@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:Style src="project://database/Assets/UI/Styles/DesignSystem.uss" />
+    <ui:Style src="project://database/Assets/UI/Styles/CharacterSelect.uss" />
+
+    <!-- Full Screen Container -->
+    <ui:VisualElement class="charselect-screen">
+
+        <!-- Layer 1: Overlay -->
+        <ui:VisualElement class="overlay" />
+
+        <!-- Layer 2: Panel with Retro Shadow -->
+        <ui:VisualElement class="charselect-shadow">
+            <ui:VisualElement class="charselect-panel">
+
+                <!-- Header Bar -->
+                <ui:VisualElement class="charselect-header">
+                    <ui:Label text="CHỌN NHÂN VẬT" class="charselect-title" />
+                </ui:VisualElement>
+
+                <!-- Subtitle -->
+                <ui:Label text="Chọn nhân vật để đổ bộ lên đảo hoang" class="charselect-subtitle" />
+
+                <!-- Character Cards -->
+                <ui:VisualElement class="charselect-cards">
+
+                    <!-- Male Card -->
+                    <ui:VisualElement class="charselect-card-shadow">
+                        <ui:VisualElement name="MaleCard" class="charselect-card charselect-card-selected">
+                            <ui:VisualElement class="charselect-avatar charselect-avatar-male">
+                                <ui:Label text="♂" class="charselect-gender-icon charselect-gender-male" />
+                            </ui:VisualElement>
+                            <ui:Label text="NAM" class="charselect-name" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <!-- Female Card -->
+                    <ui:VisualElement class="charselect-card-shadow">
+                        <ui:VisualElement name="FemaleCard" class="charselect-card">
+                            <ui:VisualElement class="charselect-avatar charselect-avatar-female">
+                                <ui:Label text="♀" class="charselect-gender-icon charselect-gender-female" />
+                            </ui:VisualElement>
+                            <ui:Label text="NỮ" class="charselect-name" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+
+                <!-- Start Button -->
+                <ui:VisualElement class="charselect-btn-container">
+                    <ui:Button name="PlayButton" text="BẮT ĐẦU HÀNH TRÌNH" class="charselect-btn-start" />
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

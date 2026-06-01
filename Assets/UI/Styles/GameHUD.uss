@@ -1,0 +1,571 @@
+/* ============================================
+   In-Game HUD Styles
+   Style: The Tangible Playground
+   Extends DesignSystem.uss
+   ============================================ */
+
+/* ── HUD Root ── */
+
+.hud-root {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    padding: 12px;
+}
+
+/* ============================================
+   1. PLAYER INFO — Top Left
+   ============================================ */
+
+.hud-top-left {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+}
+
+.player-info {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.45);
+    border-radius: 12px;
+    padding: 6px 12px 6px 6px;
+}
+
+/* Avatar */
+.player-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    border-width: 2px;
+    border-color: #FFFFFF;
+    background-color: #5B42F3;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+}
+
+.player-avatar-icon {
+    font-size: 22px;
+    color: #FFFFFF;
+    -unity-text-align: middle-center;
+}
+
+/* Player Details */
+.player-details {
+    justify-content: center;
+}
+
+.player-name {
+    font-size: 13px;
+    -unity-font-style: bold;
+    color: #FFFFFF;
+    margin-bottom: 2px;
+}
+
+.player-level-row {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 2px;
+}
+
+.player-level-badge {
+    background-color: #2D7BFF;
+    border-radius: 6px;
+    padding: 1px 8px;
+}
+
+.player-level-text {
+    font-size: 10px;
+    -unity-font-style: bold;
+    color: #FFFFFF;
+}
+
+.player-exp-text {
+    font-size: 12px;
+    -unity-font-style: bold;
+    color: rgba(255, 255, 255, 0.8);
+    margin-left: 6px;
+}
+
+/* ============================================
+   2. QUEST BUBBLE — Below Player Info
+   ============================================ */
+
+.quest-bubble {
+    flex-direction: row;
+    align-items: center;
+    background-color: #FFFFFF;
+    border-radius: 10px;
+    border-width: 2px;
+    border-color: #D5D5D5;
+    padding: 6px 10px;
+    margin-top: 8px;
+    max-width: 200px;
+}
+
+.quest-text {
+    font-size: 11px;
+    color: #2D3436;
+    flex-grow: 1;
+    flex-shrink: 1;
+    white-space: normal;
+    margin-right: 6px;
+}
+
+.quest-info-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background-color: #2D7BFF;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.quest-info-text {
+    font-size: 12px;
+    -unity-font-style: bold;
+    color: #FFFFFF;
+    -unity-text-align: middle-center;
+}
+
+/* ============================================
+   3. TOP RIGHT — Currency + Settings + Bag
+   ============================================ */
+
+.hud-top-right {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    align-items: flex-end;
+}
+
+/* Row 1: Currency + Settings side by side */
+.hud-top-right-row {
+    flex-direction: row;
+    align-items: center;
+}
+
+/* Single currency display */
+.currency-item {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.45);
+    border-radius: 10px;
+    padding: 6px 12px;
+    margin-right: 8px;
+}
+
+.currency-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin-right: 6px;
+    align-items: center;
+    justify-content: center;
+    background-color: #9B59B6;
+    border-width: 2px;
+    border-color: #8E44AD;
+}
+
+.currency-icon-label {
+    font-size: 10px;
+    -unity-font-style: bold;
+    color: #FFFFFF;
+    -unity-text-align: middle-center;
+}
+
+.currency-value {
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: #FFFFFF;
+}
+
+/* Settings button — circle, dark */
+.settings-btn-shadow {
+    background-color: rgba(0, 0, 0, 0.4);
+    border-radius: 50%;
+    padding-right: 3px;
+    padding-bottom: 3px;
+}
+
+.settings-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background-color: #2D3436;
+    border-width: 3px;
+    border-color: #1A1E20;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition-property: translate, background-color;
+    transition-duration: 0.1s;
+}
+
+.settings-btn:hover {
+    background-color: #3D4E50;
+}
+
+.settings-btn:active {
+    translate: 3px 3px;
+    background-color: #1A1E20;
+}
+
+.settings-btn-icon {
+    font-size: 22px;
+    color: #FFFFFF;
+    -unity-text-align: middle-center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    margin: 0;
+}
+
+/* Row 2: Bag / Inventory — below, aligned right */
+.bag-btn-shadow {
+    background-color: rgba(0, 0, 0, 0.4);
+    border-radius: 14px;
+    padding-right: 3px;
+    padding-bottom: 3px;
+    margin-top: 8px;
+    align-self: flex-end;
+}
+
+.bag-btn {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background-color: #2D7BFF;
+    border-width: 3px;
+    border-color: #1558CC;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition-property: translate, background-color;
+    transition-duration: 0.1s;
+}
+
+.bag-btn:hover {
+    background-color: #3A85FF;
+}
+
+.bag-btn:active {
+    translate: 3px 3px;
+    background-color: #1A6AEE;
+}
+
+.bag-btn-icon {
+    font-size: 24px;
+    color: #FFFFFF;
+    -unity-text-align: middle-center;
+    width: 52px;
+    height: 52px;
+    padding: 0;
+    margin: 0;
+}
+
+/* ============================================
+   4. LEFT SIDEBAR — Function Buttons
+   ============================================ */
+
+.hud-left-sidebar {
+    margin-top: 8px;
+}
+
+.sidebar-btn-shadow {
+    background-color: rgba(0, 0, 0, 0.4);
+    border-radius: 12px;
+    padding-right: 3px;
+    padding-bottom: 3px;
+    margin-bottom: 8px;
+    align-self: flex-start;
+}
+
+.sidebar-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background-color: #FFFFFF;
+    border-width: 3px;
+    border-color: #2D3436;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition-property: translate, background-color;
+    transition-duration: 0.1s;
+}
+
+.sidebar-btn:hover {
+    background-color: #F0F0F0;
+}
+
+.sidebar-btn:active {
+    translate: 3px 3px;
+    background-color: #E0E0E0;
+}
+
+.sidebar-btn-icon {
+    font-size: 20px;
+    color: #2D3436;
+    -unity-text-align: middle-center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    margin: 0;
+}
+
+/* ============================================
+   5. JOYSTICK — Bottom Left
+   ============================================ */
+
+.hud-bottom-left {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+}
+
+.joystick-outer {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.15);
+    border-width: 2px;
+    border-color: rgba(255, 255, 255, 0.25);
+    align-items: center;
+    justify-content: center;
+}
+
+.joystick-inner {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.35);
+    border-width: 2px;
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+/* Joystick direction indicators */
+.joystick-arrow-container {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    align-items: center;
+    justify-content: center;
+}
+
+.joystick-arrow {
+    position: absolute;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.joystick-arrow-up {
+    top: 8px;
+}
+
+.joystick-arrow-down {
+    bottom: 8px;
+}
+
+.joystick-arrow-left {
+    left: 10px;
+}
+
+.joystick-arrow-right {
+    right: 10px;
+}
+
+/* ============================================
+   6. ACTION BUTTONS — Right Side
+   ============================================ */
+
+.hud-right-actions {
+    position: absolute;
+    right: 20px;
+    bottom: 120px;
+    align-items: center;
+}
+
+/* Action button shadow (retro) */
+.action-btn-shadow {
+    background-color: rgba(0, 0, 0, 0.35);
+    border-radius: 50%;
+    padding-right: 3px;
+    padding-bottom: 3px;
+    margin-bottom: 10px;
+}
+
+/* Base action button — PERFECT CIRCLE, thick stroke */
+.action-btn {
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+    border-width: 3px;
+    padding: 0;
+    transition-property: translate, background-color;
+    transition-duration: 0.08s;
+    transition-timing-function: ease-out;
+}
+
+.action-btn:active {
+    translate: 3px 3px;
+}
+
+/* Interact button (hand) — largest */
+.action-btn-interact {
+    width: 60px;
+    height: 60px;
+    background-color: #FFFFFF;
+    border-color: #2D3436;
+}
+
+.action-btn-interact:hover {
+    background-color: #F5F5F5;
+}
+
+.action-btn-interact:active {
+    background-color: #E0E0E0;
+}
+
+/* Cancel button */
+.action-btn-cancel {
+    width: 48px;
+    height: 48px;
+    background-color: #FF4B4B;
+    border-color: #CC3333;
+}
+
+.action-btn-cancel:hover {
+    background-color: #E63E3E;
+}
+
+.action-btn-cancel:active {
+    background-color: #CC3333;
+}
+
+/* Action button icon — fixed centering */
+.action-btn-icon {
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    padding: 0;
+    margin: 0;
+}
+
+.action-btn-icon-dark {
+    color: #2D3436;
+    font-size: 26px;
+    width: 60px;
+    height: 60px;
+}
+
+.action-btn-icon-white {
+    color: #FFFFFF;
+    font-size: 22px;
+    width: 48px;
+    height: 48px;
+}
+
+/* ============================================
+   7. MESSAGES BAR — Bottom Center
+   ============================================ */
+
+.hud-bottom-center {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    translate: -50% 0;
+}
+
+.messages-bar {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.45);
+    border-radius: 20px;
+    padding: 8px 16px;
+    min-width: 200px;
+}
+
+.messages-text {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.8);
+    flex-grow: 1;
+    -unity-text-align: middle-center;
+    margin-right: 8px;
+}
+
+.messages-icons {
+    flex-direction: row;
+    align-items: center;
+}
+
+.messages-icon-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: transparent;
+    border-width: 0;
+    align-items: center;
+    justify-content: center;
+    margin-left: 6px;
+    font-size: 24px;
+    color: rgba(255, 255, 255, 0.8);
+    -unity-text-align: middle-center;
+    padding: 0;
+    transition-property: background-color;
+    transition-duration: 0.15s;
+}
+
+.messages-icon-btn:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* ============================================
+   8. JUMP BUTTON — Bottom Right
+   ============================================ */
+
+.hud-bottom-right {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+}
+
+.jump-btn-shadow {
+    background-color: rgba(0, 0, 0, 0.35);
+    border-radius: 50%;
+    padding-right: 3px;
+    padding-bottom: 3px;
+}
+
+.jump-btn {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background-color: #FFFFFF;
+    border-width: 3px;
+    border-color: #2D3436;
+    align-items: center;
+    justify-content: center;
+    transition-property: translate, background-color;
+    transition-duration: 0.08s;
+}
+
+.jump-btn:hover {
+    background-color: #F0F0F0;
+}
+
+.jump-btn:active {
+    translate: 3px 3px;
+    background-color: #E0E0E0;
+}
+
+.jump-btn-icon {
+    font-size: 22px;
+    -unity-font-style: bold;
+    color: #2D7BFF;
+    -unity-text-align: middle-center;
+    width: 52px;
+    height: 52px;
+    padding: 0;
+    margin: 0;
+}
