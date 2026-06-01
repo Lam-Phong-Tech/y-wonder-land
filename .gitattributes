@@ -1,0 +1,23 @@
+# Unity files — tell GitHub Linguist to ignore
+*.meta linguist-generated
+*.asset linguist-generated
+*.unity linguist-generated
+*.prefab linguist-generated
+*.mat linguist-generated
+*.controller linguist-generated
+*.anim linguist-generated
+*.physicMaterial linguist-generated
+*.physicsMaterial2D linguist-generated
+*.lighting linguist-generated
+*.giparams linguist-generated
+*.renderTexture linguist-generated
+*.spriteatlas linguist-generated
+*.terrainlayer linguist-generated
+*.shadergraph linguist-generated
+*.shadersubgraph linguist-generated
+
+# Schema files
+*.xsd linguist-generated
+
+# Docs — not code
+*.md linguist-documentation
