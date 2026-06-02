@@ -14,6 +14,8 @@
   - Các nút hành động dạng chữ rõ ràng: "Kết bạn" (xanh lá), "Xóa bạn" (đỏ), "Đồng ý" (xanh dương), "Từ chối" (xám).
 - Mock Data phong phú cho cả 3 chế độ danh sách, tích hợp tìm kiếm lọc tên và chức năng thêm/xóa/phản hồi kết bạn cập nhật UI thời gian thực.
 - Kết nối nút Bạn bè (👥) trên Game HUD để mở popup.
+### Fixed
+- Sửa lỗi chữ nút "Làm mới" bị khuyết thành "Làm" bằng cách rút gọn độ rộng của ô tìm kiếm (từ 170px xuống 120px), tránh tràn viền panel.
 ### Files changed
 - Assets/UI/FriendsPopup.uxml (NEW)
 - Assets/UI/Styles/FriendsPopup.uss (NEW)
