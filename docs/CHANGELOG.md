@@ -6,6 +6,7 @@
 ## [2026-06-02] — Universal Design System & AI UI Guidelines
 ### Added
 - Thiết lập và nâng cấp tài liệu `docs/DESIGN_SYSTEM_TEMPLATE.md` thành **Universal Design System Template** dùng chung cho cả 3 nền tảng: **Web**, **Mobile App**, và **Game**.
+- Dịch toàn bộ tài liệu sang **tiếng Anh chuyên ngành (Technical English)** để tất cả các AI Agent trên thế giới đều đọc hiểu chuẩn xác và áp dụng nhất quán.
 - Tích hợp chi tiết phân tích biểu hiện, tác hại và cách phòng tránh cụ thể cho **8 bệnh lý giao diện kinh điển của AI Agent** (lạm dụng glassmorphism/icon, loạn đơn vị, chột trạng thái, mù tương phản, cụt chữ...) trên từng nền tảng.
 - Cung cấp **AI Agent Self-Check Protocol** với 15 câu hỏi kiểm tra chất lượng tự động giúp AI kiểm duyệt UI trước khi bàn giao.
 ### Files changed
