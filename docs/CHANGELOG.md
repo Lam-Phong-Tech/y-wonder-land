@@ -18,6 +18,8 @@
 - Nền panel màu tím rực rỡ #5B42F3 (Hero Surface), bo góc 22px, viền 3px đen xám #3D3535.
 - Hộp tiêu đề màu xanh lam capsule #4F59E3.
 - Tab chưa chọn màu vàng cam #FDBE5B, tab đang chọn màu tím xám #8A7D9D.
+### Fixed
+- Căn giữa chữ "LEADERBOARD" trên thanh tiêu đề bằng cách loại bỏ phần padding bên trái dùng cho biểu tượng cúp vàng cũ (sau khi ẩn cúp vàng đi).
 ### Files changed
 - Assets/UI/LeaderboardPopup.uxml (NEW)
 - Assets/UI/Styles/LeaderboardPopup.uss (NEW)
