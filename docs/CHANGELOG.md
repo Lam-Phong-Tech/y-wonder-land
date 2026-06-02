@@ -3,6 +3,25 @@
 
 ---
 
+## [2026-06-02] — Module Friends Popup
+### Added
+- Popup Bạn Bè (Friends Popup) landscape theo phong cách "The Tangible Playground" và hình ảnh tham khảo.
+- Cột bên trái gồm 3 tab dạng chữ gọn gàng, giảm thiểu icon: Bạn bè, Lời mời kết bạn, Tìm bạn.
+- Khu vực hiển thị bên phải:
+  - Thanh tìm kiếm theo tên và nút "Làm mới" danh sách gợi ý.
+  - Danh sách người chơi dạng thẻ bo góc 14px, viền 2px và bóng đổ 3px, nền trắng.
+  - Avatar đại diện dạng tròn hiển thị emoji, giới tính (♂/♀), cấp độ và trạng thái Online/Offline (chấm xanh/xám).
+  - Các nút hành động dạng chữ rõ ràng: "Kết bạn" (xanh lá), "Xóa bạn" (đỏ), "Đồng ý" (xanh dương), "Từ chối" (xám).
+- Mock Data phong phú cho cả 3 chế độ danh sách, tích hợp tìm kiếm lọc tên và chức năng thêm/xóa/phản hồi kết bạn cập nhật UI thời gian thực.
+- Kết nối nút Bạn bè (👥) trên Game HUD để mở popup.
+### Files changed
+- Assets/UI/FriendsPopup.uxml (NEW)
+- Assets/UI/Styles/FriendsPopup.uss (NEW)
+- Assets/UI/FriendsPopupController.cs (NEW)
+- Assets/UI/GameHUDController.cs (MODIFIED)
+
+---
+
 ## [2026-06-02] — Module Leaderboard Popup
 ### Added
 - Popup Bảng Xếp Hạng (Leaderboard) theo phong cách thiết kế "The Tangible Playground" và hình ảnh tham khảo.
