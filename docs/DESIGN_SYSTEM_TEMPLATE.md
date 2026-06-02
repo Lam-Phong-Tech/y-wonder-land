@@ -1,174 +1,207 @@
-# Design System Template & AI UI Guidelines
+# UNIVERSAL DESIGN SYSTEM TEMPLATE & AI UI GUIDELINES
+*(Tài liệu mẫu chuẩn hóa thiết kế giao diện - Dành cho các dự án Web, Mobile App và Game)*
 
-> **Note:** Tài liệu này là template chuẩn thiết kế giao diện cho các dự án game, được tối ưu hóa đặc biệt dành cho AI Agent thiết kế. Nó tích hợp các bài học xương máu từ báo cáo *"Các bệnh lý giao diện của AI Agent"* và trải nghiệm thực tế từ dự án **Bà Chúa Khu Rừng 3D (Y WONDER LAND)**.
-
----
-
-## 1. Overview & Creative North Star
-
-**Creative North Star: "[Tên Triết Lý Thiết Kế Của Dự Án - VD: The Tangible Playground]"**
-*   **Mục tiêu:** Mang lại cảm giác giao diện có thể "chạm", "cầm nắm" và tương tác vật lý trực quan như đồ chơi trẻ em, kích thích sự tò mò.
-*   **Triết lý cốt lõi:**
-    *   **Thân thiện & Vui nhộn:** Sử dụng các đường bo góc lớn, nét viền dày tối màu (Comic-like) và màu sắc tương phản rõ ràng.
-    *   **Trực quan & Tối giản:** Cắt giảm tối đa các trang trí thừa, không lạm dụng hiệu ứng lung linh giả tạo hay các biểu tượng (icon) không cần thiết.
-    *   **Rõ ràng về Trạng thái (Feedback):** Mọi tương tác (Hover, Pressed, Disabled) đều phải có sự thay đổi rõ rệt bằng hoạt ảnh hoặc dịch chuyển hình học (ví dụ: nút lún xuống khi bấm).
+> [!IMPORTANT]
+> **HƯỚNG DẪN DÀNH CHO AI AGENT (Đọc kỹ trước khi tạo file thiết kế cụ thể):**
+> 1. Tài liệu này là **Khung Template mẫu (Universal Template)**. Khi nhận được yêu cầu viết tài liệu thiết kế giao diện (`design.md` hoặc `design_system.md`) cho một dự án cụ thể, AI phải copy khung này, thay thế các phần nằm trong ngoặc vuông `[...]` bằng thông số thiết kế thực tế của dự án đó.
+> 2. AI **không được xóa** Phần II (Danh mục 8 bệnh lý UI) và Phần III (Quy trình tự kiểm tra) trong tài liệu đầu ra của dự án. Đây là các điều khoản bắt buộc để đảm bảo chất lượng UI trong suốt quá trình phát triển.
 
 ---
 
-## 2. Color & Surface
+# [Tên Hệ Thống Thiết Kế Của Dự Án - VD: The Tangible Playground]
 
-### 2.1. The Color Tokens (Bảng màu hệ thống)
+## PHẦN I: KHUNG HỆ THỐNG THIẾT KẾ (DESIGN SYSTEM FRAMEWORK)
 
-AI tuyệt đối không được tự ý sinh mã màu ngẫu nhiên ngoài danh sách này:
+### 1. Tổng quan & Triết lý thiết kế (Overview & Philosophy)
+*   **Loại dự án (Project Type):** `[Web / Mobile App / Game 2D-3D]`
+*   **Nền tảng mục tiêu (Target Platform):** `[Desktop Web / iOS & Android App / Cross-platform Game]`
+*   **Creative North Star (Định hướng cốt lõi):** `"[Mô tả ngắn gọn triết lý thiết kế chính - VD: Minimalist, Cyberpunk, Playful, Clean & Corporate]"`
+*   **Nguyên lý trải nghiệm người dùng (UX Principles):**
+    *   `[Nguyên lý 1 - VD: Phản hồi cơ học rõ ràng, giảm thiểu tối đa độ trễ cảm giác]`
+    *   `[Nguyên lý 2 - VD: Tối giản hóa các bước thao tác, quy tắc 3-click]`
+    *   `[Nguyên lý 3 - VD: Tập trung vào nội dung chính, khoảng trắng là yếu tố dẫn đường]`
 
-| Token | Giá trị HEX | Sử dụng cho |
+---
+
+### 2. Hệ thống màu sắc & Độ tương phản (Color System & Contrast Rules)
+
+#### 2.1. Color Tokens (Bảng màu hệ thống)
+
+AI phải sử dụng chính xác các mã màu được quy định dưới đây, không tự ý phát sinh màu mới:
+
+| Token | Giá trị (HEX/HSL/RGB) | Phạm vi sử dụng |
 | :--- | :--- | :--- |
-| **Primary (Brand)** | `#FFD23F` | Các nút hành động chính (CTA), tiêu điểm quan trọng |
-| **Secondary** | `#4EA8DE` | Các nút phụ, thông tin bổ trợ |
-| **Background (Layer 0)** | `#1E1E24` | Nền tối phía sau cùng của toàn bộ màn hình |
-| **Surface Deep (Layer 1)** | `#2B2D42` | Nền của các Panel chính, khung chứa popup |
-| **Surface Mid (Layer 2)** | `#3D405B` | Nền của Card con, các item trong danh sách |
-| **Text Primary** | `#F7F7F9` | Chữ chính, tiêu đề |
-| **Text Secondary** | `#A8DADC` | Chữ phụ, chú thích, thông số |
-| **Border Dark** | `#0F1016` | Nét viền bao quanh toàn bộ các element UI (Độ dày 3px-4px) |
-| **Success** | `#4CAF50` | Trạng thái hoàn thành, đồng ý |
-| **Warning/Danger** | `#E63946` | Trạng thái cảnh báo, hủy bỏ, lỗi |
+| **Primary (Brand)** | `[VD: #FFD23F]` | Các nút hành động chính (CTA), tiêu điểm cần thu hút chú ý |
+| **Secondary** | `[VD: #4EA8DE]` | Các nút phụ, thẻ thông tin bổ trợ, danh mục |
+| **Success** | `[VD: #4CAF50]` | Trạng thái hoàn thành, thông báo thành công, nút đồng ý |
+| **Warning/Danger** | `[VD: #E63946]` | Cảnh báo lỗi, trạng thái nguy hiểm, nút hủy bỏ/xóa |
+| **Background (Layer 0)** | `[VD: #1E1E24]` | Lớp nền dưới cùng của toàn bộ ứng dụng |
+| **Surface Deep (Layer 1)**| `[VD: #2B2D42]` | Nền của panel chính, popup, form điền thông tin |
+| **Surface Mid (Layer 2)** | `[VD: #3D405B]` | Nền của card con, list item, ô nhập liệu |
+| **Text Primary** | `[VD: #F7F7F9]` | Chữ tiêu đề chính, thông số quan trọng |
+| **Text Secondary** | `[VD: #A8DADC]` | Chữ mô tả phụ, nhãn chỉ dẫn, thời gian |
+| **Border / Outline** | `[VD: #0F1016]` | Đường viền bao quanh các cấu phần UI (nếu có) |
 
-### 2.2. Phối màu & Phân cấp bề mặt (Surface Hierarchy)
-
-*   **Quy tắc phối màu (The Contrast Rule):** Tất cả các thành phần tương tác (nút, input) bắt buộc phải có nét viền `Border Dark` để tách biệt rõ ràng khỏi lớp nền, tránh bị chìm màu.
-*   **Phân cấp độ sâu lớp nền:**
-    *   **Layer 0 (Screen BG):** `#1E1E24` (Độ tương phản thấp nhất)
-    *   **Layer 1 (Panel Popup):** `#2B2D42` với viền `Border Dark` 4px và góc bo `32px`.
-    *   **Layer 2 (Card/List Item):** `#3D405B` với viền `Border Dark` 3px và góc bo `16px`.
-    *   *Quy tắc:* Lớp càng nổi lên trên thì màu càng sáng dần lên để hướng mắt người dùng tốt hơn.
+#### 2.2. Quy tắc tương phản & Phân cấp bề mặt (Surface Hierarchy)
+*   **Quy tắc tương phản (Contrast Rule):** `[Mô tả cách phối màu để chữ luôn đọc được rõ trên nền. VD: Chữ Text Primary chỉ được đặt trên nền Layer 1 hoặc Layer 2. Tỷ lệ tương phản tối thiểu đạt WCAG AA 4.5:1]`
+*   **Phân cấp độ sâu (Surface Depth):**
+    *   **Layer 0 (Background):** `[Mã màu]` - Nền tĩnh phía sau cùng.
+    *   **Layer 1 (Card/Container):** `[Mã màu]` - Khung chứa lớn.
+    *   **Layer 2 (Element/Interactive):** `[Mã màu]` - Các phần tử tương tác nằm trên Container.
 
 ---
 
-## 3. Typography
+### 3. Font chữ & Căn chỉnh (Typography & Alignment)
 
-*   **Font Family:** Chỉ sử dụng duy nhất font chính của game (ví dụ: `font-definition: resource("Fonts/Inter-Bold")` hoặc font tương đương có thuộc tính Bold rõ ràng). Không trộn lẫn nhiều font.
+*   **Font Chữ Chính (Primary Font):** `[Tên Font - VD: Inter, Outfit, Roboto]`
+*   **Font Chữ Phụ (Secondary Font - nếu có):** `[Tên Font - VD: JetBrains Mono (dùng cho code/thông số)]`
 *   **Bảng tỷ lệ chữ (Type Scale):**
 
-| Token | Cỡ chữ (PX) | Độ dày (Weight) | Sử dụng cho |
-| :--- | :--- | :--- | :--- |
-| **H1 (Headline)** | `40px` | Bold | Tiêu đề lớn (Leaderboard, Friends) |
-| **H2 (Sub-headline)**| `28px` | Bold | Tiêu đề popup nhỏ, danh mục |
-| **Body Large** | `20px` | Medium/Bold | Nội dung nút bấm chính, tên người dùng |
-| **Body Normal** | `16px` | Regular/Medium | Chi tiết dòng, mô tả chỉ số |
-| **Caption** | `12px` | Regular | Thời gian, trạng thái offline, ghi chú nhỏ |
+| Token | Kích thước (rem/px/pt) | Line Height | Weight | Sử dụng cho |
+| :--- | :--- | :--- | :--- | :--- |
+| **Heading 1 (H1)** | `[VD: 2.5rem / 40px]` | `[VD: 1.2]` | Bold | Tiêu đề lớn của trang/màn hình |
+| **Heading 2 (H2)** | `[VD: 1.75rem / 28px]`| `[VD: 1.3]` | Bold | Tiêu đề nhóm, tiêu đề popup |
+| **Body Large** | `[VD: 1.25rem / 20px]`| `[VD: 1.5]` | SemiBold | Chữ trên nút bấm chính, danh mục |
+| **Body Normal** | `[VD: 1.0rem / 16px]` | `[VD: 1.5]` | Regular | Nội dung bài viết, dòng thông số |
+| **Caption** | `[VD: 0.75rem / 12px]`| `[VD: 1.4]` | Regular | Chú thích nhỏ, ngày tháng, nhãn phụ |
 
-*   **Quy tắc căn lề chữ:**
-    *   Tiêu đề chính phải được căn giữa hoàn hảo. Nếu có icon trang trí bên cạnh, phần padding của hộp tiêu đề phải được bù trừ hợp lý để chữ không bị lệch sang bên (VD: không được để padding-left cố định khi ẩn icon).
-    *   Nút bấm phải có chữ căn giữa theo cả 2 chiều dọc và ngang.
-
----
-
-## 4. Spacing & Units System (Hệ thống khoảng cách bội số của 8)
-
-Để tránh **Bệnh loạn đơn vị (Unit Chaos)**, toàn bộ kích thước, khoảng cách và viền phải tuân theo hệ số nhân của 8px (hoặc tối thiểu là 4px trong các chi tiết cực nhỏ):
-
-*   **Padding / Margin Scale:**
-    *   `xs`: `4px` (Khoảng cách giữa icon và text rất gần)
-    *   `sm`: `8px` (Padding trong card nhỏ, khoảng cách dòng)
-    *   `md`: `16px` (Padding tiêu chuẩn của Card, khoảng cách giữa các phần tử)
-    *   `lg`: `24px` (Padding của Panel lớn, khoảng cách giữa các cụm nút)
-    *   `xl`: `32px` (Khoảng cách rìa ngoài của Popup lớn)
-*   **Border Radius Scale (Bo góc vật lý):**
-    *   `Panel/Popup`: `32px`
-    *   `Card/Item/Tabs`: `16px`
-    *   `Button/Input`: `12px`
-    *   `Avatar/Icon`: `8px`
-*   **Border Width Scale (Độ dày nét vẽ):**
-    *   `Panel lớn`: `4px`
-    *   `Card/Nút/Input`: `3px`
-    *   `Chi tiết nhỏ`: `2px`
+*   **Quy tắc căn lề (Alignment Rule):**
+    *   `[VD: Tiêu đề trang phải luôn căn giữa hoàn hảo. Chữ trong form nhập liệu luôn căn trái. Chữ trong nút bấm căn giữa tuyệt đối theo cả 2 chiều.]`
 
 ---
 
-## 5. Elevation & Depth (Mô phỏng 3D Vật lý)
+### 4. Hệ thống khoảng cách & Bo góc (Spacing & Unit System)
 
-Không dùng đổ bóng nhòe (soft shadows) kiểu Web hiện đại vốn bị chìm trong nền tối. Chỉ sử dụng **Retro Comic Shadow (Bóng cứng)**:
+Dự án áp dụng hệ thống lưới `[8px hoặc 4px]` để tối ưu hóa khoảng cách, tránh tình trạng khoảng cách ngẫu nhiên.
 
-*   **Bóng mặc định (Default state):** Đổ bóng lệch xuống dưới và sang phải một khoảng cố định (`offset-x: 4px`, `offset-y: 4px`), tô màu bóng trùng với màu `Border Dark` (`#0F1016`).
-*   **Bóng khi ấn (Pressed state):** Nút dịch chuyển dịch xuống dưới-phải `4px` và khoảng cách bóng giảm về `0px` để tạo cảm giác cơ học thật sự.
-
----
-
-## 6. Component Specs & State Machine (Quy chuẩn cấu phần UI)
-
-Mọi thành phần UI khi được dựng lên bởi AI đều bắt buộc phải có đầy đủ các trạng thái tương tác sau:
-
-### 6.1. Buttons (Nút bấm)
-*   **Cấu trúc:** Text ở trung tâm (Hạn chế tối đa icon, chỉ dùng icon khi thực sự cần thiết như nút "X" đóng popup).
-*   **Các trạng thái tương tác:**
-    1.  **Normal:** Màu nền Primary/Secondary + Viền viền Dark 3px + Bóng cứng 4px.
-    2.  **Hover:** Màu nền sáng lên 10% (VD: dùng `unity-background-image-tint-color` hoặc đổi màu nhẹ).
-    3.  **Active/Pressed:** Dịch chuyển phần tử xuống dưới-phải 4px (`translate: 4px 4px`), bóng cứng giảm về 0.
-    4.  **Disabled:** Màu xám nhạt (`#6c757d`), mất bóng cứng, không nhận sự kiện click.
-
-### 6.2. Text Inputs (Ô nhập liệu)
-*   **Cấu trúc:** Nhãn hướng dẫn (Placeholder) mờ + Viền nét bao quanh + Nền tối Surface Deep.
-*   **Các trạng thái tương tác:**
-    1.  **Normal:** Nền `#1E1E24`, Viền Dark 2px.
-    2.  **Focused:** Viền đổi màu sáng hơn (Primary `#FFD23F`), xuất hiện con trỏ nhấp nháy.
-    3.  **Error:** Viền đổi sang màu đỏ Danger `#E63946`.
-
-### 6.3. Lists & Cards (Danh sách cuộn & Hộp thông tin)
-*   **Cấu trúc:** ScrollView chứa danh sách các Card item xếp chồng.
-*   **Quy định cuộn:** 
-    *   Ẩn thanh cuộn dọc (Scrollbar) nếu không cần thiết để tối ưu diện tích hiển thị di động.
-    *   Card item phải có viền bao và khoảng cách giữa các Card tối thiểu `12px` để không bị dính vào nhau.
+*   **Bảng khoảng cách (Spacing Scale):**
+    *   `xs` (Extra Small): `[VD: 4px]` - Khoảng cách cực nhỏ (nhãn đính kèm icon).
+    *   `sm` (Small): `[VD: 8px]` - Padding trong nút bấm, khoảng cách giữa các dòng.
+    *   `md` (Medium): `[VD: 16px]` - Padding tiêu chuẩn của Card, khoảng cách các khối thông tin.
+    *   `lg` (Large): `[VD: 24px]` - Padding của Panel lớn, khoảng cách giữa các cột.
+    *   `xl` (Extra Large): `[VD: 32px]` - Rìa ngoài của Popup, khoảng cách giữa các phần lớn của trang.
+*   **Bo góc (Corner Radius Scale):**
+    *   `Lớn (Popup/Modal/Panel)`: `[VD: 24px]`
+    *   `Trung bình (Card/List item)`: `[VD: 12px]`
+    *   `Nhỏ (Button/Input/Tab)`: `[VD: 8px]`
+*   **Độ dày viền (Border Width Scale - nếu có):**
+    *   `Khung viền lớn`: `[VD: 3px]`
+    *   `Nút bấm/Input`: `[VD: 2px]`
 
 ---
 
-## 7. Do's and Don'ts (Quy tắc hành vi của AI Agent)
+### 5. Chiều sâu & Trạng thái tương tác (Elevation & States)
 
-### 10 Điều BẮT BUỘC Làm (DO's)
-1.  **Luôn căn lề hoàn chỉnh:** Sử dụng Flexbox (`justify-content: center; align-items: center;`) để căn chỉnh chữ và nội dung nút.
-2.  **Luôn có nét viền tối (`Border Dark`):** Đảm bảo mọi panel, card, button đều có viền tách biệt để giữ phong cách hoạt hình/tangible.
-3.  **Kiểm tra độ dài văn bản:** Thiết kế nút bấm và input chừa khoảng trống tối thiểu 20% chiều rộng để ngăn các từ dài (VD: "Làm mới") bị cắt chữ hoặc xuống dòng đột ngột.
-4.  **Sử dụng kích thước nút bấm dễ chạm:** Trên thiết bị di động, chiều cao tối thiểu của nút tương tác là `44px`.
-5.  **Duy trì khoảng cách đồng đều:** Sử dụng đúng Spacing Scale bội số của 8 để thiết kế gọn gàng.
-6.  **Tách biệt logic và giao diện:** Giữ mã điều khiển UI (C# Controller) độc lập với logic nghiệp vụ cốt lõi của game.
-7.  **Đặt tên class USS có ngữ nghĩa:** Đặt tên rõ ràng (VD: `.friends-tab-button`, `.leaderboard-rank-card`) thay vì tên chung chung.
-8.  **Đóng mở popup an toàn:** Luôn cung cấp nút đóng rõ ràng (Nút X ở góc trên bên phải) và hỗ trợ đóng popup khi người dùng bấm ra vùng ngoài panel (vùng mờ màu đen).
-9.  **Tự động dọn dẹp bộ nhớ:** Đăng ký và hủy đăng ký các sự kiện Click trong C# tương ứng với chu kỳ bật/tắt UI để tránh rò rỉ bộ nhớ (Memory Leak).
-10. **Tạo phân cấp hình ảnh rõ ràng:** Tiêu đề to, màu sắc tương phản cao, thông số phụ dùng màu dịu hơn.
-
-### 10 Điều CẤM Làm (DON'Ts)
-1.  **KHÔNG lạm dụng bóng mờ hoặc mờ kính (Glassmorphism):** Tránh xa hiệu ứng `backdrop-filter: blur()` trừ khi có chỉ định đặc biệt. Style của game là phẳng, sắc nét và trực quan.
-2.  **KHÔNG nhét icon bừa bãi (Icon Overuse):** Chỉ dùng icon khi thực sự mang lại giá trị nhận biết nhanh. Không đặt icon trước mọi dòng chữ, tiêu đề hoặc nút bấm thông thường.
-3.  **KHÔNG tự chế màu ngẫu nhiên:** Không dùng các hệ màu lạ mắt ngoài bảng màu hệ thống đã quy định.
-4.  **KHÔNG hardcode tọa độ tuyệt đối:** Tránh dùng `position: absolute` bừa bãi trừ khi thiết kế popup lớp đè lên (Overlay) hoặc các góc neo đặc biệt. Luôn ưu tiên Flexbox.
-5.  **KHÔNG bỏ qua trạng thái phản hồi:** Nút bấm tương tác không có trạng thái hover và pressed bị xem là lỗi thiết kế nghiêm trọng.
-6.  **KHÔNG dùng font chữ mặc định của hệ điều hành:** Tránh để UI rơi vào font mặc định không có phong cách riêng.
-7.  **KHÔNG cuộn chồng cuộn (Nested ScrollViews):** Không lồng ScrollView này bên trong ScrollView khác cùng hướng cuộn vì sẽ gây loạn thao tác trên di động.
-8.  **KHÔNG viết CSS trực tiếp (Inline CSS) trong UXML:** Luôn tách biệt CSS ra file USS để dễ quản lý và tái sử dụng.
-9.  **KHÔNG bỏ sót kiểm thử độ phân giải:** Không thiết kế UI chỉ chạy tốt trên màn hình Landscape 16:9 mà bỏ qua việc co giãn khi đổi tỷ lệ màn hình.
-10. **KHÔNG tự động áp đặt hiệu ứng nhấp nháy chuyển màu liên tục:** Hạn chế các hiệu ứng màu sắc động gây mỏi mắt trừ các sự kiện đặc biệt (nhận thưởng).
+*   **Bóng đổ (Elevation/Shadows):**
+    *   `Trạng thái tĩnh (Default)`: `[VD: Đổ bóng mờ nhẹ soft shadow hoặc bóng cứng retro offset-x: 4px, offset-y: 4px màu #000]`
+    *   `Trạng thái nổi (Hovered/Focused)`: `[VD: Bóng đổ sâu hơn để tạo cảm giác nổi lên gần mắt hơn]`
+*   **Quy chuẩn Trạng thái phần tử (Interactive States):**
+    *   **Normal:** Trạng thái mặc định của phần tử.
+    *   **Hover (Chỉ áp dụng Web/Desktop):** `[VD: Đổi màu nền sáng/tối đi 10% hoặc tăng bóng đổ]`
+    *   **Active / Pressed (Click/Chạm):** `[VD: Giảm bóng đổ về 0, dịch chuyển phần tử xuống dưới-phải 2px để giả lập lực nhấn vật lý]`
+    *   **Focus (Khi chọn vào input/nút):** `[VD: Xuất hiện outline sáng màu Primary xung quanh phần tử]`
+    *   **Disabled (Vô hiệu hóa):** `[VD: Opacity giảm còn 50%, màu xám, không nhận sự kiện click]`
 
 ---
 
-## 8. AI Agent Self-Check Protocol (Quy trình tự kiểm soát chất lượng)
+### 6. Thông số chi tiết các cấu phần UI (Component Specifications)
 
-*Trước khi bàn giao bất kỳ giao diện nào cho người dùng, AI Agent phải tự trả lời 15 câu hỏi sau:*
+#### 6.1. Buttons (Nút bấm)
+*   **Primary Button (Nút chính):** Nền màu `[Mã màu]`, chữ màu `[Mã màu]`, viền `[Độ dày]`.
+*   **Secondary Button (Nút phụ):** Nền màu `[Mã màu]`, chữ màu `[Mã màu]`, viền `[Độ dày]`.
+*   **Quy tắc Icon trong nút:** `[VD: Hạn chế dùng icon trong nút chính trừ khi đó là nút hành động đặc thù (VD: Lưu có icon Disk). Nếu dùng icon, khoảng cách giữa icon và text là 8px].`
 
-1.  [ ] Toàn bộ màu sắc sử dụng có trùng khớp với danh sách Color Tokens ở Mục 2.1 không?
-2.  [ ] Các nút tương tác có viền ngoài tối màu (`Border Dark`) để tách biệt chưa?
-3.  [ ] Khoảng cách padding/margin và bo góc có tuân thủ quy tắc Spacing Scale (bội số của 8) không?
-4.  [ ] Font chữ sử dụng có đồng bộ và tải từ Resource của game không?
-5.  [ ] Đã thử nghiệm hiển thị với chuỗi văn bản dài nhất chưa (VD: "Làm mới" có bị khuyết nét, chữ có tràn khỏi nút)?
-6.  [ ] Các nút bấm đã được cấu hình đủ 3 trạng thái USS (`:hover`, `:active/pressed`, `:disabled`) chưa?
-7.  [ ] Nút bấm có hiệu ứng lún cơ học (bóng cứng giảm, dịch chuyển vị trí) khi bấm không?
-8.  [ ] Có phần tử nào đang lạm dụng hiệu ứng kính mờ (glassmorphism) trái quy định không?
-9.  [ ] Số lượng icon trên màn hình đã tối giản chưa? Có nút nào có thể thay bằng chữ trực quan không?
-10. [ ] Có dùng `position: absolute` sai quy cách không? Giao diện có co giãn tốt khi thay đổi độ phân giải không?
-11. [ ] Đã có cơ chế đóng popup rõ ràng (Nút X hoặc click ra ngoài) chưa?
-12. [ ] Các phần tử tương tác đã được gán ID hoặc Class cụ thể để viết Script điều khiển chưa?
-13. [ ] Các sự kiện click trong script C# đã được giải phóng (unregister) khi tắt giao diện chưa?
-14. [ ] Cấu trúc cây UXML có quá sâu (nhiều lớp visual element lồng vô nghĩa) không?
-15. [ ] Bản vẽ đã mang lại cảm giác "vật lý, có thể chạm được" (The Tangible Playground) chưa?
+#### 6.2. Text Inputs (Ô nhập liệu)
+*   **Cấu trúc:** Nhãn trên đầu (Label) + Ô nhập liệu (Input Box) chứa Placeholder mờ + Nhãn lỗi bên dưới (Error Label).
+*   **Kích thước chiều cao:** `[VD: Cố định 44px trên mobile, 40px trên web]`.
+
+#### 6.3. Modals & Popups
+*   **Overlay:** Lớp che phủ nền màu `[Mã màu - VD: Đen opacity 40%]` chặn tương tác phía sau.
+*   **Cơ chế đóng:** Bắt buộc có nút đóng (X) góc trên bên phải và hỗ trợ đóng khi click ra vùng Overlay.
 
 ---
-*Bản hướng dẫn này là tài liệu sống, cần cập nhật liên tục sau mỗi màn hình giao diện mới được triển khai thành công.*
+
+## PHẦN II: DANH MỤC 8 "BỆNH LÝ UI" CỦA AI VÀ PHƯƠNG PHÁP PHÒNG TRÁNH
+
+> [!WARNING]
+> Đây là các lỗi thiết kế giao diện kinh điển mà AI Agent thường mắc phải do thói quen sao chép thiết kế hào nhoáng nhưng phi thực tế. AI khi thực hiện code UI bắt buộc phải đọc và né tránh các lỗi này đối với từng nền tảng tương ứng.
+
+### 1. Hội chứng "Nghiện" Glassmorphism & Icon Overuse (Lạm dụng mờ kính & Biểu tượng)
+*   **Biểu hiện:** AI rất thích dùng hiệu ứng kính mờ (`backdrop-filter: blur`) và nhét icon vào mọi vị trí có thể (trước tiêu đề, trên tất cả các nút bấm, cạnh mọi dòng chữ) để tạo cảm giác "hiện đại".
+*   **Tác hại:** Làm UI bị rối mắt, mất phân cấp thông tin, gây nặng hiệu năng render phần cứng (đặc biệt trên các thiết bị di động tầm trung).
+*   **Quy tắc phòng tránh theo nền tảng:**
+    *   **Web:** Chỉ dùng hiệu ứng blur cho thanh định hướng (sticky Navbar) hoặc Overlay của Modal lớn. Nút bấm phải ưu tiên hiển thị bằng Text rõ ràng, chỉ dùng icon khi icon đó mang tính toàn cầu (như bánh răng cho Cài đặt, thùng rác cho Xóa).
+    *   **Mobile App:** Hạn chế tối đa backdrop-blur vì hiệu năng di động có hạn. Nút bấm trên thiết bị di động cần diện tích chạm lớn, chữ rõ ràng quan trọng hơn icon nhỏ khó nhấn.
+    *   **Game UI:** Tránh lạm dụng kính mờ trừ khi game theo phong cách Sci-Fi. Các game casual, hoạt hình hoặc retro phải dùng các mảng màu đặc (Solid Surface) sắc nét.
+
+### 2. Hội chứng "Loạn Đơn Vị" (Unit Chaos)
+*   **Biểu hiện:** AI trộn lẫn lộn các đơn vị đo lường trong cùng một file CSS/Style (ví dụ: dùng cả `px`, `rem`, `em`, `%`, `vh`, `vw`, `pt` vô nguyên tắc cho padding, margin, font-size).
+*   **Tác hại:** UI bị vỡ layout khi thay đổi kích thước màn hình hoặc zoom trình duyệt.
+*   **Quy tắc phòng tránh theo nền tảng:**
+    *   **Web:** 
+        *   Font-size: Bắt buộc dùng `rem` (hoặc `em` cho các thành phần con phụ thuộc trực tiếp vào cha) để hỗ trợ tính năng zoom của người khiếm thị.
+        *   Layout & Spacing: Dùng `rem` hoặc `px` cố định tuân thủ Spacing Scale (bội số của 8).
+        *   Chiều rộng/cao khối lớn: Dùng `%`, `vw`, `vh` hoặc Flexbox/Grid.
+    *   **Mobile App:** Bắt buộc dùng đơn vị đo chuẩn của framework (như `dp` trong Android, `points` trong iOS, hoặc các đơn vị không đơn vị trong React Native/Flutter). Tuyệt đối không hardcode đơn vị điểm ảnh vật lý (pixel).
+    *   **Game UI (Unity UI Toolkit):** Dùng `px` cho các khoảng cách cố định nhỏ (padding, border), dùng `%` hoặc Flexbox cho việc co giãn tỷ lệ màn hình (Responsive).
+
+### 3. Hội chứng "Màu Sắc Vô Hồn" (Color Chaos)
+*   **Biểu hiện:** AI dùng các bảng màu gradient chói mắt từ Dribbble nhưng quên định nghĩa các màu chức năng cơ bản, dẫn đến việc dùng màu sắc không có ý nghĩa nhất quán.
+*   **Tác hại:** Người dùng không nhận biết được đâu là hành động nguy hiểm (Xóa), đâu là hành động an toàn (Lưu), hoặc đâu là trạng thái thành công.
+*   **Quy tắc phòng tránh theo nền tảng:**
+    *   **Mọi nền tảng (Web, App, Game):** Phải định nghĩa rõ và tuân thủ bảng màu chức năng (Success = Xanh lá, Danger = Đỏ, Warning = Vàng/Cam, Info = Xanh dương). Màu sắc của nút tương tác chính (Primary) phải đồng nhất trên toàn bộ hệ thống, không đổi màu nút chính theo từng màn hình một cách ngẫu hứng.
+
+### 4. Bệnh "Chột" Trạng Thái (Missing States Failure)
+*   **Biểu hiện:** AI thiết kế các nút bấm và ô nhập liệu vô cùng đẹp mắt ở trạng thái tĩnh (Normal) nhưng bỏ qua việc lập trình các trạng thái Hover, Active, Focus, Disabled.
+*   **Tác hại:** Người dùng click vào nút mà không có phản hồi thị giác, tạo cảm giác ứng dụng bị đơ, giật lag hoặc chất lượng kém.
+*   **Quy tắc phòng tránh theo nền tảng:**
+    *   **Web:** Nút bấm bắt buộc có đủ style cho `:hover` (chuột rà qua), `:active` (chuột nhấn xuống), `:focus` (phím tab di chuyển tới), và `:disabled`.
+    *   **Mobile App:** Thiết lập trạng thái `pressed` (khi chạm tay vào nút nền tối đi hoặc lún xuống) và trạng thái `loading` (hiển thị spinner xoay tròn khi đang xử lý tác vụ gửi biểu mẫu).
+    *   **Game UI:** Các nút tương tác bắt buộc phải có hiệu ứng cơ học rõ rệt (ví dụ: nút dịch chuyển xuống dưới-phải khi Pressed và bóng đổ co lại).
+
+### 5. Bệnh "Mù" Tỷ Lệ Tương Phản (Contrast Failure)
+*   **Biểu hiện:** AI thiết kế chữ màu xám nhạt trên nền trắng, chữ trắng trên nền vàng, hoặc chữ xám đậm trên nền đen chỉ vì nhìn nó "nghệ thuật".
+*   **Tác hại:** Gây mỏi mắt cực độ cho người dùng thường và khiến người dùng bị suy giảm thị lực (hoặc khi dùng thiết bị ngoài trời nắng) không thể đọc được nội dung.
+*   **Quy tắc phòng tránh theo nền tảng:**
+    *   **Web & Mobile App:** Bắt buộc tuân thủ tiêu chuẩn tương phản WCAG 2.1 AA. Chữ thường phải đạt tỷ lệ tương phản tối thiểu `4.5:1` so với nền. Chữ lớn (>18pt Bold hoặc >24pt Regular) phải đạt tối thiểu `3:1`. AI phải tự tính toán độ tương phản của mã màu trước khi áp dụng.
+    *   **Game UI:** Nếu dùng bảng màu rực rỡ khó đạt WCAG, bắt buộc phải bao quanh chữ/khối bằng nét viền tối màu (`Border Dark`) dày tối thiểu 2px để tăng độ tương phản hình học.
+
+### 6. Hội chứng "Lười" Thiết Kế Ô Nhập Liệu (Input Neglect)
+*   **Biểu hiện:** AI vẽ ô nhập liệu chỉ là một đường kẻ ngang hoặc một hộp trống thô kệch, không có nhãn chỉ dẫn (Label), placeholder biến mất không dấu vết khi gõ chữ, hoặc không có hiển thị báo lỗi cụ thể.
+*   **Tác hại:** Người dùng không biết mình đang nhập trường thông tin gì khi gõ dở dang, hoặc hoang mang khi bấm gửi mà không biết ô nào bị lỗi.
+*   **Quy tắc phòng tránh theo nền tảng:**
+    *   **Mọi nền tảng (Web, App, Game):** Ô nhập liệu chuẩn phải có cấu trúc 3 phần: Label tĩnh phía trên (không dùng Placeholder thay thế Label hoàn toàn), Input Box có viền phân biệt trạng thái Focus, và Helper/Error Text nằm cố định bên dưới để hiển thị cảnh báo lỗi (ví dụ: "Email không hợp lệ").
+
+### 7. Bệnh "Tràn Viền & Cụt Chữ" (Layout Cutoff)
+*   **Biểu hiện:** AI thiết kế nút bấm vừa khít với chữ ở ngôn ngữ mặc định (ví dụ: tiếng Anh "Reset"), nhưng khi chuyển sang ngôn ngữ dài hơn (tiếng Việt "Làm mới") thì chữ bị tràn khỏi viền hoặc bị cắt cụt thành "Làm...".
+*   **Tác hại:** Phá vỡ tính thẩm mỹ và làm mất chức năng của nút bấm.
+*   **Quy tắc phòng tránh theo nền tảng:**
+    *   **Mọi nền tảng (Web, App, Game):** Luôn áp dụng quy tắc khoảng trống an toàn (Safety Margin). Chiều rộng của nút bấm/input phải có khoảng đệm tối thiểu bằng 20% chiều rộng của chữ hiển thị bên trong. Không bao giờ hardcode chiều rộng cố định (`width`) cho các phần tử chứa chữ biến đổi mà nên sử dụng `min-width` kết hợp với `padding-left/right` hợp lý.
+
+### 8. Hội chứng "Phân Cấp Thị Giác Lộn Xộn" (Visual Hierarchy Mess)
+*   **Biểu hiện:** Tiêu đề chính (H1) và tiêu đề phụ (H2) có kích thước gần bằng nhau. Nút bấm hủy bỏ (Secondary) lại được tô màu đỏ rực rỡ hơn nút xác nhận chính (Primary).
+*   **Tác hại:** Người dùng bị bối rối không biết đâu là thông tin trọng tâm và dễ bấm nhầm các hành động hủy hoại dữ liệu.
+*   **Quy tắc phòng tránh theo nền tảng:**
+    *   **Mọi nền tảng (Web, App, Game):** Áp dụng quy tắc kích thước chữ giảm dần rõ rệt (VD: H1 gấp 1.5 lần H2, H2 gấp 1.4 lần Body). Nút bấm chính phải có trọng lượng thị giác lớn nhất (màu đậm nhất, diện tích lớn nhất), nút bấm phụ phải có màu chìm hơn hoặc dạng viền không nền (Outline Button).
+
+---
+
+## PHẦN III: QUY TRÌNH TỰ KIỂM TRA (AI AGENT SELF-CHECK PROTOCOL)
+
+*AI Agent bắt buộc phải chạy checklist 15 câu hỏi này trước khi bàn giao mã nguồn UI cho người dùng:*
+
+1.  [ ] **Màu sắc hệ thống:** Toàn bộ màu sắc sử dụng có trùng khớp với danh sách Color Tokens quy định tại Mục 2.1 không?
+2.  [ ] **Độ tương phản:** Chữ trên nền đã đạt độ tương phản tối thiểu (WCAG AA 4.5:1 đối với Web/App, hoặc có viền Dark Outline đối với Game) chưa?
+3.  [ ] **Tính nhất quán của Font:** Có sử dụng đúng các font chữ và tỷ lệ quy định tại hệ thống Typography không? Có bị sót font mặc định hệ điều hành không?
+4.  [ ] **Quy tắc Spacing:** Toàn bộ khoảng cách margin, padding có phải là bội số của hệ số lưới (8px/4px) quy định tại Mục 4 không?
+5.  [ ] **Khoảng đệm chữ (Safety Margin):** Các văn bản dài (như "Làm mới", "Xác nhận") có bị khuyết nét, xuống dòng lỗi hay tràn ra ngoài khung chứa không?
+6.  [ ] **Trạng thái tương tác (Interactive States):** Tất cả các nút bấm, tab và ô nhập liệu đã có đủ style Hover, Active/Pressed và Focus chưa?
+7.  [ ] **Phản hồi vật lý (Mechanical Feedback):** Các nút bấm trong Game/App có hiệu ứng lún xuống hoặc thay đổi độ sâu bóng đổ rõ rệt khi nhấn không?
+8.  [ ] **Giới hạn Glassmorphism:** Đã kiểm tra và đảm bảo không lạm dụng hiệu ứng kính mờ (blur) gây giảm hiệu năng phần cứng chưa?
+9.  [ ] **Tối giản hóa Icon:** Đã loại bỏ các icon thừa thãi không mang lại giá trị nhận diện nhanh chưa? Các nút chức năng chính có chữ ghi nhãn rõ ràng chưa?
+10. [ ] **Co giãn Responsive:** Đã kiểm tra hiển thị giao diện trên các tỷ lệ màn hình khác nhau (Landscape, Portrait, 16:9, 4:3) chưa? Có bị vỡ layout không?
+11. [ ] **Đóng mở Popup:** Tất cả các bảng thông báo, popup đã có nút đóng (X) rõ ràng và cơ chế click ra ngoài overlay để đóng chưa?
+12. [ ] **Cấu trúc Input:** Ô nhập liệu đã có đủ nhãn (Label) cố định phía trên và khu vực báo lỗi (Error Text) phía dưới chưa?
+13. [ ] **Đơn vị đo lường:** Đã loại bỏ hoàn toàn việc trộn lẫn đơn vị đo lường bừa bãi chưa (ví dụ: chỉ dùng rem/px nhất quán cho Web)?
+14. [ ] **Phân cấp thị giác:** Nút hành động chính (Primary) có nổi bật hơn nút hành động phụ (Secondary) không?
+15. [ ] **Dọn dẹp tài nguyên:** Trong mã nguồn điều khiển UI, toàn bộ sự kiện click/chạm đã được hủy đăng ký (unregister) khi đóng UI để tránh rò rỉ bộ nhớ chưa?
