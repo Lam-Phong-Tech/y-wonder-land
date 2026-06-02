@@ -10,7 +10,7 @@
         <!-- ============================== -->
         <ui:VisualElement class="hud-top-left">
             <!-- Avatar + Name + Level + EXP -->
-            <ui:VisualElement name="PlayerInfo" class="player-info">
+            <ui:VisualElement name="PlayerInfo" class="player-info clickable-hud-element">
                 <ui:VisualElement class="player-avatar">
                     <ui:Label text="👤" class="player-avatar-icon" />
                 </ui:VisualElement>
@@ -26,7 +26,7 @@
             </ui:VisualElement>
 
             <!-- Quest Notification Bubble -->
-            <ui:VisualElement name="QuestBubble" class="quest-bubble">
+            <ui:VisualElement name="QuestBubble" class="quest-bubble clickable-hud-element">
                 <ui:Label name="QuestText" text="Khám phá đảo hoang và tìm ngôi nhà đầu tiên!" class="quest-text" />
                 <ui:VisualElement class="quest-info-icon">
                     <ui:Label text="i" class="quest-info-text" />
@@ -37,29 +37,29 @@
             <ui:VisualElement class="hud-left-sidebar">
                 <!-- Leaderboard -->
                 <ui:VisualElement class="sidebar-btn-shadow">
-                    <ui:Button name="BtnLeaderboard" class="sidebar-btn">
+                    <ui:Button name="BtnLeaderboard" class="sidebar-btn sidebar-btn-leaderboard">
                         <ui:Label text="🏆" class="sidebar-btn-icon" />
                     </ui:Button>
                 </ui:VisualElement>
 
-                <!-- Friends -->
+                <!-- Daily Attendance / Event -->
                 <ui:VisualElement class="sidebar-btn-shadow">
-                    <ui:Button name="BtnFriends" class="sidebar-btn">
-                        <ui:Label text="👥" class="sidebar-btn-icon" />
+                    <ui:Button name="BtnCalendar" class="sidebar-btn sidebar-btn-calendar">
+                        <ui:Label text="📅" class="sidebar-btn-icon sidebar-btn-icon-white" />
                     </ui:Button>
                 </ui:VisualElement>
 
                 <!-- Mail -->
                 <ui:VisualElement class="sidebar-btn-shadow">
-                    <ui:Button name="BtnMail" class="sidebar-btn">
-                        <ui:Label text="✉" class="sidebar-btn-icon" />
+                    <ui:Button name="BtnMail" class="sidebar-btn sidebar-btn-mail">
+                        <ui:Label text="✉" class="sidebar-btn-icon sidebar-btn-icon-white" />
                     </ui:Button>
                 </ui:VisualElement>
 
-                <!-- Character -->
+                <!-- Friends -->
                 <ui:VisualElement class="sidebar-btn-shadow">
-                    <ui:Button name="BtnCharacter" class="sidebar-btn">
-                        <ui:Label text="👤" class="sidebar-btn-icon" />
+                    <ui:Button name="BtnFriends" class="sidebar-btn sidebar-btn-friends">
+                        <ui:Label text="👥" class="sidebar-btn-icon sidebar-btn-icon-white" />
                     </ui:Button>
                 </ui:VisualElement>
             </ui:VisualElement>

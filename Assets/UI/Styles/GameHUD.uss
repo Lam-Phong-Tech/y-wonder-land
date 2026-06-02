@@ -31,6 +31,20 @@
     padding: 6px 12px 6px 6px;
 }
 
+.clickable-hud-element {
+    transition-property: scale, background-color;
+    transition-duration: 0.1s;
+}
+
+.clickable-hud-element:hover {
+    scale: 1.03;
+}
+
+.clickable-hud-element:active {
+    scale: 0.97;
+    translate: 2px 2px;
+}
+
 /* Avatar */
 .player-avatar {
     width: 48px;
@@ -101,6 +115,10 @@
     padding: 6px 10px;
     margin-top: 8px;
     max-width: 200px;
+}
+
+.quest-bubble.clickable-hud-element:hover {
+    background-color: #F5F5F5;
 }
 
 .quest-text {
@@ -286,9 +304,8 @@
     width: 44px;
     height: 44px;
     border-radius: 12px;
-    background-color: #FFFFFF;
     border-width: 3px;
-    border-color: #2D3436;
+    border-color: #3D3535;
     align-items: center;
     justify-content: center;
     padding: 0;
@@ -296,23 +313,67 @@
     transition-duration: 0.1s;
 }
 
-.sidebar-btn:hover {
-    background-color: #F0F0F0;
+/* Individual Color Buttons */
+.sidebar-btn-leaderboard {
+    background-color: #FFC107;
+    border-color: #3D3535;
+}
+.sidebar-btn-leaderboard:hover {
+    background-color: #FFD54F;
+}
+.sidebar-btn-leaderboard:active {
+    translate: 3px 3px;
+    background-color: #FFB300;
 }
 
-.sidebar-btn:active {
+.sidebar-btn-calendar {
+    background-color: #5B42F3;
+    border-color: #3D3535;
+}
+.sidebar-btn-calendar:hover {
+    background-color: #7B66FF;
+}
+.sidebar-btn-calendar:active {
     translate: 3px 3px;
-    background-color: #E0E0E0;
+    background-color: #432BB3;
+}
+
+.sidebar-btn-mail {
+    background-color: #2D7BFF;
+    border-color: #3D3535;
+}
+.sidebar-btn-mail:hover {
+    background-color: #5294FF;
+}
+.sidebar-btn-mail:active {
+    translate: 3px 3px;
+    background-color: #1A52CC;
+}
+
+.sidebar-btn-friends {
+    background-color: #4EA8DE;
+    border-color: #3D3535;
+}
+.sidebar-btn-friends:hover {
+    background-color: #72C0FA;
+}
+.sidebar-btn-friends:active {
+    translate: 3px 3px;
+    background-color: #3582B3;
 }
 
 .sidebar-btn-icon {
     font-size: 20px;
-    color: #2D3436;
+    color: #3D3535;
     -unity-text-align: middle-center;
     width: 44px;
     height: 44px;
     padding: 0;
     margin: 0;
+}
+
+.sidebar-btn-icon-white {
+    color: #FFFFFF;
 }
 
 /* ============================================

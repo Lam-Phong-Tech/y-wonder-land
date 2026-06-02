@@ -14,10 +14,14 @@ public class GameHUDController : MonoBehaviour
     [SerializeField] private LeaderboardPopupController leaderboardPopup;
     [SerializeField] private FriendsPopupController friendsPopup;
     [SerializeField] private MailboxPopupController mailboxPopup;
+    [SerializeField] private ProfilePopupController profilePopup;
+    [SerializeField] private AttendancePopupController attendancePopup;
+    [SerializeField] private QuestPopupController questPopup;
 
     private UIDocument uiDocument;
 
     // Player Info
+    private VisualElement playerInfo;
     private Label playerName;
     private Label playerLevel;
     private Label playerCurrencySmall;
@@ -31,9 +35,9 @@ public class GameHUDController : MonoBehaviour
 
     // Sidebar buttons
     private Button btnLeaderboard;
-    private Button btnFriends;
+    private Button btnCalendar;
     private Button btnMail;
-    private Button btnCharacter;
+    private Button btnFriends;
 
     // Action buttons
     private Button btnInteract;
@@ -69,6 +73,7 @@ public class GameHUDController : MonoBehaviour
     private void QueryElements(VisualElement root)
     {
         // Player Info
+        playerInfo = root.Q<VisualElement>("PlayerInfo");
         playerName = root.Q<Label>("PlayerName");
         playerLevel = root.Q<Label>("PlayerLevel");
         playerCurrencySmall = root.Q<Label>("PlayerEXP");
@@ -82,9 +87,9 @@ public class GameHUDController : MonoBehaviour
 
         // Sidebar
         btnLeaderboard = root.Q<Button>("BtnLeaderboard");
-        btnFriends = root.Q<Button>("BtnFriends");
+        btnCalendar = root.Q<Button>("BtnCalendar");
         btnMail = root.Q<Button>("BtnMail");
-        btnCharacter = root.Q<Button>("BtnCharacter");
+        btnFriends = root.Q<Button>("BtnFriends");
 
         // Actions
         btnInteract = root.Q<Button>("BtnInteract");
@@ -100,6 +105,28 @@ public class GameHUDController : MonoBehaviour
 
     private void RegisterCallbacks()
     {
+        // Clickable HUD Elements (Player Info & Quest)
+        playerInfo?.RegisterCallback<ClickEvent>(evt =>
+        {
+            if (profilePopup != null)
+            {
+                string name = playerName != null ? playerName.text : "Player";
+                string levelStr = playerLevel != null ? playerLevel.text : "Level: 1";
+                string expStr = playerCurrencySmall != null ? playerCurrencySmall.text : "0.00";
+                profilePopup.Show(name, levelStr, expStr);
+            }
+            else
+                Debug.Log("[GameHUD] Player Info / Avatar clicked (no profile popup assigned)");
+        });
+
+        questBubble?.RegisterCallback<ClickEvent>(evt =>
+        {
+            if (questPopup != null)
+                questPopup.Show();
+            else
+                Debug.Log("[GameHUD] Quest Bubble clicked (no quest popup assigned)");
+        });
+
         // Sidebar buttons
         btnLeaderboard?.RegisterCallback<ClickEvent>(evt =>
         {
@@ -109,12 +136,12 @@ public class GameHUDController : MonoBehaviour
                 Debug.Log("[GameHUD] Leaderboard clicked (no popup assigned)");
         });
 
-        btnFriends?.RegisterCallback<ClickEvent>(evt =>
+        btnCalendar?.RegisterCallback<ClickEvent>(evt =>
         {
-            if (friendsPopup != null)
-                friendsPopup.Show();
+            if (attendancePopup != null)
+                attendancePopup.Show();
             else
-                Debug.Log("[GameHUD] Friends clicked (no popup assigned)");
+                Debug.Log("[GameHUD] Daily Attendance clicked (no popup assigned)");
         });
 
         btnMail?.RegisterCallback<ClickEvent>(evt =>
@@ -125,9 +152,12 @@ public class GameHUDController : MonoBehaviour
                 Debug.Log("[GameHUD] Mail clicked (no popup assigned)");
         });
 
-        btnCharacter?.RegisterCallback<ClickEvent>(evt =>
+        btnFriends?.RegisterCallback<ClickEvent>(evt =>
         {
-            Debug.Log("[GameHUD] Character clicked");
+            if (friendsPopup != null)
+                friendsPopup.Show();
+            else
+                Debug.Log("[GameHUD] Friends clicked (no popup assigned)");
         });
 
         // Action buttons

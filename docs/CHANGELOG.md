@@ -3,6 +3,31 @@
 
 ---
 
+## [2026-06-02] — HUD Sidebar & 3 New Popups (Profile, Attendance, Quest)
+### Added
+- Tái cấu trúc HUD Sidebar (GameHUD.uxml) theo đúng thứ tự từ trên xuống: Leaderboard (🏆 - vàng), Điểm danh (📅 - tím, nút mới), Hòm thư (✉ - xanh dương), Bạn bè (👥 - xanh lơ). Loại bỏ nút Character cũ.
+- Thiết lập Avatar (PlayerInfo) và Quest Bubble (QuestBubble) thành các phần tử tương tác bấm được (Clickable) với đầy đủ hiệu ứng phóng to/thu nhỏ (hover/active scale).
+- Popup Thông tin nhân vật (Profile Popup) dạng landscape nền kem `#F5F0E8`: Hiển thị Avatar lớn, thanh tiến trình EXP lớn, và lưới chỉ số nông trại mockup (Cây đã trồng, Nông sản đã bán, Số bạn bè) tự động tải dữ liệu từ HUD.
+- Popup Điểm danh 7 ngày (Attendance Popup) dạng lưới 7 ô slot quà: Hiển thị quà đính kèm và trạng thái (Đã nhận / Chưa nhận). Tích hợp nút Điểm danh nhận thưởng và cập nhật trạng thái ô lưới thời gian thực.
+- Popup Nhật ký nhiệm vụ (Quest Journal Popup) dạng landscape 2 cột: Danh sách nhiệm vụ đang làm/đã xong bên trái, chi tiết yêu cầu và quà đính kèm bên phải. Cho phép nhận thưởng và đổi trạng thái khi nhiệm vụ hoàn thành.
+### Changed
+- Cập nhật `GameHUDController.cs` để query các phần tử mới, đăng ký callback click mở 3 popup mới (Profile, Attendance, Quest) và truyền dữ liệu động từ HUD sang Profile.
+### Files changed
+- Assets/UI/GameHUD.uxml (MODIFIED)
+- Assets/UI/GameHUDController.cs (MODIFIED)
+- Assets/UI/Styles/GameHUD.uss (MODIFIED)
+- Assets/UI/ProfilePopup.uxml (NEW)
+- Assets/UI/ProfilePopupController.cs (NEW)
+- Assets/UI/Styles/ProfilePopup.uss (NEW)
+- Assets/UI/AttendancePopup.uxml (NEW)
+- Assets/UI/AttendancePopupController.cs (NEW)
+- Assets/UI/Styles/AttendancePopup.uss (NEW)
+- Assets/UI/QuestPopup.uxml (NEW)
+- Assets/UI/QuestPopupController.cs (NEW)
+- Assets/UI/Styles/QuestPopup.uss (NEW)
+
+---
+
 ## [2026-06-02] — Module Mailbox Popup
 ### Added
 - Giao diện Hòm thư (Mailbox Popup) dạng landscape chuẩn phong cách "The Tangible Playground" đè lên cảnh game 3D.

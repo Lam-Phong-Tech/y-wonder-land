@@ -1,0 +1,387 @@
+/* Quest Journal Popup Stylesheet - Y WONDER LAND */
+
+/* Root overlay */
+.quest-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(15, 16, 22, 0.45);
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* Main panel container */
+.quest-panel {
+    width: 740px;
+    height: 400px;
+    background-color: #F5F0E8;
+    border-width: 3px;
+    border-color: #3D3535;
+    border-radius: 22px;
+    padding: 46px 18px 18px 18px;
+    flex-direction: row;
+    position: relative;
+}
+
+/* Top Title Container & Capsule */
+.header-container {
+    position: absolute;
+    top: -24px;
+    left: 0;
+    right: 0;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+}
+
+.title-capsule {
+    background-color: #5B42F3;
+    border-width: 3px;
+    border-color: #3D3535;
+    border-radius: 18px;
+    padding: 6px 36px;
+    align-items: center;
+    justify-content: center;
+}
+
+.title-label {
+    color: #FFFFFF;
+    font-size: 20px;
+    -unity-font-style: bold;
+    letter-spacing: 1px;
+}
+
+/* Close Button (X) */
+.close-button {
+    position: absolute;
+    top: -12px;
+    right: -12px;
+    width: 36px;
+    height: 36px;
+    background-color: #FF4B4B;
+    border-width: 3px;
+    border-color: #3D3535;
+    border-radius: 10px;
+    color: #FFFFFF;
+    font-size: 18px;
+    -unity-font-style: bold;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: scale 0.1s ease-in-out;
+}
+
+.close-button:hover {
+    background-color: #FF6B6B;
+    scale: 1.05;
+}
+
+.close-button:active {
+    background-color: #E03A3A;
+    scale: 0.95;
+    translate: 2px 2px;
+}
+
+/* Left Column: Quest List Area */
+.quest-list-area {
+    width: 55%;
+    height: 100%;
+    margin-right: 14px;
+    flex-direction: column;
+}
+
+.quest-list-scroll {
+    flex-grow: 1;
+    border-width: 2px;
+    border-color: #E5DEC9;
+    border-radius: 12px;
+    padding: 6px;
+    background-color: #EFE9DB;
+}
+
+/* Individual Quest Card */
+.quest-card {
+    height: 64px;
+    background-color: #FFFFFF;
+    border-width: 2px;
+    border-color: #3D3535;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    padding: 8px 12px;
+    flex-direction: row;
+    align-items: center;
+}
+
+.quest-card:hover {
+    background-color: #FDFBF7;
+}
+
+.quest-card.selected {
+    border-color: #FFC107;
+    border-width: 3px;
+    background-color: #FFFDF4;
+}
+
+.quest-card.completed-ready {
+    border-color: #4CAF50;
+}
+
+/* Quest states icon wrap */
+.quest-icon-container {
+    width: 34px;
+    height: 34px;
+    background-color: #F2F0EA;
+    border-radius: 8px;
+    border-width: 2px;
+    border-color: #3D3535;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+}
+
+.quest-card-content {
+    flex-grow: 1;
+    justify-content: center;
+}
+
+.quest-card-title {
+    color: #3D3535;
+    font-size: 14px;
+    -unity-font-style: bold;
+}
+
+.quest-card-progress-brief {
+    color: #8A7E6E;
+    font-size: 11px;
+    margin-top: 2px;
+}
+
+.quest-card-status-badge {
+    background-color: #E2DCD3;
+    border-width: 1.5px;
+    border-color: #3D3535;
+    border-radius: 5px;
+    padding: 2px 6px;
+}
+
+.quest-card-status-badge.claimed {
+    background-color: #E2DCD3;
+    opacity: 0.6;
+}
+
+.quest-card-status-badge.ready {
+    background-color: #4CAF50;
+}
+
+.quest-card-status-text {
+    font-size: 10px;
+    -unity-font-style: bold;
+    color: #3D3535;
+}
+
+.quest-card-status-badge.ready .quest-card-status-text {
+    color: #FFFFFF;
+}
+
+/* Right Column: Quest Detail Area */
+.quest-detail-area {
+    width: 43%;
+    height: 100%;
+}
+
+.quest-detail-panel {
+    flex-grow: 1;
+    background-color: #FFFFFF;
+    border-width: 3px;
+    border-color: #3D3535;
+    border-radius: 16px;
+    padding: 16px;
+    justify-content: space-between;
+}
+
+/* Empty State Detail */
+.detail-empty-state {
+    flex-grow: 1;
+    align-items: center;
+    justify-content: center;
+}
+
+.empty-quest-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+}
+
+.empty-label {
+    color: #8A7E6E;
+    font-size: 13px;
+    -unity-font-style: bold;
+    text-align: center;
+}
+
+/* Content State Detail */
+.detail-content-state {
+    flex-grow: 1;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.detail-header {
+    border-bottom-width: 2px;
+    border-bottom-color: #EFE9DB;
+    padding-bottom: 6px;
+    margin-bottom: 6px;
+}
+
+.detail-title {
+    color: #3D3535;
+    font-size: 15px;
+    -unity-font-style: bold;
+}
+
+.detail-giver {
+    color: #8A7E6E;
+    font-size: 11px;
+    margin-top: 3px;
+}
+
+.detail-body-scroll {
+    flex-grow: 1;
+    margin-bottom: 8px;
+    max-height: 80px;
+}
+
+.detail-description-text {
+    color: #3D3535;
+    font-size: 12px;
+    white-space: normal;
+    -unity-paragraph-layout: enabled;
+    line-height: 16px;
+}
+
+/* Progress bar section */
+.quest-progress-container {
+    margin-bottom: 8px;
+}
+
+.progress-title-label {
+    color: #3D3535;
+    font-size: 11px;
+    -unity-font-style: bold;
+    margin-bottom: 4px;
+}
+
+.quest-progress-track {
+    height: 18px;
+    background-color: #EFE9DB;
+    border-width: 2px;
+    border-color: #3D3535;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+}
+
+.quest-progress-fill {
+    height: 100%;
+    background-color: #FFC107;
+    border-right-width: 2px;
+    border-right-color: #3D3535;
+}
+
+.quest-progress-text {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -unity-text-align: middle-center;
+    color: #3D3535;
+    font-size: 10px;
+    -unity-font-style: bold;
+}
+
+/* Reward items section */
+.quest-reward-section {
+    background-color: #F8F6F0;
+    border-width: 1.5px;
+    border-color: #3D3535;
+    border-radius: 8px;
+    padding: 6px;
+    margin-bottom: 8px;
+}
+
+.reward-section-title {
+    color: #3D3535;
+    font-size: 11px;
+    -unity-font-style: bold;
+    margin-bottom: 4px;
+}
+
+.reward-grid {
+    flex-direction: row;
+}
+
+.reward-slot {
+    width: 42px;
+    height: 42px;
+    background-color: #FFFFFF;
+    border-width: 2px;
+    border-color: #3D3535;
+    border-radius: 8px;
+    align-items: center;
+    justify-content: center;
+    margin-right: 6px;
+    position: relative;
+}
+
+.reward-emoji {
+    font-size: 20px;
+}
+
+.reward-amount {
+    position: absolute;
+    bottom: 1px;
+    right: 2px;
+    color: #3D3535;
+    font-size: 9px;
+    -unity-font-style: bold;
+}
+
+.detail-footer {
+    height: 36px;
+}
+
+/* Claim reward button */
+.claim-quest-reward-btn {
+    width: 100%;
+    height: 36px;
+    background-color: #FFC107;
+    border-width: 2px;
+    border-color: #3D3535;
+    border-radius: 10px;
+    color: #3D3535;
+    font-size: 13px;
+    -unity-font-style: bold;
+    align-items: center;
+    justify-content: center;
+    transition: scale 0.1s ease-in-out;
+}
+
+.claim-quest-reward-btn:hover {
+    background-color: #FFD54F;
+    scale: 1.02;
+}
+
+.claim-quest-reward-btn:active {
+    background-color: #FFB300;
+    scale: 0.98;
+    translate: 2px 2px;
+}
+
+.claim-quest-reward-btn:disabled {
+    background-color: #E2DCD3;
+    border-color: #8A7E6E;
+    color: #8A7E6E;
+    opacity: 0.65;
+}

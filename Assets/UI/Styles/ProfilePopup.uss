@@ -1,0 +1,231 @@
+/* Profile Popup Stylesheet - Y WONDER LAND */
+
+/* Root overlay */
+.profile-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(15, 16, 22, 0.45);
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* Main panel container */
+.profile-panel {
+    width: 520px;
+    height: 320px;
+    background-color: #F5F0E8;
+    border-width: 3px;
+    border-color: #3D3535;
+    border-radius: 22px;
+    padding: 42px 18px 18px 18px;
+    position: relative;
+}
+
+/* Top Title Container & Capsule */
+.header-container {
+    position: absolute;
+    top: -24px;
+    left: 0;
+    right: 0;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+}
+
+.title-capsule {
+    background-color: #5B42F3;
+    border-width: 3px;
+    border-color: #3D3535;
+    border-radius: 18px;
+    padding: 6px 36px;
+    align-items: center;
+    justify-content: center;
+}
+
+.title-label {
+    color: #FFFFFF;
+    font-size: 20px;
+    -unity-font-style: bold;
+    letter-spacing: 1px;
+}
+
+/* Close Button (X) */
+.close-button {
+    position: absolute;
+    top: -12px;
+    right: -12px;
+    width: 36px;
+    height: 36px;
+    background-color: #FF4B4B;
+    border-width: 3px;
+    border-color: #3D3535;
+    border-radius: 10px;
+    color: #FFFFFF;
+    font-size: 18px;
+    -unity-font-style: bold;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: scale 0.1s ease-in-out;
+}
+
+.close-button:hover {
+    background-color: #FF6B6B;
+    scale: 1.05;
+}
+
+.close-button:active {
+    background-color: #E03A3A;
+    scale: 0.95;
+    translate: 2px 2px;
+}
+
+/* Profile Content wrapper */
+.profile-content {
+    flex-direction: row;
+    height: 100%;
+    width: 100%;
+}
+
+/* Left Section: Avatar */
+.profile-left {
+    width: 36%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    border-right-width: 2px;
+    border-right-color: #E5DEC9;
+    padding-right: 12px;
+}
+
+.profile-avatar-large {
+    width: 80px;
+    height: 80px;
+    border-radius: 40px;
+    background-color: #5B42F3;
+    border-width: 3px;
+    border-color: #3D3535;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+.avatar-emoji {
+    font-size: 42px;
+    -unity-text-align: middle-center;
+}
+
+.profile-name {
+    color: #3D3535;
+    font-size: 16px;
+    -unity-font-style: bold;
+    margin-bottom: 8px;
+}
+
+.profile-level-badge {
+    background-color: #2D7BFF;
+    border-width: 2px;
+    border-color: #3D3535;
+    border-radius: 10px;
+    padding: 3px 14px;
+}
+
+.profile-level-text {
+    color: #FFFFFF;
+    font-size: 12px;
+    -unity-font-style: bold;
+}
+
+/* Right Section: Stats & Progress */
+.profile-right {
+    width: 64%;
+    height: 100%;
+    padding-left: 16px;
+    justify-content: space-between;
+}
+
+.profile-section-title {
+    color: #3D3535;
+    font-size: 12px;
+    -unity-font-style: bold;
+    margin-bottom: 6px;
+}
+
+/* EXP Progress bar style */
+.profile-exp-container {
+    margin-bottom: 10px;
+}
+
+.profile-exp-track {
+    height: 22px;
+    background-color: #FFFFFF;
+    border-width: 2px;
+    border-color: #3D3535;
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-exp-fill {
+    height: 100%;
+    background-color: #4CAF50;
+    border-right-width: 2px;
+    border-right-color: #3D3535;
+}
+
+.profile-exp-text {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -unity-text-align: middle-center;
+    color: #3D3535;
+    font-size: 11px;
+    -unity-font-style: bold;
+}
+
+/* Stats Cards Grid */
+.stats-grid-container {
+    flex-grow: 1;
+}
+
+.stats-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.stat-card {
+    width: 48%;
+    height: 60px;
+    background-color: #FFFFFF;
+    border-width: 2px;
+    border-color: #3D3535;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    padding: 6px;
+    align-items: center;
+    justify-content: center;
+}
+
+.stat-card-title {
+    color: #8A7E6E;
+    font-size: 10px;
+    -unity-font-style: bold;
+    margin-bottom: 2px;
+}
+
+.stat-card-value {
+    color: #3D3535;
+    font-size: 18px;
+    -unity-font-style: bold;
+}
+
+.stat-card-valueJoined {
+    color: #3D3535;
+    font-size: 11px;
+    -unity-font-style: bold;
+}
