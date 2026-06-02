@@ -3,6 +3,24 @@
 
 ---
 
+## [2026-06-02] — Module Mailbox Popup
+### Added
+- Giao diện Hòm thư (Mailbox Popup) dạng landscape chuẩn phong cách "The Tangible Playground" đè lên cảnh game 3D.
+- Cột bên trái: Danh sách các thư cuộn mượt mà. Mỗi card thư hiển thị trạng thái động (Đã đọc/Chưa đọc bằng phong bì đóng/mở và chấm xanh dương), ngày gửi, người gửi, và huy hiệu hộp quà nếu có phần thưởng.
+- Cột bên phải: Thẻ chi tiết thư nền trắng đặc bo góc, viền tối dày. Khi có thư sẽ hiện tiêu đề, nội dung, lưới ô slot quà đính kèm và nút hành động.
+- Nút "Nhận tất cả" ở chân cột danh sách trái hỗ trợ claim nhanh mọi phần thưởng chưa nhận. Nút "Xóa đã đọc" hỗ trợ dọn dẹp hòm thư tự động.
+- Nút "Nhận quà" và "Xóa thư" riêng lẻ cho từng thư, cập nhật trạng thái "Đã nhận" thời gian thực.
+- Kết nối nút Hòm thư (phong bì) trên HUD sidebar để mở popup.
+### Changed
+- Cập nhật GameHUDController.cs để tích hợp liên kết gọi MailboxPopupController.Show().
+### Files changed
+- Assets/UI/MailboxPopup.uxml (NEW)
+- Assets/UI/Styles/MailboxPopup.uss (NEW)
+- Assets/UI/MailboxPopupController.cs (NEW)
+- Assets/UI/GameHUDController.cs (MODIFIED)
+
+---
+
 ## [2026-06-02] — Universal Design System & AI UI Guidelines
 ### Added
 - Thiết lập và nâng cấp tài liệu `docs/DESIGN_SYSTEM_TEMPLATE.md` thành **Universal Design System Template** dùng chung cho cả 3 nền tảng: **Web**, **Mobile App**, và **Game**.
