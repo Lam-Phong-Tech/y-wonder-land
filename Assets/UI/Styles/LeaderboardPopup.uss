@@ -42,10 +42,10 @@
 /* ── Floating 3D Trophy ── */
 .leaderboard-trophy-img {
     position: absolute;
-    top: -45px;
-    left: 210px;
-    width: 90px;
-    height: 90px;
+    top: -18px;
+    left: 290px;
+    width: 70px;
+    height: 70px;
     background-image: url('project://database/Assets/UI/Textures/LeaderboardTrophy.png');
     -unity-background-scale-mode: scale-to-fit;
     z-index: 5;
@@ -55,7 +55,7 @@
 .leaderboard-title-container {
     align-items: center;
     margin-bottom: 12px;
-    margin-top: -8px;
+    margin-top: 10px;
 }
 
 .leaderboard-title-box {
