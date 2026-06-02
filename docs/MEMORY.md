@@ -119,3 +119,46 @@
 ### 16. Bố cục 3 cột (Tabs -> Grid -> Details) cho Landscape UI
 - **Tình huống**: Thiết kế giao diện túi đồ với màn hình ngang (16:9) để hiển thị đồng thời danh mục, danh sách vật phẩm và xem thông tin chi tiết.
 - **Giải pháp**: Phân chia tỷ lệ cân đối theo cột: Cột 1 (Tabs) ~140px -> Cột 2 (Grid) linh hoạt chiếm diện tích chính -> Cột 3 (Details Panel) ~220px. Tổng chiều rộng Panel nâng từ `680px` lên `820px` tạo bố cục chắc chắn, cân đối và tận dụng tối đa chiều rộng màn hình.
+
+---
+
+## 🩺 BÁO CÁO Y TẾ — CÁC "BỆNH LÝ" GIAO DIỆN CỦA AI AGENT
+> Nguồn: Anh yêu chia sẻ (2026-06-02). Bé cần tự kiểm tra mỗi khi làm UI.
+
+### 17. KHÔNG lạm dụng Icon & Glassmorphism
+- **Bệnh**: Nhồi nhét emoji/icon vào mọi vị trí (nút, tab, tiêu đề) mà không cần thiết, trộn lẫn style icon nét thanh và nét đậm.
+- **Bé đã mắc**: ✅ Có — Anh yêu phải nhắc giảm icon ở Friends Popup.
+- **Quy tắc**: Chỉ dùng icon khi nó **rõ nghĩa hơn chữ** hoặc **tiết kiệm không gian đáng kể**. Ưu tiên nút dạng TEXT rõ ràng. KHÔNG dùng blur/glassmorphism (đã có trong DESIGN.md).
+
+### 18. KHÔNG lồng khung quá nhiều (Box-in-a-Box)
+- **Bệnh**: Đóng khung mọi thứ (Card trong Card, wrapper trong wrapper) thay vì dùng khoảng trắng.
+- **Quy tắc**: Mỗi element chỉ nên có tối đa **2 lớp bao bọc** (shadow wrapper + panel). Nếu thấy mình viết 3+ lớp `VisualElement` lồng nhau chỉ để chứa 1 Label → DỪNG LẠI và tối ưu.
+
+### 19. Phân cấp thị giác rõ ràng (Visual Hierarchy)
+- **Bệnh**: Dùng màu Primary (#5B42F3) cho quá nhiều thành phần, khiến người dùng không biết đâu là hành động chính.
+- **Quy tắc**: Mỗi màn hình chỉ có **MỘT hành động chính** được highlight bằng màu nổi bật. Các hành động phụ dùng màu trung tính hoặc nhạt hơn.
+
+### 20. Giữ hệ thống đơn vị nhất quán (Unit Consistency)
+- **Bệnh**: Dùng lẫn lộn px với các giá trị lẻ tẻ (13.5px, 21px, 1.5px) không theo quy tắc.
+- **Bé đã mắc**: ✅ Có — border-radius: 21px, border-width: 1.5px trong FriendsPopup.uss.
+- **Quy tắc**: Tuân thủ hệ thống **bội 4** hoặc **bội 8** cho tất cả kích thước: `4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48...`. Không được sinh ra số lẻ tẻ ngoài hệ thống.
+
+### 21. Luôn thiết kế đủ trạng thái (State Coverage)
+- **Bệnh**: Chỉ thiết kế trạng thái tĩnh, quên hover/active/focus/loading/empty/error.
+- **Quy tắc**: Mỗi element tương tác **BẮT BUỘC** phải có ít nhất: Normal, Hover, Active (Pressed). Danh sách phải có trạng thái Empty ("Chưa có bạn bè nào").
+
+### 22. KHÔNG rập khuôn — Giữ bản sắc riêng
+- **Bệnh**: Mọi trang đều giống SaaS template: Navbar → Hero → 3 cột Features → Pricing → Footer.
+- **Quy tắc**: Luôn đọc DESIGN.md trước khi làm UI. Tuân thủ phong cách "The Tangible Playground" với solid colors, retro shadow, bo góc lớn. KHÔNG copy cấu trúc web phổ thông.
+
+### 23. Tối ưu mã nguồn — Tránh phình code (Code Bloat)
+- **Bệnh**: Sinh hàng chục `div` wrapper chỉ để căn giữa, lặp lại CSS thay vì dùng class chung.
+- **Quy tắc**: Trước khi tạo wrapper mới, tự hỏi: "Có thể đạt được layout này bằng 1-2 thuộc tính CSS trên element cha không?". Nếu có → KHÔNG tạo wrapper.
+
+### 24. Checklist tự kiểm tra UI trước khi giao
+- [ ] Icon có thực sự cần thiết không? Nếu bỏ icon mà vẫn hiểu → bỏ icon.
+- [ ] Có wrapper/khung nào thừa không? Tối đa 2 lớp bao bọc.
+- [ ] Tất cả giá trị px có tuân thủ bội 4 không?
+- [ ] Mọi nút bấm đều có :hover và :active chưa?
+- [ ] Danh sách rỗng có hiển thị thông báo thay thế không?
+- [ ] Màu Primary chỉ dùng cho 1 CTA chính trên màn hình?
