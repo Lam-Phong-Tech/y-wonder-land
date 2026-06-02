@@ -17,7 +17,7 @@
 /* ── Panel Shadow ── */
 
 .charselect-shadow {
-    background-color: rgba(0, 0, 0, 0.55);
+    background-color: transparent;
     border-radius: 20px;
     padding-right: 6px;
     padding-bottom: 6px;
@@ -75,7 +75,7 @@
 /* ── Card Shadow Wrapper ── */
 
 .charselect-card-shadow {
-    background-color: rgba(0, 0, 0, 0.3);
+    background-color: transparent;
     border-radius: 16px;
     padding-right: 4px;
     padding-bottom: 4px;

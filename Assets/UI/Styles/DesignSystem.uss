@@ -75,7 +75,7 @@
 }
 
 .panel-shadow {
-    background-color: var(--shadow-color);
+    background-color: transparent;
     border-radius: var(--radius-panel);
     padding-right: var(--shadow-offset);
     padding-bottom: var(--shadow-offset);
@@ -144,7 +144,7 @@
 }
 
 .btn-shadow {
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: transparent;
     border-radius: var(--radius-button);
     padding-right: var(--shadow-offset-small);
     padding-bottom: var(--shadow-offset-small);

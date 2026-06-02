@@ -20,7 +20,7 @@
 
 /* ── Panel Shadow (Retro Offset) ── */
 .leaderboard-panel-shadow {
-    background-color: rgba(30, 30, 60, 0.6);
+    background-color: transparent;
     border-radius: 22px;
     padding-right: 6px;
     padding-bottom: 6px;

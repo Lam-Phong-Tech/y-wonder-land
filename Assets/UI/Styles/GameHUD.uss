@@ -201,7 +201,7 @@
 
 /* Settings button — circle, dark */
 .settings-btn-shadow {
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: transparent;
     border-radius: 50%;
     padding-right: 3px;
     padding-bottom: 3px;
@@ -242,7 +242,7 @@
 
 /* Row 2: Bag / Inventory — below, aligned right */
 .bag-btn-shadow {
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: transparent;
     border-radius: 14px;
     padding-right: 3px;
     padding-bottom: 3px;
@@ -292,7 +292,7 @@
 }
 
 .sidebar-btn-shadow {
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: transparent;
     border-radius: 12px;
     padding-right: 3px;
     padding-bottom: 3px;
@@ -450,7 +450,7 @@
 
 /* Action button shadow (retro) */
 .action-btn-shadow {
-    background-color: rgba(0, 0, 0, 0.35);
+    background-color: transparent;
     border-radius: 50%;
     padding-right: 3px;
     padding-bottom: 3px;
@@ -541,7 +541,7 @@
 .messages-bar {
     flex-direction: row;
     align-items: center;
-    background-color: rgba(0, 0, 0, 0.45);
+    background-color: transparent;
     border-radius: 20px;
     padding: 8px 16px;
     min-width: 200px;
@@ -592,7 +592,7 @@
 }
 
 .jump-btn-shadow {
-    background-color: rgba(0, 0, 0, 0.35);
+    background-color: transparent;
     border-radius: 50%;
     padding-right: 3px;
     padding-bottom: 3px;
