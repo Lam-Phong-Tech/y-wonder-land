@@ -30,7 +30,7 @@
                         <ui:Button name="TabSpecial" text="Đặc biệt" class="inventory-tab" />
                     </ui:VisualElement>
 
-                    <!-- Right: Items Grid -->
+                    <!-- Middle: Items Grid -->
                     <ui:VisualElement class="inventory-grid-area">
                         <ui:ScrollView name="InventoryScroll" class="inventory-grid-scroll">
                             <ui:VisualElement name="InventoryGrid" class="inventory-grid">
@@ -78,6 +78,27 @@
 
                             </ui:VisualElement>
                         </ui:ScrollView>
+                    </ui:VisualElement>
+
+                    <!-- Right: Item Detail Panel -->
+                    <ui:VisualElement name="InventoryDetailPanel" class="inventory-detail-panel">
+                        <!-- Empty State View -->
+                        <ui:Label name="InventoryDetailEmptyState" text="Hãy chọn một vật phẩm để xem chi tiết..." class="inventory-detail-empty-text" />
+
+                        <!-- Detail Content View -->
+                        <ui:VisualElement name="InventoryDetailContent" class="inventory-detail-content">
+                            <ui:VisualElement class="inventory-detail-icon-container">
+                                <ui:Label name="LblDetailIcon" text="❓" class="inventory-detail-icon" />
+                            </ui:VisualElement>
+                            <ui:Label name="LblDetailName" text="Tên vật phẩm" class="inventory-detail-name" />
+                            <ui:Label name="LblDetailQty" text="x0" class="inventory-detail-qty" />
+                            <ui:VisualElement class="inventory-detail-divider" />
+                            <ui:Label name="LblDetailDesc" text="Mô tả chi tiết vật phẩm sẽ hiển thị tại đây." class="inventory-detail-desc" />
+                            <ui:VisualElement class="inventory-detail-actions">
+                                <ui:Button name="BtnDetailAction" text="Sử dụng" class="inventory-detail-btn inventory-detail-btn--primary" />
+                                <ui:Button name="BtnDetailDiscard" text="Vứt bỏ" class="inventory-detail-btn inventory-detail-btn--secondary" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
                     </ui:VisualElement>
 
                 </ui:VisualElement>

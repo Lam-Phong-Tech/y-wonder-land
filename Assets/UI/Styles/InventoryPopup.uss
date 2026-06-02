@@ -29,8 +29,8 @@
 
 /* ── Panel (Landscape) ── */
 .inventory-panel {
-    width: 680px;
-    height: 400px;
+    width: 820px;
+    height: 420px;
     background-color: #F5F0E8;
     border-radius: 22px;
     border-width: 3px;
@@ -270,4 +270,129 @@
     font-size: 11px;
     color: #8A7E6E;
     -unity-font-style: bold;
+}
+
+/* ── Item Detail Panel ── */
+.inventory-detail-panel {
+    width: 220px;
+    background-color: #FFFFFF;
+    border-radius: 16px;
+    border-width: 3px;
+    border-color: #3D3535;
+    margin: 12px 12px 12px 0;
+    padding: 16px;
+    align-items: center;
+    justify-content: flex-start;
+    flex-shrink: 0;
+}
+
+.inventory-detail-content {
+    width: 100%;
+    height: 100%;
+    align-items: center;
+}
+
+.inventory-detail-icon-container {
+    width: 72px;
+    height: 72px;
+    border-radius: 12px;
+    background-color: #F0EBE2;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+    border-width: 2px;
+    border-color: #DDD5C8;
+}
+
+.inventory-detail-icon {
+    font-size: 36px;
+    -unity-text-align: middle-center;
+}
+
+.inventory-detail-name {
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: #3D3535;
+    margin-bottom: 2px;
+    -unity-text-align: middle-center;
+}
+
+.inventory-detail-qty {
+    font-size: 11px;
+    -unity-font-style: bold;
+    color: #9E8FBB;
+    margin-bottom: 8px;
+    -unity-text-align: middle-center;
+}
+
+.inventory-detail-divider {
+    height: 2px;
+    background-color: #DDD5C8;
+    width: 100%;
+    margin-bottom: 8px;
+}
+
+.inventory-detail-desc {
+    font-size: 11px;
+    color: #8A7E6E;
+    margin-bottom: 12px;
+    white-space: normal;
+    -unity-text-align: middle-center;
+    flex-grow: 1;
+    width: 100%;
+}
+
+.inventory-detail-actions {
+    width: 100%;
+    flex-direction: column;
+    margin-top: auto;
+}
+
+.inventory-detail-btn {
+    width: 100%;
+    margin-bottom: 6px;
+    padding: 6px 12px;
+    border-radius: 10px;
+    border-width: 2px;
+    -unity-font-style: bold;
+    font-size: 11px;
+    color: #FFFFFF;
+    transition-property: translate, background-color;
+    transition-duration: 0.08s;
+}
+
+.inventory-detail-btn--primary {
+    background-color: #2D7BFF;
+    border-color: #1A5EC2;
+}
+
+.inventory-detail-btn--primary:hover {
+    background-color: #4B92FF;
+}
+
+.inventory-detail-btn--primary:active {
+    translate: 1px 1px;
+}
+
+.inventory-detail-btn--secondary {
+    background-color: #FF4B4B;
+    border-color: #CC3333;
+}
+
+.inventory-detail-btn--secondary:hover {
+    background-color: #FF6B6B;
+}
+
+.inventory-detail-btn--secondary:active {
+    translate: 1px 1px;
+}
+
+.inventory-detail-empty-text {
+    font-size: 12px;
+    color: #B0A898;
+    -unity-font-style: italic;
+    -unity-text-align: middle-center;
+    margin-top: auto;
+    margin-bottom: auto;
+    white-space: normal;
 }

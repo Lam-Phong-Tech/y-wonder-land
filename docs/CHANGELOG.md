@@ -5,15 +5,21 @@
 
 ## [2026-06-02] — Module Inventory Popup
 ### Added
-- Popup túi đồ (Inventory) landscape theo phong cách Tangible Playground
+- Nâng cấp giao diện túi đồ (Inventory) thành bố cục 3 cột (Tabs -> Grid -> Detail Panel) landscape theo phong cách Tangible Playground
 - Cột bên trái gồm 6 tab phân loại: Dụng cụ (Tool), Nguyên liệu (Material), Hạt giống (Seed), Thực phẩm (Food), Trang phục (Outfit), Đặc biệt (Special)
-- Lưới 21 ô chứa vật phẩm mockup ở cột bên phải
-- Kết nối nút Túi đồ (Bag Button) trên HUD với Inventory Popup để mở/đóng popup
-- Hỗ trợ đóng popup qua nút đóng (X) hoặc bấm lại nút Túi đồ trên HUD
+- Lưới 21 ô chứa vật phẩm mockup ở cột giữa
+- Cột bên phải là Khung chi tiết vật phẩm (Item Detail Panel):
+  - Hiển thị tên, icon lớn, số lượng và mô tả của vật phẩm được chọn.
+  - Tự động thay đổi nút hành động động (Dynamic Button) theo loại (ví dụ: Trang bị, Ăn, Gieo hạt, Chế tạo...) và nút Vứt bỏ.
+- Hỗ trợ tự động chọn vật phẩm đầu tiên khi mở túi đồ hoặc chuyển tab.
+- Kết nối nút Túi đồ (Bag Button) trên HUD với Inventory Popup để mở/đóng popup.
+- Hỗ trợ đóng popup qua nút đóng (X) hoặc bấm lại nút Túi đồ trên HUD.
 ### Design
 - Header cam #E8833A, panel kem #F5F0E8
-- Viền đậm 3px, góc bo tròn 16px-22px, retro shadow 6px offset
-- Các tab được bo tròn góc trái và có mechanical press khi chọn
+- Khung chi tiết bên phải màu nền trắng #FFFFFF, bo góc 16px, viền đậm 3px đồng bộ.
+- Thẻ vật phẩm khi được chọn có viền cam rực rỡ #E8833A.
+- Viền đậm 3px, góc bo tròn 16px-22px, retro shadow 6px offset.
+- Các tab được bo tròn góc trái và có mechanical press khi chọn.
 ### Files changed
 - Assets/UI/Styles/InventoryPopup.uss (NEW)
 - Assets/UI/InventoryPopup.uxml (NEW)
