@@ -47,7 +47,8 @@ public class MailboxPopupController : MonoBehaviour
         }
     }
 
-    private UIDocument uiDocument;
+    [Header("References")]
+    [SerializeField] private UIDocument mailboxDocument;
     private VisualElement root;
     private VisualElement mailboxOverlay;
     private VisualElement mailboxPanel;
@@ -76,14 +77,18 @@ public class MailboxPopupController : MonoBehaviour
 
     void Awake()
     {
-        uiDocument = GetComponent<UIDocument>();
-        if (uiDocument == null)
+        if (mailboxDocument == null)
+        {
+            mailboxDocument = GetComponent<UIDocument>();
+        }
+
+        if (mailboxDocument == null)
         {
             Debug.LogError("[MailboxPopup] UIDocument component not found!");
             return;
         }
 
-        root = uiDocument.rootVisualElement;
+        root = mailboxDocument.rootVisualElement;
         QueryElements();
         RegisterCallbacks();
         
