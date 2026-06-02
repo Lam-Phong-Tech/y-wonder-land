@@ -3,6 +3,14 @@
 
 ---
 
+## [2026-06-02] — Design System & AI UI Guidelines
+### Added
+- Tài liệu `docs/DESIGN_SYSTEM_TEMPLATE.md` tích hợp các quy chuẩn thiết kế "The Tangible Playground" và 15 câu hỏi trong quy trình tự kiểm soát chất lượng (AI Agent Self-Check Protocol) để ngăn ngừa triệt để 8 bệnh lý giao diện phổ biến của AI.
+### Files changed
+- docs/DESIGN_SYSTEM_TEMPLATE.md (NEW)
+
+---
+
 ## [2026-06-02] — Module Friends Popup
 ### Added
 - Popup Bạn Bè (Friends Popup) landscape theo phong cách "The Tangible Playground" và hình ảnh tham khảo.
