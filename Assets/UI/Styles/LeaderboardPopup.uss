@@ -299,12 +299,12 @@
 /* ── My Rank Floating Card ── */
 .leaderboard-my-rank-shadow {
     position: absolute;
-    right: -15px;
-    bottom: -15px;
+    right: 10px;
+    bottom: 10px;
     background-color: rgba(30, 30, 60, 0.4);
     border-radius: 12px;
-    padding-right: 4px;
-    padding-bottom: 4px;
+    padding-right: 3px;
+    padding-bottom: 3px;
     z-index: 8;
 }
 
