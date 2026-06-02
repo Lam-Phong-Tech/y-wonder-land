@@ -9,8 +9,11 @@
 - Cấu trúc lại file thành **bản song ngữ (bản tiếng Anh và bản tiếng Việt)** chia làm 2 mục lớn rõ ràng, phục vụ cả các AI Agent quốc tế lẫn các nhà phát triển Việt Nam.
 - Tích hợp chi tiết phân tích biểu hiện, tác hại và cách phòng tránh cụ thể cho **8 bệnh lý giao diện kinh điển của AI Agent** (lạm dụng glassmorphism/icon, loạn đơn vị, chột trạng thái, mù tương phản, cụt chữ...) trên từng nền tảng bằng cả hai ngôn ngữ.
 - Cung cấp **AI Agent Self-Check Protocol** với 15 câu hỏi kiểm tra chất lượng tự động giúp AI tự kiểm duyệt UI trước khi bàn giao.
+### Changed
+- Cập nhật tài liệu thiết kế của dự án [DESIGN.md](file:///d:/LamGameUnity/BaChuKhuRung3D/docs/DESIGN.md) áp dụng các thông số thực tế của game **Y WONDER LAND** theo đúng khung chuẩn Universal và tích hợp các nguyên tắc ngăn ngừa bệnh UI để dự án trực tiếp áp dụng.
 ### Files changed
 - docs/DESIGN_SYSTEM_TEMPLATE.md (NEW)
+- docs/DESIGN.md (MODIFIED)
 
 ---
 
