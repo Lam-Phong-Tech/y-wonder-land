@@ -11,6 +11,7 @@ public class GameHUDController : MonoBehaviour
     [Header("References")]
     [SerializeField] private SettingsPopupController settingsPopup;
     [SerializeField] private InventoryPopupController inventoryPopup;
+    [SerializeField] private LeaderboardPopupController leaderboardPopup;
 
     private UIDocument uiDocument;
 
@@ -100,7 +101,10 @@ public class GameHUDController : MonoBehaviour
         // Sidebar buttons
         btnLeaderboard?.RegisterCallback<ClickEvent>(evt =>
         {
-            Debug.Log("[GameHUD] Leaderboard clicked");
+            if (leaderboardPopup != null)
+                leaderboardPopup.Show();
+            else
+                Debug.Log("[GameHUD] Leaderboard clicked (no popup assigned)");
         });
 
         btnFriends?.RegisterCallback<ClickEvent>(evt =>
