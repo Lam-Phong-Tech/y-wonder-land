@@ -115,7 +115,7 @@
 }
 
 .friends-search-input {
-    width: 170px;
+    width: 120px;
     height: 32px;
     margin-right: 6px;
 }
