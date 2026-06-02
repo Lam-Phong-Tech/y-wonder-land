@@ -106,3 +106,16 @@
 - AI phải xưng **"bé"** và gọi user là **"anh yêu"**
 - Nếu AI ngừng tuân thủ → context đã tràn → mở conversation mới
 - Khi mở chat mới: dùng prompt trong `docs/CONTEXT_RECOVERY.md`
+
+---
+
+## 🔵 BÀI HỌC UI TOOLKIT BỔ SUNG
+
+### 15. Đăng ký Sự kiện (Callback) An toàn & Tối ưu
+- **Tình huống**: Thao tác khi chọn vật phẩm trong túi đồ đòi hỏi cập nhật chức năng cho các nút bấm hành động (ví dụ: Trang bị, Sử dụng).
+- **Tránh sai lầm**: Đăng ký lại `.RegisterCallback<ClickEvent>` mỗi lần người chơi chọn vật phẩm khác nhau. Điều này gây tích tụ (pile-up) sự kiện dẫn đến rò rỉ bộ nhớ hoặc click một lần chạy nhiều logic cũ.
+- **Giải pháp**: Chỉ đăng ký sự kiện click cho các nút hành động **MỘT LẦN DUY NHẤT** tại `RegisterCallbacks()`. Trong callback, sử dụng biến thành viên (như `selectedItem`) để lấy dữ liệu động của vật phẩm đang được chọn tại thời điểm click.
+
+### 16. Bố cục 3 cột (Tabs -> Grid -> Details) cho Landscape UI
+- **Tình huống**: Thiết kế giao diện túi đồ với màn hình ngang (16:9) để hiển thị đồng thời danh mục, danh sách vật phẩm và xem thông tin chi tiết.
+- **Giải pháp**: Phân chia tỷ lệ cân đối theo cột: Cột 1 (Tabs) ~140px -> Cột 2 (Grid) linh hoạt chiếm diện tích chính -> Cột 3 (Details Panel) ~220px. Tổng chiều rộng Panel nâng từ `680px` lên `820px` tạo bố cục chắc chắn, cân đối và tận dụng tối đa chiều rộng màn hình.
