@@ -3,6 +3,30 @@
 
 ---
 
+## [2026-06-02] — Module Leaderboard Popup
+### Added
+- Popup Bảng Xếp Hạng (Leaderboard) theo phong cách thiết kế "The Tangible Playground" và hình ảnh tham khảo.
+- Hàng ngang chứa 5 tab phân loại: Diligence (EXP), Level (★), Fashion (★), Pet (★), Rich (Coin).
+- Lưới danh sách sọc vằn Zebra (Hạng 1 nền kem nhạt, Hạng 2 nền xanh lơ nhạt, Hạng 3 nền hồng nhạt, các hạng sau trắng/xám lơ nhẹ xen kẽ).
+- Huy chương Unicode (🥇, 🥈, 🥉) nổi bật cho top 3 và khung hình thoi màu vàng nhạt cho thứ hạng 4 trở đi.
+- Nút đóng (X) màu đỏ cơ học có bóng đổ ở góc trên bên phải.
+- Biểu tượng Cúp Vàng 3D đồ chơi mộc mạc (không chứa chữ) nhô lên đè trên thanh tiêu đề chính.
+- Một thẻ nhỏ nổi lên ở góc dưới bên phải hiển thị thứ hạng của người chơi: "My Rank: 100+".
+- Tích hợp dữ liệu giả lập (Mock Data) phong phú với tên nông trại thuần Việt (carot6868, Anhbaole, Haiau1982...) và chỉ số động thay đổi theo từng tab.
+- Kết nối nút Cúp Vàng trên HUD để mở Bảng Xếp Hạng.
+### Design
+- Nền panel màu tím rực rỡ #5B42F3 (Hero Surface), bo góc 22px, viền 3px đen xám #3D3535.
+- Hộp tiêu đề màu xanh lam capsule #4F59E3.
+- Tab chưa chọn màu vàng cam #FDBE5B, tab đang chọn màu tím xám #8A7D9D.
+### Files changed
+- Assets/UI/LeaderboardPopup.uxml (NEW)
+- Assets/UI/Styles/LeaderboardPopup.uss (NEW)
+- Assets/UI/LeaderboardPopupController.cs (NEW)
+- Assets/UI/Textures/LeaderboardTrophy.png (NEW)
+- Assets/UI/GameHUDController.cs (MODIFIED)
+
+---
+
 ## [2026-06-02] — Module Inventory Popup
 ### Added
 - Nâng cấp giao diện túi đồ (Inventory) thành bố cục 3 cột (Tabs -> Grid -> Detail Panel) landscape theo phong cách Tangible Playground
