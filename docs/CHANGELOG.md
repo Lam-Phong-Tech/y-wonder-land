@@ -3,6 +3,25 @@
 
 ---
 
+## [2026-06-02] — Module Inventory Popup
+### Added
+- Popup túi đồ (Inventory) landscape theo phong cách Tangible Playground
+- Cột bên trái gồm 6 tab phân loại: Dụng cụ (Tool), Nguyên liệu (Material), Hạt giống (Seed), Thực phẩm (Food), Trang phục (Outfit), Đặc biệt (Special)
+- Lưới 21 ô chứa vật phẩm mockup ở cột bên phải
+- Kết nối nút Túi đồ (Bag Button) trên HUD với Inventory Popup để mở/đóng popup
+- Hỗ trợ đóng popup qua nút đóng (X) hoặc bấm lại nút Túi đồ trên HUD
+### Design
+- Header cam #E8833A, panel kem #F5F0E8
+- Viền đậm 3px, góc bo tròn 16px-22px, retro shadow 6px offset
+- Các tab được bo tròn góc trái và có mechanical press khi chọn
+### Files changed
+- Assets/UI/Styles/InventoryPopup.uss (NEW)
+- Assets/UI/InventoryPopup.uxml (NEW)
+- Assets/UI/InventoryPopupController.cs (NEW)
+- Assets/UI/GameHUDController.cs (MODIFIED)
+
+---
+
 ## [2026-06-01] — GitHub Repository
 ### Added
 - Kết nối dự án với GitHub: `Lam-Phong-Tech/y-wonder-land`

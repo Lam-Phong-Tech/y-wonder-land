@@ -1,0 +1,273 @@
+/* ============================================
+   Inventory Popup — The Tangible Playground
+   ============================================
+   Landscape layout: tabs left + item grid right
+   6 categories, retro shadow, mechanical press
+   ============================================ */
+
+/* ── Overlay ── */
+.inventory-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    align-items: center;
+    justify-content: center;
+    display: none;
+}
+
+/* ── Panel Shadow (Retro Offset) ── */
+.inventory-panel-shadow {
+    background-color: rgba(30, 30, 60, 0.6);
+    border-radius: 22px;
+    padding-right: 6px;
+    padding-bottom: 6px;
+    position: relative;
+}
+
+/* ── Panel (Landscape) ── */
+.inventory-panel {
+    width: 680px;
+    height: 400px;
+    background-color: #F5F0E8;
+    border-radius: 22px;
+    border-width: 3px;
+    border-color: #3D3535;
+    overflow: hidden;
+}
+
+/* ── Header Bar ── */
+.inventory-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background-color: #E8833A;
+    padding: 12px 16px;
+    border-bottom-width: 3px;
+    border-bottom-color: #CC6D28;
+}
+
+.inventory-header-title {
+    font-size: 20px;
+    -unity-font-style: bold;
+    color: #FFFFFF;
+    -unity-text-align: middle-center;
+    letter-spacing: 2px;
+    position: absolute;
+    left: 0;
+    right: 0;
+}
+
+/* ── Close Button (Corner) ── */
+.inventory-close-shadow {
+    position: absolute;
+    right: -8px;
+    top: -8px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    padding-right: 2px;
+    padding-bottom: 2px;
+    z-index: 10;
+}
+
+.inventory-close-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #FF4B4B;
+    border-width: 2px;
+    border-color: #CC3333;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: #FFFFFF;
+    -unity-text-align: middle-center;
+    transition-property: translate, background-color;
+    transition-duration: 0.08s;
+}
+
+.inventory-close-btn:hover {
+    background-color: #FF6B6B;
+}
+
+.inventory-close-btn:active {
+    translate: 2px 2px;
+    background-color: #CC3333;
+}
+
+/* ── Body (Tabs + Grid) ── */
+.inventory-body {
+    flex-direction: row;
+    flex-grow: 1;
+}
+
+/* ── Left: Category Tabs ── */
+.inventory-tabs {
+    width: 140px;
+    padding: 12px 8px;
+    background-color: #EDE5D8;
+    border-right-width: 3px;
+    border-right-color: #DDD5C8;
+    flex-shrink: 0;
+}
+
+.inventory-tab {
+    padding: 8px 10px;
+    margin-bottom: 4px;
+    border-radius: 10px;
+    border-width: 2px;
+    border-color: #C4BAA8;
+    background-color: #FFFFFF;
+    font-size: 12px;
+    -unity-font-style: bold;
+    color: #3D3535;
+    -unity-text-align: middle-center;
+    transition-property: translate, background-color, border-color;
+    transition-duration: 0.1s;
+}
+
+.inventory-tab:hover {
+    background-color: #FFF5E8;
+    border-color: #E8833A;
+}
+
+.inventory-tab:active {
+    translate: 1px 1px;
+}
+
+/* Active tab */
+.inventory-tab--active {
+    background-color: #E8833A;
+    border-color: #CC6D28;
+    color: #FFFFFF;
+}
+
+.inventory-tab--active:hover {
+    background-color: #F09348;
+    border-color: #CC6D28;
+}
+
+/* ── Right: Items Grid ── */
+.inventory-grid-area {
+    flex-grow: 1;
+    padding: 12px;
+}
+
+.inventory-grid-scroll {
+    flex-grow: 1;
+}
+
+.inventory-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: flex-start;
+}
+
+/* ── Item Card ── */
+.inventory-item-shadow {
+    background-color: rgba(30, 30, 60, 0.3);
+    border-radius: 12px;
+    padding-right: 3px;
+    padding-bottom: 3px;
+    margin: 4px;
+}
+
+.inventory-item {
+    width: 100px;
+    height: 110px;
+    border-radius: 12px;
+    background-color: #FFFFFF;
+    border-width: 2px;
+    border-color: #DDD5C8;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    transition-property: translate, border-color;
+    transition-duration: 0.1s;
+}
+
+.inventory-item:hover {
+    border-color: #E8833A;
+    translate: -1px -1px;
+}
+
+.inventory-item:active {
+    translate: 2px 2px;
+    border-color: #CC6D28;
+}
+
+/* Selected item */
+.inventory-item--selected {
+    border-color: #E8833A;
+    border-width: 3px;
+    background-color: #FFF5E8;
+}
+
+/* Item icon placeholder */
+.inventory-item-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 8px;
+    background-color: #F0EBE2;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 4px;
+}
+
+.inventory-item-icon-text {
+    font-size: 28px;
+    -unity-text-align: middle-center;
+}
+
+/* Item name */
+.inventory-item-name {
+    font-size: 10px;
+    -unity-font-style: bold;
+    color: #3D3535;
+    -unity-text-align: upper-center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 90px;
+}
+
+/* Item quantity badge */
+.inventory-item-qty {
+    font-size: 10px;
+    -unity-font-style: bold;
+    color: #9E8FBB;
+    -unity-text-align: upper-center;
+}
+
+/* ── Empty State ── */
+.inventory-empty {
+    flex-grow: 1;
+    align-items: center;
+    justify-content: center;
+}
+
+.inventory-empty-text {
+    font-size: 14px;
+    color: #B0A898;
+    -unity-font-style: italic;
+}
+
+/* ── Bottom Info Bar ── */
+.inventory-info-bar {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 8px 16px;
+    background-color: #EDE5D8;
+    border-top-width: 2px;
+    border-top-color: #DDD5C8;
+}
+
+.inventory-info-text {
+    font-size: 11px;
+    color: #8A7E6E;
+    -unity-font-style: bold;
+}

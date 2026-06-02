@@ -10,6 +10,7 @@ public class GameHUDController : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private SettingsPopupController settingsPopup;
+    [SerializeField] private InventoryPopupController inventoryPopup;
 
     private UIDocument uiDocument;
 
@@ -147,7 +148,10 @@ public class GameHUDController : MonoBehaviour
         // Bag
         btnBag?.RegisterCallback<ClickEvent>(evt =>
         {
-            Debug.Log("[GameHUD] Bag / Inventory clicked");
+            if (inventoryPopup != null)
+                inventoryPopup.Show();
+            else
+                Debug.Log("[GameHUD] Bag / Inventory clicked (no popup assigned)");
         });
 
         // Settings
