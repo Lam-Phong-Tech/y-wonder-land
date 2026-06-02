@@ -1893,6 +1893,75 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2169819421952128927, guid: 0d71d5ff7a6d3c342bc3bedd1ea7b26e, type: 3}
   m_PrefabInstance: {fileID: 4846970407544857859}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1131429569
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1131429570}
+  - component: {fileID: 1131429572}
+  - component: {fileID: 1131429571}
+  m_Layer: 0
+  m_Name: ProfilePopup
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1131429570
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1131429569}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1741906306}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1131429571
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1131429569}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
+  m_PanelSettings: {fileID: 11400000, guid: 733b78b50ad81f042bff3e42a7e00e1e, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: 83d5b4e758e0fa34b964c7c4fe53e20f, type: 3}
+  m_SortingOrder: 2
+  m_Position: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}
+--- !u!114 &1131429572
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1131429569}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d45809c1cbc18d48af0946594d2af63, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ProfilePopupController
+  profileDocument: {fileID: 1131429571}
 --- !u!1 &1241792997
 GameObject:
   m_ObjectHideFlags: 0
@@ -2089,7 +2158,7 @@ MonoBehaviour:
   m_PanelSettings: {fileID: 11400000, guid: 733b78b50ad81f042bff3e42a7e00e1e, type: 2}
   m_ParentUI: {fileID: 0}
   sourceAsset: {fileID: 9197481963319205126, guid: 481fc87e85059534cadd5a13d4dd7456, type: 3}
-  m_SortingOrder: 0
+  m_SortingOrder: 2
   m_Position: 0
   m_WorldSpaceSizeMode: 1
   m_WorldSpaceWidth: 1920
@@ -2113,7 +2182,10 @@ MonoBehaviour:
   inventoryPopup: {fileID: 46427941}
   leaderboardPopup: {fileID: 518688151}
   friendsPopup: {fileID: 275288947}
-  mailboxPopup: {fileID: 0}
+  mailboxPopup: {fileID: 1728201023}
+  profilePopup: {fileID: 0}
+  attendancePopup: {fileID: 0}
+  questPopup: {fileID: 0}
 --- !u!4 &1296602394
 Transform:
   m_ObjectHideFlags: 0
@@ -2475,6 +2547,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cad0747eb3ff66440b8522b5a703cb69, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MailboxPopupController
+  mailboxDocument: {fileID: 1728201024}
 --- !u!114 &1728201024
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2490,7 +2563,7 @@ MonoBehaviour:
   m_PanelSettings: {fileID: 11400000, guid: 733b78b50ad81f042bff3e42a7e00e1e, type: 2}
   m_ParentUI: {fileID: 0}
   sourceAsset: {fileID: 9197481963319205126, guid: 7ced42aae8086f34c8364a192aa7814d, type: 3}
-  m_SortingOrder: 0
+  m_SortingOrder: 2
   m_Position: 0
   m_WorldSpaceSizeMode: 1
   m_WorldSpaceWidth: 1920
@@ -2534,6 +2607,7 @@ Transform:
   - {fileID: 518688153}
   - {fileID: 275288945}
   - {fileID: 1728201022}
+  - {fileID: 1131429570}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1795601540
