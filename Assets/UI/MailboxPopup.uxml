@@ -3,13 +3,8 @@
     <ui:VisualElement name="MailboxOverlay" class="mailbox-overlay">
         <ui:VisualElement name="MailboxPanel" class="mailbox-panel">
             
-            <!-- Header Title Capsule with 3D Mail Decor -->
+            <!-- Header Title Capsule -->
             <ui:VisualElement name="HeaderContainer" class="header-container">
-                <ui:VisualElement name="MailDecor" class="mail-decor">
-                    <!-- Custom styled envelope wings using CSS -->
-                    <ui:VisualElement class="envelope-wing left-wing" />
-                    <ui:VisualElement class="envelope-wing right-wing" />
-                </ui:VisualElement>
                 <ui:VisualElement name="TitleCapsule" class="title-capsule">
                     <ui:Label name="TitleLabel" class="title-label" text="Hộp thư" />
                 </ui:VisualElement>
