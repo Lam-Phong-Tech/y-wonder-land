@@ -13,6 +13,7 @@ public class GameHUDController : MonoBehaviour
     [SerializeField] private InventoryPopupController inventoryPopup;
     [SerializeField] private LeaderboardPopupController leaderboardPopup;
     [SerializeField] private FriendsPopupController friendsPopup;
+    [SerializeField] private MailboxPopupController mailboxPopup;
 
     private UIDocument uiDocument;
 
@@ -118,7 +119,10 @@ public class GameHUDController : MonoBehaviour
 
         btnMail?.RegisterCallback<ClickEvent>(evt =>
         {
-            Debug.Log("[GameHUD] Mail clicked");
+            if (mailboxPopup != null)
+                mailboxPopup.Show();
+            else
+                Debug.Log("[GameHUD] Mail clicked (no popup assigned)");
         });
 
         btnCharacter?.RegisterCallback<ClickEvent>(evt =>
