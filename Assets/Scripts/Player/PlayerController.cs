@@ -1,18 +1,27 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(CharacterController))]
+[RequireComponent(typeof(PlayerInput))]
 public class PlayerController : MonoBehaviour
 {
     [Header("Movement Settings")]
     public float moveSpeed = 4.0f;
     public float rotationSpeed = 15.0f;
     public float gravity = -9.81f;
+    public float jumpHeight = 1.5f;
 
     private CharacterController controller;
     private Animator animator;
     private Transform mainCameraTransform;
     private Vector3 playerVelocity;
     private bool isGrounded;
+
+    // Input System Actions
+    private PlayerInput playerInput;
+    private InputAction moveAction;
+    private InputAction jumpAction;
+    private InputAction interactAction;
 
     // Animator parameter hash IDs for better performance
     private int speedHash;
@@ -22,7 +31,16 @@ public class PlayerController : MonoBehaviour
     {
         controller = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
-        
+        playerInput = GetComponent<PlayerInput>();
+
+        // Cache actions
+        if (playerInput != null)
+        {
+            moveAction = playerInput.actions["Move"];
+            jumpAction = playerInput.actions["Jump"];
+            interactAction = playerInput.actions["Interact"];
+        }
+
         DiscoverMainCamera();
 
         // Cache Animator parameters
@@ -51,11 +69,9 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        // Ensure character controller is enabled
-        if (controller == null)
-        {
-            controller = GetComponent<CharacterController>();
-        }
+        // Ensure components are cached
+        if (controller == null) controller = GetComponent<CharacterController>();
+        if (animator == null) animator = GetComponent<Animator>();
 
         // 1. Gravity and Ground Check
         isGrounded = controller.isGrounded;
@@ -64,33 +80,19 @@ public class PlayerController : MonoBehaviour
             playerVelocity.y = -2f; // Soft clamp to keep grounded
         }
 
-        // 2. Read Keyboard/Gamepad Inputs (New Input System API)
-        float horizontal = 0f;
-        float vertical = 0f;
+        // 2. Read Inputs via Input System Action Map
+        Vector2 inputVec = moveAction != null ? moveAction.ReadValue<Vector2>() : Vector2.zero;
+        bool jumpPressed = jumpAction != null && jumpAction.triggered;
+        bool interactPressed = interactAction != null && interactAction.triggered;
 
-        // Poll Keyboard
-        var keyboard = UnityEngine.InputSystem.Keyboard.current;
-        if (keyboard != null)
+        // Process Interaction
+        if (interactPressed)
         {
-            if (keyboard.wKey.isPressed || keyboard.upArrowKey.isPressed) vertical = 1f;
-            if (keyboard.sKey.isPressed || keyboard.downArrowKey.isPressed) vertical = -1f;
-            if (keyboard.aKey.isPressed || keyboard.leftArrowKey.isPressed) horizontal = -1f;
-            if (keyboard.dKey.isPressed || keyboard.rightArrowKey.isPressed) horizontal = 1f;
+            Debug.Log("[PlayerController] Action / Interact button pressed!");
+            // Add interaction logic here later
         }
 
-        // Poll Gamepad (Optional but nice)
-        var gamepad = UnityEngine.InputSystem.Gamepad.current;
-        if (gamepad != null)
-        {
-            Vector2 stick = gamepad.leftStick.ReadValue();
-            if (stick.magnitude > 0.1f)
-            {
-                horizontal = stick.x;
-                vertical = stick.y;
-            }
-        }
-
-        Vector3 inputDir = new Vector3(horizontal, 0, vertical).normalized;
+        Vector3 inputDir = new Vector3(inputVec.x, 0, inputVec.y).normalized;
         Vector3 moveDirection = Vector3.zero;
 
         // Ensure we always have the active main camera transform if the camera changed states
@@ -100,7 +102,7 @@ public class PlayerController : MonoBehaviour
         }
 
         // 3. Move Relative to Camera Direction
-        if (inputDir.magnitude >= 0.1f)
+        if (inputVec.magnitude >= 0.1f)
         {
             Vector3 camForward = Vector3.forward;
             Vector3 camRight = Vector3.right;
@@ -119,18 +121,29 @@ public class PlayerController : MonoBehaviour
             moveDirection = camForward * inputDir.z + camRight * inputDir.x;
 
             // Rotate character towards movement direction smoothly
-            Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+            if (moveDirection != Vector3.zero)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+            }
 
             // Move the character controller
             controller.Move(moveDirection * moveSpeed * Time.deltaTime);
+        }
+
+        // 4. Handle Jumping
+        if (jumpPressed && isGrounded)
+        {
+            // Physics formula for jump velocity: v = sqrt(h * -2 * g)
+            playerVelocity.y = Mathf.Sqrt(jumpHeight * -2.0f * gravity);
+            Debug.Log("[PlayerController] Jump triggered!");
         }
 
         // Apply gravity
         playerVelocity.y += gravity * Time.deltaTime;
         controller.Move(playerVelocity * Time.deltaTime);
 
-        // 4. Update Animator Parameters (for Character animations)
+        // 5. Update Animator Parameters (for Character animations)
         if (animator != null)
         {
             float currentSpeed = moveDirection.magnitude * moveSpeed;
