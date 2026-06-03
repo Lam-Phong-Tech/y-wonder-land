@@ -154,6 +154,12 @@
                 </ui:Button>
             </ui:VisualElement>
         </ui:VisualElement>
+        <!-- ============================== -->
+        <!-- 8. CROSSHAIR — Center Screen   -->
+        <!-- ============================== -->
+        <ui:VisualElement name="Crosshair" class="crosshair" picking-mode="Ignore">
+            <ui:VisualElement class="crosshair-dot" picking-mode="Ignore" />
+        </ui:VisualElement>
 
     </ui:VisualElement>
 </ui:UXML>

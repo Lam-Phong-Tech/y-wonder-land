@@ -266,7 +266,11 @@ public class QuestPopupController : MonoBehaviour
             if (quest.isRewardClaimed) iconStr = "🎁";
             else if (quest.isCompleted) iconStr = "✔️";
             Label iconLabel = new Label(iconStr);
-            iconLabel.style.fontSize = 16;
+            iconLabel.AddToClassList("quest-icon-label");
+            if (quest.isCompleted && !quest.isRewardClaimed)
+            {
+                iconLabel.AddToClassList("completed");
+            }
             iconContainer.Add(iconLabel);
             card.Add(iconContainer);
 

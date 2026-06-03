@@ -60,6 +60,29 @@ public class GameManager : MonoBehaviour
 
     private void DiscoverCameras()
     {
+        // 1. Discover gameplay camera (Main Camera with ThirdPersonCamera script or tagged MainCamera)
+        if (gameplayCamera == null)
+        {
+            // Look for ThirdPersonCamera script first
+            ThirdPersonCamera tpc = FindFirstObjectByType<ThirdPersonCamera>(FindObjectsInactive.Include);
+            if (tpc != null)
+            {
+                gameplayCamera = tpc.gameObject;
+                Debug.Log("[GameManager] Auto-discovered ThirdPersonCamera as gameplay camera: " + gameplayCamera.name);
+            }
+            else
+            {
+                // Fallback to tagged MainCamera
+                GameObject go = GameObject.FindWithTag("MainCamera");
+                if (go != null)
+                {
+                    gameplayCamera = go;
+                    Debug.Log("[GameManager] Auto-discovered MainCamera as gameplay camera: " + go.name);
+                }
+            }
+        }
+
+        // 2. Discover Menu Camera
         if (menuCamera == null)
         {
             GameObject go = GameObject.Find("MenuCamera") ?? GameObject.Find("Menu Camera");
@@ -70,6 +93,7 @@ public class GameManager : MonoBehaviour
             }
         }
 
+        // 3. Discover Cutscene Camera
         if (cutsceneCamera == null)
         {
             GameObject go = GameObject.Find("CutsceneCamera") ?? GameObject.Find("Cutscene Camera") ?? GameObject.Find("CinematicCamera");
@@ -80,23 +104,14 @@ public class GameManager : MonoBehaviour
             }
         }
 
+        // 4. Default discovery for gameplay camera if still null
         if (gameplayCamera == null)
         {
-            // First look for GameplayCamera script in scene
-            GameplayCamera gc = GameObject.FindFirstObjectByType<GameplayCamera>();
-            if (gc != null)
+            GameObject go = GameObject.Find("GameplayCamera") ?? GameObject.Find("Gameplay Camera") ?? GameObject.FindWithTag("MainCamera");
+            if (go != null)
             {
-                gameplayCamera = gc.gameObject;
-                Debug.Log("[GameManager] Auto-discovered Gameplay Camera via script: " + gameplayCamera.name);
-            }
-            else
-            {
-                GameObject go = GameObject.Find("GameplayCamera") ?? GameObject.Find("Gameplay Camera") ?? GameObject.FindWithTag("MainCamera");
-                if (go != null)
-                {
-                    gameplayCamera = go;
-                    Debug.Log("[GameManager] Auto-discovered Gameplay Camera: " + go.name);
-                }
+                gameplayCamera = go;
+                Debug.Log("[GameManager] Auto-discovered fallback Gameplay Camera: " + go.name);
             }
         }
     }
@@ -109,24 +124,55 @@ public class GameManager : MonoBehaviour
         // Auto-discover cameras again to ensure dynamic changes are caught
         DiscoverCameras();
 
-        // Toggle Cameras and UI depending on state
-        if (menuCamera != null)
+        // Toggle Cameras depending on state (conflict-free logic if cameras share the same GameObject)
+        GameObject activeCam = null;
+        if (currentState == GameState.Login || currentState == GameState.Menu)
         {
-            menuCamera.SetActive(currentState == GameState.Menu);
-            Camera cam = menuCamera.GetComponentInChildren<Camera>(true);
-            if (cam != null) cam.enabled = (currentState == GameState.Menu);
+            activeCam = menuCamera;
         }
-        if (cutsceneCamera != null)
+        else if (currentState == GameState.Cutscene)
         {
-            cutsceneCamera.SetActive(currentState == GameState.Cutscene);
-            Camera cam = cutsceneCamera.GetComponentInChildren<Camera>(true);
-            if (cam != null) cam.enabled = (currentState == GameState.Cutscene);
+            activeCam = cutsceneCamera;
         }
-        if (gameplayCamera != null)
+        else if (currentState == GameState.Gameplay)
         {
-            gameplayCamera.SetActive(currentState == GameState.Gameplay);
-            Camera cam = gameplayCamera.GetComponentInChildren<Camera>(true);
-            if (cam != null) cam.enabled = (currentState == GameState.Gameplay);
+            activeCam = gameplayCamera;
+        }
+
+        // Deactivate other cameras (ensure we don't deactivate the activeCam if they share the same GameObject)
+        if (menuCamera != null && menuCamera != activeCam)
+        {
+            menuCamera.SetActive(false);
+        }
+        if (cutsceneCamera != null && cutsceneCamera != activeCam)
+        {
+            cutsceneCamera.SetActive(false);
+        }
+        if (gameplayCamera != null && gameplayCamera != activeCam)
+        {
+            gameplayCamera.SetActive(false);
+        }
+
+        // Activate the designated camera
+        if (activeCam != null)
+        {
+            activeCam.SetActive(true);
+            Camera cam = activeCam.GetComponentInChildren<Camera>(true);
+            if (cam != null) cam.enabled = true;
+
+            // Disable CinemachineBrain to prevent it from overriding camera position
+            var brain = activeCam.GetComponentInChildren<Unity.Cinemachine.CinemachineBrain>(true);
+            if (brain != null)
+            {
+                brain.enabled = false;
+            }
+
+            // Enable ThirdPersonCamera script only during Gameplay
+            var thirdPersonCam = activeCam.GetComponentInChildren<ThirdPersonCamera>(true);
+            if (thirdPersonCam != null)
+            {
+                thirdPersonCam.enabled = (currentState == GameState.Gameplay);
+            }
         }
 
         if (loginUIPanel != null) loginUIPanel.SetActive(currentState == GameState.Login);
@@ -183,50 +229,30 @@ public class GameManager : MonoBehaviour
                         Debug.Log("[GameManager] CharacterController component enabled for gameplay.");
                     }
 
-                    // Bind gameplay camera to the spawned character (supporting both Cinemachine 3.x and old GameplayCamera)
+                    // Bind gameplay camera to the spawned character (using GTA-style ThirdPersonCamera)
+                    ThirdPersonCamera thirdPersonCam = null;
+
+                    // 1. Try to find ThirdPersonCamera on gameplayCamera or its children
                     if (gameplayCamera != null)
                     {
-                        var cinemachineCam = gameplayCamera.GetComponentInChildren<Unity.Cinemachine.CinemachineCamera>(true);
-                        if (cinemachineCam != null)
-                        {
-                            cinemachineCam.Follow = spawnedCharacter.transform;
-                            cinemachineCam.LookAt = spawnedCharacter.transform;
-                            Debug.Log("[GameManager] Successfully bound Cinemachine Camera to character.");
-                        }
-                        else
-                        {
-                            GameplayCamera camScript = gameplayCamera.GetComponentInChildren<GameplayCamera>(true);
-                            if (camScript != null)
-                            {
-                                camScript.SetTarget(spawnedCharacter.transform);
-                                Debug.Log("[GameManager] Successfully bound old GameplayCamera to character.");
-                            }
-                            else
-                            {
-                                Debug.LogWarning("[GameManager] Neither CinemachineCamera nor GameplayCamera found on gameplayCamera GameObject or children.");
-                            }
-                        }
+                        thirdPersonCam = gameplayCamera.GetComponentInChildren<ThirdPersonCamera>(true);
+                    }
+
+                    // 2. If not found, look globally in the scene
+                    if (thirdPersonCam == null)
+                    {
+                        thirdPersonCam = FindFirstObjectByType<ThirdPersonCamera>(FindObjectsInactive.Include);
+                    }
+
+                    // 3. Perform the binding
+                    if (thirdPersonCam != null)
+                    {
+                        thirdPersonCam.SetTarget(spawnedCharacter.transform);
+                        Debug.Log($"[GameManager] Successfully bound ThirdPersonCamera to character: {spawnedCharacter.name}");
                     }
                     else
                     {
-                        // Fallback search in entire scene
-                        var cinemachineCam = GameObject.FindFirstObjectByType<Unity.Cinemachine.CinemachineCamera>();
-                        if (cinemachineCam != null)
-                        {
-                            cinemachineCam.Follow = spawnedCharacter.transform;
-                            cinemachineCam.LookAt = spawnedCharacter.transform;
-                            Debug.Log("[GameManager] Fallback bound: found and bound Cinemachine Camera in scene.");
-                        }
-                        else
-                        {
-                            GameplayCamera camScript = GameObject.FindFirstObjectByType<GameplayCamera>();
-                            if (camScript != null)
-                            {
-                                camScript.SetTarget(spawnedCharacter.transform);
-                                camScript.gameObject.SetActive(true);
-                                Debug.Log("[GameManager] Fallback bound: found and bound old GameplayCamera in scene.");
-                            }
-                        }
+                        Debug.LogWarning("[GameManager] Could not find ThirdPersonCamera in the scene to bind to the player!");
                     }
                 }
                 else

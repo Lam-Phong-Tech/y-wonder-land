@@ -103,12 +103,8 @@
                 <!-- Bottom Buttons                 -->
                 <!-- ============================== -->
                 <ui:VisualElement class="settings-buttons-row">
-                    <ui:VisualElement class="settings-delete-shadow">
-                        <ui:Button name="BtnDeleteAccount" text="Xóa tài khoản" class="settings-delete-btn" />
-                    </ui:VisualElement>
-                    <ui:VisualElement class="settings-exit-shadow">
-                        <ui:Button name="BtnExitApp" text="Thoát game" class="settings-exit-btn" />
-                    </ui:VisualElement>
+                    <ui:Button name="BtnDeleteAccount" text="Xóa tài khoản" class="settings-delete-btn" />
+                    <ui:Button name="BtnExitApp" text="Thoát game" class="settings-exit-btn" />
                 </ui:VisualElement>
 
             </ui:VisualElement>

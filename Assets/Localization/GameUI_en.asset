@@ -1,0 +1,79 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: GameUI_en
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.StringTable
+  m_LocaleId:
+    m_Code: en
+  m_SharedData: {fileID: 11400000, guid: 92f86c6371e91d24da507bd2059a59e1, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 57807376384
+    m_Localized: Settings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 66124681216
+    m_Localized: Audio
+    m_Metadata:
+      m_Items: []
+  - m_Id: 69643702272
+    m_Localized: Graphic
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1413070884864
+    m_Localized: Music Volume
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1528523296768
+    m_Localized: SFX Volume
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1532516274176
+    m_Localized: CAMERA
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1535578116096
+    m_Localized: Sensitivity
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1538291830784
+    m_Localized: Zoom
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2183640027136
+    m_Localized: GENERAL
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2189814042624
+    m_Localized: Language
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2192133492736
+    m_Localized: Delete Account
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2578512777216
+    m_Localized: Exit Game
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2580358270976
+    m_Localized: ON
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2583340421120
+    m_Localized: OFF
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []

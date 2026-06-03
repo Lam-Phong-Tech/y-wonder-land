@@ -1,0 +1,84 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b11a58205ec3474ca216360e9fa74a8, type: 3}
+  m_Name: GameUI Shared Data
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.SharedTableData
+  m_TableCollectionName: GameUI
+  m_TableCollectionNameGuidString: 92f86c6371e91d24da507bd2059a59e1
+  m_Entries:
+  - m_Id: 57807376384
+    m_Key: settings_title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 66124681216
+    m_Key: audio_title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 69643702272
+    m_Key: graphics_title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1413070884864
+    m_Key: "\r\nmusic_volume\t\t"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1528523296768
+    m_Key: sfx_volume
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1532516274176
+    m_Key: camera_title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1535578116096
+    m_Key: camera_sens
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1538291830784
+    m_Key: camera_zoom
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2183640027136
+    m_Key: general_title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2189814042624
+    m_Key: language
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2192133492736
+    m_Key: delete_account
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2578512777216
+    m_Key: exit_game
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2580358270976
+    m_Key: "shadow_on\t"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2583340421120
+    m_Key: "shadow_off\t"
+    m_Metadata:
+      m_Items: []
+  m_Metadata:
+    m_Items: []
+  m_KeyGenerator:
+    rid: 4444107305477734658
+  references:
+    version: 2
+    RefIds:
+    - rid: 4444107305477734658
+      type: {class: DistributedUIDGenerator, ns: UnityEngine.Localization.Tables, asm: Unity.Localization}
+      data:
+        m_CustomEpoch: 1780389885173

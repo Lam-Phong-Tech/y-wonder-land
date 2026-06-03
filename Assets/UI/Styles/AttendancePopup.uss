@@ -161,7 +161,20 @@
     color: #8A7E6E;
     font-size: 11px;
     -unity-font-style: bold;
-    text-align: center;
+    -unity-text-align: upper-center;
+    white-space: normal;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+}
+
+.day-slot-subtitle {
+    color: #E67E22;
+    font-size: 9px;
+    -unity-font-style: bold;
+    -unity-text-align: upper-center;
+    margin: -2px 0 0 0;
+    padding: 0;
 }
 
 .day-slot-emoji {
@@ -197,6 +210,8 @@
 .claimed-check {
     color: #FFFFFF;
     font-size: 26px;
+    margin: 0;
+    padding: 0;
     -unity-text-align: middle-center;
 }
 

@@ -324,7 +324,11 @@ public class MailboxPopupController : MonoBehaviour
                     giftBadge.AddToClassList("claimed");
                 }
                 Label giftIcon = new Label(mail.isRewardClaimed ? "✔️" : "🎁");
-                giftIcon.style.fontSize = 11;
+                giftIcon.AddToClassList("mail-gift-badge-icon");
+                if (mail.isRewardClaimed)
+                {
+                    giftIcon.AddToClassList("claimed");
+                }
                 giftBadge.Add(giftIcon);
                 rightContainer.Add(giftBadge);
             }

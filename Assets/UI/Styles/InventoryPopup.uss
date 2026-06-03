@@ -220,6 +220,8 @@
 
 .inventory-item-icon-text {
     font-size: 28px;
+    margin: 0;
+    padding: 0;
     -unity-text-align: middle-center;
 }
 
@@ -228,6 +230,8 @@
     font-size: 10px;
     -unity-font-style: bold;
     color: #3D3535;
+    margin: 0;
+    padding: 0;
     -unity-text-align: upper-center;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -240,6 +244,8 @@
     font-size: 10px;
     -unity-font-style: bold;
     color: #9E8FBB;
+    margin: 0;
+    padding: 0;
     -unity-text-align: upper-center;
 }
 

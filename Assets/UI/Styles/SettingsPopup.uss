@@ -214,12 +214,13 @@
 }
 
 .settings-toggle .unity-toggle__checkmark {
-    width: 44px;
+    width: 24px;
     height: 24px;
-    border-radius: 12px;
+    border-radius: 6px;
     border-width: 2px;
     border-color: #C4BAA8;
     background-color: #DDD5C8;
+    -unity-background-image-tint-color: #3D3535;
     transition-property: background-color, border-color;
     transition-duration: 0.15s;
 }
@@ -227,6 +228,7 @@
 .settings-toggle:checked .unity-toggle__checkmark {
     background-color: #5B42F3;
     border-color: #4030C0;
+    -unity-background-image-tint-color: #FFFFFF;
 }
 
 .settings-toggle .unity-toggle__text {
@@ -297,13 +299,6 @@
 }
 
 /* ── Delete Account Button ── */
-.settings-delete-shadow {
-    background-color: rgba(180, 40, 40, 0.4);
-    border-radius: 12px;
-    padding-right: 4px;
-    padding-bottom: 4px;
-}
-
 .settings-delete-btn {
     padding: 10px 24px;
     border-radius: 12px;
@@ -314,7 +309,10 @@
     -unity-font-style: bold;
     color: #FFFFFF;
     -unity-text-align: middle-center;
-    transition-property: translate, background-color;
+    background-image: none;
+    margin: 0;
+    width: 48%;
+    transition-property: scale, background-color;
     transition-duration: 0.08s;
 }
 
@@ -323,18 +321,11 @@
 }
 
 .settings-delete-btn:active {
-    translate: 4px 4px;
+    scale: 0.96;
     background-color: #CC3333;
 }
 
 /* ── Exit App Button ── */
-.settings-exit-shadow {
-    background-color: rgba(30, 60, 180, 0.4);
-    border-radius: 12px;
-    padding-right: 4px;
-    padding-bottom: 4px;
-}
-
 .settings-exit-btn {
     padding: 10px 32px;
     border-radius: 12px;
@@ -345,7 +336,10 @@
     -unity-font-style: bold;
     color: #FFFFFF;
     -unity-text-align: middle-center;
-    transition-property: translate, background-color;
+    background-image: none;
+    margin: 0;
+    width: 48%;
+    transition-property: scale, background-color;
     transition-duration: 0.08s;
 }
 
@@ -354,6 +348,6 @@
 }
 
 .settings-exit-btn:active {
-    translate: 4px 4px;
+    scale: 0.96;
     background-color: #1A5FCC;
 }

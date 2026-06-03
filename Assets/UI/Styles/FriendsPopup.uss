@@ -219,6 +219,9 @@
 
 .friend-avatar-text {
     font-size: 22px;
+    margin: 0;
+    padding: 0;
+    -unity-text-align: middle-center;
 }
 
 .friend-status-dot {

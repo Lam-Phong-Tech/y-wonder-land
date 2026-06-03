@@ -81,7 +81,8 @@
 
                 <!-- Day 7 Special Slot (Super Gift) -->
                 <ui:VisualElement name="DaySlot7" class="day-slot day-slot-special">
-                    <ui:Label class="day-slot-title title-special" text="Ngày 7 (Quà khủng!)" />
+                    <ui:Label class="day-slot-title title-special" text="Ngày 7" />
+                    <ui:Label class="day-slot-subtitle" text="Quà khủng!" />
                     <ui:Label class="day-slot-emoji emoji-special" text="🐢" />
                     <ui:Label class="day-slot-amount amount-special" text="x1" />
                     <ui:VisualElement class="claimed-overlay">

@@ -142,6 +142,17 @@
     margin-right: 10px;
 }
 
+.quest-icon-label {
+    margin: 0;
+    padding: 0;
+    -unity-text-align: middle-center;
+    font-size: 16px;
+}
+
+.quest-icon-label.completed {
+    font-size: 18px;
+}
+
 .quest-card-content {
     flex-grow: 1;
     justify-content: center;
@@ -333,10 +344,14 @@
     justify-content: center;
     margin-right: 6px;
     position: relative;
+    overflow: hidden;
 }
 
 .reward-emoji {
     font-size: 20px;
+    margin: 0;
+    padding: 0;
+    -unity-text-align: middle-center;
 }
 
 .reward-amount {
@@ -346,6 +361,8 @@
     color: #3D3535;
     font-size: 9px;
     -unity-font-style: bold;
+    margin: 0;
+    padding: 0;
 }
 
 .detail-footer {

@@ -86,19 +86,26 @@
     background-color: #2D7BFF;
     border-radius: 6px;
     padding: 1px 8px;
+    align-items: center;
+    justify-content: center;
 }
 
 .player-level-text {
     font-size: 10px;
     -unity-font-style: bold;
     color: #FFFFFF;
+    margin: 0;
+    padding: 0;
+    -unity-text-align: middle-center;
 }
 
 .player-exp-text {
     font-size: 12px;
     -unity-font-style: bold;
     color: rgba(255, 255, 255, 0.8);
-    margin-left: 6px;
+    margin: 0 0 0 6px;
+    padding: 0;
+    -unity-text-align: middle-left;
 }
 
 /* ============================================
@@ -144,6 +151,8 @@
     font-size: 12px;
     -unity-font-style: bold;
     color: #FFFFFF;
+    margin: 0;
+    padding: 0;
     -unity-text-align: middle-center;
 }
 
@@ -190,6 +199,8 @@
     font-size: 10px;
     -unity-font-style: bold;
     color: #FFFFFF;
+    margin: 0;
+    padding: 0;
     -unity-text-align: middle-center;
 }
 
@@ -569,7 +580,7 @@
     border-width: 0;
     align-items: center;
     justify-content: center;
-    margin-left: 6px;
+    margin: 0 0 0 6px;
     font-size: 24px;
     color: rgba(255, 255, 255, 0.8);
     -unity-text-align: middle-center;
@@ -641,4 +652,27 @@
     height: 52px;
     padding: 0;
     margin: 0;
+}
+
+/* ============================================
+   8. CROSSHAIR — Center Screen
+   ============================================ */
+
+.crosshair {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+.crosshair-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.85);
+    border-width: 1px;
+    border-color: rgba(0, 0, 0, 0.3);
 }
