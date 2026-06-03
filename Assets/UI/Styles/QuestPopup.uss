@@ -312,6 +312,8 @@
     color: #3D3535;
     font-size: 10px;
     -unity-font-style: bold;
+    margin: 0;
+    padding: 0;
 }
 
 /* Reward items section */

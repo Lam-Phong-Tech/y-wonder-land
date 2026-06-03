@@ -187,6 +187,8 @@
     color: #3D3535;
     font-size: 11px;
     -unity-font-style: bold;
+    margin: 0;
+    padding: 0;
 }
 
 /* Stats Cards Grid */
