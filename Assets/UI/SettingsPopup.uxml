@@ -16,7 +16,7 @@
                 <!-- Header Bar (Purple)            -->
                 <!-- ============================== -->
                 <ui:VisualElement class="settings-header">
-                    <ui:Label text="CÀI ĐẶT" class="settings-header-title" />
+                    <ui:Label name="LblSettingsTitle" text="CÀI ĐẶT" class="settings-header-title" />
                 </ui:VisualElement>
 
                 <!-- ============================== -->
@@ -28,31 +28,31 @@
                     <ui:VisualElement class="settings-col">
 
                         <!-- AUDIO -->
-                        <ui:Label text="ÂM THANH" class="settings-section-header" />
+                        <ui:Label name="LblAudioSection" text="ÂM THANH" class="settings-section-header" />
 
                         <ui:VisualElement class="settings-row">
-                            <ui:Label text="Âm nhạc nền" class="settings-label" />
+                            <ui:Label name="LblMusicVolume" text="Âm nhạc nền" class="settings-label" />
                             <ui:Slider name="SliderMusic" low-value="0" high-value="100" value="80" class="settings-slider" />
                             <ui:Label name="LblMusicValue" text="80%" class="settings-slider-value" />
                         </ui:VisualElement>
 
                         <ui:VisualElement class="settings-row">
-                            <ui:Label text="Hiệu ứng" class="settings-label" />
+                            <ui:Label name="LblSFXVolume" text="Hiệu ứng" class="settings-label" />
                             <ui:Slider name="SliderSFX" low-value="0" high-value="100" value="100" class="settings-slider" />
                             <ui:Label name="LblSFXValue" text="100%" class="settings-slider-value" />
                         </ui:VisualElement>
 
                         <!-- CAMERA -->
-                        <ui:Label text="CAMERA" class="settings-section-header" />
+                        <ui:Label name="LblCameraSection" text="CAMERA" class="settings-section-header" />
 
                         <ui:VisualElement class="settings-row">
-                            <ui:Label text="Độ nhạy" class="settings-label" />
+                            <ui:Label name="LblCameraSens" text="Độ nhạy" class="settings-label" />
                             <ui:Slider name="SliderCameraSens" low-value="10" high-value="100" value="50" class="settings-slider" />
                             <ui:Label name="LblCameraSensValue" text="50%" class="settings-slider-value" />
                         </ui:VisualElement>
 
                         <ui:VisualElement class="settings-row">
-                            <ui:Label text="Zoom" class="settings-label" />
+                            <ui:Label name="LblCameraZoom" text="Zoom" class="settings-label" />
                             <ui:Slider name="SliderCameraZoom" low-value="50" high-value="100" value="75" class="settings-slider" />
                             <ui:Label name="LblCameraZoomValue" text="75%" class="settings-slider-value" />
                         </ui:VisualElement>
@@ -66,25 +66,25 @@
                     <ui:VisualElement class="settings-col">
 
                         <!-- GRAPHICS -->
-                        <ui:Label text="ĐỒ HỌA" class="settings-section-header" />
+                        <ui:Label name="LblGraphicsSection" text="ĐỒ HỌA" class="settings-section-header" />
 
                         <ui:VisualElement class="settings-row">
-                            <ui:Label text="Chất lượng" class="settings-label" />
+                            <ui:Label name="LblQuality" text="Chất lượng" class="settings-label" />
                             <ui:Slider name="SliderRenderQuality" low-value="0" high-value="100" value="100" class="settings-slider" />
                             <ui:Label name="LblRenderQualityValue" text="100%" class="settings-slider-value" />
                         </ui:VisualElement>
 
                         <ui:VisualElement class="settings-toggle-row">
-                            <ui:Label text="Bóng đổ" class="settings-toggle-label" />
+                            <ui:Label name="LblShadow" text="Bóng đổ" class="settings-toggle-label" />
                             <ui:Toggle name="ToggleShadow" value="true" class="settings-toggle" />
                             <ui:Label name="LblShadowStatus" text="BẬT" class="settings-toggle-status" />
                         </ui:VisualElement>
 
                         <!-- GENERAL -->
-                        <ui:Label text="CHUNG" class="settings-section-header" />
+                        <ui:Label name="LblGeneralSection" text="CHUNG" class="settings-section-header" />
 
                         <ui:VisualElement class="settings-row">
-                            <ui:Label text="Ngôn ngữ" class="settings-label" />
+                            <ui:Label name="LblLanguage" text="Ngôn ngữ" class="settings-label" />
                             <ui:VisualElement class="settings-dropdown-shadow">
                                 <ui:DropdownField name="DropdownLanguage" class="settings-dropdown" choices="Tiếng Việt,English" index="0" />
                             </ui:VisualElement>

@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 
 /// <summary>
 /// Controller for the Settings Popup v3.
@@ -13,6 +15,20 @@ public class SettingsPopupController : MonoBehaviour
     // UI Elements
     private VisualElement overlay;
     private Button btnClose;
+
+    // Localization Labels
+    private Label lblSettingsTitle;
+    private Label lblAudioSection;
+    private Label lblMusicVolume;
+    private Label lblSFXVolume;
+    private Label lblCameraSection;
+    private Label lblCameraSens;
+    private Label lblCameraZoom;
+    private Label lblGraphicsSection;
+    private Label lblQuality;
+    private Label lblShadow;
+    private Label lblGeneralSection;
+    private Label lblLanguage;
 
     // Audio
     private Slider sliderMusic;
@@ -87,14 +103,40 @@ public class SettingsPopupController : MonoBehaviour
         btnDeleteAccount = root.Q<Button>("BtnDeleteAccount");
         btnExitApp = root.Q<Button>("BtnExitApp");
 
+        // Query localization labels
+        lblSettingsTitle = root.Q<Label>("LblSettingsTitle");
+        lblAudioSection = root.Q<Label>("LblAudioSection");
+        lblMusicVolume = root.Q<Label>("LblMusicVolume");
+        lblSFXVolume = root.Q<Label>("LblSFXVolume");
+        lblCameraSection = root.Q<Label>("LblCameraSection");
+        lblCameraSens = root.Q<Label>("LblCameraSens");
+        lblCameraZoom = root.Q<Label>("LblCameraZoom");
+        lblGraphicsSection = root.Q<Label>("LblGraphicsSection");
+        lblQuality = root.Q<Label>("LblQuality");
+        lblShadow = root.Q<Label>("LblShadow");
+        lblGeneralSection = root.Q<Label>("LblGeneralSection");
+        lblLanguage = root.Q<Label>("LblLanguage");
+
+        // Subscribe to locale change event
+        LocalizationSettings.SelectedLocaleChanged += OnLocaleChanged;
+
         // Set initial values
         SetInitialValues();
 
         // Register all callbacks
         RegisterCallbacks();
 
+        // Initial localization update
+        UpdateLocalizedTexts();
+
         // Start hidden
         Hide();
+    }
+
+    private void OnDisable()
+    {
+        // Unsubscribe to avoid memory leaks
+        LocalizationSettings.SelectedLocaleChanged -= OnLocaleChanged;
     }
 
     private void SetInitialValues()
@@ -105,6 +147,8 @@ public class SettingsPopupController : MonoBehaviour
         if (sliderCameraZoom != null) sliderCameraZoom.value = 50f + cameraZoom * 50f;
         if (sliderRenderQuality != null) sliderRenderQuality.value = renderQuality * 100f;
         if (toggleShadow != null) toggleShadow.value = shadowEnabled;
+
+        UpdateDropdownLanguageValue();
         UpdateAllLabels();
     }
 
@@ -169,7 +213,7 @@ public class SettingsPopupController : MonoBehaviour
         toggleShadow?.RegisterValueChangedCallback(evt =>
         {
             shadowEnabled = evt.newValue;
-            if (lblShadowStatus != null) lblShadowStatus.text = shadowEnabled ? "BẬT" : "TẮT";
+            UpdateShadowStatusLabel();
             Debug.Log($"[Settings] Shadow: {(shadowEnabled ? "ON" : "OFF")}");
             // TODO: QualitySettings.shadows = shadowEnabled ? ShadowQuality.All : ShadowQuality.Disable;
         });
@@ -178,8 +222,17 @@ public class SettingsPopupController : MonoBehaviour
         dropdownLanguage?.RegisterValueChangedCallback(evt =>
         {
             currentLanguage = evt.newValue == "Tiếng Việt" ? "vi" : "en";
-            Debug.Log($"[Settings] Language: {currentLanguage}");
-            // TODO: LocalizationManager.Instance.SetLanguage(currentLanguage);
+            Debug.Log($"[Settings] Language change requested to: {currentLanguage}");
+
+            var locale = LocalizationSettings.AvailableLocales.GetLocale(new LocaleIdentifier(currentLanguage));
+            if (locale != null)
+            {
+                LocalizationSettings.SelectedLocale = locale;
+            }
+            else
+            {
+                Debug.LogWarning($"[Settings] Locale '{currentLanguage}' not found in AvailableLocales!");
+            }
         });
 
         // ── Bottom Buttons ──
@@ -263,5 +316,90 @@ public class SettingsPopupController : MonoBehaviour
         sfxVolume = Mathf.Clamp01(volume);
         if (sliderSFX != null) sliderSFX.value = sfxVolume * 100f;
         UpdateLabel(lblSFXValue, sfxVolume * 100f);
+    }
+
+    // ── Localization Handlers ──
+
+    private void OnLocaleChanged(Locale locale)
+    {
+        UpdateDropdownLanguageValue();
+        UpdateLocalizedTexts();
+    }
+
+    private void UpdateDropdownLanguageValue()
+    {
+        if (dropdownLanguage == null) return;
+
+        var activeLocale = LocalizationSettings.SelectedLocale;
+        if (activeLocale != null)
+        {
+            string code = activeLocale.Identifier.Code;
+            dropdownLanguage.value = code == "vi" ? "Tiếng Việt" : "English";
+            currentLanguage = code;
+        }
+    }
+
+    private void UpdateLocalizedTexts()
+    {
+        var table = LocalizationSettings.StringDatabase.GetTable("GameUI");
+        if (table != null)
+        {
+            if (lblSettingsTitle != null) lblSettingsTitle.text = GetLocalizedString(table, "settings_title", "CÀI ĐẶT");
+            if (lblAudioSection != null) lblAudioSection.text = GetLocalizedString(table, "audio_title", "ÂM THANH");
+            if (lblMusicVolume != null) lblMusicVolume.text = GetLocalizedString(table, "music_volume", "Âm nhạc nền");
+            if (lblSFXVolume != null) lblSFXVolume.text = GetLocalizedString(table, "sfx_volume", "Hiệu ứng");
+            if (lblCameraSection != null) lblCameraSection.text = GetLocalizedString(table, "camera_title", "CAMERA");
+            if (lblCameraSens != null) lblCameraSens.text = GetLocalizedString(table, "camera_sens", "Độ nhạy");
+            if (lblCameraZoom != null) lblCameraZoom.text = GetLocalizedString(table, "camera_zoom", "Zoom");
+            if (lblGraphicsSection != null) lblGraphicsSection.text = GetLocalizedString(table, "graphics_title", "ĐỒ HỌA");
+            if (lblQuality != null) lblQuality.text = GetLocalizedString(table, "quality", "Chất lượng");
+            if (lblShadow != null) lblShadow.text = GetLocalizedString(table, "shadow", "Bóng đổ");
+            if (lblGeneralSection != null) lblGeneralSection.text = GetLocalizedString(table, "general_title", "CHUNG");
+            if (lblLanguage != null) lblLanguage.text = GetLocalizedString(table, "language", "Ngôn ngữ");
+
+            // Bottom buttons
+            if (btnDeleteAccount != null) btnDeleteAccount.text = GetLocalizedString(table, "delete_account", "Xóa tài khoản");
+            if (btnExitApp != null) btnExitApp.text = GetLocalizedString(table, "exit_game", "Thoát game");
+        }
+        else
+        {
+            LoadLocalizedTextsAsync();
+        }
+
+        UpdateShadowStatusLabel();
+    }
+
+    private string GetLocalizedString(UnityEngine.Localization.Tables.StringTable table, string key, string defaultValue)
+    {
+        var entry = table.GetEntry(key);
+        return entry != null ? entry.LocalizedValue : defaultValue;
+    }
+
+    private async void LoadLocalizedTextsAsync()
+    {
+        // Wait until initialization completes
+        await LocalizationSettings.InitializationOperation.Task;
+        var table = await LocalizationSettings.StringDatabase.GetTableAsync("GameUI").Task;
+        if (table != null)
+        {
+            UpdateLocalizedTexts();
+        }
+    }
+
+    private void UpdateShadowStatusLabel()
+    {
+        if (lblShadowStatus == null) return;
+
+        var table = LocalizationSettings.StringDatabase.GetTable("GameUI");
+        string onStr = "BẬT";
+        string offStr = "TẮT";
+
+        if (table != null)
+        {
+            onStr = GetLocalizedString(table, "shadow_on", "BẬT");
+            offStr = GetLocalizedString(table, "shadow_off", "TẮT");
+        }
+
+        lblShadowStatus.text = shadowEnabled ? onStr : offStr;
     }
 }
