@@ -590,6 +590,7 @@
 
 #BtnEmoji {
     font-size: 29px;
+    padding-bottom: 3px;
 }
 
 /* ============================================
