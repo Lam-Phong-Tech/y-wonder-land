@@ -213,9 +213,21 @@ public class TutorialManager : MonoBehaviour
         subtitleContainer.style.alignSelf = Align.Center;
         subtitleContainer.style.width = 440;
         subtitleContainer.style.backgroundColor = new Color(0.93f, 0.93f, 0.93f, 1f); // #EFEFEF
-        subtitleContainer.style.borderWidth = 3;
-        subtitleContainer.style.borderColor = new Color(0.24f, 0.21f, 0.21f, 1f);     // #3D3535
-        subtitleContainer.style.borderRadius = 16;
+        subtitleContainer.style.borderTopWidth = 3f;
+        subtitleContainer.style.borderBottomWidth = 3f;
+        subtitleContainer.style.borderLeftWidth = 3f;
+        subtitleContainer.style.borderRightWidth = 3f;
+
+        Color subtitleBorderColor = new Color(0.24f, 0.21f, 0.21f, 1f);
+        subtitleContainer.style.borderTopColor = subtitleBorderColor;
+        subtitleContainer.style.borderBottomColor = subtitleBorderColor;
+        subtitleContainer.style.borderLeftColor = subtitleBorderColor;
+        subtitleContainer.style.borderRightColor = subtitleBorderColor;
+
+        subtitleContainer.style.borderTopLeftRadius = 16f;
+        subtitleContainer.style.borderTopRightRadius = 16f;
+        subtitleContainer.style.borderBottomLeftRadius = 16f;
+        subtitleContainer.style.borderBottomRightRadius = 16f;
         subtitleContainer.style.paddingLeft = 16;
         subtitleContainer.style.paddingRight = 16;
         subtitleContainer.style.paddingTop = 12;
@@ -242,7 +254,6 @@ public class TutorialManager : MonoBehaviour
         subtitleLabel.style.fontSize = 13;
         subtitleLabel.style.color = new Color(0.24f, 0.21f, 0.21f, 1f); // #3D3535
         subtitleLabel.style.whiteSpace = WhiteSpace.Normal;
-        subtitleLabel.style.unityParagraphLayout = ParagraphLayout.Enabled;
         subtitleLabel.style.paddingLeft = 0;
         subtitleLabel.style.paddingRight = 0;
 

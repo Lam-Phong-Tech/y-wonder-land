@@ -226,9 +226,21 @@ public class BoatCutscene : MonoBehaviour
         skipButton.style.fontSize = 14;
         skipButton.style.unityFontStyleAndWeight = FontStyle.Bold;
         skipButton.style.backgroundColor = new Color(0.93f, 0.93f, 0.93f, 1f); // #EFEFEF
-        skipButton.style.borderWidth = 3;
-        skipButton.style.borderColor = new Color(0.24f, 0.21f, 0.21f, 1f);     // #3D3535
-        skipButton.style.borderRadius = 8;
+        skipButton.style.borderTopWidth = 3f;
+        skipButton.style.borderBottomWidth = 3f;
+        skipButton.style.borderLeftWidth = 3f;
+        skipButton.style.borderRightWidth = 3f;
+
+        Color darkColor = new Color(0.24f, 0.21f, 0.21f, 1f);
+        skipButton.style.borderTopColor = darkColor;
+        skipButton.style.borderBottomColor = darkColor;
+        skipButton.style.borderLeftColor = darkColor;
+        skipButton.style.borderRightColor = darkColor;
+
+        skipButton.style.borderTopLeftRadius = 8f;
+        skipButton.style.borderTopRightRadius = 8f;
+        skipButton.style.borderBottomLeftRadius = 8f;
+        skipButton.style.borderBottomRightRadius = 8f;
         skipButton.style.color = new Color(0.24f, 0.21f, 0.21f, 1f);
         
         // Solid shadow style via border offset concept
@@ -266,9 +278,21 @@ public class BoatCutscene : MonoBehaviour
         subtitleContainer.style.alignSelf = Align.Center;
         subtitleContainer.style.width = 500;
         subtitleContainer.style.backgroundColor = new Color(0.15f, 0.15f, 0.15f, 0.85f); // Semi-transparent black
-        subtitleContainer.style.borderWidth = 2;
-        subtitleContainer.style.borderColor = new Color(0.93f, 0.93f, 0.93f, 0.9f);
-        subtitleContainer.style.borderRadius = 12;
+        subtitleContainer.style.borderTopWidth = 2f;
+        subtitleContainer.style.borderBottomWidth = 2f;
+        subtitleContainer.style.borderLeftWidth = 2f;
+        subtitleContainer.style.borderRightWidth = 2f;
+
+        Color lightColor = new Color(0.93f, 0.93f, 0.93f, 0.9f);
+        subtitleContainer.style.borderTopColor = lightColor;
+        subtitleContainer.style.borderBottomColor = lightColor;
+        subtitleContainer.style.borderLeftColor = lightColor;
+        subtitleContainer.style.borderRightColor = lightColor;
+
+        subtitleContainer.style.borderTopLeftRadius = 12f;
+        subtitleContainer.style.borderTopRightRadius = 12f;
+        subtitleContainer.style.borderBottomLeftRadius = 12f;
+        subtitleContainer.style.borderBottomRightRadius = 12f;
         subtitleContainer.style.paddingLeft = 20;
         subtitleContainer.style.paddingRight = 20;
         subtitleContainer.style.paddingTop = 12;
@@ -278,7 +302,6 @@ public class BoatCutscene : MonoBehaviour
         subtitleLabel.style.fontSize = 15;
         subtitleLabel.style.color = Color.white;
         subtitleLabel.style.whiteSpace = WhiteSpace.Normal;
-        subtitleLabel.style.unityParagraphLayout = ParagraphLayout.Enabled;
         subtitleLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
         
         subtitleContainer.Add(subtitleLabel);
