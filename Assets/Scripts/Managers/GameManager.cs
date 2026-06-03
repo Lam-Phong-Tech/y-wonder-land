@@ -254,6 +254,12 @@ public class GameManager : MonoBehaviour
                     {
                         Debug.LogWarning("[GameManager] Could not find ThirdPersonCamera in the scene to bind to the player!");
                     }
+
+                    // Start onboarding tutorial if TutorialManager exists in scene
+                    if (TutorialManager.Instance != null)
+                    {
+                        TutorialManager.Instance.StartTutorial();
+                    }
                 }
                 else
                 {
