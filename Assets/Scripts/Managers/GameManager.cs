@@ -183,29 +183,49 @@ public class GameManager : MonoBehaviour
                         Debug.Log("[GameManager] CharacterController component enabled for gameplay.");
                     }
 
-                    // Bind gameplay camera to the spawned character
+                    // Bind gameplay camera to the spawned character (supporting both Cinemachine 3.x and old GameplayCamera)
                     if (gameplayCamera != null)
                     {
-                        GameplayCamera camScript = gameplayCamera.GetComponentInChildren<GameplayCamera>(true);
-                        if (camScript != null)
+                        var cinemachineCam = gameplayCamera.GetComponentInChildren<Unity.Cinemachine.CinemachineCamera>(true);
+                        if (cinemachineCam != null)
                         {
-                            camScript.SetTarget(spawnedCharacter.transform);
-                            Debug.Log("[GameManager] Successfully bound GameplayCamera to character.");
+                            cinemachineCam.Follow = spawnedCharacter.transform;
+                            cinemachineCam.LookAt = spawnedCharacter.transform;
+                            Debug.Log("[GameManager] Successfully bound Cinemachine Camera to character.");
                         }
                         else
                         {
-                            Debug.LogWarning("[GameManager] GameplayCamera script not found on gameplayCamera GameObject or children.");
+                            GameplayCamera camScript = gameplayCamera.GetComponentInChildren<GameplayCamera>(true);
+                            if (camScript != null)
+                            {
+                                camScript.SetTarget(spawnedCharacter.transform);
+                                Debug.Log("[GameManager] Successfully bound old GameplayCamera to character.");
+                            }
+                            else
+                            {
+                                Debug.LogWarning("[GameManager] Neither CinemachineCamera nor GameplayCamera found on gameplayCamera GameObject or children.");
+                            }
                         }
                     }
                     else
                     {
                         // Fallback search in entire scene
-                        GameplayCamera camScript = GameObject.FindFirstObjectByType<GameplayCamera>();
-                        if (camScript != null)
+                        var cinemachineCam = GameObject.FindFirstObjectByType<Unity.Cinemachine.CinemachineCamera>();
+                        if (cinemachineCam != null)
                         {
-                            camScript.SetTarget(spawnedCharacter.transform);
-                            camScript.gameObject.SetActive(true);
-                            Debug.Log("[GameManager] Fallback bound: found and bound GameplayCamera in scene.");
+                            cinemachineCam.Follow = spawnedCharacter.transform;
+                            cinemachineCam.LookAt = spawnedCharacter.transform;
+                            Debug.Log("[GameManager] Fallback bound: found and bound Cinemachine Camera in scene.");
+                        }
+                        else
+                        {
+                            GameplayCamera camScript = GameObject.FindFirstObjectByType<GameplayCamera>();
+                            if (camScript != null)
+                            {
+                                camScript.SetTarget(spawnedCharacter.transform);
+                                camScript.gameObject.SetActive(true);
+                                Debug.Log("[GameManager] Fallback bound: found and bound old GameplayCamera in scene.");
+                            }
                         }
                     }
                 }
