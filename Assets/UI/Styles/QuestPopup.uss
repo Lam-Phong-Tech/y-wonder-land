@@ -302,6 +302,10 @@
     background-color: #FFC107;
     border-right-width: 2px;
     border-right-color: #3D3535;
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
 }
 
 .quest-progress-text {

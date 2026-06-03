@@ -8,6 +8,7 @@
 - Popup Bạn bè (Friends): Thêm khoảng đệm an toàn `margin-right: 16px` cho cụm tìm kiếm và thu nhỏ kích thước của TextField nhập tên cùng các nút bấm để tránh đè lấn lên nút đóng X ở góc trên bên phải.
 - Popup Nhiệm vụ (Quest) & Điểm danh (Attendance): Khắc phục triệt để lỗi ô vật phẩm phần thưởng bị chòi ra ngoài viền khung chứa bằng cách thiết lập `flex-shrink: 0` cho các container/grid phần thưởng và các slot con cố định, giữ nguyên layout cân đối khi kích thước màn hình thay đổi.
 - Popup Nhiệm vụ (Quest) & Thông tin nhân vật (Profile): Sửa lỗi text chỉ số tiến trình (`10 / 10`) và EXP bị lệch sát đáy dưới thanh bằng cách reset `margin` và `padding` về `0` cho `.quest-progress-text` và `.profile-exp-text`.
+- Popup Nhiệm vụ (Quest) & Thông tin nhân vật (Profile): Khắc phục lỗi thanh tiến trình khi đầy 100% bị khuyết vệt đen ở đầu bên phải do lỗi render bo góc bằng cách thiết lập `border-radius` cho `.quest-progress-fill` và `.profile-exp-fill` tương thích với khung track của chúng.
 - Popup Điểm danh (Attendance): Reset margin và padding về 0 cho emoji và chữ số lượng phần thưởng ngày để tránh lệch tâm hiển thị.
 ### Files changed
 - Assets/UI/Styles/FriendsPopup.uss (MODIFIED)

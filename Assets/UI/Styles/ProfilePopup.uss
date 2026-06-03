@@ -177,6 +177,10 @@
     background-color: #4CAF50;
     border-right-width: 2px;
     border-right-color: #3D3535;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
 }
 
 .profile-exp-text {
