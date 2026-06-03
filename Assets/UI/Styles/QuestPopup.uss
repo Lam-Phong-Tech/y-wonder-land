@@ -245,6 +245,7 @@
     border-bottom-color: #EFE9DB;
     padding-bottom: 6px;
     margin-bottom: 6px;
+    flex-shrink: 0;
 }
 
 .detail-title {
@@ -276,6 +277,7 @@
 /* Progress bar section */
 .quest-progress-container {
     margin-bottom: 8px;
+    flex-shrink: 0;
 }
 
 .progress-title-label {
@@ -320,6 +322,7 @@
     border-radius: 8px;
     padding: 6px;
     margin-bottom: 8px;
+    flex-shrink: 0;
 }
 
 .reward-section-title {
@@ -331,6 +334,7 @@
 
 .reward-grid {
     flex-direction: row;
+    flex-shrink: 0;
 }
 
 .reward-slot {
@@ -345,6 +349,7 @@
     margin-right: 6px;
     position: relative;
     overflow: hidden;
+    flex-shrink: 0;
 }
 
 .reward-emoji {
@@ -367,6 +372,7 @@
 
 .detail-footer {
     height: 36px;
+    flex-shrink: 0;
 }
 
 /* Claim reward button */

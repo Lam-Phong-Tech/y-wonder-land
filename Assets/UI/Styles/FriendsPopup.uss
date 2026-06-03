@@ -112,10 +112,11 @@
 .friends-search-group {
     flex-direction: row;
     align-items: center;
+    margin-right: 16px;
 }
 
 .friends-search-input {
-    width: 120px;
+    width: 105px;
     height: 32px;
     margin-right: 6px;
 }
@@ -132,7 +133,7 @@
 }
 
 .friends-search-btn {
-    padding: 6px 14px;
+    padding: 5px 12px;
     border-radius: 8px;
     border-width: 2px;
     border-color: #3D3535;
@@ -154,7 +155,7 @@
 }
 
 .friends-refresh-btn {
-    padding: 6px 12px;
+    padding: 5px 10px;
     border-radius: 8px;
     border-width: 2px;
     border-color: #3D3535;

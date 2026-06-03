@@ -162,3 +162,17 @@
 - [ ] Mọi nút bấm đều có :hover và :active chưa?
 - [ ] Danh sách rỗng có hiển thị thông báo thay thế không?
 - [ ] Màu Primary chỉ dùng cho 1 CTA chính trên màn hình?
+
+---
+
+## 🔵 BÀI HỌC VỀ FLEX LAYOUT & SAFE ZONE (Cập nhật 03/06/2026)
+
+### 25. Tránh móp méo/tràn phần tử bằng `flex-shrink: 0`
+- **Tình huống**: Trong các popup như Nhiệm vụ (`QuestPopup`) hoặc Điểm danh (`AttendancePopup`), các ô phần thưởng nhỏ (`.reward-slot`, `.day-slot`) bị chòi ra ngoài viền bo góc dưới của khung chứa lớn khi kích thước màn hình thay đổi.
+- **Nguyên nhân**: Theo cơ chế Flexbox mặc định, các container đều có `flex-shrink: 1`. Khi không gian dọc bị bóp hẹp, các khung chứa phần thưởng cũng bị co dẹt lại, trong khi các ô vật phẩm con bên trong có kích thước cố định nên bị tràn ra ngoài.
+- **Giải pháp**: Thiết lập `flex-shrink: 0;` cho tất cả các container phần thưởng (`.quest-reward-section`, `.reward-grid`, `.attendance-grid`) và các slot con cố định (`.reward-slot`, `.day-slot`). Để phần cuộn mô tả (`.detail-body-scroll`) có `flex-grow: 1; flex-shrink: 1;` tự động co giãn giải phóng không gian.
+
+### 26. Thiết lập khoảng trống an toàn (Safe Zone) tránh nút Absolute
+- **Tình huống**: Cụm nút Tìm kiếm và Làm mới ở hàng trên cùng của bạn bè bị xô đẩy và đè sát vào nút Close (X) màu đỏ.
+- **Nguyên nhân**: Nút Close sử dụng `position: absolute; top: -8px; right: -8px;` lấn sâu vào bên trong panel khoảng 28px. Khi cụm tìm kiếm kéo dài hết chiều rộng khả dụng của panel, mép phải của nó sẽ va chạm trực tiếp với nút Close.
+- **Giải pháp**: Luôn thiết lập `margin-right: 16px;` (hoặc một khoảng đệm an toàn theo bội số của 4) cho các container chứa cụm nút/điều hướng đặt ở góc phải để đẩy chúng sang trái một khoảng vừa đủ, tránh hoàn toàn vùng chiếm dụng của nút đóng absolute.

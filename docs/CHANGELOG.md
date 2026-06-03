@@ -3,6 +3,16 @@
 
 ---
 
+## [2026-06-03] — UI/UX Layout Polish (Friends, Quest, Attendance Popups)
+### Fixed
+- Popup Bạn bè (Friends): Thêm khoảng đệm an toàn `margin-right: 16px` cho cụm tìm kiếm và thu nhỏ kích thước của TextField nhập tên cùng các nút bấm để tránh đè lấn lên nút đóng X ở góc trên bên phải.
+- Popup Nhiệm vụ (Quest) & Điểm danh (Attendance): Khắc phục triệt để lỗi ô vật phẩm phần thưởng bị chòi ra ngoài viền khung chứa bằng cách thiết lập `flex-shrink: 0` cho các container/grid phần thưởng và các slot con cố định, giữ nguyên layout cân đối khi kích thước màn hình thay đổi.
+- Popup Điểm danh (Attendance): Reset margin và padding về 0 cho emoji và chữ số lượng phần thưởng ngày để tránh lệch tâm hiển thị.
+### Files changed
+- Assets/UI/Styles/FriendsPopup.uss (MODIFIED)
+- Assets/UI/Styles/QuestPopup.uss (MODIFIED)
+- Assets/UI/Styles/AttendancePopup.uss (MODIFIED)
+
 ## [2026-06-02] — HUD Sidebar & 3 New Popups (Profile, Attendance, Quest)
 ### Added
 - Tái cấu trúc HUD Sidebar (GameHUD.uxml) theo đúng thứ tự từ trên xuống: Leaderboard (🏆 - vàng), Điểm danh (📅 - tím, nút mới), Hòm thư (✉ - xanh dương), Bạn bè (👥 - xanh lơ). Loại bỏ nút Character cũ.

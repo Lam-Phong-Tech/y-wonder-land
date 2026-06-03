@@ -41,13 +41,20 @@
 - Assets/UI/GameHUD.uxml
 - Assets/UI/GameHUDController.cs
 
-<!-- Thêm module mới khi hoàn thành và QC Pass -->
-<!-- Ví dụ:
-### Module Settings Popup (QC Pass: 2026-06-15)
-- Assets/UI/Styles/SettingsPopup.uss
-- Assets/UI/SettingsPopup.uxml
-- Assets/UI/SettingsPopupController.cs
--->
+### Module Friends Popup (QC Pass: 2026-06-03)
+- Assets/UI/Styles/FriendsPopup.uss
+- Assets/UI/FriendsPopup.uxml
+- Assets/UI/FriendsPopupController.cs
+
+### Module Quest Popup (QC Pass: 2026-06-03)
+- Assets/UI/Styles/QuestPopup.uss
+- Assets/UI/QuestPopup.uxml
+- Assets/UI/QuestPopupController.cs
+
+### Module Attendance Popup (QC Pass: 2026-06-03)
+- Assets/UI/Styles/AttendancePopup.uss
+- Assets/UI/AttendancePopup.uxml
+- Assets/UI/AttendancePopupController.cs
 
 ## QUY TẮC KHI CODE
 1. Chỉ sửa đúng file và đúng function được yêu cầu

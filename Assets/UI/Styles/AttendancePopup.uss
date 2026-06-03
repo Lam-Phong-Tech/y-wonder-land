@@ -102,6 +102,7 @@
     flex-grow: 1;
     margin-bottom: 16px;
     padding: 6px 0;
+    flex-shrink: 0;
 }
 
 /* Day Slot base style */
@@ -116,6 +117,7 @@
     align-items: center;
     justify-content: space-between;
     position: relative;
+    flex-shrink: 0;
 }
 
 .day-slot:hover {
@@ -180,6 +182,8 @@
 .day-slot-emoji {
     font-size: 28px;
     -unity-text-align: middle-center;
+    margin: 0;
+    padding: 0;
 }
 
 .day-slot-amount {
@@ -187,6 +191,8 @@
     font-size: 12px;
     -unity-font-style: bold;
     text-align: center;
+    margin: 0;
+    padding: 0;
 }
 
 /* Claimed Overlay */
