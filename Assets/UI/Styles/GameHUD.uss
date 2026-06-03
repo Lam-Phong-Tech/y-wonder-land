@@ -542,16 +542,17 @@
     flex-direction: row;
     align-items: center;
     background-color: rgba(0, 0, 0, 0.45);
-    border-radius: 20px;
+    border-radius: 12px;
     padding: 8px 16px;
-    min-width: 200px;
+    min-width: 240px;
 }
 
 .messages-text {
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(255, 255, 255, 0.86);
     flex-grow: 1;
-    -unity-text-align: middle-center;
+    -unity-text-align: middle-left;
+    margin-left: 4px;
     margin-right: 8px;
 }
 
@@ -573,12 +574,18 @@
     color: rgba(255, 255, 255, 0.8);
     -unity-text-align: middle-center;
     padding: 0;
-    transition-property: background-color;
+    transition-property: background-color, scale;
     transition-duration: 0.15s;
 }
 
 .messages-icon-btn:hover {
     background-color: rgba(255, 255, 255, 0.15);
+    scale: 1.1;
+    color: #FFFFFF;
+}
+
+.messages-icon-btn:active {
+    scale: 0.92;
 }
 
 /* ============================================
