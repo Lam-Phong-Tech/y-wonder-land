@@ -1,5 +1,5 @@
 # MEMORY.md — Đúc kết kinh nghiệm
-> Cập nhật: 2026-06-01
+> Cập nhật: 2026-06-03
 > Mục đích: Ghi lại sai lầm + cách khắc phục để AI không lặp lại.
 
 ---
@@ -176,3 +176,15 @@
 - **Tình huống**: Cụm nút Tìm kiếm và Làm mới ở hàng trên cùng của bạn bè bị xô đẩy và đè sát vào nút Close (X) màu đỏ.
 - **Nguyên nhân**: Nút Close sử dụng `position: absolute; top: -8px; right: -8px;` lấn sâu vào bên trong panel khoảng 28px. Khi cụm tìm kiếm kéo dài hết chiều rộng khả dụng của panel, mép phải của nó sẽ va chạm trực tiếp với nút Close.
 - **Giải pháp**: Luôn thiết lập `margin-right: 16px;` (hoặc một khoảng đệm an toàn theo bội số của 4) cho các container chứa cụm nút/điều hướng đặt ở góc phải để đẩy chúng sang trái một khoảng vừa đủ, tránh hoàn toàn vùng chiếm dụng của nút đóng absolute.
+
+---
+
+## 🔵 BÀI HỌC VỀ 3D FALLBACKS & BULLETPROOF PROGRAMMING (Cập nhật 03/06/2026)
+
+### 27. Thiết lập Fallback tự động khi thiếu Assets 3D / Waypoints
+- **Tình huống**: Cần phát triển và kiểm thử các tính năng gameplay (như Hướng dẫn đi theo NPC, Trồng trọt thu hoạch) khi chưa có 3D model chính thức từ Artist hoặc waypoints chưa được thiết lập trong scene.
+- **Hậu quả**: Thử nghiệm bị gián đoạn, phát sinh lỗi `NullReferenceException` hoặc kẹt luồng state machine của hướng dẫn.
+- **Giải pháp**: 
+  - Áp dụng triết lý *lập trình chống đạn (bulletproof programming)*: Trong các hàm khởi tạo (`Awake`/`Start`), tự động kiểm tra tham chiếu. Nếu thiếu, tự sinh (`Instantiate` / `new GameObject`) các vật thể mockup cần thiết (như ô đất `FarmTile` hay `GuideNPC`) ở tọa độ an toàn.
+  - Sử dụng mô hình hình học cơ bản (Capsule cho NPC, Cylinder/Cube cho cây trồng) cùng với các màu sắc vật liệu tiêu chuẩn đặc trưng (Nâu cho đất, Xanh cho thân cây, Cam cho cà rốt chín) để người chơi kiểm thử rõ ràng trạng thái.
+  - Hủy bỏ (`Destroy`) collider của các mô hình hình học con để tia Raycast click chuột trúng trực tiếp vào collider chính của đối tượng cha.

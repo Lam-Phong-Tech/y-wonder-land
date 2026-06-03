@@ -56,6 +56,12 @@
 - Assets/UI/AttendancePopup.uxml
 - Assets/UI/AttendancePopupController.cs
 
+### Module Onboarding Cinematic & Tutorial (QC: chờ duyệt)
+- Assets/Scripts/Cutscenes/BoatCutscene.cs
+- Assets/Scripts/Tutorial/TutorialManager.cs
+- Assets/Scripts/Tutorial/GuideNPC.cs
+- Assets/Scripts/Environment/FarmTile.cs
+
 ## QUY TẮC KHI CODE
 1. Chỉ sửa đúng file và đúng function được yêu cầu
 2. KHÔNG refactor, rename, hoặc "cải thiện" code khác ngoài phạm vi yêu cầu

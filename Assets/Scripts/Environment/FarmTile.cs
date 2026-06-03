@@ -37,6 +37,7 @@ public class FarmTile : MonoBehaviour
 
     void Start()
     {
+        CreateFallbackVisuals();
         UpdateVisuals();
     }
 
@@ -158,5 +159,98 @@ public class FarmTile : MonoBehaviour
         if (currentState == TileState.Ripe) return 1f;
         if (!isGrowing) return 0f;
         return Mathf.Clamp01(growthTimer / tutorialGrowthTime);
+    }
+
+    private void CreateFallbackVisuals()
+    {
+        if (soilVisual == null)
+        {
+            soilVisual = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            soilVisual.name = "SoilVisual";
+            soilVisual.transform.SetParent(this.transform, false);
+            soilVisual.transform.localScale = new Vector3(2f, 0.1f, 2f);
+            SetColor(soilVisual, new Color(0.5f, 0.35f, 0.2f)); // Brown
+            // Remove collider so it doesn't block raycasting on the parent FarmTile
+            Destroy(soilVisual.GetComponent<Collider>());
+        }
+        if (plowedVisual == null)
+        {
+            plowedVisual = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            plowedVisual.name = "PlowedVisual";
+            plowedVisual.transform.SetParent(this.transform, false);
+            plowedVisual.transform.localScale = new Vector3(2f, 0.15f, 2f);
+            SetColor(plowedVisual, new Color(0.35f, 0.22f, 0.1f)); // Dark brown
+            Destroy(plowedVisual.GetComponent<Collider>());
+        }
+        if (seedVisual == null)
+        {
+            seedVisual = new GameObject("SeedVisual");
+            seedVisual.transform.SetParent(this.transform, false);
+            
+            // Add ground plowed representation
+            GameObject ground = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            ground.transform.SetParent(seedVisual.transform, false);
+            ground.transform.localScale = new Vector3(2f, 0.15f, 2f);
+            SetColor(ground, new Color(0.35f, 0.22f, 0.1f));
+            Destroy(ground.GetComponent<Collider>());
+            
+            // Add tiny sprout
+            GameObject sprout = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            sprout.transform.SetParent(seedVisual.transform, false);
+            sprout.transform.localPosition = new Vector3(0, 0.2f, 0);
+            sprout.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+            SetColor(sprout, Color.green);
+            Destroy(sprout.GetComponent<Collider>());
+        }
+        if (growingVisual == null)
+        {
+            growingVisual = new GameObject("GrowingVisual");
+            growingVisual.transform.SetParent(this.transform, false);
+            
+            // Add ground plowed representation
+            GameObject ground = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            ground.transform.SetParent(growingVisual.transform, false);
+            ground.transform.localScale = new Vector3(2f, 0.15f, 2f);
+            SetColor(ground, new Color(0.35f, 0.22f, 0.1f));
+            Destroy(ground.GetComponent<Collider>());
+            
+            // Add medium sprout
+            GameObject sprout = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            sprout.transform.SetParent(growingVisual.transform, false);
+            sprout.transform.localPosition = new Vector3(0, 0.4f, 0);
+            sprout.transform.localScale = new Vector3(0.3f, 0.4f, 0.3f);
+            SetColor(sprout, Color.green);
+            Destroy(sprout.GetComponent<Collider>());
+        }
+        if (ripeVisual == null)
+        {
+            ripeVisual = new GameObject("RipeVisual");
+            ripeVisual.transform.SetParent(this.transform, false);
+            
+            // Add ground plowed representation
+            GameObject ground = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            ground.transform.SetParent(ripeVisual.transform, false);
+            ground.transform.localScale = new Vector3(2f, 0.15f, 2f);
+            SetColor(ground, new Color(0.35f, 0.22f, 0.1f));
+            Destroy(ground.GetComponent<Collider>());
+            
+            // Add ripe carrot
+            GameObject carrot = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            carrot.transform.SetParent(ripeVisual.transform, false);
+            carrot.transform.localPosition = new Vector3(0, 0.6f, 0);
+            carrot.transform.localScale = new Vector3(0.4f, 0.5f, 0.4f);
+            SetColor(carrot, new Color(1f, 0.5f, 0f)); // Orange!
+            Destroy(carrot.GetComponent<Collider>());
+        }
+    }
+
+    private void SetColor(GameObject go, Color color)
+    {
+        Renderer r = go.GetComponent<Renderer>();
+        if (r != null)
+        {
+            r.material = new Material(Shader.Find("Standard"));
+            r.material.color = color;
+        }
     }
 }

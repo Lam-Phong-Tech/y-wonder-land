@@ -50,10 +50,34 @@ public class GuideNPC : MonoBehaviour
             lastPlayerPosition = playerTransform.position;
         }
 
+        // Create fallback visual capsule if no renderer exists
+        CreateFallbackVisual();
+
         // Initially configure NavMeshAgent parameters
+        if (agent == null) agent = GetComponent<NavMeshAgent>();
         agent.speed = 2.5f;
         agent.acceleration = 8f;
         agent.stoppingDistance = 0.5f;
+
+        // If waypoints are not configured, dynamically generate them using targetFarmTile position
+        if ((waypoints == null || waypoints.Length == 0) && TutorialManager.Instance != null && TutorialManager.Instance.targetFarmTile != null)
+        {
+            Vector3 startPos = transform.position;
+            Vector3 endPos = TutorialManager.Instance.targetFarmTile.transform.position;
+            
+            // Generate 3 waypoints leading to the tile
+            GameObject wp1 = new GameObject("WP_Dynamic_1");
+            wp1.transform.position = Vector3.Lerp(startPos, endPos, 0.33f);
+            
+            GameObject wp2 = new GameObject("WP_Dynamic_2");
+            wp2.transform.position = Vector3.Lerp(startPos, endPos, 0.66f);
+            
+            GameObject wp3 = new GameObject("WP_Dynamic_3");
+            wp3.transform.position = endPos - (endPos - startPos).normalized * 1.5f; // Stop 1.5m away from tile
+            
+            waypoints = new Transform[] { wp1.transform, wp2.transform, wp3.transform };
+            Debug.Log($"[GuideNPC] Dynamically generated {waypoints.Length} waypoints leading to targetFarmTile.");
+        }
 
         // Move to the first waypoint
         MoveToNextWaypoint();
@@ -200,5 +224,41 @@ public class GuideNPC : MonoBehaviour
     {
         Debug.Log($"[GuideNPC] {npcName}: \"{dialogueText}\"");
         OnDialogueTriggered?.Invoke(dialogueText);
+    }
+
+    private void CreateFallbackVisual()
+    {
+        // If there's no renderer in children, create a fallback capsule
+        if (GetComponentInChildren<Renderer>() == null)
+        {
+            GameObject capsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            capsule.name = "NPCVisualFallback";
+            capsule.transform.SetParent(this.transform, false);
+            capsule.transform.localPosition = new Vector3(0, 1f, 0); // Center at height 1m
+            capsule.transform.localScale = new Vector3(1f, 1f, 1f);
+            
+            // Set capsule color to bright purple (stands out)
+            Renderer r = capsule.GetComponent<Renderer>();
+            if (r != null)
+            {
+                r.material = new Material(Shader.Find("Standard"));
+                r.material.color = new Color(0.6f, 0.2f, 0.8f);
+            }
+            
+            // Add a pointer cylinder representing face direction
+            GameObject pointer = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            pointer.name = "NPCDirectionPointer";
+            pointer.transform.SetParent(capsule.transform, false);
+            pointer.transform.localPosition = new Vector3(0, 0.5f, 0.5f); // Nose height, facing forward Z
+            pointer.transform.localRotation = Quaternion.Euler(90f, 0, 0);
+            pointer.transform.localScale = new Vector3(0.3f, 0.2f, 0.3f);
+            
+            Renderer pr = pointer.GetComponent<Renderer>();
+            if (pr != null)
+            {
+                pr.material = new Material(Shader.Find("Standard"));
+                pr.material.color = Color.yellow; // Yellow nose
+            }
+        }
     }
 }

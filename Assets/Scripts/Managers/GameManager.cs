@@ -178,6 +178,13 @@ public class GameManager : MonoBehaviour
         if (loginUIPanel != null) loginUIPanel.SetActive(currentState == GameState.Login);
         if (menuUIPanel != null) menuUIPanel.SetActive(currentState == GameState.Menu);
 
+        // Toggle GameHUD visibility based on gameplay state
+        GameHUDController hud = FindFirstObjectByType<GameHUDController>();
+        if (hud != null)
+        {
+            hud.SetHUDVisible(currentState == GameState.Gameplay);
+        }
+
         switch (currentState)
         {
             case GameState.Login:

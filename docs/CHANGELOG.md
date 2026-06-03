@@ -3,6 +3,21 @@
 
 ---
 
+## [2026-06-03] — Onboarding Cinematic Skip & Tutorial Fallback
+### Added
+- Tích hợp Cinematic UI cho màn hình thuyền cập bến (`BoatCutscene.cs`): Bao gồm nút **Bỏ qua (Skip)** xuất hiện sau 3 giây và hội thoại dẫn truyện chạy dọc ở đáy màn hình. Bấm "Bỏ qua" sẽ dịch chuyển tức thời thuyền và camera đến vị trí kết thúc.
+- Triển khai cơ chế **Tự động Tìm kiếm & Khởi tạo (Bulletproof Fallbacks)** trong `TutorialManager.cs`: Nếu mảnh đất `FarmTile` hoặc `GuideNPC` bị thiếu trong Scene, script sẽ tự động sinh các GameObject placeholder tương thích kèm BoxCollider và các thành phần logic để tutorial chạy trơn tru không lỗi.
+- Triển khai **mô phỏng visual bằng hình 3D hình học (Primitives Mockup)** cho `FarmTile.cs`: Tự động vẽ Soil (Khối nâu), Plowed (Khối nâu đậm), Seed (Sprout nhỏ), Watered (Sprout vừa), Ripe (Củ cà rốt cam) khi thiếu tài nguyên 3D art từ Artist.
+- Triển khai **model Capsule tạm thời** cho `GuideNPC.cs`: Vẽ Capsule màu tím cao 2m cùng mũi kim chỉ hướng màu vàng để người chơi định vị NPC. Tự động sinh 3 Waypoints dẫn đường đến mảnh đất nếu waypoints bị trống.
+### Changed
+- Quản lý đồng bộ hiển thị HUD (`GameManager.cs`): Tự động ẩn HUD trong các trạng thái Login, Menu, Cutscene và hiển thị lại khi vào Gameplay.
+### Files changed
+- Assets/Scripts/Cutscenes/BoatCutscene.cs (MODIFIED)
+- Assets/Scripts/Managers/GameManager.cs (MODIFIED)
+- Assets/Scripts/Tutorial/TutorialManager.cs (MODIFIED)
+- Assets/Scripts/Tutorial/GuideNPC.cs (MODIFIED)
+- Assets/Scripts/Environment/FarmTile.cs (MODIFIED)
+
 ## [2026-06-03] — UI/UX Layout Polish (Friends, Quest, Attendance Popups)
 ### Fixed
 - Popup Bạn bè (Friends): Thêm khoảng đệm an toàn `margin-right: 16px` cho cụm tìm kiếm và thu nhỏ kích thước của TextField nhập tên cùng các nút bấm để tránh đè lấn lên nút đóng X ở góc trên bên phải.

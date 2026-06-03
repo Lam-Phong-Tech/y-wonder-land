@@ -45,6 +45,55 @@ public class TutorialManager : MonoBehaviour
         else
         {
             Destroy(gameObject);
+            return;
+        }
+
+        // Auto-discover targetFarmTile if null
+        if (targetFarmTile == null)
+        {
+            targetFarmTile = FindFirstObjectByType<FarmTile>();
+        }
+        
+        // Spawn a dynamic FarmTile if still null
+        if (targetFarmTile == null)
+        {
+            GameObject tileGo = new GameObject("FarmTile_DynamicFallback");
+            tileGo.transform.position = new Vector3(8f, 0.05f, 8f); // Default coordinate on land
+            
+            // Add BoxCollider for physics/raycasting
+            BoxCollider col = tileGo.AddComponent<BoxCollider>();
+            col.size = new Vector3(2f, 0.1f, 2f);
+            
+            targetFarmTile = tileGo.AddComponent<FarmTile>();
+            Debug.Log("[TutorialManager] Created dynamic FarmTile fallback at: " + tileGo.transform.position);
+        }
+
+        // Auto-discover guideNPC if null
+        if (guideNPC == null)
+        {
+            guideNPC = FindFirstObjectByType<GuideNPC>();
+        }
+
+        // Spawn a dynamic GuideNPC if still null
+        if (guideNPC == null)
+        {
+            Vector3 spawnPos = new Vector3(3f, 0.5f, 3f);
+            GameObject player = GameObject.FindWithTag("Player");
+            if (player != null)
+            {
+                spawnPos = player.transform.position + player.transform.forward * 2f + player.transform.right * 1.5f;
+            }
+
+            GameObject npcGo = new GameObject("GuideNPC_DynamicFallback");
+            npcGo.transform.position = spawnPos;
+
+            // Configure agent
+            UnityEngine.AI.NavMeshAgent agent = npcGo.AddComponent<UnityEngine.AI.NavMeshAgent>();
+            agent.speed = 2.5f;
+            agent.stoppingDistance = 0.5f;
+
+            guideNPC = npcGo.AddComponent<GuideNPC>();
+            Debug.Log("[TutorialManager] Created dynamic GuideNPC fallback at: " + spawnPos);
         }
     }
 
@@ -74,6 +123,37 @@ public class TutorialManager : MonoBehaviour
         {
             highlightEffect.position = targetFarmTile.transform.position + Vector3.up * 0.1f;
             highlightEffect.gameObject.SetActive(false); // Enable only when plowing starts
+        }
+        else if (targetFarmTile != null)
+        {
+            // Dynamically create a simple visual ring/highlight if none exists
+            GameObject ring = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            ring.name = "TutorialHighlightRing";
+            ring.transform.position = targetFarmTile.transform.position + Vector3.up * 0.02f;
+            ring.transform.localScale = new Vector3(2.2f, 0.01f, 2.2f);
+            
+            // Set glowing yellow material
+            Renderer r = ring.GetComponent<Renderer>();
+            if (r != null)
+            {
+                r.material = new Material(Shader.Find("Standard"));
+                r.material.color = new Color(1f, 0.92f, 0.016f, 0.5f);
+                // Simple transparency setup
+                r.material.SetFloat("_Mode", 3); // Transparent
+                r.material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                r.material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                r.material.SetInt("_ZWrite", 0);
+                r.material.DisableKeyword("_ALPHATEST_ON");
+                r.material.EnableKeyword("_ALPHABLEND_ON");
+                r.material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                r.material.renderQueue = 3000;
+            }
+            
+            // Remove collider so it doesn't block raycasts
+            Destroy(ring.GetComponent<Collider>());
+            
+            highlightEffect = ring.transform;
+            highlightEffect.gameObject.SetActive(false);
         }
 
         // Auto-discover HUD
