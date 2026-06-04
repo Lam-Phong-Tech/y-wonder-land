@@ -277,3 +277,31 @@
   - `z-index` cao nhất trong popup
   - KHÔNG nằm bên trong header/toolbar/thanh công cụ nào
   - Tham chiếu: SettingsPopup, ShopPopup, FriendsPopup, InventoryPopup đều dùng cùng pattern này
+
+---
+
+## 🟡 BÀI HỌC VỀ FLEX LAYOUT & CARD OVERFLOW (Cập nhật 04/06/2026)
+
+### 35. Card dọc xếp nhiều tầng dễ tràn — ưu tiên layout ngang khi không gian hạn chế
+- **Tình huống**: Package card Heo Đất xếp dọc 4 phần tử (icon → tên → rate → label). 3 card chiếm ~300px nhưng body chỉ còn ~320px → rate (+2%, +6%, +45%) tràn ra ngoài viền card.
+- **Hậu quả**: Chữ rate hiện bên dưới border card, trông rất xấu dù đã thêm `overflow: hidden`.
+- **Giải pháp**: Chuyển card sang **flex-direction: row** — icon bên trái, tên giữa, rate bên phải. 1 hàng duy nhất, tiết kiệm tối đa chiều cao. Ẩn label "lãi suất" dư thừa (`display: none`).
+- **Quy tắc**: Khi thiết kế card trong vùng chiều cao hạn chế (sidebar, package list):
+  - **Ước tính trước**: Tính tổng chiều cao = (card_height + margin) × số_card. So với chiều cao container còn lại.
+  - **Nếu không vừa** → chuyển sang layout **ngang** hoặc giảm số tầng.
+  - Card ngang chỉ cần ~50px/card, card dọc cần ~100px/card.
+
+### 36. Flex row phải có min-height và flex-shrink: 0 cho text không bị đè
+- **Tình huống**: Preview section Heo Đất có 3 dòng (Gốc / Lãi / Nhận về) dùng `flex-direction: row` + `justify-content: space-between`. Nhưng thiếu `min-height` → khi container bị ép, các row co lại và đè chồng lên nhau.
+- **Hậu quả**: Text "100 POS", "+2 POS", "102 POS" chồng thành 1 cục.
+- **Giải pháp**: 
+  - Thêm `min-height: 18px` cho mỗi row.
+  - Thêm `flex-shrink: 0` cho cả label và value để không bị co.
+  - Thêm `align-items: center` cho row.
+  - Thêm `-unity-text-align: middle-right` cho value.
+- **Quy tắc**: Mọi flex row chứa label + value PHẢI có:
+  ```
+  min-height: 18px;
+  align-items: center;
+  ```
+  Và mọi text element bên trong PHẢI có `flex-shrink: 0` nếu không muốn bị co lại.

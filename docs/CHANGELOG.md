@@ -27,6 +27,10 @@
 - Assets/UI/Styles/GameHUD.uss (MODIFIED — thêm sidebar-btn-piggy styles)
 - Assets/UI/GameHUDController.cs (MODIFIED — thêm piggyBankPopup reference + callback)
 
+### Fixed
+- **Package card tràn nội dung**: Layout dọc (icon→tên→rate→label) xếp 4 tầng quá cao, rate bị tràn ra ngoài viền card. Sửa bằng cách chuyển sang layout **ngang** (icon ← tên → rate), ẩn label dư thừa.
+- **Preview rows đè chồng**: Các dòng Gốc/Lãi/Nhận về bị overlap do thiếu `min-height`, `align-items`, `flex-shrink`. Thêm `min-height: 18px` + `flex-shrink: 0` cho label/value.
+
 ---
 ## [2026-06-04] — Module Map UI (Visual World Map)
 
