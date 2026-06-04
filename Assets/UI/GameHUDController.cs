@@ -55,10 +55,7 @@ public class GameHUDController : MonoBehaviour
     private Button btnBag;
     private Button btnSettings;
 
-    // Messages
-    private VisualElement messagesBar;
-    private Button btnEmoji;
-    private Button btnExpand;
+
 
     void OnEnable()
     {
@@ -88,11 +85,7 @@ public class GameHUDController : MonoBehaviour
         QueryElements(root);
         RegisterCallbacks();
 
-        // Hide default messages bar since it's replaced by the new collapsible Chat UI
-        if (messagesBar != null)
-        {
-            messagesBar.style.display = DisplayStyle.None;
-        }
+
 
         // Set initial values (mockup data)
         SetPlayerInfo("YWonderPlayer", 1);
@@ -133,10 +126,7 @@ public class GameHUDController : MonoBehaviour
         btnBag = root.Q<Button>("BtnBag");
         btnSettings = root.Q<Button>("BtnSettings");
 
-        // Messages
-        messagesBar = root.Q<VisualElement>("MessagesBar");
-        btnEmoji = root.Q<Button>("BtnEmoji");
-        btnExpand = root.Q<Button>("BtnExpand");
+
     }
 
     private void RegisterCallbacks()
@@ -244,16 +234,7 @@ public class GameHUDController : MonoBehaviour
             Debug.Log("[GameHUD] Jump clicked");
         });
 
-        // Messages
-        btnEmoji?.RegisterCallback<ClickEvent>(evt =>
-        {
-            Debug.Log("[GameHUD] Emoji clicked");
-        });
 
-        btnExpand?.RegisterCallback<ClickEvent>(evt =>
-        {
-            Debug.Log("[GameHUD] Expand messages clicked");
-        });
 
         // Bag
         btnBag?.RegisterCallback<ClickEvent>(evt =>
