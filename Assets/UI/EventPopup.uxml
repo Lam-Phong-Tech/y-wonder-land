@@ -29,7 +29,7 @@
                     <ui:Button name="TabBundle" text="💎 Gói ưu đãi" class="event-tab" />
                 </ui:VisualElement>
 
-                <!-- ═══ TAB 1: EXCHANGE (Đổi quà) ═══ -->
+                <!-- TAB 1: EXCHANGE -->
                 <ui:VisualElement name="PanelExchange" class="event-body">
 
                     <!-- Exchange grid -->
@@ -64,7 +64,7 @@
 
                 </ui:VisualElement>
 
-                <!-- ═══ TAB 2: BUNDLE (Gói ưu đãi UPOS) ═══ -->
+                <!-- TAB 2: BUNDLE -->
                 <ui:VisualElement name="PanelBundle" class="event-body event-bundle-panel">
 
                     <ui:ScrollView name="BundleScroll" class="event-scroll event-scroll--full">
