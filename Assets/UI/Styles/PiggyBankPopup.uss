@@ -26,7 +26,7 @@
 /* === PANEL === */
 .piggy-panel {
     width: 720px;
-    height: 430px;
+    height: 470px;
     background-color: #F5F0E8;
     border-radius: 22px;
     border-width: 3px;
@@ -170,7 +170,7 @@
 
 /* === LEFT: PACKAGE CARDS === */
 .piggy-packages {
-    width: 180px;
+    width: 200px;
     flex-shrink: 0;
     flex-direction: column;
 }
@@ -180,19 +180,19 @@
     border-radius: 14px;
     padding-right: 3px;
     padding-bottom: 3px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .piggy-pkg {
+    flex-direction: row;
     align-items: center;
-    padding: 14px 10px 10px 10px;
+    padding: 10px 12px;
     background-color: #FFFFFF;
     border-radius: 14px;
     border-width: 2px;
     border-color: #DDD5C8;
     transition-property: translate, border-color, background-color;
     transition-duration: 0.08s;
-    overflow: hidden;
 }
 
 .piggy-pkg:hover {
@@ -212,28 +212,28 @@
 }
 
 .piggy-pkg-icon {
-    font-size: 20px;
-    margin-bottom: 2px;
+    font-size: 22px;
+    margin-right: 10px;
+    flex-shrink: 0;
 }
 
 .piggy-pkg-duration {
-    font-size: 11px;
+    font-size: 12px;
     -unity-font-style: bold;
     color: #3D3535;
-    margin-bottom: 1px;
+    flex-grow: 1;
 }
 
 .piggy-pkg-rate {
-    font-size: 18px;
+    font-size: 16px;
     -unity-font-style: bold;
     color: #E8833A;
-    margin-bottom: 0;
+    flex-shrink: 0;
+    margin-left: 4px;
 }
 
 .piggy-pkg-label {
-    font-size: 9px;
-    color: #8A7E6E;
-    letter-spacing: 1px;
+    display: none;
 }
 
 /* === RIGHT: FORM / ACTIVE === */
