@@ -373,3 +373,10 @@
 - **Giải pháp**: Sử dụng `FocusController` của UI Toolkit thông qua `root.focusController.focusedElement` để xác định trạng thái focus hiện tại của input field. Nếu input chưa được focus → gọi `.Focus()`. Nếu đang được focus và có chữ → gửi tin nhắn. Nếu rỗng → gọi `.Blur()` giải phóng focus và thu nhỏ chat.
 - **Quy tắc**: Khi kết hợp phím cứng toàn cục với một TextField, phải kiểm tra tường minh phần tử đang được focus hệ thống trước khi quyết định hành vi.
 
+### 43. Xóa triệt để các placeholder UI lỗi thời thay vì chỉ ẩn bằng Code runtime
+- **Tình huống**: Thay thế thanh chat cũ (`MessagesBar`) bằng hệ thống Chat Panel mới linh hoạt hơn. Ban đầu chỉ dùng C# ẩn nó ở runtime trong `OnEnable()`.
+- **Hậu quả**: Khi mở Unity Editor (Edit Mode) lúc chưa chạy game, code C# không thực thi khiến cả hai thanh chat đè chồng lên nhau, giao diện bị lộn xộn rất khó làm việc trong Editor.
+- **Giải pháp**: Xóa bỏ hoàn toàn UI cũ lỗi thời khỏi template UXML chính (`GameHUD.uxml`), sau đó dọn dẹp sạch sẽ các biến tham chiếu, hàm query và callback đăng ký trong controller tương ứng (`GameHUDController.cs`).
+- **Quy tắc**: Khi nâng cấp hoặc thay thế một cụm UI, phải thực hiện dọn dẹp tận gốc ở cả file UXML mẫu và file logic điều khiển, không lạm dụng việc ẩn giấu ở runtime để giữ không gian Editor luôn sạch sẽ.
+
+

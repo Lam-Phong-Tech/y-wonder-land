@@ -10,10 +10,11 @@
 ### Added
 - **Chat Panel** — Hệ thống chat kênh thế giới đặt tại cạnh dưới giữa màn hình với 2 trạng thái:
   - **Trạng thái thu gọn (Collapsed)**: Thanh pill mờ đen đồng bộ HUD hiển thị tin nhắn mới nhất, có nút emoji nhanh và nút mở rộng (▲).
-  - **Trạng thái mở rộng (Expanded)**: Khung chat 420x260px nền kem (#F5F0E8), viền tối 3px chuẩn design system.
-    - **Header**: Thanh tiêu đề "KÊNH THẾ GIỚI" kèm nút thu nhỏ (▼).
-    - **History scroll**: Cuộn lịch sử tin nhắn, tự động cuộn xuống đáy khi có tin nhắn mới (On GeometryChangedEvent).
-    - **Footer**: Input nhập tin nhắn, nút gửi ("Gửi") màu xanh blue retro, nút emoji nhanh (☺).
+  - **Trạng thái mở rộng (Expanded)**: Khung chat 420x260px nền tối bán trong suốt (Dark Translucent — `rgba(30, 30, 35, 0.88)`) không che khuất thế giới 3D, viền tối 3px chuẩn design system.
+    - **Header**: Thanh tiêu đề "KÊNH THẾ GIỚI" nền đen mờ kèm nút thu nhỏ (▼).
+    - **History scroll**: Cuộn lịch sử tin nhắn nền tối mờ, chữ trắng/sáng màu dễ đọc, tự động cuộn xuống đáy khi có tin nhắn mới (On GeometryChangedEvent).
+    - **Footer**: Input nhập tin nhắn màu trắng nổi bật, nút gửi ("Gửi") màu xanh blue retro, nút emoji nhanh (☺) màu kem sáng.
+  - **Nút bấm Tactile đồng bộ**: Cả nút mở rộng (▲), thu nhỏ (▼) và emoji nhanh (☺) đều được thiết kế dạng phím cơ bo góc tròn, màu tím thương hiệu (`#5B42F3`), viền dày 2px `#3D3535`, có phản hồi vật lý lún 1px khi click.
 - **Tính năng mở rộng**:
   - **Profanity Filter**: Tự động lọc các từ tục tĩu tiếng Việt/Anh ("ngu", "fuck", "đm", "vl"...) thành dấu `***`.
   - **Rate Limit**: Giới hạn tần suất chat (tối đa 5 tin nhắn trong 30 giây). Nếu vượt quá, hiển thị cảnh báo đỏ từ hệ thống.
@@ -26,9 +27,15 @@
 - Assets/UI/Styles/ChatPanel.uss (NEW)
 - Assets/UI/ChatPanelController.cs (NEW)
 - Assets/Editor/SetupChatUI.cs (NEW)
-- Assets/UI/SettingsPopup.uxml (MODIFIED)
+- Assets/UI/SettingsPopup.uxml (MODIFIED — thêm toggle Hiện chat)
 - Assets/UI/SettingsPopupController.cs (MODIFIED)
-- Assets/UI/GameHUDController.cs (MODIFIED)
+- Assets/UI/GameHUD.uxml (MODIFIED — xóa MessagesBar cũ)
+- Assets/UI/GameHUDController.cs (MODIFIED — xóa dọn dẹp MessagesBar)
+
+### Fixed & Refactored
+- **Xóa giao diện đè chồng trong Editor (Edit Mode)**: Loại bỏ hoàn toàn `MessagesBar` cũ trong `GameHUD.uxml` và dọn dẹp các C# bindings liên quan trong `GameHUDController.cs` để tránh đè chồng lên Chat Panel mới lúc chưa chạy game trong Unity Editor.
+- **Đồng bộ hóa nút bấm**: Thay đổi style các nút tam giác, emoji phẳng không viền thành các nút đặc có khối đế màu tím viền đen dày để đúng tinh thần giao diện cơ học.
+- **Lỗi biên dịch Setup script**: Sửa lỗi tham chiếu sai thuộc tính `sourceAsset` thành `visualTreeAsset` trên `UIDocument` trong C# Editor setup script.
 
 ---
 ## [2026-06-04] — Module Event / Exchange UI (Sự kiện mùa)
