@@ -225,3 +225,27 @@
   - **TRƯỚC KHI** viết bất kỳ USS mới nào, PHẢI đọc ít nhất 2-3 file USS popup cũ (SettingsPopup.uss, FriendsPopup.uss, InventoryPopup.uss) để lấy giá trị chuẩn.
   - Copy-paste các giá trị chung (overlay, shadow wrapper, close button, panel border) từ popup cũ, chỉ thay đổi phần nội dung riêng.
   - Sau khi viết xong, tự so sánh bảng giá trị với popup cũ trước khi giao cho anh test.
+
+---
+
+## 🟡 BÀI HỌC VỀ HEADER LAYOUT & THÔNG TIN THỪA (Cập nhật 04/06/2026)
+
+### 30. Element trong header dùng flex sẽ đè lên title absolute — phải dùng position: absolute cho cả hai
+- **Tình huống**: Thêm pill số dư (`🪙 5,000 POS`) vào header Shop. Header dùng `flex-direction: row; justify-content: center;`, title dùng `position: absolute; left: 0; right: 0;` để căn giữa. Pill nằm trong flex flow → bị đặt ở giữa → đè lên chữ title.
+- **Hậu quả**: Pill và title chồng lên nhau, không đọc được cả hai.
+- **Giải pháp**: Pill cũng phải dùng `position: absolute; left: 12px;` để ghim vào góc trái, tránh ảnh hưởng flex flow. Title giữ nguyên `position: absolute; left: 0; right: 0;` + thêm `padding: 0 120px` để tạo khoảng trống cho pill và close button hai bên.
+- **Quy tắc**: Khi header có title căn giữa tuyệt đối, MỌI element phụ (badge, pill, icon) cũng phải dùng `position: absolute` để ghim vào góc. KHÔNG để chúng trong flex flow.
+
+### 31. KHÔNG hiển thị thông tin trùng lặp — nếu tab/sidebar đã thể hiện rõ thì bỏ label phụ
+- **Tình huống**: Shop popup có tab Mua/Bán ở sidebar trái (nổi bật, có màu active). Đồng thời ở bottom bar lại hiển thị thêm "Chế độ: Mua" — thông tin hoàn toàn trùng lặp.
+- **Hậu quả**: Giao diện rối, người dùng thắc mắc "Chế độ" là gì. Bottom bar chiếm thêm không gian vô ích.
+- **Giải pháp**: Xóa hoàn toàn bottom info bar. Tab sidebar đã đủ rõ ràng thể hiện chế độ hiện tại.
+- **Quy tắc**: Trước khi thêm label hiển thị trạng thái, tự hỏi: "Thông tin này đã được thể hiện ở đâu trên màn hình chưa?". Nếu đã có → KHÔNG thêm label trùng.
+
+### 32. Tiêu đề header dài phải có biện pháp chống tràn
+- **Tình huống**: Tiêu đề shop "HAI LÚA — VẬT TƯ NÔNG TRẠI" quá dài so với chiều rộng header, nhìn như sắp chìa ra ngoài viền.
+- **Giải pháp**: 
+  - Giảm `font-size: 20px → 18px` khi tiêu đề có thể dài.
+  - Thêm `text-overflow: ellipsis; overflow: hidden; white-space: nowrap;` để cắt an toàn nếu tràn.
+  - Thêm `padding: 0 120px` cho title absolute để chừa khoảng trống cho các element ở hai góc (pill trái, close button phải).
+- **Quy tắc**: Mọi title trong header PHẢI có `text-overflow: ellipsis` + `overflow: hidden`. Luôn test với tiêu đề dài nhất có thể xuất hiện (ví dụ: "KỶ NGUYÊN XANH — THẺ THÀNH VIÊN VIP").

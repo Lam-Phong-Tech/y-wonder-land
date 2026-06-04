@@ -5,6 +5,22 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-06-04] — Shop UI Polish & Sell Mode Testing
+
+### Fixed
+- **Số dư dính header**: Pill số dư (`🪙 5,000 POS`) bị nằm giữa header đè lên tiêu đề → sửa bằng `position: absolute; left: 12px` để ghim góc trái.
+- **Tiêu đề tràn viền**: Chữ "HAI LÚA — VẬT TƯ NÔNG TRẠI" quá dài, sắp chìa ra ngoài → giảm font `20px → 18px`, thêm `padding: 0 120px` + `text-overflow: ellipsis`.
+- **Bottom bar thừa thông tin**: Dòng "Chế độ: Mua" và "Số dư" ở cạnh dưới bị lệch nhau giữa các tab → xóa hoàn toàn bottom info bar vì tab Mua/Bán trên sidebar đã thể hiện rõ chế độ, số dư chuyển lên header.
+
+### Added
+- **Sell Mode mock data**: Bật tab Bán (`hasSellTab = true`) với 8 item nông sản có thể bán (Cà rốt 15 POS, Rau cải 20 POS, Dưa hấu 50 POS, Trứng gà 25 POS, Sữa bò 40 POS, Gỗ 8 POS, Đá 12 POS...) để test chuyển đổi Mua/Bán.
+
+### Files changed
+- Assets/UI/ShopPopup.uxml (MODIFIED — xóa bottom bar, thêm balance pill vào header)
+- Assets/UI/Styles/ShopPopup.uss (MODIFIED — thêm balance pill styles, xóa info-bar styles, sửa header title)
+- Assets/UI/ShopPopupController.cs (MODIFIED — xóa lblMode, cập nhật UpdateBalance format, thêm sell mock data)
+
+---
 ## [2026-06-04] — HUD Shop Test Button Integration
 
 ### Added
