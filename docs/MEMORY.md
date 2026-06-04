@@ -249,3 +249,31 @@
   - Thêm `text-overflow: ellipsis; overflow: hidden; white-space: nowrap;` để cắt an toàn nếu tràn.
   - Thêm `padding: 0 120px` cho title absolute để chừa khoảng trống cho các element ở hai góc (pill trái, close button phải).
 - **Quy tắc**: Mọi title trong header PHẢI có `text-overflow: ellipsis` + `overflow: hidden`. Luôn test với tiêu đề dài nhất có thể xuất hiện (ví dụ: "KỶ NGUYÊN XANH — THẺ THÀNH VIÊN VIP").
+
+---
+
+## 🔴 BÀI HỌC VỀ CLOSE BUTTON & OVERFLOW (Cập nhật 04/06/2026)
+
+### 33. Close button KHÔNG BAO GIỜ được nằm bên trong element có overflow: hidden
+- **Tình huống**: Map popup có `map-container` với `overflow: hidden` (cần thiết để clip nội dung bản đồ). Close button đặt bên trong container với `position: absolute; right: -8px; top: -8px;` để nhô ra ngoài viền.
+- **Hậu quả**: Nút X bị cắt góc (lẹm), trông xấu và khó nhận ra.
+- **Giải pháp**: Thêm `map-wrapper` bọc bên ngoài container. Wrapper dùng `position: relative` và KHÔNG có `overflow: hidden`. Close button là con của wrapper, không phải container.
+- **Cấu trúc chuẩn (bắt buộc)**:
+  ```
+  wrapper (position: relative, KHÔNG overflow)
+    ├── container/panel (overflow: hidden — clip nội dung)
+    └── close-shadow (position: absolute, right: -8px, top: -8px)
+         └── close-btn
+  ```
+- **Quy tắc**: Trước khi đặt close button, kiểm tra TOÀN BỘ element cha xem có `overflow: hidden` không. Nếu có → phải tạo wrapper bên ngoài. Pattern chuẩn: `panel-shadow/wrapper → panel + close`. Đây chính xác là cách Settings/Shop popup hoạt động.
+
+### 34. Close button phải nằm ở vị trí chuẩn, KHÔNG được giấu trong thanh header/toolbar
+- **Tình huống**: Ban đầu nút X nằm bên trong `map-top-bar` (background semi-transparent dark). Nút đỏ nhỏ trên nền tối → rất khó thấy, người dùng không biết bấm đâu để thoát.
+- **Hậu quả**: Anh Phong không tìm được nút thoát map.
+- **Giải pháp**: Chuyển nút X ra góc phải trên của popup, nhô ra ngoài viền (`right: -8px; top: -8px`), z-index cao nhất. Đây là vị trí chuẩn mà TẤT CẢ popup trong game đã dùng.
+- **Quy tắc**: Close button luôn:
+  - Nằm ở **góc phải trên** popup, nhô ra ngoài viền
+  - Kích thước **36×36px**, background **#FF4B4B**, border **3px #3D3535**
+  - `z-index` cao nhất trong popup
+  - KHÔNG nằm bên trong header/toolbar/thanh công cụ nào
+  - Tham chiếu: SettingsPopup, ShopPopup, FriendsPopup, InventoryPopup đều dùng cùng pattern này

@@ -5,23 +5,31 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
-## [2026-06-04] — Module Map UI (Bản đồ thế giới 5 cảnh)
+## [2026-06-04] — Module Map UI (Visual World Map)
 
 ### Added
-- **Map Popup** — Bản đồ thế giới hiển thị 5 địa điểm với hệ thống khóa/mở khóa:
-  - Layout landscape: Location list (trái) + Detail panel (phải)
-  - **5 Map**: 🏡 Nông trại (mặc định), 🏙️ Thành phố (tutorial), ⛏️ Khai thác mỏ (Lv.10), 🏝️ Đảo Hải Phú (Lv.40 + VIP/Vé), 🌲 Đảo Mộc Nhi (Lv.60 + VIP/Vé)
-  - **Lock Logic**: Level check + VIP/Ticket requirement — hiển thị ✅/❌ cho từng điều kiện
-  - **Detail Panel**: Icon, tên, status badge (ĐÃ MỞ KHÓA/ĐANG KHÓA), mô tả, yêu cầu, đặc điểm, nút DI CHUYỂN
-  - **Cheat Bar**: 2 nút test nhanh — cycle level (1→5→15→45→65), cycle VIP/Vé trạng thái
-  - **Header**: Ocean Blue #00B4D8 với level pill góc trái (Lesson #30 applied)
-  - **Close button**: Chuẩn design system (Lesson #29 applied)
-- **HUD Map Button** — Nút tạm "🗺️ Map" trên sidebar HUD, màu #00B4D8 matching map header
+- **Map Popup** — Bản đồ thế giới dạng visual map (biển + đảo), không phải danh sách:
+  - Nền đại dương xanh #1A8FBF với sóng trang trí `〰〰〰` + la bàn 🧭
+  - **5 đảo positioned** trên bản đồ, mỗi đảo có vùng đất riêng (hình/màu khác nhau):
+    - 🏡 Nông trại (xanh lá, center-left, luôn mở)
+    - 🏙️ Thành phố (xám bạc, center-right, cần tutorial)
+    - ⛏️ Mỏ đá (nâu, top-center, Lv.10)
+    - 🏝️ Đảo Hải Phú (vàng cát, bottom-left, Lv.40 + VIP/Vé, có 🔒 overlay)
+    - 🌲 Đảo Mộc Nhi (xanh đậm, bottom-right, Lv.60 + VIP/Vé, có 🔒 overlay)
+  - **Interaction**: Bấm đảo → pin viền vàng gold + floating info card hiện ở dưới → bấm "🚀 DI CHUYỂN"
+  - **Info Card**: Icon, tên, status badge (ĐÃ MỞ KHÓA/ĐANG KHÓA), mô tả, yêu cầu ✅/❌, nút travel
+  - **Cheat Bar**: 2 nút test — cycle level (1→5→15→45→65), cycle VIP/Vé
+  - **Top bar**: Semi-transparent dark, level pill góc trái, tiêu đề "BẢN ĐỒ THẾ GIỚI"
+- **HUD Map Button** — Nút tạm "🗺️ Map" trên sidebar HUD, màu #00B4D8
+
+### Fixed
+- **Close button bị cắt (clip)**: Nút X nằm bên trong `map-container` có `overflow: hidden` → bị lẹm góc. Sửa bằng cách thêm `map-wrapper` bọc ngoài (không có overflow), đặt close button ở wrapper level.
+- **Close button khó thấy**: Ban đầu nút X nằm trong top bar tối màu → lẫn vào nền. Chuyển ra góc phải trên, nhô ra ngoài viền (pattern chuẩn `right: -8px; top: -8px`).
 
 ### Files changed
-- Assets/UI/MapPopup.uxml (NEW)
-- Assets/UI/Styles/MapPopup.uss (NEW)
-- Assets/UI/MapPopupController.cs (NEW)
+- Assets/UI/MapPopup.uxml (NEW — restructured: map-wrapper → map-container + close)
+- Assets/UI/Styles/MapPopup.uss (NEW — ocean bg, islands, info card, wrapper)
+- Assets/UI/MapPopupController.cs (NEW — visual map, dictionary data, island clicks)
 - Assets/UI/GameHUD.uxml (MODIFIED — thêm BtnMap)
 - Assets/UI/Styles/GameHUD.uss (MODIFIED — thêm sidebar-btn-map styles)
 - Assets/UI/GameHUDController.cs (MODIFIED — thêm mapPopup reference + callback)
