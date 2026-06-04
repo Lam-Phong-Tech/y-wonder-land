@@ -1,0 +1,501 @@
+/* ============================================================
+   MapPopup.uss — World Map / Travel Popup
+   Design System: The Tangible Playground
+   Chuẩn: khớp SettingsPopup / ShopPopup (Lesson #29)
+   Header: Ocean Blue #00B4D8
+   ============================================================ */
+
+/* === OVERLAY === */
+.map-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    align-items: center;
+    justify-content: center;
+    display: none;
+}
+
+/* === PANEL SHADOW === */
+.map-panel-shadow {
+    background-color: transparent;
+    border-radius: 22px;
+    padding-right: 6px;
+    padding-bottom: 6px;
+    position: relative;
+}
+
+/* === PANEL === */
+.map-panel {
+    width: 820px;
+    height: 440px;
+    background-color: #F5F0E8;
+    border-radius: 22px;
+    border-width: 3px;
+    border-color: #3D3535;
+    overflow: hidden;
+}
+
+/* === HEADER === */
+.map-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background-color: #00B4D8;
+    padding: 14px 16px;
+    border-bottom-width: 3px;
+    border-bottom-color: #0096B7;
+    min-height: 48px;
+}
+
+.map-header-title {
+    font-size: 20px;
+    -unity-font-style: bold;
+    color: #FFFFFF;
+    -unity-text-align: middle-center;
+    letter-spacing: 2px;
+    position: absolute;
+    left: 0;
+    right: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 0 120px;
+}
+
+/* === LEVEL PILL (in header — Lesson #30) === */
+.map-level-pill {
+    position: absolute;
+    left: 12px;
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 20px;
+    padding: 4px 12px 4px 6px;
+    border-width: 2px;
+    border-color: rgba(255, 255, 255, 0.25);
+    z-index: 2;
+}
+
+.map-level-icon {
+    font-size: 14px;
+    margin: 0;
+    padding: 0;
+    margin-right: 4px;
+    -unity-text-align: middle-center;
+}
+
+.map-level-value {
+    font-size: 12px;
+    -unity-font-style: bold;
+    color: #FFFFFF;
+    margin: 0;
+    padding: 0;
+    -unity-text-align: middle-center;
+}
+
+/* === CLOSE BUTTON === */
+.map-close-shadow {
+    position: absolute;
+    right: -8px;
+    top: -8px;
+    background-color: transparent;
+    border-radius: 10px;
+    padding-right: 2px;
+    padding-bottom: 2px;
+    z-index: 10;
+}
+
+.map-close-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background-color: #FF4B4B;
+    border-width: 3px;
+    border-color: #3D3535;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: #FFFFFF;
+    -unity-text-align: middle-center;
+    transition-property: translate, background-color;
+    transition-duration: 0.08s;
+}
+
+.map-close-btn:hover {
+    background-color: #FF6B6B;
+}
+
+.map-close-btn:active {
+    translate: 2px 2px;
+    background-color: #CC3333;
+}
+
+/* === BODY === */
+.map-body {
+    flex-direction: row;
+    flex-grow: 1;
+}
+
+/* === LEFT: LOCATION LIST === */
+.map-list-scroll {
+    width: 340px;
+    flex-shrink: 0;
+    padding: 12px;
+    border-right-width: 3px;
+    border-right-color: #DDD5C8;
+}
+
+.map-list {
+    flex-direction: column;
+}
+
+/* === LOCATION CARD === */
+.map-card-shadow {
+    background-color: rgba(30, 30, 60, 0.25);
+    border-radius: 14px;
+    padding-right: 3px;
+    padding-bottom: 3px;
+    margin-bottom: 8px;
+}
+
+.map-card {
+    flex-direction: row;
+    align-items: center;
+    background-color: #FFFFFF;
+    border-radius: 14px;
+    border-width: 2px;
+    border-color: #DDD5C8;
+    padding: 10px 12px;
+    transition-property: translate, border-color, background-color;
+    transition-duration: 0.08s;
+}
+
+.map-card:hover {
+    border-color: #00B4D8;
+    background-color: #F0FAFE;
+    translate: -1px -1px;
+}
+
+.map-card:active {
+    translate: 2px 2px;
+    border-color: #0096B7;
+}
+
+.map-card--selected {
+    border-color: #00B4D8;
+    border-width: 3px;
+    background-color: #E0F7FA;
+}
+
+.map-card--locked {
+    background-color: #F0EBE2;
+}
+
+.map-card--locked:hover {
+    background-color: #E8E3DA;
+    border-color: #B0A898;
+}
+
+/* Card icon */
+.map-card-icon-wrap {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background-color: #E0F7FA;
+    border-width: 2px;
+    border-color: #B2EBF2;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+.map-card-icon-wrap--locked {
+    background-color: #EDE5D8;
+    border-color: #DDD5C8;
+}
+
+.map-card-icon {
+    font-size: 22px;
+    margin: 0;
+    padding: 0;
+    -unity-text-align: middle-center;
+}
+
+/* Card info */
+.map-card-info {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.map-card-name {
+    font-size: 13px;
+    -unity-font-style: bold;
+    color: #3D3535;
+    margin: 0;
+    padding: 0;
+    margin-bottom: 2px;
+}
+
+.map-card-name--locked {
+    color: #8A7E6E;
+}
+
+.map-card-subtitle {
+    font-size: 10px;
+    color: #8A7E6E;
+    margin: 0;
+    padding: 0;
+    white-space: normal;
+}
+
+/* Card lock badge */
+.map-card-lock {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background-color: #E0E0E0;
+    border-width: 2px;
+    border-color: #C4BAA8;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-left: 8px;
+}
+
+.map-card-lock-icon {
+    font-size: 14px;
+    margin: 0;
+    padding: 0;
+    -unity-text-align: middle-center;
+}
+
+/* === RIGHT: DETAIL PANEL === */
+.map-detail-panel {
+    flex-grow: 1;
+    background-color: #FFFFFF;
+    border-radius: 16px;
+    border-width: 3px;
+    border-color: #3D3535;
+    margin: 12px;
+    padding: 16px;
+    align-items: center;
+    overflow: hidden;
+}
+
+.map-detail-empty {
+    font-size: 12px;
+    color: #B0A898;
+    -unity-font-style: italic;
+    -unity-text-align: middle-center;
+    margin-top: auto;
+    margin-bottom: auto;
+    white-space: normal;
+}
+
+.map-detail-content {
+    width: 100%;
+    height: 100%;
+    align-items: center;
+}
+
+/* Detail icon */
+.map-detail-icon-wrap {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background-color: #E0F7FA;
+    border-width: 2px;
+    border-color: #B2EBF2;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+}
+
+.map-detail-icon {
+    font-size: 32px;
+    -unity-text-align: middle-center;
+}
+
+.map-detail-name {
+    font-size: 16px;
+    -unity-font-style: bold;
+    color: #3D3535;
+    margin-bottom: 4px;
+    -unity-text-align: middle-center;
+}
+
+/* Status badge */
+.map-status-badge {
+    border-radius: 12px;
+    padding: 4px 16px;
+    margin-bottom: 8px;
+}
+
+.map-status-badge--unlocked {
+    background-color: #E8F5E9;
+    border-width: 2px;
+    border-color: #4CAF50;
+}
+
+.map-status-badge--locked {
+    background-color: #FFF3E0;
+    border-width: 2px;
+    border-color: #E8833A;
+}
+
+.map-status-text {
+    font-size: 10px;
+    -unity-font-style: bold;
+    letter-spacing: 1px;
+    margin: 0;
+    padding: 0;
+    -unity-text-align: middle-center;
+}
+
+.map-status-badge--unlocked .map-status-text {
+    color: #388E3C;
+}
+
+.map-status-badge--locked .map-status-text {
+    color: #E8833A;
+}
+
+/* Detail divider */
+.map-detail-divider {
+    height: 2px;
+    background-color: #DDD5C8;
+    width: 100%;
+    margin-bottom: 8px;
+}
+
+/* Description */
+.map-detail-desc {
+    font-size: 11px;
+    color: #8A7E6E;
+    white-space: normal;
+    -unity-text-align: upper-center;
+    margin-bottom: 8px;
+    width: 100%;
+}
+
+/* Requirements */
+.map-requirements {
+    width: 100%;
+    background-color: #FFF3E0;
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    border-width: 2px;
+    border-color: #FFE0B2;
+}
+
+.map-req-title {
+    font-size: 9px;
+    -unity-font-style: bold;
+    color: #E8833A;
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+}
+
+.map-req-item {
+    font-size: 11px;
+    color: #3D3535;
+    margin: 0;
+    padding: 0;
+    margin-bottom: 2px;
+}
+
+/* Features */
+.map-features {
+    width: 100%;
+    margin-bottom: 8px;
+    flex-grow: 1;
+}
+
+.map-features-title {
+    font-size: 9px;
+    -unity-font-style: bold;
+    color: #8A7E6E;
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+}
+
+.map-features-text {
+    font-size: 11px;
+    color: #3D3535;
+    white-space: normal;
+}
+
+/* Travel button */
+.map-btn-travel {
+    width: 100%;
+    padding: 10px 16px;
+    border-radius: 10px;
+    border-width: 3px;
+    border-color: #0096B7;
+    background-color: #00B4D8;
+    color: #FFFFFF;
+    font-size: 14px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    letter-spacing: 1px;
+    margin-top: auto;
+    transition-property: translate, background-color;
+    transition-duration: 0.08s;
+}
+
+.map-btn-travel:hover {
+    background-color: #26C6DA;
+}
+
+.map-btn-travel:active {
+    translate: 1px 1px;
+    background-color: #0096B7;
+}
+
+.map-btn-travel:disabled {
+    background-color: #C4BAA8;
+    border-color: #B0A898;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* === CHEAT BAR (bottom, for testing) === */
+.map-cheat-bar {
+    flex-direction: row;
+    justify-content: center;
+    padding: 6px 16px;
+    background-color: #EDE5D8;
+    border-top-width: 2px;
+    border-top-color: #DDD5C8;
+}
+
+.map-cheat-btn {
+    padding: 4px 12px;
+    margin: 0 4px;
+    border-radius: 8px;
+    border-width: 2px;
+    border-color: #C4BAA8;
+    background-color: #FFFFFF;
+    font-size: 10px;
+    -unity-font-style: bold;
+    color: #8A7E6E;
+    -unity-text-align: middle-center;
+    transition-property: translate, background-color;
+    transition-duration: 0.08s;
+}
+
+.map-cheat-btn:hover {
+    background-color: #FFF5E8;
+    border-color: #E8833A;
+}
+
+.map-cheat-btn:active {
+    translate: 1px 1px;
+    background-color: #FFE0B2;
+}

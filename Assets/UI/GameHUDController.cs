@@ -18,6 +18,7 @@ public class GameHUDController : MonoBehaviour
     [SerializeField] private AttendancePopupController attendancePopup;
     [SerializeField] private QuestPopupController questPopup;
     [SerializeField] private ShopPopupController shopPopup;
+    [SerializeField] private MapPopupController mapPopup;
 
     private UIDocument uiDocument;
 
@@ -40,6 +41,7 @@ public class GameHUDController : MonoBehaviour
     private Button btnMail;
     private Button btnFriends;
     private Button btnShop;
+    private Button btnMap;
 
     // Action buttons
     private Button btnInteract;
@@ -71,6 +73,7 @@ public class GameHUDController : MonoBehaviour
         if (profilePopup == null) profilePopup = FindFirstObjectByType<ProfilePopupController>();
         if (attendancePopup == null) attendancePopup = FindFirstObjectByType<AttendancePopupController>();
         if (questPopup == null) questPopup = FindFirstObjectByType<QuestPopupController>();
+        if (mapPopup == null) mapPopup = FindFirstObjectByType<MapPopupController>();
 
         var root = uiDocument.rootVisualElement;
         QueryElements(root);
@@ -104,6 +107,7 @@ public class GameHUDController : MonoBehaviour
         btnMail = root.Q<Button>("BtnMail");
         btnFriends = root.Q<Button>("BtnFriends");
         btnShop = root.Q<Button>("BtnShop");
+        btnMap = root.Q<Button>("BtnMap");
 
         // Actions
         btnInteract = root.Q<Button>("BtnInteract");
@@ -180,6 +184,14 @@ public class GameHUDController : MonoBehaviour
                 shopPopup.Show();
             else
                 Debug.Log("[GameHUD] Shop clicked (no shop popup assigned)");
+        });
+
+        btnMap?.RegisterCallback<ClickEvent>(evt =>
+        {
+            if (mapPopup != null)
+                mapPopup.Show();
+            else
+                Debug.Log("[GameHUD] Map clicked (no map popup assigned)");
         });
 
         // Action buttons

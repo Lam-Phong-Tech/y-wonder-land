@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:Style src="project://database/Assets/UI/Styles/DesignSystem.uss" />
+    <ui:Style src="project://database/Assets/UI/Styles/MapPopup.uss" />
+
+    <!-- Overlay -->
+    <ui:VisualElement name="MapOverlay" class="map-overlay">
+
+        <!-- Panel Shadow -->
+        <ui:VisualElement class="map-panel-shadow">
+
+            <!-- Panel -->
+            <ui:VisualElement class="map-panel">
+
+                <!-- Header -->
+                <ui:VisualElement class="map-header">
+                    <!-- Player level pill (left) -->
+                    <ui:VisualElement class="map-level-pill">
+                        <ui:Label text="⭐" class="map-level-icon" />
+                        <ui:Label name="LblMapLevel" text="Lv. 1" class="map-level-value" />
+                    </ui:VisualElement>
+
+                    <!-- Title -->
+                    <ui:Label text="BẢN ĐỒ THẾ GIỚI" class="map-header-title" />
+                </ui:VisualElement>
+
+                <!-- Body: Location List + Detail -->
+                <ui:VisualElement class="map-body">
+
+                    <!-- Left: Location Cards List -->
+                    <ui:ScrollView name="MapListScroll" class="map-list-scroll">
+                        <ui:VisualElement name="MapList" class="map-list">
+                            <!-- Location cards populated by Controller -->
+                        </ui:VisualElement>
+                    </ui:ScrollView>
+
+                    <!-- Right: Detail Panel -->
+                    <ui:VisualElement name="MapDetailPanel" class="map-detail-panel">
+
+                        <!-- Empty State -->
+                        <ui:Label name="MapDetailEmpty" text="Chọn một địa điểm để xem chi tiết..." class="map-detail-empty" />
+
+                        <!-- Detail Content -->
+                        <ui:VisualElement name="MapDetailContent" class="map-detail-content">
+                            <!-- Location icon -->
+                            <ui:VisualElement class="map-detail-icon-wrap">
+                                <ui:Label name="LblMapIcon" text="🏡" class="map-detail-icon" />
+                            </ui:VisualElement>
+
+                            <!-- Location name -->
+                            <ui:Label name="LblMapName" text="Nông trại" class="map-detail-name" />
+
+                            <!-- Status badge -->
+                            <ui:VisualElement name="MapStatusBadge" class="map-status-badge map-status-badge--unlocked">
+                                <ui:Label name="LblMapStatus" text="ĐÃ MỞ KHÓA" class="map-status-text" />
+                            </ui:VisualElement>
+
+                            <!-- Divider -->
+                            <ui:VisualElement class="map-detail-divider" />
+
+                            <!-- Description -->
+                            <ui:Label name="LblMapDesc" text="Khu vực trồng trọt và chăn nuôi..." class="map-detail-desc" />
+
+                            <!-- Requirements (shown when locked) -->
+                            <ui:VisualElement name="MapRequirements" class="map-requirements">
+                                <ui:Label text="YÊU CẦU" class="map-req-title" />
+                                <ui:Label name="LblMapReqLevel" text="⭐ Cấp 40" class="map-req-item" />
+                                <ui:Label name="LblMapReqExtra" text="👑 VIP hoặc 🎫 Vé Hải Phú" class="map-req-item" />
+                            </ui:VisualElement>
+
+                            <!-- Features list -->
+                            <ui:VisualElement name="MapFeatures" class="map-features">
+                                <ui:Label text="ĐẶC ĐIỂM" class="map-features-title" />
+                                <ui:Label name="LblMapFeatures" text="🌾 Trồng trọt\n🐔 Chăn nuôi\n🪵 Chặt cây" class="map-features-text" />
+                            </ui:VisualElement>
+
+                            <!-- Travel button -->
+                            <ui:Button name="BtnTravel" text="DI CHUYỂN" class="map-btn-travel" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+
+                <!-- Cheat Bar (bottom) -->
+                <ui:VisualElement class="map-cheat-bar">
+                    <ui:Button name="BtnCheatLevel" text="🔧 Test: Tăng Level" class="map-cheat-btn" />
+                    <ui:Button name="BtnCheatVip" text="👑 Test: VIP / Vé" class="map-cheat-btn" />
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+
+            <!-- Close Button -->
+            <ui:VisualElement class="map-close-shadow">
+                <ui:Button name="BtnCloseMap" text="✕" class="map-close-btn" />
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+
+</ui:UXML>

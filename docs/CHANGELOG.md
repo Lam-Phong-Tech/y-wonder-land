@@ -5,6 +5,28 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-06-04] — Module Map UI (Bản đồ thế giới 5 cảnh)
+
+### Added
+- **Map Popup** — Bản đồ thế giới hiển thị 5 địa điểm với hệ thống khóa/mở khóa:
+  - Layout landscape: Location list (trái) + Detail panel (phải)
+  - **5 Map**: 🏡 Nông trại (mặc định), 🏙️ Thành phố (tutorial), ⛏️ Khai thác mỏ (Lv.10), 🏝️ Đảo Hải Phú (Lv.40 + VIP/Vé), 🌲 Đảo Mộc Nhi (Lv.60 + VIP/Vé)
+  - **Lock Logic**: Level check + VIP/Ticket requirement — hiển thị ✅/❌ cho từng điều kiện
+  - **Detail Panel**: Icon, tên, status badge (ĐÃ MỞ KHÓA/ĐANG KHÓA), mô tả, yêu cầu, đặc điểm, nút DI CHUYỂN
+  - **Cheat Bar**: 2 nút test nhanh — cycle level (1→5→15→45→65), cycle VIP/Vé trạng thái
+  - **Header**: Ocean Blue #00B4D8 với level pill góc trái (Lesson #30 applied)
+  - **Close button**: Chuẩn design system (Lesson #29 applied)
+- **HUD Map Button** — Nút tạm "🗺️ Map" trên sidebar HUD, màu #00B4D8 matching map header
+
+### Files changed
+- Assets/UI/MapPopup.uxml (NEW)
+- Assets/UI/Styles/MapPopup.uss (NEW)
+- Assets/UI/MapPopupController.cs (NEW)
+- Assets/UI/GameHUD.uxml (MODIFIED — thêm BtnMap)
+- Assets/UI/Styles/GameHUD.uss (MODIFIED — thêm sidebar-btn-map styles)
+- Assets/UI/GameHUDController.cs (MODIFIED — thêm mapPopup reference + callback)
+
+---
 ## [2026-06-04] — Shop UI Polish & Sell Mode Testing
 
 ### Fixed
