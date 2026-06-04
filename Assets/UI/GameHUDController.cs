@@ -20,6 +20,7 @@ public class GameHUDController : MonoBehaviour
     [SerializeField] private ShopPopupController shopPopup;
     [SerializeField] private MapPopupController mapPopup;
     [SerializeField] private PiggyBankPopupController piggyBankPopup;
+    [SerializeField] private LevelUpOverlayController levelUpOverlay;
 
     private UIDocument uiDocument;
 
@@ -77,6 +78,7 @@ public class GameHUDController : MonoBehaviour
         if (questPopup == null) questPopup = FindFirstObjectByType<QuestPopupController>();
         if (mapPopup == null) mapPopup = FindFirstObjectByType<MapPopupController>();
         if (piggyBankPopup == null) piggyBankPopup = FindFirstObjectByType<PiggyBankPopupController>();
+        if (levelUpOverlay == null) levelUpOverlay = FindFirstObjectByType<LevelUpOverlayController>();
 
         var root = uiDocument.rootVisualElement;
         QueryElements(root);
@@ -305,6 +307,15 @@ public class GameHUDController : MonoBehaviour
         if (uiDocument != null && uiDocument.rootVisualElement != null)
         {
             uiDocument.rootVisualElement.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+        }
+    }
+
+    // ── Test: Press L key to trigger Level Up ──
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.L) && levelUpOverlay != null)
+        {
+            levelUpOverlay.TestLevelUp();
         }
     }
 }

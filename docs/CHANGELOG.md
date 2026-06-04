@@ -5,6 +5,27 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-06-04] — Module Level Up VFX/UI
+
+### Added
+- **Level Up Overlay** — Fullscreen golden VFX khi người chơi thăng cấp:
+  - Background: Overlay tối + vùng glow vàng tròn ở giữa
+  - **Badge** ⭐ scale animation (0.5→1)
+  - **"LEVEL UP!"** text scale animation (0.6→1)
+  - **Level mới** hiển thị trong pill viền vàng
+  - **Mở khóa** section (xanh lá, chỉ hiện khi level có unlock): Lv.5 Câu cá, Lv.10 Mỏ đá, Lv.40 Đảo Hải Phú...
+  - **Nút "TIẾP TỤC"** màu vàng gold để đóng
+  - Star decorations ✦✧ trang trí xung quanh
+  - Fade in/out via CSS opacity transition
+- **Keyboard Test** — Bấm phím **L** trong Play Mode để test Level Up liên tục
+
+### Files changed
+- Assets/UI/LevelUpOverlay.uxml (NEW)
+- Assets/UI/Styles/LevelUpOverlay.uss (NEW)
+- Assets/UI/LevelUpOverlayController.cs (NEW)
+- Assets/UI/GameHUDController.cs (MODIFIED — thêm levelUpOverlay reference + L key test)
+
+---
 ## [2026-06-04] — Module Heo Đất UI (Piggy Bank Savings)
 
 ### Added
