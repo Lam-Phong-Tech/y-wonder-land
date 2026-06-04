@@ -22,6 +22,7 @@ public class GameHUDController : MonoBehaviour
     [SerializeField] private PiggyBankPopupController piggyBankPopup;
     [SerializeField] private LevelUpOverlayController levelUpOverlay;
     [SerializeField] private EventPopupController eventPopup;
+    [SerializeField] private FishingOverlayController fishingOverlay;
 
     private UIDocument uiDocument;
 
@@ -47,6 +48,7 @@ public class GameHUDController : MonoBehaviour
     private Button btnMap;
     private Button btnEvent;
     private Button btnPiggy;
+    private Button btnFishing;
 
     // Action buttons
     private Button btnInteract;
@@ -80,6 +82,7 @@ public class GameHUDController : MonoBehaviour
         if (piggyBankPopup == null) piggyBankPopup = FindFirstObjectByType<PiggyBankPopupController>();
         if (levelUpOverlay == null) levelUpOverlay = FindFirstObjectByType<LevelUpOverlayController>();
         if (eventPopup == null) eventPopup = FindFirstObjectByType<EventPopupController>();
+        if (fishingOverlay == null) fishingOverlay = FindFirstObjectByType<FishingOverlayController>();
 
         var root = uiDocument.rootVisualElement;
         QueryElements(root);
@@ -118,6 +121,7 @@ public class GameHUDController : MonoBehaviour
         btnShop = root.Q<Button>("BtnShop");
         btnMap = root.Q<Button>("BtnMap");
         btnPiggy = root.Q<Button>("BtnPiggy");
+        btnFishing = root.Q<Button>("BtnFishing");
 
         // Actions
         btnInteract = root.Q<Button>("BtnInteract");
@@ -208,6 +212,14 @@ public class GameHUDController : MonoBehaviour
                 piggyBankPopup.Show();
             else
                 Debug.Log("[GameHUD] Piggy Bank clicked (no piggy popup assigned)");
+        });
+
+        btnFishing?.RegisterCallback<ClickEvent>(evt =>
+        {
+            if (fishingOverlay != null)
+                fishingOverlay.Show();
+            else
+                Debug.Log("[GameHUD] Fishing clicked (no popup assigned)");
         });
 
         btnEvent?.RegisterCallback<ClickEvent>(evt =>
@@ -328,6 +340,11 @@ public class GameHUDController : MonoBehaviour
                 eventPopup.Hide();
             else
                 eventPopup.Show();
+        }
+
+        if (keyboard.fKey.wasPressedThisFrame && fishingOverlay != null)
+        {
+            fishingOverlay.Show();
         }
     }
 }

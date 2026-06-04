@@ -379,4 +379,11 @@
 - **Giải pháp**: Xóa bỏ hoàn toàn UI cũ lỗi thời khỏi template UXML chính (`GameHUD.uxml`), sau đó dọn dẹp sạch sẽ các biến tham chiếu, hàm query và callback đăng ký trong controller tương ứng (`GameHUDController.cs`).
 - **Quy tắc**: Khi nâng cấp hoặc thay thế một cụm UI, phải thực hiện dọn dẹp tận gốc ở cả file UXML mẫu và file logic điều khiển, không lạm dụng việc ẩn giấu ở runtime để giữ không gian Editor luôn sạch sẽ.
 
+### 44. Kim dao động QTE mượt mà bằng C# PingPong thay vì CSS Keyframes
+- **Tình huống**: Cần thiết kế kim đo lực QTE dao động liên tục qua lại rất mượt mà trong UI Toolkit và cần đồng bộ tọa độ chính xác để tính toán trúng/hụt.
+- **Vấn đề**: CSS Keyframes khó đồng bộ dữ liệu vị trí kim chính xác sang C# để tính toán trúng/hụt tại thời điểm click, đồng thời hỗ trợ keyframes của UI Toolkit ở các phiên bản Unity cũ thường kém ổn định.
+- **Giải pháp**: Thực hiện dao động vị trí bằng C# trong `Update()` sử dụng phép toán `Mathf.PingPong(Time.time * speed, 100f)` và gán trực tiếp vào thuộc tính `style.left = Length.Percent(position)`. Vừa mượt mà, vừa tuyệt đối chính xác để check điều kiện trúng/hụt ở đầu C#.
+- **Quy tắc**: Mọi thành phần UI cần tương tác dữ liệu chính xác theo tọa độ/vị trí thực tế (như kim QTE, thanh trượt game nhịp điệu) nên được điều khiển vị trí trực tiếp từ C# thay vì dùng CSS Animation tĩnh.
+
+
 

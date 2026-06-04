@@ -5,6 +5,36 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-06-04] — Module Fishing UI (Mini-game Câu cá)
+
+### Added
+- **Fishing Overlay** — Giao diện mini-game câu cá tương tác đầy đủ với các trạng thái:
+  - **Chuẩn bị (Ready Panel)**: Chọn mồi câu (Không mồi / Mồi thường / Mồi xịn) và nút "QUĂNG CẦN" (🎣).
+  - **Chờ đợi (Waiting Panel)**: Biểu tượng phao câu nhấp nhô theo nhịp sóng (sine wave animation trong Update) và nút "Thu cần" để hủy câu sớm.
+  - **Giật cần (QTE Panel)**: Xuất hiện khi cá cắn câu sau 3-6 giây ngẫu nhiên.
+    - Thanh đo lực chứa **Vùng Xanh (Safe Zone)** thay đổi độ rộng theo loại mồi.
+    - Kim đỏ dao động liên tục qua lại bên trong thanh đo.
+    - Thanh thời gian cạn dần biểu thị giới hạn **1.5 giây QTE**.
+    - Nút "GIẬT CẦN!" và phím nóng `Space` để câu.
+  - **Kết quả (Result Panel)**: Bảng thông báo thành công/hụt dạng modal bo góc viền đen.
+    - Hiển thị tên cá, biểu tượng emoji, độ hiếm (Thường/Hiếm/Sử Thi/Sự Kiện), và mô tả phần thưởng.
+    - Liên kết thưởng POS trực tiếp khi câu thành công. Có 5% cơ hội câu được Bao Lì Xì Event 🎁.
+- **Tính năng mở rộng**:
+  - **Bait Mechanics**: Sử dụng mồi thường tăng tỉ lệ cá hiếm, mồi xịn tăng tỉ lệ cá sử thi và mở rộng vùng xanh QTE lên 40%, giảm tốc độ kim.
+  - **Bait Shop Fallback**: Tích hợp ConfirmDialog mời mua thêm 5 mồi thường giá 50 POS khi hết lượt câu miễn phí.
+  - **Cheat Panel**: Thanh hỗ trợ nhà phát triển ở góc dưới bên trái gồm các nút hồi 10 lượt, mua 10 mồi và công tắc "Auto-Win QTE" giúp kiểm thử chính xác nhanh chóng.
+  - **HUD Integration**: Nút 🎣 ở sidebar và phím nóng `F` trên bàn phím để mở/đóng chế độ câu cá.
+
+### Files changed
+- Assets/UI/FishingOverlay.uxml (NEW)
+- Assets/UI/Styles/FishingOverlay.uss (NEW)
+- Assets/UI/FishingOverlayController.cs (NEW)
+- Assets/Editor/SetupFishingUI.cs (NEW)
+- Assets/UI/GameHUD.uxml (MODIFIED — thêm nút 🎣)
+- Assets/UI/Styles/GameHUD.uss (MODIFIED — thêm css nút 🎣)
+- Assets/UI/GameHUDController.cs (MODIFIED — thêm tích hợp nút & phím F)
+
+---
 ## [2026-06-04] — Module Chat UI (Khung chat thu/mở)
 
 ### Added

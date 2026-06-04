@@ -484,6 +484,27 @@
     padding: 0;
 }
 
+.sidebar-btn-fishing {
+    background-color: #0284C7;
+    border-color: #3D3535;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    transition-property: translate, background-color;
+    transition-duration: 0.08s;
+}
+
+.sidebar-btn-fishing:hover {
+    background-color: #0EA5E9;
+}
+
+.sidebar-btn-fishing:active {
+    translate: 3px 3px;
+    background-color: #0369A1;
+}
+
 .sidebar-btn-icon {
     font-size: 20px;
     color: #3D3535;
