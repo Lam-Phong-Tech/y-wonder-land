@@ -305,3 +305,46 @@
   align-items: center;
   ```
   Và mọi text element bên trong PHẢI có `flex-shrink: 0` nếu không muốn bị co lại.
+
+---
+
+## 🟡 BÀI HỌC VỀ UXML, FLEX-SHRINK, CARD ĐỒNG ĐỀU & INPUT SYSTEM (Cập nhật 04/06/2026)
+
+### 37. UXML comment KHÔNG được chứa ký tự Unicode đặc biệt
+- **Tình huống**: Comment `<!-- ═══ TAB 1 ═══ -->` trong EventPopup.uxml khiến UI Builder crash với lỗi "invalid UXML syntax".
+- **Nguyên nhân**: Ký tự `═` (Box Drawing Double Horizontal, U+2550) không hợp lệ trong XML parser của Unity UI Builder.
+- **Giải pháp**: Chỉ dùng ký tự ASCII thuần trong comment UXML: `<!-- TAB 1: EXCHANGE -->`.
+- **Quy tắc**: Mọi comment trong file `.uxml` CHỈ dùng ASCII (a-z, A-Z, 0-9, dấu câu thường). Tuyệt đối KHÔNG dùng emoji, box drawing, hoặc ký tự Unicode đặc biệt trong comment.
+
+### 38. Header và tab bar PHẢI có flex-shrink: 0
+- **Tình huống**: Event popup header bị co rúm/biến mất khi tab Đổi quà hiển thị nhiều item. Tab Gói ưu đãi thì bình thường.
+- **Nguyên nhân**: Header và tab bar mặc định `flex-shrink: 1`, nên khi body content có `flex-grow: 1` và vượt quá chiều cao panel → flex layout ép header co lại.
+- **Giải pháp**: Thêm `flex-shrink: 0` cho cả `.event-header` và `.event-tab-bar`.
+- **Quy tắc**: Mọi phần tử cố định (header, tab bar, footer) trong popup/panel PHẢI có `flex-shrink: 0`. Chỉ body/content area mới có `flex-grow: 1`.
+  ```
+  .popup-header { flex-shrink: 0; }
+  .popup-tab-bar { flex-shrink: 0; }
+  .popup-body { flex-grow: 1; overflow: hidden; }
+  ```
+
+### 39. Card đồng đều: dùng height cố định + spacer flex-grow
+- **Tình huống**: 3 bundle cards trong Event popup có chiều cao khác nhau vì description dài ngắn khác nhau, và card "ĐÃ HẾT" ngắn hơn card có nút "MUA NGAY".
+- **Đã thử**: `min-height: 260px` → không hiệu quả vì card có content dài vẫn vượt quá min-height.
+- **Giải pháp**:
+  1. Dùng `height: 280px` cố định (không phải min-height).
+  2. Thêm `overflow: hidden` để không tràn.
+  3. Trong Controller, thêm spacer element `flexGrow = 1` trước price section → đẩy price + button xuống đáy card.
+- **Quy tắc**: Khi cần grid cards đồng đều chiều cao:
+  ```
+  CSS: .card { height: Xpx; overflow: hidden; }
+  C#:  var spacer = new VisualElement(); spacer.style.flexGrow = 1; card.Add(spacer);
+  ```
+
+### 40. Project dùng New Input System → KHÔNG dùng UnityEngine.Input
+- **Tình huống**: `Input.GetKeyDown(KeyCode.L)` gây `InvalidOperationException` vì project đã chuyển sang Input System package trong Player Settings.
+- **Giải pháp**: Dùng `UnityEngine.InputSystem.Keyboard.current`:
+  ```csharp
+  var keyboard = UnityEngine.InputSystem.Keyboard.current;
+  if (keyboard != null && keyboard.lKey.wasPressedThisFrame) { ... }
+  ```
+- **Quy tắc**: LUÔN kiểm tra `Keyboard.current != null` trước khi đọc phím. KHÔNG BAO GIỜ dùng `Input.GetKeyDown`, `Input.GetAxis`, hoặc bất kỳ API nào từ `UnityEngine.Input` class.

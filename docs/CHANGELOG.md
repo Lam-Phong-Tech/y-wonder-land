@@ -21,6 +21,15 @@
 - Assets/UI/EventPopup.uxml (NEW)
 - Assets/UI/Styles/EventPopup.uss (NEW)
 - Assets/UI/EventPopupController.cs (NEW)
+- Assets/UI/GameHUD.uxml (MODIFIED — thêm BtnEvent 🎁)
+- Assets/UI/Styles/GameHUD.uss (MODIFIED — thêm sidebar-btn-event styles)
+- Assets/UI/GameHUDController.cs (MODIFIED — thêm eventPopup reference + BtnEvent callback + E key test)
+
+### Fixed
+- **UXML comment Unicode**: Comment `<!-- ═══ ... ═══ -->` chứa ký tự Unicode `═` khiến UI Builder không mở được file. Đã đổi thành ASCII thuần.
+- **Header bị co rúm khi đổi tab**: Header và tab bar thiếu `flex-shrink: 0`, bị body content ép nhỏ khi tab Đổi quà có nhiều item.
+- **Bundle cards cao thấp khác nhau**: Dùng `min-height` chỉ đặt mức tối thiểu, card có description dài vẫn cao hơn. Fix: dùng `height: 280px` cố định + spacer `flex-grow: 1` đẩy nút xuống đáy.
+- **Legacy Input API**: `Input.GetKeyDown` gây lỗi vì project dùng New Input System. Fix: dùng `Keyboard.current.eKey.wasPressedThisFrame`.
 
 ---
 ## [2026-06-04] — Module Level Up VFX/UI
