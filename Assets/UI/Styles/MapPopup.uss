@@ -125,21 +125,27 @@
     color: #FFFFFF;
 }
 
-/* Close button */
+/* Close button (top-right corner, overlapping border — standard pattern) */
 .map-close-shadow {
     position: absolute;
-    right: 10px;
+    right: -8px;
+    top: -8px;
+    background-color: transparent;
+    border-radius: 10px;
+    padding-right: 2px;
+    padding-bottom: 2px;
+    z-index: 50;
 }
 
 .map-close-btn {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border-radius: 10px;
     background-color: #FF4B4B;
     border-width: 3px;
     border-color: #3D3535;
     padding: 0;
-    font-size: 16px;
+    font-size: 18px;
     -unity-font-style: bold;
     color: #FFFFFF;
     -unity-text-align: middle-center;

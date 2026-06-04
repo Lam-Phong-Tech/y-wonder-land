@@ -19,11 +19,6 @@
 
                 <!-- Title -->
                 <ui:Label text="BẢN ĐỒ THẾ GIỚI" class="map-top-title" />
-
-                <!-- Close button -->
-                <ui:VisualElement class="map-close-shadow">
-                    <ui:Button name="BtnCloseMap" text="✕" class="map-close-btn" />
-                </ui:VisualElement>
             </ui:VisualElement>
 
             <!-- Ocean Background + Islands -->
@@ -128,6 +123,11 @@
             <ui:VisualElement class="map-cheat-bar">
                 <ui:Button name="BtnCheatLevel" text="🔧 Tăng Level" class="map-cheat-btn" />
                 <ui:Button name="BtnCheatVip" text="👑 VIP / Vé" class="map-cheat-btn" />
+            </ui:VisualElement>
+
+            <!-- Close Button (top-right corner, AFTER all content so it renders ON TOP) -->
+            <ui:VisualElement class="map-close-shadow">
+                <ui:Button name="BtnCloseMap" text="✕" class="map-close-btn" />
             </ui:VisualElement>
 
         </ui:VisualElement>
