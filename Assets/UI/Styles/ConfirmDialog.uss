@@ -1,8 +1,7 @@
 /* ============================================================
    ConfirmDialog.uss — Confirm Dialog Reusable Component
    Design System: The Tangible Playground
-   Spacing: bội 4/8px | Radius: Panel 24px, Button 12px
-   Shadow: retro offset 6px, 0px blur
+   Chuẩn: khớp SettingsPopup / FriendsPopup / InventoryPopup
    ============================================================ */
 
 /* === OVERLAY === */
@@ -17,54 +16,88 @@
     justify-content: center;
 }
 
-/* === SHADOW WRAPPER (disabled — no shadow) === */
+/* === SHADOW WRAPPER (transparent — giữ cấu trúc, không tô màu) === */
 .confirm-shadow {
     background-color: transparent;
-    border-radius: 24px;
-    padding-right: 0;
-    padding-bottom: 0;
+    border-radius: 22px;
+    padding-right: 6px;
+    padding-bottom: 6px;
+    position: relative;
 }
 
 /* === PANEL === */
 .confirm-panel {
     background-color: #F5F0E8;
-    border-radius: 24px;
-    border-width: 2px;
+    border-radius: 22px;
+    border-width: 3px;
     border-color: #3D3535;
     width: 400px;
     padding: 32px;
     align-items: center;
 }
 
-/* === CLOSE BUTTON (X) === */
+/* === CLOSE BUTTON (X) — khớp settings/friends/inventory === */
 .confirm-btn-close {
     position: absolute;
-    top: -8px;
     right: -8px;
+    top: -8px;
+    background-color: transparent;
+    border-radius: 10px;
+    padding-right: 2px;
+    padding-bottom: 2px;
+    z-index: 10;
+    /* Reset button defaults */
+    border-width: 0;
+}
+
+.confirm-btn-close > .confirm-btn-close-inner {
     width: 36px;
     height: 36px;
+    border-radius: 10px;
     background-color: #FF4B4B;
-    border-radius: 12px;
-    border-width: 0;
+    border-width: 3px;
+    border-color: #3D3535;
     align-items: center;
     justify-content: center;
-    color: #FFFFFF;
-    font-size: 16px;
+    padding: 0;
+    font-size: 18px;
     -unity-font-style: bold;
+    color: #FFFFFF;
     -unity-text-align: middle-center;
-    transition-property: translate, scale, background-color;
-    transition-duration: 0.1s;
+    transition-property: translate, background-color;
+    transition-duration: 0.08s;
+}
+
+/* Vì nút X là Button trực tiếp, style trực tiếp trên nó */
+.confirm-btn-close {
+    position: absolute;
+    right: -8px;
+    top: -8px;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background-color: #FF4B4B;
+    border-width: 3px;
+    border-color: #3D3535;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: #FFFFFF;
+    -unity-text-align: middle-center;
+    z-index: 10;
+    transition-property: translate, background-color;
+    transition-duration: 0.08s;
 }
 
 .confirm-btn-close:hover {
     background-color: #FF6B6B;
-    scale: 1.05;
 }
 
 .confirm-btn-close:active {
     translate: 2px 2px;
-    scale: 0.95;
-    background-color: #E03A3A;
+    background-color: #CC3333;
 }
 
 /* === ICON CONTAINER === */
@@ -72,7 +105,7 @@
     width: 64px;
     height: 64px;
     border-radius: 32px;
-    border-width: 2px;
+    border-width: 3px;
     border-color: #3D3535;
     align-items: center;
     justify-content: center;
@@ -142,7 +175,7 @@
     width: 100%;
 }
 
-/* === BUTTON SHADOW (disabled — flat buttons) === */
+/* === BUTTON WRAPPER (không shadow — nút phẳng, chỉ giữ layout) === */
 .confirm-btn-shadow {
     background-color: transparent;
     border-radius: 12px;
@@ -158,13 +191,14 @@
     color: #3D3535;
     font-size: 16px;
     -unity-font-style: bold;
-    border-width: 0;
+    border-width: 3px;
+    border-color: #3D3535;
     border-radius: 12px;
     padding: 12px 20px;
     -unity-text-align: middle-center;
     flex-grow: 1;
     transition-property: translate, background-color;
-    transition-duration: 0.1s;
+    transition-duration: 0.08s;
     transition-timing-function: ease-out;
 }
 
@@ -173,7 +207,7 @@
 }
 
 .confirm-btn-cancel:active {
-    translate: 4px 4px;
+    translate: 1px 1px;
     background-color: #C0C0C0;
 }
 
@@ -188,20 +222,21 @@
     color: #FFFFFF;
     font-size: 16px;
     -unity-font-style: bold;
-    border-width: 0;
+    border-width: 3px;
+    border-color: #3D3535;
     border-radius: 12px;
     padding: 12px 20px;
     -unity-text-align: middle-center;
     flex-grow: 1;
     transition-property: translate, background-color;
-    transition-duration: 0.1s;
+    transition-duration: 0.08s;
     transition-timing-function: ease-out;
     /* Mặc định Warning (vàng) */
     background-color: #FFC107;
 }
 
 .confirm-btn-confirm:active {
-    translate: 4px 4px;
+    translate: 1px 1px;
 }
 
 .confirm-btn-confirm:disabled {
@@ -233,7 +268,7 @@
 }
 
 .btn-confirm-danger:active {
-    background-color: #E03A3A;
+    background-color: #CC3333;
 }
 
 /* --- Confirm type: Info (xanh #2D7BFF) --- */
@@ -243,9 +278,9 @@
 }
 
 .btn-confirm-info:hover {
-    background-color: #1A6AEE;
+    background-color: #5B9AFF;
 }
 
 .btn-confirm-info:active {
-    background-color: #1558CC;
+    background-color: #1A5FCC;
 }

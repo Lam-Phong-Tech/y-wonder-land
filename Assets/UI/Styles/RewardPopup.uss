@@ -1,8 +1,7 @@
 /* ============================================================
    RewardPopup.uss — Result / Reward Popup Component
    Design System: The Tangible Playground
-   Spacing: bội 4/8px | Radius: Panel 24px, Card 16px, Button 12px
-   Shadow: retro offset 6px, 0px blur
+   Chuẩn: khớp SettingsPopup / FriendsPopup / InventoryPopup
    ============================================================ */
 
 /* === OVERLAY === */
@@ -17,60 +16,64 @@
     justify-content: center;
 }
 
-/* === SHADOW WRAPPER (disabled — no shadow) === */
+/* === SHADOW WRAPPER (transparent — giữ cấu trúc, không tô màu) === */
 .reward-shadow {
     background-color: transparent;
-    border-radius: 24px;
-    padding-right: 0;
-    padding-bottom: 0;
+    border-radius: 22px;
+    padding-right: 6px;
+    padding-bottom: 6px;
+    position: relative;
 }
 
 /* === PANEL === */
 .reward-panel {
     background-color: #F5F0E8;
-    border-radius: 24px;
-    border-width: 2px;
+    border-radius: 22px;
+    border-width: 3px;
     border-color: #3D3535;
     width: 420px;
     align-items: stretch;
 }
 
-/* === CLOSE BUTTON (X) === */
+/* === CLOSE BUTTON (X) — khớp settings/friends/inventory === */
 .reward-btn-close {
     position: absolute;
-    top: -8px;
     right: -8px;
+    top: -8px;
     width: 36px;
     height: 36px;
+    border-radius: 10px;
     background-color: #FF4B4B;
-    border-radius: 12px;
-    border-width: 0;
+    border-width: 3px;
+    border-color: #3D3535;
     align-items: center;
     justify-content: center;
-    color: #FFFFFF;
-    font-size: 16px;
+    padding: 0;
+    font-size: 18px;
     -unity-font-style: bold;
+    color: #FFFFFF;
     -unity-text-align: middle-center;
-    transition-property: translate, scale, background-color;
-    transition-duration: 0.1s;
+    z-index: 10;
+    transition-property: translate, background-color;
+    transition-duration: 0.08s;
 }
 
 .reward-btn-close:hover {
     background-color: #FF6B6B;
-    scale: 1.05;
 }
 
 .reward-btn-close:active {
     translate: 2px 2px;
-    scale: 0.95;
-    background-color: #E03A3A;
+    background-color: #CC3333;
 }
 
 /* === HEADER === */
 .reward-header {
     background-color: #FFC107;
-    border-top-left-radius: 20px;
-    border-top-right-radius: 20px;
+    border-top-left-radius: 18px;
+    border-top-right-radius: 18px;
+    border-bottom-width: 3px;
+    border-bottom-color: #E5AC06;
     padding: 16px 24px;
     align-items: center;
     justify-content: center;
@@ -114,7 +117,7 @@
     width: 72px;
     height: 72px;
     background-color: #FFFFFF;
-    border-radius: 16px;
+    border-radius: 14px;
     border-width: 2px;
     border-color: #3D3535;
     align-items: center;
@@ -162,7 +165,7 @@
     align-items: center;
 }
 
-/* === CLAIM BUTTON SHADOW (disabled — flat button) === */
+/* === CLAIM BUTTON WRAPPER (không shadow — nút phẳng) === */
 .reward-btn-shadow {
     background-color: transparent;
     border-radius: 12px;
@@ -177,13 +180,14 @@
     color: #3D3535;
     font-size: 20px;
     -unity-font-style: bold;
-    border-width: 0;
+    border-width: 3px;
+    border-color: #3D3535;
     border-radius: 12px;
     padding: 14px 24px;
     -unity-text-align: middle-center;
     width: 100%;
     transition-property: translate, background-color;
-    transition-duration: 0.1s;
+    transition-duration: 0.08s;
     transition-timing-function: ease-out;
     letter-spacing: 1px;
 }
@@ -193,7 +197,7 @@
 }
 
 .reward-btn-claim:active {
-    translate: 4px 4px;
+    translate: 1px 1px;
     background-color: #E5AC06;
 }
 

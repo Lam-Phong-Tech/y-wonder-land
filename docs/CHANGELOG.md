@@ -6,6 +6,36 @@
 
 ---
 
+## [2026-06-04] — Forgot Password Popup + UI Consistency Fix
+
+### Added
+- **Forgot Password Popup** — Popup riêng cho luồng quên mật khẩu:
+  - 1 input Email (có icon ✉, focus highlight border xanh)
+  - Nút "Gửi mã xác nhận" luôn bấm được, hiện lỗi nếu email sai
+  - Validate email real-time (regex), status thành công/lỗi
+  - Header xanh #2D7BFF, overlay click-to-dismiss, nút X đỏ
+  - Mockup flow: validate → hiện thông báo gửi mã thành công
+- Tích hợp vào **LoginScreenController**: nút "Quên mật khẩu?" gọi `ForgotPasswordPopupController.Show()`
+
+### Fixed
+- **UI Consistency** — Sửa toàn bộ ConfirmDialog.uss và RewardPopup.uss cho khớp phong cách popup cũ:
+  - Panel: `border-radius: 22px`, `border-width: 3px`, `border-color: #3D3535`
+  - Shadow wrapper: `transparent` + `padding 6px` (không tô màu)
+  - Close button: `border-radius: 10px`, `3px #3D3535`, `:active → #CC3333`
+  - Nút action: `3px border`, `translate: 1px 1px`, `transition: 0.08s`
+  - Bỏ shadow wrapper phía sau các nút bấm (nút phẳng)
+
+### Files changed
+- Assets/UI/ForgotPasswordPopup.uxml (NEW)
+- Assets/UI/Styles/ForgotPasswordPopup.uss (NEW)
+- Assets/UI/ForgotPasswordPopupController.cs (NEW)
+- Assets/UI/LoginScreenController.cs (MODIFIED — thêm SerializeField + gọi Show)
+- Assets/UI/Styles/ConfirmDialog.uss (MODIFIED — khớp popup cũ)
+- Assets/UI/Styles/RewardPopup.uss (MODIFIED — khớp popup cũ)
+- docs/MEMORY.md (MODIFIED — thêm bài học #29 UI Consistency)
+
+---
+
 ## [2026-06-04] — Module Confirm Dialog & Reward Popup
 ### Added
 - **Confirm Dialog** — Component reusable dạng modal nhỏ trung tâm cho toàn game:

@@ -8,6 +8,9 @@ using UnityEngine.UIElements;
 /// </summary>
 public class LoginScreenController : MonoBehaviour
 {
+    [Header("Popup References")]
+    [SerializeField] private ForgotPasswordPopupController forgotPasswordPopup;
+
     private UIDocument uiDocument;
 
     // Tab buttons
@@ -396,8 +399,17 @@ public class LoginScreenController : MonoBehaviour
 
     private void OnForgotPasswordClicked()
     {
-        Debug.Log("[LoginScreen] Forgot password clicked (mockup)");
-        ShowStatus(loginStatus, "Chức năng đang phát triển...", false);
+        Debug.Log("[LoginScreen] Forgot password clicked");
+
+        if (forgotPasswordPopup != null)
+        {
+            forgotPasswordPopup.Show();
+        }
+        else
+        {
+            ShowStatus(loginStatus, "Chưa gắn ForgotPasswordPopupController!", false);
+            Debug.LogWarning("[LoginScreen] forgotPasswordPopup is null! Drag the reference in Inspector.");
+        }
     }
 
     // ── Status Message Helpers ──
