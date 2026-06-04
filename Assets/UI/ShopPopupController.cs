@@ -431,7 +431,7 @@ public class ShopPopupController : MonoBehaviour
         return new ShopData
         {
             shopName = "HAI LÚA — VẬT TƯ NÔNG TRẠI",
-            hasSellTab = false,
+            hasSellTab = true,
             buyItems = new List<ShopItem>
             {
                 new ShopItem { icon = "🥕", name = "Hạt cà rốt", price = 10, description = "Hạt giống cà rốt. Thu hoạch sau 24h. Tưới mỗi 10h.", category = "seeds", canSell = false, sellPrice = 0 },
@@ -445,7 +445,17 @@ public class ShopPopupController : MonoBehaviour
                 new ShopItem { icon = "💊", name = "Thuốc trị", price = 100, description = "Thuốc điều trị cho vật nuôi đã bị bệnh.", category = "items", canSell = false, sellPrice = 0 },
                 new ShopItem { icon = "🪱", name = "Mồi câu", price = 20, description = "Mồi câu cá. Tăng 20% tỉ lệ câu được cá hiếm.", category = "items", canSell = false, sellPrice = 0 },
             },
-            sellItems = null,
+            sellItems = new List<ShopItem>
+            {
+                new ShopItem { icon = "🥕", name = "Cà rốt", price = 0, description = "Cà rốt tươi thu hoạch từ nông trại.", category = "items", canSell = true, sellPrice = 15 },
+                new ShopItem { icon = "🥬", name = "Rau cải", price = 0, description = "Rau cải xanh mơn mởn vừa hái.", category = "items", canSell = true, sellPrice = 20 },
+                new ShopItem { icon = "🍉", name = "Dưa hấu", price = 0, description = "Dưa hấu ngọt lịm, nặng 5kg.", category = "items", canSell = true, sellPrice = 50 },
+                new ShopItem { icon = "🌽", name = "Bắp ngô", price = 0, description = "Bắp ngô vàng ươm, vừa bẻ.", category = "items", canSell = true, sellPrice = 30 },
+                new ShopItem { icon = "🥚", name = "Trứng gà", price = 0, description = "Trứng gà ta, gà đẻ mỗi 12h.", category = "animals", canSell = true, sellPrice = 25 },
+                new ShopItem { icon = "🥛", name = "Sữa bò", price = 0, description = "Sữa bò tươi nguyên chất.", category = "animals", canSell = true, sellPrice = 40 },
+                new ShopItem { icon = "🪵", name = "Gỗ", price = 0, description = "Gỗ chặt từ cây trên nông trại.", category = "tools", canSell = true, sellPrice = 8 },
+                new ShopItem { icon = "🪨", name = "Đá", price = 0, description = "Đá đào từ mỏ đá trên nông trại.", category = "tools", canSell = true, sellPrice = 12 },
+            },
         };
     }
 }
