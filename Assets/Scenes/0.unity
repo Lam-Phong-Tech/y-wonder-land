@@ -2558,7 +2558,8 @@ MonoBehaviour:
   mapPopup: {fileID: 1096547432}
   piggyBankPopup: {fileID: 940746570}
   levelUpOverlay: {fileID: 1103706089}
-  eventPopup: {fileID: 0}
+  eventPopup: {fileID: 1851155762}
+  fishingOverlay: {fileID: 0}
 --- !u!4 &1296602394
 Transform:
   m_ObjectHideFlags: 0

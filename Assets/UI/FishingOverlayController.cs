@@ -139,6 +139,7 @@ public class FishingOverlayController : MonoBehaviour
 
     private void OnEnable()
     {
+        if (confirmDialog == null) confirmDialog = FindFirstObjectByType<ConfirmDialogController>();
         if (fishingDocument == null) return;
 
         root = fishingDocument.rootVisualElement;
