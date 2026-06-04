@@ -51,8 +51,8 @@ public class SetupChatUI : Editor
         VisualTreeAsset chatUxml = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UI/ChatPanel.uxml");
         if (chatUxml != null)
         {
-            uiDoc.sourceAsset = chatUxml;
-            Debug.Log("[SetupChatUI] Gán sourceAsset (ChatPanel.uxml) thành công!");
+            uiDoc.visualTreeAsset = chatUxml;
+            Debug.Log("[SetupChatUI] Gán visualTreeAsset (ChatPanel.uxml) thành công!");
         }
         else
         {
