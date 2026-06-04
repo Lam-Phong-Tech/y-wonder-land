@@ -46,29 +46,33 @@
 }
 
 .chat-mini-btn {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background-color: transparent;
-    border-width: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background-color: #5B42F3;
+    border-width: 2px;
+    border-color: #3D3535;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
-    color: rgba(255, 255, 255, 0.8);
+    font-size: 11px;
+    color: #FFFFFF;
     padding: 0;
-    margin-left: 4px;
-    transition-property: background-color, scale, color;
-    transition-duration: 0.1s;
+    margin-left: 6px;
+    transition-property: translate, background-color;
+    transition-duration: 0.08s;
 }
 
 .chat-mini-btn:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-    scale: 1.1;
-    color: #FFFFFF;
+    background-color: #7B62FF;
 }
 
 .chat-mini-btn:active {
-    scale: 0.9;
+    translate: 1px 1px;
+}
+
+#BtnQuickEmoji {
+    font-size: 14px;
+    padding-bottom: 1px;
 }
 
 /* ── 2. Expanded State ── */
