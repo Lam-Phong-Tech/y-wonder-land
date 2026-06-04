@@ -5,6 +5,27 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-06-04] — Module Shop UI (Template chung 12 shop)
+
+### Added
+- **Shop Popup** — Template UI dùng chung cho tất cả 12 cửa hàng trong Thành phố:
+  - Layout landscape 2 cột giống Inventory: Sidebar + Grid + Detail Panel
+  - **Sidebar trái**: 2 tab chế độ (🛒 Mua / 💰 Bán) + 5 filter danh mục (Tất cả / Hạt giống / Vật nuôi / Dụng cụ / Vật phẩm)
+  - **Grid giữa**: Item cards (icon + tên + giá POS) với hover/active/selected states
+  - **Detail phải**: Icon lớn + tên + giá + mô tả + bộ chọn số lượng (−/+) + tổng tiền + nút MUA/BÁN
+  - **Tab Bán**: tự ẩn nếu shop không hỗ trợ bán (cấu hình qua `ShopData.hasSellTab`)
+  - Reusable API: `Show(ShopData data)` — mỗi NPC shop truyền data riêng
+  - Mock data mặc định: "Hai Lúa — Vật tư nông trại" (10 items, giá theo kịch bản)
+  - Header xanh lá #4CAF50, border #388E3C, style khớp popup cũ (22px radius, 3px border)
+  - Nút Mua màu xanh lá, nút Bán màu cam #E8833A
+  - Footer hiển thị số dư POS + chế độ hiện tại
+
+### Files changed
+- Assets/UI/ShopPopup.uxml (NEW)
+- Assets/UI/Styles/ShopPopup.uss (NEW)
+- Assets/UI/ShopPopupController.cs (NEW)
+
+---
 
 ## [2026-06-04] — Forgot Password Popup + UI Consistency Fix
 
