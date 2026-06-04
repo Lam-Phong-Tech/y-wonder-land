@@ -1,8 +1,7 @@
 /* ============================================================
-   MapPopup.uss — World Map / Travel Popup
+   MapPopup.uss — Visual World Map
    Design System: The Tangible Playground
-   Chuẩn: khớp SettingsPopup / ShopPopup (Lesson #29)
-   Header: Ocean Blue #00B4D8
+   Style: Top-down stylized world map with ocean + islands
    ============================================================ */
 
 /* === OVERLAY === */
@@ -12,113 +11,135 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.5);
     align-items: center;
     justify-content: center;
     display: none;
 }
 
-/* === PANEL SHADOW === */
-.map-panel-shadow {
-    background-color: transparent;
-    border-radius: 22px;
-    padding-right: 6px;
-    padding-bottom: 6px;
-    position: relative;
-}
-
-/* === PANEL === */
-.map-panel {
-    width: 820px;
-    height: 440px;
-    background-color: #F5F0E8;
+/* === MAP CONTAINER (replaces panel) === */
+.map-container {
+    width: 860px;
+    height: 500px;
     border-radius: 22px;
     border-width: 3px;
     border-color: #3D3535;
     overflow: hidden;
+    position: relative;
 }
 
-/* === HEADER === */
-.map-header {
+/* === MAP WORLD (ocean background) === */
+.map-world {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    /* Deep ocean gradient via layered backgrounds */
+    background-color: #1A8FBF;
+}
+
+/* === DECORATIVE WAVES === */
+.map-wave {
+    position: absolute;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.12);
+    letter-spacing: 8px;
+}
+
+.map-wave-1 {
+    top: 80px;
+    left: 30px;
+}
+
+.map-wave-2 {
+    top: 200px;
+    right: 60px;
+}
+
+.map-wave-3 {
+    bottom: 60px;
+    left: 160px;
+}
+
+.map-wave-4 {
+    top: 140px;
+    left: 420px;
+}
+
+/* === COMPASS === */
+.map-compass {
+    position: absolute;
+    bottom: 12px;
+    right: 16px;
+}
+
+.map-compass-icon {
+    font-size: 28px;
+    color: rgba(255, 255, 255, 0.3);
+}
+
+/* === TOP BAR (floating header) === */
+.map-top-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    background-color: #00B4D8;
-    padding: 14px 16px;
-    border-bottom-width: 3px;
-    border-bottom-color: #0096B7;
-    min-height: 48px;
+    padding: 10px 16px;
+    background-color: rgba(0, 30, 60, 0.6);
+    z-index: 20;
 }
 
-.map-header-title {
-    font-size: 20px;
+.map-top-title {
+    font-size: 18px;
     -unity-font-style: bold;
     color: #FFFFFF;
-    -unity-text-align: middle-center;
     letter-spacing: 2px;
-    position: absolute;
-    left: 0;
-    right: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    padding: 0 120px;
+    -unity-text-align: middle-center;
 }
 
-/* === LEVEL PILL (in header — Lesson #30) === */
+/* Level pill */
 .map-level-pill {
     position: absolute;
-    left: 12px;
+    left: 14px;
     flex-direction: row;
     align-items: center;
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: rgba(255, 255, 255, 0.15);
     border-radius: 20px;
-    padding: 4px 12px 4px 6px;
+    padding: 3px 10px 3px 5px;
     border-width: 2px;
-    border-color: rgba(255, 255, 255, 0.25);
-    z-index: 2;
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
-.map-level-icon {
-    font-size: 14px;
-    margin: 0;
-    padding: 0;
-    margin-right: 4px;
-    -unity-text-align: middle-center;
+.map-pill-icon {
+    font-size: 13px;
+    margin-right: 3px;
 }
 
-.map-level-value {
-    font-size: 12px;
+.map-pill-value {
+    font-size: 11px;
     -unity-font-style: bold;
     color: #FFFFFF;
-    margin: 0;
-    padding: 0;
-    -unity-text-align: middle-center;
 }
 
-/* === CLOSE BUTTON === */
+/* Close button */
 .map-close-shadow {
     position: absolute;
-    right: -8px;
-    top: -8px;
-    background-color: transparent;
-    border-radius: 10px;
-    padding-right: 2px;
-    padding-bottom: 2px;
-    z-index: 10;
+    right: 10px;
 }
 
 .map-close-btn {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     border-radius: 10px;
     background-color: #FF4B4B;
     border-width: 3px;
     border-color: #3D3535;
-    align-items: center;
-    justify-content: center;
     padding: 0;
-    font-size: 18px;
+    font-size: 16px;
     -unity-font-style: bold;
     color: #FFFFFF;
     -unity-text-align: middle-center;
@@ -135,306 +156,295 @@
     background-color: #CC3333;
 }
 
-/* === BODY === */
-.map-body {
-    flex-direction: row;
-    flex-grow: 1;
-}
+/* ============================================
+   ISLANDS — Positioned on the map
+   ============================================ */
 
-/* === LEFT: LOCATION LIST === */
-.map-list-scroll {
-    width: 340px;
-    flex-shrink: 0;
-    padding: 12px;
-    border-right-width: 3px;
-    border-right-color: #DDD5C8;
-}
-
-.map-list {
-    flex-direction: column;
-}
-
-/* === LOCATION CARD === */
-.map-card-shadow {
-    background-color: rgba(30, 30, 60, 0.25);
-    border-radius: 14px;
-    padding-right: 3px;
-    padding-bottom: 3px;
-    margin-bottom: 8px;
-}
-
-.map-card {
-    flex-direction: row;
+.map-island {
+    position: absolute;
     align-items: center;
+    cursor: link;
+    transition-property: scale;
+    transition-duration: 0.12s;
+}
+
+.map-island:hover {
+    scale: 1.08;
+}
+
+/* === ISLAND LAND MASS (the terrain shape) === */
+.map-island-land {
+    border-radius: 50%;
+    position: absolute;
+    z-index: 0;
+}
+
+.map-island-land--farm {
+    width: 130px;
+    height: 90px;
+    border-radius: 45% 55% 50% 48%;
+    background-color: #6BCB77;
+    border-width: 3px;
+    border-color: #4AA956;
+    top: 10px;
+    left: -15px;
+}
+
+.map-island-land--city {
+    width: 120px;
+    height: 80px;
+    border-radius: 48% 52% 55% 42%;
+    background-color: #B0BEC5;
+    border-width: 3px;
+    border-color: #90A4AE;
+    top: 10px;
+    left: -10px;
+}
+
+.map-island-land--mine {
+    width: 100px;
+    height: 70px;
+    border-radius: 42% 58% 45% 52%;
+    background-color: #8D6E63;
+    border-width: 3px;
+    border-color: #6D4C41;
+    top: 12px;
+    left: -8px;
+}
+
+.map-island-land--haiphu {
+    width: 110px;
+    height: 75px;
+    border-radius: 55% 45% 48% 52%;
+    background-color: #FFD54F;
+    border-width: 3px;
+    border-color: #FFB300;
+    top: 10px;
+    left: -12px;
+}
+
+.map-island-land--mocnhi {
+    width: 105px;
+    height: 72px;
+    border-radius: 50% 48% 52% 45%;
+    background-color: #2E7D32;
+    border-width: 3px;
+    border-color: #1B5E20;
+    top: 12px;
+    left: -10px;
+}
+
+/* === ISLAND PIN (emoji marker) === */
+.map-island-pin {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
     background-color: #FFFFFF;
-    border-radius: 14px;
-    border-width: 2px;
-    border-color: #DDD5C8;
-    padding: 10px 12px;
-    transition-property: translate, border-color, background-color;
+    border-width: 3px;
+    border-color: #3D3535;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    transition-property: translate;
     transition-duration: 0.08s;
 }
 
-.map-card:hover {
-    border-color: #00B4D8;
-    background-color: #F0FAFE;
-    translate: -1px -1px;
+.map-island:hover .map-island-pin {
+    translate: 0 -3px;
 }
 
-.map-card:active {
-    translate: 2px 2px;
-    border-color: #0096B7;
-}
-
-.map-card--selected {
-    border-color: #00B4D8;
-    border-width: 3px;
-    background-color: #E0F7FA;
-}
-
-.map-card--locked {
-    background-color: #F0EBE2;
-}
-
-.map-card--locked:hover {
-    background-color: #E8E3DA;
-    border-color: #B0A898;
-}
-
-/* Card icon */
-.map-card-icon-wrap {
-    width: 44px;
-    height: 44px;
-    border-radius: 10px;
-    background-color: #E0F7FA;
-    border-width: 2px;
-    border-color: #B2EBF2;
-    align-items: center;
-    justify-content: center;
-    margin-right: 10px;
-    flex-shrink: 0;
-}
-
-.map-card-icon-wrap--locked {
-    background-color: #EDE5D8;
-    border-color: #DDD5C8;
-}
-
-.map-card-icon {
-    font-size: 22px;
+.map-island-icon {
+    font-size: 24px;
+    -unity-text-align: middle-center;
     margin: 0;
     padding: 0;
-    -unity-text-align: middle-center;
 }
 
-/* Card info */
-.map-card-info {
-    flex-grow: 1;
-    flex-shrink: 1;
-}
-
-.map-card-name {
-    font-size: 13px;
+/* Island name label */
+.map-island-name {
+    font-size: 11px;
     -unity-font-style: bold;
-    color: #3D3535;
-    margin: 0;
-    padding: 0;
-    margin-bottom: 2px;
+    color: #FFFFFF;
+    -unity-text-align: upper-center;
+    margin-top: 4px;
+    padding: 2px 8px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 6px;
+    z-index: 2;
 }
 
-.map-card-name--locked {
-    color: #8A7E6E;
-}
-
-.map-card-subtitle {
-    font-size: 10px;
-    color: #8A7E6E;
-    margin: 0;
-    padding: 0;
-    white-space: normal;
-}
-
-/* Card lock badge */
-.map-card-lock {
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
-    background-color: #E0E0E0;
-    border-width: 2px;
-    border-color: #C4BAA8;
+/* Island lock overlay */
+.map-island-lock {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
-    margin-left: 8px;
+    background-color: rgba(0, 0, 0, 0.35);
+    border-radius: 50%;
+    z-index: 3;
 }
 
-.map-card-lock-icon {
-    font-size: 14px;
-    margin: 0;
-    padding: 0;
+.map-island-lock-icon {
+    font-size: 20px;
     -unity-text-align: middle-center;
 }
 
-/* === RIGHT: DETAIL PANEL === */
-.map-detail-panel {
-    flex-grow: 1;
-    background-color: #FFFFFF;
+/* === ISLAND SELECTED STATE === */
+.map-island--selected .map-island-pin {
+    border-color: #FFD700;
+    border-width: 4px;
+    background-color: #FFFDE7;
+}
+
+.map-island--selected .map-island-name {
+    background-color: rgba(255, 215, 0, 0.7);
+    color: #3D3535;
+}
+
+/* === ISLAND POSITIONS ON MAP === */
+.map-island--farm {
+    left: 180px;
+    top: 160px;
+}
+
+.map-island--city {
+    left: 500px;
+    top: 130px;
+}
+
+.map-island--mine {
+    left: 370px;
+    top: 60px;
+}
+
+.map-island--haiphu {
+    left: 80px;
+    top: 320px;
+}
+
+.map-island--mocnhi {
+    left: 620px;
+    top: 310px;
+}
+
+/* ============================================
+   FLOATING INFO CARD (bottom center)
+   ============================================ */
+
+.map-info-card {
+    position: absolute;
+    bottom: 50px;
+    left: 50%;
+    translate: -50% 0;
+    z-index: 30;
+    display: none;
+}
+
+.map-info-card-inner {
+    width: 340px;
+    background-color: #F5F0E8;
     border-radius: 16px;
     border-width: 3px;
     border-color: #3D3535;
-    margin: 12px;
-    padding: 16px;
-    align-items: center;
-    overflow: hidden;
+    padding: 14px 16px;
 }
 
-.map-detail-empty {
-    font-size: 12px;
-    color: #B0A898;
-    -unity-font-style: italic;
-    -unity-text-align: middle-center;
-    margin-top: auto;
-    margin-bottom: auto;
-    white-space: normal;
-}
-
-.map-detail-content {
-    width: 100%;
-    height: 100%;
+/* Info header */
+.map-info-header {
+    flex-direction: row;
     align-items: center;
-}
-
-/* Detail icon */
-.map-detail-icon-wrap {
-    width: 64px;
-    height: 64px;
-    border-radius: 16px;
-    background-color: #E0F7FA;
-    border-width: 2px;
-    border-color: #B2EBF2;
-    align-items: center;
-    justify-content: center;
     margin-bottom: 8px;
 }
 
-.map-detail-icon {
-    font-size: 32px;
+.map-info-icon {
+    font-size: 28px;
+    margin-right: 10px;
     -unity-text-align: middle-center;
 }
 
-.map-detail-name {
-    font-size: 16px;
+.map-info-header-text {
+    flex-grow: 1;
+}
+
+.map-info-name {
+    font-size: 15px;
     -unity-font-style: bold;
     color: #3D3535;
-    margin-bottom: 4px;
-    -unity-text-align: middle-center;
+    margin-bottom: 2px;
 }
 
 /* Status badge */
-.map-status-badge {
-    border-radius: 12px;
-    padding: 4px 16px;
-    margin-bottom: 8px;
+.map-info-status {
+    border-radius: 8px;
+    padding: 2px 10px;
+    align-self: flex-start;
 }
 
-.map-status-badge--unlocked {
+.map-info-status--unlocked {
     background-color: #E8F5E9;
     border-width: 2px;
     border-color: #4CAF50;
 }
 
-.map-status-badge--locked {
+.map-info-status--locked {
     background-color: #FFF3E0;
     border-width: 2px;
     border-color: #E8833A;
 }
 
-.map-status-text {
-    font-size: 10px;
+.map-info-status-text {
+    font-size: 9px;
     -unity-font-style: bold;
     letter-spacing: 1px;
     margin: 0;
     padding: 0;
-    -unity-text-align: middle-center;
 }
 
-.map-status-badge--unlocked .map-status-text {
+.map-info-status--unlocked .map-info-status-text {
     color: #388E3C;
 }
 
-.map-status-badge--locked .map-status-text {
+.map-info-status--locked .map-info-status-text {
     color: #E8833A;
 }
 
-/* Detail divider */
-.map-detail-divider {
+/* Divider */
+.map-info-divider {
     height: 2px;
     background-color: #DDD5C8;
-    width: 100%;
     margin-bottom: 8px;
 }
 
 /* Description */
-.map-detail-desc {
+.map-info-desc {
     font-size: 11px;
     color: #8A7E6E;
     white-space: normal;
-    -unity-text-align: upper-center;
     margin-bottom: 8px;
-    width: 100%;
 }
 
 /* Requirements */
-.map-requirements {
-    width: 100%;
+.map-info-requirements {
     background-color: #FFF3E0;
     border-radius: 8px;
-    padding: 8px 12px;
+    padding: 6px 10px;
     margin-bottom: 8px;
     border-width: 2px;
     border-color: #FFE0B2;
+    display: none;
 }
 
-.map-req-title {
-    font-size: 9px;
-    -unity-font-style: bold;
-    color: #E8833A;
-    letter-spacing: 2px;
-    margin-bottom: 4px;
-}
-
-.map-req-item {
+.map-info-req {
     font-size: 11px;
     color: #3D3535;
-    margin: 0;
-    padding: 0;
     margin-bottom: 2px;
-}
-
-/* Features */
-.map-features {
-    width: 100%;
-    margin-bottom: 8px;
-    flex-grow: 1;
-}
-
-.map-features-title {
-    font-size: 9px;
-    -unity-font-style: bold;
-    color: #8A7E6E;
-    letter-spacing: 2px;
-    margin-bottom: 4px;
-}
-
-.map-features-text {
-    font-size: 11px;
-    color: #3D3535;
-    white-space: normal;
 }
 
 /* Travel button */
 .map-btn-travel {
-    width: 100%;
     padding: 10px 16px;
     border-radius: 10px;
     border-width: 3px;
@@ -445,7 +455,6 @@
     -unity-font-style: bold;
     -unity-text-align: middle-center;
     letter-spacing: 1px;
-    margin-top: auto;
     transition-property: translate, background-color;
     transition-duration: 0.08s;
 }
@@ -465,37 +474,38 @@
     color: rgba(255, 255, 255, 0.5);
 }
 
-/* === CHEAT BAR (bottom, for testing) === */
+/* ============================================
+   CHEAT BAR (floating bottom)
+   ============================================ */
+
 .map-cheat-bar {
+    position: absolute;
+    bottom: 8px;
+    right: 12px;
     flex-direction: row;
-    justify-content: center;
-    padding: 6px 16px;
-    background-color: #EDE5D8;
-    border-top-width: 2px;
-    border-top-color: #DDD5C8;
+    z-index: 25;
 }
 
 .map-cheat-btn {
-    padding: 4px 12px;
-    margin: 0 4px;
-    border-radius: 8px;
+    padding: 3px 10px;
+    margin-left: 4px;
+    border-radius: 6px;
     border-width: 2px;
-    border-color: #C4BAA8;
-    background-color: #FFFFFF;
-    font-size: 10px;
+    border-color: rgba(255, 255, 255, 0.2);
+    background-color: rgba(0, 0, 0, 0.4);
+    font-size: 9px;
     -unity-font-style: bold;
-    color: #8A7E6E;
+    color: rgba(255, 255, 255, 0.7);
     -unity-text-align: middle-center;
     transition-property: translate, background-color;
     transition-duration: 0.08s;
 }
 
 .map-cheat-btn:hover {
-    background-color: #FFF5E8;
-    border-color: #E8833A;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: #FFFFFF;
 }
 
 .map-cheat-btn:active {
     translate: 1px 1px;
-    background-color: #FFE0B2;
 }
