@@ -14,6 +14,13 @@
 
                 <!-- Header -->
                 <ui:VisualElement class="shop-header">
+                    <!-- Balance pill (left side) -->
+                    <ui:VisualElement name="ShopBalancePill" class="shop-balance-pill">
+                        <ui:Label text="🪙" class="shop-balance-icon" />
+                        <ui:Label name="LblShopBalance" text="5,000 POS" class="shop-balance-value" />
+                    </ui:VisualElement>
+
+                    <!-- Title (centered) -->
                     <ui:Label name="ShopTitle" text="CỬA HÀNG" class="shop-header-title" />
                 </ui:VisualElement>
 
@@ -89,15 +96,9 @@
 
                 </ui:VisualElement>
 
-                <!-- Bottom Info Bar -->
-                <ui:VisualElement class="shop-info-bar">
-                    <ui:Label name="LblShopBalance" text="💰 Số dư: 5,000 POS" class="shop-info-text" />
-                    <ui:Label name="LblShopMode" text="Chế độ: Mua" class="shop-info-text" />
-                </ui:VisualElement>
-
             </ui:VisualElement>
 
-            <!-- Close Button -->
+            <!-- Close Button (AFTER panel so it renders ON TOP) -->
             <ui:VisualElement class="shop-close-shadow">
                 <ui:Button name="BtnCloseShop" text="✕" class="shop-close-btn" />
             </ui:VisualElement>

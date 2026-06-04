@@ -19,7 +19,6 @@ public class ShopPopupController : MonoBehaviour
     private Button btnClose;
     private VisualElement gridContainer;
     private Label lblBalance;
-    private Label lblMode;
 
     // Mode tabs
     private Button tabBuy;
@@ -101,7 +100,6 @@ public class ShopPopupController : MonoBehaviour
         btnClose = root.Q<Button>("BtnCloseShop");
         gridContainer = root.Q<VisualElement>("ShopGrid");
         lblBalance = root.Q<Label>("LblShopBalance");
-        lblMode = root.Q<Label>("LblShopMode");
 
         // Mode tabs
         tabBuy = root.Q<Button>("TabBuy");
@@ -223,13 +221,11 @@ public class ShopPopupController : MonoBehaviour
         if (isSellMode)
         {
             tabSell?.AddToClassList("shop-mode-tab--active");
-            if (lblMode != null) lblMode.text = "Chế độ: Bán";
             btnAction?.AddToClassList("shop-btn-action--sell");
         }
         else
         {
             tabBuy?.AddToClassList("shop-mode-tab--active");
-            if (lblMode != null) lblMode.text = "Chế độ: Mua";
             btnAction?.RemoveFromClassList("shop-btn-action--sell");
         }
 
@@ -424,7 +420,7 @@ public class ShopPopupController : MonoBehaviour
     {
         if (lblBalance != null)
         {
-            lblBalance.text = $"💰 Số dư: {playerBalance:N0} POS";
+            lblBalance.text = $"{playerBalance:N0} POS";
         }
     }
 

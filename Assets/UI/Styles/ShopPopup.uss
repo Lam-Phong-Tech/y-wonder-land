@@ -44,20 +44,54 @@
     align-items: center;
     justify-content: center;
     background-color: #4CAF50;
-    padding: 12px 16px;
+    padding: 14px 16px;
     border-bottom-width: 3px;
     border-bottom-color: #388E3C;
+    min-height: 48px;
 }
 
 .shop-header-title {
-    font-size: 20px;
+    font-size: 18px;
     -unity-font-style: bold;
     color: #FFFFFF;
     -unity-text-align: middle-center;
-    letter-spacing: 2px;
+    letter-spacing: 1px;
     position: absolute;
     left: 0;
     right: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 0 120px;
+}
+
+/* === BALANCE PILL (in header) === */
+.shop-balance-pill {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 20px;
+    padding: 4px 12px 4px 6px;
+    border-width: 2px;
+    border-color: rgba(255, 255, 255, 0.25);
+    z-index: 2;
+}
+
+.shop-balance-icon {
+    font-size: 16px;
+    margin: 0;
+    padding: 0;
+    margin-right: 4px;
+    -unity-text-align: middle-center;
+}
+
+.shop-balance-value {
+    font-size: 12px;
+    -unity-font-style: bold;
+    color: #FFFFFF;
+    margin: 0;
+    padding: 0;
+    -unity-text-align: middle-center;
 }
 
 /* === CLOSE BUTTON === */
@@ -503,20 +537,4 @@
 
 .shop-btn-action--sell:active {
     background-color: #CC6D28;
-}
-
-/* === BOTTOM INFO BAR === */
-.shop-info-bar {
-    flex-direction: row;
-    justify-content: space-between;
-    padding: 8px 16px;
-    background-color: #EDE5D8;
-    border-top-width: 2px;
-    border-top-color: #DDD5C8;
-}
-
-.shop-info-text {
-    font-size: 11px;
-    color: #8A7E6E;
-    -unity-font-style: bold;
 }
