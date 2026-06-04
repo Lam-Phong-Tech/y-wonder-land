@@ -45,6 +45,7 @@ public class GameHUDController : MonoBehaviour
     private Button btnFriends;
     private Button btnShop;
     private Button btnMap;
+    private Button btnEvent;
     private Button btnPiggy;
 
     // Action buttons
@@ -111,6 +112,7 @@ public class GameHUDController : MonoBehaviour
         // Sidebar
         btnLeaderboard = root.Q<Button>("BtnLeaderboard");
         btnCalendar = root.Q<Button>("BtnCalendar");
+        btnEvent = root.Q<Button>("BtnEvent");
         btnMail = root.Q<Button>("BtnMail");
         btnFriends = root.Q<Button>("BtnFriends");
         btnShop = root.Q<Button>("BtnShop");
@@ -208,6 +210,14 @@ public class GameHUDController : MonoBehaviour
                 piggyBankPopup.Show();
             else
                 Debug.Log("[GameHUD] Piggy Bank clicked (no piggy popup assigned)");
+        });
+
+        btnEvent?.RegisterCallback<ClickEvent>(evt =>
+        {
+            if (eventPopup != null)
+                eventPopup.Show();
+            else
+                Debug.Log("[GameHUD] Event clicked (no event popup assigned)");
         });
 
         // Action buttons

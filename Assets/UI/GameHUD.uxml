@@ -42,10 +42,17 @@
                     </ui:Button>
                 </ui:VisualElement>
 
-                <!-- Daily Attendance / Event -->
+                <!-- Daily Attendance -->
                 <ui:VisualElement class="sidebar-btn-shadow">
                     <ui:Button name="BtnCalendar" class="sidebar-btn sidebar-btn-calendar">
                         <ui:Label text="📅" class="sidebar-btn-icon sidebar-btn-icon-white" />
+                    </ui:Button>
+                </ui:VisualElement>
+
+                <!-- Event -->
+                <ui:VisualElement class="sidebar-btn-shadow">
+                    <ui:Button name="BtnEvent" class="sidebar-btn sidebar-btn-event">
+                        <ui:Label text="🎁" class="sidebar-btn-icon sidebar-btn-icon-white" />
                     </ui:Button>
                 </ui:VisualElement>
 

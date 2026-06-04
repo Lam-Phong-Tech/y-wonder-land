@@ -349,6 +349,18 @@
     background-color: #432BB3;
 }
 
+.sidebar-btn-event {
+    background-color: #9C27B0;
+    border-color: #3D3535;
+}
+.sidebar-btn-event:hover {
+    background-color: #AB47BC;
+}
+.sidebar-btn-event:active {
+    translate: 3px 3px;
+    background-color: #7B1FA2;
+}
+
 .sidebar-btn-mail {
     background-color: #2D7BFF;
     border-color: #3D3535;
