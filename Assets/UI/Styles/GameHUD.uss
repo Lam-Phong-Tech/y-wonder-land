@@ -443,6 +443,35 @@
     -unity-text-align: middle-center;
 }
 
+.sidebar-btn-piggy {
+    background-color: #E8833A;
+    border-color: #3D3535;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    transition-property: translate, background-color;
+    transition-duration: 0.08s;
+}
+
+.sidebar-btn-piggy:hover {
+    background-color: #F09848;
+}
+
+.sidebar-btn-piggy:active {
+    translate: 3px 3px;
+    background-color: #CC6B28;
+}
+
+.sidebar-btn-piggy-icon {
+    font-size: 22px;
+    color: #FFFFFF;
+    -unity-text-align: middle-center;
+    margin: 0;
+    padding: 0;
+}
+
 .sidebar-btn-icon {
     font-size: 20px;
     color: #3D3535;

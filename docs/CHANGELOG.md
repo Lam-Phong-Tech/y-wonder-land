@@ -5,6 +5,29 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-06-04] — Module Heo Đất UI (Piggy Bank Savings)
+
+### Added
+- **Heo Đất Popup** — Gửi tiết kiệm POS với 3 gói lãi suất:
+  - **3 gói**: 12 ngày (+2%), 30 ngày (+6%), 180 ngày (+45%)
+  - **Tab Gửi tiết kiệm**: Chọn gói → nhập số tiền → preview (gốc/lãi/tổng) → xác nhận
+  - **Validation**: Kiểm tra số dư, chỉ cho phép 1 gói active, không rút sớm
+  - **Countdown**: Đếm ngược real-time (test mode: 1 ngày = 5 giây)
+  - **Đáo hạn**: Tự động cộng gốc + lãi vào balance, thêm entry lịch sử
+  - **Tab Lịch sử**: Hiển thị các giao dịch đã hoàn thành + mock data
+  - **Header**: Warm Gold #E8833A, balance pill góc trái (Lessons #30 #32 applied)
+  - **Close button**: Wrapper pattern chuẩn (Lessons #33 #34 applied)
+- **HUD Piggy Button** — Nút 🐷 trên sidebar HUD, màu #E8833A
+
+### Files changed
+- Assets/UI/PiggyBankPopup.uxml (NEW)
+- Assets/UI/Styles/PiggyBankPopup.uss (NEW)
+- Assets/UI/PiggyBankPopupController.cs (NEW)
+- Assets/UI/GameHUD.uxml (MODIFIED — thêm BtnPiggy)
+- Assets/UI/Styles/GameHUD.uss (MODIFIED — thêm sidebar-btn-piggy styles)
+- Assets/UI/GameHUDController.cs (MODIFIED — thêm piggyBankPopup reference + callback)
+
+---
 ## [2026-06-04] — Module Map UI (Visual World Map)
 
 ### Added

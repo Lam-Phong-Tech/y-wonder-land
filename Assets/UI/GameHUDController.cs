@@ -19,6 +19,7 @@ public class GameHUDController : MonoBehaviour
     [SerializeField] private QuestPopupController questPopup;
     [SerializeField] private ShopPopupController shopPopup;
     [SerializeField] private MapPopupController mapPopup;
+    [SerializeField] private PiggyBankPopupController piggyBankPopup;
 
     private UIDocument uiDocument;
 
@@ -42,6 +43,7 @@ public class GameHUDController : MonoBehaviour
     private Button btnFriends;
     private Button btnShop;
     private Button btnMap;
+    private Button btnPiggy;
 
     // Action buttons
     private Button btnInteract;
@@ -74,6 +76,7 @@ public class GameHUDController : MonoBehaviour
         if (attendancePopup == null) attendancePopup = FindFirstObjectByType<AttendancePopupController>();
         if (questPopup == null) questPopup = FindFirstObjectByType<QuestPopupController>();
         if (mapPopup == null) mapPopup = FindFirstObjectByType<MapPopupController>();
+        if (piggyBankPopup == null) piggyBankPopup = FindFirstObjectByType<PiggyBankPopupController>();
 
         var root = uiDocument.rootVisualElement;
         QueryElements(root);
@@ -108,6 +111,7 @@ public class GameHUDController : MonoBehaviour
         btnFriends = root.Q<Button>("BtnFriends");
         btnShop = root.Q<Button>("BtnShop");
         btnMap = root.Q<Button>("BtnMap");
+        btnPiggy = root.Q<Button>("BtnPiggy");
 
         // Actions
         btnInteract = root.Q<Button>("BtnInteract");
@@ -192,6 +196,14 @@ public class GameHUDController : MonoBehaviour
                 mapPopup.Show();
             else
                 Debug.Log("[GameHUD] Map clicked (no map popup assigned)");
+        });
+
+        btnPiggy?.RegisterCallback<ClickEvent>(evt =>
+        {
+            if (piggyBankPopup != null)
+                piggyBankPopup.Show();
+            else
+                Debug.Log("[GameHUD] Piggy Bank clicked (no piggy popup assigned)");
         });
 
         // Action buttons

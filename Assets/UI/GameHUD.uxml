@@ -78,6 +78,13 @@
                         <ui:Label text="Map" class="sidebar-btn-map-text" />
                     </ui:Button>
                 </ui:VisualElement>
+
+                <!-- Piggy Bank (Temporary) -->
+                <ui:VisualElement class="sidebar-btn-shadow">
+                    <ui:Button name="BtnPiggy" class="sidebar-btn sidebar-btn-piggy">
+                        <ui:Label text="🐷" class="sidebar-btn-piggy-icon" />
+                    </ui:Button>
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
 
