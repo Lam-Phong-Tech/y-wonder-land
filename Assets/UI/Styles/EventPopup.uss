@@ -44,6 +44,7 @@
     border-bottom-width: 3px;
     border-bottom-color: #7B1FA2;
     min-height: 46px;
+    flex-shrink: 0;
     position: relative;
 }
 
@@ -132,6 +133,7 @@
     padding: 6px 12px 0 12px;
     border-bottom-width: 2px;
     border-bottom-color: #E1BEE7;
+    flex-shrink: 0;
 }
 
 .event-tab {
@@ -314,6 +316,7 @@
 /* Bundle card */
 .event-bundle-card {
     width: 200px;
+    min-height: 260px;
     background-color: #FFFFFF;
     border-radius: 14px;
     border-width: 2px;
@@ -321,6 +324,7 @@
     padding: 14px;
     margin: 6px;
     align-items: center;
+    justify-content: flex-start;
     transition-property: border-color, translate;
     transition-duration: 0.08s;
 }
