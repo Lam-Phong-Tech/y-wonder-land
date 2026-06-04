@@ -17,7 +17,12 @@
     display: none;
 }
 
-/* === MAP CONTAINER (replaces panel) === */
+/* === MAP WRAPPER (no overflow — holds close button) === */
+.map-wrapper {
+    position: relative;
+}
+
+/* === MAP CONTAINER (clipped content) === */
 .map-container {
     width: 860px;
     height: 500px;
