@@ -185,13 +185,14 @@
 
 .piggy-pkg {
     align-items: center;
-    padding: 12px 10px;
+    padding: 14px 10px 10px 10px;
     background-color: #FFFFFF;
     border-radius: 14px;
     border-width: 2px;
     border-color: #DDD5C8;
     transition-property: translate, border-color, background-color;
     transition-duration: 0.08s;
+    overflow: hidden;
 }
 
 .piggy-pkg:hover {
@@ -211,22 +212,22 @@
 }
 
 .piggy-pkg-icon {
-    font-size: 22px;
-    margin-bottom: 4px;
+    font-size: 20px;
+    margin-bottom: 2px;
 }
 
 .piggy-pkg-duration {
-    font-size: 12px;
+    font-size: 11px;
     -unity-font-style: bold;
     color: #3D3535;
-    margin-bottom: 2px;
+    margin-bottom: 1px;
 }
 
 .piggy-pkg-rate {
-    font-size: 20px;
+    font-size: 18px;
     -unity-font-style: bold;
     color: #E8833A;
-    margin-bottom: 2px;
+    margin-bottom: 0;
 }
 
 .piggy-pkg-label {
@@ -310,12 +311,15 @@
 .piggy-preview-row {
     flex-direction: row;
     justify-content: space-between;
-    margin-bottom: 3px;
+    align-items: center;
+    margin-bottom: 4px;
+    min-height: 18px;
 }
 
 .piggy-preview-label {
     font-size: 11px;
     color: #8A7E6E;
+    flex-shrink: 0;
 }
 
 .piggy-preview-label--bold {
@@ -326,6 +330,8 @@
 .piggy-preview-value {
     font-size: 11px;
     color: #3D3535;
+    flex-shrink: 0;
+    -unity-text-align: middle-right;
 }
 
 .piggy-preview-value--green {
