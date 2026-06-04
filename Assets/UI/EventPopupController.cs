@@ -276,6 +276,11 @@ public class EventPopupController : MonoBehaviour
             card.Add(name);
             card.Add(desc);
 
+            // Spacer to push price + button to bottom
+            var spacer = new VisualElement();
+            spacer.style.flexGrow = 1;
+            card.Add(spacer);
+
             // Price
             var priceWrap = new VisualElement();
             priceWrap.AddToClassList("event-bundle-price-wrap");

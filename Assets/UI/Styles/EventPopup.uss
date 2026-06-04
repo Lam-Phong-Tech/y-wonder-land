@@ -316,7 +316,7 @@
 /* Bundle card */
 .event-bundle-card {
     width: 200px;
-    min-height: 260px;
+    height: 280px;
     background-color: #FFFFFF;
     border-radius: 14px;
     border-width: 2px;
@@ -327,6 +327,7 @@
     justify-content: flex-start;
     transition-property: border-color, translate;
     transition-duration: 0.08s;
+    overflow: hidden;
 }
 
 .event-bundle-card:hover {
