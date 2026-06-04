@@ -5,6 +5,24 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-06-04] — Module Event / Exchange UI (Sự kiện mùa)
+
+### Added
+- **Event Popup** — UI sự kiện theo mùa với 2 tab:
+  - **Tab Đổi quà**: Grid đổi vật phẩm event (cá, quặng, vé) lấy reward hiếm (V2 items, pet, cosmetic)
+  - **Tab Gói ưu đãi**: Bundle UPOS giảm giá giới hạn thời gian, có tag "-50%"/"HOT", trạng thái "ĐÃ HẾT"
+  - **Sidebar Vật phẩm**: Hiển thị số lượng 🐟 Cá event / 💎 Quặng hiếm / 🎫 Vé sự kiện
+  - **Timer pill**: Đếm ngược thời gian sự kiện còn lại
+  - **Header**: Festival Purple #9C27B0
+  - **Close button**: Wrapper pattern chuẩn (Lessons #33 #34)
+  - **Mock data**: 6 exchange items + 3 bundles
+
+### Files changed
+- Assets/UI/EventPopup.uxml (NEW)
+- Assets/UI/Styles/EventPopup.uss (NEW)
+- Assets/UI/EventPopupController.cs (NEW)
+
+---
 ## [2026-06-04] — Module Level Up VFX/UI
 
 ### Added

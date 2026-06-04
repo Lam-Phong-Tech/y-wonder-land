@@ -1,0 +1,415 @@
+/* ============================================================
+   EventPopup.uss — Event / Exchange UI
+   Design System: The Tangible Playground
+   Header: Festival Purple #9C27B0
+   Lessons applied: #29 #30 #32 #33 #34 #35 #36
+   ============================================================ */
+
+/* === OVERLAY === */
+.event-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    align-items: center;
+    justify-content: center;
+    display: none;
+}
+
+/* === WRAPPER (Lesson #33) === */
+.event-wrapper {
+    position: relative;
+}
+
+/* === PANEL === */
+.event-panel {
+    width: 720px;
+    height: 460px;
+    background-color: #FAF5FF;
+    border-radius: 22px;
+    border-width: 3px;
+    border-color: #3D3535;
+    overflow: hidden;
+}
+
+/* === HEADER === */
+.event-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background-color: #9C27B0;
+    padding: 12px 16px;
+    border-bottom-width: 3px;
+    border-bottom-color: #7B1FA2;
+    min-height: 46px;
+    position: relative;
+}
+
+.event-header-title {
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: #FFFFFF;
+    -unity-text-align: middle-center;
+    letter-spacing: 2px;
+    /* Lesson #30 + #32 */
+    position: absolute;
+    left: 0;
+    right: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 0 120px;
+}
+
+/* === TIMER PILL (Lesson #30) === */
+.event-timer-pill {
+    position: absolute;
+    left: 12px;
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 20px;
+    padding: 4px 12px 4px 6px;
+    border-width: 2px;
+    border-color: rgba(255, 255, 255, 0.25);
+    z-index: 2;
+}
+
+.event-pill-icon {
+    font-size: 13px;
+    margin-right: 4px;
+}
+
+.event-pill-value {
+    font-size: 11px;
+    -unity-font-style: bold;
+    color: #FFFFFF;
+}
+
+/* === CLOSE BUTTON (Lesson #33 + #34) === */
+.event-close-shadow {
+    position: absolute;
+    right: -8px;
+    top: -8px;
+    background-color: transparent;
+    border-radius: 10px;
+    padding-right: 2px;
+    padding-bottom: 2px;
+    z-index: 50;
+}
+
+.event-close-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background-color: #FF4B4B;
+    border-width: 3px;
+    border-color: #3D3535;
+    padding: 0;
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: #FFFFFF;
+    -unity-text-align: middle-center;
+    transition-property: translate, background-color;
+    transition-duration: 0.08s;
+}
+
+.event-close-btn:hover {
+    background-color: #FF6B6B;
+}
+
+.event-close-btn:active {
+    translate: 2px 2px;
+    background-color: #CC3333;
+}
+
+/* === TAB BAR === */
+.event-tab-bar {
+    flex-direction: row;
+    background-color: #F3E5F5;
+    padding: 6px 12px 0 12px;
+    border-bottom-width: 2px;
+    border-bottom-color: #E1BEE7;
+}
+
+.event-tab {
+    padding: 8px 16px;
+    margin-right: 4px;
+    border-radius: 10px 10px 0 0;
+    border-width: 2px;
+    border-bottom-width: 0;
+    border-color: transparent;
+    background-color: transparent;
+    font-size: 12px;
+    -unity-font-style: bold;
+    color: #9575CD;
+    -unity-text-align: middle-center;
+    transition-property: background-color, color;
+    transition-duration: 0.08s;
+}
+
+.event-tab:hover {
+    background-color: rgba(156, 39, 176, 0.1);
+    color: #9C27B0;
+}
+
+.event-tab--active {
+    background-color: #FAF5FF;
+    border-color: #E1BEE7;
+    color: #9C27B0;
+}
+
+/* === BODY === */
+.event-body {
+    flex-direction: row;
+    flex-grow: 1;
+    padding: 12px;
+}
+
+/* === SCROLL === */
+.event-scroll {
+    flex-grow: 1;
+}
+
+.event-scroll--full {
+    width: 100%;
+}
+
+/* === EXCHANGE GRID === */
+.event-grid {
+    flex-direction: column;
+}
+
+/* Exchange item row — horizontal (Lesson #35) */
+.event-exchange-row {
+    flex-direction: row;
+    align-items: center;
+    background-color: #FFFFFF;
+    border-radius: 12px;
+    border-width: 2px;
+    border-color: #E1BEE7;
+    padding: 10px 12px;
+    margin-bottom: 6px;
+    transition-property: border-color, background-color;
+    transition-duration: 0.08s;
+}
+
+.event-exchange-row:hover {
+    border-color: #9C27B0;
+    background-color: #FCF0FF;
+}
+
+.event-exchange-icon {
+    font-size: 28px;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+.event-exchange-info {
+    flex-grow: 1;
+}
+
+.event-exchange-name {
+    font-size: 12px;
+    -unity-font-style: bold;
+    color: #3D3535;
+    margin-bottom: 2px;
+}
+
+.event-exchange-cost {
+    font-size: 10px;
+    color: #8A7E6E;
+}
+
+.event-exchange-btn {
+    padding: 6px 14px;
+    border-radius: 8px;
+    border-width: 2px;
+    border-color: #7B1FA2;
+    background-color: #9C27B0;
+    color: #FFFFFF;
+    font-size: 11px;
+    -unity-font-style: bold;
+    flex-shrink: 0;
+    transition-property: translate, background-color;
+    transition-duration: 0.08s;
+}
+
+.event-exchange-btn:hover {
+    background-color: #AB47BC;
+}
+
+.event-exchange-btn:active {
+    translate: 1px 1px;
+    background-color: #7B1FA2;
+}
+
+.event-exchange-btn:disabled {
+    background-color: #C4BAA8;
+    border-color: #B0A898;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* === MATERIALS SIDEBAR === */
+.event-materials {
+    width: 160px;
+    flex-shrink: 0;
+    margin-left: 10px;
+    background-color: #FFFFFF;
+    border-radius: 12px;
+    border-width: 2px;
+    border-color: #E1BEE7;
+    padding: 10px;
+}
+
+.event-materials-title {
+    font-size: 11px;
+    -unity-font-style: bold;
+    color: #9C27B0;
+    margin-bottom: 8px;
+    -unity-text-align: upper-center;
+}
+
+.event-material-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 6px;
+    min-height: 20px;
+}
+
+.event-mat-icon {
+    font-size: 16px;
+    margin-right: 6px;
+    flex-shrink: 0;
+}
+
+.event-mat-name {
+    font-size: 10px;
+    color: #3D3535;
+    flex-grow: 1;
+}
+
+.event-mat-count {
+    font-size: 11px;
+    -unity-font-style: bold;
+    color: #9C27B0;
+    flex-shrink: 0;
+}
+
+/* === BUNDLE TAB === */
+.event-bundle-panel {
+    display: none;
+    flex-direction: column;
+}
+
+.event-bundle-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* Bundle card */
+.event-bundle-card {
+    width: 200px;
+    background-color: #FFFFFF;
+    border-radius: 14px;
+    border-width: 2px;
+    border-color: #E1BEE7;
+    padding: 14px;
+    margin: 6px;
+    align-items: center;
+    transition-property: border-color, translate;
+    transition-duration: 0.08s;
+}
+
+.event-bundle-card:hover {
+    border-color: #9C27B0;
+    translate: 0 -2px;
+}
+
+.event-bundle-icon {
+    font-size: 32px;
+    margin-bottom: 6px;
+}
+
+.event-bundle-name {
+    font-size: 13px;
+    -unity-font-style: bold;
+    color: #3D3535;
+    -unity-text-align: upper-center;
+    margin-bottom: 4px;
+}
+
+.event-bundle-desc {
+    font-size: 10px;
+    color: #8A7E6E;
+    -unity-text-align: upper-center;
+    white-space: normal;
+    margin-bottom: 8px;
+}
+
+.event-bundle-price-wrap {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.event-bundle-old-price {
+    font-size: 10px;
+    color: #B0A898;
+    margin-right: 6px;
+}
+
+.event-bundle-price {
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: #9C27B0;
+}
+
+.event-bundle-tag {
+    background-color: #FF4B4B;
+    border-radius: 6px;
+    padding: 2px 8px;
+    margin-bottom: 8px;
+}
+
+.event-bundle-tag-text {
+    font-size: 9px;
+    -unity-font-style: bold;
+    color: #FFFFFF;
+    letter-spacing: 1px;
+}
+
+.event-bundle-buy-btn {
+    padding: 8px 24px;
+    border-radius: 8px;
+    border-width: 2px;
+    border-color: #7B1FA2;
+    background-color: #9C27B0;
+    color: #FFFFFF;
+    font-size: 12px;
+    -unity-font-style: bold;
+    width: 100%;
+    -unity-text-align: middle-center;
+    transition-property: translate, background-color;
+    transition-duration: 0.08s;
+}
+
+.event-bundle-buy-btn:hover {
+    background-color: #AB47BC;
+}
+
+.event-bundle-buy-btn:active {
+    translate: 1px 1px;
+    background-color: #7B1FA2;
+}
+
+/* === SOLD OUT === */
+.event-bundle-soldout {
+    font-size: 11px;
+    -unity-font-style: bold;
+    color: #FF4B4B;
+    -unity-text-align: middle-center;
+}

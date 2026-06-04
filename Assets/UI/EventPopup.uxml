@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:Style src="project://database/Assets/UI/Styles/DesignSystem.uss" />
+    <ui:Style src="project://database/Assets/UI/Styles/EventPopup.uss" />
+
+    <!-- Overlay -->
+    <ui:VisualElement name="EventOverlay" class="event-overlay">
+
+        <!-- Wrapper (Lesson #33) -->
+        <ui:VisualElement class="event-wrapper">
+
+            <!-- Panel -->
+            <ui:VisualElement class="event-panel">
+
+                <!-- Header -->
+                <ui:VisualElement class="event-header">
+                    <!-- Timer pill -->
+                    <ui:VisualElement class="event-timer-pill">
+                        <ui:Label text="⏰" class="event-pill-icon" />
+                        <ui:Label name="LblEventTimer" text="6d 12h" class="event-pill-value" />
+                    </ui:VisualElement>
+
+                    <ui:Label text="🎁 SỰ KIỆN MÙA HÈ" class="event-header-title" />
+                </ui:VisualElement>
+
+                <!-- Tab Bar -->
+                <ui:VisualElement class="event-tab-bar">
+                    <ui:Button name="TabExchange" text="🔄 Đổi quà" class="event-tab event-tab--active" />
+                    <ui:Button name="TabBundle" text="💎 Gói ưu đãi" class="event-tab" />
+                </ui:VisualElement>
+
+                <!-- ═══ TAB 1: EXCHANGE (Đổi quà) ═══ -->
+                <ui:VisualElement name="PanelExchange" class="event-body">
+
+                    <!-- Exchange grid -->
+                    <ui:ScrollView name="ExchangeScroll" class="event-scroll">
+                        <ui:VisualElement name="ExchangeGrid" class="event-grid">
+                            <!-- Rows populated by Controller -->
+                        </ui:VisualElement>
+                    </ui:ScrollView>
+
+                    <!-- My materials sidebar -->
+                    <ui:VisualElement class="event-materials">
+                        <ui:Label text="📦 Vật phẩm của tôi" class="event-materials-title" />
+
+                        <ui:VisualElement class="event-material-row">
+                            <ui:Label text="🐟" class="event-mat-icon" />
+                            <ui:Label text="Cá event" class="event-mat-name" />
+                            <ui:Label name="LblMatFish" text="x5" class="event-mat-count" />
+                        </ui:VisualElement>
+
+                        <ui:VisualElement class="event-material-row">
+                            <ui:Label text="💎" class="event-mat-icon" />
+                            <ui:Label text="Quặng hiếm" class="event-mat-name" />
+                            <ui:Label name="LblMatOre" text="x3" class="event-mat-count" />
+                        </ui:VisualElement>
+
+                        <ui:VisualElement class="event-material-row">
+                            <ui:Label text="🎫" class="event-mat-icon" />
+                            <ui:Label text="Vé sự kiện" class="event-mat-name" />
+                            <ui:Label name="LblMatTicket" text="x1" class="event-mat-count" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+
+                <!-- ═══ TAB 2: BUNDLE (Gói ưu đãi UPOS) ═══ -->
+                <ui:VisualElement name="PanelBundle" class="event-body event-bundle-panel">
+
+                    <ui:ScrollView name="BundleScroll" class="event-scroll event-scroll--full">
+                        <ui:VisualElement name="BundleGrid" class="event-bundle-grid">
+                            <!-- Rows populated by Controller -->
+                        </ui:VisualElement>
+                    </ui:ScrollView>
+
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+
+            <!-- Close Button (Lesson #33 + #34) -->
+            <ui:VisualElement class="event-close-shadow">
+                <ui:Button name="BtnCloseEvent" text="✕" class="event-close-btn" />
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+
+</ui:UXML>
