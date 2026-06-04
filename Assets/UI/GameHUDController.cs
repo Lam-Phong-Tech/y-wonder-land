@@ -313,7 +313,8 @@ public class GameHUDController : MonoBehaviour
     // ── Test: Press L key to trigger Level Up ──
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.L) && levelUpOverlay != null)
+        var keyboard = UnityEngine.InputSystem.Keyboard.current;
+        if (keyboard != null && keyboard.lKey.wasPressedThisFrame && levelUpOverlay != null)
         {
             levelUpOverlay.TestLevelUp();
         }
