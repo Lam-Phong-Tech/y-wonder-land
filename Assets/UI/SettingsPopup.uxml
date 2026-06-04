@@ -83,6 +83,12 @@
                         <!-- GENERAL -->
                         <ui:Label name="LblGeneralSection" text="CHUNG" class="settings-section-header" />
 
+                        <ui:VisualElement class="settings-toggle-row">
+                            <ui:Label name="LblShowChat" text="Hiện chat" class="settings-toggle-label" />
+                            <ui:Toggle name="ToggleShowChat" value="true" class="settings-toggle" />
+                            <ui:Label name="LblShowChatStatus" text="BẬT" class="settings-toggle-status" />
+                        </ui:VisualElement>
+
                         <ui:VisualElement class="settings-row">
                             <ui:Label name="LblLanguage" text="Ngôn ngữ" class="settings-label" />
                             <ui:VisualElement class="settings-dropdown-shadow">

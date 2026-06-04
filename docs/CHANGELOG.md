@@ -5,6 +5,32 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-06-04] — Module Chat UI (Khung chat thu/mở)
+
+### Added
+- **Chat Panel** — Hệ thống chat kênh thế giới đặt tại cạnh dưới giữa màn hình với 2 trạng thái:
+  - **Trạng thái thu gọn (Collapsed)**: Thanh pill mờ đen đồng bộ HUD hiển thị tin nhắn mới nhất, có nút emoji nhanh và nút mở rộng (▲).
+  - **Trạng thái mở rộng (Expanded)**: Khung chat 420x260px nền kem (#F5F0E8), viền tối 3px chuẩn design system.
+    - **Header**: Thanh tiêu đề "KÊNH THẾ GIỚI" kèm nút thu nhỏ (▼).
+    - **History scroll**: Cuộn lịch sử tin nhắn, tự động cuộn xuống đáy khi có tin nhắn mới (On GeometryChangedEvent).
+    - **Footer**: Input nhập tin nhắn, nút gửi ("Gửi") màu xanh blue retro, nút emoji nhanh (☺).
+- **Tính năng mở rộng**:
+  - **Profanity Filter**: Tự động lọc các từ tục tĩu tiếng Việt/Anh ("ngu", "fuck", "đm", "vl"...) thành dấu `***`.
+  - **Rate Limit**: Giới hạn tần suất chat (tối đa 5 tin nhắn trong 30 giây). Nếu vượt quá, hiển thị cảnh báo đỏ từ hệ thống.
+  - **Mock AI Chatbot**: Tự động trả lời theo từ khóa tin nhắn ("hello", "nông trại", "shop", "bản đồ", "heo đất"...) sau 2 giây delay để mô phỏng tính năng AI NPC.
+  - **Enter Hotkey**: Bấm phím `Enter` để mở rộng chat và tự động focus vào input field; bấm tiếp để gửi tin; bấm khi rỗng sẽ tắt focus/thu nhỏ.
+  - **Settings Integration**: Thêm toggle "Hiện chat" vào Cài đặt (SettingsPopup) để bật/tắt hiển thị toàn bộ khung chat.
+
+### Files changed
+- Assets/UI/ChatPanel.uxml (NEW)
+- Assets/UI/Styles/ChatPanel.uss (NEW)
+- Assets/UI/ChatPanelController.cs (NEW)
+- Assets/Editor/SetupChatUI.cs (NEW)
+- Assets/UI/SettingsPopup.uxml (MODIFIED)
+- Assets/UI/SettingsPopupController.cs (MODIFIED)
+- Assets/UI/GameHUDController.cs (MODIFIED)
+
+---
 ## [2026-06-04] — Module Event / Exchange UI (Sự kiện mùa)
 
 ### Added

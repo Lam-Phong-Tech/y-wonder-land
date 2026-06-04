@@ -56,6 +56,7 @@ public class GameHUDController : MonoBehaviour
     private Button btnSettings;
 
     // Messages
+    private VisualElement messagesBar;
     private Button btnEmoji;
     private Button btnExpand;
 
@@ -86,6 +87,12 @@ public class GameHUDController : MonoBehaviour
         var root = uiDocument.rootVisualElement;
         QueryElements(root);
         RegisterCallbacks();
+
+        // Hide default messages bar since it's replaced by the new collapsible Chat UI
+        if (messagesBar != null)
+        {
+            messagesBar.style.display = DisplayStyle.None;
+        }
 
         // Set initial values (mockup data)
         SetPlayerInfo("YWonderPlayer", 1);
@@ -127,6 +134,7 @@ public class GameHUDController : MonoBehaviour
         btnSettings = root.Q<Button>("BtnSettings");
 
         // Messages
+        messagesBar = root.Q<VisualElement>("MessagesBar");
         btnEmoji = root.Q<Button>("BtnEmoji");
         btnExpand = root.Q<Button>("BtnExpand");
     }

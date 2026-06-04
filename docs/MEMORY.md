@@ -348,3 +348,28 @@
   if (keyboard != null && keyboard.lKey.wasPressedThisFrame) { ... }
   ```
 - **Quy tắc**: LUÔN kiểm tra `Keyboard.current != null` trước khi đọc phím. KHÔNG BAO GIỜ dùng `Input.GetKeyDown`, `Input.GetAxis`, hoặc bất kỳ API nào từ `UnityEngine.Input` class.
+
+---
+
+## 🔴 BÀI HỌC VỀ CHAT UI & SCROLLVIEW AUTO-SCROLL (Cập nhật 04/06/2026)
+
+### 41. Tự động cuộn ScrollView xuống đáy (Autoscroll) qua GeometryChangedEvent
+- **Tình huống**: Thêm tin nhắn mới vào khung chat scroll history nhưng ScrollView không tự động cuộn xuống dưới, người dùng phải kéo chuột thủ công để xem.
+- **Nguyên nhân**: Khi thêm một phần tử UI mới vào ScrollView, kích thước thực tế (`layout.height`) của content container chưa kịp cập nhật ngay trong khung hình đó. Nếu gán `scrollOffset` lập tức, hệ thống sẽ cuộn theo chiều cao cũ trước khi có tin nhắn mới.
+- **Giải pháp**: Đăng ký một callback tạm thời lắng nghe sự kiện thay đổi layout (`GeometryChangedEvent`) của ScrollView. Trong callback, cập nhật `scrollOffset = new Vector2(0, scrollview.contentContainer.layout.height)` và ngay lập tức hủy đăng ký callback (`UnregisterCallback`) để tránh đệ quy lặp vô hạn.
+  ```csharp
+  private void ScrollToBottom() {
+      scrollerHistory.RegisterCallback<GeometryChangedEvent>(OnScrollHistoryGeometryChanged);
+  }
+  private void OnScrollHistoryGeometryChanged(GeometryChangedEvent evt) {
+      scrollerHistory.UnregisterCallback<GeometryChangedEvent>(OnScrollHistoryGeometryChanged);
+      scrollerHistory.scrollOffset = new Vector2(0, scrollerHistory.contentContainer.layout.height);
+  }
+  ```
+- **Quy tắc**: Mọi thao tác cuộn tự động sau khi chèn thêm phần tử động vào ScrollView đều PHẢI sử dụng cơ chế lắng nghe `GeometryChangedEvent` và hủy đăng ký ngay sau đó.
+
+### 42. Kiểm soát Focus Input TextField kết hợp Phím Enter
+- **Tình huống**: Bấm `Enter` để mở rộng chat và focus viết chữ, nhưng khi viết xong bấm `Enter` tiếp lại bị double submit hoặc mất focus không mong muốn.
+- **Giải pháp**: Sử dụng `FocusController` của UI Toolkit thông qua `root.focusController.focusedElement` để xác định trạng thái focus hiện tại của input field. Nếu input chưa được focus → gọi `.Focus()`. Nếu đang được focus và có chữ → gửi tin nhắn. Nếu rỗng → gọi `.Blur()` giải phóng focus và thu nhỏ chat.
+- **Quy tắc**: Khi kết hợp phím cứng toàn cục với một TextField, phải kiểm tra tường minh phần tử đang được focus hệ thống trước khi quyết định hành vi.
+
