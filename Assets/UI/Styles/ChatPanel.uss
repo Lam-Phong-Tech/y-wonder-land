@@ -83,7 +83,7 @@
 }
 
 .chat-expanded-panel {
-    background-color: #F5F0E8;
+    background-color: rgba(30, 30, 35, 0.88);
     border-radius: 16px;
     border-width: 3px;
     border-color: #3D3535;
@@ -96,7 +96,9 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    background-color: #3D3535;
+    background-color: rgba(20, 20, 25, 0.95);
+    border-bottom-width: 2px;
+    border-bottom-color: #3D3535;
     padding: 8px 14px;
     height: 36px;
     flex-shrink: 0; /* prevent compression */
@@ -137,7 +139,7 @@
 .chat-history-scroll {
     flex-grow: 1;
     padding: 8px 12px;
-    background-color: #FCF9F5;
+    background-color: rgba(15, 15, 20, 0.45);
 }
 
 /* Message Item Layout */
@@ -157,7 +159,7 @@
 
 .chat-msg-text {
     font-size: 12px;
-    color: #3D3535;
+    color: #EEEEEE;
     white-space: normal; /* wrap text */
     flex-grow: 1;
     flex-shrink: 1;
@@ -167,7 +169,7 @@
 .chat-footer {
     flex-direction: row;
     align-items: center;
-    background-color: #EDE6DB;
+    background-color: rgba(25, 25, 30, 0.95);
     border-top-width: 2px;
     border-top-color: #3D3535;
     padding: 6px 10px;
@@ -182,7 +184,7 @@
     background-color: transparent;
     border-width: 0;
     font-size: 24px;
-    color: #3D3535;
+    color: #F5F0E8;
     padding: 0;
     margin-right: 6px;
     -unity-text-align: middle-center;
@@ -191,7 +193,7 @@
 }
 
 .chat-footer-emoji-btn:hover {
-    background-color: rgba(0, 0, 0, 0.06);
+    background-color: rgba(255, 255, 255, 0.15);
     scale: 1.1;
 }
 
