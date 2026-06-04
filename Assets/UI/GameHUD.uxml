@@ -62,6 +62,14 @@
                         <ui:Label text="👥" class="sidebar-btn-icon sidebar-btn-icon-white" />
                     </ui:Button>
                 </ui:VisualElement>
+
+                <!-- Shop (Temporary) -->
+                <ui:VisualElement class="sidebar-btn-shadow">
+                    <ui:Button name="BtnShop" class="sidebar-btn sidebar-btn-shop">
+                        <ui:Label text="🛒" class="sidebar-btn-shop-icon" />
+                        <ui:Label text="Shop" class="sidebar-btn-shop-text" />
+                    </ui:Button>
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
 

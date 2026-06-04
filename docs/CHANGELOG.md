@@ -5,6 +5,22 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-06-04] — HUD Shop Test Button Integration
+
+### Added
+- **HUD Shop Button** — Tích hợp nút tạm "🛒 Shop" trên HUD để test nhanh Shop Popup:
+  - Màu nền xanh lá #4CAF50 đồng bộ với header shop, viền 3px #3D3535.
+  - Sử dụng bố cục ngang (flex-direction: row) gồm emoji 🛒 và nhãn chữ "Shop".
+  - Hiệu ứng cơ học đầy đủ: hover phóng to/đổi màu nhẹ, active lún xuống 3px.
+  - Tích hợp callback click mở ShopPopup với mock data mặc định ("Hai Lúa").
+  - Cơ chế dự phòng (fallback) tự động tìm kiếm `ShopPopupController` và các popup controller khác trong `OnEnable()` nếu chưa kéo thả trong Inspector.
+
+### Files changed
+- Assets/UI/GameHUD.uxml (MODIFIED)
+- Assets/UI/Styles/GameHUD.uss (MODIFIED)
+- Assets/UI/GameHUDController.cs (MODIFIED)
+
+---
 ## [2026-06-04] — Module Shop UI (Template chung 12 shop)
 
 ### Added

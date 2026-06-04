@@ -17,6 +17,7 @@ public class GameHUDController : MonoBehaviour
     [SerializeField] private ProfilePopupController profilePopup;
     [SerializeField] private AttendancePopupController attendancePopup;
     [SerializeField] private QuestPopupController questPopup;
+    [SerializeField] private ShopPopupController shopPopup;
 
     private UIDocument uiDocument;
 
@@ -38,6 +39,7 @@ public class GameHUDController : MonoBehaviour
     private Button btnCalendar;
     private Button btnMail;
     private Button btnFriends;
+    private Button btnShop;
 
     // Action buttons
     private Button btnInteract;
@@ -58,6 +60,17 @@ public class GameHUDController : MonoBehaviour
             Debug.LogError("[GameHUD] UIDocument component not found!");
             return;
         }
+
+        // Fallback auto-find if references are not assigned in Inspector
+        if (shopPopup == null) shopPopup = FindFirstObjectByType<ShopPopupController>();
+        if (settingsPopup == null) settingsPopup = FindFirstObjectByType<SettingsPopupController>();
+        if (inventoryPopup == null) inventoryPopup = FindFirstObjectByType<InventoryPopupController>();
+        if (leaderboardPopup == null) leaderboardPopup = FindFirstObjectByType<LeaderboardPopupController>();
+        if (friendsPopup == null) friendsPopup = FindFirstObjectByType<FriendsPopupController>();
+        if (mailboxPopup == null) mailboxPopup = FindFirstObjectByType<MailboxPopupController>();
+        if (profilePopup == null) profilePopup = FindFirstObjectByType<ProfilePopupController>();
+        if (attendancePopup == null) attendancePopup = FindFirstObjectByType<AttendancePopupController>();
+        if (questPopup == null) questPopup = FindFirstObjectByType<QuestPopupController>();
 
         var root = uiDocument.rootVisualElement;
         QueryElements(root);
@@ -90,6 +103,7 @@ public class GameHUDController : MonoBehaviour
         btnCalendar = root.Q<Button>("BtnCalendar");
         btnMail = root.Q<Button>("BtnMail");
         btnFriends = root.Q<Button>("BtnFriends");
+        btnShop = root.Q<Button>("BtnShop");
 
         // Actions
         btnInteract = root.Q<Button>("BtnInteract");
@@ -158,6 +172,14 @@ public class GameHUDController : MonoBehaviour
                 friendsPopup.Show();
             else
                 Debug.Log("[GameHUD] Friends clicked (no popup assigned)");
+        });
+
+        btnShop?.RegisterCallback<ClickEvent>(evt =>
+        {
+            if (shopPopup != null)
+                shopPopup.Show();
+            else
+                Debug.Log("[GameHUD] Shop clicked (no shop popup assigned)");
         });
 
         // Action buttons
