@@ -21,6 +21,7 @@ public class GameHUDController : MonoBehaviour
     [SerializeField] private MapPopupController mapPopup;
     [SerializeField] private PiggyBankPopupController piggyBankPopup;
     [SerializeField] private LevelUpOverlayController levelUpOverlay;
+    [SerializeField] private EventPopupController eventPopup;
 
     private UIDocument uiDocument;
 
@@ -79,6 +80,7 @@ public class GameHUDController : MonoBehaviour
         if (mapPopup == null) mapPopup = FindFirstObjectByType<MapPopupController>();
         if (piggyBankPopup == null) piggyBankPopup = FindFirstObjectByType<PiggyBankPopupController>();
         if (levelUpOverlay == null) levelUpOverlay = FindFirstObjectByType<LevelUpOverlayController>();
+        if (eventPopup == null) eventPopup = FindFirstObjectByType<EventPopupController>();
 
         var root = uiDocument.rootVisualElement;
         QueryElements(root);
@@ -310,13 +312,23 @@ public class GameHUDController : MonoBehaviour
         }
     }
 
-    // ── Test: Press L key to trigger Level Up ──
+    // ── Test: Press L = Level Up, E = Event ──
     private void Update()
     {
         var keyboard = UnityEngine.InputSystem.Keyboard.current;
-        if (keyboard != null && keyboard.lKey.wasPressedThisFrame && levelUpOverlay != null)
+        if (keyboard == null) return;
+
+        if (keyboard.lKey.wasPressedThisFrame && levelUpOverlay != null)
         {
             levelUpOverlay.TestLevelUp();
+        }
+
+        if (keyboard.eKey.wasPressedThisFrame && eventPopup != null)
+        {
+            if (eventPopup.IsVisible())
+                eventPopup.Hide();
+            else
+                eventPopup.Show();
         }
     }
 }
