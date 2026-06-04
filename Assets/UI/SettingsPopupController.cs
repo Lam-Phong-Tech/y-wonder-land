@@ -11,6 +11,7 @@ public class SettingsPopupController : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private UIDocument settingsDocument;
+    [SerializeField] private ConfirmDialogController confirmDialog;
 
     // UI Elements
     private VisualElement overlay;
@@ -235,19 +236,65 @@ public class SettingsPopupController : MonoBehaviour
             }
         });
 
-        // ── Bottom Buttons ──
+        // ── Bottom Buttons (tích hợp Confirm Dialog) ──
         btnDeleteAccount?.RegisterCallback<ClickEvent>(evt =>
         {
-            Debug.Log("[Settings] Delete Account clicked — show confirmation dialog");
-            // TODO: Show confirmation popup before deleting
+            if (confirmDialog != null)
+            {
+                confirmDialog.Show(
+                    "XÓA TÀI KHOẢN",
+                    "Hành động này sẽ xóa vĩnh viễn tài khoản của bạn. Tất cả dữ liệu sẽ bị mất và không thể khôi phục.",
+                    "Xóa vĩnh viễn",
+                    "Giữ tài khoản",
+                    OnDeleteAccountConfirmed,
+                    ConfirmDialogType.Danger
+                );
+            }
+            else
+            {
+                Debug.LogWarning("[Settings] ConfirmDialogController chưa được gán! Kéo thả vào Inspector.");
+            }
         });
 
         btnExitApp?.RegisterCallback<ClickEvent>(evt =>
         {
-            Debug.Log("[Settings] Exit App clicked");
-            // TODO: Save settings before quitting
-            // Application.Quit();
+            if (confirmDialog != null)
+            {
+                confirmDialog.Show(
+                    "THOÁT GAME",
+                    "Bạn có chắc chắn muốn thoát game? Tiến trình đã được lưu tự động.",
+                    "Thoát",
+                    "Ở lại",
+                    OnExitGameConfirmed,
+                    ConfirmDialogType.Warning
+                );
+            }
+            else
+            {
+                Debug.LogWarning("[Settings] ConfirmDialogController chưa được gán! Kéo thả vào Inspector.");
+            }
         });
+    }
+
+    // ── Confirm Dialog Callbacks ──
+
+    private void OnDeleteAccountConfirmed()
+    {
+        Debug.Log("[Settings] ✅ Xác nhận XÓA TÀI KHOẢN — đang thực hiện...");
+        // TODO: Gọi UGS Authentication để xóa tài khoản
+        // AuthenticationService.Instance.DeleteAccountAsync();
+        Hide();
+    }
+
+    private void OnExitGameConfirmed()
+    {
+        Debug.Log("[Settings] ✅ Xác nhận THOÁT GAME — đang thoát...");
+        // TODO: Save settings trước khi thoát
+        #if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+        #else
+        Application.Quit();
+        #endif
     }
 
     private void UpdateLabel(Label label, float value)

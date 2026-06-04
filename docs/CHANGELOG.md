@@ -1,6 +1,39 @@
 # Changelog — Y WONDER LAND
 # Format: Theo module, có ngày và danh sách files thay đổi
 
+> **⚠️ TRẠNG THÁI QC:** Tất cả các module UI hiện tại đều **CHƯA được QC review** bởi khách hàng.
+> Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
+
+---
+
+## [2026-06-04] — Module Confirm Dialog & Reward Popup
+### Added
+- **Confirm Dialog** — Component reusable dạng modal nhỏ trung tâm cho toàn game:
+  - 3 loại dialog: Warning (⚠ vàng #FFC107), Danger (✕ đỏ #FF4B4B), Info (i xanh #2D7BFF)
+  - API: `Show(title, message, confirmText, cancelText, onConfirm, dialogType)`
+  - 2 nút: Hủy bỏ (xám) + Xác nhận (màu theo type)
+  - Icon Unicode trong vòng tròn màu theo type
+  - Overlay click-to-dismiss, nút X đỏ góc trên phải
+- **Reward Popup** — Component reusable hiển thị phần thưởng:
+  - API: `Show(title, rewards, buttonText, onClaim)`
+  - Lưới reward items tự động tạo từ `List<RewardItemData>`
+  - Mỗi item: icon + tên + số lượng trong khung trắng bo góc 16px
+  - Header vàng #FFC107, nút "Nhận thưởng" mechanical press
+  - Empty state "Không có phần thưởng" khi danh sách rỗng
+- Cả 2 component tuân thủ đầy đủ The Tangible Playground:
+  - Retro shadow 6px offset, 0px blur
+  - Spacing bội 4/8px, border 2-3px #3D3535
+  - Đủ trạng thái :hover, :active, :disabled
+  - Không glassmorphism, không gradient, không icon thừa
+  - Callbacks đăng ký 1 lần, unregister khi disable
+### Files changed
+- Assets/UI/ConfirmDialog.uxml (NEW)
+- Assets/UI/Styles/ConfirmDialog.uss (NEW)
+- Assets/UI/ConfirmDialogController.cs (NEW)
+- Assets/UI/RewardPopup.uxml (NEW)
+- Assets/UI/Styles/RewardPopup.uss (NEW)
+- Assets/UI/RewardPopupController.cs (NEW)
+
 ---
 
 ## [2026-06-03] — Onboarding Cinematic Skip & Tutorial Fallback
@@ -18,8 +51,9 @@
 - Assets/Scripts/Tutorial/GuideNPC.cs (MODIFIED)
 - Assets/Scripts/Environment/FarmTile.cs (MODIFIED)
 
-## [2026-06-03] — UI/UX Layout Polish (Friends, Quest, Attendance Popups)
+## [2026-06-03] — UI/UX Layout Polish (Friends, Quest, Attendance, Settings Popups)
 ### Fixed
+- Popup Cài đặt (Settings): Polish và hoàn thiện layout ngày 03/06.
 - Popup Bạn bè (Friends): Thêm khoảng đệm an toàn `margin-right: 16px` cho cụm tìm kiếm và thu nhỏ kích thước của TextField nhập tên cùng các nút bấm để tránh đè lấn lên nút đóng X ở góc trên bên phải.
 - Popup Nhiệm vụ (Quest) & Điểm danh (Attendance): Khắc phục triệt để lỗi ô vật phẩm phần thưởng bị chòi ra ngoài viền khung chứa bằng cách thiết lập `flex-shrink: 0` cho các container/grid phần thưởng và các slot con cố định, giữ nguyên layout cân đối khi kích thước màn hình thay đổi.
 - Popup Nhiệm vụ (Quest) & Thông tin nhân vật (Profile): Sửa lỗi text chỉ số tiến trình (`10 / 10`) và EXP bị lệch sát đáy dưới thanh bằng cách reset `margin` và `padding` về `0` cho `.quest-progress-text` và `.profile-exp-text`.

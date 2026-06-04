@@ -1,0 +1,251 @@
+/* ============================================================
+   ConfirmDialog.uss — Confirm Dialog Reusable Component
+   Design System: The Tangible Playground
+   Spacing: bội 4/8px | Radius: Panel 24px, Button 12px
+   Shadow: retro offset 6px, 0px blur
+   ============================================================ */
+
+/* === OVERLAY === */
+.confirm-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    align-items: center;
+    justify-content: center;
+}
+
+/* === SHADOW WRAPPER (disabled — no shadow) === */
+.confirm-shadow {
+    background-color: transparent;
+    border-radius: 24px;
+    padding-right: 0;
+    padding-bottom: 0;
+}
+
+/* === PANEL === */
+.confirm-panel {
+    background-color: #F5F0E8;
+    border-radius: 24px;
+    border-width: 2px;
+    border-color: #3D3535;
+    width: 400px;
+    padding: 32px;
+    align-items: center;
+}
+
+/* === CLOSE BUTTON (X) === */
+.confirm-btn-close {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 36px;
+    height: 36px;
+    background-color: #FF4B4B;
+    border-radius: 12px;
+    border-width: 0;
+    align-items: center;
+    justify-content: center;
+    color: #FFFFFF;
+    font-size: 16px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    transition-property: translate, scale, background-color;
+    transition-duration: 0.1s;
+}
+
+.confirm-btn-close:hover {
+    background-color: #FF6B6B;
+    scale: 1.05;
+}
+
+.confirm-btn-close:active {
+    translate: 2px 2px;
+    scale: 0.95;
+    background-color: #E03A3A;
+}
+
+/* === ICON CONTAINER === */
+.confirm-icon-container {
+    width: 64px;
+    height: 64px;
+    border-radius: 32px;
+    border-width: 2px;
+    border-color: #3D3535;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+.confirm-icon {
+    font-size: 28px;
+    -unity-text-align: middle-center;
+    padding: 0;
+    margin: 0;
+}
+
+/* --- Icon type: Warning (vàng) --- */
+.icon-warning {
+    color: #3D3535;
+}
+
+.confirm-icon-container.icon-container-warning {
+    background-color: #FFC107;
+}
+
+/* --- Icon type: Danger (đỏ) --- */
+.icon-danger {
+    color: #FFFFFF;
+}
+
+.confirm-icon-container.icon-container-danger {
+    background-color: #FF4B4B;
+}
+
+/* --- Icon type: Info (xanh) --- */
+.icon-info {
+    color: #FFFFFF;
+    -unity-font-style: bold;
+}
+
+.confirm-icon-container.icon-container-info {
+    background-color: #2D7BFF;
+}
+
+/* === TITLE === */
+.confirm-title {
+    font-size: 28px;
+    -unity-font-style: bold;
+    color: #3D3535;
+    -unity-text-align: middle-center;
+    margin-bottom: 12px;
+    padding: 0;
+}
+
+/* === MESSAGE === */
+.confirm-message {
+    font-size: 16px;
+    color: #3D3535;
+    -unity-text-align: middle-center;
+    white-space: normal;
+    margin-bottom: 24px;
+    padding: 0 8px;
+}
+
+/* === BUTTONS ROW === */
+.confirm-buttons {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+/* === BUTTON SHADOW (disabled — flat buttons) === */
+.confirm-btn-shadow {
+    background-color: transparent;
+    border-radius: 12px;
+    padding-right: 0;
+    padding-bottom: 0;
+    flex-grow: 1;
+    margin: 0 8px;
+}
+
+/* === CANCEL BUTTON (xám) === */
+.confirm-btn-cancel {
+    background-color: #D5D5D5;
+    color: #3D3535;
+    font-size: 16px;
+    -unity-font-style: bold;
+    border-width: 0;
+    border-radius: 12px;
+    padding: 12px 20px;
+    -unity-text-align: middle-center;
+    flex-grow: 1;
+    transition-property: translate, background-color;
+    transition-duration: 0.1s;
+    transition-timing-function: ease-out;
+}
+
+.confirm-btn-cancel:hover {
+    background-color: #E0E0E0;
+}
+
+.confirm-btn-cancel:active {
+    translate: 4px 4px;
+    background-color: #C0C0C0;
+}
+
+.confirm-btn-cancel:disabled {
+    background-color: #E8E8E8;
+    color: rgba(61, 53, 53, 0.5);
+    opacity: 0.5;
+}
+
+/* === CONFIRM BUTTON (base) === */
+.confirm-btn-confirm {
+    color: #FFFFFF;
+    font-size: 16px;
+    -unity-font-style: bold;
+    border-width: 0;
+    border-radius: 12px;
+    padding: 12px 20px;
+    -unity-text-align: middle-center;
+    flex-grow: 1;
+    transition-property: translate, background-color;
+    transition-duration: 0.1s;
+    transition-timing-function: ease-out;
+    /* Mặc định Warning (vàng) */
+    background-color: #FFC107;
+}
+
+.confirm-btn-confirm:active {
+    translate: 4px 4px;
+}
+
+.confirm-btn-confirm:disabled {
+    opacity: 0.5;
+}
+
+/* --- Confirm type: Warning (vàng #FFC107) --- */
+.btn-confirm-warning {
+    background-color: #FFC107;
+    color: #3D3535;
+}
+
+.btn-confirm-warning:hover {
+    background-color: #FFD54F;
+}
+
+.btn-confirm-warning:active {
+    background-color: #E5AC06;
+}
+
+/* --- Confirm type: Danger (đỏ #FF4B4B) --- */
+.btn-confirm-danger {
+    background-color: #FF4B4B;
+    color: #FFFFFF;
+}
+
+.btn-confirm-danger:hover {
+    background-color: #FF6B6B;
+}
+
+.btn-confirm-danger:active {
+    background-color: #E03A3A;
+}
+
+/* --- Confirm type: Info (xanh #2D7BFF) --- */
+.btn-confirm-info {
+    background-color: #2D7BFF;
+    color: #FFFFFF;
+}
+
+.btn-confirm-info:hover {
+    background-color: #1A6AEE;
+}
+
+.btn-confirm-info:active {
+    background-color: #1558CC;
+}

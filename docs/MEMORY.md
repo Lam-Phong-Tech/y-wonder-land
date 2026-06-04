@@ -188,3 +188,40 @@
   - Áp dụng triết lý *lập trình chống đạn (bulletproof programming)*: Trong các hàm khởi tạo (`Awake`/`Start`), tự động kiểm tra tham chiếu. Nếu thiếu, tự sinh (`Instantiate` / `new GameObject`) các vật thể mockup cần thiết (như ô đất `FarmTile` hay `GuideNPC`) ở tọa độ an toàn.
   - Sử dụng mô hình hình học cơ bản (Capsule cho NPC, Cylinder/Cube cho cây trồng) cùng với các màu sắc vật liệu tiêu chuẩn đặc trưng (Nâu cho đất, Xanh cho thân cây, Cam cho cà rốt chín) để người chơi kiểm thử rõ ràng trạng thái.
   - Hủy bỏ (`Destroy`) collider của các mô hình hình học con để tia Raycast click chuột trúng trực tiếp vào collider chính của đối tượng cha.
+
+---
+
+## 🔴 BÀI HỌC VỀ INPUT SYSTEM (Cập nhật 04/06/2026)
+
+### 28. KHÔNG dùng UnityEngine.Input (legacy) — dự án dùng New Input System
+- **Tình huống**: Viết script test dùng `Input.GetKeyDown(KeyCode.F1)` để test UI popup.
+- **Hậu quả**: `InvalidOperationException: You are trying to read Input using the UnityEngine.Input class, but you have switched active Input handling to Input System package in Player Settings.`
+- **Nguyên nhân**: Dự án đã chuyển hoàn toàn sang **New Input System** (`com.unity.inputsystem`). Player Settings → Active Input Handling = "Input System Package (New)". Khi đó toàn bộ API `UnityEngine.Input` cũ bị vô hiệu hóa.
+- **Quy tắc**:
+  - **TUYỆT ĐỐI KHÔNG** dùng `Input.GetKeyDown`, `Input.GetAxis`, `Input.GetMouseButton` hay bất kỳ API nào từ `UnityEngine.Input`.
+  - Thay bằng `UnityEngine.InputSystem`:
+    - `Keyboard.current.f1Key.wasPressedThisFrame` thay cho `Input.GetKeyDown(KeyCode.F1)`
+    - `Mouse.current.leftButton.wasPressedThisFrame` thay cho `Input.GetMouseButtonDown(0)`
+    - `Gamepad.current.buttonSouth.wasPressedThisFrame` thay cho `Input.GetButtonDown("Submit")`
+  - Luôn null-check `Keyboard.current` / `Mouse.current` trước khi truy cập (có thể null nếu không có thiết bị kết nối).
+
+---
+
+## 🔴 BÀI HỌC VỀ UI CONSISTENCY (Cập nhật 04/06/2026)
+
+### 29. PHẢI đọc USS popup cũ trước khi viết popup mới — đảm bảo phong cách đồng nhất
+- **Tình huống**: Tạo ConfirmDialog.uss và RewardPopup.uss mới, nhưng viết theo trí nhớ/tự sáng tạo mà không đọc lại USS của Settings/Friends/Inventory đã có sẵn.
+- **Hậu quả**: Popup mới bị lệch phong cách so với popup cũ — border-width, border-radius, shadow wrapper, :active translate, close button đều khác nhau. Mất thời gian sửa đi sửa lại nhiều lần.
+- **Bảng giá trị chuẩn từ popup cũ** (Settings/Friends/Inventory):
+  - Panel: `border-radius: 22px`, `border-width: 3px`, `border-color: #3D3535`
+  - Shadow wrapper: `background-color: transparent`, `padding-right: 6px`, `padding-bottom: 6px` (giữ cấu trúc, không tô màu)
+  - Close button: `border-radius: 10px`, `border-width: 3px`, `border-color: #3D3535`, `background-color: #FF4B4B`
+  - Close shadow: `background-color: transparent`, `padding-right: 2px`, `padding-bottom: 2px`
+  - Nút action: `border-width: 2-3px`, `border-color: #3D3535`, KHÔNG có shadow wrapper phía sau
+  - `:active` effect: `translate: 1px 1px` (nhỏ) hoặc `translate: 2px 2px` (close button). KHÔNG dùng `4px 4px`.
+  - `:active` close button: `background-color: #CC3333`
+  - Transition: `transition-duration: 0.08s` (không phải 0.1s)
+- **Quy tắc**:
+  - **TRƯỚC KHI** viết bất kỳ USS mới nào, PHẢI đọc ít nhất 2-3 file USS popup cũ (SettingsPopup.uss, FriendsPopup.uss, InventoryPopup.uss) để lấy giá trị chuẩn.
+  - Copy-paste các giá trị chung (overlay, shadow wrapper, close button, panel border) từ popup cũ, chỉ thay đổi phần nội dung riêng.
+  - Sau khi viết xong, tự so sánh bảng giá trị với popup cũ trước khi giao cho anh test.
