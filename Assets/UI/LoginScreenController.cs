@@ -8,6 +8,9 @@ using UnityEngine.UIElements;
 /// </summary>
 public class LoginScreenController : MonoBehaviour
 {
+    [Header("Popup References")]
+    [SerializeField] private ForgotPasswordPopupController forgotPasswordPopup;
+
     private UIDocument uiDocument;
 
     // Tab buttons
@@ -60,6 +63,12 @@ public class LoginScreenController : MonoBehaviour
         QueryElements(root);
         RegisterCallbacks();
         SetupPlaceholders();
+        
+        // Disable register button by default until validated
+        if (btnRegister != null)
+        {
+            btnRegister.SetEnabled(false);
+        }
 
         // Default: show Login tab
         ShowLoginTab();
@@ -107,6 +116,12 @@ public class LoginScreenController : MonoBehaviour
         // Register actions
         btnRegister?.RegisterCallback<ClickEvent>(evt => OnRegisterClicked());
         btnToggleRegPassword?.RegisterCallback<ClickEvent>(evt => ToggleRegPasswordVisibility());
+
+        // Register real-time validation callbacks
+        regUsernameField?.RegisterValueChangedCallback(evt => OnRegisterFieldsChanged());
+        regEmailField?.RegisterValueChangedCallback(evt => OnRegisterFieldsChanged());
+        regPasswordField?.RegisterValueChangedCallback(evt => OnRegisterFieldsChanged());
+        regConfirmField?.RegisterValueChangedCallback(evt => OnRegisterFieldsChanged());
 
         // Forgot password
         forgotPassword?.RegisterCallback<ClickEvent>(evt => OnForgotPasswordClicked());
@@ -250,37 +265,116 @@ public class LoginScreenController : MonoBehaviour
 
     // ── Register ──
 
-    private void OnRegisterClicked()
+    private void OnRegisterFieldsChanged()
     {
+        string errMsg;
+        bool isValid = ValidateRegisterForm(out errMsg);
+
+        if (btnRegister != null)
+        {
+            btnRegister.SetEnabled(isValid);
+        }
+
+        // Show real-time error helper only if at least one field has been edited
+        bool anyFieldFilled = !string.IsNullOrEmpty(regUsernameField?.value) ||
+                              !string.IsNullOrEmpty(regEmailField?.value) ||
+                              !string.IsNullOrEmpty(regPasswordField?.value) ||
+                              !string.IsNullOrEmpty(regConfirmField?.value);
+
+        if (!isValid)
+        {
+            if (anyFieldFilled)
+            {
+                ShowStatus(registerStatus, errMsg, false);
+            }
+            else
+            {
+                ClearStatus(registerStatus);
+            }
+        }
+        else
+        {
+            ShowStatus(registerStatus, "Thông tin hợp lệ, sẵn sàng đăng ký!", true);
+        }
+    }
+
+    private bool ValidateRegisterForm(out string errorMessage)
+    {
+        errorMessage = "";
         string username = regUsernameField?.value ?? "";
         string email = regEmailField?.value ?? "";
         string password = regPasswordField?.value ?? "";
         string confirm = regConfirmField?.value ?? "";
 
-        Debug.Log($"[LoginScreen] Register clicked — Username: '{username}', Email: '{email}'");
-
-        // Validation
-        if (string.IsNullOrWhiteSpace(username))
+        // 1. Check empty
+        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(email) ||
+            string.IsNullOrEmpty(password) || string.IsNullOrEmpty(confirm))
         {
-            ShowStatus(registerStatus, "Vui lòng nhập tên đăng nhập", false);
-            return;
+            errorMessage = "Vui lòng điền đầy đủ các thông tin đăng ký";
+            return false;
         }
 
-        if (string.IsNullOrWhiteSpace(email))
+        // 2. Validate Username (> 8 chars, alphanumeric & underscore only)
+        if (username.Length <= 8)
         {
-            ShowStatus(registerStatus, "Vui lòng nhập email", false);
-            return;
+            errorMessage = "Tên đăng nhập phải dài hơn 8 ký tự";
+            return false;
+        }
+        if (!System.Text.RegularExpressions.Regex.IsMatch(username, @"^[a-zA-Z0-9_]+$"))
+        {
+            errorMessage = "Tên đăng nhập chỉ được chứa chữ, số và dấu gạch dưới (_)";
+            return false;
         }
 
-        if (string.IsNullOrWhiteSpace(password))
+        // 3. Validate Email (standard email regex)
+        if (!System.Text.RegularExpressions.Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
         {
-            ShowStatus(registerStatus, "Vui lòng nhập mật khẩu", false);
-            return;
+            errorMessage = "Email không đúng định dạng";
+            return false;
         }
 
+        // 4. Validate Password (> 8 chars, 1 uppercase, 1 lowercase, 1 digit, 1 special char)
+        if (password.Length <= 8)
+        {
+            errorMessage = "Mật khẩu phải dài hơn 8 ký tự";
+            return false;
+        }
+
+        bool hasUpper = false;
+        bool hasLower = false;
+        bool hasDigit = false;
+        bool hasSpecial = false;
+
+        foreach (char c in password)
+        {
+            if (char.IsUpper(c)) hasUpper = true;
+            else if (char.IsLower(c)) hasLower = true;
+            else if (char.IsDigit(c)) hasDigit = true;
+            else if (!char.IsLetterOrDigit(c)) hasSpecial = true;
+        }
+
+        if (!hasUpper || !hasLower || !hasDigit || !hasSpecial)
+        {
+            errorMessage = "Mật khẩu cần ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt";
+            return false;
+        }
+
+        // 5. Validate Password Confirm
         if (password != confirm)
         {
-            ShowStatus(registerStatus, "Mật khẩu xác nhận không khớp", false);
+            errorMessage = "Mật khẩu xác nhận không khớp";
+            return false;
+        }
+
+        return true;
+    }
+
+    private void OnRegisterClicked()
+    {
+        string errMsg;
+        if (!ValidateRegisterForm(out errMsg))
+        {
+            ShowStatus(registerStatus, errMsg, false);
             return;
         }
 
@@ -305,8 +399,17 @@ public class LoginScreenController : MonoBehaviour
 
     private void OnForgotPasswordClicked()
     {
-        Debug.Log("[LoginScreen] Forgot password clicked (mockup)");
-        ShowStatus(loginStatus, "Chức năng đang phát triển...", false);
+        Debug.Log("[LoginScreen] Forgot password clicked");
+
+        if (forgotPasswordPopup != null)
+        {
+            forgotPasswordPopup.Show();
+        }
+        else
+        {
+            ShowStatus(loginStatus, "Chưa gắn ForgotPasswordPopupController!", false);
+            Debug.LogWarning("[LoginScreen] forgotPasswordPopup is null! Drag the reference in Inspector.");
+        }
     }
 
     // ── Status Message Helpers ──

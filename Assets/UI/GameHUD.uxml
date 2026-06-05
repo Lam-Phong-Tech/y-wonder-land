@@ -42,10 +42,17 @@
                     </ui:Button>
                 </ui:VisualElement>
 
-                <!-- Daily Attendance / Event -->
+                <!-- Daily Attendance -->
                 <ui:VisualElement class="sidebar-btn-shadow">
                     <ui:Button name="BtnCalendar" class="sidebar-btn sidebar-btn-calendar">
                         <ui:Label text="📅" class="sidebar-btn-icon sidebar-btn-icon-white" />
+                    </ui:Button>
+                </ui:VisualElement>
+
+                <!-- Event -->
+                <ui:VisualElement class="sidebar-btn-shadow">
+                    <ui:Button name="BtnEvent" class="sidebar-btn sidebar-btn-event">
+                        <ui:Label text="🎁" class="sidebar-btn-icon sidebar-btn-icon-white" />
                     </ui:Button>
                 </ui:VisualElement>
 
@@ -60,6 +67,43 @@
                 <ui:VisualElement class="sidebar-btn-shadow">
                     <ui:Button name="BtnFriends" class="sidebar-btn sidebar-btn-friends">
                         <ui:Label text="👥" class="sidebar-btn-icon sidebar-btn-icon-white" />
+                    </ui:Button>
+                </ui:VisualElement>
+
+                <!-- Shop (Temporary) -->
+                <ui:VisualElement class="sidebar-btn-shadow">
+                    <ui:Button name="BtnShop" class="sidebar-btn sidebar-btn-shop">
+                        <ui:Label text="🛒" class="sidebar-btn-shop-icon" />
+                        <ui:Label text="Shop" class="sidebar-btn-shop-text" />
+                    </ui:Button>
+                </ui:VisualElement>
+
+                <!-- Map (Temporary) -->
+                <ui:VisualElement class="sidebar-btn-shadow">
+                    <ui:Button name="BtnMap" class="sidebar-btn sidebar-btn-map">
+                        <ui:Label text="🗺️" class="sidebar-btn-map-icon" />
+                        <ui:Label text="Map" class="sidebar-btn-map-text" />
+                    </ui:Button>
+                </ui:VisualElement>
+
+                <!-- Piggy Bank (Temporary) -->
+                <ui:VisualElement class="sidebar-btn-shadow">
+                    <ui:Button name="BtnPiggy" class="sidebar-btn sidebar-btn-piggy">
+                        <ui:Label text="🐷" class="sidebar-btn-piggy-icon" />
+                    </ui:Button>
+                </ui:VisualElement>
+
+                <!-- Build Mode -->
+                <ui:VisualElement class="sidebar-btn-shadow">
+                    <ui:Button name="BtnBuild" class="sidebar-btn sidebar-btn-build">
+                        <ui:Label text="🔨" class="sidebar-btn-icon sidebar-btn-icon-white" />
+                    </ui:Button>
+                </ui:VisualElement>
+
+                <!-- Fishing (Temporary) -->
+                <ui:VisualElement class="sidebar-btn-shadow">
+                    <ui:Button name="BtnFishing" class="sidebar-btn sidebar-btn-fishing">
+                        <ui:Label text="🎣" class="sidebar-btn-icon sidebar-btn-icon-white" />
                     </ui:Button>
                 </ui:VisualElement>
             </ui:VisualElement>
@@ -112,18 +156,7 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
-        <!-- ============================== -->
-        <!-- 5. MESSAGES — Bottom Center    -->
-        <!-- ============================== -->
-        <ui:VisualElement class="hud-bottom-center">
-            <ui:VisualElement name="MessagesBar" class="messages-bar">
-                <ui:Label text="Messages" class="messages-text" />
-                <ui:VisualElement class="messages-icons">
-                    <ui:Button name="BtnEmoji" text="☺" class="messages-icon-btn" />
-                    <ui:Button name="BtnExpand" text="▲" class="messages-icon-btn" />
-                </ui:VisualElement>
-            </ui:VisualElement>
-        </ui:VisualElement>
+
 
         <!-- ============================== -->
         <!-- 6. ACTION BUTTONS — Right      -->

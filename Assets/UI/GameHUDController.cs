@@ -17,6 +17,13 @@ public class GameHUDController : MonoBehaviour
     [SerializeField] private ProfilePopupController profilePopup;
     [SerializeField] private AttendancePopupController attendancePopup;
     [SerializeField] private QuestPopupController questPopup;
+    [SerializeField] private ShopPopupController shopPopup;
+    [SerializeField] private MapPopupController mapPopup;
+    [SerializeField] private PiggyBankPopupController piggyBankPopup;
+    [SerializeField] private LevelUpOverlayController levelUpOverlay;
+    [SerializeField] private EventPopupController eventPopup;
+    [SerializeField] private FishingOverlayController fishingOverlay;
+    [SerializeField] private BuildModeOverlayController buildModeOverlay;
 
     private UIDocument uiDocument;
 
@@ -38,6 +45,12 @@ public class GameHUDController : MonoBehaviour
     private Button btnCalendar;
     private Button btnMail;
     private Button btnFriends;
+    private Button btnShop;
+    private Button btnMap;
+    private Button btnEvent;
+    private Button btnPiggy;
+    private Button btnFishing;
+    private Button btnBuild;
 
     // Action buttons
     private Button btnInteract;
@@ -46,9 +59,7 @@ public class GameHUDController : MonoBehaviour
     private Button btnBag;
     private Button btnSettings;
 
-    // Messages
-    private Button btnEmoji;
-    private Button btnExpand;
+
 
     void OnEnable()
     {
@@ -59,9 +70,28 @@ public class GameHUDController : MonoBehaviour
             return;
         }
 
+        // Fallback auto-find if references are not assigned in Inspector
+        if (shopPopup == null) shopPopup = FindFirstObjectByType<ShopPopupController>();
+        if (settingsPopup == null) settingsPopup = FindFirstObjectByType<SettingsPopupController>();
+        if (inventoryPopup == null) inventoryPopup = FindFirstObjectByType<InventoryPopupController>();
+        if (leaderboardPopup == null) leaderboardPopup = FindFirstObjectByType<LeaderboardPopupController>();
+        if (friendsPopup == null) friendsPopup = FindFirstObjectByType<FriendsPopupController>();
+        if (mailboxPopup == null) mailboxPopup = FindFirstObjectByType<MailboxPopupController>();
+        if (profilePopup == null) profilePopup = FindFirstObjectByType<ProfilePopupController>();
+        if (attendancePopup == null) attendancePopup = FindFirstObjectByType<AttendancePopupController>();
+        if (questPopup == null) questPopup = FindFirstObjectByType<QuestPopupController>();
+        if (mapPopup == null) mapPopup = FindFirstObjectByType<MapPopupController>();
+        if (piggyBankPopup == null) piggyBankPopup = FindFirstObjectByType<PiggyBankPopupController>();
+        if (levelUpOverlay == null) levelUpOverlay = FindFirstObjectByType<LevelUpOverlayController>();
+        if (eventPopup == null) eventPopup = FindFirstObjectByType<EventPopupController>();
+        if (fishingOverlay == null) fishingOverlay = FindFirstObjectByType<FishingOverlayController>();
+        if (buildModeOverlay == null) buildModeOverlay = FindFirstObjectByType<BuildModeOverlayController>();
+
         var root = uiDocument.rootVisualElement;
         QueryElements(root);
         RegisterCallbacks();
+
+
 
         // Set initial values (mockup data)
         SetPlayerInfo("YWonderPlayer", 1);
@@ -88,8 +118,14 @@ public class GameHUDController : MonoBehaviour
         // Sidebar
         btnLeaderboard = root.Q<Button>("BtnLeaderboard");
         btnCalendar = root.Q<Button>("BtnCalendar");
+        btnEvent = root.Q<Button>("BtnEvent");
         btnMail = root.Q<Button>("BtnMail");
         btnFriends = root.Q<Button>("BtnFriends");
+        btnShop = root.Q<Button>("BtnShop");
+        btnMap = root.Q<Button>("BtnMap");
+        btnPiggy = root.Q<Button>("BtnPiggy");
+        btnFishing = root.Q<Button>("BtnFishing");
+        btnBuild = root.Q<Button>("BtnBuild");
 
         // Actions
         btnInteract = root.Q<Button>("BtnInteract");
@@ -98,9 +134,7 @@ public class GameHUDController : MonoBehaviour
         btnBag = root.Q<Button>("BtnBag");
         btnSettings = root.Q<Button>("BtnSettings");
 
-        // Messages
-        btnEmoji = root.Q<Button>("BtnEmoji");
-        btnExpand = root.Q<Button>("BtnExpand");
+
     }
 
     private void RegisterCallbacks()
@@ -160,6 +194,59 @@ public class GameHUDController : MonoBehaviour
                 Debug.Log("[GameHUD] Friends clicked (no popup assigned)");
         });
 
+        btnShop?.RegisterCallback<ClickEvent>(evt =>
+        {
+            if (shopPopup != null)
+                shopPopup.Show();
+            else
+                Debug.Log("[GameHUD] Shop clicked (no shop popup assigned)");
+        });
+
+        btnMap?.RegisterCallback<ClickEvent>(evt =>
+        {
+            if (mapPopup != null)
+                mapPopup.Show();
+            else
+                Debug.Log("[GameHUD] Map clicked (no map popup assigned)");
+        });
+
+        btnPiggy?.RegisterCallback<ClickEvent>(evt =>
+        {
+            if (piggyBankPopup != null)
+                piggyBankPopup.Show();
+            else
+                Debug.Log("[GameHUD] Piggy Bank clicked (no piggy popup assigned)");
+        });
+
+        btnFishing?.RegisterCallback<ClickEvent>(evt =>
+        {
+            if (fishingOverlay != null)
+                fishingOverlay.Show();
+            else
+                Debug.Log("[GameHUD] Fishing clicked (no popup assigned)");
+        });
+
+        btnBuild?.RegisterCallback<ClickEvent>(evt =>
+        {
+            if (buildModeOverlay != null)
+            {
+                if (buildModeOverlay.IsVisible())
+                    buildModeOverlay.Hide();
+                else
+                    buildModeOverlay.Show();
+            }
+            else
+                Debug.Log("[GameHUD] Build clicked (no overlay assigned)");
+        });
+
+        btnEvent?.RegisterCallback<ClickEvent>(evt =>
+        {
+            if (eventPopup != null)
+                eventPopup.Show();
+            else
+                Debug.Log("[GameHUD] Event clicked (no event popup assigned)");
+        });
+
         // Action buttons
         btnInteract?.RegisterCallback<ClickEvent>(evt =>
         {
@@ -176,16 +263,7 @@ public class GameHUDController : MonoBehaviour
             Debug.Log("[GameHUD] Jump clicked");
         });
 
-        // Messages
-        btnEmoji?.RegisterCallback<ClickEvent>(evt =>
-        {
-            Debug.Log("[GameHUD] Emoji clicked");
-        });
 
-        btnExpand?.RegisterCallback<ClickEvent>(evt =>
-        {
-            Debug.Log("[GameHUD] Expand messages clicked");
-        });
 
         // Bag
         btnBag?.RegisterCallback<ClickEvent>(evt =>
@@ -259,6 +337,39 @@ public class GameHUDController : MonoBehaviour
         if (uiDocument != null && uiDocument.rootVisualElement != null)
         {
             uiDocument.rootVisualElement.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+        }
+    }
+
+    // ── Test: Press L = Level Up, E = Event ──
+    private void Update()
+    {
+        var keyboard = UnityEngine.InputSystem.Keyboard.current;
+        if (keyboard == null) return;
+
+        if (keyboard.lKey.wasPressedThisFrame && levelUpOverlay != null)
+        {
+            levelUpOverlay.TestLevelUp();
+        }
+
+        if (keyboard.eKey.wasPressedThisFrame && eventPopup != null)
+        {
+            if (eventPopup.IsVisible())
+                eventPopup.Hide();
+            else
+                eventPopup.Show();
+        }
+
+        if (keyboard.fKey.wasPressedThisFrame && fishingOverlay != null)
+        {
+            fishingOverlay.Show();
+        }
+
+        if (keyboard.bKey.wasPressedThisFrame && buildModeOverlay != null)
+        {
+            if (buildModeOverlay.IsVisible())
+                buildModeOverlay.Hide();
+            else
+                buildModeOverlay.Show();
         }
     }
 }
