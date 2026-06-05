@@ -385,5 +385,17 @@
 - **Giải pháp**: Thực hiện dao động vị trí bằng C# trong `Update()` sử dụng phép toán `Mathf.PingPong(Time.time * speed, 100f)` và gán trực tiếp vào thuộc tính `style.left = Length.Percent(position)`. Vừa mượt mà, vừa tuyệt đối chính xác để check điều kiện trúng/hụt ở đầu C#.
 - **Quy tắc**: Mọi thành phần UI cần tương tác dữ liệu chính xác theo tọa độ/vị trí thực tế (như kim QTE, thanh trượt game nhịp điệu) nên được điều khiển vị trí trực tiếp từ C# thay vì dùng CSS Animation tĩnh.
 
+---
+
+## 🟡 BÀI HỌC VỀ SPLASH SCREEN & SORT ORDER (Cập nhật 05/06/2026)
+
+### 45. UXML comment ASCII-only KHÔNG áp dụng cho text content — chữ hiển thị PHẢI có dấu tiếng Việt
+- **Tình huống**: Khi tạo SplashLoadingScreen.uxml, bé viết tất cả nội dung text hiển thị (thuộc tính `text=`) bằng tiếng Việt không dấu ("CUOC PHIEU LUU BAT DAU", "Click de bo qua") vì nhầm lẫn với quy tắc #37 yêu cầu comment UXML phải ASCII-only.
+- **Hậu quả**: Người dùng Việt Nam nhìn thấy chữ không dấu rất khó đọc và thiếu chuyên nghiệp, mặc dù bản thân Unity hỗ trợ Unicode trong thuộc tính `text=` hoàn toàn bình thường.
+- **Giải pháp**: Phân biệt rõ ràng:
+  - **Comment** `<!-- ... -->` trong UXML: Chỉ dùng ASCII (quy tắc #37, vì XML parser Unity UI Builder có thể crash với ký tự đặc biệt trong comment).
+  - **Thuộc tính text=** và chuỗi C# hiển thị: LUÔN LUÔN dùng tiếng Việt đầy đủ dấu ("Đang tải tài nguyên...", "Click để bỏ qua").
+- **Quy tắc**: Trước khi bàn giao file UXML hoặc C# có chữ tiếng Việt, kiểm tra nhanh toàn bộ thuộc tính `text="..."` và chuỗi `string` hiển thị xem đã có đầy đủ dấu chưa. Không bao giờ giao chữ không dấu cho người dùng cuối.
+
 
 

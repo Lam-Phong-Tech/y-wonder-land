@@ -5,6 +5,30 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-06-05] — Module Splash/Loading Screen (Màn hình Chào/Tải game)
+
+### Added
+- **Splash Loading Screen** — Màn hình khởi động game hiển thị đầu tiên khi Play Mode:
+  - **Logo thương hiệu**: Chữ "Y WONDER LAND" cỡ 48px nét đậm trắng trên nền tối `#1E1E23`, có bóng đổ retro cứng `#3D3535` lệch 4px tạo hiệu ứng khắc chữ nổi.
+  - **Phụ đề**: "CUỘC PHIÊU LƯU BẮT ĐẦU" màu vàng `#FFC107`, letter-spacing 6px tạo cảm giác trang trọng.
+  - **Thanh tiến trình retro**: Chiều rộng 400px, chiều cao 24px, viền dày 3px `#3D3535`, nền xám `#3A3A42`. Vệt nạp màu vàng `#FFC107` bo góc 8px, chiều rộng thay đổi mượt mà từ 0% → 100% theo eased curve (smoothstep).
+  - **Nhãn trạng thái động**: Thay đổi theo 5 mốc phần trăm — "Đang tải cấu hình nông trại..." → "Đang kết nối đến máy chủ Cloud..." → "Đang đồng bộ dữ liệu thế giới 3D..." → "Đang chuẩn bị giao diện..." → "Tải hoàn tất!".
+  - **Nhãn phần trăm**: Hiển thị `0%` → `100%` đồng bộ với thanh tiến trình.
+  - **Trang trí**: 4 ngôi sao Unicode ✦✧ ở 4 góc màn hình tạo bầu không khí, gạch phân cách vàng mờ dưới phụ đề, nhãn phiên bản `v0.1.0-alpha` góc dưới phải.
+- **Tính năng mở rộng**:
+  - **Sort Order = 10**: UIDocument đặt Sort Order cao hơn Login Screen (mặc định 0) để tự động đè lên mà không cần thay đổi GameManager.
+  - **Click to Skip**: Nhấp chuột vào bất kỳ đâu trên màn hình splash trong lúc tải sẽ nhảy nhanh đến 100% và chuyển cảnh.
+  - **Fade-out Transition**: Khi tải hoàn tất, toàn bộ màn hình splash mờ dần (opacity 1 → 0) trong 0.5 giây, rồi GameObject tự động deactivate để lộ Login Screen bên dưới.
+  - **Phím nóng P**: Bấm phím P (New Input System) bất kỳ lúc nào để bật lại Splash Screen và chạy lại mô phỏng từ 0% — tiện cho nhà phát triển kiểm thử và quay video demo.
+  - **Simulated Loading**: Coroutine giả lập tiến trình từ 2 đến 3 giây ngẫu nhiên với đường cong smoothstep tạo cảm giác tải tự nhiên.
+
+### Files changed
+- Assets/UI/SplashLoadingScreen.uxml (NEW)
+- Assets/UI/Styles/SplashLoadingScreen.uss (NEW)
+- Assets/UI/SplashLoadingController.cs (NEW)
+- Assets/Editor/SetupSplashUI.cs (NEW)
+
+---
 ## [2026-06-04] — Module Fishing UI (Mini-game Câu cá)
 
 ### Added
