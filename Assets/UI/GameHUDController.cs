@@ -23,6 +23,7 @@ public class GameHUDController : MonoBehaviour
     [SerializeField] private LevelUpOverlayController levelUpOverlay;
     [SerializeField] private EventPopupController eventPopup;
     [SerializeField] private FishingOverlayController fishingOverlay;
+    [SerializeField] private BuildModeOverlayController buildModeOverlay;
 
     private UIDocument uiDocument;
 
@@ -49,6 +50,7 @@ public class GameHUDController : MonoBehaviour
     private Button btnEvent;
     private Button btnPiggy;
     private Button btnFishing;
+    private Button btnBuild;
 
     // Action buttons
     private Button btnInteract;
@@ -83,6 +85,7 @@ public class GameHUDController : MonoBehaviour
         if (levelUpOverlay == null) levelUpOverlay = FindFirstObjectByType<LevelUpOverlayController>();
         if (eventPopup == null) eventPopup = FindFirstObjectByType<EventPopupController>();
         if (fishingOverlay == null) fishingOverlay = FindFirstObjectByType<FishingOverlayController>();
+        if (buildModeOverlay == null) buildModeOverlay = FindFirstObjectByType<BuildModeOverlayController>();
 
         var root = uiDocument.rootVisualElement;
         QueryElements(root);
@@ -122,6 +125,7 @@ public class GameHUDController : MonoBehaviour
         btnMap = root.Q<Button>("BtnMap");
         btnPiggy = root.Q<Button>("BtnPiggy");
         btnFishing = root.Q<Button>("BtnFishing");
+        btnBuild = root.Q<Button>("BtnBuild");
 
         // Actions
         btnInteract = root.Q<Button>("BtnInteract");
@@ -220,6 +224,19 @@ public class GameHUDController : MonoBehaviour
                 fishingOverlay.Show();
             else
                 Debug.Log("[GameHUD] Fishing clicked (no popup assigned)");
+        });
+
+        btnBuild?.RegisterCallback<ClickEvent>(evt =>
+        {
+            if (buildModeOverlay != null)
+            {
+                if (buildModeOverlay.IsVisible())
+                    buildModeOverlay.Hide();
+                else
+                    buildModeOverlay.Show();
+            }
+            else
+                Debug.Log("[GameHUD] Build clicked (no overlay assigned)");
         });
 
         btnEvent?.RegisterCallback<ClickEvent>(evt =>
@@ -345,6 +362,14 @@ public class GameHUDController : MonoBehaviour
         if (keyboard.fKey.wasPressedThisFrame && fishingOverlay != null)
         {
             fishingOverlay.Show();
+        }
+
+        if (keyboard.bKey.wasPressedThisFrame && buildModeOverlay != null)
+        {
+            if (buildModeOverlay.IsVisible())
+                buildModeOverlay.Hide();
+            else
+                buildModeOverlay.Show();
         }
     }
 }

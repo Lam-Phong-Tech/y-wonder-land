@@ -1,5 +1,5 @@
 # MEMORY.md — Đúc kết kinh nghiệm
-> Cập nhật: 2026-06-03
+> Cập nhật: 2026-06-05
 > Mục đích: Ghi lại sai lầm + cách khắc phục để AI không lặp lại.
 
 ---
@@ -397,5 +397,35 @@
   - **Thuộc tính text=** và chuỗi C# hiển thị: LUÔN LUÔN dùng tiếng Việt đầy đủ dấu ("Đang tải tài nguyên...", "Click để bỏ qua").
 - **Quy tắc**: Trước khi bàn giao file UXML hoặc C# có chữ tiếng Việt, kiểm tra nhanh toàn bộ thuộc tính `text="..."` và chuỗi `string` hiển thị xem đã có đầy đủ dấu chưa. Không bao giờ giao chữ không dấu cho người dùng cuối.
 
+---
 
+## 🟡 BÀI HỌC VỀ BUILD MODE & UXML ENTITY (Cập nhật 05/06/2026)
+
+### 46. Chức năng Build Mode chưa hoàn thiện — chờ model 3D
+- **Trạng thái hiện tại**: Hệ thống Build Mode đã có đầy đủ khung UI (overlay, category sidebar, item bar, tooltip, control bar), hệ thống 3D (BuildGridManager, GhostPlacementController, BuildCameraController, BuildGridRenderer), và tích hợp vào GameHUD (nút 🔨, phím B).
+- **Chưa hoàn thiện**:
+  - Ghost placeholder đang dùng **Primitive Cube** thay vì model 3D thật.
+  - Chưa test kỹ: ghost xanh/đỏ khi đặt đúng/sai vị trí, cho xây, cho hủy, cho thay đổi vị trí.
+  - Chưa có logic trừ POS khi đặt qua ghost (chỉ có mockup UI).
+  - Chưa có hệ thống lưu/load bố cục nông trại.
+- **Kế hoạch test sắp tới**:
+  - [ ] Ghost đổi màu xanh (hợp lệ) / đỏ (trùng ô hoặc ngoài grid) khi di chuyển chuột.
+  - [ ] Click trái xác nhận đặt công trình, Cube placeholder xuất hiện tại ô grid.
+  - [ ] Click phải hủy ghost.
+  - [ ] Phím R xoay ghost 90°.
+  - [ ] Đặt trùng ô đã có công trình → ghost đỏ, không cho đặt.
+  - [ ] Di chuyển nhân vật → grid bám theo liên tục.
+- **Quy tắc**: Khi swap model 3D thật vào, chỉ cần thay Cube trong `GhostPlacementController.CreateGhostObject()` và `SpawnPlacedBuilding()` bằng prefab tương ứng.
+
+### 47. UXML KHÔNG được dùng XML entity reference cho emoji ngoài BMP (U+FFFF)
+- **Tình huống**: Viết `&#x1F504;` (🔄), `&#x1F5D1;` (🗑️), `&#x1F4BE;` (💾) trong file BuildModeOverlay.uxml.
+- **Hậu quả**: Unity UI Builder crash: "Failed to open asset. This may be due to invalid UXML syntax."
+- **Nguyên nhân**: Unity XML parser không hỗ trợ numeric character references cho code point trên U+FFFF (Supplementary Multilingual Plane). Các ký tự như emoji 🔄🗑️💾 đều nằm ở U+1Fxxx.
+- **Giải pháp**: Dùng ký tự BMP-safe (U+0000–U+FFFF) trực tiếp trong thuộc tính `text=`:
+  - `⌂` (U+2302) thay cho 🏠
+  - `✿` (U+273F) thay cho 🎀
+  - `⟳` (U+27F3) thay cho 🔄
+  - `↩` (U+21A9) thay cho ↩️
+  - `✕` (U+2715) thay cho ✕
+- **Quy tắc**: Trong file `.uxml`, KHÔNG BAO GIỜ dùng `&#xNNNNN;` với N > 4 chữ số hex. Nếu cần icon, dùng ký tự BMP-safe hoặc chữ text thường. Trong file `.cs` thì dùng `\U0001Fxxx` bình thường vì C# string hỗ trợ đầy đủ UTF-32.
 

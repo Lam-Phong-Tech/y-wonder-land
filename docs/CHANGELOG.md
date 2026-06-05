@@ -5,6 +5,47 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-06-05] — Module Build Mode / Chế độ Xây dựng (WIP)
+
+### Added
+- **Build Mode Overlay UI** — Giao diện xây dựng/trang trí nông trại:
+  - **Control Bar** (cạnh trên): Pill số dư POS, tiêu đề "CHẾ ĐỘ XÂY DỰNG", 5 nút công cụ (Hoàn tác, Di chuyển, Xoay, Xóa, Lưu) + nút thoát (✕ đỏ).
+  - **Category Sidebar** (cạnh trái): 5 tab dọc — Nhà cửa, Nông trại, Hàng rào, Trang trí, Đường đi. Tab active nền vàng `#FFC107`.
+  - **Item Bar** (cạnh dưới): ScrollView ngang chứa card vật phẩm (80×96px) với icon, tên, giá POS. Card được chọn viền vàng 3px.
+  - **Detail Tooltip** (nổi phía trên item): Panel kem `#F5F0E8` với retro shadow, hiển thị icon + tên + kích thước + giá + mô tả + nút "ĐẶT XUỐNG".
+  - **Status Label**: Nhãn trung tâm mờ dần (fade-out 2s) thông báo kết quả thao tác.
+  - **Màu chủ đạo**: Nâu gỗ `#8B5E3C` cho nút Xoay và sidebar button trên HUD.
+  - **Mock Data**: 5 danh mục × ~5 vật phẩm = ~25 item mẫu với emoji, giá, kích thước.
+- **Hệ thống 3D Placement**:
+  - **BuildGridManager**: Lưới 50×50 ô (1 unit/ô), world↔grid conversion, occupancy validation (CanPlace/OccupyCells/FreeCells), Gizmos debug, **follow target** (grid bám theo nhân vật liên tục mỗi frame).
+  - **BuildGridRenderer**: Vẽ lưới ô vuông runtime bằng GL.Lines trong Game View (không chỉ Scene View). Viền nâu gỗ. Bật/tắt theo Build Mode.
+  - **GhostPlacementController**: Cube bán trong suốt theo chuột qua Raycast → snap grid → xanh lá (hợp lệ) / đỏ (trùng hoặc ngoài grid). Click trái đặt, click phải hủy. Hỗ trợ xoay + multi-cell (2x2, 3x3...).
+  - **BuildCameraController**: Camera Top-Down 75°, smooth transition từ/về ThirdPersonCamera, WASD pan, scroll zoom. Unlock cursor cho Build Mode.
+- **HUD Integration**:
+  - Nút 🔨 (`BtnBuild`) trên sidebar trái, nền nâu gỗ `#8B5E3C`.
+  - Phím **B** toggle Build Mode.
+
+### ⚠️ WIP — Chưa hoàn thiện
+- Ghost dùng Primitive Cube placeholder — chờ model 3D thật.
+- Chưa test kỹ ghost xanh/đỏ, cho xây/hủy/di chuyển.
+- Chưa có logic trừ POS qua ghost system (chỉ có mockup UI).
+- Chưa có lưu/load bố cục nông trại.
+
+### Files changed
+- Assets/UI/BuildModeOverlay.uxml (NEW)
+- Assets/UI/Styles/BuildModeOverlay.uss (NEW)
+- Assets/UI/BuildModeOverlayController.cs (NEW)
+- Assets/Editor/SetupBuildModeUI.cs (NEW)
+- Assets/Scripts/Environment/BuildGridManager.cs (NEW)
+- Assets/Scripts/Environment/BuildGridRenderer.cs (NEW)
+- Assets/Scripts/Environment/GhostPlacementController.cs (NEW)
+- Assets/Scripts/Camera/BuildCameraController.cs (NEW)
+- Assets/UI/GameHUD.uxml (MODIFIED — thêm BtnBuild)
+- Assets/UI/Styles/GameHUD.uss (MODIFIED — thêm .sidebar-btn-build)
+- Assets/UI/GameHUDController.cs (MODIFIED — thêm reference + callback + phím B)
+- docs/MEMORY.md (MODIFIED — thêm bài học #46, #47)
+
+---
 ## [2026-06-05] — Module Splash/Loading Screen (Màn hình Chào/Tải game)
 
 ### Added

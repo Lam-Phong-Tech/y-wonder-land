@@ -93,6 +93,13 @@
                     </ui:Button>
                 </ui:VisualElement>
 
+                <!-- Build Mode -->
+                <ui:VisualElement class="sidebar-btn-shadow">
+                    <ui:Button name="BtnBuild" class="sidebar-btn sidebar-btn-build">
+                        <ui:Label text="🔨" class="sidebar-btn-icon sidebar-btn-icon-white" />
+                    </ui:Button>
+                </ui:VisualElement>
+
                 <!-- Fishing (Temporary) -->
                 <ui:VisualElement class="sidebar-btn-shadow">
                     <ui:Button name="BtnFishing" class="sidebar-btn sidebar-btn-fishing">

@@ -505,6 +505,28 @@
     background-color: #0369A1;
 }
 
+/* Build Mode */
+.sidebar-btn-build {
+    background-color: #8B5E3C;
+    border-color: #3D3535;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    transition-property: translate, background-color;
+    transition-duration: 0.08s;
+}
+
+.sidebar-btn-build:hover {
+    background-color: #A0724E;
+}
+
+.sidebar-btn-build:active {
+    translate: 3px 3px;
+    background-color: #6D4830;
+}
+
 .sidebar-btn-icon {
     font-size: 20px;
     color: #3D3535;
