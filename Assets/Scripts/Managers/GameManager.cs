@@ -35,6 +35,7 @@ public class GameManager : MonoBehaviour
 
     [HideInInspector]
     public int selectedCharacterIndex = 0; // 0 = Male, 1 = Female
+    public string playerName;
     private GameObject spawnedCharacter;
 
     void Awake()
@@ -178,6 +179,16 @@ public class GameManager : MonoBehaviour
         if (loginUIPanel != null) loginUIPanel.SetActive(currentState == GameState.Login);
         if (menuUIPanel != null) menuUIPanel.SetActive(currentState == GameState.Menu);
 
+        // Toggle CharacterSelect UI Toolkit screen
+        CharacterSelectController charSelect = FindFirstObjectByType<CharacterSelectController>();
+        if (charSelect != null)
+        {
+            if (currentState == GameState.Menu)
+                charSelect.Show();
+            else
+                charSelect.Hide();
+        }
+
         // Toggle GameHUD visibility based on gameplay state
         GameHUDController hud = FindFirstObjectByType<GameHUDController>();
         if (hud != null)
@@ -284,6 +295,7 @@ public class GameManager : MonoBehaviour
 
     public void StartGame()
     {
+        playerName = CharacterSelectController.PlayerName ?? "Player";
         SetGameState(GameState.Cutscene);
     }
 
@@ -383,6 +395,16 @@ public class GameManager : MonoBehaviour
             
             // Force activate character gameobject in case it was disabled in prefab
             spawnedCharacter.SetActive(true);
+
+            // Auto-attach floating name tag above player head
+            if (spawnedCharacter.GetComponent<FloatingNameTag>() == null)
+            {
+                FloatingNameTag tag = spawnedCharacter.AddComponent<FloatingNameTag>();
+                tag.displayName = playerName ?? "Player";
+                tag.nameColor = FloatingNameTag.COLOR_ACHIEVEMENT; // #FFC107 — Gold/Achievement
+                tag.heightOffset = 2.2f;
+                tag.tmpFontSize = 3.5f;
+            }
             
             // Initially disable player controls and physics during cutscene
             PlayerController controller = spawnedCharacter.GetComponent<PlayerController>();

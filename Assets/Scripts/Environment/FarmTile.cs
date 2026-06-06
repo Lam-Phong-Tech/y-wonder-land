@@ -249,7 +249,7 @@ public class FarmTile : MonoBehaviour
         Renderer r = go.GetComponent<Renderer>();
         if (r != null)
         {
-            r.material = new Material(Shader.Find("Standard"));
+            r.material = new Material(Shader.Find("Universal Render Pipeline/Lit"));
             r.material.color = color;
         }
     }

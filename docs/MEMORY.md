@@ -429,3 +429,24 @@
   - `✕` (U+2715) thay cho ✕
 - **Quy tắc**: Trong file `.uxml`, KHÔNG BAO GIỜ dùng `&#xNNNNN;` với N > 4 chữ số hex. Nếu cần icon, dùng ký tự BMP-safe hoặc chữ text thường. Trong file `.cs` thì dùng `\U0001Fxxx` bình thường vì C# string hỗ trợ đầy đủ UTF-32.
 
+### 48. Project dùng URP — KHÔNG BAO GIỜ dùng Shader.Find("Standard")
+- **Tình huống**: Tạo material bằng `new Material(Shader.Find("Standard"))` cho NPC fallback, FarmTile, GhostPlacement.
+- **Hậu quả**: Mọi object hiện màu TÍM/HỒNG (shader lỗi) vì URP không hỗ trợ Built-in Standard shader.
+- **Giải pháp**: Luôn dùng `Shader.Find("Universal Render Pipeline/Lit")` cho opaque objects, hoặc `Shader.Find("Universal Render Pipeline/Unlit")` cho UI/overlay objects.
+- **Quy tắc**: Grep toàn bộ project tìm `Shader.Find("Standard")` → đổi hết sang URP trước khi commit.
+
+### 49. Floating Name Tag — Dùng TextMeshPro 3D, KHÔNG dùng TextMesh hay UI Toolkit WorldToScreenPoint
+- **Tình huống**: Cần hiển thị tên nhân vật nổi trên đầu trong 3D.
+- **Cách SAI 1**: UI Toolkit + WorldToScreenPoint mỗi frame → text biến mất khi di chuyển.
+- **Cách SAI 2**: TextMesh cơ bản → chữ 3D thô, không sắc nét, khó đọc.
+- **Cách ĐÚNG**: TextMeshPro 3D (TMPro.TextMeshPro, KHÔNG phải TextMeshProUGUI) + billboard rotation.
+- **Chống frustum culling**: `enableWordWrapping=false`, `overflowMode=Overflow`, `allowOcclusionWhenDynamic=false`, `sizeDelta=(20,5)`, `ForceMeshUpdate()`.
+- **Camera**: Luôn refresh `Camera.main` mỗi frame (GameManager swap cameras giữa states).
+- **Scale**: KHÔNG scale theo khoảng cách (để nhỏ tự nhiên khi xa). Thêm fade opacity khi xa.
+
+### 50. Tiếng Việt có dấu trong UXML — Set từ C# code, KHÔNG gõ trực tiếp trong UXML
+- **Tình huống**: Gõ text tiếng Việt có dấu trực tiếp trong file `.uxml`.
+- **Hậu quả**: Chữ hiển thị không dấu hoặc ký tự lạ do encoding.
+- **Giải pháp**: Trong UXML dùng placeholder (text="."), rồi set text tiếng Việt từ C# controller bằng Unicode escapes (`\u1EA0`, `\u00c2`...) hoặc string literals.
+- **Lưu ý**: Rule #45 (UXML comment ASCII-only) áp dụng cho COMMENTS, không áp dụng cho text content. Nhưng vì UXML encoding không đáng tin cậy, set từ code cho an toàn.
+

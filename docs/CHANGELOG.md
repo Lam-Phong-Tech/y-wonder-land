@@ -5,6 +5,41 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-06-06] — Part A Hoàn thành: Onboarding Flow + Tutorial UX + Name Tags
+
+### Added
+- **Character Select UI Toolkit** (`CharacterSelect.uxml`, `CharacterSelectController.cs`):
+  - Chọn giới tính (♂/♀ cards), đặt tên (2-16 ký tự, validate), popup cảnh báo xác nhận.
+  - Vietnamese text set từ C# code (không gõ trực tiếp UXML).
+  - GameManager tự Show/Hide theo state.
+- **Tutorial UX cải thiện cho đối tượng nhỏ tuổi** (`TutorialManager.cs`):
+  - Instruction Banner lớn (nền xanh) hiện mỗi bước quan trọng.
+  - Countdown Timer to (48px) giữa màn hình khi chờ cây lớn, đổi màu xanh→vàng→đỏ.
+  - Dấu chấm than (!) vàng nhấp nhô+xoay trên đầu NPC.
+  - NPC chào ngay khi tutorial bắt đầu.
+- **Floating Name Tags** (`FloatingNameTag.cs`):
+  - TextMeshPro 3D + billboard rotation — chữ phẳng sắc nét kiểu Minecraft.
+  - Outline đen dày, màu theo Design System (Player=Gold #FFC107, NPC=Hero #5B42F3).
+  - Anti-frustum culling: overflow mode, disable occlusion, force mesh update.
+  - Fade opacity khi xa, ẩn khi >30m.
+  - Auto-attach cho Player (GameManager) và NPC (GuideNPC).
+
+### Fixed
+- **Legacy Input bug** (`TutorialManager.cs`): `Input.GetMouseButtonDown(0)` → `Mouse.current.leftButton.wasPressedThisFrame`.
+- **URP Shader tím** (8 files): `Shader.Find("Standard")` → `Shader.Find("Universal Render Pipeline/Lit")` trong FarmTile, GhostPlacement, GuideNPC, TutorialManager.
+- **CharacterSelect không ẩn sau xác nhận**: Thêm Hide() + GameManager quản lý visibility.
+
+### Changed Files
+- `Assets/UI/CharacterSelect.uxml` [NEW]
+- `Assets/UI/CharacterSelectController.cs` [NEW]
+- `Assets/Scripts/UI/FloatingNameTag.cs` [NEW]
+- `Assets/Scripts/Tutorial/TutorialManager.cs`
+- `Assets/Scripts/Tutorial/GuideNPC.cs`
+- `Assets/Scripts/Managers/GameManager.cs`
+- `Assets/Scripts/Environment/FarmTile.cs`
+- `Assets/Scripts/Environment/GhostPlacementController.cs`
+
+---
 ## [2026-06-05] — Module Build Mode / Chế độ Xây dựng (WIP)
 
 ### Added

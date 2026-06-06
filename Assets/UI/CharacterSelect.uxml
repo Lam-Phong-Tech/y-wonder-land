@@ -1,0 +1,79 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:Template name="DesignSystem" src="project://database/Assets/UI/Styles/DesignSystem.uss" />
+    <Style src="project://database/Assets/UI/Styles/CharacterSelect.uss" />
+    <Style src="project://database/Assets/UI/Styles/DesignSystem.uss" />
+
+    <!-- Main Screen (hidden by default, shown by controller) -->
+    <ui:VisualElement name="CharacterSelectScreen" class="charselect-screen hidden">
+
+        <!-- Panel Shadow -->
+        <ui:VisualElement class="charselect-shadow">
+            <ui:VisualElement class="charselect-panel">
+
+                <!-- Header -->
+                <ui:VisualElement class="charselect-header">
+                    <ui:Label name="TitleLabel" text="." class="charselect-title" />
+                </ui:VisualElement>
+
+                <!-- Subtitle -->
+                <ui:Label name="SubtitleLabel" text="." class="charselect-subtitle" />
+
+                <!-- Gender Cards -->
+                <ui:VisualElement class="charselect-cards">
+                    <!-- Male Card -->
+                    <ui:VisualElement class="charselect-card-shadow">
+                        <ui:VisualElement name="MaleCard" class="charselect-card charselect-card-selected">
+                            <ui:VisualElement class="charselect-avatar charselect-avatar-male">
+                                <ui:Label text="M" class="charselect-gender-icon charselect-gender-male" />
+                            </ui:VisualElement>
+                            <ui:Label name="MaleLabel" text="NAM" class="charselect-name" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <!-- Female Card -->
+                    <ui:VisualElement class="charselect-card-shadow">
+                        <ui:VisualElement name="FemaleCard" class="charselect-card">
+                            <ui:VisualElement class="charselect-avatar charselect-avatar-female">
+                                <ui:Label text="F" class="charselect-gender-icon charselect-gender-female" />
+                            </ui:VisualElement>
+                            <ui:Label name="FemaleLabel" text="NU" class="charselect-name" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- Name Input Section -->
+                <ui:VisualElement class="charselect-name-container">
+                    <ui:Label name="InputTitle" text="." class="charselect-input-title" />
+                    <ui:VisualElement name="NameInputGroup" class="charselect-input-group">
+                        <ui:Label text="@" class="charselect-input-icon" />
+                        <ui:TextField name="NameField" class="charselect-textfield" max-length="16" />
+                    </ui:VisualElement>
+                    <ui:Label name="NameStatus" class="charselect-status-message" />
+                </ui:VisualElement>
+
+                <!-- Start Button -->
+                <ui:VisualElement class="charselect-btn-container">
+                    <ui:Button name="BtnStart" text="." class="charselect-btn-start" />
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Confirm Dialog Overlay (hidden by default) -->
+        <ui:VisualElement name="ConfirmOverlay" class="charselect-confirm-overlay hidden">
+            <ui:VisualElement class="charselect-confirm-shadow">
+                <ui:VisualElement class="charselect-confirm-panel">
+                    <ui:VisualElement class="charselect-confirm-header">
+                        <ui:Label name="ConfirmTitle" text="." class="charselect-confirm-title" />
+                    </ui:VisualElement>
+                    <ui:Label name="ConfirmBody" text="." class="charselect-confirm-body" />
+                    <ui:VisualElement class="charselect-confirm-actions">
+                        <ui:Button name="BtnConfirmNo" text="." class="charselect-confirm-btn charselect-confirm-btn-cancel" />
+                        <ui:Button name="BtnConfirmYes" text="." class="charselect-confirm-btn charselect-confirm-btn-accept" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

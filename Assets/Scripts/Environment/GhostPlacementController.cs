@@ -185,7 +185,7 @@ public class GhostPlacementController : MonoBehaviour
 
             // Create transparent material
             ghostRenderer = ghostObject.GetComponent<Renderer>();
-            ghostMaterial = new Material(Shader.Find("Standard"));
+            ghostMaterial = new Material(Shader.Find("Universal Render Pipeline/Lit"));
             ghostMaterial.SetFloat("_Mode", 3); // Transparent
             ghostMaterial.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
             ghostMaterial.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
@@ -264,7 +264,7 @@ public class GhostPlacementController : MonoBehaviour
         Renderer renderer = building.GetComponent<Renderer>();
         if (renderer != null)
         {
-            Material mat = new Material(Shader.Find("Standard"));
+            Material mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
             mat.color = GetBuildingColor();
             renderer.material = mat;
         }

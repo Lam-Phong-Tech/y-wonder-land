@@ -53,6 +53,16 @@ public class GuideNPC : MonoBehaviour
         // Create fallback visual capsule if no renderer exists
         CreateFallbackVisual();
 
+        // Auto-attach floating name tag above NPC head
+        if (GetComponent<FloatingNameTag>() == null)
+        {
+            FloatingNameTag tag = gameObject.AddComponent<FloatingNameTag>();
+            tag.displayName = npcName;
+            tag.nameColor = FloatingNameTag.COLOR_HERO; // #5B42F3 — Hero purple
+            tag.heightOffset = 3.0f;
+            tag.tmpFontSize = 3.5f;
+        }
+
         // Initially configure NavMeshAgent parameters
         if (agent == null) agent = GetComponent<NavMeshAgent>();
         agent.speed = 2.5f;
@@ -241,7 +251,7 @@ public class GuideNPC : MonoBehaviour
             Renderer r = capsule.GetComponent<Renderer>();
             if (r != null)
             {
-                r.material = new Material(Shader.Find("Standard"));
+                r.material = new Material(Shader.Find("Universal Render Pipeline/Lit"));
                 r.material.color = new Color(0.6f, 0.2f, 0.8f);
             }
             
@@ -256,7 +266,7 @@ public class GuideNPC : MonoBehaviour
             Renderer pr = pointer.GetComponent<Renderer>();
             if (pr != null)
             {
-                pr.material = new Material(Shader.Find("Standard"));
+                pr.material = new Material(Shader.Find("Universal Render Pipeline/Lit"));
                 pr.material.color = Color.yellow; // Yellow nose
             }
         }

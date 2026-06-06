@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 using System.Collections;
 
@@ -32,6 +33,19 @@ public class TutorialManager : MonoBehaviour
     private VisualElement subtitleContainer;
     private Label subtitleLabel;
     private Label subtitleSpeaker;
+
+    // Instruction banner (big overlay when tutorial starts)
+    private VisualElement instructionBanner;
+    private Label instructionText;
+    private Label instructionHint;
+
+    // Countdown timer (big center overlay during growth)
+    private VisualElement countdownContainer;
+    private Label countdownNumber;
+    private Label countdownLabel;
+
+    // NPC exclamation mark
+    private GameObject exclamationMark;
 
     private float harvestCountdown = 60f;
     private Coroutine countdownCoroutine;
@@ -136,7 +150,7 @@ public class TutorialManager : MonoBehaviour
             Renderer r = ring.GetComponent<Renderer>();
             if (r != null)
             {
-                r.material = new Material(Shader.Find("Standard"));
+                r.material = new Material(Shader.Find("Universal Render Pipeline/Lit"));
                 r.material.color = new Color(1f, 0.92f, 0.016f, 0.5f);
                 // Simple transparency setup
                 r.material.SetFloat("_Mode", 3); // Transparent
@@ -163,7 +177,7 @@ public class TutorialManager : MonoBehaviour
     void Update()
     {
         // Handle debug raycasting for PC/Mobile interaction in Tutorial
-        if (Input.GetMouseButtonDown(0))
+        if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
         {
             HandleInteractionRaycast();
         }
@@ -198,8 +212,20 @@ public class TutorialManager : MonoBehaviour
     public void StartTutorial()
     {
         currentStep = TutorialStep.FollowNPC;
-        UpdateQuestHUD("Đi theo Lâm Hướng Dẫn tới mảnh đất hoang");
+        UpdateQuestHUD("\u0110i theo L\u00e2m H\u01b0\u1edbng D\u1eabn t\u1edbi m\u1ea3nh \u0111\u1ea5t hoang");
         Debug.Log("[TutorialManager] Onboarding Tutorial Started.");
+
+        // Show big instruction banner for young players
+        ShowInstructionBanner(
+            "\u0110i theo NPC H\u01b0\u1edbng D\u1eabn!",
+            "D\u00f9ng ph\u00edm W A S D ho\u1eb7c Joystick \u0111\u1ec3 di chuy\u1ec3n \u0111\u1ebfn NPC m\u00e0u t\u00edm"
+        );
+
+        // NPC greets immediately
+        ShowSubtitle("Ch\u00e0o m\u1eebng b\u1ea1n \u0111\u1ebfn \u0111\u1ea3o hoang! H\u00e3y \u0111i theo t\u00f4i nh\u00e9!");
+
+        // Create exclamation mark above NPC
+        CreateNPCExclamationMark();
     }
 
     // ── Subtitle UI Dynamic Injection (Tangible Playground Standard) ──
@@ -261,6 +287,91 @@ public class TutorialManager : MonoBehaviour
         subtitleContainer.Add(subtitleSpeaker);
         subtitleContainer.Add(subtitleLabel);
         root.Add(subtitleContainer);
+
+        // ── Instruction Banner (big top overlay) ──
+        instructionBanner = new VisualElement();
+        instructionBanner.style.position = Position.Absolute;
+        instructionBanner.style.top = 80;
+        instructionBanner.style.alignSelf = Align.Center;
+        instructionBanner.style.width = 500;
+        instructionBanner.style.backgroundColor = new Color(0.18f, 0.48f, 1f, 0.95f);
+        instructionBanner.style.borderTopLeftRadius = 16f;
+        instructionBanner.style.borderTopRightRadius = 16f;
+        instructionBanner.style.borderBottomLeftRadius = 16f;
+        instructionBanner.style.borderBottomRightRadius = 16f;
+        instructionBanner.style.borderTopWidth = 3f;
+        instructionBanner.style.borderBottomWidth = 3f;
+        instructionBanner.style.borderLeftWidth = 3f;
+        instructionBanner.style.borderRightWidth = 3f;
+        Color bannerBorder = new Color(0.24f, 0.21f, 0.21f, 1f);
+        instructionBanner.style.borderTopColor = bannerBorder;
+        instructionBanner.style.borderBottomColor = bannerBorder;
+        instructionBanner.style.borderLeftColor = bannerBorder;
+        instructionBanner.style.borderRightColor = bannerBorder;
+        instructionBanner.style.paddingLeft = 24;
+        instructionBanner.style.paddingRight = 24;
+        instructionBanner.style.paddingTop = 16;
+        instructionBanner.style.paddingBottom = 16;
+        instructionBanner.style.display = DisplayStyle.None;
+
+        instructionText = new Label();
+        instructionText.style.fontSize = 20;
+        instructionText.style.unityFontStyleAndWeight = FontStyle.Bold;
+        instructionText.style.color = Color.white;
+        instructionText.style.unityTextAlign = TextAnchor.MiddleCenter;
+        instructionText.style.marginBottom = 8;
+
+        instructionHint = new Label();
+        instructionHint.style.fontSize = 13;
+        instructionHint.style.color = new Color(0.85f, 0.9f, 1f, 1f);
+        instructionHint.style.unityTextAlign = TextAnchor.MiddleCenter;
+        instructionHint.style.whiteSpace = WhiteSpace.Normal;
+
+        instructionBanner.Add(instructionText);
+        instructionBanner.Add(instructionHint);
+        root.Add(instructionBanner);
+
+        // ── Countdown Timer (big center overlay) ──
+        countdownContainer = new VisualElement();
+        countdownContainer.style.position = Position.Absolute;
+        countdownContainer.style.top = Length.Percent(35);
+        countdownContainer.style.alignSelf = Align.Center;
+        countdownContainer.style.width = 200;
+        countdownContainer.style.alignItems = Align.Center;
+        countdownContainer.style.backgroundColor = new Color(0.15f, 0.15f, 0.15f, 0.8f);
+        countdownContainer.style.borderTopLeftRadius = 20f;
+        countdownContainer.style.borderTopRightRadius = 20f;
+        countdownContainer.style.borderBottomLeftRadius = 20f;
+        countdownContainer.style.borderBottomRightRadius = 20f;
+        countdownContainer.style.borderTopWidth = 3f;
+        countdownContainer.style.borderBottomWidth = 3f;
+        countdownContainer.style.borderLeftWidth = 3f;
+        countdownContainer.style.borderRightWidth = 3f;
+        Color timerBorder = new Color(0.4f, 0.8f, 0.3f, 1f);
+        countdownContainer.style.borderTopColor = timerBorder;
+        countdownContainer.style.borderBottomColor = timerBorder;
+        countdownContainer.style.borderLeftColor = timerBorder;
+        countdownContainer.style.borderRightColor = timerBorder;
+        countdownContainer.style.paddingTop = 20;
+        countdownContainer.style.paddingBottom = 20;
+        countdownContainer.style.display = DisplayStyle.None;
+
+        countdownNumber = new Label("60");
+        countdownNumber.style.fontSize = 48;
+        countdownNumber.style.unityFontStyleAndWeight = FontStyle.Bold;
+        countdownNumber.style.color = new Color(0.4f, 0.9f, 0.3f, 1f);
+        countdownNumber.style.unityTextAlign = TextAnchor.MiddleCenter;
+
+        countdownLabel = new Label();
+        countdownLabel.text = "C\u00e2y \u0111ang l\u1edbn...";
+        countdownLabel.style.fontSize = 12;
+        countdownLabel.style.color = new Color(0.85f, 0.85f, 0.85f, 1f);
+        countdownLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
+        countdownLabel.style.marginTop = 4;
+
+        countdownContainer.Add(countdownNumber);
+        countdownContainer.Add(countdownLabel);
+        root.Add(countdownContainer);
     }
 
     public void ShowSubtitle(string text)
@@ -335,7 +446,16 @@ public class TutorialManager : MonoBehaviour
             if (countdownCoroutine != null) StopCoroutine(countdownCoroutine);
             countdownCoroutine = StartCoroutine(HarvestCountdownSequence());
 
-            ShowSubtitle("Nước đã được tưới! Bình thường cà rốt cần 24 giờ để chín, nhưng hôm nay tôi sẽ dùng phân bón thần kỳ để nó chín sau 60 giây!");
+            ShowSubtitle("N\u01b0\u1edbc \u0111\u00e3 \u0111\u01b0\u1ee3c t\u01b0\u1edbi! C\u00e0 r\u1ed1t s\u1ebd ch\u00edn sau 60 gi\u00e2y. H\u00e3y \u0111\u1ee3i nh\u00e9!");
+
+            // Show big instruction about waiting
+            ShowInstructionBanner(
+                "\u0110\u1ee3i c\u00e2y l\u1edbn!",
+                "C\u00e0 r\u1ed1t \u0111ang ph\u00e1t tri\u1ec3n. H\u00e3y \u0111\u1ee3i 60 gi\u00e2y \u0111\u1ec3 thu ho\u1ea1ch!"
+            );
+
+            // Show big countdown timer
+            ShowCountdownTimer();
         }
     }
 
@@ -343,14 +463,34 @@ public class TutorialManager : MonoBehaviour
     {
         while (harvestCountdown > 0f)
         {
-            UpdateQuestHUD($"Chờ Cà Rốt chín và thu hoạch (còn {Mathf.CeilToInt(harvestCountdown)}s)");
+            UpdateQuestHUD($"Ch\u1edd C\u00e0 R\u1ed1t ch\u00edn v\u00e0 thu ho\u1ea1ch (c\u00f2n {Mathf.CeilToInt(harvestCountdown)}s)");
+
+            // Update big countdown number
+            if (countdownNumber != null)
+            {
+                countdownNumber.text = Mathf.CeilToInt(harvestCountdown).ToString();
+
+                // Color changes: green > yellow > red
+                if (harvestCountdown > 30f)
+                    countdownNumber.style.color = new Color(0.4f, 0.9f, 0.3f, 1f);
+                else if (harvestCountdown > 10f)
+                    countdownNumber.style.color = new Color(1f, 0.85f, 0.2f, 1f);
+                else
+                    countdownNumber.style.color = new Color(1f, 0.3f, 0.2f, 1f);
+            }
+
             yield return new WaitForSeconds(1f);
             harvestCountdown -= 1f;
         }
 
         // Time's up, make tile ripe
-        UpdateQuestHUD("Nhấp vào ô đất để thu hoạch Cà Rốt!");
-        ShowSubtitle("Cà rốt đã chín vàng ruộm rồi! Hãy nhấp vào để thu hoạch nông sản đầu tay của bạn!");
+        HideCountdownTimer();
+        UpdateQuestHUD("Nh\u1ea5p v\u00e0o \u00f4 \u0111\u1ea5t \u0111\u1ec3 thu ho\u1ea1ch C\u00e0 R\u1ed1t!");
+        ShowSubtitle("C\u00e0 r\u1ed1t \u0111\u00e3 ch\u00edn v\u00e0ng ru\u1ed9m r\u1ed3i! H\u00e3y nh\u1ea5p v\u00e0o \u0111\u1ec3 thu ho\u1ea1ch n\u00f4ng s\u1ea3n \u0111\u1ea7u tay c\u1ee7a b\u1ea1n!");
+        ShowInstructionBanner(
+            "C\u00e0 r\u1ed1t \u0111\u00e3 ch\u00edn!",
+            "Nh\u1ea5p chu\u1ed9t v\u00e0o \u00f4 \u0111\u1ea5t \u0111\u1ec3 thu ho\u1ea1ch"
+        );
     }
 
     private void OnTileHarvested(FarmTile tile)
@@ -395,12 +535,110 @@ public class TutorialManager : MonoBehaviour
         Debug.Log($"[Quest HUD Update] {questText}");
     }
 
+    // ── Instruction Banner Helpers ──
+
+    private void ShowInstructionBanner(string title, string hint)
+    {
+        if (instructionBanner == null) return;
+
+        if (instructionText != null) instructionText.text = title;
+        if (instructionHint != null) instructionHint.text = hint;
+        instructionBanner.style.display = DisplayStyle.Flex;
+
+        // Auto hide after 6 seconds
+        CancelInvoke(nameof(HideInstructionBanner));
+        Invoke(nameof(HideInstructionBanner), 6f);
+    }
+
+    private void HideInstructionBanner()
+    {
+        if (instructionBanner != null)
+        {
+            instructionBanner.style.display = DisplayStyle.None;
+        }
+    }
+
+    // ── Countdown Timer Helpers ──
+
+    private void ShowCountdownTimer()
+    {
+        if (countdownContainer != null)
+        {
+            countdownContainer.style.display = DisplayStyle.Flex;
+        }
+    }
+
+    private void HideCountdownTimer()
+    {
+        if (countdownContainer != null)
+        {
+            countdownContainer.style.display = DisplayStyle.None;
+        }
+    }
+
+    // ── NPC Exclamation Mark ──
+
+    private void CreateNPCExclamationMark()
+    {
+        if (guideNPC == null) return;
+
+        exclamationMark = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        exclamationMark.name = "NPC_ExclamationMark";
+        exclamationMark.transform.SetParent(guideNPC.transform, false);
+        exclamationMark.transform.localPosition = new Vector3(0, 3.2f, 0);
+        exclamationMark.transform.localScale = new Vector3(0.3f, 0.5f, 0.3f);
+
+        // Remove collider
+        Destroy(exclamationMark.GetComponent<Collider>());
+
+        // Bright yellow material
+        Renderer r = exclamationMark.GetComponent<Renderer>();
+        if (r != null)
+        {
+            r.material = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+            r.material.color = new Color(1f, 0.85f, 0f, 1f);
+            r.material.SetColor("_EmissionColor", new Color(1f, 0.85f, 0f, 0.5f));
+            r.material.EnableKeyword("_EMISSION");
+        }
+
+        // Add small dot below
+        GameObject dot = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        dot.name = "ExclamationDot";
+        dot.transform.SetParent(exclamationMark.transform, false);
+        dot.transform.localPosition = new Vector3(0, -1.4f, 0);
+        dot.transform.localScale = new Vector3(0.5f, 0.4f, 0.5f);
+        Destroy(dot.GetComponent<Collider>());
+
+        Renderer dr = dot.GetComponent<Renderer>();
+        if (dr != null)
+        {
+            dr.material = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+            dr.material.color = new Color(1f, 0.85f, 0f, 1f);
+            dr.material.SetColor("_EmissionColor", new Color(1f, 0.85f, 0f, 0.5f));
+            dr.material.EnableKeyword("_EMISSION");
+        }
+
+        // Animate bobbing
+        StartCoroutine(BobExclamationMark());
+    }
+
+    private IEnumerator BobExclamationMark()
+    {
+        while (exclamationMark != null)
+        {
+            float y = 3.2f + Mathf.Sin(Time.time * 3f) * 0.2f;
+            exclamationMark.transform.localPosition = new Vector3(0, y, 0);
+            exclamationMark.transform.Rotate(0, 120f * Time.deltaTime, 0);
+            yield return null;
+        }
+    }
+
     // ── Interaction Raycasting (Mobile/PC) ──
 
     private void HandleInteractionRaycast()
     {
         // 1. Create ray from center of screen (or click point)
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
         RaycastHit hit;
 
         if (Physics.Raycast(ray, out hit, 10f))
