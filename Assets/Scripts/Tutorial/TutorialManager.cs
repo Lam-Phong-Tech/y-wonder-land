@@ -779,6 +779,8 @@ public class TutorialManager : MonoBehaviour
 
     private void HandleInteractionRaycast()
     {
+        if (Camera.main == null || Mouse.current == null) return;
+
         // 1. Create ray from center of screen (or click point)
         Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
         RaycastHit hit;
