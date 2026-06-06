@@ -93,12 +93,6 @@ public class GhostPlacementController : MonoBehaviour
             UpdateGhostColor(currentPlacementValid);
         }
 
-        // Click to place
-        if (mouse.leftButton.wasPressedThisFrame && currentPlacementValid)
-        {
-            ConfirmPlacement();
-        }
-
         // Right click to cancel
         if (mouse.rightButton.wasPressedThisFrame)
         {
@@ -224,9 +218,11 @@ public class GhostPlacementController : MonoBehaviour
         }
     }
 
+    public bool IsPlacementValid => currentPlacementValid;
+
     // ── Placement ──
 
-    private void ConfirmPlacement()
+    public void ConfirmPlacement()
     {
         if (gridManager == null) return;
 

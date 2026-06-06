@@ -9,7 +9,7 @@ public class FishingSpot : MonoBehaviour
 {
     [Header("Settings")]
     public float interactionRange = 3f;
-    public string promptText = "Nh\u1ea5p E \u0111\u1ec3 c\u00e2u c\u00e1"; // "Nhấp E để câu cá"
+    public string promptText = "Nh\u1ea5p F \u0111\u1ec3 c\u00e2u c\u00e1"; // "Nhấp F để câu cá"
     
     private Transform playerTransform;
     private bool isPlayerNearby = false;
@@ -61,7 +61,7 @@ public class FishingSpot : MonoBehaviour
         if (isPlayerNearby)
         {
             bool pressed = false;
-            if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
+            if (Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame)
                 pressed = true;
             
             if (pressed && fishingUI != null)

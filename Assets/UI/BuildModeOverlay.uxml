@@ -7,7 +7,7 @@
     <ui:VisualElement name="BuildRoot" class="build-overlay" picking-mode="Ignore">
 
         <!-- ================================ -->
-        <!-- CONTROL BAR — Top                -->
+        <!-- CONTROL BAR — Top (Clean)        -->
         <!-- ================================ -->
         <ui:VisualElement class="build-control-bar">
 
@@ -20,35 +20,10 @@
             <!-- Center: Title -->
             <ui:Label text="CHẾ ĐỘ XÂY DỰNG" class="build-title" />
 
-            <!-- Right: Tool Buttons -->
-            <ui:VisualElement class="build-tools-group">
-                <!-- Undo -->
-                <ui:Button name="BtnUndo" class="build-tool-btn build-tool-undo">
-                    <ui:Label text="↩" class="build-tool-icon" />
-                </ui:Button>
-                <!-- Move -->
-                <ui:Button name="BtnMove" class="build-tool-btn build-tool-move">
-                    <ui:Label text="↔" class="build-tool-icon" />
-                </ui:Button>
-                <!-- Rotate -->
-                <ui:Button name="BtnRotate" class="build-tool-btn build-tool-rotate">
-                    <ui:Label text="⟳" class="build-tool-icon" />
-                </ui:Button>
-                <!-- Delete -->
-                <ui:Button name="BtnDelete" class="build-tool-btn build-tool-delete">
-                    <ui:Label text="✕" class="build-tool-icon" />
-                </ui:Button>
-                <!-- Save -->
-                <ui:Button name="BtnSave" class="build-tool-btn build-tool-save">
-                    <ui:Label text="▼" class="build-tool-icon" />
-                </ui:Button>
-                <!-- Separator -->
-                <ui:VisualElement class="build-tool-separator" />
-                <!-- Exit -->
-                <ui:Button name="BtnExitBuild" class="build-tool-btn build-tool-exit">
-                    <ui:Label text="✕" class="build-tool-icon" />
-                </ui:Button>
-            </ui:VisualElement>
+            <!-- Right: Exit Button Only -->
+            <ui:Button name="BtnExitBuild" class="build-tool-btn build-tool-exit">
+                <ui:Label text="✕" class="build-tool-icon" />
+            </ui:Button>
         </ui:VisualElement>
 
         <!-- ================================ -->
@@ -87,17 +62,52 @@
         </ui:VisualElement>
 
         <!-- ================================ -->
-        <!-- DETAIL TOOLTIP — Floating        -->
+        <!-- PLACEMENT CONTROLS — Center Bot  -->
+        <!-- Visible only when ghost is active -->
         <!-- ================================ -->
-        <ui:VisualElement name="DetailTooltip" class="build-detail-tooltip hidden">
-            <ui:Label name="TooltipIcon" text="⌂" class="build-tooltip-icon" />
-            <ui:Label name="TooltipName" text="Nhà gỗ nhỏ" class="build-tooltip-name" />
-            <ui:VisualElement class="build-tooltip-info-row">
-                <ui:Label name="TooltipSize" text="2x2" class="build-tooltip-size" />
-                <ui:Label name="TooltipPrice" text="500 POS" class="build-tooltip-price" />
+        <ui:VisualElement name="PlacementControls" class="build-placement-controls hidden">
+            <ui:Button name="BtnConfirmPlace" class="build-placement-btn build-placement-confirm">
+                <ui:Label text="✔" class="build-placement-btn-icon" />
+            </ui:Button>
+            <ui:Button name="BtnRotatePlace" class="build-placement-btn build-placement-rotate">
+                <ui:Label text="⟳" class="build-placement-btn-icon" />
+            </ui:Button>
+            <ui:Button name="BtnCancelPlace" class="build-placement-btn build-placement-cancel">
+                <ui:Label text="✕" class="build-placement-btn-icon" />
+            </ui:Button>
+        </ui:VisualElement>
+
+        <!-- ================================ -->
+        <!-- CONTEXTUAL MENU — Near building  -->
+        <!-- Visible when a placed building   -->
+        <!-- is clicked                       -->
+        <!-- ================================ -->
+        <ui:VisualElement name="ContextMenu" class="build-context-menu hidden">
+            <ui:Button name="BtnCtxRotate" class="build-ctx-btn">
+                <ui:Label text="⟳" class="build-ctx-icon" />
+                <ui:Label text="Xoay" class="build-ctx-label" />
+            </ui:Button>
+            <ui:Button name="BtnCtxMove" class="build-ctx-btn">
+                <ui:Label text="↔" class="build-ctx-icon" />
+                <ui:Label text="Nhấc" class="build-ctx-label" />
+            </ui:Button>
+            <ui:Button name="BtnCtxDelete" class="build-ctx-btn build-ctx-delete">
+                <ui:Label text="🗑" class="build-ctx-icon" />
+                <ui:Label text="Xóa" class="build-ctx-label" />
+            </ui:Button>
+        </ui:VisualElement>
+
+        <!-- ================================ -->
+        <!-- INFO TOOLTIP — Small popup       -->
+        <!-- Shows when "i" button is pressed -->
+        <!-- ================================ -->
+        <ui:VisualElement name="InfoTooltip" class="build-info-tooltip hidden">
+            <ui:Label name="InfoTooltipName" text="Nhà gỗ nhỏ" class="build-info-name" />
+            <ui:VisualElement class="build-info-row">
+                <ui:Label name="InfoTooltipSize" text="2x2" class="build-info-size" />
+                <ui:Label name="InfoTooltipPrice" text="500 POS" class="build-info-price" />
             </ui:VisualElement>
-            <ui:Label name="TooltipDesc" text="Ngôi nhà gỗ ấm cúng cho gia đình nhỏ." class="build-tooltip-desc" />
-            <ui:Button name="BtnPlace" text="ĐẶT XUỐNG" class="build-btn-place" />
+            <ui:Label name="InfoTooltipDesc" text="Ngôi nhà gỗ ấm cúng." class="build-info-desc" />
         </ui:VisualElement>
 
         <!-- ================================ -->

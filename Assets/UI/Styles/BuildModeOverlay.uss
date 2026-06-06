@@ -1,7 +1,7 @@
 /* ============================================
-   Build Mode Overlay Styles
-   Extends DesignSystem.uss
+   Build Mode Overlay Styles — v2 Redesign
    Theme: Wood Brown #8B5E3C
+   Clean header, contextual placement controls
    ============================================ */
 
 /* -- Overlay Root -- */
@@ -13,7 +13,7 @@
 }
 
 /* ================================ */
-/* CONTROL BAR — Top                */
+/* CONTROL BAR — Top (Minimal)      */
 /* ================================ */
 
 .build-control-bar {
@@ -71,12 +71,6 @@
     overflow: hidden;
 }
 
-/* Tools Group */
-.build-tools-group {
-    flex-direction: row;
-    align-items: center;
-}
-
 /* Tool Button Base */
 .build-tool-btn {
     width: 40px;
@@ -86,7 +80,6 @@
     border-color: #3D3535;
     align-items: center;
     justify-content: center;
-    margin-left: 6px;
     padding: 0;
     transition-property: translate, background-color;
     transition-duration: 0.08s;
@@ -95,91 +88,12 @@
 .build-tool-icon {
     font-size: 18px;
     -unity-text-align: middle-center;
-}
-
-/* Tool Button Colors */
-.build-tool-undo {
-    background-color: #607D8B;
-}
-.build-tool-undo:hover {
-    background-color: #78909C;
-}
-.build-tool-undo:active {
-    translate: 1px 1px;
-    background-color: #546E7A;
-}
-.build-tool-undo .build-tool-icon {
     color: #FFFFFF;
-}
-
-.build-tool-move {
-    background-color: #5C6BC0;
-}
-.build-tool-move:hover {
-    background-color: #7986CB;
-}
-.build-tool-move:active {
-    translate: 1px 1px;
-    background-color: #3F51B5;
-}
-.build-tool-move .build-tool-icon {
-    color: #FFFFFF;
-}
-
-.build-tool-rotate {
-    background-color: #8B5E3C;
-}
-.build-tool-rotate:hover {
-    background-color: #A0724E;
-}
-.build-tool-rotate:active {
-    translate: 1px 1px;
-    background-color: #6D4830;
-}
-.build-tool-rotate .build-tool-icon {
-    color: #FFFFFF;
-}
-
-.build-tool-delete {
-    background-color: #E53935;
-}
-.build-tool-delete:hover {
-    background-color: #EF5350;
-}
-.build-tool-delete:active {
-    translate: 1px 1px;
-    background-color: #C62828;
-}
-.build-tool-delete .build-tool-icon {
-    color: #FFFFFF;
-}
-
-.build-tool-save {
-    background-color: #43A047;
-}
-.build-tool-save:hover {
-    background-color: #66BB6A;
-}
-.build-tool-save:active {
-    translate: 1px 1px;
-    background-color: #2E7D32;
-}
-.build-tool-save .build-tool-icon {
-    color: #FFFFFF;
-}
-
-/* Tool Separator */
-.build-tool-separator {
-    width: 2px;
-    height: 28px;
-    background-color: rgba(255, 255, 255, 0.2);
-    margin-left: 8px;
 }
 
 /* Exit Button */
 .build-tool-exit {
     background-color: #FF4B4B;
-    margin-left: 8px;
 }
 .build-tool-exit:hover {
     background-color: #FF6B6B;
@@ -187,11 +101,6 @@
 .build-tool-exit:active {
     translate: 1px 1px;
     background-color: #CC3333;
-}
-.build-tool-exit .build-tool-icon {
-    color: #FFFFFF;
-    font-size: 16px;
-    -unity-font-style: bold;
 }
 
 /* ================================ */
@@ -320,11 +229,11 @@
 .build-item-emoji {
     font-size: 28px;
     -unity-text-align: middle-center;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
 }
 
 .build-item-name {
-    font-size: 11px;
+    font-size: 10px;
     color: #FFFFFF;
     -unity-text-align: middle-center;
     white-space: nowrap;
@@ -341,99 +250,218 @@
     margin-top: 2px;
 }
 
+/* Info icon badge on card */
+.build-item-info-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    background-color: rgba(255, 255, 255, 0.25);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.4);
+    align-items: center;
+    justify-content: center;
+}
+
+.build-item-info-badge:hover {
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
+.build-item-info-icon {
+    font-size: 10px;
+    -unity-font-style: bold;
+    color: #FFFFFF;
+    -unity-text-align: middle-center;
+}
+
 /* ================================ */
-/* DETAIL TOOLTIP — Floating        */
+/* PLACEMENT CONTROLS — Bottom Ctr  */
+/* 3 round buttons: Confirm, Rotate, Cancel */
 /* ================================ */
 
-.build-detail-tooltip {
+.build-placement-controls {
     position: absolute;
     bottom: 140px;
     left: 50%;
-    margin-left: -120px;
-    width: 240px;
-    background-color: #F5F0E8;
-    border-radius: 16px;
+    margin-left: -96px;
+    width: 192px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.build-placement-btn {
+    width: 56px;
+    height: 56px;
+    border-radius: 28px;
     border-width: 3px;
     border-color: #3D3535;
-    padding: 16px;
     align-items: center;
-    /* Retro shadow */
-    border-bottom-width: 7px;
-    border-right-width: 7px;
+    justify-content: center;
+    margin: 0 6px;
+    padding: 0;
+    border-bottom-width: 6px;
+    border-right-width: 5px;
+    transition-property: translate, background-color, scale;
+    transition-duration: 0.08s;
 }
 
-.build-tooltip-icon {
-    font-size: 36px;
+.build-placement-btn:hover {
+    scale: 1.08;
+}
+
+.build-placement-btn:active {
+    translate: 2px 3px;
+    border-bottom-width: 3px;
+    border-right-width: 3px;
+    scale: 0.96;
+}
+
+.build-placement-btn-icon {
+    font-size: 24px;
+    -unity-font-style: bold;
     -unity-text-align: middle-center;
-    margin-bottom: 4px;
+    color: #FFFFFF;
 }
 
-.build-tooltip-name {
-    font-size: 16px;
+/* Confirm = green */
+.build-placement-confirm {
+    background-color: #43A047;
+}
+.build-placement-confirm:hover {
+    background-color: #66BB6A;
+}
+
+/* Rotate = brown */
+.build-placement-rotate {
+    background-color: #8B5E3C;
+}
+.build-placement-rotate:hover {
+    background-color: #A0724E;
+}
+
+/* Cancel = red */
+.build-placement-cancel {
+    background-color: #E53935;
+}
+.build-placement-cancel:hover {
+    background-color: #EF5350;
+}
+
+/* ================================ */
+/* CONTEXTUAL MENU — Near building  */
+/* ================================ */
+
+.build-context-menu {
+    position: absolute;
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(30, 30, 35, 0.9);
+    border-radius: 14px;
+    border-width: 2px;
+    border-color: #3D3535;
+    padding: 6px 10px;
+    /* Will be positioned dynamically via C# */
+}
+
+.build-ctx-btn {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
+    margin: 0 2px;
+    border-radius: 10px;
+    border-width: 0;
+    background-color: transparent;
+    transition-property: background-color;
+    transition-duration: 0.08s;
+}
+
+.build-ctx-btn:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.build-ctx-btn:active {
+    background-color: rgba(255, 255, 255, 0.25);
+}
+
+.build-ctx-icon {
+    font-size: 20px;
+    -unity-text-align: middle-center;
+    color: #FFFFFF;
+    margin-bottom: 2px;
+}
+
+.build-ctx-label {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.75);
+    -unity-text-align: middle-center;
+}
+
+.build-ctx-delete .build-ctx-icon {
+    color: #FF6B6B;
+}
+
+.build-ctx-delete .build-ctx-label {
+    color: #FF6B6B;
+}
+
+/* ================================ */
+/* INFO TOOLTIP — Small popup       */
+/* ================================ */
+
+.build-info-tooltip {
+    position: absolute;
+    bottom: 130px;
+    width: 200px;
+    background-color: #F5F0E8;
+    border-radius: 12px;
+    border-width: 2px;
+    border-color: #3D3535;
+    border-bottom-width: 5px;
+    border-right-width: 4px;
+    padding: 10px 12px;
+    align-items: center;
+    /* Positioned dynamically near the item card */
+}
+
+.build-info-name {
+    font-size: 13px;
     -unity-font-style: bold;
     color: #3D3535;
     -unity-text-align: middle-center;
     margin-bottom: 4px;
 }
 
-.build-tooltip-info-row {
+.build-info-row {
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
 }
 
-.build-tooltip-size {
-    font-size: 12px;
+.build-info-size {
+    font-size: 11px;
     color: #8A7E6E;
     background-color: rgba(139, 94, 60, 0.12);
     border-radius: 6px;
-    padding: 2px 8px;
+    padding: 2px 6px;
     margin-right: 8px;
 }
 
-.build-tooltip-price {
-    font-size: 14px;
+.build-info-price {
+    font-size: 12px;
     -unity-font-style: bold;
     color: #8B5E3C;
 }
 
-.build-tooltip-desc {
-    font-size: 12px;
+.build-info-desc {
+    font-size: 11px;
     color: #8A7E6E;
     -unity-text-align: middle-center;
-    margin-bottom: 12px;
     white-space: normal;
-}
-
-/* Place Button */
-.build-btn-place {
-    background-color: #FFC107;
-    color: #3D3535;
-    font-size: 14px;
-    -unity-font-style: bold;
-    border-width: 2px;
-    border-bottom-width: 5px;
-    border-right-width: 4px;
-    border-color: #3D3535;
-    border-radius: 12px;
-    padding: 10px 24px;
-    -unity-text-align: middle-center;
-    align-self: stretch;
-    letter-spacing: 2px;
-    transition-property: translate, background-color, border-bottom-width, border-right-width;
-    transition-duration: 0.08s;
-}
-
-.build-btn-place:hover {
-    background-color: #FFD54F;
-}
-
-.build-btn-place:active {
-    translate: 2px 3px;
-    border-bottom-width: 2px;
-    border-right-width: 2px;
-    background-color: #FFA000;
 }
 
 /* ================================ */
@@ -450,7 +478,6 @@
     color: #FFFFFF;
     -unity-text-align: middle-center;
     letter-spacing: 2px;
-    /* Text shadow via text-shadow not supported in UI Toolkit, use outline-width trick or just rely on dark bg */
     transition-property: opacity;
     transition-duration: 0.5s;
     transition-timing-function: ease-out;

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Rendering;
 
 /// <summary>
 /// Renders the build grid at runtime using GL.Lines.
@@ -61,12 +62,22 @@ public class BuildGridRenderer : MonoBehaviour
         lineMaterial.SetInt("_ZTest", (int)UnityEngine.Rendering.CompareFunction.LessEqual);
     }
 
-    void OnRenderObject()
+    void OnEnable()
+    {
+        RenderPipelineManager.endCameraRendering += OnEndCameraRendering;
+    }
+
+    void OnDisable()
+    {
+        RenderPipelineManager.endCameraRendering -= OnEndCameraRendering;
+    }
+
+    void OnEndCameraRendering(ScriptableRenderContext context, Camera camera)
     {
         if (!isVisible || gridManager == null || lineMaterial == null) return;
 
         // Only render for the main camera to avoid rendering in scene view etc.
-        if (Camera.current == null || Camera.current != Camera.main) return;
+        if (camera == null || camera != Camera.main) return;
 
         float cellSize = gridManager.CellSize;
         Vector3 origin = gridManager.GridOrigin;
