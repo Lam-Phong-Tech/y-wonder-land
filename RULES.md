@@ -97,6 +97,12 @@
 - Assets/Scripts/Tutorial/GuideNPC.cs
 - Assets/Scripts/Environment/FarmTile.cs
 
+### Module Build Mode & Fishing (QC: chờ duyệt)
+- Assets/UI/BuildModeOverlay* (uxml, uss, cs)
+- Assets/Scripts/Environment/BuildGrid*
+- Assets/Scripts/Environment/GhostPlacementController.cs
+- Assets/Scripts/Environment/FishingSpot.cs
+
 ## QUY TẮC KHI CODE
 1. Chỉ sửa đúng file và đúng function được yêu cầu
 2. KHÔNG refactor, rename, hoặc "cải thiện" code khác ngoài phạm vi yêu cầu

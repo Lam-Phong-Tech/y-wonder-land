@@ -283,9 +283,6 @@
 
 .build-placement-controls {
     position: absolute;
-    bottom: 140px;
-    left: 50%;
-    margin-left: -96px;
     width: 192px;
     flex-direction: row;
     align-items: center;

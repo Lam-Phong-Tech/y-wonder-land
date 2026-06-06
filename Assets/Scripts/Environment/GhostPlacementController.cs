@@ -35,6 +35,8 @@ public class GhostPlacementController : MonoBehaviour
     private int rotationAngle = 0;
     private Vector2Int currentGridCell;
     private bool currentPlacementValid = false;
+    public bool IsPinned { get; private set; } = false;
+    public Vector3 GhostPosition => ghostObject != null ? ghostObject.transform.position : Vector3.zero;
 
     // Reference
     private Camera mainCamera;
@@ -60,6 +62,9 @@ public class GhostPlacementController : MonoBehaviour
     void Update()
     {
         if (!isActive || ghostObject == null || gridManager == null) return;
+        
+        // Skip raycast if pinned
+        if (IsPinned) return;
 
         // Update camera reference if needed
         if (mainCamera == null) mainCamera = Camera.main;
@@ -112,6 +117,7 @@ public class GhostPlacementController : MonoBehaviour
         currentItemPrice = price;
         rotationAngle = 0;
         isActive = true;
+        IsPinned = false;
 
         // Ensure grid manager reference
         if (gridManager == null) gridManager = BuildGridManager.Instance;
@@ -136,6 +142,11 @@ public class GhostPlacementController : MonoBehaviour
     }
 
     public bool IsActive => isActive;
+
+    public void SetPinned(bool pinned)
+    {
+        IsPinned = pinned;
+    }
 
     // ── Rotation ──
 

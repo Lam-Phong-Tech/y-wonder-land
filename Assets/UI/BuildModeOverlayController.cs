@@ -167,7 +167,8 @@ public class BuildModeOverlayController : MonoBehaviour
         if (state == BuildState.Hidden) return;
 
         var keyboard = Keyboard.current;
-        if (keyboard == null) return;
+        var mouse = Mouse.current;
+        if (keyboard == null || mouse == null) return;
 
         // R = Rotate (when placing)
         if (keyboard.rKey.wasPressedThisFrame && state == BuildState.Placing)
@@ -188,11 +189,70 @@ public class BuildModeOverlayController : MonoBehaviour
             }
         }
 
-        // Left-click while Browsing = check if clicked a placed building (contextual menu)
-        if (state == BuildState.Browsing)
+        if (state == BuildState.Placing)
         {
-            HandleContextualClick();
+            var ghost = GhostPlacementController.Instance;
+            if (ghost != null && ghost.IsActive)
+            {
+                if (ghost.IsPinned)
+                {
+                    UpdatePlacementControlsPosition(ghost.GhostPosition);
+                }
+
+                if (mouse.leftButton.wasPressedThisFrame && !IsPointerOverUI())
+                {
+                    if (!ghost.IsPinned)
+                    {
+                        ghost.SetPinned(true);
+                        ShowPlacementControls();
+                        ShowStatusMessage("\u0110\u00e3 ghim v\u1ecb tr\u00ed. B\u1ea5m \u2714 \u0111\u1ec3 x\u00e2y.", true); // "Đã ghim vị trí. Bấm ✔ để xây."
+                    }
+                    else
+                    {
+                        // Unpin to move again
+                        ghost.SetPinned(false);
+                        HidePlacementControls();
+                    }
+                }
+            }
         }
+        else if (state == BuildState.Browsing)
+        {
+            if (mouse.leftButton.wasPressedThisFrame && !IsPointerOverUI())
+            {
+                HandleContextualClick(mouse.position.ReadValue());
+            }
+        }
+    }
+
+    private bool IsPointerOverUI()
+    {
+        if (buildDocument == null || buildDocument.rootVisualElement == null || buildDocument.rootVisualElement.panel == null) return false;
+        var mousePos = Mouse.current.position.ReadValue();
+        Vector2 invertedY = new Vector2(mousePos.x, Screen.height - mousePos.y);
+        var picked = buildDocument.rootVisualElement.panel.Pick(RuntimePanelUtils.ScreenToPanel(buildDocument.rootVisualElement.panel, invertedY));
+        return picked != null && picked != buildRoot;
+    }
+
+    private void UpdatePlacementControlsPosition(Vector3 worldPos)
+    {
+        if (placementControls == null || Camera.main == null) return;
+        
+        Vector3 screenPos = Camera.main.WorldToScreenPoint(worldPos);
+        if (screenPos.z < 0) 
+        {
+            placementControls.style.display = DisplayStyle.None;
+            return;
+        }
+        
+        placementControls.style.display = DisplayStyle.Flex;
+        var panelPos = RuntimePanelUtils.ScreenToPanel(
+            buildDocument.rootVisualElement.panel,
+            new Vector2(screenPos.x, Screen.height - screenPos.y)
+        );
+
+        placementControls.style.left = panelPos.x - 96f; // half of 192px width
+        placementControls.style.top = panelPos.y + 40f; // slightly below the building
     }
 
     // ── Query & Register ──
@@ -482,11 +542,11 @@ public class BuildModeOverlayController : MonoBehaviour
 
         // Show placement controls (confirm/rotate/cancel)
         state = BuildState.Placing;
-        ShowPlacementControls();
+        HidePlacementControls(); // Wait for user to pin before showing
         HideContextMenu();
         HideInfoTooltip();
 
-        ShowStatusMessage($"Di chuy\u1ec3n chu\u1ed9t \u0111\u1ec3 ch\u1ecdn v\u1ecb tr\u00ed, b\u1ea5m [\u2714] \u0111\u1ec3 \u0111\u1eb7t {item.name}", true);
+        ShowStatusMessage($"Click chu\u1ed9t \u0111\u1ec3 ghim {item.name}", true); // "Click chuột để ghim [name]"
         Debug.Log($"[BuildMode] Item selected & ghost activated: {item.name}");
     }
 
@@ -526,7 +586,9 @@ public class BuildModeOverlayController : MonoBehaviour
         }
 
         ghost.ConfirmPlacement();
-        // Ghost stays active for placing more of the same item
+        // Unpin so the next one follows mouse immediately
+        ghost.SetPinned(false);
+        HidePlacementControls();
     }
 
     private void OnRotatePlacement()
@@ -557,15 +619,11 @@ public class BuildModeOverlayController : MonoBehaviour
 
     // ── Contextual Menu (for placed buildings) ──
 
-    private void HandleContextualClick()
+    private void HandleContextualClick(Vector2 mousePos)
     {
-        var mouse = Mouse.current;
-        if (mouse == null || !mouse.leftButton.wasPressedThisFrame) return;
-
         Camera cam = Camera.main;
         if (cam == null) return;
 
-        Vector2 mousePos = mouse.position.ReadValue();
         Ray ray = cam.ScreenPointToRay(new Vector3(mousePos.x, mousePos.y, 0f));
 
         if (Physics.Raycast(ray, out RaycastHit hit, 200f, buildingRayMask))

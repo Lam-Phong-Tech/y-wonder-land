@@ -70,7 +70,7 @@
                 <ui:Label text="✔" class="build-placement-btn-icon" />
             </ui:Button>
             <ui:Button name="BtnRotatePlace" class="build-placement-btn build-placement-rotate">
-                <ui:Label text="⟳" class="build-placement-btn-icon" />
+                <ui:Label text="Xoay" class="build-placement-btn-icon" style="font-size: 14px;" />
             </ui:Button>
             <ui:Button name="BtnCancelPlace" class="build-placement-btn build-placement-cancel">
                 <ui:Label text="✕" class="build-placement-btn-icon" />

@@ -5,6 +5,32 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-06-06] — Part B (Fix Phase): Fishing 3D & Build Mode Redesign
+
+### Added
+- **Fishing Spot 3D Interaction** (`FishingSpot.cs`): Chuyển từ bấm nút UI sang trigger 3D. Lại gần hiện TextMeshPro nổi "Nhấp F để Câu", bấm F mới mở UI câu cá. Tránh đụng phím E của sự kiện.
+- **Contextual Build Mode UX** (`BuildModeOverlayController.cs`):
+  - Ghim (Pin) vị trí nhà trên map khi click trái thay vì xây ngay, giải phóng chuột.
+  - Các nút Xây/Xoay/Hủy nổi cạnh ngôi nhà 3D.
+  - Context menu Xoay/Nhấc/Xóa nổi cạnh nhà khi click vào nhà đã xây.
+- **URP Grid Renderer** (`BuildGridRenderer.cs`): Dùng `RenderPipelineManager.endCameraRendering` để vẽ lưới bằng lệnh `Graphics.DrawMeshNow` thay cho `GL.Lines` (không chạy trên URP).
+
+### Fixed
+- **Build Mode Bugs**:
+  - Khối Ghost không trong suốt: Sửa shader URP.
+  - Lỗi click UI xuyên xuống game: Tự động ẩn `GameHUD` khi bật chế độ xây dựng.
+  - Ghost bị dính chuột: Đổi logic sang Pin position.
+
+### Changed Files
+- `Assets/UI/BuildModeOverlayController.cs`
+- `Assets/UI/BuildModeOverlay.uxml`
+- `Assets/UI/Styles/BuildModeOverlay.uss`
+- `Assets/Scripts/Environment/GhostPlacementController.cs`
+- `Assets/Scripts/Environment/BuildGridRenderer.cs` [NEW]
+- `Assets/Scripts/Environment/BuildGridManager.cs`
+- `Assets/Scripts/Environment/FishingSpot.cs` [NEW]
+
+---
 ## [2026-06-06] — Part A Hoàn thành: Onboarding Flow + Tutorial UX + Name Tags
 
 ### Added

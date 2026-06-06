@@ -248,6 +248,30 @@
   - Giảm `font-size: 20px → 18px` khi tiêu đề có thể dài.
   - Thêm `text-overflow: ellipsis; overflow: hidden; white-space: nowrap;` để cắt an toàn nếu tràn.
   - Thêm `padding: 0 120px` cho title absolute để chừa khoảng trống cho các element ở hai góc (pill trái, close button phải).
+
+---
+
+## 🟢 BÀI HỌC VỀ CHẾ ĐỘ XÂY DỰNG & TRẢI NGHIỆM NGƯỜI DÙNG (Cập nhật 06/06/2026)
+
+### 33. KHÔNG bắt sự kiện Left Click đặt công trình khi chưa Pin (Ghim)
+- **Tình huống**: Trong chế độ Xây dựng, khi Ghost preview đi theo chuột, nếu user bấm Left Click thì công trình tự động xây luôn.
+- **Hậu quả**: Khi user click vào UI (chọn nhà khác, chuyển tab) thì vô tình đặt luôn nhà xuống map vì tia raycast vẫn xuyên qua UI.
+- **Giải pháp (Chuẩn UX Mobile/PC)**: Click trái lần 1 để "Ghim" vị trí ngôi nhà (pin). Khi ghim xong, hiện 3 nút nổi cạnh nhà: [Dấu tích/Xây], [Xoay], [Hủy]. Click trái vào nút Tích mới thực sự trừ tiền và đặt công trình.
+
+### 34. KHÔNG vẽ GL.Lines trong URP
+- **Tình huống**: Dùng hàm `OnRenderObject()` và `GL.Lines` để vẽ lưới (Grid) 3D cho chế độ xây dựng.
+- **Hậu quả**: Lưới hoàn toàn tàng hình trong Universal Render Pipeline (URP).
+- **Giải pháp**: Trong URP, phải dùng `RenderPipelineManager.endCameraRendering`. Sử dụng `MeshTopology.Lines` để tạo Mesh, và vẽ nó bằng `Graphics.DrawMeshNow` với một Unlit Shader màu cơ bản.
+
+### 35. KHÔNG gán trùng phím tắt cho 2 tính năng lớn
+- **Tình huống**: Tính năng Câu cá gán phím `E`. Tính năng Popup Sự kiện cũng gán phím `E` ở ngoài HUD.
+- **Hậu quả**: Khi user đứng gần hồ, bấm `E` thì bật cả popup câu cá lẫn popup sự kiện lên cùng lúc.
+- **Giải pháp**: Map phím khác (`F` cho câu cá) hoặc dùng hệ thống Contextual Input chặn luồng sự kiện lẫn nhau.
+
+### 36. Xóa bớt UI rối mắt — Thay bằng Contextual Menu
+- **Tình huống**: Header của chế độ Xây dựng chứa 6-7 nút (Lưu, Hủy, Xoay, Nhấc, Xóa, Cất kho).
+- **Hậu quả**: Chiếm diện tích, rối mắt, trải nghiệm kém so với các game Township, Hay Day.
+- **Giải pháp**: Xóa hết các nút trên Header (chỉ chừa lại Tiền, Tiêu đề, Thoát). Các thao tác Xoay, Xóa, Nhấc được đặt vào Contextual Menu (menu ngữ cảnh) sẽ nổi lên NGAY CẠNH công trình khi user click vào một công trình ĐÃ XÂY.
 - **Quy tắc**: Mọi title trong header PHẢI có `text-overflow: ellipsis` + `overflow: hidden`. Luôn test với tiêu đề dài nhất có thể xuất hiện (ví dụ: "KỶ NGUYÊN XANH — THẺ THÀNH VIÊN VIP").
 
 ---
