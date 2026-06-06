@@ -41,8 +41,8 @@ public class BuildGridRenderer : MonoBehaviour
 
     private void CreateLineMaterial()
     {
-        // Unity built-in shader for drawing simple colored lines
-        Shader shader = Shader.Find("Hidden/Internal-Colored");
+        // Use Sprites/Default shader which works in both Built-in and URP pipelines
+        Shader shader = Shader.Find("Sprites/Default");
         if (shader == null)
         {
             Debug.LogError("[BuildGridRenderer] Could not find Internal-Colored shader!");
@@ -64,6 +64,9 @@ public class BuildGridRenderer : MonoBehaviour
     void OnRenderObject()
     {
         if (!isVisible || gridManager == null || lineMaterial == null) return;
+
+        // Only render for the main camera to avoid rendering in scene view etc.
+        if (Camera.current == null || Camera.current != Camera.main) return;
 
         float cellSize = gridManager.CellSize;
         Vector3 origin = gridManager.GridOrigin;

@@ -9,6 +9,11 @@ public class GhostPlacementController : MonoBehaviour
 {
     public static GhostPlacementController Instance { get; private set; }
 
+    /// <summary>
+    /// Fired when a building is placed. Parameter is the item price.
+    /// </summary>
+    public event System.Action<int> OnBuildingPlaced;
+
     [Header("Ghost Settings")]
     [SerializeField] private Color validColor = new Color(0.2f, 0.9f, 0.3f, 0.4f);
     [SerializeField] private Color invalidColor = new Color(0.9f, 0.2f, 0.2f, 0.4f);
@@ -186,13 +191,13 @@ public class GhostPlacementController : MonoBehaviour
             // Create transparent material
             ghostRenderer = ghostObject.GetComponent<Renderer>();
             ghostMaterial = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-            ghostMaterial.SetFloat("_Mode", 3); // Transparent
-            ghostMaterial.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-            ghostMaterial.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-            ghostMaterial.SetInt("_ZWrite", 0);
-            ghostMaterial.DisableKeyword("_ALPHATEST_ON");
-            ghostMaterial.EnableKeyword("_ALPHABLEND_ON");
-            ghostMaterial.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+            // URP Lit transparency settings
+            ghostMaterial.SetFloat("_Surface", 1); // 0=Opaque, 1=Transparent
+            ghostMaterial.SetFloat("_Blend", 0);   // 0=Alpha, 1=Premultiply
+            ghostMaterial.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            ghostMaterial.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+            ghostMaterial.SetFloat("_ZWrite", 0);
+            ghostMaterial.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
             ghostMaterial.renderQueue = 3000;
             ghostRenderer.material = ghostMaterial;
         }
@@ -234,11 +239,8 @@ public class GhostPlacementController : MonoBehaviour
         Vector3 worldPos = gridManager.GridToWorldCentered(currentGridCell, effectiveSize);
         SpawnPlacedBuilding(worldPos, effectiveSize);
 
-        // Notify UI controller
-        if (BuildModeOverlayController.Instance != null)
-        {
-            // The UI controller will handle balance deduction and status message
-        }
+        // Notify listeners (UI controller handles balance deduction)
+        OnBuildingPlaced?.Invoke(currentItemPrice);
 
         Debug.Log($"[GhostPlacement] Placed '{currentItemName}' at grid ({currentGridCell.x},{currentGridCell.y}) rotation {rotationAngle}");
 
@@ -265,12 +267,17 @@ public class GhostPlacementController : MonoBehaviour
         if (renderer != null)
         {
             Material mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+            // Ensure spawned building is opaque (URP Lit defaults)
+            mat.SetFloat("_Surface", 0); // 0=Opaque
+            mat.DisableKeyword("_SURFACE_TYPE_TRANSPARENT");
+            mat.SetFloat("_ZWrite", 1);
+            mat.renderQueue = -1; // Use shader default queue
             mat.color = GetBuildingColor();
             renderer.material = mat;
         }
 
-        // Tag for identification
-        building.tag = "Untagged";
+        // Tag for identification (used by Delete/Move tools)
+        building.tag = "PlacedBuilding";
 
         Debug.Log($"[GhostPlacement] Spawned building '{building.name}' at {position}");
     }

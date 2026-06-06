@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UIElements;
+using UnityEngine.InputSystem;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -55,6 +56,10 @@ public class BuildModeOverlayController : MonoBehaviour
     // Active tool
     private enum BuildTool { Place, Delete, Move }
     private BuildTool activeTool = BuildTool.Place;
+
+    // Raycast for delete/move tools
+    [Header("Delete/Move Raycast")]
+    [SerializeField] private LayerMask buildingRayMask = ~0;
 
     // ── Mock Data ──
 
@@ -156,7 +161,7 @@ public class BuildModeOverlayController : MonoBehaviour
     {
         if (state == BuildState.Hidden) return;
 
-        var keyboard = UnityEngine.InputSystem.Keyboard.current;
+        var keyboard = Keyboard.current;
         if (keyboard == null) return;
 
         // R = Rotate
@@ -170,6 +175,9 @@ public class BuildModeOverlayController : MonoBehaviour
         {
             OnDeleteClicked();
         }
+
+        // Handle Delete/Move tool raycasting on left-click
+        HandleDeleteAndMoveTool();
 
         // Escape = Exit
         if (keyboard.escapeKey.wasPressedThisFrame)
@@ -271,6 +279,10 @@ public class BuildModeOverlayController : MonoBehaviour
         if (gridRenderer != null)
             gridRenderer.Show();
 
+        // Subscribe to building placed event for balance deduction
+        if (GhostPlacementController.Instance != null)
+            GhostPlacementController.Instance.OnBuildingPlaced += OnBuildingPlacedHandler;
+
         Debug.Log("[BuildMode] Build Mode opened");
     }
 
@@ -281,6 +293,10 @@ public class BuildModeOverlayController : MonoBehaviour
             buildDocument.rootVisualElement.style.display = DisplayStyle.None;
         }
         state = BuildState.Hidden;
+
+        // Unsubscribe from building placed event
+        if (GhostPlacementController.Instance != null)
+            GhostPlacementController.Instance.OnBuildingPlaced -= OnBuildingPlacedHandler;
 
         // Deactivate ghost and camera
         if (GhostPlacementController.Instance != null)
@@ -486,14 +502,24 @@ public class BuildModeOverlayController : MonoBehaviour
     private void OnDeleteClicked()
     {
         activeTool = BuildTool.Delete;
-        ShowStatusMessage("Chế độ xóa — bấm vào công trình để xóa", true);
+
+        // Deactivate ghost preview when switching to delete
+        if (GhostPlacementController.Instance != null && GhostPlacementController.Instance.IsActive)
+            GhostPlacementController.Instance.Deactivate();
+
+        ShowStatusMessage("Ch\u1ebf \u0111\u1ed9 x\u00f3a \u2014 b\u1ea5m v\u00e0o c\u00f4ng tr\u00ecnh \u0111\u1ec3 x\u00f3a", true);
         Debug.Log("[BuildMode] Delete mode activated");
     }
 
     private void OnMoveClicked()
     {
         activeTool = BuildTool.Move;
-        ShowStatusMessage("Chế độ di chuyển — bấm vào công trình để nhấc", true);
+
+        // Deactivate ghost preview when switching to move
+        if (GhostPlacementController.Instance != null && GhostPlacementController.Instance.IsActive)
+            GhostPlacementController.Instance.Deactivate();
+
+        ShowStatusMessage("Ch\u1ebf \u0111\u1ed9 di chuy\u1ec3n \u2014 b\u1ea5m v\u00e0o c\u00f4ng tr\u00ecnh \u0111\u1ec3 nh\u1ea5c", true);
         Debug.Log("[BuildMode] Move mode activated");
     }
 
@@ -505,8 +531,121 @@ public class BuildModeOverlayController : MonoBehaviour
 
     private void OnUndoClicked()
     {
-        ShowStatusMessage("Hoàn tác thao tác trước!", true);
+        ShowStatusMessage("Ho\u00e0n t\u00e1c thao t\u00e1c tr\u01b0\u1edbc!", true);
         Debug.Log("[BuildMode] Undo last action (mockup)");
+    }
+
+    // ── Delete / Move Tool Logic ──
+
+    /// <summary>
+    /// Called every frame from Update(). When Delete or Move tool is active,
+    /// raycasts on left-click to find "PlacedBuilding" objects.
+    /// </summary>
+    private void HandleDeleteAndMoveTool()
+    {
+        if (activeTool != BuildTool.Delete && activeTool != BuildTool.Move) return;
+
+        var mouse = Mouse.current;
+        if (mouse == null) return;
+        if (!mouse.leftButton.wasPressedThisFrame) return;
+
+        Camera cam = Camera.main;
+        if (cam == null) return;
+
+        Vector2 mousePos = mouse.position.ReadValue();
+        Ray ray = cam.ScreenPointToRay(new Vector3(mousePos.x, mousePos.y, 0f));
+
+        if (!Physics.Raycast(ray, out RaycastHit hit, 200f, buildingRayMask)) return;
+
+        GameObject hitObj = hit.collider.gameObject;
+        if (!hitObj.CompareTag("PlacedBuilding")) return;
+
+        if (activeTool == BuildTool.Delete)
+        {
+            DeleteBuildingAt(hitObj);
+        }
+        else if (activeTool == BuildTool.Move)
+        {
+            PickUpBuilding(hitObj);
+        }
+    }
+
+    /// <summary>
+    /// Destroy a placed building and free its grid cells.
+    /// </summary>
+    private void DeleteBuildingAt(GameObject building)
+    {
+        // Free grid cells occupied by this building
+        if (BuildGridManager.Instance != null)
+        {
+            Vector2Int gridCell = BuildGridManager.Instance.WorldToGrid(building.transform.position);
+            // Estimate size from the object's local scale and grid cell size
+            float cellSize = BuildGridManager.Instance.CellSize;
+            int sizeX = Mathf.Max(1, Mathf.RoundToInt(building.transform.localScale.x / (cellSize * 0.95f)));
+            int sizeZ = Mathf.Max(1, Mathf.RoundToInt(building.transform.localScale.z / (cellSize * 0.95f)));
+            Vector2Int size = new Vector2Int(sizeX, sizeZ);
+
+            // Recalculate the origin cell (WorldToGrid gives center, need corner)
+            Vector2Int originCell = new Vector2Int(
+                gridCell.x - (sizeX / 2),
+                gridCell.y - (sizeZ / 2)
+            );
+            BuildGridManager.Instance.FreeCells(originCell, size);
+        }
+
+        Destroy(building);
+        ShowStatusMessage("\u0110\u00e3 x\u00f3a!", true); // "Đã xóa!"
+        Debug.Log($"[BuildMode] Deleted building: {building.name}");
+    }
+
+    /// <summary>
+    /// Pick up a placed building (destroy it, free cells, activate ghost at same position).
+    /// Player can then re-place it.
+    /// </summary>
+    private void PickUpBuilding(GameObject building)
+    {
+        // Read building info before destroying
+        Vector3 buildingPos = building.transform.position;
+        Vector3 buildingScale = building.transform.localScale;
+        string buildingName = building.name;
+
+        // Estimate size from scale
+        float cellSize = BuildGridManager.Instance != null ? BuildGridManager.Instance.CellSize : 1f;
+        int sizeX = Mathf.Max(1, Mathf.RoundToInt(buildingScale.x / (cellSize * 0.95f)));
+        int sizeZ = Mathf.Max(1, Mathf.RoundToInt(buildingScale.z / (cellSize * 0.95f)));
+        Vector2Int size = new Vector2Int(sizeX, sizeZ);
+
+        // Free grid cells
+        if (BuildGridManager.Instance != null)
+        {
+            Vector2Int gridCell = BuildGridManager.Instance.WorldToGrid(buildingPos);
+            Vector2Int originCell = new Vector2Int(
+                gridCell.x - (sizeX / 2),
+                gridCell.y - (sizeZ / 2)
+            );
+            BuildGridManager.Instance.FreeCells(originCell, size);
+        }
+
+        // Destroy the original
+        Destroy(building);
+
+        // Activate ghost at the same position for re-placement
+        if (GhostPlacementController.Instance != null)
+        {
+            // Extract item name from building name (format: Building_ItemName_X_Y)
+            string itemName = buildingName;
+            if (buildingName.StartsWith("Building_"))
+            {
+                string[] parts = buildingName.Split('_');
+                if (parts.Length >= 2) itemName = parts[1];
+            }
+
+            GhostPlacementController.Instance.Activate(itemName, size, 0);
+            activeTool = BuildTool.Place;
+        }
+
+        ShowStatusMessage("\u0110\u00e3 nh\u1ea5c c\u00f4ng tr\u00ecnh \u2014 ch\u1ecdn v\u1ecb tr\u00ed m\u1edbi", true); // "Đã nhấc công trình — chọn vị trí mới"
+        Debug.Log($"[BuildMode] Picked up building: {buildingName}");
     }
 
     // ── Balance ──
@@ -517,6 +656,23 @@ public class BuildModeOverlayController : MonoBehaviour
         {
             lblBuildBalance.text = $"{currentBalance:N0} POS";
         }
+    }
+
+    /// <summary>
+    /// Called when a building is placed via the ghost system.
+    /// Deducts the item price from mock balance and updates the UI.
+    /// </summary>
+    private void OnBuildingPlacedHandler(int price)
+    {
+        if (currentBalance < price)
+        {
+            ShowStatusMessage($"Kh\u00F4ng \u0111\u1EE7 POS! C\u1EA7n {price} POS.", false);
+            return;
+        }
+
+        currentBalance -= price;
+        UpdateBalance();
+        ShowStatusMessage($"\u0110\u1EB7t th\u00E0nh c\u00F4ng! (-{price} POS)", true);
     }
 
     // ── Status Message (Fade-out) ──

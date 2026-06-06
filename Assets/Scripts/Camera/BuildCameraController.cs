@@ -213,7 +213,7 @@ public class BuildCameraController : MonoBehaviour
         float scroll = mouse.scroll.ReadValue().y;
         if (Mathf.Abs(scroll) > 0.01f)
         {
-            currentHeight -= scroll * zoomSpeed * Time.deltaTime;
+            currentHeight -= scroll * zoomSpeed * 0.01f; // 0.01f to normalize scroll value (typically ±120)
             currentHeight = Mathf.Clamp(currentHeight, minHeight, maxHeight);
 
             if (cam != null)

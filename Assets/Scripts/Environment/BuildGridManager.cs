@@ -192,8 +192,8 @@ public class BuildGridManager : MonoBehaviour
             Mathf.Round(worldPos.z) - halfH
         );
 
-        // Reset occupancy for the new area
-        occupancyMap = new bool[gridWidth, gridHeight];
+        // NOTE: Do NOT reset occupancyMap here — it would wipe all placed building data.
+        // The occupancy map is initialized once in Awake() and persists across re-centers.
 
         Debug.Log($"[BuildGrid] Grid centered on ({worldPos.x:F1}, {worldPos.z:F1}), origin = {gridOrigin}");
     }
