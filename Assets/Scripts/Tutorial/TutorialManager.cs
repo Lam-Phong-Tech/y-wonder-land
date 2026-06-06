@@ -12,10 +12,11 @@ public class TutorialManager : MonoBehaviour
         WaitForStart,   // 0: Waiting for cutscene to arrive
         FollowNPC,      // 1: Follow Guide NPC to farm tile
         PlowTile,       // 2: Plow the farm tile
-        PlantSeed,      // 3: Plant carrot seed
-        WaterTile,      // 4: Water the planted seed
-        WaitHarvest,    // 5: Wait for carrot to ripen (60s countdown)
-        Complete        // 6: Tutorial complete, give rewards
+        OpenInventory,  // 3: Open inventory and select carrot seed
+        PlantSeed,      // 4: Plant carrot seed on tile
+        WaterTile,      // 5: Water the planted seed
+        WaitHarvest,    // 6: Wait for carrot to ripen (60s countdown)
+        Complete        // 7: Tutorial complete, give rewards
     }
 
     [Header("Current Progress")]
@@ -49,6 +50,14 @@ public class TutorialManager : MonoBehaviour
 
     private float harvestCountdown = 60f;
     private Coroutine countdownCoroutine;
+
+    // Timeout hint system (120s)
+    private float stepStartTime;
+    private bool hasShownHint;
+    private const float HINT_TIMEOUT = 120f;
+
+    // Inventory integration
+    private InventoryPopupController inventoryPopup;
 
     void Awake()
     {
@@ -181,6 +190,61 @@ public class TutorialManager : MonoBehaviour
         {
             HandleInteractionRaycast();
         }
+
+        // Timeout hint system: if player is stuck >120s, show help
+        CheckTimeoutHint();
+    }
+
+    private void CheckTimeoutHint()
+    {
+        if (currentStep == TutorialStep.WaitForStart || 
+            currentStep == TutorialStep.WaitHarvest || 
+            currentStep == TutorialStep.Complete) return;
+
+        if (hasShownHint) return;
+        if (Time.time - stepStartTime < HINT_TIMEOUT) return;
+
+        hasShownHint = true;
+        string hintTitle = "";
+        string hintDesc = "";
+
+        switch (currentStep)
+        {
+            case TutorialStep.FollowNPC:
+                hintTitle = "B\u1ea1n c\u1ea7n tr\u1ee3 gi\u00fap!";
+                hintDesc = "\u0110i theo NPC t\u00edm! D\u00f9ng ph\u00edm W A S D \u0111\u1ec3 di chuy\u1ec3n";
+                break;
+            case TutorialStep.PlowTile:
+                hintTitle = "Cu\u1ed1c \u0111\u1ea5t!";
+                hintDesc = "Nh\u1ea5p chu\u1ed9t v\u00e0o \u00f4 \u0111\u1ea5t \u0111ang ph\u00e1t s\u00e1ng m\u00e0u v\u00e0ng!";
+                break;
+            case TutorialStep.OpenInventory:
+                hintTitle = "M\u1edf t\u00fai \u0111\u1ed3!";
+                hintDesc = "T\u00fai \u0111\u1ed3 \u0111ang m\u1edf, h\u00e3y nh\u1ea5p v\u00e0o \u2018H\u1ea1t c\u00e0 r\u1ed1t\u2019 r\u1ed3i b\u1ea5m \u2018Gieo h\u1ea1t\u2019!";
+                break;
+            case TutorialStep.PlantSeed:
+                hintTitle = "Gieo h\u1ea1t!";
+                hintDesc = "Nh\u1ea5p chu\u1ed9t v\u00e0o \u00f4 \u0111\u1ea5t \u0111\u1ec3 gieo h\u1ea1t c\u00e0 r\u1ed1t!";
+                break;
+            case TutorialStep.WaterTile:
+                hintTitle = "T\u01b0\u1edbi n\u01b0\u1edbc!";
+                hintDesc = "Nh\u1ea5p chu\u1ed9t v\u00e0o \u00f4 \u0111\u1ea5t \u0111\u1ec3 t\u01b0\u1edbi n\u01b0\u1edbc cho c\u00e2y!";
+                break;
+        }
+
+        if (!string.IsNullOrEmpty(hintTitle))
+        {
+            ShowInstructionBanner(hintTitle, hintDesc);
+            ShowSubtitle(hintDesc);
+            Debug.Log($"[TutorialManager] Timeout hint shown for step: {currentStep}");
+        }
+    }
+
+    private void SetStep(TutorialStep newStep)
+    {
+        currentStep = newStep;
+        stepStartTime = Time.time;
+        hasShownHint = false;
     }
 
     private IEnumerator SetupHUDReferences()
@@ -207,11 +271,19 @@ public class TutorialManager : MonoBehaviour
         {
             StartTutorial();
         }
+
+        // Find and connect to Inventory popup
+        inventoryPopup = FindFirstObjectByType<InventoryPopupController>();
+        if (inventoryPopup != null)
+        {
+            inventoryPopup.OnItemUsed += OnInventoryItemUsed;
+            Debug.Log("[TutorialManager] Connected to InventoryPopupController.");
+        }
     }
 
     public void StartTutorial()
     {
-        currentStep = TutorialStep.FollowNPC;
+        SetStep(TutorialStep.FollowNPC);
         UpdateQuestHUD("\u0110i theo L\u00e2m H\u01b0\u1edbng D\u1eabn t\u1edbi m\u1ea3nh \u0111\u1ea5t hoang");
         Debug.Log("[TutorialManager] Onboarding Tutorial Started.");
 
@@ -400,13 +472,17 @@ public class TutorialManager : MonoBehaviour
     {
         if (currentStep == TutorialStep.FollowNPC)
         {
-            currentStep = TutorialStep.PlowTile;
-            UpdateQuestHUD("Sử dụng Cuốc nhấp vào ô đất phát sáng");
+            SetStep(TutorialStep.PlowTile);
+            UpdateQuestHUD("S\u1eed d\u1ee5ng Cu\u1ed1c nh\u1ea5p v\u00e0o \u00f4 \u0111\u1ea5t ph\u00e1t s\u00e1ng");
             
             // Highlight the farm tile
             if (highlightEffect != null) highlightEffect.gameObject.SetActive(true);
             
-            ShowSubtitle("Chúng ta đã đến nơi! Hãy dùng Cuốc nhấp vào mảnh đất phát sáng này để xới tơi đất lên nhé.");
+            ShowSubtitle("Ch\u00fang ta \u0111\u00e3 \u0111\u1ebfn n\u01a1i! H\u00e3y d\u00f9ng Cu\u1ed1c nh\u1ea5p v\u00e0o m\u1ea3nh \u0111\u1ea5t ph\u00e1t s\u00e1ng n\u00e0y \u0111\u1ec3 x\u1edbi t\u01a1i \u0111\u1ea5t l\u00ean nh\u00e9.");
+            ShowInstructionBanner(
+                "Cu\u1ed1c \u0111\u1ea5t!",
+                "Nh\u1ea5p chu\u1ed9t v\u00e0o \u00f4 \u0111\u1ea5t m\u00e0u v\u00e0ng \u0111ang ph\u00e1t s\u00e1ng"
+            );
         }
     }
 
@@ -414,10 +490,72 @@ public class TutorialManager : MonoBehaviour
     {
         if (currentStep == TutorialStep.PlowTile)
         {
-            currentStep = TutorialStep.PlantSeed;
-            UpdateQuestHUD("Nhấp vào ô đất để gieo hạt Cà Rốt");
+            SetStep(TutorialStep.OpenInventory);
+            UpdateQuestHUD("M\u1edf t\u00fai \u0111\u1ed3 \u2192 ch\u1ecdn H\u1ea1t c\u00e0 r\u1ed1t \u2192 b\u1ea5m Gieo h\u1ea1t");
             
-            ShowSubtitle("Tuyệt vời! Bây giờ hãy gieo hạt giống Cà Rốt lên ô đất vừa cuốc đi nào.");
+            ShowSubtitle("Tuy\u1ec7t v\u1eddi! B\u00e2y gi\u1edd h\u00e3y m\u1edf t\u00fai \u0111\u1ed3, ch\u1ecdn h\u1ea1t c\u00e0 r\u1ed1t v\u00e0 b\u1ea5m 'Gieo h\u1ea1t' nh\u00e9!");
+            ShowInstructionBanner(
+                "M\u1edf t\u00fai \u0111\u1ed3!",
+                "Ch\u1ecdn 'H\u1ea1t c\u00e0 r\u1ed1t' r\u1ed3i b\u1ea5m n\u00fat 'Gieo h\u1ea1t'"
+            );
+
+            // Auto-open inventory at Seeds tab after 2 seconds
+            StartCoroutine(AutoOpenInventorySeeds());
+        }
+    }
+
+    private IEnumerator AutoOpenInventorySeeds()
+    {
+        yield return new WaitForSeconds(2f);
+
+        if (currentStep != TutorialStep.OpenInventory) yield break;
+
+        if (inventoryPopup == null)
+        {
+            inventoryPopup = FindFirstObjectByType<InventoryPopupController>();
+            if (inventoryPopup != null)
+            {
+                inventoryPopup.OnItemUsed += OnInventoryItemUsed;
+            }
+        }
+
+        if (inventoryPopup != null)
+        {
+            inventoryPopup.ShowAtTab("seeds");
+            Debug.Log("[TutorialManager] Auto-opened Inventory at Seeds tab.");
+        }
+        else
+        {
+            Debug.LogWarning("[TutorialManager] InventoryPopupController not found! Skipping to PlantSeed.");
+            SetStep(TutorialStep.PlantSeed);
+            UpdateQuestHUD("Nh\u1ea5p v\u00e0o \u00f4 \u0111\u1ea5t \u0111\u1ec3 gieo h\u1ea1t C\u00e0 R\u1ed1t");
+            ShowSubtitle("H\u00e3y nh\u1ea5p v\u00e0o \u00f4 \u0111\u1ea5t \u0111\u1ec3 gieo h\u1ea1t!");
+        }
+    }
+
+    private void OnInventoryItemUsed(string itemName)
+    {
+        // Only react during OpenInventory step
+        if (currentStep != TutorialStep.OpenInventory) return;
+
+        if (itemName.Contains("c\u00e0 r\u1ed1t") || itemName.Contains("C\u00e0 R\u1ed1t") || itemName.Contains("c\u00e0 r\u1ed1t"))
+        {
+            Debug.Log($"[TutorialManager] Carrot seed selected: {itemName}");
+
+            // Close inventory
+            if (inventoryPopup != null)
+            {
+                inventoryPopup.Hide();
+            }
+
+            // Move to PlantSeed step
+            SetStep(TutorialStep.PlantSeed);
+            UpdateQuestHUD("Nh\u1ea5p v\u00e0o \u00f4 \u0111\u1ea5t \u0111\u1ec3 gieo h\u1ea1t C\u00e0 R\u1ed1t");
+            ShowSubtitle("\u0110\u00e3 ch\u1ecdn h\u1ea1t c\u00e0 r\u1ed1t! Gi\u1edd h\u00e3y nh\u1ea5p v\u00e0o \u00f4 \u0111\u1ea5t \u0111\u1ec3 gieo h\u1ea1t nh\u00e9.");
+            ShowInstructionBanner(
+                "Gieo h\u1ea1t!",
+                "Nh\u1ea5p chu\u1ed9t v\u00e0o \u00f4 \u0111\u1ea5t \u0111\u1ec3 gieo h\u1ea1t c\u00e0 r\u1ed1t"
+            );
         }
     }
 
@@ -425,10 +563,14 @@ public class TutorialManager : MonoBehaviour
     {
         if (currentStep == TutorialStep.PlantSeed)
         {
-            currentStep = TutorialStep.WaterTile;
-            UpdateQuestHUD("Nhấp vào ô đất để tưới nước");
+            SetStep(TutorialStep.WaterTile);
+            UpdateQuestHUD("Nh\u1ea5p v\u00e0o \u00f4 \u0111\u1ea5t \u0111\u1ec3 t\u01b0\u1edbi n\u01b0\u1edbc");
             
-            ShowSubtitle("Hạt giống đã được gieo! Hãy nhấp vào ô đất một lần nữa để tưới nước cho cây mau lớn.");
+            ShowSubtitle("H\u1ea1t gi\u1ed1ng \u0111\u00e3 \u0111\u01b0\u1ee3c gieo! H\u00e3y nh\u1ea5p v\u00e0o \u00f4 \u0111\u1ea5t m\u1ed9t l\u1ea7n n\u1eefa \u0111\u1ec3 t\u01b0\u1edbi n\u01b0\u1edbc cho c\u00e2y mau l\u1edbn.");
+            ShowInstructionBanner(
+                "T\u01b0\u1edbi n\u01b0\u1edbc!",
+                "Nh\u1ea5p chu\u1ed9t v\u00e0o \u00f4 \u0111\u1ea5t \u0111\u1ec3 t\u01b0\u1edbi n\u01b0\u1edbc"
+            );
         }
     }
 
@@ -436,7 +578,7 @@ public class TutorialManager : MonoBehaviour
     {
         if (currentStep == TutorialStep.WaterTile)
         {
-            currentStep = TutorialStep.WaitHarvest;
+            SetStep(TutorialStep.WaitHarvest);
             
             // Hide highlight effect
             if (highlightEffect != null) highlightEffect.gameObject.SetActive(false);

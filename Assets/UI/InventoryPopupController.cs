@@ -8,6 +8,11 @@ using UnityEngine.UIElements;
 /// </summary>
 public class InventoryPopupController : MonoBehaviour
 {
+    /// <summary>
+    /// Fired when player clicks the action button on an item.
+    /// Parameter is the item name (e.g. "H\u1ea1t c\u00e0 r\u1ed1t").
+    /// </summary>
+    public event System.Action<string> OnItemUsed;
     [Header("References")]
     [SerializeField] private UIDocument inventoryDocument;
 
@@ -127,6 +132,7 @@ public class InventoryPopupController : MonoBehaviour
             if (selectedItem.HasValue)
             {
                 Debug.Log($"[Inventory] Executed action '{selectedItem.Value.actionText}' on item: {selectedItem.Value.name}");
+                OnItemUsed?.Invoke(selectedItem.Value.name);
             }
         });
 
@@ -314,6 +320,43 @@ public class InventoryPopupController : MonoBehaviour
     public bool IsVisible()
     {
         return overlay != null && overlay.style.display == DisplayStyle.Flex;
+    }
+
+    /// <summary>
+    /// Open inventory directly at a specific tab. Used by tutorial system.
+    /// Valid tab names: "tools", "materials", "seeds", "food", "outfit", "special"
+    /// </summary>
+    public void ShowAtTab(string tabName)
+    {
+        Show();
+
+        // Map tab name to button + display name
+        switch (tabName)
+        {
+            case "seeds":
+                SetActiveTab(tabSeeds, "seeds", "H\u1ea1t gi\u1ed1ng");
+                break;
+            case "tools":
+                SetActiveTab(tabTools, "tools", "D\u1ee5ng c\u1ee5");
+                break;
+            case "materials":
+                SetActiveTab(tabMaterials, "materials", "Nguy\u00ean li\u1ec7u");
+                break;
+            case "food":
+                SetActiveTab(tabFood, "food", "Th\u1ef1c ph\u1ea9m");
+                break;
+            case "outfit":
+                SetActiveTab(tabOutfit, "outfit", "Trang ph\u1ee5c");
+                break;
+            case "special":
+                SetActiveTab(tabSpecial, "special", "\u0110\u1eb7c bi\u1ec7t");
+                break;
+            default:
+                Debug.LogWarning($"[Inventory] Unknown tab: {tabName}");
+                break;
+        }
+
+        Debug.Log($"[Inventory] Opened at tab: {tabName}");
     }
 
     // ── Mock Data ──
