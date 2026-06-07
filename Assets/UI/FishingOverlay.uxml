@@ -4,7 +4,7 @@
     <ui:Style src="project://database/Assets/UI/Styles/FishingOverlay.uss" />
 
     <!-- Fullscreen overlay container -->
-    <ui:VisualElement name="FishingOverlayRoot" class="fish-root" picking-mode="Ignore">
+    <ui:VisualElement name="FishingOverlayRoot" class="fish-root">
 
         <!-- ============================== -->
         <!-- TOP STATUS BAR                 -->

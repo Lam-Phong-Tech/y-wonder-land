@@ -68,7 +68,6 @@ public class FishingOverlayController : MonoBehaviour
     // Game Variables
     private int freeTurns = 10;
     private int normalBait = 5;
-    private int premiumBait = 2;
 
     // QTE Variables
     private float qteTimerElapsed = 0f;
@@ -85,6 +84,7 @@ public class FishingOverlayController : MonoBehaviour
     // Fish Database Item
     private struct FishItem
     {
+        public string itemId;
         public string name;
         public string emoji;
         public string rarity;
@@ -92,8 +92,9 @@ public class FishingOverlayController : MonoBehaviour
         public float rewardCoins;
         public string rarityColorHex;
 
-        public FishItem(string name, string emoji, string rarity, string desc, float rewardCoins, string colorHex)
+        public FishItem(string itemId, string name, string emoji, string rarity, string desc, float rewardCoins, string colorHex)
         {
+            this.itemId = itemId;
             this.name = name;
             this.emoji = emoji;
             this.rarity = rarity;
@@ -105,20 +106,20 @@ public class FishingOverlayController : MonoBehaviour
 
     private readonly List<FishItem> commonFish = new List<FishItem>
     {
-        new FishItem("Cá Rô Phi", "🐟", "Thường", "Cá rô phi ngọt thịt, rất phổ biến ở ao thành phố. Nhận +20 POS!", 20f, "#9E9E9E"),
-        new FishItem("Cá Chép", "🐟", "Thường", "Cá chép sông dày mình, nấu canh rất ngon. Nhận +30 POS!", 30f, "#9E9E9E")
+        new FishItem("fish_01", "Cá Rô Phi", "🐟", "Thường", "Cá rô phi ngọt thịt, rất phổ biến ở ao thành phố. Nhận +20 POS!", 20f, "#9E9E9E"),
+        new FishItem("fish_01", "Cá Chép", "🐟", "Thường", "Cá chép sông dày mình, nấu canh rất ngon. Nhận +30 POS!", 30f, "#9E9E9E")
     };
 
     private readonly List<FishItem> rareFish = new List<FishItem>
     {
-        new FishItem("Cá Trắm Đen", "🐟", "Hiếm", "Cá trắm đen to lớn khỏe mạnh, cực kỳ hiếm gặp ở vùng nước ngọt. Nhận +60 POS!", 60f, "#5B42F3"),
-        new FishItem("Cá Hồi Vây Đỏ", "🐟", "Hiếm", "Cá hồi di cư ngược dòng nước xiết, thịt béo bổ dưỡng. Nhận +80 POS!", 80f, "#5B42F3")
+        new FishItem("fish_02", "Cá Trắm Đen", "🐟", "Hiếm", "Cá trắm đen to lớn khỏe mạnh, cực kỳ hiếm gặp ở vùng nước ngọt. Nhận +60 POS!", 60f, "#5B42F3"),
+        new FishItem("fish_02", "Cá Hồi Vây Đỏ", "🐟", "Hiếm", "Cá hồi di cư ngược dòng nước xiết, thịt béo bổ dưỡng. Nhận +80 POS!", 80f, "#5B42F3")
     };
 
     private readonly List<FishItem> epicFish = new List<FishItem>
     {
-        new FishItem("Cá Kiếm Vàng", "🐠", "Sử Thi", "Chú cá cảnh lấp lánh mang sắc vàng hoàng gia kiêu hãnh. Nhận +150 POS!", 150f, "#FFC107"),
-        new FishItem("Bao Lì Xì Event", "🎁", "Sự Kiện", "Bao lì xì rớt ra từ sự kiện sông nước Y WONDER LAND. Nhận +3 Vật phẩm sự kiện 🎫!", 0f, "#9C27B0")
+        new FishItem("fish_02", "Cá Kiếm Vàng", "🐠", "Sử Thi", "Chú cá cảnh lấp lánh mang sắc vàng hoàng gia kiêu hãnh. Nhận +150 POS!", 150f, "#FFC107"),
+        new FishItem("gift_box_01", "Bao Lì Xì Event", "🎁", "Sự Kiện", "Bao lì xì rớt ra từ sự kiện sông nước Y WONDER LAND. Nhận +3 Vật phẩm sự kiện 🎫!", 0f, "#9C27B0")
     };
 
     private void Awake()
@@ -135,6 +136,22 @@ public class FishingOverlayController : MonoBehaviour
 
         if (fishingDocument == null)
             fishingDocument = GetComponent<UIDocument>();
+
+        // Check date for resetting free turns
+        string lastDate = PlayerPrefs.GetString("FishingLastDate", "");
+        string today = System.DateTime.Now.ToString("yyyy-MM-dd");
+        
+        if (lastDate != today)
+        {
+            freeTurns = 10;
+            PlayerPrefs.SetString("FishingLastDate", today);
+            PlayerPrefs.SetInt("FishingFreeTurns", freeTurns);
+            PlayerPrefs.Save();
+        }
+        else
+        {
+            freeTurns = PlayerPrefs.GetInt("FishingFreeTurns", 10);
+        }
     }
 
     private void OnEnable()
@@ -214,16 +231,17 @@ public class FishingOverlayController : MonoBehaviour
         btnCheatRefill?.RegisterCallback<ClickEvent>(evt =>
         {
             freeTurns = 10;
+            PlayerPrefs.SetInt("FishingFreeTurns", freeTurns);
             UpdateUI();
             Debug.Log("[Fishing] Cheat: Refilled free turns to 10.");
         });
 
         btnCheatAddBait?.RegisterCallback<ClickEvent>(evt =>
         {
-            normalBait += 10;
-            premiumBait += 10;
+            var inv = YWonderLand.Managers.InventoryManager.Instance;
+            if (inv != null) inv.AddItem("bait_01", 10);
             UpdateUI();
-            Debug.Log("[Fishing] Cheat: Added 10 normal & premium baits.");
+            Debug.Log("[Fishing] Cheat: Added 10 normal baits.");
         });
     }
 
@@ -245,7 +263,7 @@ public class FishingOverlayController : MonoBehaviour
         if (state == FishingState.Waiting && lblBobberEmoji != null)
         {
             float bobAmount = Mathf.Sin(Time.time * 6f) * 12f;
-            lblBobberEmoji.transform.position = new Vector3(0f, bobAmount, 0f);
+            lblBobberEmoji.style.translate = new Translate(0f, bobAmount, 0f);
         }
 
         // State 3 QTE: Needle oscillation + Timer decay
@@ -303,6 +321,11 @@ public class FishingOverlayController : MonoBehaviour
             state = FishingState.Idle;
             SelectBait(BaitType.None);
             UpdateUI();
+
+            // Hide GameHUD to avoid overlap
+            var hud = FindFirstObjectByType<GameHUDController>();
+            if (hud != null) hud.SetHUDVisible(false);
+
             Debug.Log("[Fishing] Entering Fishing Mode");
         }
     }
@@ -316,15 +339,24 @@ public class FishingOverlayController : MonoBehaviour
         {
             CancelFishing();
             fishingDocument.rootVisualElement.style.display = DisplayStyle.None;
+
+            // Restore GameHUD
+            var hud = FindFirstObjectByType<GameHUDController>();
+            if (hud != null) hud.SetHUDVisible(true);
+
             Debug.Log("[Fishing] Exiting Fishing Mode");
         }
     }
 
     private void UpdateUI()
     {
+        var inv = YWonderLand.Managers.InventoryManager.Instance;
+        int currentNormalBait = inv != null ? inv.GetItemQuantity("bait_01") : 0;
+        int currentPremiumBait = 0; // Not implemented yet
+        
         if (lblFreeTurns != null) lblFreeTurns.text = $"Lượt câu: {freeTurns}/10";
-        if (lblBaitNormal != null) lblBaitNormal.text = $"Mồi thường: {normalBait}";
-        if (lblBaitPremium != null) lblBaitPremium.text = $"Mồi xịn: {premiumBait}";
+        if (lblBaitNormal != null) lblBaitNormal.text = $"Mồi thường: {currentNormalBait}";
+        if (lblBaitPremium != null) lblBaitPremium.text = $"Mồi xịn: {currentPremiumBait}";
 
         // Bait button active classes
         btnBaitNone?.EnableInClassList("active-bait", selectedBait == BaitType.None);
@@ -342,13 +374,15 @@ public class FishingOverlayController : MonoBehaviour
     {
         if (state != FishingState.Idle) return;
 
+        var inv = YWonderLand.Managers.InventoryManager.Instance;
+
         // Validation: do we have enough?
-        if (baitType == BaitType.Normal && normalBait <= 0)
+        if (baitType == BaitType.Normal && (inv == null || inv.GetItemQuantity("bait_01") <= 0))
         {
             Debug.LogWarning("[Fishing] Hết mồi thường!");
             return;
         }
-        if (baitType == BaitType.Premium && premiumBait <= 0)
+        if (baitType == BaitType.Premium)
         {
             Debug.LogWarning("[Fishing] Hết mồi xịn!");
             return;
@@ -363,30 +397,38 @@ public class FishingOverlayController : MonoBehaviour
         if (state != FishingState.Idle) return;
 
         // Check turn count
-        if (freeTurns <= 0)
+        if (freeTurns <= 0 && selectedBait == BaitType.None)
         {
-            // Try fallback purchase confirmation dialog
+            // Require bait if no free turns
             if (confirmDialog != null)
             {
                 confirmDialog.Show(
-                    "MUA MỒI & LƯỢT CÂU",
-                    "Bạn đã hết lượt câu miễn phí hôm nay. Bạn có muốn mua 5 mồi thường với giá 50 POS để tiếp tục câu?",
-                    "Mua mồi",
-                    "Không mua",
-                    OnConfirmBaitPurchase
+                    "HẾT LƯỢT MIỄN PHÍ",
+                    "Bạn đã hết lượt câu miễn phí hôm nay. Hãy chọn Mồi câu để tiếp tục, hoặc mua thêm Mồi từ cửa hàng.",
+                    "Đã hiểu",
+                    "Thoát",
+                    () => { }
                 );
             }
             else
             {
-                Debug.LogWarning("[Fishing] Hết lượt câu và chưa gán ConfirmDialog!");
+                Debug.LogWarning("[Fishing] Hết lượt câu, yêu cầu mồi!");
             }
             return;
         }
 
         // Deduct turn and bait
-        freeTurns--;
-        if (selectedBait == BaitType.Normal) normalBait--;
-        else if (selectedBait == BaitType.Premium) premiumBait--;
+        if (freeTurns > 0)
+        {
+            freeTurns--;
+            PlayerPrefs.SetInt("FishingFreeTurns", freeTurns);
+        }
+        
+        var inv = YWonderLand.Managers.InventoryManager.Instance;
+        if (selectedBait == BaitType.Normal && inv != null)
+        {
+            inv.RemoveItem("bait_01", 1);
+        }
 
         state = FishingState.Waiting;
         UpdateUI();
@@ -552,6 +594,14 @@ public class FishingOverlayController : MonoBehaviour
         {
             // Simulating coin reward addition
             Debug.Log($"[Fishing] Reward coin added to player: +{caught.rewardCoins} POS");
+        }
+        
+        // Add to Inventory
+        var inv = YWonderLand.Managers.InventoryManager.Instance;
+        if (inv != null && !string.IsNullOrEmpty(caught.itemId))
+        {
+            inv.AddItem(caught.itemId, 1);
+            Debug.Log($"[Fishing] Added 1x {caught.itemId} to inventory.");
         }
         
         // Connect to Event exchange if Gift box caught

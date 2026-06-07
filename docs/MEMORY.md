@@ -474,3 +474,15 @@
 - **Giải pháp**: Trong UXML dùng placeholder (text="."), rồi set text tiếng Việt từ C# controller bằng Unicode escapes (`\u1EA0`, `\u00c2`...) hoặc string literals.
 - **Lưu ý**: Rule #45 (UXML comment ASCII-only) áp dụng cho COMMENTS, không áp dụng cho text content. Nhưng vì UXML encoding không đáng tin cậy, set từ code cho an toàn.
 
+---
+
+## 🟢 BÀI HỌC VỀ BẢO TRÌ CODE & ĐẤU NỐI (Cập nhật 07/06/2026)
+
+### 51. TextMeshPro Obsolete API: `enableWordWrapping`
+- **Tình huống**: Sử dụng `enableWordWrapping = false` cho `TextMeshPro` dẫn đến cảnh báo Obsolete Warning trong console của các bản Unity/TMP mới.
+- **Giải pháp**: Thay thế bằng API mới `textWrappingMode = TMPro.TextWrappingModes.NoWrap;` (hoặc `Normal` nếu muốn bật). Điều này giúp code tương thích tốt với tương lai và giữ console sạch sẽ.
+
+### 52. Tận dụng Mockup UI cũ khi đấu nối hệ thống (Integration)
+- **Tình huống**: Yêu cầu triển khai hệ thống Câu Cá (Phase 6). AI định lên plan code từ đầu.
+- **Phát hiện**: Trước đó, file `FishingOverlay.uxml` và `FishingOverlayController.cs` đã được xây dựng sẵn dưới dạng Mockup (dùng biến ảo `premiumBait = 2`).
+- **Bài học**: TRƯỚC KHI tạo UI mới hoặc viết controller mới cho một tính năng, luôn dùng `grep_search` quét thư mục `Assets/UI/` để xem tính năng đó đã từng được làm mockup hay chưa. Việc tận dụng mockup cũ và chỉ việc thay đổi logic đọc data thực tế (như gọi `InventoryManager.Instance.GetItemQuantity`) tiết kiệm đến 80% thời lượng. Khai báo biến thừa trong Mockup (như `premiumBait`) cần được xóa sạch để tránh rác.

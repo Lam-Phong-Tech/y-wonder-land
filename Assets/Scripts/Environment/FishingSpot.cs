@@ -84,7 +84,7 @@ public class FishingSpot : MonoBehaviour
         promptLabel.fontStyle = TMPro.FontStyles.Bold;
         promptLabel.color = new Color(1f, 0.85f, 0.2f, 1f); // Gold
         promptLabel.alignment = TMPro.TextAlignmentOptions.Center;
-        promptLabel.enableWordWrapping = false;
+        promptLabel.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
         promptLabel.overflowMode = TMPro.TextOverflowModes.Overflow;
         promptLabel.outlineColor = new Color32(45, 52, 54, 255); // #2D3436
         promptLabel.outlineWidth = 0.3f;

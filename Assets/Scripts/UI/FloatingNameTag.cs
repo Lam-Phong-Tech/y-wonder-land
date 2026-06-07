@@ -59,7 +59,7 @@ public class FloatingNameTag : MonoBehaviour
         nameText.alignment = TextAlignmentOptions.Center;
 
         // Prevent frustum culling from hiding text during movement
-        nameText.enableWordWrapping = false;
+        nameText.textWrappingMode = TextWrappingModes.NoWrap;
         nameText.overflowMode = TextOverflowModes.Overflow;
 
         // Outline (Minecraft style — black border around white text)

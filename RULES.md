@@ -102,6 +102,12 @@
 - Assets/Scripts/Environment/BuildGrid*
 - Assets/Scripts/Environment/GhostPlacementController.cs
 - Assets/Scripts/Environment/FishingSpot.cs
+- Assets/UI/FishingOverlay* (uxml, uss, cs)
+
+### Module Resource Harvesting (QC: chờ duyệt)
+- Assets/Scripts/Environment/HarvestableResource.cs
+- Assets/Scripts/Managers/ResourceSpawner.cs
+- Assets/UI/ResourceInteractionUI* (uxml, uss, cs)
 
 ## QUY TẮC KHI CODE
 1. Chỉ sửa đúng file và đúng function được yêu cầu

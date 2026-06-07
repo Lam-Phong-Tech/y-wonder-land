@@ -540,3 +540,44 @@
 .shop-btn-action--sell:active {
     background-color: #CC6D28;
 }
+
+/* === OWNED BADGE === */
+.shop-detail-owned-badge {
+    background-color: #EDE5D8;
+    border-width: 2px;
+    border-color: #3D3535;
+    border-radius: 8px;
+    padding: 4px 12px;
+    color: #3D3535;
+    font-size: 11px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin-top: 4px;
+    margin-bottom: 8px;
+}
+
+/* === QUANTITY INPUT FIELD === */
+.shop-qty-input {
+    width: 50px;
+    height: 28px;
+    margin: 0 8px;
+    padding: 0;
+}
+
+.shop-qty-input .unity-text-field__input {
+    background-color: #FFFFFF;
+    border-color: #3D3535;
+    border-width: 2px;
+    border-radius: 8px;
+    color: #3D3535;
+    font-size: 13px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    padding: 0;
+    margin: 0;
+}
+
+.shop-qty-input .unity-text-field__input:focus {
+    border-color: #E8833A;
+    background-color: #FFF5E8;
+}

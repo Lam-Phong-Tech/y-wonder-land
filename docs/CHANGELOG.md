@@ -5,6 +5,35 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-06-07] — Phase 5 & 6: Khai Thác Tài Nguyên và Câu Cá
+
+### Added
+- **Phase 5 (Khai Thác Tài Nguyên)**:
+  - Hệ thống `HarvestableResource.cs` xử lý tương tác nhấn giữ (hold 3s) để chặt cây, đập đá. Rơi ra `wood_01` và `stone_01`.
+  - `ResourceSpawner.cs` sinh ngẫu nhiên tài nguyên trên bản đồ, theo dõi đếm ngược thời gian hồi sinh (Respawn Timer) và lưu qua `PlayerPrefs`.
+  - Giao diện thanh tiến trình lơ lửng (`ResourceInteractionUI.uxml` và Controller) theo dõi tiến độ nhấn giữ.
+- **Phase 6 (Câu Cá - Đấu nối lõi)**:
+  - Tích hợp `FishingOverlayController.cs` với `InventoryManager`. Đọc số lượng `bait_01` thật từ túi đồ.
+  - Vượt qua QTE thành công, cá (`fish_01`, `fish_02`, `gift_box_01`) tự động thêm vào túi đồ.
+  - Hệ thống 10 lượt câu miễn phí mỗi ngày, lưu và reset bằng `PlayerPrefs` theo ngày thực.
+- **Item Database**: Thêm `pickaxe_01`, `fish_01`, `fish_02`, `gift_box_01` vào `ItemDataGenerator.cs`.
+
+### Fixed
+- **Obsolete API Cleanup (bởi Unity Assistant)**: Thay `enableWordWrapping` bằng `textWrappingMode = TextWrappingModes.NoWrap` trong `FloatingNameTag.cs` và `FishingSpot.cs`.
+- **Code Cleanup**: Dọn dẹp biến thừa `premiumBait` trong `FishingOverlayController.cs`.
+
+### Changed Files
+- `Assets/Scripts/Environment/HarvestableResource.cs` [NEW]
+- `Assets/Scripts/Managers/ResourceSpawner.cs` [NEW]
+- `Assets/UI/ResourceInteractionUI.uxml` [NEW]
+- `Assets/UI/ResourceInteractionUIController.cs` [NEW]
+- `Assets/Scripts/Environment/FarmInteractionController.cs` [MODIFIED]
+- `Assets/Scripts/Editor/ItemDataGenerator.cs` [MODIFIED]
+- `Assets/UI/FishingOverlayController.cs` [MODIFIED]
+- `Assets/Scripts/UI/FloatingNameTag.cs` [MODIFIED]
+- `Assets/Scripts/Environment/FishingSpot.cs` [MODIFIED]
+
+---
 ## [2026-06-06] — Part B (Fix Phase): Fishing 3D & Build Mode Redesign
 
 ### Added

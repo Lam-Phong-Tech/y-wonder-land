@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ui="UnityEngine.UIElements"
+    xsi:noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd">
+
+    <ui:VisualElement name="AnimalPopupContainer" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: none; align-items: center; justify-content: center; background-color: rgba(0, 0, 0, 0.4);">
+        <ui:VisualElement style="background-color: rgb(255, 245, 230); border-radius: 20px; padding: 20px; width: 350px; border-width: 4px; border-color: rgb(150, 100, 50);">
+            
+            <!-- Header -->
+            <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <ui:Label name="LblAnimalName" text="Con Gà" style="font-size: 24px; -unity-font-style: bold; color: rgb(120, 60, 20);" />
+                <ui:Button name="BtnClose" text="X" style="width: 30px; height: 30px; background-color: rgb(200, 50, 50); color: white; border-radius: 15px; -unity-font-style: bold;" />
+            </ui:VisualElement>
+
+            <!-- Status -->
+            <ui:Label name="LblStatus" text="Trạng thái: Khỏe mạnh" style="font-size: 16px; margin-bottom: 20px; color: rgb(50, 50, 50);" />
+
+            <!-- Buttons -->
+            <ui:VisualElement style="flex-direction: column; align-items: stretch;">
+                <ui:Button name="BtnFeed" text="Cho Ăn (1 Thức ăn)" style="height: 45px; margin-bottom: 10px; background-color: rgb(100, 200, 100); color: white; font-size: 16px; -unity-font-style: bold; border-radius: 10px;" />
+                <ui:Button name="BtnHarvest" text="Thu Hoạch" style="height: 45px; margin-bottom: 10px; background-color: rgb(250, 200, 50); color: white; font-size: 16px; -unity-font-style: bold; border-radius: 10px;" />
+                <ui:Button name="BtnHeal" text="Chữa Bệnh (1 Vaccine)" style="height: 45px; background-color: rgb(100, 150, 250); color: white; font-size: 16px; -unity-font-style: bold; border-radius: 10px;" />
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

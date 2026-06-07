@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UIElements;
+using System.Collections;
 
 /// <summary>
 /// Controller for the In-Game HUD.
@@ -24,6 +25,7 @@ public class GameHUDController : MonoBehaviour
     [SerializeField] private EventPopupController eventPopup;
     [SerializeField] private FishingOverlayController fishingOverlay;
     [SerializeField] private BuildModeOverlayController buildModeOverlay;
+    [SerializeField] private WorkshopPopupController workshopPopup;
 
     private UIDocument uiDocument;
 
@@ -50,6 +52,7 @@ public class GameHUDController : MonoBehaviour
     private Button btnEvent;
     private Button btnPiggy;
     private Button btnFishing;
+    private Button btnWorkshop;
     private Button btnBuild;
 
     // Action buttons
@@ -86,6 +89,7 @@ public class GameHUDController : MonoBehaviour
         if (eventPopup == null) eventPopup = FindFirstObjectByType<EventPopupController>();
         if (fishingOverlay == null) fishingOverlay = FindFirstObjectByType<FishingOverlayController>();
         if (buildModeOverlay == null) buildModeOverlay = FindFirstObjectByType<BuildModeOverlayController>();
+        if (workshopPopup == null) workshopPopup = FindFirstObjectByType<WorkshopPopupController>();
 
         var root = uiDocument.rootVisualElement;
         QueryElements(root);
@@ -93,11 +97,27 @@ public class GameHUDController : MonoBehaviour
 
 
 
-        // Set initial values (mockup data)
+        // Set initial values
         SetPlayerInfo("YWonderPlayer", 1);
         SetPlayerEXP(0.00f);
-        SetCurrency(84.00f);
-        SetQuest("Khám phá đảo hoang và tìm ngôi nhà đầu tiên!");
+        SetQuest("Kh\u00e1m ph\u00e1 \u0111\u1ea3o hoang v\u00e0 t\u00ecm ng\u00f4i nh\u00e0 \u0111\u1ea7u ti\u00ean!");
+
+        // Sync player name from GameManager (retry until available)
+        StartCoroutine(SyncPlayerName());
+
+        if (YWonderLand.Managers.EconomyManager.Instance != null)
+        {
+            SetCurrency(YWonderLand.Managers.EconomyManager.Instance.GetPOS());
+            YWonderLand.Managers.EconomyManager.Instance.OnPOSChanged += SetCurrency;
+        }
+    }
+
+    void OnDisable()
+    {
+        if (YWonderLand.Managers.EconomyManager.Instance != null)
+        {
+            YWonderLand.Managers.EconomyManager.Instance.OnPOSChanged -= SetCurrency;
+        }
     }
 
     private void QueryElements(VisualElement root)
@@ -125,6 +145,7 @@ public class GameHUDController : MonoBehaviour
         btnMap = root.Q<Button>("BtnMap");
         btnPiggy = root.Q<Button>("BtnPiggy");
         btnFishing = root.Q<Button>("BtnFishing");
+        btnWorkshop = root.Q<Button>("BtnWorkshop");
         btnBuild = root.Q<Button>("BtnBuild");
 
         // Actions
@@ -226,6 +247,14 @@ public class GameHUDController : MonoBehaviour
                 Debug.Log("[GameHUD] Fishing clicked (no popup assigned)");
         });
 
+        btnWorkshop?.RegisterCallback<ClickEvent>(evt =>
+        {
+            if (workshopPopup != null)
+                workshopPopup.Show();
+            else
+                Debug.Log("[GameHUD] Workshop clicked (no popup assigned)");
+        });
+
         btnBuild?.RegisterCallback<ClickEvent>(evt =>
         {
             if (buildModeOverlay != null)
@@ -304,11 +333,11 @@ public class GameHUDController : MonoBehaviour
     }
 
     /// <summary>
-    /// Update currency display (single currency).
+    /// Update currency display (POS).
     /// </summary>
-    public void SetCurrency(float amount)
+    public void SetCurrency(long amount)
     {
-        if (currencyValue != null) currencyValue.text = amount.ToString("F2");
+        if (currencyValue != null) currencyValue.text = amount.ToString("N0");
     }
 
     /// <summary>
@@ -341,10 +370,34 @@ public class GameHUDController : MonoBehaviour
     }
 
     // ── Test: Press L = Level Up, E = Event ──
+    private IEnumerator SyncPlayerName()
+    {
+        // Retry every 0.5s until GameManager has a valid playerName
+        for (int i = 0; i < 20; i++) // Max 10 seconds
+        {
+            if (GameManager.Instance != null && !string.IsNullOrEmpty(GameManager.Instance.playerName))
+            {
+                SetPlayerInfo(GameManager.Instance.playerName, 1);
+                Debug.Log($"[GameHUD] Synced player name: {GameManager.Instance.playerName}");
+                yield break;
+            }
+            yield return new WaitForSeconds(0.5f);
+        }
+    }
+
     private void Update()
     {
         var keyboard = UnityEngine.InputSystem.Keyboard.current;
         if (keyboard == null) return;
+
+        // I = Inventory
+        if (keyboard.iKey.wasPressedThisFrame && inventoryPopup != null)
+        {
+            if (inventoryPopup.IsVisible())
+                inventoryPopup.Hide();
+            else
+                inventoryPopup.Show();
+        }
 
         if (keyboard.lKey.wasPressedThisFrame && levelUpOverlay != null)
         {
@@ -370,6 +423,11 @@ public class GameHUDController : MonoBehaviour
                 buildModeOverlay.Hide();
             else
                 buildModeOverlay.Show();
+        }
+
+        if (keyboard.rKey.wasPressedThisFrame && workshopPopup != null)
+        {
+            workshopPopup.Show();
         }
     }
 }

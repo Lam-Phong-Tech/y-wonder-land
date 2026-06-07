@@ -75,11 +75,12 @@
 
                             <ui:VisualElement class="shop-detail-divider" />
                             <ui:Label name="LblShopDesc" text="Mô tả vật phẩm" class="shop-detail-desc" />
+                            <ui:Label name="LblOwned" text="Đang có: 0" class="shop-detail-owned-badge" />
 
                             <!-- Quantity selector -->
                             <ui:VisualElement class="shop-qty-row">
                                 <ui:Button name="BtnQtyMinus" text="−" class="shop-qty-btn" />
-                                <ui:Label name="LblQty" text="1" class="shop-qty-label" />
+                                <ui:TextField name="TxtQty" value="1" class="shop-qty-input" />
                                 <ui:Button name="BtnQtyPlus" text="+" class="shop-qty-btn" />
                             </ui:VisualElement>
 

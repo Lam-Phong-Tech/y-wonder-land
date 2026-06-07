@@ -281,20 +281,36 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Returns true if tutorial is still in progress (not complete).
+    /// Used by FarmInteractionController to avoid conflict.
+    /// </summary>
+    public bool IsActive()
+    {
+        return currentStep != TutorialStep.WaitForStart && currentStep != TutorialStep.Complete;
+    }
+
     public void StartTutorial()
     {
         SetStep(TutorialStep.FollowNPC);
-        UpdateQuestHUD("\u0110i theo L\u00e2m H\u01b0\u1edbng D\u1eabn t\u1edbi m\u1ea3nh \u0111\u1ea5t hoang");
+        UpdateQuestHUD("Đi theo Lâm Hướng Dẫn tới mảnh đất hoang");
         Debug.Log("[TutorialManager] Onboarding Tutorial Started.");
+
+        // Force reset the tutorial tile so it doesn't get stuck if FarmManager loaded a saved state
+        if (targetFarmTile != null)
+        {
+            targetFarmTile.currentState = FarmTile.TileState.Soil;
+            targetFarmTile.plantedSeedId = "";
+        }
 
         // Show big instruction banner for young players
         ShowInstructionBanner(
-            "\u0110i theo NPC H\u01b0\u1edbng D\u1eabn!",
-            "D\u00f9ng ph\u00edm W A S D ho\u1eb7c Joystick \u0111\u1ec3 di chuy\u1ec3n \u0111\u1ebfn NPC m\u00e0u t\u00edm"
+            "Đi theo NPC Hướng Dẫn!",
+            "Dùng phím W A S D hoặc Joystick để di chuyển đến NPC màu tím"
         );
 
         // NPC greets immediately
-        ShowSubtitle("Ch\u00e0o m\u1eebng b\u1ea1n \u0111\u1ebfn \u0111\u1ea3o hoang! H\u00e3y \u0111i theo t\u00f4i nh\u00e9!");
+        ShowSubtitle("Chào mừng bạn đến đảo hoang! Hãy đi theo tôi nhé!");
 
         // Create exclamation mark above NPC
         CreateNPCExclamationMark();
@@ -533,14 +549,18 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
-    private void OnInventoryItemUsed(string itemName)
+    private void OnInventoryItemUsed(string itemIdOrName)
     {
         // Only react during OpenInventory step
         if (currentStep != TutorialStep.OpenInventory) return;
 
-        if (itemName.Contains("c\u00e0 r\u1ed1t") || itemName.Contains("C\u00e0 R\u1ed1t") || itemName.Contains("c\u00e0 r\u1ed1t"))
+        // OnItemUsed sends item ID (e.g. "carrot_seed_01") or Vietnamese name
+        // Accept any seed item during tutorial
+        if (itemIdOrName.Contains("carrot") || itemIdOrName.Contains("seed") ||
+            itemIdOrName.Contains("c\u00e0 r\u1ed1t") || itemIdOrName.Contains("C\u00e0 R\u1ed1t") ||
+            itemIdOrName.Contains("h\u1ea1t"))
         {
-            Debug.Log($"[TutorialManager] Carrot seed selected: {itemName}");
+            Debug.Log($"[TutorialManager] Seed selected: {itemIdOrName}");
 
             // Close inventory
             if (inventoryPopup != null)
@@ -655,16 +675,38 @@ public class TutorialManager : MonoBehaviour
 
     private void GiveTutorialRewards()
     {
-        Debug.Log("[TutorialManager] Giving Rewards: +50 POS, +20 EXP.");
+        Debug.Log("[TutorialManager] Giving Rewards: +50 POS, +20 EXP + starter seeds.");
         
-        // Find GameHUDController to update Currency/EXP UI dynamically
+        // Add POS via EconomyManager (not SET on HUD)
+        if (YWonderLand.Managers.EconomyManager.Instance != null)
+        {
+            YWonderLand.Managers.EconomyManager.Instance.AddPOS(50);
+            Debug.Log("[TutorialManager] +50 POS added via EconomyManager.");
+        }
+
+        // Update EXP on HUD
         GameHUDController hudController = FindFirstObjectByType<GameHUDController>();
         if (hudController != null)
         {
-            // Set mock values or call public update APIs
-            hudController.SetCurrency(50); // Set POS Currency
-            hudController.SetPlayerEXP(20f); // Set Player EXP progress
-            Debug.Log("[TutorialManager] Successfully updated HUD currency and EXP fields.");
+            hudController.SetPlayerEXP(20f);
+        }
+
+        // Give free starter seeds (5 of each type)
+        if (YWonderLand.Managers.InventoryManager.Instance != null)
+        {
+            var inv = YWonderLand.Managers.InventoryManager.Instance;
+            inv.AddItem("carrot_seed_01", 5);
+            inv.AddItem("cabbage_seed_01", 5);
+            inv.AddItem("corn_seed_01", 5);
+            inv.AddItem("watermelon_seed_01", 3);
+            inv.AddItem("pumpkin_seed_01", 3);
+            inv.AddItem("morning_glory_seed_01", 5);
+            inv.AddItem("sweet_potato_seed_01", 3);
+            inv.AddItem("grass_seed_01", 5);
+            // Also give some basic resources to get started
+            inv.AddItem("wood_01", 10);
+            inv.AddItem("stone_01", 5);
+            Debug.Log("[TutorialManager] Starter seeds and resources added to inventory.");
         }
     }
 

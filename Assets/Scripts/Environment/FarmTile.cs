@@ -1,6 +1,12 @@
 using UnityEngine;
 using System;
+using YWonderLand.Data;
 
+/// <summary>
+/// FarmTile nâng cấp: tích hợp CropDefinition, visual stages theo loại cây,
+/// growth time từ CropDatabase, thu hoạch trả produce ID + yield từ data.
+/// Tương thích ngược với TutorialManager (vẫn giữ tutorialGrowthTime fallback).
+/// </summary>
 public class FarmTile : MonoBehaviour
 {
     public enum TileState
@@ -15,16 +21,22 @@ public class FarmTile : MonoBehaviour
     [Header("Tile Info")]
     public TileState currentState = TileState.Soil;
     public string plantedSeedId = "";
-    
+
     [Header("Visual Models (Assign in Inspector)")]
     public GameObject soilVisual;
     public GameObject plowedVisual;
     public GameObject seedVisual;      // Visual showing small sprout
     public GameObject growingVisual;   // Visual showing half grown plant
-    public GameObject ripeVisual;      // Visual showing final product (e.g. Carrot ready)
+    public GameObject ripeVisual;      // Visual showing final product
 
     [Header("Timing Configuration")]
-    public float tutorialGrowthTime = 60f; // 60s for tutorial
+    public float tutorialGrowthTime = 60f; // Fallback for tutorial
+
+    [Header("Crop Data (Auto-assigned)")]
+    [SerializeField] private CropDefinition currentCrop;
+
+    // Tile index for FarmManager tracking
+    [HideInInspector] public int tileIndex = -1;
 
     // Events
     public Action<FarmTile> OnTilePlowed;
@@ -34,6 +46,9 @@ public class FarmTile : MonoBehaviour
 
     private float growthTimer = 0f;
     private bool isGrowing = false;
+
+    // Crop-specific color (used for primitive fallback visuals)
+    private Color cropColor = Color.green;
 
     void Start()
     {
@@ -46,21 +61,28 @@ public class FarmTile : MonoBehaviour
         if (isGrowing && currentState == TileState.Watered)
         {
             growthTimer += Time.deltaTime;
-            
+
+            float totalGrowthTime = GetGrowthTime();
+
             // Switch from seed Visual to growing Visual at 40% growth
-            if (growthTimer >= tutorialGrowthTime * 0.4f && seedVisual != null && seedVisual.activeSelf)
+            if (growthTimer >= totalGrowthTime * 0.4f && seedVisual != null && seedVisual.activeSelf)
             {
                 if (seedVisual != null) seedVisual.SetActive(false);
-                if (growingVisual != null) growingVisual.SetActive(true);
+                if (growingVisual != null)
+                {
+                    growingVisual.SetActive(true);
+                    // Update growing visual color to match crop
+                    UpdateCropColor(growingVisual);
+                }
             }
 
-            if (growthTimer >= tutorialGrowthTime)
+            if (growthTimer >= totalGrowthTime)
             {
                 // Ripe state reached
                 isGrowing = false;
                 currentState = TileState.Ripe;
                 UpdateVisuals();
-                
+
                 OnTileWatered?.Invoke(this); // Trigger update to show progress text at 100%
             }
         }
@@ -84,7 +106,24 @@ public class FarmTile : MonoBehaviour
 
         plantedSeedId = seedId;
         currentState = TileState.Planted;
+
+        // Lookup CropDefinition from CropDatabase
+        var cropDb = Resources.Load<CropDatabase>("CropDatabase");
+        if (cropDb != null)
+        {
+            currentCrop = cropDb.GetCropBySeedId(seedId);
+            if (currentCrop != null)
+            {
+                cropColor = currentCrop.cropColor;
+                Debug.Log($"[FarmTile] Planted {seedId} → crop found, growth={currentCrop.growthTimeSec}s, yield={currentCrop.harvestYield}");
+            }
+        }
+
+        // Recreate visuals with crop-specific color
+        DestroySeedAndGrowingVisuals();
+        CreateCropVisuals();
         UpdateVisuals();
+
         OnTilePlanted?.Invoke(this);
         return true;
     }
@@ -108,12 +147,24 @@ public class FarmTile : MonoBehaviour
 
         if (currentState != TileState.Ripe) return false;
 
-        harvestedItemId = plantedSeedId; // Return the carrot or whatever was planted
-        amount = 5; // e.g. yields 5 carrots
-        
+        // Use CropDefinition data if available
+        if (currentCrop != null)
+        {
+            harvestedItemId = currentCrop.harvestItemId;
+            amount = currentCrop.harvestYield;
+        }
+        else
+        {
+            // Fallback: return seed id as harvest (legacy tutorial behavior)
+            harvestedItemId = plantedSeedId;
+            amount = 5;
+        }
+
         // Reset tile to Soil
         currentState = TileState.Soil;
         plantedSeedId = "";
+        currentCrop = null;
+        cropColor = Color.green;
         growthTimer = 0f;
         isGrowing = false;
 
@@ -122,7 +173,18 @@ public class FarmTile : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Get the CropDefinition for the currently planted crop (if any).
+    /// </summary>
+    public CropDefinition GetCurrentCrop() => currentCrop;
+
     // ── Helper Visual Updates ──
+
+    private float GetGrowthTime()
+    {
+        if (currentCrop != null) return currentCrop.growthTimeSec;
+        return tutorialGrowthTime;
+    }
 
     private void UpdateVisuals()
     {
@@ -149,7 +211,11 @@ public class FarmTile : MonoBehaviour
                 if (seedVisual != null) seedVisual.SetActive(true);
                 break;
             case TileState.Ripe:
-                if (ripeVisual != null) ripeVisual.SetActive(true);
+                if (ripeVisual != null)
+                {
+                    ripeVisual.SetActive(true);
+                    UpdateCropColor(ripeVisual);
+                }
                 break;
         }
     }
@@ -158,7 +224,99 @@ public class FarmTile : MonoBehaviour
     {
         if (currentState == TileState.Ripe) return 1f;
         if (!isGrowing) return 0f;
-        return Mathf.Clamp01(growthTimer / tutorialGrowthTime);
+        return Mathf.Clamp01(growthTimer / GetGrowthTime());
+    }
+
+    private void UpdateCropColor(GameObject visual)
+    {
+        if (visual == null) return;
+        // Update the non-ground child (the plant/fruit shape)
+        foreach (Transform child in visual.transform)
+        {
+            if (child.name != "Ground")
+            {
+                Renderer r = child.GetComponent<Renderer>();
+                if (r != null) r.material.color = cropColor;
+            }
+        }
+    }
+
+    private void DestroySeedAndGrowingVisuals()
+    {
+        // Destroy existing dynamic visuals to recreate with new crop color
+        if (seedVisual != null && seedVisual.name == "SeedVisual")
+        {
+            Destroy(seedVisual);
+            seedVisual = null;
+        }
+        if (growingVisual != null && growingVisual.name == "GrowingVisual")
+        {
+            Destroy(growingVisual);
+            growingVisual = null;
+        }
+        if (ripeVisual != null && ripeVisual.name == "RipeVisual")
+        {
+            Destroy(ripeVisual);
+            ripeVisual = null;
+        }
+    }
+
+    private void CreateCropVisuals()
+    {
+        // Recreate seed, growing, ripe visuals with crop-specific color
+        if (seedVisual == null)
+        {
+            seedVisual = new GameObject("SeedVisual");
+            seedVisual.transform.SetParent(this.transform, false);
+
+            GameObject ground = CreateGround(seedVisual.transform);
+            GameObject sprout = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            sprout.name = "Sprout";
+            sprout.transform.SetParent(seedVisual.transform, false);
+            sprout.transform.localPosition = new Vector3(0, 0.2f, 0);
+            sprout.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+            SetColor(sprout, cropColor * 0.7f); // Slightly darker for seed stage
+            Destroy(sprout.GetComponent<Collider>());
+        }
+        if (growingVisual == null)
+        {
+            growingVisual = new GameObject("GrowingVisual");
+            growingVisual.transform.SetParent(this.transform, false);
+
+            GameObject ground = CreateGround(growingVisual.transform);
+            GameObject plant = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            plant.name = "Plant";
+            plant.transform.SetParent(growingVisual.transform, false);
+            plant.transform.localPosition = new Vector3(0, 0.4f, 0);
+            plant.transform.localScale = new Vector3(0.3f, 0.4f, 0.3f);
+            SetColor(plant, cropColor);
+            Destroy(plant.GetComponent<Collider>());
+        }
+        if (ripeVisual == null)
+        {
+            ripeVisual = new GameObject("RipeVisual");
+            ripeVisual.transform.SetParent(this.transform, false);
+
+            GameObject ground = CreateGround(ripeVisual.transform);
+            GameObject fruit = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            fruit.name = "Fruit";
+            fruit.transform.SetParent(ripeVisual.transform, false);
+            fruit.transform.localPosition = new Vector3(0, 0.6f, 0);
+            fruit.transform.localScale = new Vector3(0.4f, 0.5f, 0.4f);
+            SetColor(fruit, cropColor);
+            Destroy(fruit.GetComponent<Collider>());
+        }
+    }
+
+    private GameObject CreateGround(Transform parent)
+    {
+        GameObject ground = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        ground.name = "Ground";
+        ground.transform.SetParent(parent, false);
+        ground.transform.localScale = new Vector3(2f, 0.15f, 2f);
+        SetColor(ground, new Color(0.35f, 0.22f, 0.1f));
+        Destroy(ground.GetComponent<Collider>());
+        return ground;
     }
 
     private void CreateFallbackVisuals()
@@ -182,20 +340,15 @@ public class FarmTile : MonoBehaviour
             SetColor(plowedVisual, new Color(0.35f, 0.22f, 0.1f)); // Dark brown
             Destroy(plowedVisual.GetComponent<Collider>());
         }
+        // Default seed/growing/ripe visuals (will be recreated with crop color when planted)
         if (seedVisual == null)
         {
             seedVisual = new GameObject("SeedVisual");
             seedVisual.transform.SetParent(this.transform, false);
-            
-            // Add ground plowed representation
-            GameObject ground = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            ground.transform.SetParent(seedVisual.transform, false);
-            ground.transform.localScale = new Vector3(2f, 0.15f, 2f);
-            SetColor(ground, new Color(0.35f, 0.22f, 0.1f));
-            Destroy(ground.GetComponent<Collider>());
-            
-            // Add tiny sprout
+
+            CreateGround(seedVisual.transform);
             GameObject sprout = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            sprout.name = "Sprout";
             sprout.transform.SetParent(seedVisual.transform, false);
             sprout.transform.localPosition = new Vector3(0, 0.2f, 0);
             sprout.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
@@ -206,41 +359,29 @@ public class FarmTile : MonoBehaviour
         {
             growingVisual = new GameObject("GrowingVisual");
             growingVisual.transform.SetParent(this.transform, false);
-            
-            // Add ground plowed representation
-            GameObject ground = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            ground.transform.SetParent(growingVisual.transform, false);
-            ground.transform.localScale = new Vector3(2f, 0.15f, 2f);
-            SetColor(ground, new Color(0.35f, 0.22f, 0.1f));
-            Destroy(ground.GetComponent<Collider>());
-            
-            // Add medium sprout
-            GameObject sprout = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            sprout.transform.SetParent(growingVisual.transform, false);
-            sprout.transform.localPosition = new Vector3(0, 0.4f, 0);
-            sprout.transform.localScale = new Vector3(0.3f, 0.4f, 0.3f);
-            SetColor(sprout, Color.green);
-            Destroy(sprout.GetComponent<Collider>());
+
+            CreateGround(growingVisual.transform);
+            GameObject plant = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            plant.name = "Plant";
+            plant.transform.SetParent(growingVisual.transform, false);
+            plant.transform.localPosition = new Vector3(0, 0.4f, 0);
+            plant.transform.localScale = new Vector3(0.3f, 0.4f, 0.3f);
+            SetColor(plant, Color.green);
+            Destroy(plant.GetComponent<Collider>());
         }
         if (ripeVisual == null)
         {
             ripeVisual = new GameObject("RipeVisual");
             ripeVisual.transform.SetParent(this.transform, false);
-            
-            // Add ground plowed representation
-            GameObject ground = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            ground.transform.SetParent(ripeVisual.transform, false);
-            ground.transform.localScale = new Vector3(2f, 0.15f, 2f);
-            SetColor(ground, new Color(0.35f, 0.22f, 0.1f));
-            Destroy(ground.GetComponent<Collider>());
-            
-            // Add ripe carrot
-            GameObject carrot = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            carrot.transform.SetParent(ripeVisual.transform, false);
-            carrot.transform.localPosition = new Vector3(0, 0.6f, 0);
-            carrot.transform.localScale = new Vector3(0.4f, 0.5f, 0.4f);
-            SetColor(carrot, new Color(1f, 0.5f, 0f)); // Orange!
-            Destroy(carrot.GetComponent<Collider>());
+
+            CreateGround(ripeVisual.transform);
+            GameObject fruit = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            fruit.name = "Fruit";
+            fruit.transform.SetParent(ripeVisual.transform, false);
+            fruit.transform.localPosition = new Vector3(0, 0.6f, 0);
+            fruit.transform.localScale = new Vector3(0.4f, 0.5f, 0.4f);
+            SetColor(fruit, new Color(1f, 0.5f, 0f)); // Orange fallback
+            Destroy(fruit.GetComponent<Collider>());
         }
     }
 

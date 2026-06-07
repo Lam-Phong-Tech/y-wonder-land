@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cac8b9f5919afc44599c356803f7ca4a, type: 3}
+  m_Name: chicken_01
+  m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.ItemDefinition
+  id: chicken_01
+  itemName: "G\xE0"
+  description: "G\xE0 ta \u0111\u1EBB tr\u1EE9ng."
+  iconEmoji: "\U0001F414"
+  iconSprite: {fileID: 0}
+  category: animals
+  buyPrice: 500
+  sellPrice: 0
+  canSell: 0
+  isStackable: 1
+  maxStack: 999
