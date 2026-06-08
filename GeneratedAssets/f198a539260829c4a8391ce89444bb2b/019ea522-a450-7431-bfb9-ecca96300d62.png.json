@@ -1,0 +1,28 @@
+{
+    "asset": "f198a539260829c4a8391ce89444bb2b",
+    "fileName": "019ea522-a450-7431-bfb9-ecca96300d62.png",
+    "prompt": "a cute stylized low poly cartoon duck, standing upright facing forward, full body front view, yellow body with orange beak and webbed feet, symmetrical, clean rounded shapes, centered, plain background, 3D render game asset",
+    "negativePrompt": "",
+    "model": "stylized-3d",
+    "modelName": "Stylized 3D",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelatePixelGridSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0,
+    "dimensions": {
+        "width": 1024,
+        "height": 1024
+    },
+    "spriteSheet": false,
+    "duration": 0.0
+}

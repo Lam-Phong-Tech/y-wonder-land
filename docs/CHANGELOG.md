@@ -749,7 +749,7 @@
 
 ## [2026-05-27] — Khởi tạo dự án
 ### Added
-- Unity project setup (URP, Unity 2022 LTS)
+- Unity project setup (URP, Unity 6.3 LTS)
 - 3D environment cơ bản (terrain, trees, house)
 - Character model + animations
 - Camera controller

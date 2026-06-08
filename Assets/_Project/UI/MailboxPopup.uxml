@@ -1,0 +1,65 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElementsSchema.xsd" editor-extension-mode="False">
+    <ui:Style src="Styles/MailboxPopup.uss" />
+    <ui:VisualElement name="MailboxOverlay" class="mailbox-overlay">
+        <ui:VisualElement name="MailboxPanel" class="mailbox-panel">
+            
+            <!-- Header Title Capsule -->
+            <ui:VisualElement name="HeaderContainer" class="header-container">
+                <ui:VisualElement name="TitleCapsule" class="title-capsule">
+                    <ui:Label name="TitleLabel" class="title-label" text="Hộp thư" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Close Button (X) -->
+            <ui:Button name="BtnClose" class="close-button" text="✕" />
+
+            <!-- Left Column: Mail List -->
+            <ui:VisualElement name="MailListArea" class="mail-list-area">
+                <ui:ScrollView name="MailListScroll" class="mail-list-scroll" show-vertical-scroller="false" />
+                <ui:VisualElement name="MailListFooter" class="mail-list-footer">
+                    <ui:Button name="BtnClaimAll" class="action-button success-btn claim-all-btn" text="Nhận tất cả" />
+                    <ui:Button name="BtnDeleteRead" class="action-button danger-btn-outline delete-read-btn" text="Xóa đã đọc" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Right Column: Mail Detail -->
+            <ui:VisualElement name="MailDetailArea" class="mail-detail-area">
+                <ui:VisualElement name="MailDetailPanel" class="mail-detail-panel">
+                    
+                    <!-- Empty State -->
+                    <ui:VisualElement name="DetailEmptyState" class="detail-empty-state">
+                        <ui:VisualElement class="empty-envelope-icon">
+                            <ui:VisualElement class="envelope-flap" />
+                        </ui:VisualElement>
+                        <ui:Label name="EmptyLabel" class="empty-label" text="Chọn thư để xem chi tiết" />
+                    </ui:VisualElement>
+
+                    <!-- Content State -->
+                    <ui:VisualElement name="DetailContentState" class="detail-content-state">
+                        <ui:VisualElement name="DetailHeader" class="detail-header">
+                            <ui:Label name="DetailTitle" class="detail-title" text="Tiêu đề thư" />
+                            <ui:Label name="DetailMeta" class="detail-meta" text="Người gửi: Ban Quản Trị  |  10:00 02/06" />
+                        </ui:VisualElement>
+                        
+                        <ui:ScrollView name="DetailBodyScroll" class="detail-body-scroll" show-vertical-scroller="true">
+                            <ui:Label name="DetailBodyText" class="detail-body-text" text="Nội dung thư chi tiết sẽ được tải động ở đây..." />
+                        </ui:ScrollView>
+                        
+                        <!-- Attachments Section -->
+                        <ui:VisualElement name="DetailAttachmentSection" class="detail-attachment-section">
+                            <ui:Label class="attachment-section-title" text="Phần thưởng đính kèm:" />
+                            <ui:VisualElement name="AttachmentGrid" class="attachment-grid" />
+                        </ui:VisualElement>
+
+                        <ui:VisualElement name="DetailFooter" class="detail-footer">
+                            <ui:Button name="BtnClaimReward" class="action-button success-btn claim-reward-btn" text="Nhận quà" />
+                            <ui:Button name="BtnDeleteMail" class="action-button danger-btn delete-mail-btn" text="Xóa thư" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

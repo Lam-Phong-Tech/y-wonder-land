@@ -18,13 +18,12 @@
 **Tình huống:** Unity dùng file .meta để track assets, references, GUIDs.
 **Quy tắc:** Nếu sửa/xóa file .meta → Unity mất track → reference bị null → lỗi cả project.
 
-### 3. Unity version mismatch — Awaitable API
-**Tình huống:** Toolkit unity-ai-workflow dùng `Awaitable` (Unity 6.2+) nhưng dự án chạy Unity 2022 LTS.
-**Hậu quả:** Compile error, code không chạy được.
+### 3. Sức mạnh của Unity 6.3 LTS — Awaitable API
+**Tình huống:** Ban đầu dự án ghi nhầm là dùng Unity 2022 LTS, khiến AI không dám dùng các API async hiện đại.
+**Đính chính:** Dự án đang chạy trên **Unity 6.3 LTS**!
 **Quy tắc:**
-- Dự án này dùng **Unity 2022 LTS** — KHÔNG có `Awaitable`, `Application.exitCancellationToken`
-- Async pattern: dùng **UniTask** hoặc **async Task**
-- Luôn kiểm tra Unity version trước khi copy code từ nguồn ngoài
+- CÓ THỂ sử dụng thoải mái `Awaitable`, `Awaitable.WaitForSecondsAsync()`, `Application.exitCancellationToken`.
+- Đây là một lợi thế cực lớn giúp code async/await trong Unity sạch đẹp hơn rất nhiều so với UniTask hay Coroutine truyền thống.
 
 ---
 

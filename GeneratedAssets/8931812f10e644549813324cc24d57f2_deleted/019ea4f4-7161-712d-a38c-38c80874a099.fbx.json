@@ -1,0 +1,12 @@
+{
+    "asset": "8931812f10e644549813324cc24d57f2",
+    "fileName": "019ea4f4-7161-712d-a38c-38c80874a099.fbx",
+    "prompt": "duck idle animation, subtle breathing and neck tilting",
+    "negativePrompt": "",
+    "model": "uthana-text-to-motion",
+    "modelName": "Uthana Text to Motion",
+    "customSeed": 1159458187,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "isTrimmed": false
+}

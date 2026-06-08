@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ui="UnityEngine.UIElements"
+    xsi:noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd"
+>
+    <ui:Style src="project://database/Assets/_Project/UI/Styles/LoadingScreen.uss" />
+
+    <ui:VisualElement name="LoadingContainer" class="loading-screen-container">
+        
+        <ui:VisualElement class="content-wrapper">
+            <!-- Logo Text -->
+            <ui:Label text="Y-WONDERLAND" class="logo-text" />
+            <ui:Label text="3D FARMING ADVENTURE" class="subtitle-text" />
+
+            <!-- Progress Bar -->
+            <ui:VisualElement class="progress-bar-container">
+                <ui:VisualElement name="ProgressBarFill" class="progress-bar-fill" />
+            </ui:VisualElement>
+
+            <!-- Loading Message -->
+            <ui:Label name="LoadingText" text="Đang đồng bộ thế giới..." class="loading-text" />
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

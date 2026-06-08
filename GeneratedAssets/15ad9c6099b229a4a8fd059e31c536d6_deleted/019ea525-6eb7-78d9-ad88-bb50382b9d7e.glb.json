@@ -1,0 +1,23 @@
+{
+    "asset": "15ad9c6099b229a4a8fd059e31c536d6",
+    "fileName": "019ea525-6eb7-78d9-ad88-bb50382b9d7e.glb",
+    "prompt": "a cute stylized low poly cartoon duck, standing upright on two legs, yellow body with orange beak and webbed feet, matching the reference image",
+    "negativePrompt": "",
+    "model": "model3d-tripo-p1",
+    "modelName": "Tripo P1",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "promptImageReferenceGuid": "f198a539260829c4a8391ce89444bb2b",
+    "modelReferenceGuid": "",
+    "multiviewFrontGuid": "",
+    "multiviewBackGuid": "",
+    "multiviewLeftGuid": "",
+    "multiviewRightGuid": "",
+    "multiviewTopGuid": "",
+    "multiviewBottomGuid": "",
+    "multiviewLeftFrontGuid": "",
+    "multiviewRightFrontGuid": "",
+    "faceLimit": -1
+}

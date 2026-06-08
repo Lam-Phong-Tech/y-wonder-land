@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:Style src="Styles/DesignSystem.uss" />
+    <ui:Style src="Styles/ShopPopup.uss" />
+
+    <!-- Overlay -->
+    <ui:VisualElement name="ShopOverlay" class="shop-overlay">
+
+        <!-- Panel Shadow -->
+        <ui:VisualElement class="shop-panel-shadow">
+
+            <!-- Panel -->
+            <ui:VisualElement class="shop-panel">
+
+                <!-- Header -->
+                <ui:VisualElement class="shop-header">
+                    <!-- Balance pill (left side) -->
+                    <ui:VisualElement name="ShopBalancePill" class="shop-balance-pill">
+                        <ui:Label text="🪙" class="shop-balance-icon" />
+                        <ui:Label name="LblShopBalance" text="5,000 POS" class="shop-balance-value" />
+                    </ui:VisualElement>
+
+                    <!-- Title (centered) -->
+                    <ui:Label name="ShopTitle" text="CỬA HÀNG" class="shop-header-title" />
+                </ui:VisualElement>
+
+                <!-- Body: Sidebar + Grid + Detail -->
+                <ui:VisualElement class="shop-body">
+
+                    <!-- Left: Mode Tabs + Category Filters -->
+                    <ui:VisualElement class="shop-sidebar">
+                        <!-- Mode tabs (Mua / Bán) -->
+                        <ui:Label text="CHẾ ĐỘ" class="shop-sidebar-section" />
+                        <ui:Button name="TabBuy" text="🛒 Mua" class="shop-mode-tab shop-mode-tab--active" />
+                        <ui:Button name="TabSell" text="💰 Bán" class="shop-mode-tab" />
+
+                        <!-- Divider -->
+                        <ui:VisualElement class="shop-sidebar-divider" />
+
+                        <!-- Category filters -->
+                        <ui:Label text="DANH MỤC" class="shop-sidebar-section" />
+                        <ui:Button name="FilterAll" text="Tất cả" class="shop-filter shop-filter--active" />
+                        <ui:Button name="FilterSeeds" text="🌱 Hạt giống" class="shop-filter" />
+                        <ui:Button name="FilterAnimals" text="🐔 Vật nuôi" class="shop-filter" />
+                        <ui:Button name="FilterTools" text="🔧 Dụng cụ" class="shop-filter" />
+                        <ui:Button name="FilterItems" text="📦 Vật phẩm" class="shop-filter" />
+                    </ui:VisualElement>
+
+                    <!-- Middle: Items Grid -->
+                    <ui:VisualElement class="shop-grid-area">
+                        <ui:ScrollView name="ShopScroll" class="shop-grid-scroll">
+                            <ui:VisualElement name="ShopGrid" class="shop-grid">
+                                <!-- Items populated by Controller -->
+                            </ui:VisualElement>
+                        </ui:ScrollView>
+                    </ui:VisualElement>
+
+                    <!-- Right: Item Detail Panel -->
+                    <ui:VisualElement name="ShopDetailPanel" class="shop-detail-panel">
+                        <!-- Empty State -->
+                        <ui:Label name="ShopDetailEmpty" text="Chọn vật phẩm để xem chi tiết..." class="shop-detail-empty" />
+
+                        <!-- Detail Content -->
+                        <ui:VisualElement name="ShopDetailContent" class="shop-detail-content">
+                            <ui:VisualElement class="shop-detail-icon-wrap">
+                                <ui:Label name="LblShopIcon" text="❓" class="shop-detail-icon" />
+                            </ui:VisualElement>
+                            <ui:Label name="LblShopName" text="Tên vật phẩm" class="shop-detail-name" />
+
+                            <!-- Price row -->
+                            <ui:VisualElement class="shop-price-row">
+                                <ui:Label name="LblShopPriceIcon" text="🪙" class="shop-price-icon" />
+                                <ui:Label name="LblShopPrice" text="100 POS" class="shop-price-text" />
+                            </ui:VisualElement>
+
+                            <ui:VisualElement class="shop-detail-divider" />
+                            <ui:Label name="LblShopDesc" text="Mô tả vật phẩm" class="shop-detail-desc" />
+                            <ui:Label name="LblOwned" text="Đang có: 0" class="shop-detail-owned-badge" />
+
+                            <!-- Quantity selector -->
+                            <ui:VisualElement class="shop-qty-row">
+                                <ui:Button name="BtnQtyMinus" text="−" class="shop-qty-btn" />
+                                <ui:TextField name="TxtQty" value="1" class="shop-qty-input" />
+                                <ui:Button name="BtnQtyPlus" text="+" class="shop-qty-btn" />
+                            </ui:VisualElement>
+
+                            <!-- Total -->
+                            <ui:VisualElement class="shop-total-row">
+                                <ui:Label text="Tổng:" class="shop-total-label" />
+                                <ui:Label name="LblTotal" text="100 POS" class="shop-total-value" />
+                            </ui:VisualElement>
+
+                            <!-- Action button -->
+                            <ui:Button name="BtnShopAction" text="MUA" class="shop-btn-action" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+
+            <!-- Close Button (AFTER panel so it renders ON TOP) -->
+            <ui:VisualElement class="shop-close-shadow">
+                <ui:Button name="BtnCloseShop" text="✕" class="shop-close-btn" />
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+
+</ui:UXML>

@@ -2,7 +2,7 @@
 # Cập nhật: 2026-06-01
 
 ## Tech Stack
-- **Engine:** Unity 2022 LTS (URP)
+- **Engine:** Unity 6 (6000.3.15f1) - URP
 - **Language:** C#
 - **UI Framework:** Unity UI Toolkit (UXML + USS)
 - **Design System:** The Tangible Playground (xem docs/DESIGN.md)

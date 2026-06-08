@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:Style src="Styles/DesignSystem.uss" />
+    <ui:Style src="Styles/SettingsPopup.uss" />
+
+    <!-- Overlay (click to close) -->
+    <ui:VisualElement name="SettingsOverlay" class="settings-overlay">
+
+        <!-- Panel Shadow (Retro Offset) -->
+        <ui:VisualElement class="settings-panel-shadow">
+
+            <!-- Panel (Landscape) -->
+            <ui:VisualElement class="settings-panel">
+
+                <!-- ============================== -->
+                <!-- Header Bar (Purple)            -->
+                <!-- ============================== -->
+                <ui:VisualElement class="settings-header">
+                    <ui:Label name="LblSettingsTitle" text="CÀI ĐẶT" class="settings-header-title" />
+                </ui:VisualElement>
+
+                <!-- ============================== -->
+                <!-- 2-Column Layout                -->
+                <!-- ============================== -->
+                <ui:VisualElement class="settings-columns">
+
+                    <!-- ── LEFT COLUMN ── -->
+                    <ui:VisualElement class="settings-col">
+
+                        <!-- AUDIO -->
+                        <ui:Label name="LblAudioSection" text="ÂM THANH" class="settings-section-header" />
+
+                        <ui:VisualElement class="settings-row">
+                            <ui:Label name="LblMusicVolume" text="Âm nhạc nền" class="settings-label" />
+                            <ui:Slider name="SliderMusic" low-value="0" high-value="100" value="80" class="settings-slider" />
+                            <ui:Label name="LblMusicValue" text="80%" class="settings-slider-value" />
+                        </ui:VisualElement>
+
+                        <ui:VisualElement class="settings-row">
+                            <ui:Label name="LblSFXVolume" text="Hiệu ứng" class="settings-label" />
+                            <ui:Slider name="SliderSFX" low-value="0" high-value="100" value="100" class="settings-slider" />
+                            <ui:Label name="LblSFXValue" text="100%" class="settings-slider-value" />
+                        </ui:VisualElement>
+
+                        <!-- CAMERA -->
+                        <ui:Label name="LblCameraSection" text="CAMERA" class="settings-section-header" />
+
+                        <ui:VisualElement class="settings-row">
+                            <ui:Label name="LblCameraSens" text="Độ nhạy" class="settings-label" />
+                            <ui:Slider name="SliderCameraSens" low-value="10" high-value="100" value="50" class="settings-slider" />
+                            <ui:Label name="LblCameraSensValue" text="50%" class="settings-slider-value" />
+                        </ui:VisualElement>
+
+                        <ui:VisualElement class="settings-row">
+                            <ui:Label name="LblCameraZoom" text="Zoom" class="settings-label" />
+                            <ui:Slider name="SliderCameraZoom" low-value="50" high-value="100" value="75" class="settings-slider" />
+                            <ui:Label name="LblCameraZoomValue" text="75%" class="settings-slider-value" />
+                        </ui:VisualElement>
+
+                    </ui:VisualElement>
+
+                    <!-- ── VERTICAL DIVIDER ── -->
+                    <ui:VisualElement class="settings-col-divider" />
+
+                    <!-- ── RIGHT COLUMN ── -->
+                    <ui:VisualElement class="settings-col">
+
+                        <!-- GRAPHICS -->
+                        <ui:Label name="LblGraphicsSection" text="ĐỒ HỌA" class="settings-section-header" />
+
+                        <ui:VisualElement class="settings-row">
+                            <ui:Label name="LblQuality" text="Chất lượng" class="settings-label" />
+                            <ui:Slider name="SliderRenderQuality" low-value="0" high-value="100" value="100" class="settings-slider" />
+                            <ui:Label name="LblRenderQualityValue" text="100%" class="settings-slider-value" />
+                        </ui:VisualElement>
+
+                        <ui:VisualElement class="settings-toggle-row">
+                            <ui:Label name="LblShadow" text="Bóng đổ" class="settings-toggle-label" />
+                            <ui:Toggle name="ToggleShadow" value="true" class="settings-toggle" />
+                            <ui:Label name="LblShadowStatus" text="BẬT" class="settings-toggle-status" />
+                        </ui:VisualElement>
+
+                        <!-- GENERAL -->
+                        <ui:Label name="LblGeneralSection" text="CHUNG" class="settings-section-header" />
+
+                        <ui:VisualElement class="settings-toggle-row">
+                            <ui:Label name="LblShowChat" text="Hiện chat" class="settings-toggle-label" />
+                            <ui:Toggle name="ToggleShowChat" value="true" class="settings-toggle" />
+                            <ui:Label name="LblShowChatStatus" text="BẬT" class="settings-toggle-status" />
+                        </ui:VisualElement>
+
+                        <ui:VisualElement class="settings-row">
+                            <ui:Label name="LblLanguage" text="Ngôn ngữ" class="settings-label" />
+                            <ui:VisualElement class="settings-dropdown-shadow">
+                                <ui:DropdownField name="DropdownLanguage" class="settings-dropdown" choices="Tiếng Việt,English" index="0" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+
+                <!-- ============================== -->
+                <!-- Divider                        -->
+                <!-- ============================== -->
+                <ui:VisualElement class="settings-divider" />
+
+                <!-- ============================== -->
+                <!-- Bottom Buttons                 -->
+                <!-- ============================== -->
+                <ui:VisualElement class="settings-buttons-row">
+                    <ui:Button name="BtnDeleteAccount" text="Xóa tài khoản" class="settings-delete-btn" />
+                    <ui:Button name="BtnExitApp" text="Thoát game" class="settings-exit-btn" />
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+
+            <!-- Close Button (Corner — AFTER panel so it renders ON TOP) -->
+            <ui:VisualElement class="settings-close-shadow">
+                <ui:Button name="BtnCloseSettings" text="✕" class="settings-close-btn" />
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+
+</ui:UXML>
