@@ -12,6 +12,8 @@ namespace YWonderLand.Environment
             Rock
         }
 
+        public static event System.Action<string, int> OnResourceHarvested;
+
         [Header("Configuration")]
         public string resourceId; // Unique ID for saving state
         public ResourceType type;
@@ -211,6 +213,7 @@ namespace YWonderLand.Environment
             {
                 inv.AddItem(yieldItemId, yield);
                 Debug.Log($"[HarvestableResource] Harvested {yield}x {yieldItemId}!");
+                OnResourceHarvested?.Invoke(yieldItemId, yield);
             }
 
             // VFX/SFX could be added here

@@ -225,6 +225,18 @@ namespace YWonderLand.Environment
                 return; // Handled tile, stop here
                 }
             }
+
+            // 3. Try to find a MerchantNPC
+            foreach (var hit in hits)
+            {
+                MerchantNPC merchant = hit.collider.GetComponent<MerchantNPC>();
+                if (merchant != null)
+                {
+                    Debug.Log($"[FarmInteraction] TÌM THẤY MERCHANT: {hit.collider.gameObject.name}! Mở Shop...");
+                    merchant.Interact();
+                    return; // Handled merchant, stop here
+                }
+            }
         }
 
         // ── Action Handlers ──

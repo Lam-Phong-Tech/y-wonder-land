@@ -10,6 +10,8 @@ using UnityEngine.UIElements;
 /// </summary>
 public class ShopPopupController : MonoBehaviour
 {
+    public static event System.Action<string, int> OnItemSold;
+
     [Header("References")]
     [SerializeField] private UIDocument shopDocument;
 
@@ -540,6 +542,8 @@ public class ShopPopupController : MonoBehaviour
 
             YWonderLand.Managers.EconomyManager.Instance.AddPOS(totalCost);
             Debug.Log($"[Shop] Bán {selectedQty}x {item.name} — Nhận {totalCost} POS.");
+            
+            OnItemSold?.Invoke(item.id, selectedQty);
             
             RefreshGrid();
         }

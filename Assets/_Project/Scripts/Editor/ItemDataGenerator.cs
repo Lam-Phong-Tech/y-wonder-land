@@ -133,62 +133,6 @@ namespace YWonderLand.EditorScripts
             db.items.Add(item);
         }
 
-        [MenuItem("Y Wonder Land/Tools/Generate Crop Data")]
-        public static void GenerateCropData()
-        {
-            if (!AssetDatabase.IsValidFolder("Assets/Resources"))
-                AssetDatabase.CreateFolder("Assets", "Resources");
-            if (!AssetDatabase.IsValidFolder("Assets/Resources/Items"))
-                AssetDatabase.CreateFolder("Assets/Resources", "Items");
-
-            var db = AssetDatabase.LoadAssetAtPath<YWonderLand.Data.CropDatabase>("Assets/Resources/CropDatabase.asset");
-            if (db == null)
-            {
-                db = ScriptableObject.CreateInstance<YWonderLand.Data.CropDatabase>();
-                AssetDatabase.CreateAsset(db, "Assets/Resources/CropDatabase.asset");
-            }
-
-            db.ClearCrops();
-
-            AddCropEntry(db, "carrot_seed_01", "carrot_01", 45f, 20f, 3, 20, 50, 3, new Color(1f, 0.55f, 0.1f), "\ud83e\udd55");
-            AddCropEntry(db, "cabbage_seed_01", "cabbage_01", 40f, 18f, 3, 15, 40, 3, new Color(0.3f, 0.8f, 0.3f), "\ud83e\udd6c");
-            AddCropEntry(db, "watermelon_seed_01", "watermelon_01", 60f, 25f, 5, 30, 80, 3, new Color(0.1f, 0.6f, 0.1f), "\ud83c\udf49");
-            AddCropEntry(db, "corn_seed_01", "corn_01", 50f, 22f, 4, 25, 60, 3, new Color(1f, 0.85f, 0.2f), "\ud83c\udf3d");
-            AddCropEntry(db, "pumpkin_seed_01", "pumpkin_01", 55f, 24f, 4, 25, 70, 3, new Color(0.9f, 0.5f, 0.1f), "\ud83c\udf83");
-            AddCropEntry(db, "morning_glory_seed_01", "morning_glory_01", 30f, 15f, 2, 10, 25, 2, new Color(0.4f, 0.7f, 0.3f), "\ud83c\udf3e");
-            AddCropEntry(db, "sweet_potato_seed_01", "sweet_potato_01", 50f, 22f, 3, 20, 45, 3, new Color(0.6f, 0.3f, 0.15f), "\ud83c\udf60");
-            AddCropEntry(db, "grass_seed_01", "grass_01", 30f, 15f, 3, 5, 10, 2, new Color(0.2f, 0.6f, 0.2f), "\ud83c\udf3f");
-
-            EditorUtility.SetDirty(db);
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-            Debug.Log("[CropData] Generated CropDatabase with 8 crops!");
-        }
-
-        private static void AddCropEntry(YWonderLand.Data.CropDatabase db, string seedId, string harvestId,
-            float growthTime, float waterInterval, int yield,
-            int exp, int pos, int stages, Color color, string emoji)
-        {
-            string path = "Assets/Resources/Items/Crop_" + seedId + ".asset";
-            var crop = AssetDatabase.LoadAssetAtPath<YWonderLand.Data.CropDefinition>(path);
-            if (crop == null)
-            {
-                crop = ScriptableObject.CreateInstance<YWonderLand.Data.CropDefinition>();
-                AssetDatabase.CreateAsset(crop, path);
-            }
-            crop.seedItemId = seedId;
-            crop.harvestItemId = harvestId;
-            crop.growthTimeSec = growthTime;
-            crop.waterIntervalSec = waterInterval;
-            crop.harvestYield = yield;
-            crop.expReward = exp;
-            crop.posReward = pos;
-            crop.growthStages = stages;
-            crop.cropColor = color;
-            crop.iconEmoji = emoji;
-            EditorUtility.SetDirty(crop);
-            db.AddCropEntry(crop);
-        }
         [MenuItem("YWonderLand/Generate Animal Data")]
         public static void GenerateAnimalData()
         {

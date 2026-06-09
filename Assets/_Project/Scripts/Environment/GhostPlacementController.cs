@@ -12,7 +12,7 @@ public class GhostPlacementController : MonoBehaviour
     /// <summary>
     /// Fired when a building is placed. Parameter is the item price.
     /// </summary>
-    public event System.Action<int> OnBuildingPlaced;
+    public static event System.Action<int> OnBuildingPlaced;
 
     [Header("Ghost Settings")]
     [SerializeField] private Color validColor = new Color(0.2f, 0.9f, 0.3f, 0.4f);
@@ -163,11 +163,19 @@ public class GhostPlacementController : MonoBehaviour
 
             // Update scale for swapped dimensions
             Vector2Int effectiveSize = GetEffectiveSize();
+            float cellSize = gridManager != null ? gridManager.CellSize : 1f;
             ghostObject.transform.localScale = new Vector3(
-                effectiveSize.x * (gridManager != null ? gridManager.CellSize : 1f) * 0.95f,
+                effectiveSize.x * cellSize * 0.95f,
                 ghostHeight,
-                effectiveSize.y * (gridManager != null ? gridManager.CellSize : 1f) * 0.95f
+                effectiveSize.y * cellSize * 0.95f
             );
+
+            // Re-check validity if pinned
+            if (gridManager != null)
+            {
+                currentPlacementValid = gridManager.CanPlace(currentGridCell, effectiveSize);
+                UpdateGhostColor(currentPlacementValid);
+            }
         }
 
         Debug.Log($"[GhostPlacement] Rotated to {rotationAngle} degrees");
@@ -205,6 +213,26 @@ public class GhostPlacementController : MonoBehaviour
             ghostMaterial.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
             ghostMaterial.renderQueue = 3000;
             ghostRenderer.material = ghostMaterial;
+
+            // Add a small indicator to show the "Front" so 1x1 items visibly rotate
+            GameObject forwardIndicator = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            forwardIndicator.name = "FrontIndicator";
+            forwardIndicator.transform.SetParent(ghostObject.transform);
+            // Local pos: at the front face (Z = +0.5)
+            forwardIndicator.transform.localPosition = new Vector3(0f, 0.5f, 0.5f); 
+            // Local scale: small box
+            forwardIndicator.transform.localScale = new Vector3(0.2f, 0.2f, 0.1f);
+            
+            var indicatorCol = forwardIndicator.GetComponent<Collider>();
+            if (indicatorCol != null) Destroy(indicatorCol);
+            
+            var indicatorRenderer = forwardIndicator.GetComponent<Renderer>();
+            if (indicatorRenderer != null)
+            {
+                Material indMat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+                indMat.color = Color.yellow;
+                indicatorRenderer.material = indMat;
+            }
         }
 
         ghostObject.SetActive(true);
@@ -244,6 +272,10 @@ public class GhostPlacementController : MonoBehaviour
 
         // Spawn placed building (Cube placeholder)
         Vector3 worldPos = gridManager.GridToWorldCentered(currentGridCell, effectiveSize);
+        if (ghostObject != null)
+        {
+            worldPos.y = ghostObject.transform.position.y;
+        }
         SpawnPlacedBuilding(worldPos, effectiveSize);
 
         // Notify listeners (UI controller handles balance deduction)
@@ -261,7 +293,7 @@ public class GhostPlacementController : MonoBehaviour
 
         GameObject building = GameObject.CreatePrimitive(PrimitiveType.Cube);
         building.name = $"Building_{currentItemName}_{currentGridCell.x}_{currentGridCell.y}";
-        building.transform.position = new Vector3(position.x, ghostHeight * 0.5f, position.z);
+        building.transform.position = position;
         building.transform.rotation = Quaternion.Euler(0, rotationAngle, 0);
         building.transform.localScale = new Vector3(
             size.x * cellSize * 0.95f,
@@ -281,6 +313,21 @@ public class GhostPlacementController : MonoBehaviour
             mat.renderQueue = -1; // Use shader default queue
             mat.color = GetBuildingColor();
             renderer.material = mat;
+        }
+
+        // Add a small indicator to show the "Front" so 1x1 items visibly rotate
+        GameObject forwardIndicator = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        forwardIndicator.name = "FrontIndicator";
+        forwardIndicator.transform.SetParent(building.transform);
+        forwardIndicator.transform.localPosition = new Vector3(0f, 0.5f, 0.5f); 
+        forwardIndicator.transform.localScale = new Vector3(0.2f, 0.2f, 0.1f);
+        
+        var indicatorRenderer = forwardIndicator.GetComponent<Renderer>();
+        if (indicatorRenderer != null)
+        {
+            Material indMat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+            indMat.color = Color.yellow;
+            indicatorRenderer.material = indMat;
         }
 
         // Tag for identification (used by Delete/Move tools)

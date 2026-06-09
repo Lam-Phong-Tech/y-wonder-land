@@ -359,8 +359,8 @@ public class BuildModeOverlayController : MonoBehaviour
             gridRenderer.Show();
 
         // Subscribe to building placed event for balance deduction
-        if (GhostPlacementController.Instance != null)
-            GhostPlacementController.Instance.OnBuildingPlaced += OnBuildingPlacedHandler;
+        GhostPlacementController.OnBuildingPlaced -= OnBuildingPlacedHandler;
+        GhostPlacementController.OnBuildingPlaced += OnBuildingPlacedHandler;
 
         // Hide GameHUD to prevent UI click overlaps
         SetGameHUDVisible(false);
@@ -377,8 +377,7 @@ public class BuildModeOverlayController : MonoBehaviour
         state = BuildState.Hidden;
 
         // Unsubscribe from building placed event
-        if (GhostPlacementController.Instance != null)
-            GhostPlacementController.Instance.OnBuildingPlaced -= OnBuildingPlacedHandler;
+        GhostPlacementController.OnBuildingPlaced -= OnBuildingPlacedHandler;
 
         // Deactivate ghost and camera
         if (GhostPlacementController.Instance != null)

@@ -26,6 +26,9 @@ public class PlayerController : MonoBehaviour
     // Animator parameter hash IDs for better performance
     private int speedHash;
     private int isMovingHash;
+    private int jumpHash;
+    private int sitHash;
+    private int feedHash;
 
     void Start()
     {
@@ -46,6 +49,9 @@ public class PlayerController : MonoBehaviour
         // Cache Animator parameters
         speedHash = Animator.StringToHash("Speed");
         isMovingHash = Animator.StringToHash("IsMoving");
+        jumpHash = Animator.StringToHash("Jump");
+        sitHash = Animator.StringToHash("Sit");
+        feedHash = Animator.StringToHash("Feed");
     }
 
     private void DiscoverMainCamera()
@@ -89,7 +95,11 @@ public class PlayerController : MonoBehaviour
         if (interactPressed)
         {
             Debug.Log("[PlayerController] Action / Interact button pressed!");
-            // Add interaction logic here later
+            
+            if (animator != null && HasParameter(animator, "Feed"))
+            {
+                animator.SetTrigger(feedHash);
+            }
         }
 
         Vector3 inputDir = new Vector3(inputVec.x, 0, inputVec.y).normalized;
@@ -136,6 +146,12 @@ public class PlayerController : MonoBehaviour
         {
             // Physics formula for jump velocity: v = sqrt(h * -2 * g)
             playerVelocity.y = Mathf.Sqrt(jumpHeight * -2.0f * gravity);
+            
+            if (animator != null && HasParameter(animator, "Jump"))
+            {
+                animator.SetTrigger(jumpHash);
+            }
+            
             Debug.Log("[PlayerController] Jump triggered!");
         }
 
