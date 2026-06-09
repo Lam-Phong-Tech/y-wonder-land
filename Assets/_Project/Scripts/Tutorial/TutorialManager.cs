@@ -32,6 +32,8 @@ public class TutorialManager : MonoBehaviour
 
     [Header("References")]
     public GuideNPC guideNPC;
+    [Tooltip("Vị trí sinh ra NPC Tân Thủ (kéo thả Transform vào đây). Nếu để trống, NPC sẽ sinh ra gần Player.")]
+    public Transform guideNpcSpawnPoint;
     public FarmTile targetFarmTile;
     public Transform targetAnimalPen; // Chuồng thú
     public Transform targetMarket; // Quầy giao thương (Chợ)
@@ -117,10 +119,17 @@ public class TutorialManager : MonoBehaviour
         if (guideNPC == null)
         {
             Vector3 spawnPos = new Vector3(3f, 0.5f, 3f);
-            GameObject player = GameObject.FindWithTag("Player");
-            if (player != null)
+            if (guideNpcSpawnPoint != null)
             {
-                spawnPos = player.transform.position + player.transform.forward * 2f + player.transform.right * 1.5f;
+                spawnPos = guideNpcSpawnPoint.position;
+            }
+            else
+            {
+                GameObject player = GameObject.FindWithTag("Player");
+                if (player != null)
+                {
+                    spawnPos = player.transform.position + player.transform.forward * 2f + player.transform.right * 1.5f;
+                }
             }
 
             GameObject npcGo = new GameObject("GuideNPC_DynamicFallback");
@@ -370,14 +379,14 @@ public class TutorialManager : MonoBehaviour
                 break;
             case TutorialStep.FollowNPCToMarket:
                 hintTitle = "B\u1ea1n C\u1ea7n Tr\u1ee3 Gi\u00fap!";
-                hintDesc = "\u0110i theo Anh L\u00e2m \u0111\u1ebfn Ch\u1ee3!";
+                hintDesc = "\u0110i theo NPC T\u00e2n Th\u1ee7 \u0111\u1ebfn Ch\u1ee3!";
                 break;
             case TutorialStep.InteractMarket:
                 hintTitle = "B\u00e1n C\u00e0 R\u1ed1t!";
                 hintDesc = "M\u1edf C\u1eeda H\u00e0ng, ch\u1ecdn B\u00c1N v\u00e0 b\u00e1n C\u00e0 R\u1ed1t!";
                 break;
             case TutorialStep.FollowNPCToResource:
-                hintTitle = "Theo Anh L\u00e2m!";
+                hintTitle = "Theo NPC T\u00e2n Th\u1ee7!";
                 hintDesc = "\u0110i theo v\u00e0o khu v\u1ef1c r\u1eebng / m\u1ecf.";
                 break;
             case TutorialStep.InteractResource:
@@ -385,7 +394,7 @@ public class TutorialManager : MonoBehaviour
                 hintDesc = "Nh\u1ea5n gi\u1eef chu\u1ed9t l\u00ean c\u00e2y ho\u1eb7c \u0111\u00e1 \u0111\u1ec3 khai th\u00e1c.";
                 break;
             case TutorialStep.FollowNPCToBuild:
-                hintTitle = "Theo Anh L\u00e2m!";
+                hintTitle = "Theo NPC T\u00e2n Th\u1ee7!";
                 hintDesc = "\u0110i v\u1ec1 b\u00e3i \u0111\u1ea5t tr\u1ed1ng \u0111\u1ec3 x\u00e2y d\u1ef1ng.";
                 break;
             case TutorialStep.InteractBuild:
@@ -455,7 +464,7 @@ public class TutorialManager : MonoBehaviour
     public void StartTutorial()
     {
         SetStep(TutorialStep.FollowNPC);
-        UpdateQuestHUD("[1/6] Đi theo Anh Lâm Tốt Bụng tới mảnh đất hoang");
+        UpdateQuestHUD("[1/6] Đi theo NPC Tân Thủ tới mảnh đất hoang");
         Debug.Log("[TutorialManager] Onboarding Tutorial Started.");
 
         // Khởi động Trạm Hướng Dẫn số 1
@@ -520,7 +529,7 @@ public class TutorialManager : MonoBehaviour
         subtitleContainer.style.display = DisplayStyle.None;
 
         // Speaker Name
-        subtitleSpeaker = new Label("Anh Lâm Tốt Bụng");
+        subtitleSpeaker = new Label("NPC Tân Thủ");
         subtitleSpeaker.style.fontSize = 11;
         subtitleSpeaker.style.unityFontStyleAndWeight = FontStyle.Bold;
         subtitleSpeaker.style.color = new Color(0.36f, 0.26f, 0.95f, 1f); // #5B42F3 (Hero color)
@@ -692,11 +701,11 @@ public class TutorialManager : MonoBehaviour
                 guideNPC.tutorialNodes[1].CompleteNodeTask();
                 
                 SetStep(TutorialStep.FollowNPCToMarket);
-                UpdateQuestHUD("[8/9] Đi theo Anh Lâm tới khu vực Chợ");
+                UpdateQuestHUD("[8/9] Đi theo NPC Tân Thủ tới khu vực Chợ");
                 ShowSubtitle("Tuyệt vời! Chú thú cưng mới của cậu trông đáng yêu quá. Bây giờ hãy theo tôi ra Chợ để bán Cà rốt lấy tiền nhé!");
                 
                 ShowInstructionBanner(
-                    "Theo Anh Lâm!",
+                    "Theo NPC Tân Thủ!",
                     "Hãy đi theo NPC tới khu vực Chợ"
                 );
 
@@ -751,11 +760,11 @@ public class TutorialManager : MonoBehaviour
                 ShopPopupController.OnItemSold -= OnTutorialItemSold;
                 
                 SetStep(TutorialStep.FollowNPCToResource);
-                UpdateQuestHUD("[10/12] Đi theo Anh Lâm tới khu Khai thác");
+                UpdateQuestHUD("[10/12] Đi theo NPC Tân Thủ tới khu Khai thác");
                 ShowSubtitle("Bán được tiền rồi! Giờ cậu đi theo tôi để học cách thu thập nguyên liệu nhé!");
                 
                 ShowInstructionBanner(
-                    "Theo Anh Lâm!",
+                    "Theo NPC Tân Thủ!",
                     "Di chuyển tới khu Khai thác"
                 );
 
@@ -820,7 +829,7 @@ public class TutorialManager : MonoBehaviour
                 }
                 
                 SetStep(TutorialStep.FollowNPCToBuild);
-                UpdateQuestHUD("[11.5/12] Theo Anh Lâm tới bãi đất trống");
+                UpdateQuestHUD("[11.5/12] Theo NPC Tân Thủ tới bãi đất trống");
                 ShowSubtitle("Đủ nguyên liệu rồi! Ta kiếm chỗ trống để xây thử gì đó nào!");
                 
                 if (guideNPC.tutorialNodes.Length > 4)
@@ -1109,7 +1118,7 @@ public class TutorialManager : MonoBehaviour
         if (currentStep == TutorialStep.WaitHarvest || currentStep == TutorialStep.PlantSeed) // Fallback support
         {
             currentStep = TutorialStep.FollowNPCToAnimalPen;
-            UpdateQuestHUD("[6/7] Nhiệm vụ: Đi theo Anh Lâm sang Chuồng Thú");
+            UpdateQuestHUD("[6/7] Nhiệm vụ: Đi theo NPC Tân Thủ sang Chuồng Thú");
             
             // Tell the node that task is complete so GuideNPC can proceed
             if (guideNPC != null && guideNPC.tutorialNodes != null && guideNPC.tutorialNodes.Length > 0)

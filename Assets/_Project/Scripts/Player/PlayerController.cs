@@ -22,6 +22,7 @@ public class PlayerController : MonoBehaviour
     private InputAction moveAction;
     private InputAction jumpAction;
     private InputAction interactAction;
+    private InputAction attackAction;
 
     // Animator parameter hash IDs for better performance
     private int speedHash;
@@ -29,6 +30,9 @@ public class PlayerController : MonoBehaviour
     private int jumpHash;
     private int sitHash;
     private int feedHash;
+    private int plantHash;
+    private int chopHash;
+    private int petHash;
 
     void Start()
     {
@@ -42,6 +46,7 @@ public class PlayerController : MonoBehaviour
             moveAction = playerInput.actions["Move"];
             jumpAction = playerInput.actions["Jump"];
             interactAction = playerInput.actions["Interact"];
+            attackAction = playerInput.actions["Attack"];
         }
 
         DiscoverMainCamera();
@@ -52,6 +57,9 @@ public class PlayerController : MonoBehaviour
         jumpHash = Animator.StringToHash("Jump");
         sitHash = Animator.StringToHash("Sit");
         feedHash = Animator.StringToHash("Feed");
+        plantHash = Animator.StringToHash("Plant");
+        chopHash = Animator.StringToHash("Chop");
+        petHash = Animator.StringToHash("Pet");
     }
 
     private void DiscoverMainCamera()
@@ -90,15 +98,40 @@ public class PlayerController : MonoBehaviour
         Vector2 inputVec = moveAction != null ? moveAction.ReadValue<Vector2>() : Vector2.zero;
         bool jumpPressed = jumpAction != null && jumpAction.triggered;
         bool interactPressed = interactAction != null && interactAction.triggered;
+        bool attackPressed = attackAction != null && attackAction.triggered;
 
-        // Process Interaction
+        // Process Interaction / Actions
         if (interactPressed)
         {
-            Debug.Log("[PlayerController] Action / Interact button pressed!");
-            
+            Debug.Log("[PlayerController] Interact button pressed!");
+            // TODO: Bỏ hành động Trồng Cây ra khỏi nút Interact như đã trao đổi
+        }
+
+        if (attackPressed)
+        {
+            Debug.Log("[PlayerController] Attack button pressed!");
+            if (animator != null && HasParameter(animator, "Chop"))
+            {
+                animator.SetTrigger(chopHash);
+            }
+        }
+
+        if (attackPressed)
+        {
+            Debug.Log("[PlayerController] Attack button pressed!");
+            if (animator != null && HasParameter(animator, "Chop"))
+            {
+                animator.SetTrigger(chopHash);
+            }
+        }
+
+        // Test Nút Câu Cá (Phím F)
+        if (Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame)
+        {
+            Debug.Log("[PlayerController] Nút Câu Cá (F) được bấm!");
             if (animator != null && HasParameter(animator, "Feed"))
             {
-                animator.SetTrigger(feedHash);
+                animator.SetTrigger(feedHash); // Feed đang được nối với Fishing
             }
         }
 

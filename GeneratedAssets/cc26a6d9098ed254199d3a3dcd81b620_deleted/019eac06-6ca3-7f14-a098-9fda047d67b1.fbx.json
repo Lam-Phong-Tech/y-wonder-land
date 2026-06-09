@@ -1,0 +1,12 @@
+{
+    "asset": "cc26a6d9098ed254199d3a3dcd81b620",
+    "fileName": "019eac06-6ca3-7f14-a098-9fda047d67b1.fbx",
+    "prompt": "A humanoid character swinging an axe to chop down a tree. The swing is powerful and energetic, ending with the character pulling the axe back.",
+    "negativePrompt": "",
+    "model": "uthana-text-to-motion",
+    "modelName": "Uthana Text to Motion",
+    "customSeed": 2098730152,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "isTrimmed": false
+}

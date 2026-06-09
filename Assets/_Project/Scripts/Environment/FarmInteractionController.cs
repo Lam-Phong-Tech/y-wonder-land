@@ -300,6 +300,13 @@ namespace YWonderLand.Environment
             if (pendingPlantTile.InteractPlant(itemId))
             {
                 Debug.Log($"[FarmInteraction] Planted {itemId}!");
+                
+                // Múa động tác gieo hạt
+                Animator anim = GetComponent<Animator>();
+                if (anim != null)
+                {
+                    anim.SetTrigger("Plant");
+                }
             }
 
             // Close inventory

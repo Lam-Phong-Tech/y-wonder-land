@@ -91,7 +91,11 @@ public class ThirdPersonCamera : MonoBehaviour
 
     void LateUpdate()
     {
-        if (target == null) return;
+        if (target == null) 
+        {
+            // Debug.LogWarning("[ThirdPersonCamera] No target assigned!");
+            return;
+        }
 
         // 1. Read raw mouse input (skip rotation when cursor is unlocked)
         Vector2 rawInput = Vector2.zero;
@@ -134,6 +138,8 @@ public class ThirdPersonCamera : MonoBehaviour
         // 7. Set camera transform directly (rigid = rock solid, no wobble)
         transform.position = cameraPos;
         transform.rotation = orbitRotation;
+        
+        // Debug.Log($"[ThirdPersonCamera] Orbiting at {transform.position} around {target.name}");
     }
 
     /// <summary>

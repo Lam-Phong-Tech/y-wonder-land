@@ -143,6 +143,8 @@ public class BoatCutscene : MonoBehaviour
         }
     }
 
+    private int currentStage = -1;
+
     private void UpdateCinematicCamera()
     {
         if (mainCameraTransform == null || waypoints.Count == 0) return;
@@ -156,30 +158,40 @@ public class BoatCutscene : MonoBehaviour
             progress = Mathf.Clamp01(progress);
         }
 
-        Transform targetCamTransform = cameraPosition1;
+        int newStage = 1;
+        if (progress < 0.35f) newStage = 1;
+        else if (progress < 0.70f) newStage = 2;
+        else newStage = 3;
 
-        // Determine camera target based on progress
-        if (progress < 0.35f)
+        if (newStage != currentStage)
         {
-            // Stage 1: Wide Angle Intro
-            targetCamTransform = cameraPosition1;
-        }
-        else if (progress < 0.70f)
-        {
-            // Stage 2: Character Close-up
-            targetCamTransform = cameraPosition2;
-        }
-        else
-        {
-            // Stage 3: Island Welcoming View
-            targetCamTransform = cameraPosition3;
+            currentStage = newStage;
+            Debug.Log($"[BoatCutscene] Hard Cut to Camera Stage {currentStage}");
         }
 
-        // Interpolate camera position and rotation smoothly
-        if (targetCamTransform != null)
+        if (currentStage == 1)
         {
-            mainCameraTransform.position = Vector3.Lerp(mainCameraTransform.position, targetCamTransform.position, camLerpSpeed * Time.deltaTime);
-            mainCameraTransform.rotation = Quaternion.Slerp(mainCameraTransform.rotation, targetCamTransform.rotation, camLerpSpeed * Time.deltaTime);
+            if (cameraPosition1 != null)
+            {
+                mainCameraTransform.position = cameraPosition1.position;
+                mainCameraTransform.rotation = cameraPosition1.rotation;
+            }
+        }
+        else if (currentStage == 2)
+        {
+            if (cameraPosition2 != null)
+            {
+                mainCameraTransform.position = cameraPosition2.position;
+                mainCameraTransform.rotation = cameraPosition2.rotation;
+            }
+        }
+        else if (currentStage == 3)
+        {
+            if (cameraPosition3 != null)
+            {
+                mainCameraTransform.position = cameraPosition3.position;
+                mainCameraTransform.LookAt(transform.position + Vector3.up * 1.5f);
+            }
         }
     }
 
@@ -350,7 +362,15 @@ public class BoatCutscene : MonoBehaviour
             if (finalWaypoint != null)
             {
                 transform.position = finalWaypoint.position;
-                transform.rotation = finalWaypoint.rotation;
+                if (waypoints.Count > 1)
+                {
+                    Vector3 arrivalDir = (finalWaypoint.position - waypoints[waypoints.Count - 2].position).normalized;
+                    if (arrivalDir != Vector3.zero) transform.rotation = Quaternion.LookRotation(arrivalDir);
+                }
+                else
+                {
+                    transform.rotation = finalWaypoint.rotation;
+                }
             }
         }
         
@@ -358,7 +378,7 @@ public class BoatCutscene : MonoBehaviour
         if (cameraPosition3 != null && mainCameraTransform != null)
         {
             mainCameraTransform.position = cameraPosition3.position;
-            mainCameraTransform.rotation = cameraPosition3.rotation;
+            mainCameraTransform.LookAt(transform.position + Vector3.up * 1.5f);
         }
         
         EndCutscene();

@@ -16,7 +16,7 @@ public class GuideNPC : MonoBehaviour
     public float warningTime = 10.0f;
     
     [Header("NPC Identity")]
-    public string npcName = "Anh Lâm Tốt Bụng";
+    public string npcName = "NPC Tân Thủ";
 
     // Actions/Callbacks
     public Action<string> OnDialogueTriggered; // Triggers subtitle UI
