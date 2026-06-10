@@ -1,286 +1,126 @@
 /* ============================================================
    ConfirmDialog.uss — Confirm Dialog Reusable Component
-   Design System: The Tangible Playground
-   Chuẩn: khớp SettingsPopup / FriendsPopup / InventoryPopup
+   Design System: Cozy Dark Palia
    ============================================================ */
 
 /* === OVERLAY === */
 .confirm-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.4);
-    align-items: center;
-    justify-content: center;
-}
-
-/* === SHADOW WRAPPER (transparent — giữ cấu trúc, không tô màu) === */
-.confirm-shadow {
-    background-color: transparent;
-    border-radius: 22px;
-    padding-right: 6px;
-    padding-bottom: 6px;
-    position: relative;
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(21, 26, 39, 0.7); /* Mystic Black 70% */
+    align-items: center; justify-content: center; z-index: 200;
 }
 
 /* === PANEL === */
 .confirm-panel {
-    background-color: #F5F0E8;
-    border-radius: 22px;
-    border-width: 3px;
-    border-color: #3D3535;
-    width: 400px;
-    padding: 32px;
-    align-items: center;
+    width: 480px;
+    background-color: var(--color-primary-navy);
+    border-radius: var(--radius-panel);
+    border-width: 1px; border-color: rgba(255, 255, 255, 0.1);
+    overflow: hidden;
 }
 
-/* === CLOSE BUTTON (X) — khớp settings/friends/inventory === */
-.confirm-btn-close {
-    position: absolute;
-    right: -8px;
-    top: -8px;
-    background-color: transparent;
-    border-radius: 10px;
-    padding-right: 2px;
-    padding-bottom: 2px;
-    z-index: 10;
-    /* Reset button defaults */
-    border-width: 0;
+/* === HEADER === */
+.confirm-header {
+    flex-direction: row; align-items: center; justify-content: center;
+    background-color: var(--color-deep-blue);
+    padding: 24px 20px;
+    border-bottom-width: 1px; border-bottom-color: rgba(255, 255, 255, 0.05);
+    min-height: 80px; position: relative;
 }
 
-.confirm-btn-close > .confirm-btn-close-inner {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    background-color: #FF4B4B;
-    border-width: 3px;
-    border-color: #3D3535;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    font-size: 18px;
-    -unity-font-style: bold;
-    color: #FFFFFF;
-    -unity-text-align: middle-center;
-    transition-property: translate, background-color;
-    transition-duration: 0.08s;
+.confirm-header-title {
+    font-size: 32px; -unity-font-style: bold;
+    color: var(--color-accent-yellow); -unity-text-align: middle-center;
+    letter-spacing: 2px; position: absolute; left: 0; right: 0;
 }
 
-/* Vì nút X là Button trực tiếp, style trực tiếp trên nó */
-.confirm-btn-close {
-    position: absolute;
-    right: -8px;
-    top: -8px;
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    background-color: #FF4B4B;
-    border-width: 3px;
-    border-color: #3D3535;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    font-size: 18px;
-    -unity-font-style: bold;
-    color: #FFFFFF;
-    -unity-text-align: middle-center;
-    z-index: 10;
-    transition-property: translate, background-color;
-    transition-duration: 0.08s;
+/* === CLOSE BUTTON === */
+.confirm-close-btn-container { position: absolute; right: 16px; top: 16px; }
+.confirm-close-btn {
+    width: 40px; height: 40px; border-radius: 20px;
+    background-color: rgba(255, 255, 255, 0.05); border-width: 0;
+    font-size: 18px; color: var(--color-text-white); -unity-font-style: bold;
+    padding: 0; align-items: center; justify-content: center;
+    transition-property: background-color, scale; transition-duration: 0.15s;
 }
+.confirm-close-btn:hover { background-color: var(--color-danger); color: white; }
+.confirm-close-btn:active { scale: 0.9; }
 
-.confirm-btn-close:hover {
-    background-color: #FF6B6B;
-}
-
-.confirm-btn-close:active {
-    translate: 2px 2px;
-    background-color: #CC3333;
+/* === BODY === */
+.confirm-body {
+    padding: 32px 24px; align-items: center;
 }
 
 /* === ICON CONTAINER === */
 .confirm-icon-container {
-    width: 64px;
-    height: 64px;
-    border-radius: 32px;
-    border-width: 3px;
-    border-color: #3D3535;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 16px;
+    width: 64px; height: 64px; border-radius: 32px;
+    background-color: var(--color-mystic-black); /* fallback */
+    border-width: 0;
+    align-items: center; justify-content: center;
+    margin-bottom: 24px;
 }
-
 .confirm-icon {
-    font-size: 28px;
-    -unity-text-align: middle-center;
-    padding: 0;
-    margin: 0;
+    font-size: 32px; -unity-text-align: middle-center; padding: 0; margin: 0; color: white;
 }
 
 /* --- Icon type: Warning (vàng) --- */
-.icon-warning {
-    color: #3D3535;
-}
-
-.confirm-icon-container.icon-container-warning {
-    background-color: #FFC107;
-}
+.icon-warning { color: var(--color-mystic-black); }
+.confirm-icon-container.icon-container-warning { background-color: var(--color-accent-yellow); }
 
 /* --- Icon type: Danger (đỏ) --- */
-.icon-danger {
-    color: #FFFFFF;
-}
-
-.confirm-icon-container.icon-container-danger {
-    background-color: #FF4B4B;
-}
+.icon-danger { color: white; }
+.confirm-icon-container.icon-container-danger { background-color: var(--color-danger); }
 
 /* --- Icon type: Info (xanh) --- */
-.icon-info {
-    color: #FFFFFF;
-    -unity-font-style: bold;
-}
-
-.confirm-icon-container.icon-container-info {
-    background-color: #2D7BFF;
-}
-
-/* === TITLE === */
-.confirm-title {
-    font-size: 28px;
-    -unity-font-style: bold;
-    color: #3D3535;
-    -unity-text-align: middle-center;
-    margin-bottom: 12px;
-    padding: 0;
-}
+.icon-info { color: white; -unity-font-style: bold; }
+.confirm-icon-container.icon-container-info { background-color: var(--color-accent-blue); }
 
 /* === MESSAGE === */
 .confirm-message {
-    font-size: 16px;
-    color: #3D3535;
-    -unity-text-align: middle-center;
-    white-space: normal;
-    margin-bottom: 24px;
-    padding: 0 8px;
+    font-size: 16px; color: var(--color-bright-grey);
+    -unity-text-align: middle-center; white-space: normal;
+    margin-bottom: 32px; padding: 0 16px; width: 100%;
 }
 
 /* === BUTTONS ROW === */
 .confirm-buttons {
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
+    flex-direction: row; justify-content: space-between; width: 100%; padding: 0 16px;
 }
 
-/* === BUTTON WRAPPER (không shadow — nút phẳng, chỉ giữ layout) === */
-.confirm-btn-shadow {
-    background-color: transparent;
-    border-radius: 12px;
-    padding-right: 0;
-    padding-bottom: 0;
-    flex-grow: 1;
-    margin: 0 8px;
-}
-
-/* === CANCEL BUTTON (xám) === */
+/* === CANCEL BUTTON === */
 .confirm-btn-cancel {
-    background-color: #D5D5D5;
-    color: #3D3535;
-    font-size: 16px;
-    -unity-font-style: bold;
-    border-width: 3px;
-    border-color: #3D3535;
-    border-radius: 12px;
-    padding: 12px 20px;
-    -unity-text-align: middle-center;
-    flex-grow: 1;
-    transition-property: translate, background-color;
-    transition-duration: 0.08s;
-    transition-timing-function: ease-out;
+    padding: 14px 24px; border-radius: 24px; /* Flat pill shape */
+    background-color: transparent; border-width: 2px; border-color: var(--color-danger);
+    font-size: 16px; -unity-font-style: bold; color: var(--color-danger); -unity-text-align: middle-center;
+    width: 46%; margin: 0;
+    transition-property: background-color, color, scale; transition-duration: 0.1s;
 }
-
-.confirm-btn-cancel:hover {
-    background-color: #E0E0E0;
-}
-
-.confirm-btn-cancel:active {
-    translate: 1px 1px;
-    background-color: #C0C0C0;
-}
-
-.confirm-btn-cancel:disabled {
-    background-color: #E8E8E8;
-    color: rgba(61, 53, 53, 0.5);
-    opacity: 0.5;
-}
+.confirm-btn-cancel:hover { background-color: rgba(230, 74, 25, 0.15); }
+.confirm-btn-cancel:active { scale: 0.98; background-color: var(--color-danger); color: white; }
+.confirm-btn-cancel:disabled { opacity: 0.5; border-color: var(--color-overcast-grey); color: var(--color-overcast-grey); }
 
 /* === CONFIRM BUTTON (base) === */
 .confirm-btn-confirm {
-    color: #FFFFFF;
-    font-size: 16px;
-    -unity-font-style: bold;
-    border-width: 3px;
-    border-color: #3D3535;
-    border-radius: 12px;
-    padding: 12px 20px;
-    -unity-text-align: middle-center;
-    flex-grow: 1;
-    transition-property: translate, background-color;
-    transition-duration: 0.08s;
-    transition-timing-function: ease-out;
-    /* Mặc định Warning (vàng) */
-    background-color: #FFC107;
+    padding: 14px 24px; border-radius: 24px; /* Flat pill shape */
+    background-color: var(--color-accent-yellow); border-width: 0;
+    font-size: 16px; -unity-font-style: bold; color: var(--color-mystic-black); -unity-text-align: middle-center;
+    width: 46%; margin: 0;
+    transition-property: background-color, scale; transition-duration: 0.1s;
 }
+.confirm-btn-confirm:active { scale: 0.98; }
+.confirm-btn-confirm:disabled { opacity: 0.5; background-color: var(--color-overcast-grey); }
 
-.confirm-btn-confirm:active {
-    translate: 1px 1px;
-}
+/* --- Confirm type: Warning (vàng) --- */
+.btn-confirm-warning { background-color: var(--color-accent-yellow); color: var(--color-mystic-black); }
+.btn-confirm-warning:hover { background-color: #FFF890; }
+.btn-confirm-warning:active { background-color: #D0C350; }
 
-.confirm-btn-confirm:disabled {
-    opacity: 0.5;
-}
+/* --- Confirm type: Danger (đỏ) --- */
+.btn-confirm-danger { background-color: var(--color-danger); color: white; }
+.btn-confirm-danger:hover { background-color: #FF7A6E; }
+.btn-confirm-danger:active { background-color: #C63A2E; }
 
-/* --- Confirm type: Warning (vàng #FFC107) --- */
-.btn-confirm-warning {
-    background-color: #FFC107;
-    color: #3D3535;
-}
-
-.btn-confirm-warning:hover {
-    background-color: #FFD54F;
-}
-
-.btn-confirm-warning:active {
-    background-color: #E5AC06;
-}
-
-/* --- Confirm type: Danger (đỏ #FF4B4B) --- */
-.btn-confirm-danger {
-    background-color: #FF4B4B;
-    color: #FFFFFF;
-}
-
-.btn-confirm-danger:hover {
-    background-color: #FF6B6B;
-}
-
-.btn-confirm-danger:active {
-    background-color: #CC3333;
-}
-
-/* --- Confirm type: Info (xanh #2D7BFF) --- */
-.btn-confirm-info {
-    background-color: #2D7BFF;
-    color: #FFFFFF;
-}
-
-.btn-confirm-info:hover {
-    background-color: #5B9AFF;
-}
-
-.btn-confirm-info:active {
-    background-color: #1A5FCC;
-}
+/* --- Confirm type: Info (xanh) --- */
+.btn-confirm-info { background-color: var(--color-accent-blue); color: var(--color-mystic-black); }
+.btn-confirm-info:hover { background-color: #6BC0F6; }
+.btn-confirm-info:active { background-color: #3886B8; }

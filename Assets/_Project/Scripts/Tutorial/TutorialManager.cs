@@ -497,53 +497,48 @@ public class TutorialManager : MonoBehaviour
         // Container
         subtitleContainer = new VisualElement();
         subtitleContainer.style.position = Position.Absolute;
-        subtitleContainer.style.bottom = 40;
+        subtitleContainer.style.bottom = 120;
         subtitleContainer.style.alignSelf = Align.Center;
-        subtitleContainer.style.width = 440;
-        subtitleContainer.style.backgroundColor = new Color(0.93f, 0.93f, 0.93f, 1f); // #EFEFEF
-        subtitleContainer.style.borderTopWidth = 3f;
-        subtitleContainer.style.borderBottomWidth = 3f;
-        subtitleContainer.style.borderLeftWidth = 3f;
-        subtitleContainer.style.borderRightWidth = 3f;
+        subtitleContainer.style.width = 500;
+        subtitleContainer.style.backgroundColor = new Color(0.25f, 0.29f, 0.38f, 0.95f); // Dark blue-grey background
+        subtitleContainer.style.borderTopWidth = 2f;
+        subtitleContainer.style.borderBottomWidth = 2f;
+        subtitleContainer.style.borderLeftWidth = 2f;
+        subtitleContainer.style.borderRightWidth = 2f;
 
-        Color subtitleBorderColor = new Color(0.24f, 0.21f, 0.21f, 1f);
+        Color subtitleBorderColor = new Color(0.4f, 0.45f, 0.55f, 1f);
         subtitleContainer.style.borderTopColor = subtitleBorderColor;
         subtitleContainer.style.borderBottomColor = subtitleBorderColor;
         subtitleContainer.style.borderLeftColor = subtitleBorderColor;
         subtitleContainer.style.borderRightColor = subtitleBorderColor;
 
-        subtitleContainer.style.borderTopLeftRadius = 16f;
-        subtitleContainer.style.borderTopRightRadius = 16f;
-        subtitleContainer.style.borderBottomLeftRadius = 16f;
-        subtitleContainer.style.borderBottomRightRadius = 16f;
-        subtitleContainer.style.paddingLeft = 16;
-        subtitleContainer.style.paddingRight = 16;
-        subtitleContainer.style.paddingTop = 12;
-        subtitleContainer.style.paddingBottom = 12;
-        
-        // Solid black retro shadow
-        subtitleContainer.style.marginRight = 6;
-        subtitleContainer.style.marginBottom = 6;
+        subtitleContainer.style.borderTopLeftRadius = 20f;
+        subtitleContainer.style.borderTopRightRadius = 20f;
+        subtitleContainer.style.borderBottomLeftRadius = 20f;
+        subtitleContainer.style.borderBottomRightRadius = 20f;
+        subtitleContainer.style.paddingLeft = 24;
+        subtitleContainer.style.paddingRight = 24;
+        subtitleContainer.style.paddingTop = 16;
+        subtitleContainer.style.paddingBottom = 16;
         
         // Hide by default
         subtitleContainer.style.display = DisplayStyle.None;
 
         // Speaker Name
         subtitleSpeaker = new Label("NPC Tân Thủ");
-        subtitleSpeaker.style.fontSize = 11;
+        subtitleSpeaker.style.fontSize = 13;
         subtitleSpeaker.style.unityFontStyleAndWeight = FontStyle.Bold;
-        subtitleSpeaker.style.color = new Color(0.36f, 0.26f, 0.95f, 1f); // #5B42F3 (Hero color)
-        subtitleSpeaker.style.marginBottom = 4;
-        subtitleSpeaker.style.paddingLeft = 0;
-        subtitleSpeaker.style.paddingRight = 0;
+        subtitleSpeaker.style.color = new Color(1f, 0.85f, 0.4f, 1f); // Accent Yellow
+        subtitleSpeaker.style.marginBottom = 6;
+        subtitleSpeaker.style.unityTextAlign = TextAnchor.MiddleCenter;
 
         // Dialogue Content
         subtitleLabel = new Label("Lời thoại của NPC...");
-        subtitleLabel.style.fontSize = 13;
-        subtitleLabel.style.color = new Color(0.24f, 0.21f, 0.21f, 1f); // #3D3535
+        subtitleLabel.style.fontSize = 15;
+        subtitleLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+        subtitleLabel.style.color = Color.white; 
         subtitleLabel.style.whiteSpace = WhiteSpace.Normal;
-        subtitleLabel.style.paddingLeft = 0;
-        subtitleLabel.style.paddingRight = 0;
+        subtitleLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
 
         // Assemble
         subtitleContainer.Add(subtitleSpeaker);
@@ -1316,7 +1311,7 @@ public class TutorialManager : MonoBehaviour
                 break;
 
             case TutorialStep.PlantSeed:
-                if (tile.InteractPlant("carrot"))
+                if (tile.InteractPlant("carrot_seed_01"))
                 {
                     Debug.Log("[Tutorial] Seed planted successfully.");
                 }

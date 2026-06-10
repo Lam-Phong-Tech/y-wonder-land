@@ -3,9 +3,10 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 /// <summary>
-/// Controller for the Event / Exchange Popup.
-/// Tab 1: Exchange — trade event items for rare rewards.
-/// Tab 2: Bundle — limited-time UPOS deals.
+/// Controller for the Event / Rewards Hub Popup.
+/// Tab 0: Exchange — trade event items for rare rewards.
+/// Tab 1: Bundle — limited-time UPOS deals.
+/// Tab 2: Attendance — daily login rewards.
 /// </summary>
 public class EventPopupController : MonoBehaviour
 {
@@ -20,8 +21,11 @@ public class EventPopupController : MonoBehaviour
     // Tabs
     private Button tabExchange;
     private Button tabBundle;
+    private Button tabAttendance;
+    
     private VisualElement panelExchange;
     private VisualElement panelBundle;
+    private VisualElement panelAttendance;
 
     // Grids
     private VisualElement exchangeGrid;
@@ -32,8 +36,7 @@ public class EventPopupController : MonoBehaviour
     private Label lblMatOre;
     private Label lblMatTicket;
 
-    // ── Mock Data ──
-
+    // ── Mock Data (Exchange) ──
     private int matFish = 5;
     private int matOre = 3;
     private int matTicket = 1;
@@ -57,6 +60,7 @@ public class EventPopupController : MonoBehaviour
         new ExchangeItem { icon = "👒", name = "Nón Mùa Hè", costText = "🐟 x2 + 💎 x1", costType = "fish", costAmount = 2 },
     };
 
+    // ── Mock Data (Bundle) ──
     private struct BundleItem
     {
         public string icon;
@@ -73,6 +77,23 @@ public class EventPopupController : MonoBehaviour
         new BundleItem { icon = "💎", name = "Gói Khởi Đầu", desc = "500 UPOS + 3 Vé sự kiện", oldPrice = 100000, newPrice = 49000, tag = "-50%", soldOut = false },
         new BundleItem { icon = "🎁", name = "Gói Mùa Hè", desc = "1000 UPOS + 1 Pet + 5 Hạt giống V2", oldPrice = 200000, newPrice = 99000, tag = "HOT", soldOut = false },
         new BundleItem { icon = "👑", name = "Gói VIP 30 ngày", desc = "VIP 30 ngày + 2000 UPOS", oldPrice = 500000, newPrice = 299000, tag = "-40%", soldOut = true },
+    };
+
+    // ── Mock Data (Attendance) ──
+    private Button btnClaimAttendance;
+    private List<VisualElement> daySlots = new List<VisualElement>();
+    private int claimedDays = 2; // Days 1 & 2 claimed initially
+    private bool hasClaimedToday = false; // Player can claim for Day 3 today
+
+    private Dictionary<int, string> dayRewards = new Dictionary<int, string>
+    {
+        { 1, "🪙 500 Cá vàng" },
+        { 2, "🥕 5 Hạt giống Cà rốt" },
+        { 3, "🪙 1000 Cá vàng" },
+        { 4, "🧪 2 Phân bón siêu tốc" },
+        { 5, "🍎 5 Quả Táo" },
+        { 6, "💎 2 Kim cương" },
+        { 7, "🐢 1 Rùa con quý hiếm!" }
     };
 
     // ── Lifecycle ──
@@ -97,17 +118,35 @@ public class EventPopupController : MonoBehaviour
         btnClose = root.Q<Button>("BtnCloseEvent");
         lblTimer = root.Q<Label>("LblEventTimer");
 
+        // Tabs
         tabExchange = root.Q<Button>("TabExchange");
         tabBundle = root.Q<Button>("TabBundle");
+        tabAttendance = root.Q<Button>("TabAttendance");
+        
         panelExchange = root.Q<VisualElement>("PanelExchange");
         panelBundle = root.Q<VisualElement>("PanelBundle");
+        panelAttendance = root.Q<VisualElement>("PanelAttendance");
 
+        // Exchange/Bundle Grids
         exchangeGrid = root.Q<VisualElement>("ExchangeGrid");
         bundleGrid = root.Q<VisualElement>("BundleGrid");
 
         lblMatFish = root.Q<Label>("LblMatFish");
         lblMatOre = root.Q<Label>("LblMatOre");
         lblMatTicket = root.Q<Label>("LblMatTicket");
+
+        // Attendance
+        btnClaimAttendance = root.Q<Button>("BtnClaimAttendance");
+        
+        daySlots.Clear();
+        for (int i = 1; i <= 7; i++)
+        {
+            var slot = root.Q<VisualElement>($"DaySlot{i}");
+            if (slot != null)
+            {
+                daySlots.Add(slot);
+            }
+        }
     }
 
     private void RegisterCallbacks()
@@ -120,21 +159,30 @@ public class EventPopupController : MonoBehaviour
 
         tabExchange?.RegisterCallback<ClickEvent>(evt => SwitchTab(0));
         tabBundle?.RegisterCallback<ClickEvent>(evt => SwitchTab(1));
+        tabAttendance?.RegisterCallback<ClickEvent>(evt => SwitchTab(2));
+
+        btnClaimAttendance?.RegisterCallback<ClickEvent>(evt => ClaimDailyReward());
     }
 
     // ── Public API ──
 
     public void Show()
     {
+        ShowTab(0);
+    }
+
+    public void ShowTab(int tabIndex)
+    {
         if (overlay == null) return;
 
-        SwitchTab(0);
+        SwitchTab(tabIndex);
         UpdateMaterials();
         PopulateExchangeGrid();
         PopulateBundleGrid();
+        UpdateAttendanceGridUI();
 
         overlay.style.display = DisplayStyle.Flex;
-        Debug.Log("[Event] Opened Event popup");
+        Debug.Log("[Event] Opened Event Hub popup on tab " + tabIndex);
     }
 
     public void Hide()
@@ -142,7 +190,7 @@ public class EventPopupController : MonoBehaviour
         if (overlay != null)
         {
             overlay.style.display = DisplayStyle.None;
-            Debug.Log("[Event] Closed Event popup");
+            Debug.Log("[Event] Closed Event Hub popup");
         }
     }
 
@@ -157,14 +205,18 @@ public class EventPopupController : MonoBehaviour
     {
         tabExchange?.RemoveFromClassList("event-tab--active");
         tabBundle?.RemoveFromClassList("event-tab--active");
+        tabAttendance?.RemoveFromClassList("event-tab--active");
 
         if (tabIndex == 0) tabExchange?.AddToClassList("event-tab--active");
-        else tabBundle?.AddToClassList("event-tab--active");
+        else if (tabIndex == 1) tabBundle?.AddToClassList("event-tab--active");
+        else if (tabIndex == 2) tabAttendance?.AddToClassList("event-tab--active");
 
         if (panelExchange != null)
             panelExchange.style.display = tabIndex == 0 ? DisplayStyle.Flex : DisplayStyle.None;
         if (panelBundle != null)
             panelBundle.style.display = tabIndex == 1 ? DisplayStyle.Flex : DisplayStyle.None;
+        if (panelAttendance != null)
+            panelAttendance.style.display = tabIndex == 2 ? DisplayStyle.Flex : DisplayStyle.None;
     }
 
     // ── Exchange Grid ──
@@ -314,6 +366,57 @@ public class EventPopupController : MonoBehaviour
 
             bundleGrid.Add(card);
         }
+    }
+
+    // ── Attendance Grid ──
+
+    private void UpdateAttendanceGridUI()
+    {
+        for (int i = 0; i < daySlots.Count; i++)
+        {
+            var slot = daySlots[i];
+            int dayNumber = i + 1;
+
+            slot.RemoveFromClassList("claimed");
+            slot.RemoveFromClassList("current");
+
+            if (dayNumber <= claimedDays)
+            {
+                slot.AddToClassList("claimed");
+            }
+            else if (dayNumber == claimedDays + 1 && !hasClaimedToday)
+            {
+                slot.AddToClassList("current");
+            }
+        }
+
+        if (btnClaimAttendance != null)
+        {
+            if (hasClaimedToday)
+            {
+                btnClaimAttendance.text = "Đã điểm danh";
+                btnClaimAttendance.SetEnabled(false);
+            }
+            else
+            {
+                int nextDay = claimedDays + 1;
+                btnClaimAttendance.text = nextDay <= 7 ? $"Điểm danh (Ngày {nextDay})" : "Đã hoàn thành!";
+                btnClaimAttendance.SetEnabled(nextDay <= 7);
+            }
+        }
+    }
+
+    private void ClaimDailyReward()
+    {
+        if (hasClaimedToday || claimedDays >= 7) return;
+
+        claimedDays++;
+        hasClaimedToday = true;
+
+        string reward = dayRewards.ContainsKey(claimedDays) ? dayRewards[claimedDays] : "Quà ngẫu nhiên";
+        Debug.Log($"[Event] Điểm danh Ngày {claimedDays} thành công! Phần thưởng: {reward}");
+
+        UpdateAttendanceGridUI();
     }
 
     // ── Helpers ──

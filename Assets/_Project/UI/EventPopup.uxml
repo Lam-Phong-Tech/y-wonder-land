@@ -6,7 +6,7 @@
     <!-- Overlay -->
     <ui:VisualElement name="EventOverlay" class="event-overlay">
 
-        <!-- Wrapper (Lesson #33) -->
+        <!-- Wrapper -->
         <ui:VisualElement class="event-wrapper">
 
             <!-- Panel -->
@@ -20,13 +20,14 @@
                         <ui:Label name="LblEventTimer" text="6d 12h" class="event-pill-value" />
                     </ui:VisualElement>
 
-                    <ui:Label text="🎁 SỰ KIỆN MÙA HÈ" class="event-header-title" />
+                    <ui:Label text="🎁 SỰ KIỆN &amp; QUÀ TẶNG" class="event-header-title" />
                 </ui:VisualElement>
 
                 <!-- Tab Bar -->
                 <ui:VisualElement class="event-tab-bar">
                     <ui:Button name="TabExchange" text="🔄 Đổi quà" class="event-tab event-tab--active" />
-                    <ui:Button name="TabBundle" text="💎 Gói ưu đãi" class="event-tab" />
+                    <ui:Button name="TabBundle" text="💎 Ưu đãi" class="event-tab" />
+                    <ui:Button name="TabAttendance" text="📅 Điểm danh" class="event-tab" />
                 </ui:VisualElement>
 
                 <!-- TAB 1: EXCHANGE -->
@@ -75,9 +76,77 @@
 
                 </ui:VisualElement>
 
+                <!-- TAB 3: ATTENDANCE -->
+                <ui:VisualElement name="PanelAttendance" class="event-body event-attendance-panel">
+                    
+                    <!-- Description -->
+                    <ui:Label name="DescriptionLabel" class="attendance-desc" text="Điểm danh nhận quà hấp dẫn mỗi ngày!" />
+
+                    <!-- 7-Day Attendance Grid -->
+                    <ui:VisualElement name="AttendanceGrid" class="attendance-grid">
+                        
+                        <ui:VisualElement name="DaySlot1" class="day-slot">
+                            <ui:Label class="day-slot-title" text="Ngày 1" />
+                            <ui:Label class="day-slot-emoji" text="🪙" />
+                            <ui:Label class="day-slot-amount" text="x500" />
+                            <ui:VisualElement class="claimed-overlay"><ui:Label class="claimed-check" text="✔️" /></ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <ui:VisualElement name="DaySlot2" class="day-slot">
+                            <ui:Label class="day-slot-title" text="Ngày 2" />
+                            <ui:Label class="day-slot-emoji" text="🥕" />
+                            <ui:Label class="day-slot-amount" text="x5" />
+                            <ui:VisualElement class="claimed-overlay"><ui:Label class="claimed-check" text="✔️" /></ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <ui:VisualElement name="DaySlot3" class="day-slot">
+                            <ui:Label class="day-slot-title" text="Ngày 3" />
+                            <ui:Label class="day-slot-emoji" text="🪙" />
+                            <ui:Label class="day-slot-amount" text="x1000" />
+                            <ui:VisualElement class="claimed-overlay"><ui:Label class="claimed-check" text="✔️" /></ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <ui:VisualElement name="DaySlot4" class="day-slot">
+                            <ui:Label class="day-slot-title" text="Ngày 4" />
+                            <ui:Label class="day-slot-emoji" text="🧪" />
+                            <ui:Label class="day-slot-amount" text="x2" />
+                            <ui:VisualElement class="claimed-overlay"><ui:Label class="claimed-check" text="✔️" /></ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <ui:VisualElement name="DaySlot5" class="day-slot">
+                            <ui:Label class="day-slot-title" text="Ngày 5" />
+                            <ui:Label class="day-slot-emoji" text="🍎" />
+                            <ui:Label class="day-slot-amount" text="x5" />
+                            <ui:VisualElement class="claimed-overlay"><ui:Label class="claimed-check" text="✔️" /></ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <ui:VisualElement name="DaySlot6" class="day-slot">
+                            <ui:Label class="day-slot-title" text="Ngày 6" />
+                            <ui:Label class="day-slot-emoji" text="💎" />
+                            <ui:Label class="day-slot-amount" text="x2" />
+                            <ui:VisualElement class="claimed-overlay"><ui:Label class="claimed-check" text="✔️" /></ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <ui:VisualElement name="DaySlot7" class="day-slot day-slot-special">
+                            <ui:Label class="day-slot-title title-special" text="Ngày 7" />
+                            <ui:Label class="day-slot-subtitle" text="Quà khủng!" />
+                            <ui:Label class="day-slot-emoji emoji-special" text="🐢" />
+                            <ui:Label class="day-slot-amount amount-special" text="x1" />
+                            <ui:VisualElement class="claimed-overlay"><ui:Label class="claimed-check" text="✔️" /></ui:VisualElement>
+                        </ui:VisualElement>
+
+                    </ui:VisualElement>
+
+                    <!-- Bottom Button Container -->
+                    <ui:VisualElement class="attendance-footer">
+                        <ui:Button name="BtnClaimAttendance" class="claim-attendance-btn" text="Điểm danh" />
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+
             </ui:VisualElement>
 
-            <!-- Close Button (Lesson #33 + #34) -->
+            <!-- Close Button -->
             <ui:VisualElement class="event-close-shadow">
                 <ui:Button name="BtnCloseEvent" text="✕" class="event-close-btn" />
             </ui:VisualElement>

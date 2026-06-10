@@ -50,7 +50,7 @@
                 </ui:VisualElement>
 
                 <!-- Event -->
-                <ui:VisualElement class="sidebar-btn-shadow">
+                <ui:VisualElement class="sidebar-btn-shadow" style="display: none;">
                     <ui:Button name="BtnEvent" class="sidebar-btn sidebar-btn-event">
                         <ui:Label text="🎁" class="sidebar-btn-icon sidebar-btn-icon-white" />
                     </ui:Button>
@@ -79,36 +79,29 @@
                 </ui:VisualElement>
 
                 <!-- Map (Temporary) -->
-                <ui:VisualElement class="sidebar-btn-shadow">
+                <ui:VisualElement class="sidebar-btn-shadow" style="display: none;">
                     <ui:Button name="BtnMap" class="sidebar-btn sidebar-btn-map">
                         <ui:Label text="🗺️" class="sidebar-btn-map-icon" />
                         <ui:Label text="Map" class="sidebar-btn-map-text" />
                     </ui:Button>
                 </ui:VisualElement>
 
-                <!-- Piggy Bank (Temporary) -->
-                <ui:VisualElement class="sidebar-btn-shadow">
-                    <ui:Button name="BtnPiggy" class="sidebar-btn sidebar-btn-piggy">
-                        <ui:Label text="🐷" class="sidebar-btn-piggy-icon" />
-                    </ui:Button>
-                </ui:VisualElement>
-
                 <!-- Build Mode -->
-                <ui:VisualElement class="sidebar-btn-shadow">
+                <ui:VisualElement class="sidebar-btn-shadow" style="display: none;">
                     <ui:Button name="BtnBuild" class="sidebar-btn sidebar-btn-build">
                         <ui:Label text="🔨" class="sidebar-btn-icon sidebar-btn-icon-white" />
                     </ui:Button>
                 </ui:VisualElement>
 
                 <!-- Fishing (Temporary) -->
-                <ui:VisualElement class="sidebar-btn-shadow">
+                <ui:VisualElement class="sidebar-btn-shadow" style="display: none;">
                     <ui:Button name="BtnFishing" class="sidebar-btn sidebar-btn-fishing">
                         <ui:Label text="🎣" class="sidebar-btn-icon sidebar-btn-icon-white" />
                     </ui:Button>
                 </ui:VisualElement>
 
                 <!-- Workshop (Temporary) -->
-                <ui:VisualElement class="sidebar-btn-shadow">
+                <ui:VisualElement class="sidebar-btn-shadow" style="display: none;">
                     <ui:Button name="BtnWorkshop" class="sidebar-btn sidebar-btn-workshop">
                         <ui:Label text="🔨" class="sidebar-btn-icon sidebar-btn-icon-white" />
                     </ui:Button>
@@ -122,6 +115,13 @@
         <ui:VisualElement class="hud-top-right">
             <!-- Row 1: Currency + Settings -->
             <ui:VisualElement class="hud-top-right-row">
+                <!-- Piggy Bank (Moved here) -->
+                <ui:VisualElement class="settings-btn-shadow" style="margin-right: 10px;">
+                    <ui:Button name="BtnPiggy" class="settings-btn">
+                        <ui:Label text="🐷" class="settings-btn-icon" style="font-size: 26px;" />
+                    </ui:Button>
+                </ui:VisualElement>
+
                 <!-- Currency (single) -->
                 <ui:VisualElement name="CurrencyDisplay" class="currency-item">
                     <ui:VisualElement class="currency-icon">

@@ -16,7 +16,7 @@ public class GameHUDController : MonoBehaviour
     [SerializeField] private FriendsPopupController friendsPopup;
     [SerializeField] private MailboxPopupController mailboxPopup;
     [SerializeField] private ProfilePopupController profilePopup;
-    [SerializeField] private AttendancePopupController attendancePopup;
+
     [SerializeField] private QuestPopupController questPopup;
     [SerializeField] private ShopPopupController shopPopup;
     [SerializeField] private MapPopupController mapPopup;
@@ -79,9 +79,7 @@ public class GameHUDController : MonoBehaviour
         if (inventoryPopup == null) inventoryPopup = FindFirstObjectByType<InventoryPopupController>(FindObjectsInactive.Include);
         if (leaderboardPopup == null) leaderboardPopup = FindFirstObjectByType<LeaderboardPopupController>(FindObjectsInactive.Include);
         if (friendsPopup == null) friendsPopup = FindFirstObjectByType<FriendsPopupController>(FindObjectsInactive.Include);
-        if (mailboxPopup == null) mailboxPopup = FindFirstObjectByType<MailboxPopupController>(FindObjectsInactive.Include);
-        if (profilePopup == null) profilePopup = FindFirstObjectByType<ProfilePopupController>(FindObjectsInactive.Include);
-        if (attendancePopup == null) attendancePopup = FindFirstObjectByType<AttendancePopupController>(FindObjectsInactive.Include);
+        if (mailboxPopup == null) mailboxPopup = FindFirstObjectByType<MailboxPopupController>(FindObjectsInactive.Include);        if (profilePopup == null) profilePopup = FindFirstObjectByType<ProfilePopupController>(FindObjectsInactive.Include);
         if (questPopup == null) questPopup = FindFirstObjectByType<QuestPopupController>(FindObjectsInactive.Include);
         if (mapPopup == null) mapPopup = FindFirstObjectByType<MapPopupController>(FindObjectsInactive.Include);
         if (piggyBankPopup == null) piggyBankPopup = FindFirstObjectByType<PiggyBankPopupController>(FindObjectsInactive.Include);
@@ -193,10 +191,10 @@ public class GameHUDController : MonoBehaviour
 
         btnCalendar?.RegisterCallback<ClickEvent>(evt =>
         {
-            if (attendancePopup != null)
-                attendancePopup.Show();
+            if (eventPopup != null)
+                eventPopup.ShowTab(2);
             else
-                Debug.Log("[GameHUD] Daily Attendance clicked (no popup assigned)");
+                Debug.Log("[GameHUD] Daily Attendance clicked (no event popup assigned)");
         });
 
         btnMail?.RegisterCallback<ClickEvent>(evt =>

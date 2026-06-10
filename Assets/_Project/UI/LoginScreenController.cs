@@ -129,6 +129,8 @@ public class LoginScreenController : MonoBehaviour
         // Input focus styling
         RegisterInputFocusEvents(usernameField, "UsernameGroup");
         RegisterInputFocusEvents(passwordField, "PasswordGroup");
+        RegisterInputFocusEvents(regUsernameField, "RegUsernameGroup");
+        RegisterInputFocusEvents(regEmailField, "RegEmailGroup");
         RegisterInputFocusEvents(regPasswordField, "RegPasswordGroup");
         RegisterInputFocusEvents(regConfirmField, "RegConfirmGroup");
     }

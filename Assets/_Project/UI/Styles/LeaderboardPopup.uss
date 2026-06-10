@@ -1,330 +1,199 @@
 /* ========================================================
    Leaderboard Popup — The Tangible Playground
-   ========================================================
-   Theme: Purple main panel (#5B42F3), Yellow-orange tabs,
-   Zebra stripe ranking lists, Floating gold trophy cup.
    ======================================================== */
 
 /* ── Overlay ── */
 .leaderboard-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.4);
-    align-items: center;
-    justify-content: center;
-    display: none;
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(21, 26, 39, 0.8);
+    align-items: center; justify-content: center; display: none; z-index: 100;
 }
 
-/* ── Panel Shadow (Retro Offset) ── */
+/* ── Panel Shadow ── */
 .leaderboard-panel-shadow {
-    background-color: transparent;
-    border-radius: 22px;
-    padding-right: 6px;
-    padding-bottom: 6px;
-    position: relative;
+    background-color: transparent; position: relative;
 }
 
 /* ── Panel (Hero Surface) ── */
 .leaderboard-panel {
-    width: 740px;
-    height: 460px;
-    background-color: #5B42F3;
-    border-radius: 22px;
-    border-width: 3px;
-    border-color: #3D3535;
-    padding: 20px 24px 20px 24px;
-    position: relative;
+    width: 900px; height: 600px;
+    background-color: var(--color-primary-navy);
+    border-radius: var(--radius-panel);
+    border-width: 1px; border-color: rgba(255, 255, 255, 0.1);
+    padding: 32px; flex-direction: column; position: relative;
 }
 
-/* ── Floating 3D Trophy (hidden — waiting for professional art) ── */
-.leaderboard-trophy-img {
-    display: none;
-}
+/* ── Floating 3D Trophy (hidden) ── */
+.leaderboard-trophy-img { display: none; }
 
 /* ── Header Title (Capsule) ── */
 .leaderboard-title-container {
-    align-items: center;
-    margin-bottom: 12px;
-    margin-top: 0;
+    align-items: center; margin-bottom: 24px; margin-top: 0;
 }
 
 .leaderboard-title-box {
-    background-color: #4F59E3;
-    border-radius: 18px;
-    border-width: 3px;
-    border-color: #3D3535;
-    padding: 4px 30px;
+    background-color: rgba(0, 0, 0, 0.4);
+    border-radius: var(--radius-button);
+    border-width: 1px; border-color: rgba(255, 255, 255, 0.1);
+    padding: 8px 32px;
 }
 
 .leaderboard-title-text {
-    font-size: 16px;
-    -unity-font-style: bold;
-    color: #FFFFFF;
-    letter-spacing: 1px;
+    font-size: 20px; -unity-font-style: bold;
+    color: var(--color-accent-yellow); letter-spacing: 2px;
 }
+
+/* ── Close Button (Sync with others) ── */
+.leaderboard-close-shadow {
+    position: absolute; right: 12px; top: 12px; z-index: 50;
+}
+
+.leaderboard-close-btn {
+    width: 40px; height: 40px; border-radius: var(--radius-button);
+    background-color: rgba(255, 255, 255, 0.1);
+    border-width: 0; padding: 0; align-items: center; justify-content: center;
+    font-size: 16px; -unity-font-style: bold; color: var(--color-bright-grey);
+    transition-property: scale, background-color, color; transition-duration: 0.1s;
+}
+
+.leaderboard-close-btn:hover { background-color: rgba(255, 75, 75, 0.8); color: #FFF; }
+.leaderboard-close-btn:active { scale: 0.95; }
 
 /* ── Category Tabs (Horizontal Row) ── */
 .leaderboard-tabs {
-    flex-direction: row;
-    justify-content: space-between;
-    margin-bottom: 12px;
+    flex-direction: row; justify-content: space-between; margin-bottom: 24px;
 }
 
 .leaderboard-tab {
-    flex-grow: 1;
-    margin: 0 4px;
-    padding: 6px 2px;
-    border-radius: 12px;
-    border-width: 3px;
-    border-color: #3D3535;
-    background-color: #FDBE5B;
-    font-size: 11px;
-    -unity-font-style: bold;
-    color: #3D3535;
+    flex-grow: 1; margin: 0 6px; padding: 12px 0;
+    border-radius: var(--radius-tab); border-width: 1px; border-color: transparent;
+    background-color: rgba(255, 255, 255, 0.05);
+    font-size: 14px; -unity-font-style: bold; color: var(--color-bright-grey);
     -unity-text-align: middle-center;
-    transition-property: translate, background-color;
-    transition-duration: 0.08s;
+    transition-property: scale, background-color, color; transition-duration: 0.1s;
 }
 
 .leaderboard-tab:hover {
-    background-color: #FECF82;
+    background-color: rgba(255, 255, 255, 0.1); color: var(--color-text-white);
 }
 
-.leaderboard-tab:active {
-    translate: 1px 1px;
-}
+.leaderboard-tab:active { scale: 0.95; }
 
 .leaderboard-tab--active {
-    background-color: #8A7D9D;
-    color: #3D3535;
+    background-color: var(--color-primary-navy);
+    border-color: var(--color-accent-yellow);
+    color: var(--color-accent-yellow);
 }
 
 .leaderboard-tab--active:hover {
-    background-color: #9C8FAB;
+    background-color: var(--color-primary-navy);
 }
 
 /* ── Content Table Area ── */
 .leaderboard-content {
-    flex-grow: 1;
-    background-color: #FFFFFF;
-    border-radius: 16px;
-    border-width: 3px;
-    border-color: #3D3535;
-    padding: 10px 14px 14px 14px;
-    overflow: hidden;
+    flex-grow: 1; background-color: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-panel); border-width: 1px; border-color: rgba(255, 255, 255, 0.05);
+    padding: 16px; overflow: hidden;
 }
 
 /* ── Table Headers ── */
 .leaderboard-table-header {
-    flex-direction: row;
-    border-bottom-width: 2px;
-    border-bottom-color: #DDD5C8;
-    padding-bottom: 6px;
-    margin-bottom: 6px;
-    align-items: center;
+    flex-direction: row; border-bottom-width: 1px; border-bottom-color: rgba(255, 255, 255, 0.1);
+    padding-bottom: 12px; margin-bottom: 12px; align-items: center;
 }
 
 .header-col {
-    font-size: 11px;
-    -unity-font-style: bold;
-    color: #8A7E6E;
+    font-size: 13px; -unity-font-style: bold; color: var(--color-bright-grey);
 }
 
-.col-rank {
-    width: 80px;
-    -unity-text-align: middle-center;
-}
-
-.col-player {
-    flex-grow: 1;
-    -unity-text-align: middle-left;
-    padding-left: 16px;
-}
-
-.col-value {
-    width: 120px;
-    -unity-text-align: middle-center;
-}
-
-.col-guild {
-    width: 150px;
-    -unity-text-align: middle-center;
-}
+.col-rank { width: 80px; -unity-text-align: middle-center; }
+.col-player { flex-grow: 1; -unity-text-align: middle-left; padding-left: 20px; }
+.col-value { width: 140px; -unity-text-align: middle-center; }
+.col-guild { width: 160px; -unity-text-align: middle-center; }
 
 /* ── Table Scroll View ── */
-.leaderboard-scroll {
-    flex-grow: 1;
-}
-
-.leaderboard-list {
-    flex-direction: column;
-}
+.leaderboard-scroll { flex-grow: 1; }
+.leaderboard-list { flex-direction: column; padding-right: 8px; }
 
 /* ── Table Rows ── */
 .leaderboard-row {
-    flex-direction: row;
-    height: 44px;
-    align-items: center;
-    border-radius: 8px;
-    margin-bottom: 4px;
-    padding: 0 4px;
+    flex-direction: row; height: 56px; align-items: center;
+    border-radius: 12px; margin-bottom: 6px; padding: 0 4px;
 }
 
 /* Row Zebra Striping & Ranks colors */
 .row-rank-1 {
-    background-color: #FCECD6; /* Gold rank cream background */
+    background-color: rgba(255, 215, 0, 0.15); border-width: 1px; border-color: rgba(255, 215, 0, 0.4);
 }
-
 .row-rank-2 {
-    background-color: #E6F5FF; /* Silver rank blue background */
+    background-color: rgba(192, 192, 192, 0.15); border-width: 1px; border-color: rgba(192, 192, 192, 0.3);
 }
-
 .row-rank-3 {
-    background-color: #FFEBEB; /* Bronze rank pink background */
+    background-color: rgba(205, 127, 50, 0.15); border-width: 1px; border-color: rgba(205, 127, 50, 0.3);
 }
-
 .row-rank-even {
-    background-color: #F8F6F2;
+    background-color: rgba(255, 255, 255, 0.05); border-width: 1px; border-color: transparent;
 }
-
 .row-rank-odd {
-    background-color: #FFFFFF;
+    background-color: transparent; border-width: 1px; border-color: transparent;
 }
 
 /* Rank column icon */
 .rank-medal {
-    font-size: 20px;
-    margin: 0;
-    padding: 0;
-    -unity-text-align: middle-center;
+    font-size: 24px; margin: 0; padding: 0; -unity-text-align: middle-center;
 }
 
 /* Rank column diamond badge (Rank 4+) */
 .rank-diamond-container {
-    width: 100%;
-    align-items: center;
-    justify-content: center;
+    width: 100%; align-items: center; justify-content: center;
 }
 
 .rank-diamond {
-    width: 20px;
-    height: 20px;
-    border-radius: 4px;
-    border-width: 2px;
-    border-color: #3D3535;
-    background-color: #FFF5E8;
-    align-items: center;
-    justify-content: center;
-    rotate: 45deg;
+    width: 24px; height: 24px; border-radius: 6px;
+    border-width: 1px; border-color: rgba(255, 255, 255, 0.2);
+    background-color: var(--color-mystic-black);
+    align-items: center; justify-content: center; rotate: 45deg;
 }
 
 .rank-diamond-text {
-    font-size: 10px;
-    -unity-font-style: bold;
-    color: #3D3535;
-    rotate: -45deg;
-    margin: 0;
-    padding: 0;
-    -unity-text-align: middle-center;
+    font-size: 11px; -unity-font-style: bold; color: var(--color-text-white);
+    rotate: -45deg; margin: 0; padding: 0; -unity-text-align: middle-center;
 }
 
 /* Player Column Text */
 .row-player-text {
-    font-size: 12px;
-    -unity-font-style: bold;
-    color: #3D3535;
-    -unity-text-align: middle-left;
-    padding-left: 16px;
+    font-size: 14px; -unity-font-style: bold; color: var(--color-text-white);
+    -unity-text-align: middle-left; padding-left: 20px;
 }
 
 /* Value Column Text */
 .row-value-text {
-    font-size: 12px;
-    -unity-font-style: bold;
-    color: #4F59E3;
+    font-size: 14px; -unity-font-style: bold; color: var(--color-accent-yellow);
     -unity-text-align: middle-center;
 }
 
 /* Guild Column Text */
 .row-guild-text {
-    font-size: 11px;
-    color: #8A7E6E;
+    font-size: 13px; color: var(--color-bright-grey);
     -unity-text-align: middle-center;
-}
-
-/* ── Close Button Corner ── */
-.leaderboard-close-shadow {
-    position: absolute;
-    right: -8px;
-    top: -8px;
-    background-color: transparent;
-    border-radius: 10px;
-    padding-right: 2px;
-    padding-bottom: 2px;
-    z-index: 10;
-}
-
-.leaderboard-close-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    background-color: #FF4B4B;
-    border-width: 3px;
-    border-color: #3D3535;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    font-size: 18px;
-    -unity-font-style: bold;
-    color: #FFFFFF;
-    -unity-text-align: middle-center;
-    transition-property: translate, background-color;
-    transition-duration: 0.08s;
-}
-
-.leaderboard-close-btn:hover {
-    background-color: #FF6B6B;
-}
-
-.leaderboard-close-btn:active {
-    translate: 2px 2px;
-    background-color: #CC3333;
 }
 
 /* ── My Rank Floating Card ── */
 .leaderboard-my-rank-shadow {
-    position: absolute;
-    right: 10px;
-    bottom: 10px;
-    background-color: rgba(30, 30, 60, 0.4);
-    border-radius: 12px;
-    padding-right: 3px;
-    padding-bottom: 3px;
-    z-index: 8;
+    position: absolute; right: 24px; bottom: 24px; z-index: 60;
 }
 
 .leaderboard-my-rank-card {
-    background-color: #FFFFFF;
-    border-width: 3px;
-    border-color: #3D3535;
-    border-radius: 12px;
-    padding: 6px 14px;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    background-color: var(--color-mystic-black);
+    border-width: 1px; border-color: var(--color-accent-yellow);
+    border-radius: var(--radius-panel); padding: 12px 24px;
+    flex-direction: column; align-items: center; justify-content: center;
 }
 
 .my-rank-label {
-    font-size: 10px;
-    color: #8A7E6E;
-    -unity-font-style: bold;
+    font-size: 12px; color: var(--color-bright-grey); -unity-font-style: bold; margin-bottom: 4px;
 }
 
 .my-rank-value {
-    font-size: 16px;
-    -unity-font-style: bold;
-    color: #4F59E3;
+    font-size: 20px; -unity-font-style: bold; color: var(--color-accent-yellow);
 }

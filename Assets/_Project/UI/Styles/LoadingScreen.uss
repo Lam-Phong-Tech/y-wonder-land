@@ -1,18 +1,15 @@
+/* ============================================
+   Loading Screen Styles - Cozy Dark Theme
+   Extends DesignSystem.uss
+   ============================================ */
+
 .loading-screen-container {
     flex-grow: 1;
-    background-color: rgba(15, 23, 42, 0.98); /* Sleek Slate Dark Mode */
-    align-items: center;
-    justify-content: center;
-    position: absolute;
-    left: 0;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    opacity: 0;
-    display: none;
-    transition-property: opacity;
-    transition-duration: 0.8s;
-    transition-timing-function: ease-in-out;
+    background-color: var(--color-mystic-black); /* Cozy Dark base */
+    align-items: center; justify-content: center;
+    position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+    opacity: 0; display: none;
+    transition-property: opacity; transition-duration: 0.8s; transition-timing-function: ease-in-out;
 }
 
 .loading-screen-container--visible {
@@ -20,54 +17,43 @@
 }
 
 .content-wrapper {
-    align-items: center;
-    justify-content: center;
+    align-items: center; justify-content: center;
     padding: 60px;
-    background-color: rgba(30, 41, 59, 0.6);
-    border-radius: 24px;
-    border-width: 1px;
-    border-color: rgba(255, 255, 255, 0.1);
+    background-color: var(--color-primary-navy);
+    border-radius: var(--radius-panel);
+    border-width: 1px; border-color: rgba(255, 255, 255, 0.05);
 }
 
 .logo-text {
     font-size: 64px;
-    color: rgb(255, 215, 0); /* Premium Gold */
+    color: var(--color-accent-yellow);
     -unity-font-style: bold;
-    letter-spacing: 10px;
-    margin-bottom: 20px;
-    text-shadow: 0px 4px 10px rgba(255, 215, 0, 0.4);
+    letter-spacing: 10px; margin-bottom: 20px;
+    text-shadow: 0px 4px 10px rgba(0, 0, 0, 0.8);
 }
 
 .subtitle-text {
-    font-size: 20px;
-    color: rgba(255, 255, 255, 0.7);
-    margin-bottom: 50px;
-    letter-spacing: 2px;
+    font-size: 20px; color: var(--color-bright-grey);
+    margin-bottom: 50px; letter-spacing: 2px;
 }
 
 .progress-bar-container {
-    width: 400px;
-    height: 12px;
+    width: 400px; height: 12px;
     background-color: rgba(0, 0, 0, 0.5);
-    border-radius: 6px;
-    overflow: hidden;
+    border-radius: 6px; overflow: hidden;
     margin-bottom: 15px;
-    border-width: 1px;
-    border-color: rgba(255, 255, 255, 0.05);
+    border-width: 1px; border-color: rgba(255, 255, 255, 0.05);
 }
 
 .progress-bar-fill {
     width: 0%; /* We animate this in C# */
     height: 100%;
-    background-color: rgb(255, 193, 7); /* Amber Gold */
+    background-color: var(--color-accent-yellow);
     border-radius: 6px;
-    transition-property: width;
-    transition-duration: 0.2s;
-    transition-timing-function: linear;
+    transition-property: width; transition-duration: 0.2s; transition-timing-function: linear;
 }
 
 .loading-text {
-    font-size: 16px;
-    color: rgb(200, 200, 200);
+    font-size: 16px; color: var(--color-bright-grey);
     -unity-font-style: italic;
 }

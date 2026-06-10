@@ -4150,7 +4150,6 @@ MonoBehaviour:
   friendsPopup: {fileID: 275288947}
   mailboxPopup: {fileID: 1728201023}
   profilePopup: {fileID: 1433271487}
-  attendancePopup: {fileID: 1724897824}
   questPopup: {fileID: 1736398150}
   shopPopup: {fileID: 1326651972}
   mapPopup: {fileID: 1096547432}
@@ -5525,75 +5524,6 @@ MonoBehaviour:
   m_PivotReferenceSize: 0
   m_Pivot: 0
   m_WorldSpaceCollider: {fileID: 0}
---- !u!1 &1724897821
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1724897822}
-  - component: {fileID: 1724897824}
-  - component: {fileID: 1724897823}
-  m_Layer: 0
-  m_Name: AttendancePopup
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1724897822
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1724897821}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1741906306}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1724897823
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1724897821}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
-  m_PanelSettings: {fileID: 11400000, guid: 733b78b50ad81f042bff3e42a7e00e1e, type: 2}
-  m_ParentUI: {fileID: 0}
-  sourceAsset: {fileID: 9197481963319205126, guid: 12804900a4712d348bc3e734eef0106e, type: 3}
-  m_SortingOrder: 2
-  m_Position: 0
-  m_WorldSpaceSizeMode: 1
-  m_WorldSpaceWidth: 1920
-  m_WorldSpaceHeight: 1080
-  m_PivotReferenceSize: 0
-  m_Pivot: 0
-  m_WorldSpaceCollider: {fileID: 0}
---- !u!114 &1724897824
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1724897821}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 220338ef24416b341ae62a7fae1ca698, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AttendancePopupController
-  attendanceDocument: {fileID: 1724897823}
 --- !u!1 &1728201021
 GameObject:
   m_ObjectHideFlags: 0
@@ -5769,7 +5699,6 @@ Transform:
   - {fileID: 275288945}
   - {fileID: 1728201022}
   - {fileID: 1131429570}
-  - {fileID: 1724897822}
   - {fileID: 1433271486}
   - {fileID: 1736398149}
   - {fileID: 1244740497}

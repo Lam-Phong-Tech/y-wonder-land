@@ -4,6 +4,7 @@
     xmlns:ui="UnityEngine.UIElements"
     xsi:noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd"
 >
+    <ui:Style src="project://database/Assets/_Project/UI/Styles/DesignSystem.uss" />
     <ui:Style src="project://database/Assets/_Project/UI/Styles/LoadingScreen.uss" />
 
     <ui:VisualElement name="LoadingContainer" class="loading-screen-container">

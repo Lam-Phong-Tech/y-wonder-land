@@ -106,7 +106,11 @@ public class FriendsPopupController : MonoBehaviour
     private void RegisterCallbacks()
     {
         // Close operations
-        btnClose?.RegisterCallback<ClickEvent>(evt => Hide());
+        if (btnClose != null)
+        {
+            btnClose.clicked -= Hide;
+            btnClose.clicked += Hide;
+        }
         overlay?.RegisterCallback<ClickEvent>(evt =>
         {
             if (evt.target == overlay)

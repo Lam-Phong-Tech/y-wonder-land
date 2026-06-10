@@ -15,9 +15,9 @@
 
 /* === PANEL === */
 .shop-panel {
-    width: 860px; height: 540px;
+    width: 1024px; height: 600px;
     background-color: var(--color-primary-navy);
-    border-radius: 24px;
+    border-radius: var(--radius-panel);
     border-width: 1px; border-color: rgba(255, 255, 255, 0.1);
     overflow: hidden;
 }
@@ -42,7 +42,7 @@
     position: absolute; left: 24px;
     flex-direction: row; align-items: center;
     background-color: var(--color-mystic-black);
-    border-radius: 20px; padding: 8px 16px;
+    border-radius: var(--radius-button); padding: 8px 16px;
     border-width: 0; z-index: 2;
 }
 .shop-balance-icon { font-size: 18px; margin-right: 6px; padding: 0; -unity-text-align: middle-center; }
@@ -51,7 +51,7 @@
 /* === CLOSE BUTTON === */
 .shop-close-btn-container { position: absolute; right: 16px; top: 16px; }
 .shop-close-btn {
-    width: 40px; height: 40px; border-radius: 20px;
+    width: 36px; height: 36px; border-radius: var(--radius-button);
     background-color: rgba(255, 255, 255, 0.05); border-width: 0;
     font-size: 18px; color: var(--color-text-white); -unity-font-style: bold;
     padding: 0; align-items: center; justify-content: center;
@@ -82,7 +82,7 @@
 
 /* === TABS & FILTERS === */
 .shop-mode-tab, .shop-filter {
-    padding: 12px 16px; margin-bottom: 8px; border-radius: 16px; border-width: 0;
+    padding: 10px 14px; margin-bottom: 6px; border-radius: var(--radius-tab); border-width: 0;
     background-color: transparent; font-size: 15px; -unity-font-style: bold;
     color: var(--color-bright-grey); -unity-text-align: middle-left;
     transition-property: background-color, color, scale; transition-duration: 0.1s;
@@ -127,7 +127,7 @@
 /* === DETAIL PANEL === */
 .shop-detail-panel {
     width: 260px; background-color: var(--color-deep-blue);
-    border-radius: 20px; border-width: 0;
+    border-radius: var(--radius-panel); border-width: 0;
     margin: 24px 24px 24px 0; padding: 20px;
     align-items: center; justify-content: flex-start; flex-shrink: 0;
 }
@@ -195,7 +195,7 @@
 
 /* === ACTION BUTTON (MUA / BÁN) === */
 .shop-btn-action {
-    width: 100%; padding: 14px 24px; border-radius: 24px; border-width: 0;
+    width: 100%; padding: 12px 24px; border-radius: var(--radius-button); border-width: 0;
     background-color: var(--color-accent-yellow); color: var(--color-mystic-black);
     font-size: 16px; -unity-font-style: bold; -unity-text-align: middle-center; letter-spacing: 1px;
     margin-top: auto; transition-property: scale, background-color; transition-duration: 0.1s;

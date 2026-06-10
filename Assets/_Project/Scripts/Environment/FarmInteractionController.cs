@@ -268,7 +268,7 @@ namespace YWonderLand.Environment
             // CHỮA CHÁY NHANH CHO SẾP XEM: Tự động gieo hạt cà rốt luôn, không thèm mở túi đồ!
             Debug.Log("[FarmInteraction] CHỮA CHÁY DEMO: Tự động gieo hạt cà rốt!");
             
-            if (tile.InteractPlant("carrot"))
+            if (tile.InteractPlant("carrot_seed_01"))
             {
                 // Múa động tác gieo hạt
                 Animator anim = GetComponent<Animator>();
