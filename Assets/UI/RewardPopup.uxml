@@ -1,0 +1,51 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements"
+         xsi="http://www.w3.org/2001/XMLSchema-instance"
+         editor="UnityEditor.UIElements"
+         noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="False">
+
+    <Style src="project://database/Assets/UI/Styles/DesignSystem.uss?fileID=7433441132597879392&amp;guid=placeholder&amp;type=3#DesignSystem" />
+    <Style src="project://database/Assets/UI/Styles/RewardPopup.uss?fileID=7433441132597879392&amp;guid=placeholder&amp;type=3#RewardPopup" />
+
+    <!-- Layer 1: Overlay -->
+    <ui:VisualElement name="reward-overlay" class="reward-overlay" style="display: none;">
+
+        <!-- Shadow wrapper -->
+        <ui:VisualElement name="reward-shadow" class="reward-shadow">
+
+            <!-- Layer 2: Panel -->
+            <ui:VisualElement name="reward-panel" class="reward-panel">
+
+                <!-- Close button (X) — SAU panel để z-order đúng -->
+                <ui:Button name="btn-close" class="reward-btn-close" text="✕" />
+
+                <!-- Header -->
+                <ui:VisualElement name="reward-header" class="reward-header">
+                    <ui:Label name="reward-title" class="reward-title" text="PHẦN THƯỞNG" />
+                </ui:VisualElement>
+
+                <!-- Body: Lưới phần thưởng -->
+                <ui:VisualElement name="reward-body" class="reward-body">
+
+                    <!-- Container cho các reward items (sẽ được populate bởi Controller) -->
+                    <ui:VisualElement name="reward-grid" class="reward-grid">
+
+                        <!-- Template 1 reward item (Controller sẽ clone pattern này) -->
+                        <!-- Khi không có reward, hiển thị empty state -->
+                        <ui:Label name="reward-empty" class="reward-empty" text="Không có phần thưởng" />
+
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+
+                <!-- Footer: Nút nhận thưởng -->
+                <ui:VisualElement name="reward-footer" class="reward-footer">
+                    <ui:VisualElement class="reward-btn-shadow">
+                        <ui:Button name="btn-claim" class="reward-btn-claim" text="Nhận thưởng" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

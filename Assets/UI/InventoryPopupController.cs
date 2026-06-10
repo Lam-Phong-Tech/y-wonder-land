@@ -8,6 +8,11 @@ using UnityEngine.UIElements;
 /// </summary>
 public class InventoryPopupController : MonoBehaviour
 {
+    /// <summary>
+    /// Fired when player clicks the action button on an item.
+    /// Parameter is the item name (e.g. "H\u1ea1t c\u00e0 r\u1ed1t").
+    /// </summary>
+    public event System.Action<string> OnItemUsed;
     [Header("References")]
     [SerializeField] private UIDocument inventoryDocument;
 
@@ -44,11 +49,15 @@ public class InventoryPopupController : MonoBehaviour
     // Max inventory slots
     private const int MAX_SLOTS = 50;
 
-    // Mock inventory data
-    private Dictionary<string, List<InventoryItem>> mockData;
+    // Max inventory slots from Manager
+    private int maxSlots => YWonderLand.Managers.InventoryManager.Instance?.GetMaxSlots() ?? 50;
+
+    // Database
+    private YWonderLand.Data.ItemDatabase itemDatabase;
 
     private struct InventoryItem
     {
+        public string id;
         public string icon;
         public string name;
         public int quantity;
@@ -61,7 +70,8 @@ public class InventoryPopupController : MonoBehaviour
         if (inventoryDocument == null)
             inventoryDocument = GetComponent<UIDocument>();
 
-        InitMockData();
+        itemDatabase = Resources.Load<YWonderLand.Data.ItemDatabase>("ItemDatabase");
+        if (itemDatabase == null) Debug.LogError("[Inventory] ItemDatabase not found in Resources!");
     }
 
     private void OnEnable()
@@ -102,6 +112,19 @@ public class InventoryPopupController : MonoBehaviour
 
         // Start hidden
         Hide();
+
+        if (YWonderLand.Managers.InventoryManager.Instance != null)
+        {
+            YWonderLand.Managers.InventoryManager.Instance.OnInventoryChanged += RefreshGrid;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (YWonderLand.Managers.InventoryManager.Instance != null)
+        {
+            YWonderLand.Managers.InventoryManager.Instance.OnInventoryChanged -= RefreshGrid;
+        }
     }
 
     private void RegisterCallbacks()
@@ -126,7 +149,8 @@ public class InventoryPopupController : MonoBehaviour
         {
             if (selectedItem.HasValue)
             {
-                Debug.Log($"[Inventory] Executed action '{selectedItem.Value.actionText}' on item: {selectedItem.Value.name}");
+                Debug.Log($"[Inventory] Executed action '{selectedItem.Value.actionText}' on item: {selectedItem.Value.name} ({selectedItem.Value.id})");
+                OnItemUsed?.Invoke(selectedItem.Value.id); // Send ID instead of name
             }
         });
 
@@ -166,14 +190,39 @@ public class InventoryPopupController : MonoBehaviour
         // Clear existing items
         gridContainer.Clear();
 
-        // Get items for active category
-        if (mockData.TryGetValue(activeCategory, out var items) && items.Count > 0)
+        if (itemDatabase == null || YWonderLand.Managers.InventoryManager.Instance == null)
+        {
+            ShowEmptyDetails();
+            return;
+        }
+
+        var allSlots = YWonderLand.Managers.InventoryManager.Instance.GetAllSlots();
+        var categoryItems = new List<InventoryItem>();
+
+        foreach (var slot in allSlots)
+        {
+            var def = itemDatabase.GetItem(slot.itemId);
+            if (def != null && def.category == activeCategory)
+            {
+                categoryItems.Add(new InventoryItem
+                {
+                    id = def.id,
+                    icon = !string.IsNullOrEmpty(def.iconEmoji) ? def.iconEmoji : "📦",
+                    name = def.itemName,
+                    quantity = slot.quantity,
+                    description = def.description,
+                    actionText = "Sử dụng"
+                });
+            }
+        }
+
+        if (categoryItems.Count > 0)
         {
             VisualElement firstCard = null;
 
-            for (int i = 0; i < items.Count; i++)
+            for (int i = 0; i < categoryItems.Count; i++)
             {
-                var item = items[i];
+                var item = categoryItems[i];
                 var itemElement = CreateItemElement(item, out var card);
                 gridContainer.Add(itemElement);
 
@@ -185,15 +234,15 @@ public class InventoryPopupController : MonoBehaviour
 
             // Update count
             if (lblItemCount != null)
-                lblItemCount.text = $"{items.Count} / {MAX_SLOTS} vật phẩm";
+                lblItemCount.text = $"{categoryItems.Count} / {maxSlots} vật phẩm";
 
             // Automatically select first item
-            SelectItem(items[0], firstCard);
+            SelectItem(categoryItems[0], firstCard);
         }
         else
         {
             if (lblItemCount != null)
-                lblItemCount.text = $"0 / {MAX_SLOTS} vật phẩm";
+                lblItemCount.text = $"0 / {maxSlots} vật phẩm";
 
             ShowEmptyDetails();
         }
@@ -316,51 +365,41 @@ public class InventoryPopupController : MonoBehaviour
         return overlay != null && overlay.style.display == DisplayStyle.Flex;
     }
 
-    // ── Mock Data ──
-
-    private void InitMockData()
+    /// <summary>
+    /// Open inventory directly at a specific tab. Used by tutorial system.
+    /// Valid tab names: "tools", "materials", "seeds", "food", "outfit", "special"
+    /// </summary>
+    public void ShowAtTab(string tabName)
     {
-        mockData = new Dictionary<string, List<InventoryItem>>
+        Show();
+
+        // Map tab name to button + display name
+        switch (tabName)
         {
-            ["tools"] = new List<InventoryItem>
-            {
-                new InventoryItem { icon = "⛏", name = "Cuốc Lv1", quantity = 1, description = "Dụng cụ dùng để cuốc đất gieo hạt, khai hoang đất trồng trọt trù phú.", actionText = "Trang bị" },
-                new InventoryItem { icon = "🎣", name = "Cần câu", quantity = 1, description = "Cần câu bằng tre dẻo dai. Dùng để câu các loài cá sông nước ngọt.", actionText = "Trang bị" },
-                new InventoryItem { icon = "🪓", name = "Rìu gỗ", quantity = 1, description = "Rìu gỗ thô sơ nhưng chắc chắn. Thích hợp để đốn củi và chặt cây nhỏ.", actionText = "Trang bị" },
-                new InventoryItem { icon = "🪣", name = "Xô tưới", quantity = 2, description = "Xô đựng nước làm vườn. Dùng để tưới nước giúp cây trồng mau lớn.", actionText = "Trang bị" },
-            },
-            ["materials"] = new List<InventoryItem>
-            {
-                new InventoryItem { icon = "🪵", name = "Gỗ", quantity = 15, description = "Thân cây gỗ chắc nịch. Nguyên liệu cơ bản dùng để chế tạo và xây dựng.", actionText = "Chế tạo" },
-                new InventoryItem { icon = "🪨", name = "Đá", quantity = 8, description = "Đá cuội nhặt ven sông. Có ích trong việc nâng cấp nhà cửa và công cụ.", actionText = "Chế tạo" },
-                new InventoryItem { icon = "⛓", name = "Sắt", quantity = 3, description = "Quặng sắt đã tinh chế. Cần thiết để rèn các công cụ cao cấp hơn.", actionText = "Chế tạo" },
-                new InventoryItem { icon = "🧱", name = "Gạch", quantity = 10, description = "Gạch đất nung chắc chắn. Thích hợp để làm hàng rào hoặc lát nền.", actionText = "Chế tạo" },
-                new InventoryItem { icon = "🪢", name = "Dây thừng", quantity = 5, description = "Dây thừng bện từ sợi đay. Rất dai và hữu dụng trong nhiều việc.", actionText = "Chế tạo" },
-            },
-            ["seeds"] = new List<InventoryItem>
-            {
-                new InventoryItem { icon = "🌾", name = "Hạt lúa", quantity = 20, description = "Hạt giống lúa nước. Gieo hạt trên đất trồng và nhớ tưới nước nhé.", actionText = "Gieo hạt" },
-                new InventoryItem { icon = "🌻", name = "Hạt hoa", quantity = 10, description = "Hạt giống hoa hướng dương rực rỡ. Giúp trang trí nông trại thêm đẹp.", actionText = "Gieo hạt" },
-                new InventoryItem { icon = "🥕", name = "Hạt cà rốt", quantity = 8, description = "Hạt giống cà rốt ngon ngọt. Thời gian sinh trưởng trung bình.", actionText = "Gieo hạt" },
-                new InventoryItem { icon = "🍅", name = "Hạt cà chua", quantity = 5, description = "Hạt giống cà chua chín đỏ. Cho sản lượng thu hoạch cao.", actionText = "Gieo hạt" },
-            },
-            ["food"] = new List<InventoryItem>
-            {
-                new InventoryItem { icon = "🍞", name = "Bánh mì", quantity = 3, description = "Bánh mì thơm ngon vừa mới nướng. Hồi phục 20 thể lực khi ăn.", actionText = "Ăn" },
-                new InventoryItem { icon = "🥛", name = "Sữa tươi", quantity = 2, description = "Sữa bò nguyên chất vừa vắt sáng nay. Cung cấp năng lượng dồi dào.", actionText = "Uống" },
-                new InventoryItem { icon = "🍎", name = "Táo đỏ", quantity = 6, description = "Táo chín đỏ ngọt lịm từ vườn nhà. Giúp phục hồi sinh lực tức thì.", actionText = "Ăn" },
-            },
-            ["outfit"] = new List<InventoryItem>
-            {
-                new InventoryItem { icon = "👒", name = "Nón rơm", quantity = 1, description = "Chiếc nón rơm rộng vành. Che nắng cực tốt khi đi làm vườn.", actionText = "Mặc" },
-                new InventoryItem { icon = "👕", name = "Áo nông dân", quantity = 1, description = "Trang phục lao động bằng vải bố bền bỉ, thấm hút mồ hôi tốt.", actionText = "Mặc" },
-            },
-            ["special"] = new List<InventoryItem>
-            {
-                new InventoryItem { icon = "🎫", name = "Vé sự kiện", quantity = 1, description = "Tấm vé tham gia lễ hội nông trang đặc biệt. Đừng làm mất nó nhé!", actionText = "Sử dụng" },
-                new InventoryItem { icon = "🎁", name = "Hộp quà", quantity = 2, description = "Hộp quà may mắn từ thị trưởng. Mở ra để nhận những vật phẩm ngẫu nhiên.", actionText = "Mở" },
-                new InventoryItem { icon = "💎", name = "Kim cương", quantity = 1, description = "Viên kim cương lấp lánh cực kỳ quý hiếm. Có thể bán được rất nhiều xu.", actionText = "Bán" },
-            },
-        };
+            case "seeds":
+                SetActiveTab(tabSeeds, "seeds", "H\u1ea1t gi\u1ed1ng");
+                break;
+            case "tools":
+                SetActiveTab(tabTools, "tools", "D\u1ee5ng c\u1ee5");
+                break;
+            case "materials":
+                SetActiveTab(tabMaterials, "materials", "Nguy\u00ean li\u1ec7u");
+                break;
+            case "food":
+                SetActiveTab(tabFood, "food", "Th\u1ef1c ph\u1ea9m");
+                break;
+            case "outfit":
+                SetActiveTab(tabOutfit, "outfit", "Trang ph\u1ee5c");
+                break;
+            case "special":
+                SetActiveTab(tabSpecial, "special", "\u0110\u1eb7c bi\u1ec7t");
+                break;
+            default:
+                Debug.LogWarning($"[Inventory] Unknown tab: {tabName}");
+                break;
+        }
+
+        Debug.Log($"[Inventory] Opened at tab: {tabName}");
     }
+
 }

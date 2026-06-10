@@ -41,20 +41,73 @@
 - Assets/UI/GameHUD.uxml
 - Assets/UI/GameHUDController.cs
 
-### Module Friends Popup (QC Pass: 2026-06-03)
+### Module Friends Popup (QC: chờ duyệt)
 - Assets/UI/Styles/FriendsPopup.uss
 - Assets/UI/FriendsPopup.uxml
 - Assets/UI/FriendsPopupController.cs
 
-### Module Quest Popup (QC Pass: 2026-06-03)
+### Module Quest Popup (QC: chờ duyệt)
 - Assets/UI/Styles/QuestPopup.uss
 - Assets/UI/QuestPopup.uxml
 - Assets/UI/QuestPopupController.cs
 
-### Module Attendance Popup (QC Pass: 2026-06-03)
+### Module Attendance Popup (QC: chờ duyệt)
 - Assets/UI/Styles/AttendancePopup.uss
 - Assets/UI/AttendancePopup.uxml
 - Assets/UI/AttendancePopupController.cs
+
+### Module Settings Popup (QC: chờ duyệt)
+- Assets/UI/Styles/SettingsPopup.uss
+- Assets/UI/SettingsPopup.uxml
+- Assets/UI/SettingsPopupController.cs
+
+### Module Inventory Popup (QC: chờ duyệt)
+- Assets/UI/Styles/InventoryPopup.uss
+- Assets/UI/InventoryPopup.uxml
+- Assets/UI/InventoryPopupController.cs
+
+### Module Leaderboard Popup (QC: chờ duyệt)
+- Assets/UI/Styles/LeaderboardPopup.uss
+- Assets/UI/LeaderboardPopup.uxml
+- Assets/UI/LeaderboardPopupController.cs
+
+### Module Mailbox Popup (QC: chờ duyệt)
+- Assets/UI/Styles/MailboxPopup.uss
+- Assets/UI/MailboxPopup.uxml
+- Assets/UI/MailboxPopupController.cs
+
+### Module Profile Popup (QC: chờ duyệt)
+- Assets/UI/Styles/ProfilePopup.uss
+- Assets/UI/ProfilePopup.uxml
+- Assets/UI/ProfilePopupController.cs
+
+### Module Confirm Dialog (QC: chờ duyệt)
+- Assets/UI/Styles/ConfirmDialog.uss
+- Assets/UI/ConfirmDialog.uxml
+- Assets/UI/ConfirmDialogController.cs
+
+### Module Reward Popup (QC: chờ duyệt)
+- Assets/UI/Styles/RewardPopup.uss
+- Assets/UI/RewardPopup.uxml
+- Assets/UI/RewardPopupController.cs
+
+### Module Onboarding Cinematic & Tutorial (QC: chờ duyệt)
+- Assets/Scripts/Cutscenes/BoatCutscene.cs
+- Assets/Scripts/Tutorial/TutorialManager.cs
+- Assets/Scripts/Tutorial/GuideNPC.cs
+- Assets/Scripts/Environment/FarmTile.cs
+
+### Module Build Mode & Fishing (QC: chờ duyệt)
+- Assets/UI/BuildModeOverlay* (uxml, uss, cs)
+- Assets/Scripts/Environment/BuildGrid*
+- Assets/Scripts/Environment/GhostPlacementController.cs
+- Assets/Scripts/Environment/FishingSpot.cs
+- Assets/UI/FishingOverlay* (uxml, uss, cs)
+
+### Module Resource Harvesting (QC: chờ duyệt)
+- Assets/Scripts/Environment/HarvestableResource.cs
+- Assets/Scripts/Managers/ResourceSpawner.cs
+- Assets/UI/ResourceInteractionUI* (uxml, uss, cs)
 
 ## QUY TẮC KHI CODE
 1. Chỉ sửa đúng file và đúng function được yêu cầu

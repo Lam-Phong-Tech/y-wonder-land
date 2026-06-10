@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:Style src="project://database/Assets/UI/Styles/DesignSystem.uss" />
+    <ui:Style src="project://database/Assets/UI/Styles/SplashLoadingScreen.uss" />
+
+    <!-- Full Screen Splash Container -->
+    <ui:VisualElement name="SplashRoot" class="splash-screen">
+
+        <!-- Decorative Corner Stars -->
+        <ui:Label text="&#x2726;" class="splash-star splash-star-tl" />
+        <ui:Label text="&#x2727;" class="splash-star splash-star-tr" />
+        <ui:Label text="&#x2727;" class="splash-star splash-star-bl" />
+        <ui:Label text="&#x2726;" class="splash-star splash-star-br" />
+
+        <!-- Brand Logo Group (Centered) -->
+        <ui:VisualElement class="splash-logo-container">
+
+            <!-- Title Shadow Layer -->
+            <ui:VisualElement class="splash-title-shadow-wrapper">
+                <ui:Label text="Y WONDER LAND" class="splash-title-shadow" />
+            </ui:VisualElement>
+
+            <!-- Title Main Layer -->
+            <ui:Label text="Y WONDER LAND" class="splash-title" />
+
+            <!-- Subtitle -->
+            <ui:Label text="CUỘC PHIÊU LƯU BẮT ĐẦU" class="splash-subtitle" />
+
+            <!-- Decorative Divider -->
+            <ui:VisualElement class="splash-divider" />
+        </ui:VisualElement>
+
+        <!-- Loading Group (Bottom Center) -->
+        <ui:VisualElement class="splash-loading-group">
+
+            <!-- Status Label -->
+            <ui:Label name="lblStatus" text="Đang tải tài nguyên..." class="splash-status-text" />
+
+            <!-- Progress Bar Container -->
+            <ui:VisualElement class="splash-progress-wrapper">
+
+                <!-- Progress Track (Background) -->
+                <ui:VisualElement class="splash-progress-track">
+
+                    <!-- Progress Fill (Dynamic Width) -->
+                    <ui:VisualElement name="ProgressFill" class="splash-progress-fill" />
+
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Percentage Label -->
+            <ui:Label name="lblPercentage" text="0%" class="splash-percentage-text" />
+
+            <!-- Skip Hint -->
+            <ui:Label text="Click để bỏ qua" class="splash-skip-hint" />
+        </ui:VisualElement>
+
+        <!-- Version Label (Bottom Right) -->
+        <ui:Label text="v0.1.0-alpha" class="splash-version" />
+
+    </ui:VisualElement>
+</ui:UXML>

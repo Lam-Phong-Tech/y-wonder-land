@@ -1,0 +1,550 @@
+/* ============================================================
+   PiggyBankPopup.uss — Heo Đất / Piggy Bank Savings
+   Design System: The Tangible Playground
+   Header: Warm Gold #E8833A
+   Lessons applied: #29 #30 #32 #33 #34
+   ============================================================ */
+
+/* === OVERLAY === */
+.piggy-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    align-items: center;
+    justify-content: center;
+    display: none;
+}
+
+/* === WRAPPER (Lesson #33 — close button outside) === */
+.piggy-wrapper {
+    position: relative;
+}
+
+/* === PANEL === */
+.piggy-panel {
+    width: 720px;
+    height: 470px;
+    background-color: #F5F0E8;
+    border-radius: 22px;
+    border-width: 3px;
+    border-color: #3D3535;
+    overflow: hidden;
+}
+
+/* === HEADER === */
+.piggy-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background-color: #E8833A;
+    padding: 12px 16px;
+    border-bottom-width: 3px;
+    border-bottom-color: #CC6B28;
+    min-height: 46px;
+    position: relative;
+}
+
+.piggy-header-title {
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: #FFFFFF;
+    -unity-text-align: middle-center;
+    letter-spacing: 2px;
+    /* Lesson #30 + #32: absolute + overflow protection */
+    position: absolute;
+    left: 0;
+    right: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 0 120px;
+}
+
+/* === BALANCE PILL (Lesson #30) === */
+.piggy-balance-pill {
+    position: absolute;
+    left: 12px;
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 20px;
+    padding: 4px 12px 4px 6px;
+    border-width: 2px;
+    border-color: rgba(255, 255, 255, 0.25);
+    z-index: 2;
+}
+
+.piggy-pill-icon {
+    font-size: 13px;
+    margin-right: 4px;
+}
+
+.piggy-pill-value {
+    font-size: 11px;
+    -unity-font-style: bold;
+    color: #FFFFFF;
+}
+
+/* === CLOSE BUTTON (Lesson #33 + #34) === */
+.piggy-close-shadow {
+    position: absolute;
+    right: -8px;
+    top: -8px;
+    background-color: transparent;
+    border-radius: 10px;
+    padding-right: 2px;
+    padding-bottom: 2px;
+    z-index: 50;
+}
+
+.piggy-close-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background-color: #FF4B4B;
+    border-width: 3px;
+    border-color: #3D3535;
+    padding: 0;
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: #FFFFFF;
+    -unity-text-align: middle-center;
+    transition-property: translate, background-color;
+    transition-duration: 0.08s;
+}
+
+.piggy-close-btn:hover {
+    background-color: #FF6B6B;
+}
+
+.piggy-close-btn:active {
+    translate: 2px 2px;
+    background-color: #CC3333;
+}
+
+/* === TAB BAR === */
+.piggy-tab-bar {
+    flex-direction: row;
+    background-color: #EDE5D8;
+    padding: 6px 12px 0 12px;
+    border-bottom-width: 2px;
+    border-bottom-color: #DDD5C8;
+}
+
+.piggy-tab {
+    padding: 8px 16px;
+    margin-right: 4px;
+    border-radius: 10px 10px 0 0;
+    border-width: 2px;
+    border-bottom-width: 0;
+    border-color: transparent;
+    background-color: transparent;
+    font-size: 12px;
+    -unity-font-style: bold;
+    color: #8A7E6E;
+    -unity-text-align: middle-center;
+    transition-property: background-color, color;
+    transition-duration: 0.08s;
+}
+
+.piggy-tab:hover {
+    background-color: rgba(232, 131, 58, 0.1);
+    color: #E8833A;
+}
+
+.piggy-tab--active {
+    background-color: #F5F0E8;
+    border-color: #DDD5C8;
+    color: #E8833A;
+}
+
+/* === BODY === */
+.piggy-body {
+    flex-direction: row;
+    flex-grow: 1;
+    padding: 12px;
+}
+
+/* === LEFT: PACKAGE CARDS === */
+.piggy-packages {
+    width: 200px;
+    flex-shrink: 0;
+    flex-direction: column;
+}
+
+.piggy-pkg-shadow {
+    background-color: rgba(30, 30, 60, 0.2);
+    border-radius: 14px;
+    padding-right: 3px;
+    padding-bottom: 3px;
+    margin-bottom: 6px;
+}
+
+.piggy-pkg {
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 12px;
+    background-color: #FFFFFF;
+    border-radius: 14px;
+    border-width: 2px;
+    border-color: #DDD5C8;
+    transition-property: translate, border-color, background-color;
+    transition-duration: 0.08s;
+}
+
+.piggy-pkg:hover {
+    border-color: #E8833A;
+    background-color: #FFF5EE;
+    translate: -1px -1px;
+}
+
+.piggy-pkg:active {
+    translate: 2px 2px;
+}
+
+.piggy-pkg--selected {
+    border-color: #E8833A;
+    border-width: 3px;
+    background-color: #FFF0E0;
+}
+
+.piggy-pkg-icon {
+    font-size: 22px;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+.piggy-pkg-duration {
+    font-size: 12px;
+    -unity-font-style: bold;
+    color: #3D3535;
+    flex-grow: 1;
+}
+
+.piggy-pkg-rate {
+    font-size: 16px;
+    -unity-font-style: bold;
+    color: #E8833A;
+    flex-shrink: 0;
+    margin-left: 4px;
+}
+
+.piggy-pkg-label {
+    display: none;
+}
+
+/* === RIGHT: FORM / ACTIVE === */
+.piggy-right {
+    flex-grow: 1;
+    margin-left: 12px;
+}
+
+/* ── DEPOSIT FORM ── */
+.piggy-form {
+    background-color: #FFFFFF;
+    border-radius: 14px;
+    border-width: 3px;
+    border-color: #3D3535;
+    padding: 14px 16px;
+    height: 100%;
+}
+
+.piggy-form-title {
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: #3D3535;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    -unity-text-align: upper-center;
+}
+
+.piggy-form-summary {
+    background-color: #FFF0E0;
+    border-radius: 8px;
+    padding: 6px 12px;
+    margin-bottom: 10px;
+    border-width: 2px;
+    border-color: #FFE0B2;
+    align-items: center;
+}
+
+.piggy-form-pkg {
+    font-size: 12px;
+    -unity-font-style: bold;
+    color: #E8833A;
+    -unity-text-align: middle-center;
+}
+
+/* Input */
+.piggy-input-label {
+    font-size: 11px;
+    color: #8A7E6E;
+    margin-bottom: 4px;
+}
+
+.piggy-input {
+    border-radius: 10px;
+    border-width: 2px;
+    border-color: #DDD5C8;
+    padding: 8px 12px;
+    font-size: 14px;
+    -unity-font-style: bold;
+    background-color: #FFFFFF;
+    margin-bottom: 10px;
+}
+
+.piggy-input:focus {
+    border-color: #E8833A;
+}
+
+/* Preview */
+.piggy-preview {
+    background-color: #F8F5F0;
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+}
+
+.piggy-preview-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+    min-height: 18px;
+}
+
+.piggy-preview-label {
+    font-size: 11px;
+    color: #8A7E6E;
+    flex-shrink: 0;
+}
+
+.piggy-preview-label--bold {
+    -unity-font-style: bold;
+    color: #3D3535;
+}
+
+.piggy-preview-value {
+    font-size: 11px;
+    color: #3D3535;
+    flex-shrink: 0;
+    -unity-text-align: middle-right;
+}
+
+.piggy-preview-value--green {
+    color: #4CAF50;
+    -unity-font-style: bold;
+}
+
+.piggy-preview-value--bold {
+    font-size: 13px;
+    -unity-font-style: bold;
+    color: #E8833A;
+}
+
+.piggy-preview-divider {
+    height: 1px;
+    background-color: #DDD5C8;
+    margin: 4px 0;
+}
+
+/* Error */
+.piggy-form-error {
+    font-size: 11px;
+    color: #FF4B4B;
+    -unity-font-style: bold;
+    margin-bottom: 4px;
+    min-height: 14px;
+    -unity-text-align: upper-center;
+}
+
+/* Submit button */
+.piggy-btn-deposit {
+    padding: 10px 16px;
+    border-radius: 10px;
+    border-width: 3px;
+    border-color: #CC6B28;
+    background-color: #E8833A;
+    color: #FFFFFF;
+    font-size: 14px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    letter-spacing: 1px;
+    transition-property: translate, background-color;
+    transition-duration: 0.08s;
+}
+
+.piggy-btn-deposit:hover {
+    background-color: #F09848;
+}
+
+.piggy-btn-deposit:active {
+    translate: 1px 1px;
+    background-color: #CC6B28;
+}
+
+.piggy-btn-deposit:disabled {
+    background-color: #C4BAA8;
+    border-color: #B0A898;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* ── ACTIVE DEPOSIT (countdown view) ── */
+.piggy-active {
+    background-color: #FFFFFF;
+    border-radius: 14px;
+    border-width: 3px;
+    border-color: #3D3535;
+    padding: 16px;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    display: none;
+}
+
+.piggy-active-emoji {
+    font-size: 40px;
+    margin-bottom: 8px;
+}
+
+.piggy-active-title {
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: #E8833A;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+}
+
+.piggy-active-info {
+    width: 100%;
+    background-color: #F8F5F0;
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-bottom: 12px;
+}
+
+.piggy-active-row {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 3px;
+}
+
+.piggy-active-label {
+    font-size: 11px;
+    color: #8A7E6E;
+}
+
+.piggy-active-value {
+    font-size: 11px;
+    -unity-font-style: bold;
+    color: #3D3535;
+}
+
+/* Countdown */
+.piggy-countdown-wrap {
+    width: 100%;
+    background-color: #FFF3E0;
+    border-radius: 10px;
+    border-width: 2px;
+    border-color: #FFE0B2;
+    padding: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.piggy-countdown-title {
+    font-size: 10px;
+    color: #8A7E6E;
+    margin-bottom: 4px;
+}
+
+.piggy-countdown-value {
+    font-size: 22px;
+    -unity-font-style: bold;
+    color: #E8833A;
+    letter-spacing: 2px;
+}
+
+.piggy-active-note {
+    font-size: 10px;
+    color: #B0A898;
+    -unity-font-style: italic;
+    -unity-text-align: upper-center;
+    white-space: normal;
+}
+
+/* === HISTORY TAB === */
+.piggy-history-panel {
+    display: none;
+    flex-direction: column;
+}
+
+.piggy-history-scroll {
+    flex-grow: 1;
+}
+
+.piggy-history-list {
+    flex-direction: column;
+}
+
+/* History row */
+.piggy-history-row {
+    flex-direction: row;
+    align-items: center;
+    background-color: #FFFFFF;
+    border-radius: 10px;
+    border-width: 2px;
+    border-color: #DDD5C8;
+    padding: 10px 12px;
+    margin-bottom: 6px;
+}
+
+.piggy-history-icon {
+    font-size: 20px;
+    margin-right: 10px;
+}
+
+.piggy-history-info {
+    flex-grow: 1;
+}
+
+.piggy-history-pkg-name {
+    font-size: 12px;
+    -unity-font-style: bold;
+    color: #3D3535;
+    margin-bottom: 2px;
+}
+
+.piggy-history-detail {
+    font-size: 10px;
+    color: #8A7E6E;
+}
+
+.piggy-history-result {
+    align-items: flex-end;
+}
+
+.piggy-history-amount {
+    font-size: 12px;
+    -unity-font-style: bold;
+    color: #4CAF50;
+}
+
+.piggy-history-status {
+    font-size: 9px;
+    color: #8A7E6E;
+    -unity-font-style: italic;
+}
+
+/* History empty */
+.piggy-history-empty {
+    font-size: 12px;
+    color: #B0A898;
+    -unity-font-style: italic;
+    -unity-text-align: middle-center;
+    margin-top: auto;
+    margin-bottom: auto;
+}

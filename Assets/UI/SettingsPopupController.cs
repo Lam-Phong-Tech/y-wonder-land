@@ -11,6 +11,7 @@ public class SettingsPopupController : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private UIDocument settingsDocument;
+    [SerializeField] private ConfirmDialogController confirmDialog;
 
     // UI Elements
     private VisualElement overlay;
@@ -29,6 +30,7 @@ public class SettingsPopupController : MonoBehaviour
     private Label lblShadow;
     private Label lblGeneralSection;
     private Label lblLanguage;
+    private Label lblShowChat;
 
     // Audio
     private Slider sliderMusic;
@@ -47,6 +49,8 @@ public class SettingsPopupController : MonoBehaviour
     private Label lblRenderQualityValue;
     private Toggle toggleShadow;
     private Label lblShadowStatus;
+    private Toggle toggleShowChat;
+    private Label lblShowChatStatus;
 
     // General
     private DropdownField dropdownLanguage;
@@ -62,6 +66,7 @@ public class SettingsPopupController : MonoBehaviour
     private float cameraZoom = 0.75f;
     private float renderQuality = 1.0f;
     private bool shadowEnabled = true;
+    private bool showChatEnabled = true;
     private string currentLanguage = "vi";
 
     private void Awake()
@@ -95,6 +100,8 @@ public class SettingsPopupController : MonoBehaviour
         lblRenderQualityValue = root.Q<Label>("LblRenderQualityValue");
         toggleShadow = root.Q<Toggle>("ToggleShadow");
         lblShadowStatus = root.Q<Label>("LblShadowStatus");
+        toggleShowChat = root.Q<Toggle>("ToggleShowChat");
+        lblShowChatStatus = root.Q<Label>("LblShowChatStatus");
 
         // General
         dropdownLanguage = root.Q<DropdownField>("DropdownLanguage");
@@ -116,6 +123,7 @@ public class SettingsPopupController : MonoBehaviour
         lblShadow = root.Q<Label>("LblShadow");
         lblGeneralSection = root.Q<Label>("LblGeneralSection");
         lblLanguage = root.Q<Label>("LblLanguage");
+        lblShowChat = root.Q<Label>("LblShowChat");
 
         // Subscribe to locale change event
         LocalizationSettings.SelectedLocaleChanged += OnLocaleChanged;
@@ -147,6 +155,7 @@ public class SettingsPopupController : MonoBehaviour
         if (sliderCameraZoom != null) sliderCameraZoom.value = 50f + cameraZoom * 50f;
         if (sliderRenderQuality != null) sliderRenderQuality.value = renderQuality * 100f;
         if (toggleShadow != null) toggleShadow.value = shadowEnabled;
+        if (toggleShowChat != null) toggleShowChat.value = showChatEnabled;
 
         UpdateDropdownLanguageValue();
         UpdateAllLabels();
@@ -218,6 +227,17 @@ public class SettingsPopupController : MonoBehaviour
             // TODO: QualitySettings.shadows = shadowEnabled ? ShadowQuality.All : ShadowQuality.Disable;
         });
 
+        toggleShowChat?.RegisterValueChangedCallback(evt =>
+        {
+            showChatEnabled = evt.newValue;
+            UpdateChatStatusLabel();
+            Debug.Log($"[Settings] Show Chat: {(showChatEnabled ? "ON" : "OFF")}");
+            if (ChatPanelController.Instance != null)
+            {
+                ChatPanelController.Instance.SetChatVisible(showChatEnabled);
+            }
+        });
+
         // ── General ──
         dropdownLanguage?.RegisterValueChangedCallback(evt =>
         {
@@ -235,19 +255,65 @@ public class SettingsPopupController : MonoBehaviour
             }
         });
 
-        // ── Bottom Buttons ──
+        // ── Bottom Buttons (tích hợp Confirm Dialog) ──
         btnDeleteAccount?.RegisterCallback<ClickEvent>(evt =>
         {
-            Debug.Log("[Settings] Delete Account clicked — show confirmation dialog");
-            // TODO: Show confirmation popup before deleting
+            if (confirmDialog != null)
+            {
+                confirmDialog.Show(
+                    "XÓA TÀI KHOẢN",
+                    "Hành động này sẽ xóa vĩnh viễn tài khoản của bạn. Tất cả dữ liệu sẽ bị mất và không thể khôi phục.",
+                    "Xóa vĩnh viễn",
+                    "Giữ tài khoản",
+                    OnDeleteAccountConfirmed,
+                    ConfirmDialogType.Danger
+                );
+            }
+            else
+            {
+                Debug.LogWarning("[Settings] ConfirmDialogController chưa được gán! Kéo thả vào Inspector.");
+            }
         });
 
         btnExitApp?.RegisterCallback<ClickEvent>(evt =>
         {
-            Debug.Log("[Settings] Exit App clicked");
-            // TODO: Save settings before quitting
-            // Application.Quit();
+            if (confirmDialog != null)
+            {
+                confirmDialog.Show(
+                    "THOÁT GAME",
+                    "Bạn có chắc chắn muốn thoát game? Tiến trình đã được lưu tự động.",
+                    "Thoát",
+                    "Ở lại",
+                    OnExitGameConfirmed,
+                    ConfirmDialogType.Warning
+                );
+            }
+            else
+            {
+                Debug.LogWarning("[Settings] ConfirmDialogController chưa được gán! Kéo thả vào Inspector.");
+            }
         });
+    }
+
+    // ── Confirm Dialog Callbacks ──
+
+    private void OnDeleteAccountConfirmed()
+    {
+        Debug.Log("[Settings] ✅ Xác nhận XÓA TÀI KHOẢN — đang thực hiện...");
+        // TODO: Gọi UGS Authentication để xóa tài khoản
+        // AuthenticationService.Instance.DeleteAccountAsync();
+        Hide();
+    }
+
+    private void OnExitGameConfirmed()
+    {
+        Debug.Log("[Settings] ✅ Xác nhận THOÁT GAME — đang thoát...");
+        // TODO: Save settings trước khi thoát
+        #if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+        #else
+        Application.Quit();
+        #endif
     }
 
     private void UpdateLabel(Label label, float value)
@@ -356,6 +422,7 @@ public class SettingsPopupController : MonoBehaviour
             if (lblShadow != null) lblShadow.text = GetLocalizedString(table, "shadow", "Bóng đổ");
             if (lblGeneralSection != null) lblGeneralSection.text = GetLocalizedString(table, "general_title", "CHUNG");
             if (lblLanguage != null) lblLanguage.text = GetLocalizedString(table, "language", "Ngôn ngữ");
+            if (lblShowChat != null) lblShowChat.text = GetLocalizedString(table, "show_chat", "Hiện chat");
 
             // Bottom buttons
             if (btnDeleteAccount != null) btnDeleteAccount.text = GetLocalizedString(table, "delete_account", "Xóa tài khoản");
@@ -367,6 +434,7 @@ public class SettingsPopupController : MonoBehaviour
         }
 
         UpdateShadowStatusLabel();
+        UpdateChatStatusLabel();
     }
 
     private string GetLocalizedString(UnityEngine.Localization.Tables.StringTable table, string key, string defaultValue)
@@ -401,5 +469,22 @@ public class SettingsPopupController : MonoBehaviour
         }
 
         lblShadowStatus.text = shadowEnabled ? onStr : offStr;
+    }
+
+    private void UpdateChatStatusLabel()
+    {
+        if (lblShowChatStatus == null || toggleShowChat == null) return;
+
+        var table = LocalizationSettings.StringDatabase.GetTable("GameUI");
+        string onStr = "BẬT";
+        string offStr = "TẮT";
+
+        if (table != null)
+        {
+            onStr = GetLocalizedString(table, "shadow_on", "BẬT");
+            offStr = GetLocalizedString(table, "shadow_off", "TẮT");
+        }
+
+        lblShowChatStatus.text = showChatEnabled ? onStr : offStr;
     }
 }

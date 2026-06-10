@@ -1,10 +1,465 @@
 # Changelog — Y WONDER LAND
 # Format: Theo module, có ngày và danh sách files thay đổi
 
+> **⚠️ TRẠNG THÁI QC:** Tất cả các module UI hiện tại đều **CHƯA được QC review** bởi khách hàng.
+> Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
+
+---
+## [2026-06-07] — Phase 5 & 6: Khai Thác Tài Nguyên và Câu Cá
+
+### Added
+- **Phase 5 (Khai Thác Tài Nguyên)**:
+  - Hệ thống `HarvestableResource.cs` xử lý tương tác nhấn giữ (hold 3s) để chặt cây, đập đá. Rơi ra `wood_01` và `stone_01`.
+  - `ResourceSpawner.cs` sinh ngẫu nhiên tài nguyên trên bản đồ, theo dõi đếm ngược thời gian hồi sinh (Respawn Timer) và lưu qua `PlayerPrefs`.
+  - Giao diện thanh tiến trình lơ lửng (`ResourceInteractionUI.uxml` và Controller) theo dõi tiến độ nhấn giữ.
+- **Phase 6 (Câu Cá - Đấu nối lõi)**:
+  - Tích hợp `FishingOverlayController.cs` với `InventoryManager`. Đọc số lượng `bait_01` thật từ túi đồ.
+  - Vượt qua QTE thành công, cá (`fish_01`, `fish_02`, `gift_box_01`) tự động thêm vào túi đồ.
+  - Hệ thống 10 lượt câu miễn phí mỗi ngày, lưu và reset bằng `PlayerPrefs` theo ngày thực.
+- **Item Database**: Thêm `pickaxe_01`, `fish_01`, `fish_02`, `gift_box_01` vào `ItemDataGenerator.cs`.
+
+### Fixed
+- **Obsolete API Cleanup (bởi Unity Assistant)**: Thay `enableWordWrapping` bằng `textWrappingMode = TextWrappingModes.NoWrap` trong `FloatingNameTag.cs` và `FishingSpot.cs`.
+- **Code Cleanup**: Dọn dẹp biến thừa `premiumBait` trong `FishingOverlayController.cs`.
+
+### Changed Files
+- `Assets/Scripts/Environment/HarvestableResource.cs` [NEW]
+- `Assets/Scripts/Managers/ResourceSpawner.cs` [NEW]
+- `Assets/UI/ResourceInteractionUI.uxml` [NEW]
+- `Assets/UI/ResourceInteractionUIController.cs` [NEW]
+- `Assets/Scripts/Environment/FarmInteractionController.cs` [MODIFIED]
+- `Assets/Scripts/Editor/ItemDataGenerator.cs` [MODIFIED]
+- `Assets/UI/FishingOverlayController.cs` [MODIFIED]
+- `Assets/Scripts/UI/FloatingNameTag.cs` [MODIFIED]
+- `Assets/Scripts/Environment/FishingSpot.cs` [MODIFIED]
+
+---
+## [2026-06-06] — Part B (Fix Phase): Fishing 3D & Build Mode Redesign
+
+### Added
+- **Fishing Spot 3D Interaction** (`FishingSpot.cs`): Chuyển từ bấm nút UI sang trigger 3D. Lại gần hiện TextMeshPro nổi "Nhấp F để Câu", bấm F mới mở UI câu cá. Tránh đụng phím E của sự kiện.
+- **Contextual Build Mode UX** (`BuildModeOverlayController.cs`):
+  - Ghim (Pin) vị trí nhà trên map khi click trái thay vì xây ngay, giải phóng chuột.
+  - Các nút Xây/Xoay/Hủy nổi cạnh ngôi nhà 3D.
+  - Context menu Xoay/Nhấc/Xóa nổi cạnh nhà khi click vào nhà đã xây.
+- **URP Grid Renderer** (`BuildGridRenderer.cs`): Dùng `RenderPipelineManager.endCameraRendering` để vẽ lưới bằng lệnh `Graphics.DrawMeshNow` thay cho `GL.Lines` (không chạy trên URP).
+
+### Fixed
+- **Build Mode Bugs**:
+  - Khối Ghost không trong suốt: Sửa shader URP.
+  - Lỗi click UI xuyên xuống game: Tự động ẩn `GameHUD` khi bật chế độ xây dựng.
+  - Ghost bị dính chuột: Đổi logic sang Pin position.
+
+### Changed Files
+- `Assets/UI/BuildModeOverlayController.cs`
+- `Assets/UI/BuildModeOverlay.uxml`
+- `Assets/UI/Styles/BuildModeOverlay.uss`
+- `Assets/Scripts/Environment/GhostPlacementController.cs`
+- `Assets/Scripts/Environment/BuildGridRenderer.cs` [NEW]
+- `Assets/Scripts/Environment/BuildGridManager.cs`
+- `Assets/Scripts/Environment/FishingSpot.cs` [NEW]
+
+---
+## [2026-06-06] — Part A Hoàn thành: Onboarding Flow + Tutorial UX + Name Tags
+
+### Added
+- **Character Select UI Toolkit** (`CharacterSelect.uxml`, `CharacterSelectController.cs`):
+  - Chọn giới tính (♂/♀ cards), đặt tên (2-16 ký tự, validate), popup cảnh báo xác nhận.
+  - Vietnamese text set từ C# code (không gõ trực tiếp UXML).
+  - GameManager tự Show/Hide theo state.
+- **Tutorial UX cải thiện cho đối tượng nhỏ tuổi** (`TutorialManager.cs`):
+  - Instruction Banner lớn (nền xanh) hiện mỗi bước quan trọng.
+  - Countdown Timer to (48px) giữa màn hình khi chờ cây lớn, đổi màu xanh→vàng→đỏ.
+  - Dấu chấm than (!) vàng nhấp nhô+xoay trên đầu NPC.
+  - NPC chào ngay khi tutorial bắt đầu.
+- **Floating Name Tags** (`FloatingNameTag.cs`):
+  - TextMeshPro 3D + billboard rotation — chữ phẳng sắc nét kiểu Minecraft.
+  - Outline đen dày, màu theo Design System (Player=Gold #FFC107, NPC=Hero #5B42F3).
+  - Anti-frustum culling: overflow mode, disable occlusion, force mesh update.
+  - Fade opacity khi xa, ẩn khi >30m.
+  - Auto-attach cho Player (GameManager) và NPC (GuideNPC).
+
+### Fixed
+- **Legacy Input bug** (`TutorialManager.cs`): `Input.GetMouseButtonDown(0)` → `Mouse.current.leftButton.wasPressedThisFrame`.
+- **URP Shader tím** (8 files): `Shader.Find("Standard")` → `Shader.Find("Universal Render Pipeline/Lit")` trong FarmTile, GhostPlacement, GuideNPC, TutorialManager.
+- **CharacterSelect không ẩn sau xác nhận**: Thêm Hide() + GameManager quản lý visibility.
+
+### Changed Files
+- `Assets/UI/CharacterSelect.uxml` [NEW]
+- `Assets/UI/CharacterSelectController.cs` [NEW]
+- `Assets/Scripts/UI/FloatingNameTag.cs` [NEW]
+- `Assets/Scripts/Tutorial/TutorialManager.cs`
+- `Assets/Scripts/Tutorial/GuideNPC.cs`
+- `Assets/Scripts/Managers/GameManager.cs`
+- `Assets/Scripts/Environment/FarmTile.cs`
+- `Assets/Scripts/Environment/GhostPlacementController.cs`
+
+---
+## [2026-06-05] — Module Build Mode / Chế độ Xây dựng (WIP)
+
+### Added
+- **Build Mode Overlay UI** — Giao diện xây dựng/trang trí nông trại:
+  - **Control Bar** (cạnh trên): Pill số dư POS, tiêu đề "CHẾ ĐỘ XÂY DỰNG", 5 nút công cụ (Hoàn tác, Di chuyển, Xoay, Xóa, Lưu) + nút thoát (✕ đỏ).
+  - **Category Sidebar** (cạnh trái): 5 tab dọc — Nhà cửa, Nông trại, Hàng rào, Trang trí, Đường đi. Tab active nền vàng `#FFC107`.
+  - **Item Bar** (cạnh dưới): ScrollView ngang chứa card vật phẩm (80×96px) với icon, tên, giá POS. Card được chọn viền vàng 3px.
+  - **Detail Tooltip** (nổi phía trên item): Panel kem `#F5F0E8` với retro shadow, hiển thị icon + tên + kích thước + giá + mô tả + nút "ĐẶT XUỐNG".
+  - **Status Label**: Nhãn trung tâm mờ dần (fade-out 2s) thông báo kết quả thao tác.
+  - **Màu chủ đạo**: Nâu gỗ `#8B5E3C` cho nút Xoay và sidebar button trên HUD.
+  - **Mock Data**: 5 danh mục × ~5 vật phẩm = ~25 item mẫu với emoji, giá, kích thước.
+- **Hệ thống 3D Placement**:
+  - **BuildGridManager**: Lưới 50×50 ô (1 unit/ô), world↔grid conversion, occupancy validation (CanPlace/OccupyCells/FreeCells), Gizmos debug, **follow target** (grid bám theo nhân vật liên tục mỗi frame).
+  - **BuildGridRenderer**: Vẽ lưới ô vuông runtime bằng GL.Lines trong Game View (không chỉ Scene View). Viền nâu gỗ. Bật/tắt theo Build Mode.
+  - **GhostPlacementController**: Cube bán trong suốt theo chuột qua Raycast → snap grid → xanh lá (hợp lệ) / đỏ (trùng hoặc ngoài grid). Click trái đặt, click phải hủy. Hỗ trợ xoay + multi-cell (2x2, 3x3...).
+  - **BuildCameraController**: Camera Top-Down 75°, smooth transition từ/về ThirdPersonCamera, WASD pan, scroll zoom. Unlock cursor cho Build Mode.
+- **HUD Integration**:
+  - Nút 🔨 (`BtnBuild`) trên sidebar trái, nền nâu gỗ `#8B5E3C`.
+  - Phím **B** toggle Build Mode.
+
+### ⚠️ WIP — Chưa hoàn thiện
+- Ghost dùng Primitive Cube placeholder — chờ model 3D thật.
+- Chưa test kỹ ghost xanh/đỏ, cho xây/hủy/di chuyển.
+- Chưa có logic trừ POS qua ghost system (chỉ có mockup UI).
+- Chưa có lưu/load bố cục nông trại.
+
+### Files changed
+- Assets/UI/BuildModeOverlay.uxml (NEW)
+- Assets/UI/Styles/BuildModeOverlay.uss (NEW)
+- Assets/UI/BuildModeOverlayController.cs (NEW)
+- Assets/Editor/SetupBuildModeUI.cs (NEW)
+- Assets/Scripts/Environment/BuildGridManager.cs (NEW)
+- Assets/Scripts/Environment/BuildGridRenderer.cs (NEW)
+- Assets/Scripts/Environment/GhostPlacementController.cs (NEW)
+- Assets/Scripts/Camera/BuildCameraController.cs (NEW)
+- Assets/UI/GameHUD.uxml (MODIFIED — thêm BtnBuild)
+- Assets/UI/Styles/GameHUD.uss (MODIFIED — thêm .sidebar-btn-build)
+- Assets/UI/GameHUDController.cs (MODIFIED — thêm reference + callback + phím B)
+- docs/MEMORY.md (MODIFIED — thêm bài học #46, #47)
+
+---
+## [2026-06-05] — Module Splash/Loading Screen (Màn hình Chào/Tải game)
+
+### Added
+- **Splash Loading Screen** — Màn hình khởi động game hiển thị đầu tiên khi Play Mode:
+  - **Logo thương hiệu**: Chữ "Y WONDER LAND" cỡ 48px nét đậm trắng trên nền tối `#1E1E23`, có bóng đổ retro cứng `#3D3535` lệch 4px tạo hiệu ứng khắc chữ nổi.
+  - **Phụ đề**: "CUỘC PHIÊU LƯU BẮT ĐẦU" màu vàng `#FFC107`, letter-spacing 6px tạo cảm giác trang trọng.
+  - **Thanh tiến trình retro**: Chiều rộng 400px, chiều cao 24px, viền dày 3px `#3D3535`, nền xám `#3A3A42`. Vệt nạp màu vàng `#FFC107` bo góc 8px, chiều rộng thay đổi mượt mà từ 0% → 100% theo eased curve (smoothstep).
+  - **Nhãn trạng thái động**: Thay đổi theo 5 mốc phần trăm — "Đang tải cấu hình nông trại..." → "Đang kết nối đến máy chủ Cloud..." → "Đang đồng bộ dữ liệu thế giới 3D..." → "Đang chuẩn bị giao diện..." → "Tải hoàn tất!".
+  - **Nhãn phần trăm**: Hiển thị `0%` → `100%` đồng bộ với thanh tiến trình.
+  - **Trang trí**: 4 ngôi sao Unicode ✦✧ ở 4 góc màn hình tạo bầu không khí, gạch phân cách vàng mờ dưới phụ đề, nhãn phiên bản `v0.1.0-alpha` góc dưới phải.
+- **Tính năng mở rộng**:
+  - **Sort Order = 10**: UIDocument đặt Sort Order cao hơn Login Screen (mặc định 0) để tự động đè lên mà không cần thay đổi GameManager.
+  - **Click to Skip**: Nhấp chuột vào bất kỳ đâu trên màn hình splash trong lúc tải sẽ nhảy nhanh đến 100% và chuyển cảnh.
+  - **Fade-out Transition**: Khi tải hoàn tất, toàn bộ màn hình splash mờ dần (opacity 1 → 0) trong 0.5 giây, rồi GameObject tự động deactivate để lộ Login Screen bên dưới.
+  - **Phím nóng P**: Bấm phím P (New Input System) bất kỳ lúc nào để bật lại Splash Screen và chạy lại mô phỏng từ 0% — tiện cho nhà phát triển kiểm thử và quay video demo.
+  - **Simulated Loading**: Coroutine giả lập tiến trình từ 2 đến 3 giây ngẫu nhiên với đường cong smoothstep tạo cảm giác tải tự nhiên.
+
+### Files changed
+- Assets/UI/SplashLoadingScreen.uxml (NEW)
+- Assets/UI/Styles/SplashLoadingScreen.uss (NEW)
+- Assets/UI/SplashLoadingController.cs (NEW)
+- Assets/Editor/SetupSplashUI.cs (NEW)
+
+---
+## [2026-06-04] — Module Fishing UI (Mini-game Câu cá)
+
+### Added
+- **Fishing Overlay** — Giao diện mini-game câu cá tương tác đầy đủ với các trạng thái:
+  - **Chuẩn bị (Ready Panel)**: Chọn mồi câu (Không mồi / Mồi thường / Mồi xịn) và nút "QUĂNG CẦN" (🎣).
+  - **Chờ đợi (Waiting Panel)**: Biểu tượng phao câu nhấp nhô theo nhịp sóng (sine wave animation trong Update) và nút "Thu cần" để hủy câu sớm.
+  - **Giật cần (QTE Panel)**: Xuất hiện khi cá cắn câu sau 3-6 giây ngẫu nhiên.
+    - Thanh đo lực chứa **Vùng Xanh (Safe Zone)** thay đổi độ rộng theo loại mồi.
+    - Kim đỏ dao động liên tục qua lại bên trong thanh đo.
+    - Thanh thời gian cạn dần biểu thị giới hạn **1.5 giây QTE**.
+    - Nút "GIẬT CẦN!" và phím nóng `Space` để câu.
+  - **Kết quả (Result Panel)**: Bảng thông báo thành công/hụt dạng modal bo góc viền đen.
+    - Hiển thị tên cá, biểu tượng emoji, độ hiếm (Thường/Hiếm/Sử Thi/Sự Kiện), và mô tả phần thưởng.
+    - Liên kết thưởng POS trực tiếp khi câu thành công. Có 5% cơ hội câu được Bao Lì Xì Event 🎁.
+- **Tính năng mở rộng**:
+  - **Bait Mechanics**: Sử dụng mồi thường tăng tỉ lệ cá hiếm, mồi xịn tăng tỉ lệ cá sử thi và mở rộng vùng xanh QTE lên 40%, giảm tốc độ kim.
+  - **Bait Shop Fallback**: Tích hợp ConfirmDialog mời mua thêm 5 mồi thường giá 50 POS khi hết lượt câu miễn phí.
+  - **Cheat Panel**: Thanh hỗ trợ nhà phát triển ở góc dưới bên trái gồm các nút hồi 10 lượt, mua 10 mồi và công tắc "Auto-Win QTE" giúp kiểm thử chính xác nhanh chóng.
+  - **HUD Integration**: Nút 🎣 ở sidebar và phím nóng `F` trên bàn phím để mở/đóng chế độ câu cá.
+
+### Files changed
+- Assets/UI/FishingOverlay.uxml (NEW)
+- Assets/UI/Styles/FishingOverlay.uss (NEW)
+- Assets/UI/FishingOverlayController.cs (NEW)
+- Assets/Editor/SetupFishingUI.cs (NEW)
+- Assets/UI/GameHUD.uxml (MODIFIED — thêm nút 🎣)
+- Assets/UI/Styles/GameHUD.uss (MODIFIED — thêm css nút 🎣)
+- Assets/UI/GameHUDController.cs (MODIFIED — thêm tích hợp nút & phím F)
+
+---
+## [2026-06-04] — Module Chat UI (Khung chat thu/mở)
+
+### Added
+- **Chat Panel** — Hệ thống chat kênh thế giới đặt tại cạnh dưới giữa màn hình với 2 trạng thái:
+  - **Trạng thái thu gọn (Collapsed)**: Thanh pill mờ đen đồng bộ HUD hiển thị tin nhắn mới nhất, có nút emoji nhanh và nút mở rộng (▲).
+  - **Trạng thái mở rộng (Expanded)**: Khung chat 420x260px nền tối bán trong suốt (Dark Translucent — `rgba(30, 30, 35, 0.88)`) không che khuất thế giới 3D, viền tối 3px chuẩn design system.
+    - **Header**: Thanh tiêu đề "KÊNH THẾ GIỚI" nền đen mờ kèm nút thu nhỏ (▼).
+    - **History scroll**: Cuộn lịch sử tin nhắn nền tối mờ, chữ trắng/sáng màu dễ đọc, tự động cuộn xuống đáy khi có tin nhắn mới (On GeometryChangedEvent).
+    - **Footer**: Input nhập tin nhắn màu trắng nổi bật, nút gửi ("Gửi") màu xanh blue retro, nút emoji nhanh (☺) màu kem sáng.
+  - **Nút bấm Tactile đồng bộ**: Cả nút mở rộng (▲), thu nhỏ (▼) và emoji nhanh (☺) đều được thiết kế dạng phím cơ bo góc tròn, màu tím thương hiệu (`#5B42F3`), viền dày 2px `#3D3535`, có phản hồi vật lý lún 1px khi click.
+- **Tính năng mở rộng**:
+  - **Profanity Filter**: Tự động lọc các từ tục tĩu tiếng Việt/Anh ("ngu", "fuck", "đm", "vl"...) thành dấu `***`.
+  - **Rate Limit**: Giới hạn tần suất chat (tối đa 5 tin nhắn trong 30 giây). Nếu vượt quá, hiển thị cảnh báo đỏ từ hệ thống.
+  - **Mock AI Chatbot**: Tự động trả lời theo từ khóa tin nhắn ("hello", "nông trại", "shop", "bản đồ", "heo đất"...) sau 2 giây delay để mô phỏng tính năng AI NPC.
+  - **Enter Hotkey**: Bấm phím `Enter` để mở rộng chat và tự động focus vào input field; bấm tiếp để gửi tin; bấm khi rỗng sẽ tắt focus/thu nhỏ.
+  - **Settings Integration**: Thêm toggle "Hiện chat" vào Cài đặt (SettingsPopup) để bật/tắt hiển thị toàn bộ khung chat.
+
+### Files changed
+- Assets/UI/ChatPanel.uxml (NEW)
+- Assets/UI/Styles/ChatPanel.uss (NEW)
+- Assets/UI/ChatPanelController.cs (NEW)
+- Assets/Editor/SetupChatUI.cs (NEW)
+- Assets/UI/SettingsPopup.uxml (MODIFIED — thêm toggle Hiện chat)
+- Assets/UI/SettingsPopupController.cs (MODIFIED)
+- Assets/UI/GameHUD.uxml (MODIFIED — xóa MessagesBar cũ)
+- Assets/UI/GameHUDController.cs (MODIFIED — xóa dọn dẹp MessagesBar)
+
+### Fixed & Refactored
+- **Xóa giao diện đè chồng trong Editor (Edit Mode)**: Loại bỏ hoàn toàn `MessagesBar` cũ trong `GameHUD.uxml` và dọn dẹp các C# bindings liên quan trong `GameHUDController.cs` để tránh đè chồng lên Chat Panel mới lúc chưa chạy game trong Unity Editor.
+- **Đồng bộ hóa nút bấm**: Thay đổi style các nút tam giác, emoji phẳng không viền thành các nút đặc có khối đế màu tím viền đen dày để đúng tinh thần giao diện cơ học.
+- **Lỗi biên dịch Setup script**: Sửa lỗi tham chiếu sai thuộc tính `sourceAsset` thành `visualTreeAsset` trên `UIDocument` trong C# Editor setup script.
+
+---
+## [2026-06-04] — Module Event / Exchange UI (Sự kiện mùa)
+
+### Added
+- **Event Popup** — UI sự kiện theo mùa với 2 tab:
+  - **Tab Đổi quà**: Grid đổi vật phẩm event (cá, quặng, vé) lấy reward hiếm (V2 items, pet, cosmetic)
+  - **Tab Gói ưu đãi**: Bundle UPOS giảm giá giới hạn thời gian, có tag "-50%"/"HOT", trạng thái "ĐÃ HẾT"
+  - **Sidebar Vật phẩm**: Hiển thị số lượng 🐟 Cá event / 💎 Quặng hiếm / 🎫 Vé sự kiện
+  - **Timer pill**: Đếm ngược thời gian sự kiện còn lại
+  - **Header**: Festival Purple #9C27B0
+  - **Close button**: Wrapper pattern chuẩn (Lessons #33 #34)
+  - **Mock data**: 6 exchange items + 3 bundles
+
+### Files changed
+- Assets/UI/EventPopup.uxml (NEW)
+- Assets/UI/Styles/EventPopup.uss (NEW)
+- Assets/UI/EventPopupController.cs (NEW)
+- Assets/UI/GameHUD.uxml (MODIFIED — thêm BtnEvent 🎁)
+- Assets/UI/Styles/GameHUD.uss (MODIFIED — thêm sidebar-btn-event styles)
+- Assets/UI/GameHUDController.cs (MODIFIED — thêm eventPopup reference + BtnEvent callback + E key test)
+
+### Fixed
+- **UXML comment Unicode**: Comment `<!-- ═══ ... ═══ -->` chứa ký tự Unicode `═` khiến UI Builder không mở được file. Đã đổi thành ASCII thuần.
+- **Header bị co rúm khi đổi tab**: Header và tab bar thiếu `flex-shrink: 0`, bị body content ép nhỏ khi tab Đổi quà có nhiều item.
+- **Bundle cards cao thấp khác nhau**: Dùng `min-height` chỉ đặt mức tối thiểu, card có description dài vẫn cao hơn. Fix: dùng `height: 280px` cố định + spacer `flex-grow: 1` đẩy nút xuống đáy.
+- **Legacy Input API**: `Input.GetKeyDown` gây lỗi vì project dùng New Input System. Fix: dùng `Keyboard.current.eKey.wasPressedThisFrame`.
+
+---
+## [2026-06-04] — Module Level Up VFX/UI
+
+### Added
+- **Level Up Overlay** — Fullscreen golden VFX khi người chơi thăng cấp:
+  - Background: Overlay tối + vùng glow vàng tròn ở giữa
+  - **Badge** ⭐ scale animation (0.5→1)
+  - **"LEVEL UP!"** text scale animation (0.6→1)
+  - **Level mới** hiển thị trong pill viền vàng
+  - **Mở khóa** section (xanh lá, chỉ hiện khi level có unlock): Lv.5 Câu cá, Lv.10 Mỏ đá, Lv.40 Đảo Hải Phú...
+  - **Nút "TIẾP TỤC"** màu vàng gold để đóng
+  - Star decorations ✦✧ trang trí xung quanh
+  - Fade in/out via CSS opacity transition
+- **Keyboard Test** — Bấm phím **L** trong Play Mode để test Level Up liên tục
+
+### Files changed
+- Assets/UI/LevelUpOverlay.uxml (NEW)
+- Assets/UI/Styles/LevelUpOverlay.uss (NEW)
+- Assets/UI/LevelUpOverlayController.cs (NEW)
+- Assets/UI/GameHUDController.cs (MODIFIED — thêm levelUpOverlay reference + L key test)
+
+---
+## [2026-06-04] — Module Heo Đất UI (Piggy Bank Savings)
+
+### Added
+- **Heo Đất Popup** — Gửi tiết kiệm POS với 3 gói lãi suất:
+  - **3 gói**: 12 ngày (+2%), 30 ngày (+6%), 180 ngày (+45%)
+  - **Tab Gửi tiết kiệm**: Chọn gói → nhập số tiền → preview (gốc/lãi/tổng) → xác nhận
+  - **Validation**: Kiểm tra số dư, chỉ cho phép 1 gói active, không rút sớm
+  - **Countdown**: Đếm ngược real-time (test mode: 1 ngày = 5 giây)
+  - **Đáo hạn**: Tự động cộng gốc + lãi vào balance, thêm entry lịch sử
+  - **Tab Lịch sử**: Hiển thị các giao dịch đã hoàn thành + mock data
+  - **Header**: Warm Gold #E8833A, balance pill góc trái (Lessons #30 #32 applied)
+  - **Close button**: Wrapper pattern chuẩn (Lessons #33 #34 applied)
+- **HUD Piggy Button** — Nút 🐷 trên sidebar HUD, màu #E8833A
+
+### Files changed
+- Assets/UI/PiggyBankPopup.uxml (NEW)
+- Assets/UI/Styles/PiggyBankPopup.uss (NEW)
+- Assets/UI/PiggyBankPopupController.cs (NEW)
+- Assets/UI/GameHUD.uxml (MODIFIED — thêm BtnPiggy)
+- Assets/UI/Styles/GameHUD.uss (MODIFIED — thêm sidebar-btn-piggy styles)
+- Assets/UI/GameHUDController.cs (MODIFIED — thêm piggyBankPopup reference + callback)
+
+### Fixed
+- **Package card tràn nội dung**: Layout dọc (icon→tên→rate→label) xếp 4 tầng quá cao, rate bị tràn ra ngoài viền card. Sửa bằng cách chuyển sang layout **ngang** (icon ← tên → rate), ẩn label dư thừa.
+- **Preview rows đè chồng**: Các dòng Gốc/Lãi/Nhận về bị overlap do thiếu `min-height`, `align-items`, `flex-shrink`. Thêm `min-height: 18px` + `flex-shrink: 0` cho label/value.
+
+---
+## [2026-06-04] — Module Map UI (Visual World Map)
+
+### Added
+- **Map Popup** — Bản đồ thế giới dạng visual map (biển + đảo), không phải danh sách:
+  - Nền đại dương xanh #1A8FBF với sóng trang trí `〰〰〰` + la bàn 🧭
+  - **5 đảo positioned** trên bản đồ, mỗi đảo có vùng đất riêng (hình/màu khác nhau):
+    - 🏡 Nông trại (xanh lá, center-left, luôn mở)
+    - 🏙️ Thành phố (xám bạc, center-right, cần tutorial)
+    - ⛏️ Mỏ đá (nâu, top-center, Lv.10)
+    - 🏝️ Đảo Hải Phú (vàng cát, bottom-left, Lv.40 + VIP/Vé, có 🔒 overlay)
+    - 🌲 Đảo Mộc Nhi (xanh đậm, bottom-right, Lv.60 + VIP/Vé, có 🔒 overlay)
+  - **Interaction**: Bấm đảo → pin viền vàng gold + floating info card hiện ở dưới → bấm "🚀 DI CHUYỂN"
+  - **Info Card**: Icon, tên, status badge (ĐÃ MỞ KHÓA/ĐANG KHÓA), mô tả, yêu cầu ✅/❌, nút travel
+  - **Cheat Bar**: 2 nút test — cycle level (1→5→15→45→65), cycle VIP/Vé
+  - **Top bar**: Semi-transparent dark, level pill góc trái, tiêu đề "BẢN ĐỒ THẾ GIỚI"
+- **HUD Map Button** — Nút tạm "🗺️ Map" trên sidebar HUD, màu #00B4D8
+
+### Fixed
+- **Close button bị cắt (clip)**: Nút X nằm bên trong `map-container` có `overflow: hidden` → bị lẹm góc. Sửa bằng cách thêm `map-wrapper` bọc ngoài (không có overflow), đặt close button ở wrapper level.
+- **Close button khó thấy**: Ban đầu nút X nằm trong top bar tối màu → lẫn vào nền. Chuyển ra góc phải trên, nhô ra ngoài viền (pattern chuẩn `right: -8px; top: -8px`).
+
+### Files changed
+- Assets/UI/MapPopup.uxml (NEW — restructured: map-wrapper → map-container + close)
+- Assets/UI/Styles/MapPopup.uss (NEW — ocean bg, islands, info card, wrapper)
+- Assets/UI/MapPopupController.cs (NEW — visual map, dictionary data, island clicks)
+- Assets/UI/GameHUD.uxml (MODIFIED — thêm BtnMap)
+- Assets/UI/Styles/GameHUD.uss (MODIFIED — thêm sidebar-btn-map styles)
+- Assets/UI/GameHUDController.cs (MODIFIED — thêm mapPopup reference + callback)
+
+---
+## [2026-06-04] — Shop UI Polish & Sell Mode Testing
+
+### Fixed
+- **Số dư dính header**: Pill số dư (`🪙 5,000 POS`) bị nằm giữa header đè lên tiêu đề → sửa bằng `position: absolute; left: 12px` để ghim góc trái.
+- **Tiêu đề tràn viền**: Chữ "HAI LÚA — VẬT TƯ NÔNG TRẠI" quá dài, sắp chìa ra ngoài → giảm font `20px → 18px`, thêm `padding: 0 120px` + `text-overflow: ellipsis`.
+- **Bottom bar thừa thông tin**: Dòng "Chế độ: Mua" và "Số dư" ở cạnh dưới bị lệch nhau giữa các tab → xóa hoàn toàn bottom info bar vì tab Mua/Bán trên sidebar đã thể hiện rõ chế độ, số dư chuyển lên header.
+
+### Added
+- **Sell Mode mock data**: Bật tab Bán (`hasSellTab = true`) với 8 item nông sản có thể bán (Cà rốt 15 POS, Rau cải 20 POS, Dưa hấu 50 POS, Trứng gà 25 POS, Sữa bò 40 POS, Gỗ 8 POS, Đá 12 POS...) để test chuyển đổi Mua/Bán.
+
+### Files changed
+- Assets/UI/ShopPopup.uxml (MODIFIED — xóa bottom bar, thêm balance pill vào header)
+- Assets/UI/Styles/ShopPopup.uss (MODIFIED — thêm balance pill styles, xóa info-bar styles, sửa header title)
+- Assets/UI/ShopPopupController.cs (MODIFIED — xóa lblMode, cập nhật UpdateBalance format, thêm sell mock data)
+
+---
+## [2026-06-04] — HUD Shop Test Button Integration
+
+### Added
+- **HUD Shop Button** — Tích hợp nút tạm "🛒 Shop" trên HUD để test nhanh Shop Popup:
+  - Màu nền xanh lá #4CAF50 đồng bộ với header shop, viền 3px #3D3535.
+  - Sử dụng bố cục ngang (flex-direction: row) gồm emoji 🛒 và nhãn chữ "Shop".
+  - Hiệu ứng cơ học đầy đủ: hover phóng to/đổi màu nhẹ, active lún xuống 3px.
+  - Tích hợp callback click mở ShopPopup với mock data mặc định ("Hai Lúa").
+  - Cơ chế dự phòng (fallback) tự động tìm kiếm `ShopPopupController` và các popup controller khác trong `OnEnable()` nếu chưa kéo thả trong Inspector.
+
+### Files changed
+- Assets/UI/GameHUD.uxml (MODIFIED)
+- Assets/UI/Styles/GameHUD.uss (MODIFIED)
+- Assets/UI/GameHUDController.cs (MODIFIED)
+
+---
+## [2026-06-04] — Module Shop UI (Template chung 12 shop)
+
+### Added
+- **Shop Popup** — Template UI dùng chung cho tất cả 12 cửa hàng trong Thành phố:
+  - Layout landscape 2 cột giống Inventory: Sidebar + Grid + Detail Panel
+  - **Sidebar trái**: 2 tab chế độ (🛒 Mua / 💰 Bán) + 5 filter danh mục (Tất cả / Hạt giống / Vật nuôi / Dụng cụ / Vật phẩm)
+  - **Grid giữa**: Item cards (icon + tên + giá POS) với hover/active/selected states
+  - **Detail phải**: Icon lớn + tên + giá + mô tả + bộ chọn số lượng (−/+) + tổng tiền + nút MUA/BÁN
+  - **Tab Bán**: tự ẩn nếu shop không hỗ trợ bán (cấu hình qua `ShopData.hasSellTab`)
+  - Reusable API: `Show(ShopData data)` — mỗi NPC shop truyền data riêng
+  - Mock data mặc định: "Hai Lúa — Vật tư nông trại" (10 items, giá theo kịch bản)
+  - Header xanh lá #4CAF50, border #388E3C, style khớp popup cũ (22px radius, 3px border)
+  - Nút Mua màu xanh lá, nút Bán màu cam #E8833A
+  - Footer hiển thị số dư POS + chế độ hiện tại
+
+### Files changed
+- Assets/UI/ShopPopup.uxml (NEW)
+- Assets/UI/Styles/ShopPopup.uss (NEW)
+- Assets/UI/ShopPopupController.cs (NEW)
+
 ---
 
-## [2026-06-03] — UI/UX Layout Polish (Friends, Quest, Attendance Popups)
+## [2026-06-04] — Forgot Password Popup + UI Consistency Fix
+
+### Added
+- **Forgot Password Popup** — Popup riêng cho luồng quên mật khẩu:
+  - 1 input Email (có icon ✉, focus highlight border xanh)
+  - Nút "Gửi mã xác nhận" luôn bấm được, hiện lỗi nếu email sai
+  - Validate email real-time (regex), status thành công/lỗi
+  - Header xanh #2D7BFF, overlay click-to-dismiss, nút X đỏ
+  - Mockup flow: validate → hiện thông báo gửi mã thành công
+- Tích hợp vào **LoginScreenController**: nút "Quên mật khẩu?" gọi `ForgotPasswordPopupController.Show()`
+
 ### Fixed
+- **UI Consistency** — Sửa toàn bộ ConfirmDialog.uss và RewardPopup.uss cho khớp phong cách popup cũ:
+  - Panel: `border-radius: 22px`, `border-width: 3px`, `border-color: #3D3535`
+  - Shadow wrapper: `transparent` + `padding 6px` (không tô màu)
+  - Close button: `border-radius: 10px`, `3px #3D3535`, `:active → #CC3333`
+  - Nút action: `3px border`, `translate: 1px 1px`, `transition: 0.08s`
+  - Bỏ shadow wrapper phía sau các nút bấm (nút phẳng)
+
+### Files changed
+- Assets/UI/ForgotPasswordPopup.uxml (NEW)
+- Assets/UI/Styles/ForgotPasswordPopup.uss (NEW)
+- Assets/UI/ForgotPasswordPopupController.cs (NEW)
+- Assets/UI/LoginScreenController.cs (MODIFIED — thêm SerializeField + gọi Show)
+- Assets/UI/Styles/ConfirmDialog.uss (MODIFIED — khớp popup cũ)
+- Assets/UI/Styles/RewardPopup.uss (MODIFIED — khớp popup cũ)
+- docs/MEMORY.md (MODIFIED — thêm bài học #29 UI Consistency)
+
+---
+
+## [2026-06-04] — Module Confirm Dialog & Reward Popup
+### Added
+- **Confirm Dialog** — Component reusable dạng modal nhỏ trung tâm cho toàn game:
+  - 3 loại dialog: Warning (⚠ vàng #FFC107), Danger (✕ đỏ #FF4B4B), Info (i xanh #2D7BFF)
+  - API: `Show(title, message, confirmText, cancelText, onConfirm, dialogType)`
+  - 2 nút: Hủy bỏ (xám) + Xác nhận (màu theo type)
+  - Icon Unicode trong vòng tròn màu theo type
+  - Overlay click-to-dismiss, nút X đỏ góc trên phải
+- **Reward Popup** — Component reusable hiển thị phần thưởng:
+  - API: `Show(title, rewards, buttonText, onClaim)`
+  - Lưới reward items tự động tạo từ `List<RewardItemData>`
+  - Mỗi item: icon + tên + số lượng trong khung trắng bo góc 16px
+  - Header vàng #FFC107, nút "Nhận thưởng" mechanical press
+  - Empty state "Không có phần thưởng" khi danh sách rỗng
+- Cả 2 component tuân thủ đầy đủ The Tangible Playground:
+  - Retro shadow 6px offset, 0px blur
+  - Spacing bội 4/8px, border 2-3px #3D3535
+  - Đủ trạng thái :hover, :active, :disabled
+  - Không glassmorphism, không gradient, không icon thừa
+  - Callbacks đăng ký 1 lần, unregister khi disable
+### Files changed
+- Assets/UI/ConfirmDialog.uxml (NEW)
+- Assets/UI/Styles/ConfirmDialog.uss (NEW)
+- Assets/UI/ConfirmDialogController.cs (NEW)
+- Assets/UI/RewardPopup.uxml (NEW)
+- Assets/UI/Styles/RewardPopup.uss (NEW)
+- Assets/UI/RewardPopupController.cs (NEW)
+
+---
+
+## [2026-06-03] — Onboarding Cinematic Skip & Tutorial Fallback
+### Added
+- Tích hợp Cinematic UI cho màn hình thuyền cập bến (`BoatCutscene.cs`): Bao gồm nút **Bỏ qua (Skip)** xuất hiện sau 3 giây và hội thoại dẫn truyện chạy dọc ở đáy màn hình. Bấm "Bỏ qua" sẽ dịch chuyển tức thời thuyền và camera đến vị trí kết thúc.
+- Triển khai cơ chế **Tự động Tìm kiếm & Khởi tạo (Bulletproof Fallbacks)** trong `TutorialManager.cs`: Nếu mảnh đất `FarmTile` hoặc `GuideNPC` bị thiếu trong Scene, script sẽ tự động sinh các GameObject placeholder tương thích kèm BoxCollider và các thành phần logic để tutorial chạy trơn tru không lỗi.
+- Triển khai **mô phỏng visual bằng hình 3D hình học (Primitives Mockup)** cho `FarmTile.cs`: Tự động vẽ Soil (Khối nâu), Plowed (Khối nâu đậm), Seed (Sprout nhỏ), Watered (Sprout vừa), Ripe (Củ cà rốt cam) khi thiếu tài nguyên 3D art từ Artist.
+- Triển khai **model Capsule tạm thời** cho `GuideNPC.cs`: Vẽ Capsule màu tím cao 2m cùng mũi kim chỉ hướng màu vàng để người chơi định vị NPC. Tự động sinh 3 Waypoints dẫn đường đến mảnh đất nếu waypoints bị trống.
+### Changed
+- Quản lý đồng bộ hiển thị HUD (`GameManager.cs`): Tự động ẩn HUD trong các trạng thái Login, Menu, Cutscene và hiển thị lại khi vào Gameplay.
+### Files changed
+- Assets/Scripts/Cutscenes/BoatCutscene.cs (MODIFIED)
+- Assets/Scripts/Managers/GameManager.cs (MODIFIED)
+- Assets/Scripts/Tutorial/TutorialManager.cs (MODIFIED)
+- Assets/Scripts/Tutorial/GuideNPC.cs (MODIFIED)
+- Assets/Scripts/Environment/FarmTile.cs (MODIFIED)
+
+## [2026-06-03] — UI/UX Layout Polish (Friends, Quest, Attendance, Settings Popups)
+### Fixed
+- Popup Cài đặt (Settings): Polish và hoàn thiện layout ngày 03/06.
 - Popup Bạn bè (Friends): Thêm khoảng đệm an toàn `margin-right: 16px` cho cụm tìm kiếm và thu nhỏ kích thước của TextField nhập tên cùng các nút bấm để tránh đè lấn lên nút đóng X ở góc trên bên phải.
 - Popup Nhiệm vụ (Quest) & Điểm danh (Attendance): Khắc phục triệt để lỗi ô vật phẩm phần thưởng bị chòi ra ngoài viền khung chứa bằng cách thiết lập `flex-shrink: 0` cho các container/grid phần thưởng và các slot con cố định, giữ nguyên layout cân đối khi kích thước màn hình thay đổi.
 - Popup Nhiệm vụ (Quest) & Thông tin nhân vật (Profile): Sửa lỗi text chỉ số tiến trình (`10 / 10`) và EXP bị lệch sát đáy dưới thanh bằng cách reset `margin` và `padding` về `0` cho `.quest-progress-text` và `.profile-exp-text`.

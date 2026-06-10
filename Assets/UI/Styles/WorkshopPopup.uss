@@ -1,0 +1,367 @@
+/* ============================================================
+   WorkshopPopup.uss — Workshop / Forge Popup
+   Design System: The Tangible Playground
+   Chuan: khop SettingsPopup / ShopPopup / InventoryPopup
+   Header: Cam #E8833A
+   ============================================================ */
+
+/* === OVERLAY === */
+.workshop-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    align-items: center;
+    justify-content: center;
+    display: none;
+}
+
+/* === PANEL SHADOW (transparent padding, khop Memory #29) === */
+.workshop-panel-shadow {
+    background-color: transparent;
+    border-radius: 22px;
+    padding-right: 6px;
+    padding-bottom: 6px;
+    position: relative;
+}
+
+/* === PANEL === */
+.workshop-panel {
+    width: 820px;
+    height: 440px;
+    background-color: #F5F0E8;
+    border-radius: 22px;
+    border-width: 3px;
+    border-color: #3D3535;
+    overflow: hidden;
+}
+
+/* === HEADER (Cam E8833A, khop shop header) === */
+.workshop-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background-color: #E8833A;
+    padding: 14px 16px;
+    border-bottom-width: 3px;
+    border-bottom-color: #CC6D28;
+    min-height: 48px;
+    flex-shrink: 0;
+}
+
+.workshop-header-title {
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: #FFFFFF;
+    -unity-text-align: middle-center;
+    letter-spacing: 1px;
+    position: absolute;
+    left: 0;
+    right: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 0 120px;
+}
+
+/* === CLOSE BUTTON (border-radius: 10px, khop Memory #29) === */
+.workshop-close-shadow {
+    position: absolute;
+    right: -8px;
+    top: -8px;
+    background-color: transparent;
+    border-radius: 10px;
+    padding-right: 2px;
+    padding-bottom: 2px;
+    z-index: 10;
+}
+
+.workshop-close-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background-color: #FF4B4B;
+    border-width: 3px;
+    border-color: #3D3535;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: #FFFFFF;
+    -unity-text-align: middle-center;
+    transition-property: translate, background-color;
+    transition-duration: 0.08s;
+}
+
+.workshop-close-btn:hover {
+    background-color: #FF6B6B;
+}
+
+.workshop-close-btn:active {
+    translate: 2px 2px;
+    background-color: #CC3333;
+}
+
+/* === BODY (Sidebar + Detail) === */
+.workshop-body {
+    flex-direction: row;
+    flex-grow: 1;
+}
+
+/* === LEFT SIDEBAR (Tool List) === */
+.workshop-sidebar {
+    width: 200px;
+    padding: 12px 8px;
+    background-color: #EDE5D8;
+    border-right-width: 3px;
+    border-right-color: #DDD5C8;
+    flex-shrink: 0;
+    flex-direction: column;
+}
+
+.workshop-sidebar-section {
+    font-size: 10px;
+    -unity-font-style: bold;
+    color: #8A7E6E;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+    margin-top: 4px;
+}
+
+.workshop-tool-scroll {
+    flex-grow: 1;
+}
+
+/* === TOOL ITEM CARD === */
+.workshop-tool-item {
+    background-color: #FFFFFF;
+    border-radius: 12px;
+    border-width: 2px;
+    border-color: #3D3535;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    flex-direction: row;
+    align-items: center;
+    transition-property: translate, background-color;
+    transition-duration: 0.08s;
+}
+
+.workshop-tool-item:hover {
+    background-color: #FFF9F0;
+}
+
+.workshop-tool-item:active {
+    translate: 1px 1px;
+}
+
+.workshop-tool-item--active {
+    background-color: #FFF5E8;
+    border-color: #E8833A;
+    border-width: 3px;
+}
+
+.workshop-tool-item-icon {
+    font-size: 20px;
+    margin-right: 8px;
+    flex-shrink: 0;
+    -unity-text-align: middle-center;
+}
+
+.workshop-tool-item-name {
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: #3D3535;
+    flex-grow: 1;
+}
+
+/* === DETAIL PANEL (Right side) === */
+.workshop-detail-panel {
+    flex-grow: 1;
+    background-color: #F5F0E8;
+    position: relative;
+}
+
+.workshop-detail-empty {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -unity-text-align: middle-center;
+    font-size: 16px;
+    color: #8A7E6E;
+    -unity-font-style: italic;
+}
+
+.workshop-detail-content {
+    flex-grow: 1;
+    padding: 24px;
+    flex-direction: row;
+    display: none;
+}
+
+/* === LEFT HALF: Icon + Name === */
+.workshop-detail-left {
+    width: 200px;
+    flex-shrink: 0;
+    align-items: center;
+    padding-right: 16px;
+}
+
+.workshop-detail-icon-wrap {
+    width: 96px;
+    height: 96px;
+    background-color: #FFFFFF;
+    border-width: 3px;
+    border-color: #3D3535;
+    border-radius: 16px;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+.workshop-detail-icon {
+    font-size: 48px;
+    -unity-text-align: middle-center;
+}
+
+.workshop-detail-name {
+    font-size: 16px;
+    -unity-font-style: bold;
+    color: #3D3535;
+    -unity-text-align: middle-center;
+    margin-bottom: 8px;
+}
+
+.workshop-detail-effect {
+    font-size: 12px;
+    color: #4CAF50;
+    -unity-font-style: bold;
+    -unity-text-align: upper-center;
+    white-space: normal;
+}
+
+/* === RIGHT HALF: Requirements + Button === */
+.workshop-detail-right {
+    flex-grow: 1;
+    flex-direction: column;
+}
+
+.workshop-detail-divider {
+    width: 100%;
+    height: 2px;
+    background-color: #DDD5C8;
+    margin: 8px 0;
+    flex-shrink: 0;
+}
+
+/* === REQUIREMENTS === */
+.workshop-req-title {
+    font-size: 10px;
+    -unity-font-style: bold;
+    color: #8A7E6E;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+    flex-shrink: 0;
+}
+
+.workshop-req-container {
+    width: 100%;
+    background-color: #FFFFFF;
+    border-radius: 12px;
+    border-width: 2px;
+    border-color: #3D3535;
+    padding: 8px 12px;
+    flex-shrink: 0;
+}
+
+.workshop-req-row {
+    flex-direction: row;
+    align-items: center;
+    min-height: 24px;
+    padding: 4px 0;
+}
+
+.workshop-req-icon {
+    font-size: 16px;
+    width: 24px;
+    flex-shrink: 0;
+    -unity-text-align: middle-center;
+    margin-right: 8px;
+}
+
+.workshop-req-name {
+    font-size: 14px;
+    color: #3D3535;
+    flex-grow: 1;
+    flex-shrink: 0;
+}
+
+.workshop-req-value {
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: #3D3535;
+    flex-shrink: 0;
+    -unity-text-align: middle-right;
+}
+
+.workshop-req-value--not-enough {
+    color: #FF4B4B;
+}
+
+.workshop-req-value--enough {
+    color: #4CAF50;
+}
+
+/* === ACTION BUTTON (Primary Yellow #FFC107) === */
+.workshop-btn-action {
+    margin-top: 16px;
+    width: 100%;
+    height: 48px;
+    background-color: #FFC107;
+    border-width: 3px;
+    border-color: #3D3535;
+    border-radius: 12px;
+    color: #3D3535;
+    font-size: 16px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    letter-spacing: 1px;
+    flex-shrink: 0;
+    transition-property: translate, background-color;
+    transition-duration: 0.08s;
+}
+
+.workshop-btn-action:hover {
+    background-color: #FFD54F;
+}
+
+.workshop-btn-action:active {
+    translate: 2px 2px;
+    background-color: #FFA000;
+}
+
+.workshop-btn-action--disabled {
+    background-color: #C8C0B4;
+    color: #8A7E6E;
+    opacity: 0.5;
+}
+
+.workshop-btn-action--disabled:hover {
+    background-color: #C8C0B4;
+}
+
+.workshop-btn-action--disabled:active {
+    translate: 0 0;
+    background-color: #C8C0B4;
+}
+
+/* === MAX LEVEL LABEL === */
+.workshop-max-label {
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: #8A7E6E;
+    -unity-text-align: middle-center;
+    margin-top: 16px;
+}

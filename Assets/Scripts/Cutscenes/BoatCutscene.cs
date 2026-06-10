@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.UIElements;
 
 public class BoatCutscene : MonoBehaviour
 {
@@ -29,6 +30,12 @@ public class BoatCutscene : MonoBehaviour
     private int currentWaypointIndex = 0;
     private bool isCutscenePlaying = false;
     private GameObject spawnedPlayer;
+
+    // Cutscene UI elements
+    private UIDocument cutsceneUIDocument;
+    private VisualElement cutsceneRoot;
+    private Button skipButton;
+    private Label subtitleLabel;
 
     void Start()
     {
@@ -60,6 +67,9 @@ public class BoatCutscene : MonoBehaviour
         {
             Debug.LogWarning("Please configure Waypoints for the Boat Cutscene in Inspector!");
         }
+
+        // Setup the dynamic Cutscene UI
+        SetupCutsceneUI();
     }
 
     void Update()
@@ -74,6 +84,15 @@ public class BoatCutscene : MonoBehaviour
             EndCutscene();
             return;
         }
+
+        // Enable Skip button after 3 seconds
+        if (cutsceneTimer >= 3.0f && skipButton != null && skipButton.style.display == DisplayStyle.None)
+        {
+            skipButton.style.display = DisplayStyle.Flex;
+        }
+
+        // Update subtitle text based on timer
+        UpdateSubtitleText();
 
         // 1. Boat Movement
         MoveBoat();
@@ -164,11 +183,198 @@ public class BoatCutscene : MonoBehaviour
         }
     }
 
+    private void SetupCutsceneUI()
+    {
+        // 1. Try to find PanelSettings from existing UIDocuments in the scene
+        PanelSettings settings = null;
+        UIDocument[] allDocs = FindObjectsByType<UIDocument>(FindObjectsSortMode.None);
+        foreach (var doc in allDocs)
+        {
+            if (doc != null && doc.panelSettings != null)
+            {
+                settings = doc.panelSettings;
+                break;
+            }
+        }
+
+        // 2. Create GameObject for Cutscene UI
+        GameObject uiGo = new GameObject("CutsceneUI");
+        uiGo.transform.SetParent(this.transform);
+        
+        cutsceneUIDocument = uiGo.AddComponent<UIDocument>();
+        if (settings != null)
+        {
+            cutsceneUIDocument.panelSettings = settings;
+        }
+
+        // 3. Construct Visual Elements
+        cutsceneRoot = new VisualElement();
+        cutsceneRoot.style.position = Position.Absolute;
+        cutsceneRoot.style.width = Length.Percent(100);
+        cutsceneRoot.style.height = Length.Percent(100);
+        
+        // Add Skip Button (Top-Right)
+        skipButton = new Button();
+        skipButton.text = "Bỏ qua >>";
+        skipButton.style.position = Position.Absolute;
+        skipButton.style.top = 24;
+        skipButton.style.right = 24;
+        skipButton.style.paddingLeft = 16;
+        skipButton.style.paddingRight = 16;
+        skipButton.style.paddingTop = 8;
+        skipButton.style.paddingBottom = 8;
+        skipButton.style.fontSize = 14;
+        skipButton.style.unityFontStyleAndWeight = FontStyle.Bold;
+        skipButton.style.backgroundColor = new Color(0.93f, 0.93f, 0.93f, 1f); // #EFEFEF
+        skipButton.style.borderTopWidth = 3f;
+        skipButton.style.borderBottomWidth = 3f;
+        skipButton.style.borderLeftWidth = 3f;
+        skipButton.style.borderRightWidth = 3f;
+
+        Color darkColor = new Color(0.24f, 0.21f, 0.21f, 1f);
+        skipButton.style.borderTopColor = darkColor;
+        skipButton.style.borderBottomColor = darkColor;
+        skipButton.style.borderLeftColor = darkColor;
+        skipButton.style.borderRightColor = darkColor;
+
+        skipButton.style.borderTopLeftRadius = 8f;
+        skipButton.style.borderTopRightRadius = 8f;
+        skipButton.style.borderBottomLeftRadius = 8f;
+        skipButton.style.borderBottomRightRadius = 8f;
+        skipButton.style.color = new Color(0.24f, 0.21f, 0.21f, 1f);
+        
+        // Solid shadow style via border offset concept
+        skipButton.style.marginRight = 4;
+        skipButton.style.marginBottom = 4;
+        
+        // Skip button start hidden (first 3s)
+        skipButton.style.display = DisplayStyle.None;
+        
+        // Register skip click callback
+        skipButton.clicked += SkipCutscene;
+        
+        // Style callbacks for button hover/click states (The Tangible Playground)
+        skipButton.RegisterCallback<PointerOverEvent>(evt => {
+            skipButton.style.backgroundColor = new Color(0.85f, 0.85f, 0.85f, 1f);
+        });
+        skipButton.RegisterCallback<PointerOutEvent>(evt => {
+            skipButton.style.backgroundColor = new Color(0.93f, 0.93f, 0.93f, 1f);
+        });
+        skipButton.RegisterCallback<PointerDownEvent>(evt => {
+            skipButton.style.backgroundColor = new Color(0.81f, 0.81f, 0.81f, 1f);
+            skipButton.style.borderLeftWidth = 4;
+            skipButton.style.borderTopWidth = 4;
+        });
+        skipButton.RegisterCallback<PointerUpEvent>(evt => {
+            skipButton.style.backgroundColor = new Color(0.85f, 0.85f, 0.85f, 1f);
+            skipButton.style.borderLeftWidth = 3;
+            skipButton.style.borderTopWidth = 3;
+        });
+        
+        // Add Subtitle Panel (Bottom Center)
+        VisualElement subtitleContainer = new VisualElement();
+        subtitleContainer.style.position = Position.Absolute;
+        subtitleContainer.style.bottom = 40;
+        subtitleContainer.style.alignSelf = Align.Center;
+        subtitleContainer.style.width = 500;
+        subtitleContainer.style.backgroundColor = new Color(0.15f, 0.15f, 0.15f, 0.85f); // Semi-transparent black
+        subtitleContainer.style.borderTopWidth = 2f;
+        subtitleContainer.style.borderBottomWidth = 2f;
+        subtitleContainer.style.borderLeftWidth = 2f;
+        subtitleContainer.style.borderRightWidth = 2f;
+
+        Color lightColor = new Color(0.93f, 0.93f, 0.93f, 0.9f);
+        subtitleContainer.style.borderTopColor = lightColor;
+        subtitleContainer.style.borderBottomColor = lightColor;
+        subtitleContainer.style.borderLeftColor = lightColor;
+        subtitleContainer.style.borderRightColor = lightColor;
+
+        subtitleContainer.style.borderTopLeftRadius = 12f;
+        subtitleContainer.style.borderTopRightRadius = 12f;
+        subtitleContainer.style.borderBottomLeftRadius = 12f;
+        subtitleContainer.style.borderBottomRightRadius = 12f;
+        subtitleContainer.style.paddingLeft = 20;
+        subtitleContainer.style.paddingRight = 20;
+        subtitleContainer.style.paddingTop = 12;
+        subtitleContainer.style.paddingBottom = 12;
+        
+        subtitleLabel = new Label("Chào mừng bạn đến với Y WONDER LAND...");
+        subtitleLabel.style.fontSize = 15;
+        subtitleLabel.style.color = Color.white;
+        subtitleLabel.style.whiteSpace = WhiteSpace.Normal;
+        subtitleLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
+        
+        subtitleContainer.Add(subtitleLabel);
+        
+        cutsceneRoot.Add(skipButton);
+        cutsceneRoot.Add(subtitleContainer);
+        
+        cutsceneUIDocument.rootVisualElement.Add(cutsceneRoot);
+    }
+
+    private void UpdateSubtitleText()
+    {
+        if (subtitleLabel == null) return;
+        
+        if (cutsceneTimer < 5.0f)
+        {
+            subtitleLabel.text = "Chào mừng bạn đến với vùng đất kỳ diệu Y WONDER LAND!";
+        }
+        else if (cutsceneTimer < 12.0f)
+        {
+            subtitleLabel.text = "Nơi đây từng là một nông trại trù phú, ngập tràn tiếng cười và sức sống...";
+        }
+        else if (cutsceneTimer < 20.0f)
+        {
+            subtitleLabel.text = "Hãy cùng nhau khôi phục lại nông trại hoang sơ này và xây dựng một kỷ nguyên mới.";
+        }
+        else if (cutsceneTimer < 28.0f)
+        {
+            subtitleLabel.text = "Thuyền đang cập bến rồi. Một cuộc phiêu lưu mới đang đón chờ bạn phía trước!";
+        }
+        else
+        {
+            subtitleLabel.text = "Sẵn sàng lên bờ khám phá nào!";
+        }
+    }
+
+    public void SkipCutscene()
+    {
+        if (!isCutscenePlaying) return;
+        Debug.Log("[BoatCutscene] Skipping cutscene!");
+        
+        // Instant teleport boat to the final waypoint position
+        if (waypoints.Count > 0)
+        {
+            Transform finalWaypoint = waypoints[waypoints.Count - 1];
+            if (finalWaypoint != null)
+            {
+                transform.position = finalWaypoint.position;
+                transform.rotation = finalWaypoint.rotation;
+            }
+        }
+        
+        // Instantly align camera to cameraPosition3 (Shore View / Ending position)
+        if (cameraPosition3 != null && mainCameraTransform != null)
+        {
+            mainCameraTransform.position = cameraPosition3.position;
+            mainCameraTransform.rotation = cameraPosition3.rotation;
+        }
+        
+        EndCutscene();
+    }
+
     private void EndCutscene()
     {
         if (!isCutscenePlaying) return; // Prevent double trigger
         isCutscenePlaying = false;
         Debug.Log("[BoatCutscene] Boat Cutscene Completed!");
+        
+        // Clean up UI
+        if (cutsceneUIDocument != null)
+        {
+            Destroy(cutsceneUIDocument.gameObject);
+        }
         
         // Notify GameManager to start gameplay!
         if (GameManager.Instance != null)

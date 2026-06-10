@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3334ccb6c504b8468a3bcc8773d485c, type: 3}
+  m_Name: Crop_morning_glory_seed_01
+  m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.CropDefinition
+  seedItemId: morning_glory_seed_01
+  harvestItemId: morning_glory_01
+  growthTimeSec: 30
+  waterIntervalSec: 15
+  harvestYield: 2
+  expReward: 10
+  posReward: 25
+  growthStages: 2
+  cropColor: {r: 0.4, g: 0.7, b: 0.3, a: 1}
+  iconEmoji: "\U0001F33E"

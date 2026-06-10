@@ -328,6 +328,17 @@
     padding-top: 17px;
 }
 
+.btn-login:disabled,
+.btn-login.unity-disabled {
+    background-color: #D5D5D5;
+    color: #9BA3A8;
+    border-color: #B0B0B0;
+    opacity: 0.65;
+    translate: 0 0;
+    border-bottom-width: 5px;
+    border-right-width: 3px;
+}
+
 /* ── Status Message ── */
 
 .status-message {
