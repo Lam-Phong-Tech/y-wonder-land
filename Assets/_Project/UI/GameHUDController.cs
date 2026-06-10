@@ -74,22 +74,22 @@ public class GameHUDController : MonoBehaviour
         }
 
         // Fallback auto-find if references are not assigned in Inspector
-        if (shopPopup == null) shopPopup = FindFirstObjectByType<ShopPopupController>();
-        if (settingsPopup == null) settingsPopup = FindFirstObjectByType<SettingsPopupController>();
-        if (inventoryPopup == null) inventoryPopup = FindFirstObjectByType<InventoryPopupController>();
-        if (leaderboardPopup == null) leaderboardPopup = FindFirstObjectByType<LeaderboardPopupController>();
-        if (friendsPopup == null) friendsPopup = FindFirstObjectByType<FriendsPopupController>();
-        if (mailboxPopup == null) mailboxPopup = FindFirstObjectByType<MailboxPopupController>();
-        if (profilePopup == null) profilePopup = FindFirstObjectByType<ProfilePopupController>();
-        if (attendancePopup == null) attendancePopup = FindFirstObjectByType<AttendancePopupController>();
-        if (questPopup == null) questPopup = FindFirstObjectByType<QuestPopupController>();
-        if (mapPopup == null) mapPopup = FindFirstObjectByType<MapPopupController>();
-        if (piggyBankPopup == null) piggyBankPopup = FindFirstObjectByType<PiggyBankPopupController>();
-        if (levelUpOverlay == null) levelUpOverlay = FindFirstObjectByType<LevelUpOverlayController>();
-        if (eventPopup == null) eventPopup = FindFirstObjectByType<EventPopupController>();
-        if (fishingOverlay == null) fishingOverlay = FindFirstObjectByType<FishingOverlayController>();
-        if (buildModeOverlay == null) buildModeOverlay = FindFirstObjectByType<BuildModeOverlayController>();
-        if (workshopPopup == null) workshopPopup = FindFirstObjectByType<WorkshopPopupController>();
+        if (shopPopup == null) shopPopup = FindFirstObjectByType<ShopPopupController>(FindObjectsInactive.Include);
+        if (settingsPopup == null) settingsPopup = FindFirstObjectByType<SettingsPopupController>(FindObjectsInactive.Include);
+        if (inventoryPopup == null) inventoryPopup = FindFirstObjectByType<InventoryPopupController>(FindObjectsInactive.Include);
+        if (leaderboardPopup == null) leaderboardPopup = FindFirstObjectByType<LeaderboardPopupController>(FindObjectsInactive.Include);
+        if (friendsPopup == null) friendsPopup = FindFirstObjectByType<FriendsPopupController>(FindObjectsInactive.Include);
+        if (mailboxPopup == null) mailboxPopup = FindFirstObjectByType<MailboxPopupController>(FindObjectsInactive.Include);
+        if (profilePopup == null) profilePopup = FindFirstObjectByType<ProfilePopupController>(FindObjectsInactive.Include);
+        if (attendancePopup == null) attendancePopup = FindFirstObjectByType<AttendancePopupController>(FindObjectsInactive.Include);
+        if (questPopup == null) questPopup = FindFirstObjectByType<QuestPopupController>(FindObjectsInactive.Include);
+        if (mapPopup == null) mapPopup = FindFirstObjectByType<MapPopupController>(FindObjectsInactive.Include);
+        if (piggyBankPopup == null) piggyBankPopup = FindFirstObjectByType<PiggyBankPopupController>(FindObjectsInactive.Include);
+        if (levelUpOverlay == null) levelUpOverlay = FindFirstObjectByType<LevelUpOverlayController>(FindObjectsInactive.Include);
+        if (eventPopup == null) eventPopup = FindFirstObjectByType<EventPopupController>(FindObjectsInactive.Include);
+        if (fishingOverlay == null) fishingOverlay = FindFirstObjectByType<FishingOverlayController>(FindObjectsInactive.Include);
+        if (buildModeOverlay == null) buildModeOverlay = FindFirstObjectByType<BuildModeOverlayController>(FindObjectsInactive.Include);
+        if (workshopPopup == null) workshopPopup = FindFirstObjectByType<WorkshopPopupController>(FindObjectsInactive.Include);
 
         var root = uiDocument.rootVisualElement;
         QueryElements(root);
@@ -428,6 +428,25 @@ public class GameHUDController : MonoBehaviour
         if (keyboard.rKey.wasPressedThisFrame && workshopPopup != null)
         {
             workshopPopup.Show();
+        }
+
+        // Phím 1 = Mở/Đóng Shop (Sắp tới ẩn nút UI)
+        if (keyboard.digit1Key.wasPressedThisFrame)
+        {
+            Debug.Log($"[GameHUD] Đã bấm phím 1. Biến shopPopup có null không: {shopPopup == null}");
+            if (shopPopup != null)
+            {
+                if (shopPopup.IsVisible())
+                {
+                    Debug.Log("[GameHUD] shopPopup đang hiện -> Gọi Hide()");
+                    shopPopup.Hide();
+                }
+                else
+                {
+                    Debug.Log("[GameHUD] shopPopup đang ẩn -> Gọi Show()");
+                    shopPopup.Show();
+                }
+            }
         }
     }
 }

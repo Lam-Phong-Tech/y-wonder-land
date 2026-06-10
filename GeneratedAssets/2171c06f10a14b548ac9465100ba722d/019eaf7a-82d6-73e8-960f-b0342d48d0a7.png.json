@@ -1,0 +1,28 @@
+{
+    "asset": "2171c06f10a14b548ac9465100ba722d",
+    "fileName": "019eaf7a-82d6-73e8-960f-b0342d48d0a7.png",
+    "prompt": "Minimalist 3D Sleek Close X window UI icon with frosted red tint, onyx black/dark grey matte plastic base with frosted glass (glassmorphism) elements, soft glowing neon red accents, premium modern futuristic friendly style, rounded thick minimalist shape, soft studio lighting, 3D isometric view, subtle drop shadows, solid white background.",
+    "negativePrompt": "",
+    "model": "gemini-3.1-flash",
+    "modelName": "Gemini 3.1 Nano Banana 2",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelatePixelGridSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0,
+    "dimensions": {
+        "width": 1024,
+        "height": 1024
+    },
+    "spriteSheet": false,
+    "duration": 0.0
+}

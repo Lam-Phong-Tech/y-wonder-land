@@ -52,6 +52,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Male 1
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: c2fb789864b21fd4fb051bf1a4233c28, type: 3}
+      propertyPath: m_TagString
+      value: Player
+      objectReference: {fileID: 0}
     - target: {fileID: 5866666021909216657, guid: c2fb789864b21fd4fb051bf1a4233c28, type: 3}
       propertyPath: m_Avatar
       value: 
@@ -77,6 +81,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: c2fb789864b21fd4fb051bf1a4233c28, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7724076628981653899}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: c2fb789864b21fd4fb051bf1a4233c28, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -6796010396429687585}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: c2fb789864b21fd4fb051bf1a4233c28, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8366305817180044009}
     - targetCorrespondingSourceObject: {fileID: 5938153930611046346, guid: c2fb789864b21fd4fb051bf1a4233c28, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3563350548422089403}
@@ -184,3 +194,32 @@ MonoBehaviour:
   rotationSpeed: 15
   gravity: -9.81
   jumpHeight: 1.5
+--- !u!114 &-6796010396429687585
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5851388417649494510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fac7d98278c6c1a4496c889c8235b5c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Environment.FarmInteractionController
+  interactRange: 10
+  farmTileLayer:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  mainCamera: {fileID: 0}
+--- !u!114 &8366305817180044009
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5851388417649494510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc90b5aeb22be2a4a9e4b60ed2a99c13, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.PlayAnimTest

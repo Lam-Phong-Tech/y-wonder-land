@@ -253,26 +253,29 @@ namespace YWonderLand.Environment
             if (tile.InteractPlow())
             {
                 Debug.Log("[FarmInteraction] Plowed tile!");
+                
+                // Múa động tác Cuốc đất (Dùng tạm animation Chop/Attack)
+                Animator anim = GetComponent<Animator>();
+                if (anim != null)
+                {
+                    anim.SetTrigger("Chop");
+                }
             }
         }
 
         private void HandleOpenSeedSelection(FarmTile tile)
         {
-            // Store pending tile and open inventory at seeds tab
-            pendingPlantTile = tile;
-            pendingSeedId = null;
-
-            if (inventoryPopup == null)
-                inventoryPopup = Object.FindFirstObjectByType<InventoryPopupController>();
-
-            if (inventoryPopup != null)
+            // CHỮA CHÁY NHANH CHO SẾP XEM: Tự động gieo hạt cà rốt luôn, không thèm mở túi đồ!
+            Debug.Log("[FarmInteraction] CHỮA CHÁY DEMO: Tự động gieo hạt cà rốt!");
+            
+            if (tile.InteractPlant("carrot"))
             {
-                inventoryPopup.ShowAtTab("seeds");
-                Debug.Log("[FarmInteraction] Opened seed selection for plowed tile.");
-            }
-            else
-            {
-                Debug.LogWarning("[FarmInteraction] InventoryPopupController not found!");
+                // Múa động tác gieo hạt
+                Animator anim = GetComponent<Animator>();
+                if (anim != null)
+                {
+                    anim.SetTrigger("Plant");
+                }
             }
         }
 

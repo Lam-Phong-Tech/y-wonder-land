@@ -1,5 +1,5 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
-    <ui:Template name="DesignSystem" src="Styles/DesignSystem.uss" />
+
     <Style src="Styles/CharacterSelect.uss" />
     <Style src="Styles/DesignSystem.uss" />
 

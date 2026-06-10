@@ -1,7 +1,6 @@
 /* ============================================
-   Splash Loading Screen Styles
+   Splash Loading Screen Styles - Palia Style
    Extends DesignSystem.uss
-   Following The Tangible Playground design
    ============================================ */
 
 /* -- Screen Container -- */
@@ -12,7 +11,7 @@
     position: absolute;
     align-items: center;
     justify-content: center;
-    background-color: #1E1E23;
+    background-color: var(--color-primary-navy); /* Dark Navy Background */
     transition-property: opacity;
     transition-duration: 0.5s;
     transition-timing-function: ease-in-out;
@@ -23,7 +22,7 @@
 .splash-star {
     position: absolute;
     font-size: 32px;
-    color: rgba(255, 193, 7, 0.25);
+    color: rgba(253, 239, 112, 0.15); /* Soft Accent Yellow */
 }
 
 .splash-star-tl {
@@ -56,19 +55,19 @@
     margin-bottom: 80px;
 }
 
-/* -- Title Shadow (Retro Offset) -- */
+/* -- Title Shadow (Removed retro block, now just subtle soft shadow) -- */
 
 .splash-title-shadow-wrapper {
     position: absolute;
     top: 4px;
-    left: 4px;
+    left: 0px;
+    opacity: 0.5;
 }
 
 .splash-title-shadow {
-    font-size: 48px;
-    -unity-font-style: bold;
-    color: #3D3535;
-    letter-spacing: 8px;
+    font-size: 56px;
+    color: var(--color-mystic-black);
+    letter-spacing: 4px;
     -unity-text-align: middle-center;
     white-space: nowrap;
 }
@@ -76,10 +75,9 @@
 /* -- Title Main -- */
 
 .splash-title {
-    font-size: 48px;
-    -unity-font-style: bold;
-    color: #FFFFFF;
-    letter-spacing: 8px;
+    font-size: 56px;
+    color: var(--color-text-white);
+    letter-spacing: 4px;
     -unity-text-align: middle-center;
     white-space: nowrap;
 }
@@ -87,22 +85,22 @@
 /* -- Subtitle -- */
 
 .splash-subtitle {
-    font-size: 16px;
-    -unity-font-style: bold;
-    color: #FFC107;
+    font-size: 18px;
+    color: var(--color-accent-yellow);
     letter-spacing: 6px;
     -unity-text-align: middle-center;
-    margin-top: 12px;
+    margin-top: 8px;
 }
 
 /* -- Decorative Divider -- */
 
 .splash-divider {
-    width: 200px;
-    height: 3px;
-    background-color: rgba(255, 193, 7, 0.4);
+    width: 120px;
+    height: 4px;
+    background-color: var(--color-accent-yellow);
     border-radius: 2px;
-    margin-top: 16px;
+    margin-top: 24px;
+    opacity: 0.8;
 }
 
 /* -- Loading Group -- */
@@ -118,35 +116,32 @@
 /* -- Status Text -- */
 
 .splash-status-text {
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.7);
+    font-size: 16px;
+    color: var(--color-bright-grey);
     -unity-text-align: middle-center;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
     letter-spacing: 1px;
 }
 
-/* -- Progress Bar Wrapper (Shadow container) -- */
+/* -- Progress Bar Wrapper -- */
 
 .splash-progress-wrapper {
-    background-color: #3D3535;
-    border-radius: 14px;
-    padding-right: 4px;
-    padding-bottom: 4px;
     width: 400px;
+    /* Soft shadow instead of block offset */
 }
 
 /* -- Progress Track -- */
 
 .splash-progress-track {
     width: 100%;
-    height: 24px;
-    background-color: #3A3A42;
-    border-radius: 12px;
-    border-width: 3px;
-    border-color: #3D3535;
+    height: 16px;
+    background-color: var(--color-mystic-black); /* Dark Navy Track */
+    border-radius: 8px; /* Pill shape */
     overflow: hidden;
     flex-direction: row;
     align-items: stretch;
+    border-width: 2px;
+    border-color: rgba(255,255,255,0.05); /* Very subtle highlight */
 }
 
 /* -- Progress Fill -- */
@@ -154,8 +149,8 @@
 .splash-progress-fill {
     width: 0%;
     height: 100%;
-    background-color: #FFC107;
-    border-radius: 8px;
+    background-color: var(--color-accent-blue); /* Palia Accent Blue */
+    border-radius: 8px; /* Pill shape */
     transition-property: width;
     transition-duration: 0.15s;
     transition-timing-function: ease-out;
@@ -165,21 +160,19 @@
 
 .splash-percentage-text {
     font-size: 16px;
-    -unity-font-style: bold;
-    color: #FFFFFF;
+    color: var(--color-text-white);
     -unity-text-align: middle-center;
-    margin-top: 8px;
-    letter-spacing: 2px;
+    margin-top: 12px;
+    letter-spacing: 1px;
 }
 
 /* -- Skip Hint -- */
 
 .splash-skip-hint {
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.35);
+    font-size: 14px;
+    color: var(--color-overcast-grey);
     -unity-text-align: middle-center;
-    margin-top: 16px;
-    letter-spacing: 1px;
+    margin-top: 24px;
 }
 
 /* -- Version Label -- */
@@ -187,9 +180,9 @@
 .splash-version {
     position: absolute;
     bottom: 16px;
-    right: 20px;
-    font-size: 11px;
-    color: rgba(255, 255, 255, 0.25);
+    right: 24px;
+    font-size: 12px;
+    color: var(--color-overcast-grey);
 }
 
 /* -- Fade Out Class (applied via C#) -- */

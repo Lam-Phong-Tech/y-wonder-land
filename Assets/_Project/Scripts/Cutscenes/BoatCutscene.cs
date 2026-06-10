@@ -231,33 +231,30 @@ public class BoatCutscene : MonoBehaviour
         skipButton.style.position = Position.Absolute;
         skipButton.style.top = 24;
         skipButton.style.right = 24;
-        skipButton.style.paddingLeft = 16;
-        skipButton.style.paddingRight = 16;
-        skipButton.style.paddingTop = 8;
-        skipButton.style.paddingBottom = 8;
-        skipButton.style.fontSize = 14;
+        skipButton.style.paddingLeft = 24;
+        skipButton.style.paddingRight = 24;
+        skipButton.style.paddingTop = 10;
+        skipButton.style.paddingBottom = 10;
+        skipButton.style.fontSize = 16;
         skipButton.style.unityFontStyleAndWeight = FontStyle.Bold;
-        skipButton.style.backgroundColor = new Color(0.93f, 0.93f, 0.93f, 1f); // #EFEFEF
-        skipButton.style.borderTopWidth = 3f;
-        skipButton.style.borderBottomWidth = 3f;
-        skipButton.style.borderLeftWidth = 3f;
-        skipButton.style.borderRightWidth = 3f;
-
-        Color darkColor = new Color(0.24f, 0.21f, 0.21f, 1f);
-        skipButton.style.borderTopColor = darkColor;
-        skipButton.style.borderBottomColor = darkColor;
-        skipButton.style.borderLeftColor = darkColor;
-        skipButton.style.borderRightColor = darkColor;
-
-        skipButton.style.borderTopLeftRadius = 8f;
-        skipButton.style.borderTopRightRadius = 8f;
-        skipButton.style.borderBottomLeftRadius = 8f;
-        skipButton.style.borderBottomRightRadius = 8f;
-        skipButton.style.color = new Color(0.24f, 0.21f, 0.21f, 1f);
         
-        // Solid shadow style via border offset concept
-        skipButton.style.marginRight = 4;
-        skipButton.style.marginBottom = 4;
+        // Palia Style Skip Button (Accent Yellow Pill)
+        Color accentYellow = new Color(0.992f, 0.937f, 0.439f, 1f);
+        Color yellowLip = new Color(0.815f, 0.764f, 0.313f, 1f);
+        Color mysticBlack = new Color(0.082f, 0.101f, 0.152f, 1f);
+        
+        skipButton.style.backgroundColor = accentYellow;
+        skipButton.style.borderTopWidth = 0f;
+        skipButton.style.borderLeftWidth = 0f;
+        skipButton.style.borderRightWidth = 0f;
+        skipButton.style.borderBottomWidth = 0f; // Bỏ hoàn toàn đổ bóng/viền lún
+        
+        // Pill shape
+        skipButton.style.borderTopLeftRadius = 24f;
+        skipButton.style.borderTopRightRadius = 24f;
+        skipButton.style.borderBottomLeftRadius = 24f;
+        skipButton.style.borderBottomRightRadius = 24f;
+        skipButton.style.color = mysticBlack;
         
         // Skip button start hidden (first 3s)
         skipButton.style.display = DisplayStyle.None;
@@ -265,54 +262,56 @@ public class BoatCutscene : MonoBehaviour
         // Register skip click callback
         skipButton.clicked += SkipCutscene;
         
-        // Style callbacks for button hover/click states (The Tangible Playground)
+        // Hover/Active states (Chỉ đổi độ sáng nền, không lún)
         skipButton.RegisterCallback<PointerOverEvent>(evt => {
-            skipButton.style.backgroundColor = new Color(0.85f, 0.85f, 0.85f, 1f);
+            skipButton.style.backgroundColor = new Color(1f, 0.97f, 0.56f, 1f); // Lighter yellow
         });
         skipButton.RegisterCallback<PointerOutEvent>(evt => {
-            skipButton.style.backgroundColor = new Color(0.93f, 0.93f, 0.93f, 1f);
+            skipButton.style.backgroundColor = accentYellow;
         });
         skipButton.RegisterCallback<PointerDownEvent>(evt => {
-            skipButton.style.backgroundColor = new Color(0.81f, 0.81f, 0.81f, 1f);
-            skipButton.style.borderLeftWidth = 4;
-            skipButton.style.borderTopWidth = 4;
+            skipButton.style.backgroundColor = yellowLip; // Màu nhấn
+            skipButton.style.marginTop = 0f;
         });
         skipButton.RegisterCallback<PointerUpEvent>(evt => {
-            skipButton.style.backgroundColor = new Color(0.85f, 0.85f, 0.85f, 1f);
-            skipButton.style.borderLeftWidth = 3;
-            skipButton.style.borderTopWidth = 3;
+            skipButton.style.backgroundColor = accentYellow;
+            skipButton.style.marginTop = 0f;
         });
         
         // Add Subtitle Panel (Bottom Center)
         VisualElement subtitleContainer = new VisualElement();
         subtitleContainer.style.position = Position.Absolute;
-        subtitleContainer.style.bottom = 40;
+        subtitleContainer.style.bottom = 80; // Raised higher to give space for chat panel
         subtitleContainer.style.alignSelf = Align.Center;
-        subtitleContainer.style.width = 500;
-        subtitleContainer.style.backgroundColor = new Color(0.15f, 0.15f, 0.15f, 0.85f); // Semi-transparent black
+        subtitleContainer.style.width = 600; // Wider
+        
+        // Primary Navy background
+        subtitleContainer.style.backgroundColor = new Color(0.227f, 0.278f, 0.400f, 0.95f);
         subtitleContainer.style.borderTopWidth = 2f;
         subtitleContainer.style.borderBottomWidth = 2f;
         subtitleContainer.style.borderLeftWidth = 2f;
         subtitleContainer.style.borderRightWidth = 2f;
 
-        Color lightColor = new Color(0.93f, 0.93f, 0.93f, 0.9f);
-        subtitleContainer.style.borderTopColor = lightColor;
-        subtitleContainer.style.borderBottomColor = lightColor;
-        subtitleContainer.style.borderLeftColor = lightColor;
-        subtitleContainer.style.borderRightColor = lightColor;
+        Color borderLight = new Color(1f, 1f, 1f, 0.1f);
+        subtitleContainer.style.borderTopColor = borderLight;
+        subtitleContainer.style.borderBottomColor = borderLight;
+        subtitleContainer.style.borderLeftColor = borderLight;
+        subtitleContainer.style.borderRightColor = borderLight;
 
-        subtitleContainer.style.borderTopLeftRadius = 12f;
-        subtitleContainer.style.borderTopRightRadius = 12f;
-        subtitleContainer.style.borderBottomLeftRadius = 12f;
-        subtitleContainer.style.borderBottomRightRadius = 12f;
-        subtitleContainer.style.paddingLeft = 20;
-        subtitleContainer.style.paddingRight = 20;
-        subtitleContainer.style.paddingTop = 12;
-        subtitleContainer.style.paddingBottom = 12;
+        // Pill/Soft shape
+        subtitleContainer.style.borderTopLeftRadius = 24f;
+        subtitleContainer.style.borderTopRightRadius = 24f;
+        subtitleContainer.style.borderBottomLeftRadius = 24f;
+        subtitleContainer.style.borderBottomRightRadius = 24f;
+        subtitleContainer.style.paddingLeft = 32;
+        subtitleContainer.style.paddingRight = 32;
+        subtitleContainer.style.paddingTop = 16;
+        subtitleContainer.style.paddingBottom = 16;
         
         subtitleLabel = new Label("Chào mừng bạn đến với Y WONDER LAND...");
-        subtitleLabel.style.fontSize = 15;
-        subtitleLabel.style.color = Color.white;
+        subtitleLabel.style.fontSize = 18;
+        subtitleLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+        subtitleLabel.style.color = new Color(1f, 0.988f, 0.968f, 1f); // Palia White
         subtitleLabel.style.whiteSpace = WhiteSpace.Normal;
         subtitleLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
         

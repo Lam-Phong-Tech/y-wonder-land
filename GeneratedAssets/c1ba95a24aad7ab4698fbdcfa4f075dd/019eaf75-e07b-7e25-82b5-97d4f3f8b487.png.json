@@ -1,0 +1,28 @@
+{
+    "asset": "c1ba95a24aad7ab4698fbdcfa4f075dd",
+    "fileName": "019eaf75-e07b-7e25-82b5-97d4f3f8b487.png",
+    "prompt": "Minimalist 3D Trophy Leaderboard UI icon, onyx black/dark grey matte plastic base with frosted glass (glassmorphism) elements, soft glowing neon gold accents, premium modern futuristic friendly style, rounded thick minimalist shape, soft studio lighting, 3D isometric view, subtle drop shadows, solid white background.",
+    "negativePrompt": "",
+    "model": "gemini-3.1-flash",
+    "modelName": "Gemini 3.1 Nano Banana 2",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelatePixelGridSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0,
+    "dimensions": {
+        "width": 1024,
+        "height": 1024
+    },
+    "spriteSheet": false,
+    "duration": 0.0
+}

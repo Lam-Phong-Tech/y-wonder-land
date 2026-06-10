@@ -1,37 +1,28 @@
 /* ========================================================
-   Friends Popup — The Tangible Playground
+   Friends Popup — Minimalist 3D Onyx
    ======================================================== */
 
-/* ── Overlay ── */
 .friends-overlay {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.4);
-    align-items: center;
-    justify-content: center;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    align-items: center; justify-content: center;
     display: none;
 }
 
-/* ── Panel Shadow ── */
 .friends-panel-shadow {
     background-color: transparent;
-    border-radius: 22px;
-    padding-right: 6px;
-    padding-bottom: 6px;
+    border-radius: var(--radius-panel);
     position: relative;
 }
 
-/* ── Panel (Landscape two-column) ── */
 .friends-panel {
     width: 760px;
     height: 460px;
-    background-color: #F5F0E8;
-    border-radius: 22px;
-    border-width: 3px;
-    border-color: #3D3535;
+    background-color: var(--color-neutral-surface);
+    border-radius: var(--radius-panel);
+    border-width: var(--border-medium);
+    border-color: var(--color-border);
     flex-direction: row;
     overflow: hidden;
 }
@@ -39,16 +30,16 @@
 /* ── Left Sidebar (Tabs) ── */
 .friends-sidebar {
     width: 190px;
-    background-color: #E5DEC9;
-    border-right-width: 3px;
-    border-right-color: #3D3535;
+    background-color: rgba(0, 0, 0, 0.4);
+    border-right-width: 1px;
+    border-right-color: var(--color-border);
     padding: 20px 14px;
 }
 
 .friends-sidebar-title {
     font-size: 11px;
     -unity-font-style: bold;
-    color: #8A7E6E;
+    color: var(--color-text-secondary);
     letter-spacing: 2px;
     margin-bottom: 16px;
     -unity-text-align: middle-center;
@@ -57,33 +48,31 @@
 .friends-tab {
     margin-bottom: 10px;
     padding: 10px 4px;
-    border-radius: 12px;
-    border-width: 3px;
-    border-color: #3D3535;
-    background-color: #FFFFFF;
-    color: #3D3535;
+    border-radius: var(--radius-button);
+    border-width: 1px;
+    border-color: var(--color-border);
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--color-text-secondary);
     font-size: 12px;
     -unity-font-style: bold;
     -unity-text-align: middle-center;
-    transition-property: translate, background-color, color;
-    transition-duration: 0.08s;
+    transition-property: background-color, color, border-color;
+    transition-duration: 0.15s;
 }
 
 .friends-tab:hover {
-    background-color: #F4EDE2;
-}
-
-.friends-tab:active {
-    translate: 1px 1px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--color-text-white);
 }
 
 .friends-tab--active {
-    background-color: #5B42F3;
-    color: #FFFFFF;
+    background-color: rgba(0, 229, 255, 0.2);
+    border-color: rgb(0, 229, 255);
+    color: rgb(0, 229, 255);
 }
 
 .friends-tab--active:hover {
-    background-color: #7B62FF;
+    background-color: rgba(0, 229, 255, 0.3);
 }
 
 /* ── Right Content Area ── */
@@ -93,7 +82,6 @@
     justify-content: flex-start;
 }
 
-/* ── Header Bar ── */
 .friends-header-bar {
     flex-direction: row;
     justify-content: space-between;
@@ -105,7 +93,8 @@
 .friends-state-title {
     font-size: 18px;
     -unity-font-style: bold;
-    color: #3D3535;
+    color: var(--color-text-white);
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
 }
 
 /* ── Search Group ── */
@@ -122,70 +111,58 @@
 }
 
 .friends-search-input .unity-text-field__input {
-    background-color: #FFFFFF;
-    border-width: 2px;
-    border-color: #3D3535;
-    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0.4);
+    border-width: 1px;
+    border-color: var(--color-border);
+    border-radius: var(--radius-button);
     padding: 2px 8px;
     font-size: 11px;
-    color: #3D3535;
+    color: var(--color-text-white);
     margin: 0;
 }
 
 .friends-search-btn {
     padding: 5px 12px;
-    border-radius: 8px;
-    border-width: 2px;
-    border-color: #3D3535;
-    background-color: #2D7BFF;
-    color: #FFFFFF;
+    border-radius: var(--radius-button);
+    border-width: 1px;
+    border-color: rgb(0, 229, 255);
+    background-color: rgba(0, 229, 255, 0.2);
+    color: rgb(0, 229, 255);
     font-size: 11px;
     -unity-font-style: bold;
     -unity-text-align: middle-center;
-    transition-property: translate, background-color;
-    transition-duration: 0.08s;
+    transition-property: background-color, color;
+    transition-duration: 0.15s;
 }
 
 .friends-search-btn:hover {
-    background-color: #5B9AFF;
-}
-
-.friends-search-btn:active {
-    translate: 1px 1px;
+    background-color: rgba(0, 229, 255, 0.8);
+    color: rgb(26, 26, 26);
 }
 
 .friends-refresh-btn {
     padding: 5px 10px;
-    border-radius: 8px;
-    border-width: 2px;
-    border-color: #3D3535;
-    background-color: #FDBE5B;
-    color: #3D3535;
+    border-radius: var(--radius-button);
+    border-width: 1px;
+    border-color: var(--color-confirm);
+    background-color: rgba(255, 193, 7, 0.2);
+    color: var(--color-confirm);
     font-size: 11px;
     -unity-font-style: bold;
     -unity-text-align: middle-center;
     margin-left: 6px;
-    transition-property: translate, background-color;
-    transition-duration: 0.08s;
+    transition-property: background-color, color;
+    transition-duration: 0.15s;
 }
 
 .friends-refresh-btn:hover {
-    background-color: #FECF82;
-}
-
-.friends-refresh-btn:active {
-    translate: 1px 1px;
+    background-color: rgba(255, 193, 7, 0.8);
+    color: rgb(26, 26, 26);
 }
 
 /* ── Scroll Area ── */
-.friends-scroll {
-    flex-grow: 1;
-}
-
-.friends-list {
-    flex-direction: column;
-    padding-right: 4px;
-}
+.friends-scroll { flex-grow: 1; }
+.friends-list { flex-direction: column; padding-right: 4px; }
 
 /* ── Player Card Item ── */
 .friend-card {
@@ -193,198 +170,90 @@
     height: 64px;
     align-items: center;
     justify-content: space-between;
-    background-color: #FFFFFF;
-    border-width: 2px;
-    border-color: #3D3535;
-    border-radius: 14px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-width: 1px;
+    border-color: var(--color-border);
+    border-radius: var(--radius-button);
     margin-bottom: 8px;
     padding: 0 14px;
-    background-color: #FFFFFF;
 }
 
-.friend-card-left {
-    flex-direction: row;
-    align-items: center;
+.friend-card:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: var(--color-border-focus);
 }
+
+.friend-card-left { flex-direction: row; align-items: center; }
 
 .friend-avatar-wrap {
     width: 42px;
     height: 42px;
     border-radius: 21px;
-    border-width: 2px;
-    border-color: #3D3535;
-    background-color: #FFF5E8;
+    border-width: 1px;
+    border-color: var(--color-border);
+    background-color: rgba(0, 0, 0, 0.4);
     align-items: center;
     justify-content: center;
+    /* Use V2 icons via CSS injection below */
 }
 
 .friend-avatar-text {
-    font-size: 22px;
-    margin: 0;
-    padding: 0;
+    font-size: 22px; margin: 0; padding: 0;
     -unity-text-align: middle-center;
 }
 
 .friend-status-dot {
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    width: 10px;
-    height: 10px;
-    border-radius: 5px;
-    border-width: 1.5px;
-    border-color: #3D3535;
+    position: absolute; right: 0; bottom: 0;
+    width: 10px; height: 10px;
+    border-radius: 5px; border-width: 1px; border-color: rgb(26, 26, 26);
 }
+.status-online { background-color: rgb(0, 229, 255); box-shadow: 0 0 5px rgb(0, 229, 255); }
+.status-offline { background-color: var(--color-text-secondary); }
 
-.status-online {
-    background-color: #4CAF50;
-}
+.friend-info { margin-left: 12px; }
+.friend-name-row { flex-direction: row; align-items: center; }
+.friend-name { font-size: 13px; -unity-font-style: bold; color: var(--color-text-white); }
 
-.status-offline {
-    background-color: #8A7E6E;
-}
+.friend-gender { font-size: 11px; -unity-font-style: bold; margin-left: 6px; }
+.gender-female { color: rgb(255, 105, 180); text-shadow: 0 0 5px rgb(255, 105, 180); }
+.gender-male { color: rgb(0, 229, 255); text-shadow: 0 0 5px rgb(0, 229, 255); }
 
-.friend-info {
-    margin-left: 12px;
-}
+.friend-level { font-size: 11px; color: var(--color-text-secondary); margin-top: 1px; }
 
-.friend-name-row {
-    flex-direction: row;
-    align-items: center;
-}
-
-.friend-name {
-    font-size: 13px;
-    -unity-font-style: bold;
-    color: #3D3535;
-}
-
-.friend-gender {
-    font-size: 11px;
-    -unity-font-style: bold;
-    margin-left: 6px;
-}
-
-.gender-female {
-    color: #E84393;
-}
-
-.gender-male {
-    color: #0984E3;
-}
-
-.friend-level {
-    font-size: 11px;
-    color: #8A7E6E;
-    margin-top: 1px;
-}
-
-/* ── Action Buttons inside Rows ── */
-.friend-actions {
-    flex-direction: row;
-    align-items: center;
-}
+/* ── Action Buttons ── */
+.friend-actions { flex-direction: row; align-items: center; }
 
 .btn-action {
     padding: 6px 14px;
-    border-radius: 10px;
-    border-width: 2px;
-    border-color: #3D3535;
+    border-radius: 8px;
+    border-width: 1px;
     font-size: 11px;
     -unity-font-style: bold;
     -unity-text-align: middle-center;
-    transition-property: translate, background-color;
-    transition-duration: 0.08s;
+    transition-property: background-color, color;
+    transition-duration: 0.15s;
 }
 
-.btn-add {
-    background-color: #4CAF50;
-    color: #FFFFFF;
-}
-
-.btn-add:hover {
-    background-color: #66BB6A;
-}
-
-.btn-add:active {
-    translate: 1px 1px;
-}
-
-.btn-remove {
-    background-color: #FF4B4B;
-    color: #FFFFFF;
-}
-
-.btn-remove:hover {
-    background-color: #FF6B6B;
-}
-
-.btn-remove:active {
-    translate: 1px 1px;
-}
-
-.btn-accept {
-    background-color: #2D7BFF;
-    color: #FFFFFF;
+.btn-add, .btn-accept {
+    background-color: rgba(0, 229, 255, 0.2);
+    border-color: rgb(0, 229, 255);
+    color: rgb(0, 229, 255);
     margin-right: 6px;
 }
+.btn-add:hover, .btn-accept:hover { background-color: rgba(0, 229, 255, 0.8); color: white; }
 
-.btn-accept:hover {
-    background-color: #5B9AFF;
+.btn-remove, .btn-decline {
+    background-color: rgba(255, 75, 75, 0.2);
+    border-color: var(--color-danger);
+    color: var(--color-danger);
 }
+.btn-remove:hover, .btn-decline:hover { background-color: rgba(255, 75, 75, 0.8); color: white; }
 
-.btn-accept:active {
-    translate: 1px 1px;
-}
-
-.btn-decline {
-    background-color: #8A7E6E;
-    color: #FFFFFF;
-}
-
-.btn-decline:hover {
-    background-color: #9C8FAB;
-}
-
-.btn-decline:active {
-    translate: 1px 1px;
-}
-
-/* ── Close Button Corner ── */
-.friends-close-shadow {
-    position: absolute;
-    right: -8px;
-    top: -8px;
-    background-color: transparent;
-    border-radius: 10px;
-    padding-right: 2px;
-    padding-bottom: 2px;
-    z-index: 10;
-}
-
+/* ── Close Button ── */
+.friends-close-shadow { position: absolute; right: -8px; top: -8px; }
 .friends-close-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    background-color: #FF4B4B;
-    border-width: 3px;
-    border-color: #3D3535;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    font-size: 18px;
-    -unity-font-style: bold;
-    color: #FFFFFF;
-    -unity-text-align: middle-center;
-    transition-property: translate, background-color;
-    transition-duration: 0.08s;
-}
-
-.friends-close-btn:hover {
-    background-color: #FF6B6B;
-}
-
-.friends-close-btn:active {
-    translate: 2px 2px;
-    background-color: #CC3333;
+    width: 36px; height: 36px; border-radius: var(--radius-button);
+    background-color: transparent; border-width: 0;
+    align-items: center; justify-content: center; padding: 0;
+    /* Uses V2 icon injected below */
 }

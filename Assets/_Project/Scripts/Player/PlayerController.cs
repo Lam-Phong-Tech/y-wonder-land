@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.EventSystems;
 
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(PlayerInput))]
@@ -98,22 +99,16 @@ public class PlayerController : MonoBehaviour
         Vector2 inputVec = moveAction != null ? moveAction.ReadValue<Vector2>() : Vector2.zero;
         bool jumpPressed = jumpAction != null && jumpAction.triggered;
         bool interactPressed = interactAction != null && interactAction.triggered;
-        bool attackPressed = attackAction != null && attackAction.triggered;
+        
+        // Kiểm tra xem chuột có đang nằm trên UI không để chặn click xuyên UI
+        bool isPointerOverUI = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
+        bool attackPressed = attackAction != null && attackAction.triggered && !isPointerOverUI;
 
         // Process Interaction / Actions
         if (interactPressed)
         {
             Debug.Log("[PlayerController] Interact button pressed!");
             // TODO: Bỏ hành động Trồng Cây ra khỏi nút Interact như đã trao đổi
-        }
-
-        if (attackPressed)
-        {
-            Debug.Log("[PlayerController] Attack button pressed!");
-            if (animator != null && HasParameter(animator, "Chop"))
-            {
-                animator.SetTrigger(chopHash);
-            }
         }
 
         if (attackPressed)

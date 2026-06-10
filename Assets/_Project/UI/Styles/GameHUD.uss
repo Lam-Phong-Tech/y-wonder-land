@@ -1,832 +1,159 @@
 /* ============================================
-   In-Game HUD Styles
-   Style: The Tangible Playground
+   In-Game HUD Styles - Structured Palia
    Extends DesignSystem.uss
    ============================================ */
 
-/* ── HUD Root ── */
+.hud-root { width: 100%; height: 100%; position: absolute; padding: 16px; }
 
-.hud-root {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    padding: 12px;
-}
-
-/* ============================================
-   1. PLAYER INFO — Top Left
-   ============================================ */
-
-.hud-top-left {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-}
+/* ── 1. PLAYER INFO ── */
+.hud-top-left { position: absolute; top: 16px; left: 16px; }
 
 .player-info {
-    flex-direction: row;
-    align-items: center;
-    background-color: rgba(0, 0, 0, 0.45);
-    border-radius: 12px;
-    padding: 6px 12px 6px 6px;
+    flex-direction: row; align-items: center;
+    background-color: var(--color-neutral-surface);
+    border-radius: var(--radius-panel);
+    border-width: var(--border-medium); border-color: var(--color-border);
+    padding: 8px 16px 8px 8px;
+    transition-property: background-color, border-color, scale; transition-duration: 0.15s;
 }
+.player-info:hover { border-color: var(--color-border-focus); background-color: rgba(45, 50, 65, 0.95); scale: 1.02; }
 
-.clickable-hud-element {
-    transition-property: scale, background-color;
-    transition-duration: 0.1s;
-}
-
-.clickable-hud-element:hover {
-    scale: 1.03;
-}
-
-.clickable-hud-element:active {
-    scale: 0.97;
-    translate: 2px 2px;
-}
-
-/* Avatar */
 .player-avatar {
-    width: 48px;
-    height: 48px;
-    border-radius: 10px;
-    border-width: 2px;
-    border-color: #FFFFFF;
-    background-color: #5B42F3;
-    align-items: center;
-    justify-content: center;
-    margin-right: 8px;
+    width: 44px; height: 44px; border-radius: var(--radius-button);
+    border-width: 1px; border-color: var(--color-border);
+    background-color: rgba(0, 0, 0, 0.3); align-items: center; justify-content: center; margin-right: 12px;
 }
+.player-avatar-icon { font-size: 22px; color: var(--color-text-white); -unity-text-align: middle-center; }
+.player-details { justify-content: center; }
+.player-name { font-size: 14px; -unity-font-style: bold; color: var(--color-text-white); margin-bottom: 4px; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
 
-.player-avatar-icon {
-    font-size: 22px;
-    color: #FFFFFF;
-    -unity-text-align: middle-center;
-}
-
-/* Player Details */
-.player-details {
-    justify-content: center;
-}
-
-.player-name {
-    font-size: 13px;
-    -unity-font-style: bold;
-    color: #FFFFFF;
-    margin-bottom: 2px;
-}
-
-.player-level-row {
-    flex-direction: row;
-    align-items: center;
-    margin-top: 2px;
-}
-
+.player-level-row { flex-direction: row; align-items: center; }
 .player-level-badge {
-    background-color: #2D7BFF;
-    border-radius: 6px;
-    padding: 1px 8px;
-    align-items: center;
-    justify-content: center;
+    background-color: rgba(255, 179, 71, 0.2);
+    border-width: 1px; border-color: var(--color-primary); border-radius: 4px;
+    padding: 2px 8px; align-items: center; justify-content: center;
 }
+.player-level-text { font-size: 11px; -unity-font-style: bold; color: var(--color-primary); margin: 0; padding: 0; -unity-text-align: middle-center; }
+.player-exp-text { font-size: 12px; -unity-font-style: bold; color: var(--color-text-secondary); margin: 0 0 0 8px; padding: 0; -unity-text-align: middle-left; }
 
-.player-level-text {
-    font-size: 10px;
-    -unity-font-style: bold;
-    color: #FFFFFF;
-    margin: 0;
-    padding: 0;
-    -unity-text-align: middle-center;
-}
-
-.player-exp-text {
-    font-size: 12px;
-    -unity-font-style: bold;
-    color: rgba(255, 255, 255, 0.8);
-    margin: 0 0 0 6px;
-    padding: 0;
-    -unity-text-align: middle-left;
-}
-
-/* ============================================
-   2. QUEST BUBBLE — Below Player Info
-   ============================================ */
-
+/* ── 2. QUEST BUBBLE ── */
 .quest-bubble {
-    flex-direction: row;
-    align-items: center;
-    background-color: #FFFFFF;
-    border-radius: 10px;
-    border-width: 2px;
-    border-color: #D5D5D5;
-    padding: 6px 10px;
-    margin-top: 8px;
-    max-width: 200px;
+    flex-direction: row; align-items: center;
+    background-color: var(--color-neutral-surface);
+    border-radius: var(--radius-panel); border-width: var(--border-medium); border-color: var(--color-border);
+    padding: 8px 12px; margin-top: 10px; max-width: 220px;
+    transition-property: scale, border-color; transition-duration: 0.15s;
 }
+.quest-bubble:hover { border-color: var(--color-border-focus); scale: 1.02; }
+.quest-text { font-size: 12px; color: var(--color-text-white); flex-grow: 1; flex-shrink: 1; white-space: normal; margin-right: 8px; line-height: 16px; }
+.quest-info-icon { width: 24px; height: 24px; flex-shrink: 0; }
+.quest-info-text { font-size: 12px; -unity-font-style: bold; color: var(--color-primary); margin: 0; padding: 0; -unity-text-align: middle-center; }
 
-.quest-bubble.clickable-hud-element:hover {
-    background-color: #F5F5F5;
-}
+/* ── 3. TOP RIGHT ── */
+.hud-top-right { position: absolute; top: 16px; right: 16px; align-items: flex-end; }
+.hud-top-right-row { flex-direction: row; align-items: center; }
 
-.quest-text {
-    font-size: 11px;
-    color: #2D3436;
-    flex-grow: 1;
-    flex-shrink: 1;
-    white-space: normal;
-    margin-right: 6px;
-}
-
-.quest-info-icon {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background-color: #2D7BFF;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.quest-info-text {
-    font-size: 12px;
-    -unity-font-style: bold;
-    color: #FFFFFF;
-    margin: 0;
-    padding: 0;
-    -unity-text-align: middle-center;
-}
-
-/* ============================================
-   3. TOP RIGHT — Currency + Settings + Bag
-   ============================================ */
-
-.hud-top-right {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    align-items: flex-end;
-}
-
-/* Row 1: Currency + Settings side by side */
-.hud-top-right-row {
-    flex-direction: row;
-    align-items: center;
-}
-
-/* Single currency display */
 .currency-item {
-    flex-direction: row;
-    align-items: center;
-    background-color: rgba(0, 0, 0, 0.45);
-    border-radius: 10px;
-    padding: 6px 12px;
-    margin-right: 8px;
+    flex-direction: row; align-items: center;
+    background-color: var(--color-neutral-surface);
+    border-radius: var(--radius-panel); border-width: var(--border-medium); border-color: var(--color-border);
+    padding: 8px 14px; margin-right: 10px;
 }
-
-.currency-icon {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    margin-right: 6px;
-    align-items: center;
-    justify-content: center;
-    background-color: #9B59B6;
-    border-width: 2px;
-    border-color: #8E44AD;
-}
-
-.currency-icon-label {
-    font-size: 10px;
-    -unity-font-style: bold;
-    color: #FFFFFF;
-    margin: 0;
-    padding: 0;
-    -unity-text-align: middle-center;
-}
-
-.currency-value {
-    font-size: 14px;
-    -unity-font-style: bold;
-    color: #FFFFFF;
-}
-
-/* Settings button — circle, dark */
-.settings-btn-shadow {
-    background-color: transparent;
-    border-radius: 50%;
-    padding-right: 3px;
-    padding-bottom: 3px;
-}
+.currency-icon { width: 22px; height: 22px; margin-right: 8px; align-items: center; justify-content: center; }
+.currency-icon-label { font-size: 10px; -unity-font-style: bold; color: var(--color-primary); margin: 0; padding: 0; -unity-text-align: middle-center; }
+.currency-value { font-size: 15px; -unity-font-style: bold; color: var(--color-text-white); }
 
 .settings-btn {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background-color: #2D3436;
-    border-width: 3px;
-    border-color: #1A1E20;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    transition-property: translate, background-color;
-    transition-duration: 0.1s;
+    width: 46px; height: 46px; border-radius: var(--radius-button);
+    background-color: var(--color-neutral-surface); border-width: var(--border-medium); border-color: var(--color-border);
+    align-items: center; justify-content: center; padding: 0;
+    transition-property: background-color, border-color, scale; transition-duration: 0.15s;
 }
+.settings-btn:hover { border-color: var(--color-primary); scale: 1.05; }
+.settings-btn:active { scale: 0.95; }
+.settings-btn-icon { font-size: 24px; color: var(--color-text-white); width: 46px; height: 46px; }
 
-.settings-btn:hover {
-    background-color: #3D4E50;
-}
-
-.settings-btn:active {
-    translate: 3px 3px;
-    background-color: #1A1E20;
-}
-
-.settings-btn-icon {
-    font-size: 22px;
-    color: #FFFFFF;
-    -unity-text-align: middle-center;
-    width: 44px;
-    height: 44px;
-    padding: 0;
-    margin: 0;
-}
-
-/* Row 2: Bag / Inventory — below, aligned right */
-.bag-btn-shadow {
-    background-color: transparent;
-    border-radius: 14px;
-    padding-right: 3px;
-    padding-bottom: 3px;
-    margin-top: 8px;
-    align-self: flex-end;
-}
-
+.bag-btn-shadow { margin-top: 10px; align-self: flex-end; }
 .bag-btn {
-    width: 52px;
-    height: 52px;
-    border-radius: 14px;
-    background-color: #2D7BFF;
-    border-width: 3px;
-    border-color: #1558CC;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    transition-property: translate, background-color;
-    transition-duration: 0.1s;
+    width: 56px; height: 56px; border-radius: var(--radius-button);
+    background-color: var(--color-primary); border-width: 0;
+    align-items: center; justify-content: center; padding: 0;
+    transition-property: background-color, scale; transition-duration: 0.15s;
 }
+.bag-btn:hover { background-color: var(--color-primary-hover); scale: 1.05; }
+.bag-btn:active { background-color: var(--color-primary-active); scale: 0.95; }
+.bag-btn-icon { width: 56px; height: 56px; }
 
-.bag-btn:hover {
-    background-color: #3A85FF;
-}
-
-.bag-btn:active {
-    translate: 3px 3px;
-    background-color: #1A6AEE;
-}
-
-.bag-btn-icon {
-    font-size: 24px;
-    color: #FFFFFF;
-    -unity-text-align: middle-center;
-    width: 52px;
-    height: 52px;
-    padding: 0;
-    margin: 0;
-}
-
-/* ============================================
-   4. LEFT SIDEBAR — Function Buttons
-   ============================================ */
-
-.hud-left-sidebar {
-    margin-top: 8px;
-}
-
-.sidebar-btn-shadow {
-    background-color: transparent;
-    border-radius: 12px;
-    padding-right: 3px;
-    padding-bottom: 3px;
-    margin-bottom: 8px;
-    align-self: flex-start;
-}
-
+/* ── 4. LEFT SIDEBAR ── */
+.hud-left-sidebar { margin-top: 10px; }
+.sidebar-btn-shadow { margin-bottom: 10px; align-self: flex-start; }
 .sidebar-btn {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-    border-width: 3px;
-    border-color: #3D3535;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    transition-property: translate, background-color;
-    transition-duration: 0.1s;
+    width: 46px; height: 46px; border-radius: var(--radius-button);
+    border-width: var(--border-medium); border-color: var(--color-border);
+    background-color: var(--color-neutral-surface);
+    align-items: center; justify-content: center; padding: 0;
+    transition-property: background-color, border-color, scale; transition-duration: 0.15s;
 }
+.sidebar-btn:hover { border-color: var(--color-primary); scale: 1.05; }
+.sidebar-btn:active { scale: 0.95; }
 
-/* Individual Color Buttons */
-.sidebar-btn-leaderboard {
-    background-color: #FFC107;
-    border-color: #3D3535;
-}
-.sidebar-btn-leaderboard:hover {
-    background-color: #FFD54F;
-}
-.sidebar-btn-leaderboard:active {
-    translate: 3px 3px;
-    background-color: #FFB300;
-}
+.sidebar-btn-shop, .sidebar-btn-map { flex-direction: row; width: 100px; height: 46px; padding: 0 10px; }
+.sidebar-btn-shop-icon, .sidebar-btn-map-icon { font-size: 20px; width: 24px; height: 24px; }
+.sidebar-btn-shop-text, .sidebar-btn-map-text { font-size: 14px; -unity-font-style: bold; color: var(--color-text-white); margin-left: 6px; }
+.sidebar-btn-piggy, .sidebar-btn-fishing, .sidebar-btn-build { width: 46px; height: 46px; }
 
-.sidebar-btn-calendar {
-    background-color: #5B42F3;
-    border-color: #3D3535;
-}
-.sidebar-btn-calendar:hover {
-    background-color: #7B66FF;
-}
-.sidebar-btn-calendar:active {
-    translate: 3px 3px;
-    background-color: #432BB3;
-}
+/* ── 5. JOYSTICK ── */
+.hud-bottom-left { position: absolute; bottom: 24px; left: 24px; }
+.joystick-outer { width: 130px; height: 130px; border-radius: 65px; background-color: rgba(30, 35, 45, 0.6); border-width: 1px; border-color: rgba(255, 255, 255, 0.15); align-items: center; justify-content: center; }
+.joystick-inner { width: 48px; height: 48px; border-radius: 24px; background-color: rgba(255, 255, 255, 0.5); border-width: 1px; border-color: rgba(255, 255, 255, 0.8); }
+.joystick-arrow-container { position: absolute; width: 130px; height: 130px; align-items: center; justify-content: center; }
+.joystick-arrow { position: absolute; font-size: 14px; color: rgba(255, 255, 255, 0.4); }
+.joystick-arrow-up { top: 10px; } .joystick-arrow-down { bottom: 10px; } .joystick-arrow-left { left: 12px; } .joystick-arrow-right { right: 12px; }
 
-.sidebar-btn-event {
-    background-color: #9C27B0;
-    border-color: #3D3535;
-}
-.sidebar-btn-event:hover {
-    background-color: #AB47BC;
-}
-.sidebar-btn-event:active {
-    translate: 3px 3px;
-    background-color: #7B1FA2;
-}
+/* ── 6. ACTION BUTTONS ── */
+.hud-right-actions { position: absolute; right: 24px; bottom: 130px; align-items: center; }
+.action-btn-shadow { margin-bottom: 12px; }
+.action-btn { border-radius: 50%; align-items: center; justify-content: center; padding: 0; transition-property: background-color, scale; transition-duration: 0.15s; }
 
-.sidebar-btn-mail {
-    background-color: #2D7BFF;
-    border-color: #3D3535;
-}
-.sidebar-btn-mail:hover {
-    background-color: #5294FF;
-}
-.sidebar-btn-mail:active {
-    translate: 3px 3px;
-    background-color: #1A52CC;
-}
+.action-btn-interact { width: 64px; height: 64px; background-color: var(--color-surface-mid); border-width: var(--border-medium); border-color: var(--color-border); }
+.action-btn-interact:hover { border-color: var(--color-primary); scale: 1.05; }
+.action-btn-interact:active { scale: 0.95; }
 
-.sidebar-btn-friends {
-    background-color: #4EA8DE;
-    border-color: #3D3535;
-}
-.sidebar-btn-friends:hover {
-    background-color: #72C0FA;
-}
-.sidebar-btn-friends:active {
-    translate: 3px 3px;
-    background-color: #3582B3;
-}
+.action-btn-cancel { width: 52px; height: 52px; background-color: var(--color-danger); border-width: 0; }
+.action-btn-cancel:hover { background-color: var(--color-danger-hover); scale: 1.05; }
+.action-btn-cancel:active { background-color: var(--color-danger-active); scale: 0.95; }
 
-.sidebar-btn-shop {
-    background-color: #4CAF50;
-    border-color: #3D3535;
-    flex-direction: row;
-    width: 90px;
-    height: 44px;
-    padding: 0 8px;
-}
-.sidebar-btn-shop:hover {
-    background-color: #66BB6A;
-}
-.sidebar-btn-shop:active {
-    translate: 3px 3px;
-    background-color: #388E3C;
-}
+.action-btn-icon-dark { width: 64px; height: 64px; }
+.action-btn-icon-white { width: 52px; height: 52px; }
 
-.sidebar-btn-shop-icon {
-    font-size: 18px;
-    color: #FFFFFF;
-    -unity-text-align: middle-center;
-    margin: 0;
-    padding: 0;
-}
-
-.sidebar-btn-shop-text {
-    font-size: 13px;
-    -unity-font-style: bold;
-    color: #FFFFFF;
-    margin-left: 4px;
-    -unity-text-align: middle-center;
-}
-
-.sidebar-btn-map {
-    background-color: #00B4D8;
-    border-color: #3D3535;
-    flex-direction: row;
-    width: 90px;
-    height: 44px;
-    padding: 0 8px;
-    align-items: center;
-    justify-content: center;
-    transition-property: translate, background-color;
-    transition-duration: 0.08s;
-}
-
-.sidebar-btn-map:hover {
-    background-color: #26C6DA;
-}
-
-.sidebar-btn-map:active {
-    translate: 3px 3px;
-    background-color: #0096B7;
-}
-
-.sidebar-btn-map-icon {
-    font-size: 18px;
-    color: #FFFFFF;
-    -unity-text-align: middle-center;
-    margin: 0;
-    padding: 0;
-}
-
-.sidebar-btn-map-text {
-    font-size: 13px;
-    -unity-font-style: bold;
-    color: #FFFFFF;
-    margin-left: 4px;
-    -unity-text-align: middle-center;
-}
-
-.sidebar-btn-piggy {
-    background-color: #E8833A;
-    border-color: #3D3535;
-    width: 44px;
-    height: 44px;
-    padding: 0;
-    align-items: center;
-    justify-content: center;
-    transition-property: translate, background-color;
-    transition-duration: 0.08s;
-}
-
-.sidebar-btn-piggy:hover {
-    background-color: #F09848;
-}
-
-.sidebar-btn-piggy:active {
-    translate: 3px 3px;
-    background-color: #CC6B28;
-}
-
-.sidebar-btn-piggy-icon {
-    font-size: 22px;
-    color: #FFFFFF;
-    -unity-text-align: middle-center;
-    margin: 0;
-    padding: 0;
-}
-
-.sidebar-btn-fishing {
-    background-color: #0284C7;
-    border-color: #3D3535;
-    width: 44px;
-    height: 44px;
-    padding: 0;
-    align-items: center;
-    justify-content: center;
-    transition-property: translate, background-color;
-    transition-duration: 0.08s;
-}
-
-.sidebar-btn-fishing:hover {
-    background-color: #0EA5E9;
-}
-
-.sidebar-btn-fishing:active {
-    translate: 3px 3px;
-    background-color: #0369A1;
-}
-
-/* Build Mode */
-.sidebar-btn-build {
-    background-color: #8B5E3C;
-    border-color: #3D3535;
-    width: 44px;
-    height: 44px;
-    padding: 0;
-    align-items: center;
-    justify-content: center;
-    transition-property: translate, background-color;
-    transition-duration: 0.08s;
-}
-
-.sidebar-btn-build:hover {
-    background-color: #A0724E;
-}
-
-.sidebar-btn-build:active {
-    translate: 3px 3px;
-    background-color: #6D4830;
-}
-
-.sidebar-btn-icon {
-    font-size: 20px;
-    color: #3D3535;
-    -unity-text-align: middle-center;
-    width: 44px;
-    height: 44px;
-    padding: 0;
-    margin: 0;
-}
-
-.sidebar-btn-icon-white {
-    color: #FFFFFF;
-}
-
-/* ============================================
-   5. JOYSTICK — Bottom Left
-   ============================================ */
-
-.hud-bottom-left {
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
-}
-
-.joystick-outer {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    background-color: rgba(0, 0, 0, 0.15);
-    border-width: 2px;
-    border-color: rgba(255, 255, 255, 0.25);
-    align-items: center;
-    justify-content: center;
-}
-
-.joystick-inner {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.35);
-    border-width: 2px;
-    border-color: rgba(255, 255, 255, 0.6);
-}
-
-/* Joystick direction indicators */
-.joystick-arrow-container {
-    position: absolute;
-    width: 120px;
-    height: 120px;
-    align-items: center;
-    justify-content: center;
-}
-
-.joystick-arrow {
-    position: absolute;
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.3);
-}
-
-.joystick-arrow-up {
-    top: 8px;
-}
-
-.joystick-arrow-down {
-    bottom: 8px;
-}
-
-.joystick-arrow-left {
-    left: 10px;
-}
-
-.joystick-arrow-right {
-    right: 10px;
-}
-
-/* ============================================
-   6. ACTION BUTTONS — Right Side
-   ============================================ */
-
-.hud-right-actions {
-    position: absolute;
-    right: 20px;
-    bottom: 120px;
-    align-items: center;
-}
-
-/* Action button shadow (retro) */
-.action-btn-shadow {
-    background-color: transparent;
-    border-radius: 50%;
-    padding-right: 3px;
-    padding-bottom: 3px;
-    margin-bottom: 10px;
-}
-
-/* Base action button — PERFECT CIRCLE, thick stroke */
-.action-btn {
-    border-radius: 50%;
-    align-items: center;
-    justify-content: center;
-    border-width: 3px;
-    padding: 0;
-    transition-property: translate, background-color;
-    transition-duration: 0.08s;
-    transition-timing-function: ease-out;
-}
-
-.action-btn:active {
-    translate: 3px 3px;
-}
-
-/* Interact button (hand) — largest */
-.action-btn-interact {
-    width: 60px;
-    height: 60px;
-    background-color: #FFFFFF;
-    border-color: #2D3436;
-}
-
-.action-btn-interact:hover {
-    background-color: #F5F5F5;
-}
-
-.action-btn-interact:active {
-    background-color: #E0E0E0;
-}
-
-/* Cancel button */
-.action-btn-cancel {
-    width: 48px;
-    height: 48px;
-    background-color: #FF4B4B;
-    border-color: #CC3333;
-}
-
-.action-btn-cancel:hover {
-    background-color: #E63E3E;
-}
-
-.action-btn-cancel:active {
-    background-color: #CC3333;
-}
-
-/* Action button icon — fixed centering */
-.action-btn-icon {
-    -unity-font-style: bold;
-    -unity-text-align: middle-center;
-    padding: 0;
-    margin: 0;
-}
-
-.action-btn-icon-dark {
-    color: #2D3436;
-    font-size: 26px;
-    width: 60px;
-    height: 60px;
-}
-
-.action-btn-icon-white {
-    color: #FFFFFF;
-    font-size: 22px;
-    width: 48px;
-    height: 48px;
-}
-
-/* ============================================
-   7. MESSAGES BAR — Bottom Center
-   ============================================ */
-
-.hud-bottom-center {
-    position: absolute;
-    bottom: 12px;
-    left: 50%;
-    translate: -50% 0;
-}
-
+/* ── 7. MESSAGES BAR ── */
+.hud-bottom-center { position: absolute; bottom: 16px; left: 50%; translate: -50% 0; }
 .messages-bar {
-    flex-direction: row;
-    align-items: center;
-    background-color: rgba(0, 0, 0, 0.45);
-    border-radius: 12px;
-    padding: 8px 16px;
-    min-width: 240px;
+    flex-direction: row; align-items: center;
+    background-color: var(--color-neutral-surface);
+    border-radius: var(--radius-panel); border-width: var(--border-medium); border-color: var(--color-border);
+    padding: 10px 20px; min-width: 260px;
 }
-
-.messages-text {
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.86);
-    flex-grow: 1;
-    -unity-text-align: middle-left;
-    margin-left: 4px;
-    margin-right: 8px;
-}
-
-.messages-icons {
-    flex-direction: row;
-    align-items: center;
-}
-
+.messages-text { font-size: 14px; color: var(--color-text-secondary); flex-grow: 1; margin-left: 6px; margin-right: 12px; }
+.messages-icons { flex-direction: row; align-items: center; }
 .messages-icon-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: transparent;
-    border-width: 0;
-    align-items: center;
-    justify-content: center;
-    margin: 0 0 0 6px;
-    font-size: 24px;
-    color: rgba(255, 255, 255, 0.8);
-    -unity-text-align: middle-center;
-    padding: 0;
-    transition-property: background-color, scale;
-    transition-duration: 0.15s;
+    width: 44px; height: 44px; border-radius: var(--radius-button);
+    background-color: transparent; border-width: 0; align-items: center; justify-content: center; margin: 0 0 0 8px;
+    font-size: 26px; color: var(--color-text-secondary); padding: 0; transition-property: background-color, color; transition-duration: 0.15s;
 }
+.messages-icon-btn:hover { background-color: rgba(255, 255, 255, 0.1); color: var(--color-text-white); }
+#BtnEmoji { font-size: 30px; padding-bottom: 4px; }
 
-.messages-icon-btn:hover {
-    background-color: rgba(255, 255, 255, 0.15);
-    scale: 1.1;
-    color: #FFFFFF;
-}
-
-.messages-icon-btn:active {
-    scale: 0.92;
-}
-
-#BtnEmoji {
-    font-size: 29px;
-    padding-bottom: 3px;
-}
-
-/* ============================================
-   8. JUMP BUTTON — Bottom Right
-   ============================================ */
-
-.hud-bottom-right {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-}
-
-.jump-btn-shadow {
-    background-color: transparent;
-    border-radius: 50%;
-    padding-right: 3px;
-    padding-bottom: 3px;
-}
-
+/* ── 8. JUMP BUTTON ── */
+.hud-bottom-right { position: absolute; bottom: 24px; right: 24px; }
 .jump-btn {
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    background-color: #FFFFFF;
-    border-width: 3px;
-    border-color: #2D3436;
-    align-items: center;
-    justify-content: center;
-    transition-property: translate, background-color;
-    transition-duration: 0.08s;
+    width: 56px; height: 56px; border-radius: 50%;
+    background-color: var(--color-surface-mid); border-width: var(--border-medium); border-color: var(--color-border);
+    align-items: center; justify-content: center; transition-property: border-color, scale; transition-duration: 0.15s;
 }
+.jump-btn:hover { border-color: var(--color-primary); scale: 1.05; }
+.jump-btn:active { scale: 0.95; }
+.jump-btn-icon { width: 56px; height: 56px; }
 
-.jump-btn:hover {
-    background-color: #F0F0F0;
-}
-
-.jump-btn:active {
-    translate: 3px 3px;
-    background-color: #E0E0E0;
-}
-
-.jump-btn-icon {
-    font-size: 22px;
-    -unity-font-style: bold;
-    color: #2D7BFF;
-    -unity-text-align: middle-center;
-    width: 52px;
-    height: 52px;
-    padding: 0;
-    margin: 0;
-}
-
-/* ============================================
-   8. CROSSHAIR — Center Screen
-   ============================================ */
-
-.crosshair {
-    position: absolute;
-    left: 0;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    align-items: center;
-    justify-content: center;
-}
-
-.crosshair-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.85);
-    border-width: 1px;
-    border-color: rgba(0, 0, 0, 0.3);
-}
+.crosshair { position: absolute; left: 0; top: 0; right: 0; bottom: 0; align-items: center; justify-content: center; }
+.crosshair-dot { width: 8px; height: 8px; border-radius: 4px; background-color: rgba(255, 255, 255, 0.9); border-width: 1px; border-color: rgba(0, 0, 0, 0.5); }

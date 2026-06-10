@@ -124,6 +124,8 @@ public class ShopPopupController : MonoBehaviour
     private void QueryElements(VisualElement root)
     {
         overlay = root.Q<VisualElement>("ShopOverlay");
+        if (overlay == null) Debug.LogError("[ShopPopup] LỖI: Không tìm thấy 'ShopOverlay' trong UXML!");
+
         shopTitle = root.Q<Label>("ShopTitle");
         btnClose = root.Q<Button>("BtnCloseShop");
         gridContainer = root.Q<VisualElement>("ShopGrid");
@@ -190,6 +192,20 @@ public class ShopPopupController : MonoBehaviour
     /// </summary>
     public void Show(ShopData data)
     {
+        if (!gameObject.activeInHierarchy)
+        {
+            Debug.Log("[ShopPopup] GameObject đang tắt, tiến hành bật lại!");
+            gameObject.SetActive(true);
+        }
+
+        if (overlay == null && shopDocument != null && shopDocument.rootVisualElement != null)
+        {
+            Debug.Log("[ShopPopup] Tự động load lại UI Elements do bị null...");
+            QueryElements(shopDocument.rootVisualElement);
+            RegisterCallbacks();
+        }
+
+        Debug.Log($"[ShopPopup] Đang gọi Show(ShopData). overlay null? {overlay == null}. data null? {data == null}");
         if (overlay == null || data == null) return;
 
         currentShop = data;

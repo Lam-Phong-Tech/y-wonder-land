@@ -1,363 +1,142 @@
 /* ============================================
-   Login Screen Styles
+   Login Screen Styles - Cozy Dark Palia
    Extends DesignSystem.uss
    ============================================ */
 
-/* ── Screen Container ── */
-
 .login-screen {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    align-items: center;
-    justify-content: center;
+    width: 100%; height: 100%;
+    position: absolute; align-items: center; justify-content: center;
 }
-
-/* ── Login Panel Shadow ── */
 
 .login-shadow {
-    background-color: rgba(0, 0, 0, 0.55);
-    border-radius: 20px;
-    padding-right: 6px;
-    padding-bottom: 6px;
-    width: 420px;
+    width: 440px;
 }
 
-/* ── Login Panel ── */
-
+/* -- Main Panel -- */
 .login-panel {
-    background-color: #EFEFEF;
-    border-radius: 20px;
-    flex-grow: 1;
-    overflow: hidden;
+    background-color: var(--color-primary-navy); /* Base Navy */
+    border-radius: var(--radius-panel);
+    flex-grow: 1; overflow: hidden;
 }
 
-/* ── Header ── */
-
+/* -- Header -- */
 .login-header {
-    background-color: #2D3436;
-    padding: 20px 24px;
-    align-items: center;
-    justify-content: center;
-    border-top-left-radius: 20px;
-    border-top-right-radius: 20px;
+    background-color: var(--color-deep-blue);
+    padding: 32px 24px 32px 24px;
+    align-items: center; justify-content: center;
+    border-top-left-radius: var(--radius-panel);
+    border-top-right-radius: var(--radius-panel);
 }
 
 .game-title {
-    font-size: 26px;
-    -unity-font-style: bold;
-    color: #FFFFFF;
-    letter-spacing: 4px;
-    -unity-text-align: middle-center;
-    white-space: nowrap;
+    font-size: 32px; -unity-font-style: bold;
+    color: var(--color-text-white);
+    letter-spacing: 2px; -unity-text-align: middle-center;
+    white-space: nowrap; 
 }
 
 .game-subtitle {
-    font-size: 11px;
-    color: rgba(255, 255, 255, 0.5);
-    letter-spacing: 2px;
-    -unity-text-align: middle-center;
-    margin-top: 4px;
+    font-size: 14px; color: var(--color-accent-blue);
+    letter-spacing: 2px; -unity-text-align: middle-center; margin-top: 8px;
 }
 
-/* ── Tab Bar ── */
-
-.login-tab-bar {
-    flex-direction: row;
-    background-color: #E0E0E0;
-    border-radius: 10px;
-    padding: 4px;
-    margin: 20px 24px 0 24px;
+/* -- Tab Bar (Pill shaped Tabs inside) -- */
+.login-tab-bar { 
+    flex-direction: row; justify-content: center; 
+    padding: 0; margin-top: -24px; /* Overlap header slightly */
+    margin-bottom: 24px;
 }
-
 .login-tab {
-    flex-grow: 1;
-    padding: 11px 0;
-    -unity-text-align: middle-center;
-    font-size: 15px;
-    color: #636E72;
-    border-width: 0;
-    border-radius: 8px;
-    background-color: transparent;
-    transition-property: background-color, color;
-    transition-duration: 0.15s;
+    background-color: var(--color-mystic-black); color: var(--color-bright-grey);
+    font-size: 16px; -unity-font-style: bold; padding: 12px 32px; margin: 0 4px;
+    border-width: 0; border-radius: 24px; /* Pill shape */
+    transition-property: color, background-color; transition-duration: 0.15s;
+}
+.login-tab:hover { color: var(--color-text-white); background-color: var(--color-deep-blue); }
+.login-tab-active { 
+    color: var(--color-mystic-black); 
+    background-color: var(--color-tan); /* Tan/Cream active tab */
 }
 
-.login-tab:hover {
-    color: #2D3436;
-}
+/* -- Form Area -- */
+.form-container { padding: 8px 32px 32px 32px; }
 
-.login-tab-active {
-    background-color: #FFFFFF;
-    color: #2D3436;
-    -unity-font-style: bold;
-}
-
-/* ── Form Container ── */
-
-.form-container {
-    padding: 24px 28px 28px 28px;
-}
-
-/* ── Input Groups ── */
-
+/* -- Login Input Groups -- */
 .login-input-group {
-    flex-direction: row;
-    align-items: center;
-    background-color: #FFFFFF;
-    border-radius: 10px;
-    border-width: 2px;
-    border-color: #D5D5D5;
-    height: 48px;
-    padding: 0 14px;
-    margin-bottom: 12px;
-    transition-property: border-color;
-    transition-duration: 0.2s;
+    flex-direction: row; align-items: center;
+    background-color: var(--color-mystic-black);
+    border-radius: var(--radius-input);
+    border-width: 2px; border-color: transparent;
+    height: 56px; padding: 0 16px; margin-bottom: 16px;
+    transition-property: border-color; transition-duration: 0.15s;
 }
 
-.login-input-group:hover {
-    border-color: #B0B0B0;
-}
+.login-input-group:hover { border-color: rgba(255, 255, 255, 0.1); }
+.login-input-group-focus { border-color: var(--color-accent-yellow); }
 
-.login-input-group-focus {
-    border-color: #2D7BFF;
-}
-
-/* Input Icon Container */
 .login-icon {
-    width: 24px;
-    height: 24px;
-    margin-right: 10px;
-    flex-shrink: 0;
-    align-items: center;
-    justify-content: flex-end;
+    width: 24px; height: 24px; margin-right: 12px;
+    flex-shrink: 0; align-items: center; justify-content: flex-end;
+    -unity-background-image-tint-color: var(--color-overcast-grey);
 }
 
-/* User Icon */
-.user-icon-head {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background-color: #9BA3A8;
-    margin-bottom: 1px;
-}
+.login-textfield { flex-grow: 1; border-width: 0; background-color: transparent; font-size: 16px; color: var(--color-text-white); margin: 0; padding: 0; }
+.login-textfield > .unity-text-field__input { border-width: 0; background-color: transparent; padding: 4px 0; margin: 0; color: var(--color-text-white); font-size: 16px; }
+.login-textfield:focus > .unity-text-field__input { border-width: 0; background-color: transparent; }
 
-.user-icon-body {
-    width: 18px;
-    height: 7px;
-    border-top-left-radius: 9px;
-    border-top-right-radius: 9px;
-    background-color: #9BA3A8;
-}
-
-/* Lock Icon */
-.lock-icon-top {
-    width: 10px;
-    height: 7px;
-    border-width: 2px;
-    border-color: #9BA3A8;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-    background-color: transparent;
-    border-bottom-width: 0;
-}
-
-.lock-icon-body {
-    width: 14px;
-    height: 9px;
-    border-radius: 2px;
-    background-color: #9BA3A8;
-}
-
-/* Email Icon */
-.email-icon-box {
-    width: 18px;
-    height: 12px;
-    border-width: 2px;
-    border-color: #9BA3A8;
-    border-radius: 2px;
-    background-color: transparent;
-}
-
-/* Text Field Inside Input Group */
-.login-textfield {
-    flex-grow: 1;
-    border-width: 0;
-    background-color: transparent;
-    font-size: 14px;
-    color: #2D3436;
-    margin: 0;
-    padding: 0;
-}
-
-.login-textfield > .unity-text-field__input {
-    border-width: 0;
-    background-color: transparent;
-    padding: 4px 0;
-    margin: 0;
-    color: #2D3436;
-    font-size: 14px;
-}
-
-.login-textfield:focus > .unity-text-field__input {
-    border-width: 0;
-    background-color: transparent;
-}
-
-/* ── Eye Toggle Button ── */
-
+/* -- Toggle Eye -- */
 .btn-toggle-eye {
-    width: 30px;
-    height: 30px;
-    background-color: transparent;
-    border-width: 0;
-    border-radius: 50%;
-    font-size: 13px;
-    color: #9BA3A8;
-    -unity-text-align: middle-center;
-    flex-shrink: 0;
-    margin-left: 4px;
-    padding: 0;
-    transition-property: background-color, color;
-    transition-duration: 0.15s;
+    width: 36px; height: 36px;
+    background-color: transparent; border-width: 0; border-radius: 18px; /* Circular */
+    flex-shrink: 0; margin-left: 4px; padding: 0;
+    transition-property: background-color; transition-duration: 0.15s;
 }
+.btn-toggle-eye:hover { background-color: rgba(255, 255, 255, 0.1); }
 
-.btn-toggle-eye:hover {
-    background-color: rgba(0, 0, 0, 0.06);
-    color: #636E72;
-}
+/* -- Options Row -- */
+.options-row { flex-direction: row; align-items: center; justify-content: space-between; margin-top: 8px; margin-bottom: 32px; }
+.remember-row { flex-direction: row; align-items: center; }
 
-/* ── Options Row ── */
-
-.options-row {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 2px;
-    margin-bottom: 18px;
-}
-
-/* Remember Me - Custom Row */
-.remember-row {
-    flex-direction: row;
-    align-items: center;
-}
-
-.remember-toggle {
-    width: 20px;
-    height: 20px;
-    margin: 0;
-    padding: 0;
-}
-
-.remember-toggle > .unity-toggle__input {
-    margin: 0;
-    padding: 0;
-}
-
+.remember-toggle { width: 24px; height: 24px; margin: 0; padding: 0; }
+.remember-toggle > .unity-toggle__input { margin: 0; padding: 0; }
 .remember-toggle > .unity-toggle__input > .unity-toggle__checkmark {
-    width: 18px;
-    height: 18px;
-    border-radius: 4px;
-    border-width: 2px;
-    border-color: #D5D5D5;
-    background-color: #FFFFFF;
-    margin: 0;
-    padding: 0;
+    width: 24px; height: 24px; border-radius: 6px; /* Soft square */
+    border-width: 2px; border-color: var(--color-mystic-black);
+    background-color: var(--color-mystic-black); margin: 0; padding: 0;
+    -unity-background-image-tint-color: var(--color-mystic-black);
 }
-
 .remember-toggle > .unity-toggle__input:checked > .unity-toggle__checkmark {
-    background-color: #2D7BFF;
-    border-color: #2D7BFF;
+    background-color: var(--color-accent-yellow); border-color: var(--color-accent-yellow);
 }
 
-.remember-label {
-    font-size: 13px;
-    color: #636E72;
-    margin-left: 6px;
-}
+.remember-label { font-size: 14px; color: var(--color-bright-grey); margin-left: 12px; }
+.forgot-password { font-size: 14px; color: var(--color-accent-blue); -unity-text-align: middle-right; cursor: link; }
+.forgot-password:hover { color: var(--color-text-white); }
 
-/* Forgot Password Link */
-.forgot-password {
-    font-size: 13px;
-    color: #2D7BFF;
-    -unity-text-align: middle-right;
-    cursor: link;
-}
-
-.forgot-password:hover {
-    color: #1A6AEE;
-}
-
-/* ── Login / Register Button ── */
-
-.login-btn-shadow {
-    margin-top: 8px;
-}
-
+/* -- Login Button (Pill shape with tactile lip) -- */
+.login-btn-shadow { margin-top: 8px; }
 .btn-login {
-    background-color: #2D7BFF;
-    color: #FFFFFF;
-    font-size: 16px;
-    -unity-font-style: bold;
+    background-color: var(--color-accent-yellow);
+    color: var(--color-mystic-black);
+    font-size: 18px; -unity-font-style: bold;
     border-width: 0;
-    border-bottom-width: 5px;
-    border-right-width: 3px;
-    border-color: #1558CC;
-    border-radius: 12px;
-    padding: 14px 0;
-    -unity-text-align: middle-center;
-    flex-grow: 1;
-    letter-spacing: 2px;
-    transition-property: translate, background-color, border-bottom-width, border-right-width, padding-top;
-    transition-duration: 0.08s;
-    transition-timing-function: ease-out;
+    border-radius: var(--radius-button); /* Pill shape 24px */
+    padding: 16px 0; -unity-text-align: middle-center; flex-grow: 1; letter-spacing: 1px;
+    transition-property: background-color; 
+    transition-duration: 0.1s; transition-timing-function: ease-out;
+}
+.btn-login:hover { background-color: #FFF890; }
+.btn-login:active { 
+    background-color: #D0C350; 
+}
+.btn-login:disabled, .btn-login.unity-disabled {
+    background-color: var(--color-overcast-grey);
+    color: var(--color-mystic-black);
+    border-bottom-color: #7E7C82;
+    opacity: 1;
 }
 
-.btn-login:hover {
-    background-color: #3A85FF;
-    border-color: #1A6AEE;
-}
-
-.btn-login:active {
-    translate: 2px 3px;
-    border-bottom-width: 2px;
-    border-right-width: 1px;
-    background-color: #1A6AEE;
-    border-color: #1046AA;
-    padding-top: 17px;
-}
-
-.btn-login:disabled,
-.btn-login.unity-disabled {
-    background-color: #D5D5D5;
-    color: #9BA3A8;
-    border-color: #B0B0B0;
-    opacity: 0.65;
-    translate: 0 0;
-    border-bottom-width: 5px;
-    border-right-width: 3px;
-}
-
-/* ── Status Message ── */
-
-.status-message {
-    font-size: 13px;
-    -unity-text-align: middle-center;
-    margin-top: 12px;
-    padding: 8px;
-    border-radius: 6px;
-    display: none;
-}
-
-.status-success {
-    color: #27AE60;
-    background-color: rgba(39, 174, 96, 0.1);
-    display: flex;
-}
-
-.status-error {
-    color: #FF4B4B;
-    background-color: rgba(255, 75, 75, 0.1);
-    display: flex;
-}
+/* -- Status Message -- */
+.status-message { font-size: 14px; -unity-text-align: middle-center; margin-top: 16px; padding: 12px; border-radius: 12px; display: none; }
+.status-success { color: var(--color-mystic-black); background-color: var(--color-success); display: flex; }
+.status-error { color: var(--color-text-white); background-color: var(--color-danger); display: flex; }

@@ -74,7 +74,7 @@
                 <ui:VisualElement name="RegisterForm" class="form-container hidden">
 
                     <!-- Username -->
-                    <ui:VisualElement class="login-input-group">
+                    <ui:VisualElement name="RegUsernameGroup" class="login-input-group">
                         <ui:VisualElement class="login-icon">
                             <ui:VisualElement class="user-icon-head" />
                             <ui:VisualElement class="user-icon-body" />
@@ -83,7 +83,7 @@
                     </ui:VisualElement>
 
                     <!-- Email -->
-                    <ui:VisualElement class="login-input-group">
+                    <ui:VisualElement name="RegEmailGroup" class="login-input-group">
                         <ui:VisualElement class="login-icon">
                             <ui:VisualElement class="email-icon-box" />
                         </ui:VisualElement>

@@ -1,0 +1,28 @@
+{
+    "asset": "725aced9cbbb76744b619e2ee038702c",
+    "fileName": "019eaf92-ce58-76e8-ae7a-807bc3aad119.png",
+    "prompt": "Strictly front-facing orthographic view of a sleek dark 3D mail envelope icon with a glowing neon blue seal. Isolated object, no pedestal, no display stand, no floor shadow. Minimalist 3D Onyx style: matte dark plastic, frosted glass seal. Solid white background.",
+    "negativePrompt": "",
+    "model": "gemini-3.1-flash",
+    "modelName": "Gemini 3.1 Nano Banana 2",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelatePixelGridSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0,
+    "dimensions": {
+        "width": 1024,
+        "height": 1024
+    },
+    "spriteSheet": false,
+    "duration": 0.0
+}

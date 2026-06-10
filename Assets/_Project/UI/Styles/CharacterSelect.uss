@@ -1,398 +1,148 @@
 /* ============================================
-   Character Selection Screen
-   Style: The Tangible Playground
+   Character Selection Screen - Cozy Dark Palia
    Extends DesignSystem.uss
    ============================================ */
 
-/* ── Screen ── */
+.charselect-screen { width: 100%; height: 100%; position: absolute; align-items: center; justify-content: center; }
 
-.charselect-screen {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    align-items: center;
-    justify-content: center;
-}
+.charselect-shadow { width: 540px; }
 
-/* ── Panel Shadow ── */
-
-.charselect-shadow {
-    background-color: transparent;
-    border-radius: 20px;
-    padding-right: 6px;
-    padding-bottom: 6px;
-    width: 520px;
-}
-
-/* ── Panel ── */
-
+/* -- Main Panel -- */
 .charselect-panel {
-    background-color: #EFEFEF;
-    border-radius: 20px;
-    flex-grow: 1;
-    overflow: hidden;
+    background-color: var(--color-primary-navy);
+    border-radius: var(--radius-panel);
+    flex-grow: 1; overflow: hidden;
 }
 
-/* ── Header ── */
-
+/* -- Header -- */
 .charselect-header {
-    background-color: #2D3436;
-    padding: 18px 24px;
-    align-items: center;
-    justify-content: center;
-    border-top-left-radius: 20px;
-    border-top-right-radius: 20px;
+    background-color: var(--color-deep-blue);
+    padding: 24px 24px; align-items: center; justify-content: center;
+    border-top-left-radius: var(--radius-panel);
+    border-top-right-radius: var(--radius-panel);
 }
 
 .charselect-title {
-    font-size: 22px;
-    -unity-font-style: bold;
-    color: #FFFFFF;
-    letter-spacing: 3px;
-    -unity-text-align: middle-center;
+    font-size: 32px; -unity-font-style: bold;
+    color: var(--color-accent-yellow); /* Accent Yellow for Title */
+    letter-spacing: 2px; -unity-text-align: middle-center;
     white-space: nowrap;
 }
 
-/* ── Subtitle ── */
-
 .charselect-subtitle {
-    font-size: 13px;
-    color: #636E72;
-    -unity-text-align: middle-center;
-    margin-top: 16px;
-    margin-bottom: 4px;
-    padding: 0 24px;
+    font-size: 14px; color: var(--color-text-white);
+    -unity-text-align: middle-center; margin-top: 12px; margin-bottom: 4px;
 }
 
-/* ── Cards Row ── */
-
-.charselect-cards {
-    flex-direction: row;
-    justify-content: center;
-    padding: 16px 24px 20px 24px;
-}
-
-/* ── Card Shadow Wrapper ── */
-
-.charselect-card-shadow {
-    background-color: transparent;
-    border-radius: 16px;
-    padding-right: 4px;
-    padding-bottom: 4px;
-    margin: 0 10px;
-    flex-grow: 1;
-}
-
-/* ── Card ── */
+/* -- Gender Cards -- */
+.charselect-cards { flex-direction: row; justify-content: center; padding: 24px 24px 20px 24px; }
+.charselect-card-shadow { margin: 0 12px; flex-grow: 1; }
 
 .charselect-card {
-    background-color: #FFFFFF;
+    background-color: var(--color-mystic-black);
     border-radius: 16px;
-    border-width: 3px;
-    border-color: #D5D5D5;
-    align-items: center;
-    justify-content: center;
-    padding: 24px 16px;
-    flex-grow: 1;
-    transition-property: border-color, background-color, translate;
-    transition-duration: 0.15s;
-    transition-timing-function: ease-out;
+    border-width: 2px;
+    border-color: transparent;
+    align-items: center; justify-content: center;
+    padding: 24px 16px; flex-grow: 1;
+    transition-property: border-color, background-color, scale;
+    transition-duration: 0.15s; transition-timing-function: ease-out;
 }
 
-.charselect-card:hover {
-    border-color: #B0B0B0;
-    background-color: #FAFAFA;
-}
-
-/* ── Card Selected ── */
+.charselect-card:hover { background-color: var(--color-deep-blue); }
 
 .charselect-card-selected {
-    border-color: #2D7BFF;
-    background-color: rgba(45, 123, 255, 0.06);
+    border-color: var(--color-accent-yellow);
+    background-color: var(--color-deep-blue);
 }
 
 .charselect-card-selected:hover {
-    border-color: #2D7BFF;
-    background-color: rgba(45, 123, 255, 0.08);
+    background-color: var(--color-primary-navy);
 }
-
-/* ── Avatar Circle ── */
 
 .charselect-avatar {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 14px;
-    border-width: 3px;
+    width: 80px; height: 80px; border-radius: 40px;
+    align-items: center; justify-content: center; margin-bottom: 16px;
+    background-color: rgba(255, 255, 255, 0.05); 
 }
 
-.charselect-avatar-male {
-    background-color: #E3F2FD;
-    border-color: #90CAF9;
+.charselect-card-selected .charselect-avatar-male, .charselect-card-selected .charselect-avatar-female {
+    background-color: rgba(253, 239, 112, 0.15); /* Soft yellow glow */
 }
-
-.charselect-avatar-female {
-    background-color: #FCE4EC;
-    border-color: #F48FB1;
-}
-
-/* Selected avatar gets stronger border */
-.charselect-card-selected .charselect-avatar-male {
-    border-color: #2D7BFF;
-    background-color: #BBDEFB;
-}
-
-.charselect-card-selected .charselect-avatar-female {
-    border-color: #E91E63;
-    background-color: #F8BBD0;
-}
-
-/* ── Gender Icon (text) ── */
-
-.charselect-gender-icon {
-    font-size: 36px;
-    -unity-font-style: bold;
-    -unity-text-align: middle-center;
-}
-
-.charselect-gender-male {
-    color: #2D7BFF;
-}
-
-.charselect-gender-female {
-    color: #E91E63;
-}
-
-/* ── Card Name ── */
 
 .charselect-name {
-    font-size: 18px;
-    -unity-font-style: bold;
-    color: #2D3436;
-    -unity-text-align: middle-center;
-    letter-spacing: 2px;
+    font-size: 18px; -unity-font-style: bold;
+    color: var(--color-bright-grey); -unity-text-align: middle-center; letter-spacing: 1px;
 }
 
-/* ── Start Button ── */
-
-.charselect-btn-container {
-    padding: 0 24px 24px 24px;
+.charselect-card-selected .charselect-name {
+    color: var(--color-text-white);
 }
 
-.charselect-btn-start {
-    background-color: #2D7BFF;
-    color: #FFFFFF;
-    font-size: 16px;
-    -unity-font-style: bold;
-    border-width: 0;
-    border-bottom-width: 5px;
-    border-right-width: 3px;
-    border-color: #1558CC;
-    border-radius: 12px;
-    padding: 14px 0;
-    -unity-text-align: middle-center;
-    letter-spacing: 2px;
-    width: 100%;
-    transition-property: translate, background-color, border-bottom-width, border-right-width, padding-top;
-    transition-duration: 0.08s;
-    transition-timing-function: ease-out;
-}
-
-.charselect-btn-start:hover {
-    background-color: #3A85FF;
-    border-color: #1A6AEE;
-}
-
-.charselect-btn-start:active {
-    translate: 2px 3px;
-    border-bottom-width: 2px;
-    border-right-width: 1px;
-    background-color: #1A6AEE;
-    border-color: #1046AA;
-    padding-top: 17px;
-}
-
-/* ── Name Input Section ── */
-
-.charselect-name-container {
-    padding: 0 24px 16px 24px;
-}
-
-.charselect-input-title {
-    font-size: 11px;
-    -unity-font-style: bold;
-    color: #636E72;
-    margin-bottom: 6px;
-    letter-spacing: 1px;
-}
+/* -- Name Input Group -- */
+.charselect-name-container { padding: 0 36px 16px 36px; }
+.charselect-input-title { font-size: 14px; -unity-font-style: bold; color: var(--color-text-white); margin-bottom: 8px; letter-spacing: 1px; }
 
 .charselect-input-group {
-    flex-direction: row;
-    align-items: center;
-    background-color: #FFFFFF;
-    border-radius: 10px;
-    border-width: 2px;
-    border-color: #D5D5D5;
-    height: 44px;
-    padding: 0 12px;
-    transition-property: border-color;
-    transition-duration: 0.15s;
+    flex-direction: row; align-items: center;
+    background-color: var(--color-mystic-black);
+    border-radius: 16px; border-width: 2px; border-color: transparent;
+    height: 56px; padding: 0 16px; transition-property: border-color; transition-duration: 0.15s;
+}
+.charselect-input-group:hover { border-color: rgba(255, 255, 255, 0.1); }
+.charselect-input-group-focus { border-color: var(--color-accent-yellow); }
+
+.charselect-input-icon { width: 24px; height: 24px; margin-right: 12px; flex-shrink: 0; -unity-background-image-tint-color: var(--color-overcast-grey); }
+
+.charselect-textfield { flex-grow: 1; border-width: 0; background-color: transparent; font-size: 16px; color: var(--color-text-white); margin: 0; padding: 0; }
+.charselect-textfield > .unity-text-field__input { border-width: 0; background-color: transparent; padding: 4px 0; margin: 0; color: var(--color-text-white); font-size: 16px; }
+.charselect-textfield:focus > .unity-text-field__input { border-width: 0; background-color: transparent; }
+
+/* -- Status Message -- */
+.charselect-status-message { font-size: 14px; margin-top: 12px; padding: 10px; border-radius: 12px; display: none; -unity-text-align: middle-center; }
+.status-success { color: var(--color-mystic-black); background-color: var(--color-success); display: flex; }
+.status-error { color: var(--color-text-white); background-color: var(--color-danger); display: flex; }
+
+/* -- Start Button -- */
+.charselect-btn-container { padding: 0 36px 32px 36px; margin-top: 16px; }
+
+.charselect-btn-start {
+    background-color: var(--color-accent-yellow);
+    color: var(--color-mystic-black);
+    font-size: 18px; -unity-font-style: bold;
+    border-width: 0; border-radius: 28px; /* Pill shape */
+    padding: 16px 0; -unity-text-align: middle-center; letter-spacing: 2px; width: 100%;
+    transition-property: background-color; transition-duration: 0.1s;
 }
 
-.charselect-input-group:hover {
-    border-color: #B0B0B0;
-}
-
-.charselect-input-group-focus {
-    border-color: #2D7BFF;
-}
-
-.charselect-input-icon {
-    font-size: 18px;
-    margin-right: 8px;
-    flex-shrink: 0;
-}
-
-.charselect-textfield {
-    flex-grow: 1;
-    border-width: 0;
-    background-color: transparent;
-    font-size: 14px;
-    color: #2D3436;
-    margin: 0;
-    padding: 0;
-}
-
-.charselect-textfield > .unity-text-field__input {
-    border-width: 0;
-    background-color: transparent;
-    padding: 4px 0;
-    margin: 0;
-    color: #2D3436;
-    font-size: 14px;
-}
-
-.charselect-status-message {
-    font-size: 11px;
-    margin-top: 6px;
-    padding: 4px;
-    border-radius: 4px;
-    display: none;
-    -unity-text-align: middle-center;
-}
-
-.status-success {
-    color: #27AE60;
-    background-color: rgba(39, 174, 96, 0.1);
-    display: flex;
-}
-
-.status-error {
-    color: #FF4B4B;
-    background-color: rgba(255, 75, 75, 0.1);
-    display: flex;
-}
+.charselect-btn-start:hover { background-color: #FFF890; }
+.charselect-btn-start:active { background-color: #D0C350; }
 
 /* ── Confirmation Popup Overlay ── */
+.charselect-confirm-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(21, 26, 39, 0.7); align-items: center; justify-content: center; z-index: 100; }
+.charselect-confirm-shadow { width: 440px; }
+.charselect-confirm-panel { background-color: var(--color-primary-navy); border-radius: var(--radius-panel); overflow: hidden; }
 
-.charselect-confirm-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(15, 16, 22, 0.5);
-    align-items: center;
-    justify-content: center;
-    z-index: 100;
+.charselect-confirm-header { background-color: var(--color-deep-blue); padding: 24px 24px; align-items: center; }
+.charselect-confirm-title { font-size: 24px; -unity-font-style: bold; color: var(--color-danger); -unity-text-align: middle-center; letter-spacing: 1px; }
+
+.charselect-confirm-body { padding: 32px 24px; font-size: 16px; color: var(--color-text-white); -unity-text-align: middle-center; white-space: normal; line-height: 24px; }
+
+.charselect-confirm-actions { flex-direction: row; justify-content: space-between; padding: 0 24px 32px 24px; }
+.charselect-confirm-btn { width: 46%; padding: 14px 0; border-width: 0; border-radius: 24px; font-size: 16px; -unity-font-style: bold; -unity-text-align: middle-center; transition-property: background-color, scale; transition-duration: 0.1s; }
+
+.charselect-confirm-btn-cancel { 
+    background-color: transparent; color: var(--color-text-white); 
+    border-width: 2px; border-color: var(--color-deep-blue);
 }
+.charselect-confirm-btn-cancel:hover { background-color: rgba(255, 255, 255, 0.05); }
+.charselect-confirm-btn-cancel:active { background-color: rgba(255, 255, 255, 0.1); scale: 0.98; }
 
-.charselect-confirm-shadow {
-    background-color: transparent;
-    border-radius: 20px;
-    padding-right: 6px;
-    padding-bottom: 6px;
-    width: 380px;
+.charselect-confirm-btn-accept { 
+    background-color: var(--color-danger); color: white; 
+    border-width: 0;
 }
+.charselect-confirm-btn-accept:hover { background-color: var(--color-danger-hover); }
+.charselect-confirm-btn-accept:active { background-color: var(--color-danger-active); }
 
-.charselect-confirm-panel {
-    background-color: #EFEFEF;
-    border-radius: 20px;
-    border-width: 3px;
-    border-color: #3D3535;
-    overflow: hidden;
-}
-
-.charselect-confirm-header {
-    background-color: #FF4B4B;
-    padding: 14px 20px;
-    border-bottom-width: 3px;
-    border-bottom-color: #3D3535;
-}
-
-.charselect-confirm-title {
-    font-size: 18px;
-    -unity-font-style: bold;
-    color: #FFFFFF;
-    -unity-text-align: middle-center;
-    letter-spacing: 1px;
-}
-
-.charselect-confirm-body {
-    padding: 24px;
-    font-size: 14px;
-    color: #3D3535;
-    -unity-text-align: middle-center;
-    -unity-font-style: bold;
-    white-space: normal;
-    line-height: 20px;
-}
-
-.charselect-confirm-actions {
-    flex-direction: row;
-    justify-content: space-between;
-    padding: 0 20px 20px 20px;
-}
-
-.charselect-confirm-btn {
-    width: 46%;
-    height: 38px;
-    border-width: 2px;
-    border-color: #3D3535;
-    border-radius: 10px;
-    font-size: 13px;
-    -unity-font-style: bold;
-    -unity-text-align: middle-center;
-    transition-property: translate, background-color;
-    transition-duration: 0.08s;
-}
-
-.charselect-confirm-btn-cancel {
-    background-color: #FFFFFF;
-    color: #3D3535;
-}
-
-.charselect-confirm-btn-cancel:hover {
-    background-color: #FAFAFA;
-}
-
-.charselect-confirm-btn-accept {
-    background-color: #4CAF50;
-    color: #FFFFFF;
-}
-
-.charselect-confirm-btn-accept:hover {
-    background-color: #5cb860;
-}
-
-.charselect-confirm-btn:active {
-    translate: 2px 2px;
-}
-
-/* Helpers */
-.hidden {
-    display: none;
-}
-
+.hidden { display: none; }

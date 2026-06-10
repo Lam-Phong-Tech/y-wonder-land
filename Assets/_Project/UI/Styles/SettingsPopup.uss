@@ -1,353 +1,151 @@
 /* ============================================
-   Settings Popup — The Tangible Playground v3
-   ============================================
-   Horizontal layout, 2 columns
-   Fix: title centered, toggle proper, landscape
+   Settings Popup - Cozy Dark Palia
+   Extends DesignSystem.uss
    ============================================ */
 
-/* ── Overlay ── */
 .settings-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.4);
-    align-items: center;
-    justify-content: center;
-    display: none;
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(21, 26, 39, 0.7); /* Mystic Black 70% */
+    align-items: center; justify-content: center; display: none; z-index: 100;
 }
 
-/* ── Panel Shadow (Retro Offset) ── */
-.settings-panel-shadow {
-    background-color: transparent;
-    border-radius: 22px;
-    padding-right: 6px;
-    padding-bottom: 6px;
-    position: relative;
-}
+.settings-panel-shadow { position: relative; }
 
-/* ── Panel (Landscape) ── */
 .settings-panel {
-    width: 640px;
-    background-color: #F5F0E8;
-    border-radius: 22px;
-    border-width: 3px;
-    border-color: #3D3535;
+    width: 680px;
+    background-color: var(--color-primary-navy);
+    border-radius: 24px; /* Soft Pill shape for panel */
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.1); /* Subtle inner glow */
     overflow: hidden;
 }
 
-/* ── Header Bar ── */
+/* ── HEADER ── */
 .settings-header {
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    background-color: #5B42F3;
-    padding: 14px 16px;
-    border-bottom-width: 3px;
-    border-bottom-color: #4030C0;
+    flex-direction: row; align-items: center; justify-content: center;
+    background-color: var(--color-deep-blue); 
+    padding: 24px 20px;
+    border-bottom-width: 1px; border-bottom-color: rgba(255, 255, 255, 0.05);
 }
 
 .settings-header-title {
-    font-size: 20px;
-    -unity-font-style: bold;
-    color: #FFFFFF;
-    -unity-text-align: middle-center;
+    font-size: 32px; -unity-font-style: bold;
+    color: var(--color-accent-yellow); -unity-text-align: middle-center;
     letter-spacing: 2px;
-    position: absolute;
-    left: 0;
-    right: 0;
 }
 
-/* ── Close Button (Corner — outside panel) ── */
-.settings-close-shadow {
-    position: absolute;
-    right: -8px;
-    top: -8px;
-    background-color: transparent;
-    border-radius: 10px;
-    padding-right: 2px;
-    padding-bottom: 2px;
-    z-index: 10;
+/* ── CLOSE BUTTON (Inside Header) ── */
+.settings-close-btn-container {
+    position: absolute; right: 16px; top: 16px;
 }
 
 .settings-close-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    background-color: #FF4B4B;
-    border-width: 3px;
-    border-color: #3D3535;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    font-size: 18px;
-    -unity-font-style: bold;
-    color: #FFFFFF;
-    -unity-text-align: middle-center;
-    transition-property: translate, background-color;
-    transition-duration: 0.08s;
+    width: 40px; height: 40px; border-radius: 20px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-width: 0;
+    font-size: 18px; color: var(--color-text-white);
+    -unity-font-style: bold; padding: 0; align-items: center; justify-content: center;
+    transition-property: background-color, scale; transition-duration: 0.15s;
 }
 
-.settings-close-btn:hover {
-    background-color: #FF6B6B;
-}
+.settings-close-btn:hover { background-color: var(--color-danger); color: white; }
+.settings-close-btn:active { scale: 0.9; }
 
-.settings-close-btn:active {
-    translate: 2px 2px;
-    background-color: #CC3333;
-}
+/* ── BODY ── */
+.settings-columns { flex-direction: row; padding: 24px 24px 12px 24px; }
+.settings-col { flex: 1; padding: 0 16px; }
+.settings-col-divider { width: 1px; background-color: rgba(255, 255, 255, 0.1); margin: 0 8px; }
 
-/* ── 2-Column Layout ── */
-.settings-columns {
-    flex-direction: row;
-    padding: 16px 20px 8px 20px;
-}
-
-.settings-col {
-    flex: 1;
-    padding: 0 8px;
-}
-
-/* Vertical divider between columns */
-.settings-col-divider {
-    width: 3px;
-    background-color: #E0D8CC;
-    border-radius: 2px;
-    margin: 0 4px;
-}
-
-/* ── Section Header ── */
 .settings-section-header {
-    font-size: 11px;
-    -unity-font-style: bold;
-    color: #9E8FBB;
-    letter-spacing: 2px;
-    margin-bottom: 10px;
-    margin-top: 4px;
-    padding-bottom: 6px;
-    border-bottom-width: 2px;
-    border-bottom-color: #E0D8CC;
+    font-size: 14px; -unity-font-style: bold;
+    color: var(--color-accent-blue); letter-spacing: 1px;
+    margin-bottom: 16px; margin-top: 8px; padding-bottom: 8px;
+    border-bottom-width: 1px; border-bottom-color: rgba(255, 255, 255, 0.05);
 }
 
-/* ── Settings Row ── */
-.settings-row {
-    flex-direction: row;
-    align-items: center;
-    margin-bottom: 12px;
-    padding: 2px 0;
-}
+.settings-row { flex-direction: row; align-items: center; margin-bottom: 20px; }
 
-.settings-label {
-    font-size: 12px;
-    -unity-font-style: bold;
-    color: #3D3535;
-    width: 80px;
-    flex-shrink: 0;
+/* ── SLIDERS ── */
+.settings-slider-row {
+    flex-direction: row; flex-wrap: wrap;
+    align-items: center; justify-content: space-between;
+    margin-bottom: 24px;
 }
+.settings-slider-row > .settings-label { width: auto; font-size: 15px; -unity-font-style: bold; color: var(--color-text-white); margin-bottom: 8px; }
+.settings-label { font-size: 15px; -unity-font-style: bold; color: var(--color-text-white); width: 100px; flex-shrink: 0; }
 
-/* ── Slider ── */
-.settings-slider {
-    flex-grow: 1;
-    height: 28px;
-}
-
+.settings-slider { width: 100%; height: 24px; margin-top: 4px; }
 .settings-slider .unity-base-slider__tracker {
-    height: 10px;
-    border-radius: 5px;
-    background-color: #DDD5C8;
-    border-width: 2px;
-    border-color: #C4BAA8;
-    margin-top: 0;
+    height: 12px; border-radius: 6px; background-color: var(--color-mystic-black);
+    border-width: 0; margin-top: -6px;
 }
-
 .settings-slider .unity-base-slider__dragger {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background-color: #FFFFFF;
-    border-width: 3px;
-    border-color: #5B42F3;
-    margin-top: -7px;
-    transition-property: scale, border-color;
-    transition-duration: 0.1s;
+    width: 24px; height: 24px; border-radius: 12px; background-color: var(--color-accent-blue);
+    border-width: 3px; border-color: var(--color-text-white); margin-top: -12px;
+    transition-property: scale, background-color; transition-duration: 0.1s;
 }
+.settings-slider .unity-base-slider__dragger:hover { scale: 1.2; background-color: #6BC0F6; }
+.settings-slider .unity-base-slider__fill { background-color: var(--color-accent-blue); border-radius: 6px; }
 
-.settings-slider .unity-base-slider__dragger:hover {
-    scale: 1.12;
-    border-color: #7B62FF;
-}
-
-.settings-slider .unity-base-slider__dragger:active {
-    scale: 0.92;
-    background-color: #EDE8FF;
-}
-
-.settings-slider .unity-base-slider__fill {
-    background-color: #5B42F3;
-    border-radius: 5px;
-}
-
-/* ── Slider Value Label ── */
 .settings-slider-value {
-    font-size: 11px;
-    -unity-font-style: bold;
-    color: #5B42F3;
-    width: 36px;
-    -unity-text-align: middle-center;
-    margin-left: 6px;
-    background-color: #EDE8FF;
-    border-radius: 6px;
-    padding: 2px 4px;
+    font-size: 14px; -unity-font-style: bold; color: var(--color-text-white);
+    width: 52px; -unity-text-align: middle-center;
+    background-color: var(--color-mystic-black); border-radius: 12px; padding: 6px 4px;
+    margin-bottom: 8px;
 }
 
-/* ── Toggle (Shadow on/off) ── */
-.settings-toggle-row {
-    flex-direction: row;
-    align-items: center;
-    margin-bottom: 12px;
-    padding: 2px 0;
-}
-
-.settings-toggle .unity-toggle__input {
-    flex-direction: row-reverse;
-}
-
+/* ── TOGGLES / CHECKBOXES ── */
+.settings-toggle-row { flex-direction: row; align-items: center; margin-bottom: 20px; }
+.settings-toggle .unity-toggle__input { flex-direction: row-reverse; }
 .settings-toggle .unity-toggle__checkmark {
-    width: 24px;
-    height: 24px;
-    border-radius: 6px;
-    border-width: 2px;
-    border-color: #C4BAA8;
-    background-color: #DDD5C8;
-    -unity-background-image-tint-color: #3D3535;
-    transition-property: background-color, border-color;
-    transition-duration: 0.15s;
+    width: 28px; height: 28px; border-radius: 8px;
+    border-width: 2px; border-color: rgba(255,255,255,0.2); background-color: var(--color-mystic-black);
+    -unity-background-image-tint-color: transparent; transition-property: background-color, border-color; transition-duration: 0.1s;
 }
-
 .settings-toggle:checked .unity-toggle__checkmark {
-    background-color: #5B42F3;
-    border-color: #4030C0;
-    -unity-background-image-tint-color: #FFFFFF;
+    background-color: var(--color-mystic-black); border-color: var(--color-accent-yellow);
+    -unity-background-image-tint-color: var(--color-accent-yellow);
 }
+.settings-toggle .unity-toggle__text { display: none; }
+.settings-toggle-label { font-size: 15px; -unity-font-style: bold; color: var(--color-text-white); width: 150px; flex-shrink: 0; }
+.settings-toggle-status { font-size: 14px; -unity-font-style: bold; margin-left: 12px; color: var(--color-bright-grey); }
 
-.settings-toggle .unity-toggle__text {
-    display: none;
-}
-
-.settings-toggle-label {
-    font-size: 12px;
-    -unity-font-style: bold;
-    color: #3D3535;
-    width: 80px;
-    flex-shrink: 0;
-}
-
-.settings-toggle-status {
-    font-size: 11px;
-    -unity-font-style: bold;
-    margin-left: 8px;
-    color: #9E8FBB;
-}
-
-/* ── Dropdown (Language) ── */
-.settings-dropdown-shadow {
-    background-color: rgba(30, 30, 60, 0.3);
-    border-radius: 10px;
-    padding-right: 3px;
-    padding-bottom: 3px;
-    flex-grow: 1;
-    min-width: 130px;
-}
-
+/* ── DROPDOWN ── */
+.settings-dropdown-shadow { flex-grow: 1; min-width: 140px; }
 .settings-dropdown {
-    border-radius: 10px;
-    background-color: #FFFFFF;
-    border-width: 2px;
-    border-color: #C4BAA8;
-    padding: 6px 12px;
-    font-size: 12px;
-    -unity-font-style: bold;
-    color: #3D3535;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    transition-property: border-color;
-    transition-duration: 0.1s;
+    border-radius: 16px; background-color: var(--color-mystic-black);
+    border-width: 0; padding: 0; margin: 0; flex-grow: 1;
+    transition-property: background-color; transition-duration: 0.1s;
 }
+.settings-dropdown:hover { background-color: var(--color-deep-blue); }
 
-.settings-dropdown:hover {
-    border-color: #5B42F3;
+.settings-dropdown > .unity-base-popup-field__input {
+    background-color: transparent; border-width: 0; margin: 0;
+    padding: 10px 16px; color: var(--color-text-white);
+    font-size: 14px; -unity-font-style: bold;
 }
+.settings-dropdown .unity-text-element { color: var(--color-text-white); }
+.settings-dropdown .unity-base-popup-field__arrow { -unity-background-image-tint-color: var(--color-text-white); }
 
-.settings-dropdown .unity-base-popup-field__arrow {
-    -unity-background-image-tint-color: #5B42F3;
-}
+.settings-divider { height: 1px; background-color: rgba(255, 255, 255, 0.05); margin: 8px 32px 24px 32px; }
 
-/* ── Divider ── */
-.settings-divider {
-    height: 3px;
-    background-color: #E0D8CC;
-    margin: 4px 20px 12px 20px;
-    border-radius: 2px;
-}
+/* ── FOOTER BUTTONS ── */
+.settings-buttons-row { flex-direction: row; justify-content: space-between; padding: 0 32px 32px 32px; }
 
-/* ── Bottom Buttons Container ── */
-.settings-buttons-row {
-    flex-direction: row;
-    justify-content: space-between;
-    padding: 0 20px 16px 20px;
-}
-
-/* ── Delete Account Button ── */
 .settings-delete-btn {
-    padding: 10px 24px;
-    border-radius: 12px;
-    background-color: #FF4B4B;
-    border-width: 3px;
-    border-color: #CC3333;
-    font-size: 13px;
-    -unity-font-style: bold;
-    color: #FFFFFF;
-    -unity-text-align: middle-center;
-    background-image: none;
-    margin: 0;
-    width: 48%;
-    transition-property: scale, background-color;
-    transition-duration: 0.08s;
+    padding: 14px 24px; border-radius: 24px; /* Flat pill shape */
+    background-color: transparent; border-width: 2px; border-color: var(--color-danger);
+    font-size: 16px; -unity-font-style: bold; color: var(--color-danger); -unity-text-align: middle-center; width: 48%;
+    transition-property: background-color, color, scale; transition-duration: 0.1s;
 }
+.settings-delete-btn:hover { background-color: rgba(230, 74, 25, 0.15); }
+.settings-delete-btn:active { scale: 0.98; background-color: var(--color-danger); color: white; }
 
-.settings-delete-btn:hover {
-    background-color: #FF6B6B;
-}
-
-.settings-delete-btn:active {
-    scale: 0.96;
-    background-color: #CC3333;
-}
-
-/* ── Exit App Button ── */
 .settings-exit-btn {
-    padding: 10px 32px;
-    border-radius: 12px;
-    background-color: #2D7BFF;
-    border-width: 3px;
-    border-color: #1A5FCC;
-    font-size: 13px;
-    -unity-font-style: bold;
-    color: #FFFFFF;
-    -unity-text-align: middle-center;
-    background-image: none;
-    margin: 0;
-    width: 48%;
-    transition-property: scale, background-color;
-    transition-duration: 0.08s;
+    padding: 14px 32px; border-radius: 24px; /* Flat pill shape */
+    background-color: var(--color-accent-yellow); border-width: 0;
+    font-size: 16px; -unity-font-style: bold; color: var(--color-mystic-black); -unity-text-align: middle-center; width: 48%;
+    transition-property: background-color, scale; transition-duration: 0.1s;
 }
-
-.settings-exit-btn:hover {
-    background-color: #5B9AFF;
-}
-
-.settings-exit-btn:active {
-    scale: 0.96;
-    background-color: #1A5FCC;
-}
+.settings-exit-btn:hover { background-color: #FFF890; }
+.settings-exit-btn:active { scale: 0.98; background-color: #D0C350; }

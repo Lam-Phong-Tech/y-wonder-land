@@ -1,0 +1,28 @@
+{
+    "asset": "a4ea745742acb3642b1f55d29a266bc1",
+    "fileName": "019eaf79-8ae9-75b3-ab94-eb5644d2fb15.png",
+    "prompt": "Cool Female 3D Avatar Bust UI icon, holographic frosted glass (glassmorphism) style, onyx black base, soft glowing neon purple accents, premium modern futuristic style, rounded thick minimalist shape, soft studio lighting, 3D isometric view, subtle drop shadows, solid white background.",
+    "negativePrompt": "",
+    "model": "gemini-3.1-flash",
+    "modelName": "Gemini 3.1 Nano Banana 2",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelatePixelGridSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0,
+    "dimensions": {
+        "width": 1024,
+        "height": 1024
+    },
+    "spriteSheet": false,
+    "duration": 0.0
+}

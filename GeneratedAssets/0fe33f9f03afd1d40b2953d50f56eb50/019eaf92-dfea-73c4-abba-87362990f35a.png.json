@@ -1,0 +1,28 @@
+{
+    "asset": "0fe33f9f03afd1d40b2953d50f56eb50",
+    "fileName": "019eaf92-dfea-73c4-abba-87362990f35a.png",
+    "prompt": "Strictly front-facing orthographic view of a sleek dark-grey 3D daily calendar page icon. Isolated object, no pedestal, no display stand, no floor shadow. Minimalist 3D Onyx style: matte dark plastic, frosted glass elements, glowing neon cyan accents. Solid white background.",
+    "negativePrompt": "",
+    "model": "gemini-3.1-flash",
+    "modelName": "Gemini 3.1 Nano Banana 2",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelatePixelGridSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0,
+    "dimensions": {
+        "width": 1024,
+        "height": 1024
+    },
+    "spriteSheet": false,
+    "duration": 0.0
+}
