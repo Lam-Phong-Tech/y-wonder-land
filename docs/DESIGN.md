@@ -92,13 +92,18 @@ All components must use these exact color values to maintain visual unity:
 * **Sliders:** Track is Mystic Black `#151A27`, Fill and Thumb are Accent Blue `#4EB0E6`.
 * **Checkboxes:** Soft rounded squares, yellow border when checked.
 
+##### 5.3. Sprites & Icons (2D vs 2.5D Rule)
+
+* **HUD Icons:** MUST use **Flat 2D Sprites**. Simple, minimalist, high contrast, clean shapes (e.g., solid white icons). Reason: High readability, avoids cluttering the 3D world view.
+* **Popup Icons (Inventory, Shop, Items):** MUST use **2.5D / Stylized 3D Render Sprites**. Isometric or top-down angles, soft shading, chunky clay-like feel, vibrant colors. Reason: Gives tangibility, weight, and visual reward to collected items.
+
 ---
 
 ### PART II: 8 "AI UI DISEASES" & PREVENTION IN Y WONDER LAND
 
 #### 1. The "Glassmorphism & Sharp Edges" Addiction
 
-* **In this project:** Do NOT use glassmorphism (backdrop-filter blur). Palia uses solid flat graphics and soft gradients. Do NOT use sharp 4px corners; everything must be cozy and heavily rounded (12px to 24px).
+* **In this project:** **Glassmorphism IS ALLOWED exclusively for HUD components** (e.g., dark navy translucent background `rgba(58, 71, 102, 0.5)` with thin soft white borders) to avoid blocking the 3D camera. However, main Popups must remain solid flat graphics. Do NOT use sharp 4px corners; everything must be cozy and heavily rounded (12px to 32px).
 
 #### 2. Unit Chaos (Mixed Metric Units)
 

@@ -84,43 +84,19 @@
                         </ui:VisualElement>
                     </ui:VisualElement>
 
-                    <!-- Compass rose decoration -->
-                    <ui:VisualElement class="map-compass">
+                    <!-- Compass rose button -->
+                    <ui:Button name="BtnCompass" class="map-compass">
                         <ui:Label text="🧭" class="map-compass-icon" />
+                    </ui:Button>
+
+                    <!-- Player Location Indicator -->
+                    <ui:VisualElement name="PlayerIndicator" class="map-player-indicator">
+                        <ui:Label text="✨" class="map-indicator-star" />
                     </ui:VisualElement>
 
                 </ui:VisualElement>
 
-                <!-- ═══ FLOATING INFO CARD (appears when island selected) ═══ -->
-                <ui:VisualElement name="MapInfoCard" class="map-info-card">
-                    <ui:VisualElement class="map-info-card-inner">
-                        <!-- Header row -->
-                        <ui:VisualElement class="map-info-header">
-                            <ui:Label name="LblInfoIcon" text="🏡" class="map-info-icon" />
-                            <ui:VisualElement class="map-info-header-text">
-                                <ui:Label name="LblInfoName" text="Nông trại" class="map-info-name" />
-                                <ui:VisualElement name="InfoStatusBadge" class="map-info-status map-info-status--unlocked">
-                                    <ui:Label name="LblInfoStatus" text="ĐÃ MỞ KHÓA" class="map-info-status-text" />
-                                </ui:VisualElement>
-                            </ui:VisualElement>
-                        </ui:VisualElement>
-
-                        <!-- Divider -->
-                        <ui:VisualElement class="map-info-divider" />
-
-                        <!-- Description -->
-                        <ui:Label name="LblInfoDesc" text="Khu vực trồng trọt và chăn nuôi chính của bạn." class="map-info-desc" />
-
-                        <!-- Requirements (when locked) -->
-                        <ui:VisualElement name="InfoRequirements" class="map-info-requirements">
-                            <ui:Label name="LblInfoReqLevel" text="❌ Cấp 40" class="map-info-req" />
-                            <ui:Label name="LblInfoReqExtra" text="❌ VIP hoặc 🎫 Vé" class="map-info-req" />
-                        </ui:VisualElement>
-
-                        <!-- Travel button -->
-                        <ui:Button name="BtnTravel" text="🚀 DI CHUYỂN" class="map-btn-travel" />
-                    </ui:VisualElement>
-                </ui:VisualElement>
+                <!-- Removed InfoCard per new design -->
 
                 <!-- Cheat Bar (bottom floating) -->
                 <ui:VisualElement class="map-cheat-bar">

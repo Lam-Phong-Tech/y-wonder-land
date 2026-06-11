@@ -21,9 +21,7 @@
             <ui:Label text="CHẾ ĐỘ XÂY DỰNG" class="build-title" />
 
             <!-- Right: Exit Button Only -->
-            <ui:Button name="BtnExitBuild" class="build-tool-btn build-tool-exit">
-                <ui:Label text="✕" class="build-tool-icon" />
-            </ui:Button>
+            <ui:Button name="BtnExitBuild" text="✕" class="build-tool-btn build-tool-exit" />
         </ui:VisualElement>
 
         <!-- ================================ -->

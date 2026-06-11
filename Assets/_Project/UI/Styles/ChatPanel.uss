@@ -12,6 +12,9 @@
     width: 460px;
     align-items: center;
     justify-content: flex-end;
+    transition-property: bottom;
+    transition-duration: 0.3s;
+    transition-timing-function: ease-out-back;
 }
 
 /* ── 1. Collapsed State ── */

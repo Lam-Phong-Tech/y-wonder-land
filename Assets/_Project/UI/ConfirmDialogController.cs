@@ -139,11 +139,17 @@ public class ConfirmDialogController : MonoBehaviour
         if (btnConfirm != null)
         {
             btnConfirm.text = confirmText;
+            if (string.IsNullOrEmpty(cancelText)) {
+                btnConfirm.style.width = new StyleLength(new Length(100, LengthUnit.Percent));
+            } else {
+                btnConfirm.style.width = new StyleLength(new Length(46, LengthUnit.Percent));
+            }
         }
 
         if (btnCancel != null)
         {
             btnCancel.text = cancelText;
+            btnCancel.style.display = string.IsNullOrEmpty(cancelText) ? DisplayStyle.None : DisplayStyle.Flex;
         }
 
         ApplyDialogType(dialogType);

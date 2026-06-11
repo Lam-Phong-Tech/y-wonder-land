@@ -1,7 +1,9 @@
 # 🔄 Context Recovery — Y WONDER LAND
+
 # Dùng khi bắt đầu conversation MỚI với AI
 
 ## Cách dùng
+
 Copy đoạn prompt bên dưới → paste vào chat mới → AI sẽ tự đọc và hiểu dự án.
 
 ---
@@ -20,6 +22,7 @@ Hãy đọc các file sau THEO THỨ TỰ để hiểu dự án:
 4. docs/DATA_SCHEMA.md — Cấu trúc dữ liệu Cloud Save + Economy
 5. docs/API_CONTRACTS.md — Blueprint tích hợp 8 UGS services
 6. docs/CHANGELOG.md — Lịch sử phát triển (xem module nào đã xong)
+7. MEMORY.md - các kinh nghiệm được đúc kết
 
 Sau khi đọc xong, cho tôi biết bạn đã hiểu gì về dự án.
 ```

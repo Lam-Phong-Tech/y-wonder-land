@@ -16,10 +16,10 @@
 
 .build-control-bar {
     position: absolute; top: 0; left: 0; right: 0; height: 56px;
-    background-color: var(--color-primary-navy);
+    background-color: rgba(21, 26, 39, 0.75); /* Hiệu ứng thấu kính / Glassmorphism */
     flex-direction: row; align-items: center; justify-content: space-between;
     padding: 0 16px;
-    border-bottom-width: 2px; border-color: rgba(255, 255, 255, 0.05);
+    border-bottom-width: 1px; border-color: rgba(255, 255, 255, 0.15);
     flex-shrink: 0;
 }
 
@@ -53,18 +53,16 @@
 /* Tool Button Base */
 .build-tool-btn {
     width: 40px; height: 40px; border-radius: var(--radius-button);
-    border-width: 0; align-items: center; justify-content: center; padding: 0;
-    transition-property: translate, background-color, scale; transition-duration: 0.1s;
-}
-
-.build-tool-icon {
-    font-size: 18px; -unity-text-align: middle-center; color: var(--color-text-white);
+    background-color: rgba(255, 255, 255, 0.1);
+    border-width: 0; padding: 0; align-items: center; justify-content: center;
+    font-size: 16px; -unity-font-style: bold; color: var(--color-bright-grey);
+    transition-property: scale, background-color, color; transition-duration: 0.1s;
 }
 
 /* Exit Button */
-.build-tool-exit { background-color: var(--color-danger); }
-.build-tool-exit:hover { background-color: var(--color-danger-hover); scale: 1.05; }
-.build-tool-exit:active { background-color: var(--color-danger-active); scale: 0.95; }
+.build-tool-exit { background-color: rgba(255, 255, 255, 0.1); }
+.build-tool-exit:hover { background-color: rgba(255, 75, 75, 0.8); color: #FFF; }
+.build-tool-exit:active { scale: 0.95; }
 
 /* ================================ */
 /* CATEGORY SIDEBAR — Left          */
@@ -111,10 +109,11 @@
 /* ================================ */
 
 .build-item-bar {
-    position: absolute; bottom: 0; left: 100px; right: 0; height: 120px;
-    background-color: var(--color-primary-navy);
-    border-top-width: 2px; border-color: rgba(255, 255, 255, 0.05);
-    padding: 8px 12px; flex-direction: row; align-items: center;
+    position: absolute; bottom: 0; left: 0; right: 0; height: 120px;
+    background-color: rgba(21, 26, 39, 0.75); /* Hiệu ứng thấu kính / Glassmorphism */
+    border-top-width: 1px; border-color: rgba(255, 255, 255, 0.15);
+    padding: 8px 12px; padding-left: 104px; /* Nhường chỗ cho Sidebar bên trái để cân đối */
+    flex-direction: row; align-items: center;
 }
 
 .build-item-scroll { flex-grow: 1; flex-direction: row; }

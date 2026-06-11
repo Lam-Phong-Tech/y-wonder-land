@@ -7,6 +7,8 @@ using YWonderLand.Managers;
 public class WorkshopPopupController : MonoBehaviour
 {
     public static WorkshopPopupController Instance { get; private set; }
+    
+    public static event System.Action<string> OnItemUpgraded;
 
     [SerializeField] private UIDocument uiDocument;
     private VisualElement root;
@@ -332,6 +334,8 @@ public class WorkshopPopupController : MonoBehaviour
             // Cập nhật lại UI sau khi nâng cấp
             RefreshToolList(); // To update names in sidebar
             UpdateDetailPanel(); // To show next level
+            
+            OnItemUpgraded?.Invoke(selectedToolId);
             
             // Optionally: Play sound or VFX
             Debug.Log("[Workshop] Upgrade success UI updated.");

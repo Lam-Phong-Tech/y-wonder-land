@@ -68,7 +68,14 @@ public class InventoryPopupController : MonoBehaviour
     private void Awake()
     {
         if (inventoryDocument == null)
+        {
             inventoryDocument = GetComponent<UIDocument>();
+        }
+
+        if (inventoryDocument != null)
+        {
+            inventoryDocument.sortingOrder = 100;
+        }
 
         itemDatabase = Resources.Load<YWonderLand.Data.ItemDatabase>("ItemDatabase");
         if (itemDatabase == null) Debug.LogError("[Inventory] ItemDatabase not found in Resources!");

@@ -1,5 +1,28 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-06-11
+### Changed
+- **Cập nhật Giao diện HUD (Glassmorphism):**
+  - Áp dụng phong cách Glassmorphism (nền trong suốt Dark Navy kết hợp viền trắng mỏng) cho toàn bộ UI HUD (thanh chức năng, kho đồ, phím nóng).
+  - Thay thế toàn bộ text/emoji trên HUD bằng Sprite phẳng 2D (Flat 2D Icons) để tăng mức độ dễ đọc và tinh gọn giao diện.
+  - Ẩn các phím hành động thừa (Interact, Cancel) để tiết kiệm không gian màn hình.
+- **Cập nhật Style Guide (`DESIGN.md`):**
+  - Chính thức quy định: HUD sử dụng Sprite 2D phẳng; Các Popup tĩnh (Cửa hàng, Kho đồ) sử dụng Sprite 2.5D (Isometric / 3D Stylized) để mang lại cảm giác chân thực.
+  - Nới lỏng quy tắc cấm Glassmorphism: Cho phép sử dụng giới hạn cho HUD để không che khuất camera 3D.
+- **Cải tiến Giao diện Bản Đồ (Map Popup):**
+  - Thay đổi hệ tọa độ các đảo trên bản đồ sang dùng điểm neo 0x0 (Anchor Point) kết hợp phần trăm (`%`) để hitboxes tự động scale chuẩn xác với mọi kích thước màn hình. Thu nhỏ tỷ lệ Map xuống 400x400.
+  - Thêm Ngôi sao nhấp nháy (`map-player-indicator`) để hiển thị vị trí hiện tại của người chơi trên đảo.
+  - Tích hợp tính năng cho nút La Bàn: Khi bấm sẽ Highlight vị trí đảo hiện tại mà không bật nhầm hộp thoại di chuyển.
+- **Tinh chỉnh Hộp thoại Xác Nhận (Confirm Dialog):**
+  - Thu nhỏ kích thước hộp thoại từ 480px xuống 320px để giao diện gọn gàng, phù hợp hơn với UI của game.
+  - Xóa bỏ nút X ở góc phải trên cùng để giảm lộn xộn UI, người dùng sẽ dùng nút Hủy ở dưới.
+  - Tự động ẩn nút Hủy và kéo giãn nút Xác nhận lên 100% chiều rộng đối với các hộp thoại chỉ có 1 lựa chọn (VD: Bảng thông báo).
+- **Thanh cuộn hiện đại (Modern Scrollbar):**
+  - Thêm CSS toàn cục vào `DesignSystem.uss` để thay thế thanh cuộn mặc định xấu xí của UI Toolkit thành thanh cuộn mỏng (6px), bo tròn, không nền và phản hồi khi hover/active.
+
+### Added
+- **Tài liệu 3D Pipeline:** Viết quy trình chuẩn cho họa sĩ 3D về cách xuất FBX từ Blender sang Unity chuẩn Humanoid (quy tắc đặt tên xương, T-Pose, tắt Add Leaf Bones, đồng bộ trục Y-Up).
+- **Kịch bản tự động xử lý ảnh:** Chạy thành công Script Python `clean_icons.py` tự động cắt phông nền (remove bg), loại bỏ viền grid AI và crop ảnh hàng loạt cho các icon UI.
 ## [Unreleased] - 2026-06-10
 ### Changed
 - **UI Lột Xác Toàn Diện (Cozy Dark Palia Flat Graphics):**

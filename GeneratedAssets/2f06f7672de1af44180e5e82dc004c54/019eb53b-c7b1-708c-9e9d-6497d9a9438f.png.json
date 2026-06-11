@@ -1,0 +1,28 @@
+{
+    "asset": "2f06f7672de1af44180e5e82dc004c54",
+    "fileName": "019eb53b-c7b1-708c-9e9d-6497d9a9438f.png",
+    "prompt": "A single round orange pumpkin, 3D game icon asset, casual farming game style, top-down isometric view, chunky clay texture, soft smooth shading, vibrant and cozy colors, clean solid white background, high quality, highly detailed, no text, no shadows on background --v 6.0",
+    "negativePrompt": "",
+    "model": "gemini-3.1-flash",
+    "modelName": "Gemini 3.1 Nano Banana 2",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelatePixelGridSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0,
+    "dimensions": {
+        "width": 1024,
+        "height": 1024
+    },
+    "spriteSheet": false,
+    "duration": 0.0
+}

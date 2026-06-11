@@ -89,6 +89,9 @@ public class GameHUDController : MonoBehaviour
         if (buildModeOverlay == null) buildModeOverlay = FindFirstObjectByType<BuildModeOverlayController>(FindObjectsInactive.Include);
         if (workshopPopup == null) workshopPopup = FindFirstObjectByType<WorkshopPopupController>(FindObjectsInactive.Include);
 
+        // Đảm bảo GameHUD luôn nằm dưới các Popup để popup block được thao tác chuột
+        uiDocument.sortingOrder = -10;
+
         var root = uiDocument.rootVisualElement;
         QueryElements(root);
         RegisterCallbacks();
@@ -183,6 +186,7 @@ public class GameHUDController : MonoBehaviour
         // Sidebar buttons
         btnLeaderboard?.RegisterCallback<ClickEvent>(evt =>
         {
+            HideAllPopups();
             if (leaderboardPopup != null)
                 leaderboardPopup.Show();
             else
@@ -191,6 +195,7 @@ public class GameHUDController : MonoBehaviour
 
         btnCalendar?.RegisterCallback<ClickEvent>(evt =>
         {
+            HideAllPopups();
             if (eventPopup != null)
                 eventPopup.ShowTab(2);
             else
@@ -199,6 +204,7 @@ public class GameHUDController : MonoBehaviour
 
         btnMail?.RegisterCallback<ClickEvent>(evt =>
         {
+            HideAllPopups();
             if (mailboxPopup != null)
                 mailboxPopup.Show();
             else
@@ -207,6 +213,7 @@ public class GameHUDController : MonoBehaviour
 
         btnFriends?.RegisterCallback<ClickEvent>(evt =>
         {
+            HideAllPopups();
             if (friendsPopup != null)
                 friendsPopup.Show();
             else
@@ -215,6 +222,7 @@ public class GameHUDController : MonoBehaviour
 
         btnShop?.RegisterCallback<ClickEvent>(evt =>
         {
+            HideAllPopups();
             if (shopPopup != null)
                 shopPopup.Show();
             else
@@ -223,6 +231,7 @@ public class GameHUDController : MonoBehaviour
 
         btnMap?.RegisterCallback<ClickEvent>(evt =>
         {
+            HideAllPopups();
             if (mapPopup != null)
                 mapPopup.Show();
             else
@@ -231,6 +240,7 @@ public class GameHUDController : MonoBehaviour
 
         btnPiggy?.RegisterCallback<ClickEvent>(evt =>
         {
+            HideAllPopups();
             if (piggyBankPopup != null)
                 piggyBankPopup.Show();
             else
@@ -239,6 +249,8 @@ public class GameHUDController : MonoBehaviour
 
         btnFishing?.RegisterCallback<ClickEvent>(evt =>
         {
+            // Fishing is an overlay, but let's hide other popups anyway
+            HideAllPopups();
             if (fishingOverlay != null)
                 fishingOverlay.Show();
             else
@@ -247,6 +259,7 @@ public class GameHUDController : MonoBehaviour
 
         btnWorkshop?.RegisterCallback<ClickEvent>(evt =>
         {
+            HideAllPopups();
             if (workshopPopup != null)
                 workshopPopup.Show();
             else
@@ -268,6 +281,7 @@ public class GameHUDController : MonoBehaviour
 
         btnEvent?.RegisterCallback<ClickEvent>(evt =>
         {
+            HideAllPopups();
             if (eventPopup != null)
                 eventPopup.Show();
             else
@@ -295,6 +309,7 @@ public class GameHUDController : MonoBehaviour
         // Bag
         btnBag?.RegisterCallback<ClickEvent>(evt =>
         {
+            HideAllPopups();
             if (inventoryPopup != null)
                 inventoryPopup.Show();
             else
@@ -304,11 +319,31 @@ public class GameHUDController : MonoBehaviour
         // Settings
         btnSettings?.RegisterCallback<ClickEvent>(evt =>
         {
+            HideAllPopups();
             if (settingsPopup != null)
                 settingsPopup.Show();
             else
                 Debug.Log("[GameHUD] Settings clicked (no popup assigned)");
         });
+    }
+
+    /// <summary>
+    /// Đảm bảo tính "kỷ luật", không cho phép mở chồng chéo nhiều popup.
+    /// </summary>
+    public void HideAllPopups()
+    {
+        if (shopPopup != null) shopPopup.Hide();
+        if (settingsPopup != null) settingsPopup.Hide();
+        if (inventoryPopup != null) inventoryPopup.Hide();
+        if (leaderboardPopup != null) leaderboardPopup.Hide();
+        if (friendsPopup != null) friendsPopup.Hide();
+        if (mailboxPopup != null) mailboxPopup.Hide();
+        if (profilePopup != null) profilePopup.Hide();
+        if (questPopup != null) questPopup.Hide();
+        if (mapPopup != null) mapPopup.Hide();
+        if (piggyBankPopup != null) piggyBankPopup.Hide();
+        if (eventPopup != null) eventPopup.Hide();
+        if (workshopPopup != null) workshopPopup.Hide();
     }
 
     // ── Public API for Game Systems ──
@@ -385,16 +420,24 @@ public class GameHUDController : MonoBehaviour
 
     private void Update()
     {
+        // Không xử lý phím tắt nếu GameHUD đang bị ẩn (ví dụ: đang ở Login hoặc Cutscene)
+        if (uiDocument == null || uiDocument.rootVisualElement == null || uiDocument.rootVisualElement.style.display == DisplayStyle.None)
+            return;
+
         var keyboard = UnityEngine.InputSystem.Keyboard.current;
         if (keyboard == null) return;
 
-        // I = Inventory
         if (keyboard.iKey.wasPressedThisFrame && inventoryPopup != null)
         {
             if (inventoryPopup.IsVisible())
+            {
                 inventoryPopup.Hide();
+            }
             else
+            {
+                HideAllPopups();
                 inventoryPopup.Show();
+            }
         }
 
         if (keyboard.lKey.wasPressedThisFrame && levelUpOverlay != null)
@@ -405,30 +448,41 @@ public class GameHUDController : MonoBehaviour
         if (keyboard.eKey.wasPressedThisFrame && eventPopup != null)
         {
             if (eventPopup.IsVisible())
+            {
                 eventPopup.Hide();
+            }
             else
+            {
+                HideAllPopups();
                 eventPopup.Show();
+            }
         }
 
         if (keyboard.fKey.wasPressedThisFrame && fishingOverlay != null)
         {
+            HideAllPopups();
             fishingOverlay.Show();
         }
 
         if (keyboard.bKey.wasPressedThisFrame && buildModeOverlay != null)
         {
             if (buildModeOverlay.IsVisible())
+            {
                 buildModeOverlay.Hide();
+            }
             else
+            {
+                HideAllPopups();
                 buildModeOverlay.Show();
+            }
         }
 
         if (keyboard.rKey.wasPressedThisFrame && workshopPopup != null)
         {
+            HideAllPopups();
             workshopPopup.Show();
         }
 
-        // Phím 1 = Mở/Đóng Shop (Sắp tới ẩn nút UI)
         if (keyboard.digit1Key.wasPressedThisFrame)
         {
             Debug.Log($"[GameHUD] Đã bấm phím 1. Biến shopPopup có null không: {shopPopup == null}");
@@ -442,8 +496,22 @@ public class GameHUDController : MonoBehaviour
                 else
                 {
                     Debug.Log("[GameHUD] shopPopup đang ẩn -> Gọi Show()");
+                    HideAllPopups();
                     shopPopup.Show();
                 }
+            }
+        }
+
+        if (keyboard.mKey.wasPressedThisFrame && mapPopup != null)
+        {
+            if (mapPopup.IsVisible())
+            {
+                mapPopup.Hide();
+            }
+            else
+            {
+                HideAllPopups();
+                mapPopup.Show();
             }
         }
     }

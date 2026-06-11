@@ -380,6 +380,24 @@ public class ChatPanelController : MonoBehaviour
     }
 
     /// <summary>
+    /// Shift the chat panel up when Build Mode is active to avoid overlapping build items.
+    /// </summary>
+    public void ShiftForBuildMode(bool isBuildMode)
+    {
+        if (root != null)
+        {
+            if (isBuildMode)
+            {
+                root.style.bottom = 136f; // Move up above the 120px build item bar
+            }
+            else
+            {
+                root.style.bottom = StyleKeyword.Null; // Reset to CSS default (16px)
+            }
+        }
+    }
+
+    /// <summary>
     /// Helper to parse color hex strings.
     /// </summary>
     private Color ParseColor(string hex)

@@ -4,7 +4,7 @@ using UnityEngine.UIElements;
 
 /// <summary>
 /// Controller for the Visual World Map Popup.
-/// Displays 5 islands on an ocean map; click an island to see info card, then confirm travel.
+/// Displays 5 islands on an ocean map. Click an island to confirm travel via ConfirmDialog.
 /// Includes cheat buttons for testing level/VIP states.
 /// </summary>
 public class MapPopupController : MonoBehaviour
@@ -26,21 +26,15 @@ public class MapPopupController : MonoBehaviour
     private VisualElement lockHaiphu;
     private VisualElement lockMocnhi;
 
-    // Info card
-    private VisualElement infoCard;
-    private Label lblInfoIcon;
-    private Label lblInfoName;
-    private VisualElement infoStatusBadge;
-    private Label lblInfoStatus;
-    private Label lblInfoDesc;
-    private VisualElement infoRequirements;
-    private Label lblInfoReqLevel;
-    private Label lblInfoReqExtra;
-    private Button btnTravel;
-
     // Cheat
     private Button btnCheatLevel;
     private Button btnCheatVip;
+
+    // Player Indicator
+    private Button btnCompass;
+    private VisualElement playerIndicator;
+    private string currentLocation = "farm"; // Default player location
+    private IVisualElementScheduledItem blinkSchedule;
 
     // State
     private int playerLevel = 1;
@@ -140,21 +134,13 @@ public class MapPopupController : MonoBehaviour
         lockHaiphu = root.Q<VisualElement>("LockHaiphu");
         lockMocnhi = root.Q<VisualElement>("LockMocnhi");
 
-        // Info card
-        infoCard = root.Q<VisualElement>("MapInfoCard");
-        lblInfoIcon = root.Q<Label>("LblInfoIcon");
-        lblInfoName = root.Q<Label>("LblInfoName");
-        infoStatusBadge = root.Q<VisualElement>("InfoStatusBadge");
-        lblInfoStatus = root.Q<Label>("LblInfoStatus");
-        lblInfoDesc = root.Q<Label>("LblInfoDesc");
-        infoRequirements = root.Q<VisualElement>("InfoRequirements");
-        lblInfoReqLevel = root.Q<Label>("LblInfoReqLevel");
-        lblInfoReqExtra = root.Q<Label>("LblInfoReqExtra");
-        btnTravel = root.Q<Button>("BtnTravel");
-
         // Cheat
         btnCheatLevel = root.Q<Button>("BtnCheatLevel");
         btnCheatVip = root.Q<Button>("BtnCheatVip");
+
+        // Player Indicator
+        btnCompass = root.Q<Button>("BtnCompass");
+        playerIndicator = root.Q<VisualElement>("PlayerIndicator");
     }
 
     private void RegisterCallbacks()
@@ -175,12 +161,12 @@ public class MapPopupController : MonoBehaviour
         RegisterIslandClick(islandHaiphu, "haiphu");
         RegisterIslandClick(islandMocnhi, "mocnhi");
 
-        // Travel
-        btnTravel?.RegisterCallback<ClickEvent>(evt => OnTravelClicked());
-
         // Cheat
         btnCheatLevel?.RegisterCallback<ClickEvent>(evt => OnCheatLevel());
         btnCheatVip?.RegisterCallback<ClickEvent>(evt => OnCheatVip());
+
+        // Compass
+        btnCompass?.RegisterCallback<ClickEvent>(evt => OnCompassClicked());
     }
 
     private void RegisterIslandClick(VisualElement island, string id)
@@ -189,7 +175,7 @@ public class MapPopupController : MonoBehaviour
         island.RegisterCallback<ClickEvent>(evt =>
         {
             evt.StopPropagation();
-            SelectIsland(id, island);
+            HandleIslandClick(id, island);
         });
     }
 
@@ -209,7 +195,17 @@ public class MapPopupController : MonoBehaviour
 
         UpdateLevelDisplay();
         RefreshIslandStates();
-        HideInfoCard();
+        UpdatePlayerIndicator();
+
+        // Start blinking schedule
+        if (playerIndicator != null)
+        {
+            blinkSchedule?.Pause();
+            blinkSchedule = playerIndicator.schedule.Execute(() => 
+            {
+                playerIndicator.ToggleInClassList("map-indicator-blink");
+            }).Every(800);
+        }
 
         overlay.style.display = DisplayStyle.Flex;
         Debug.Log("[Map] Opened Visual World Map");
@@ -219,6 +215,7 @@ public class MapPopupController : MonoBehaviour
     {
         if (overlay != null)
         {
+            blinkSchedule?.Pause();
             overlay.style.display = DisplayStyle.None;
             Debug.Log("[Map] Closed World Map");
         }
@@ -236,12 +233,6 @@ public class MapPopupController : MonoBehaviour
         // Update lock overlays
         UpdateLockOverlay(lockHaiphu, "haiphu");
         UpdateLockOverlay(lockMocnhi, "mocnhi");
-
-        // Re-select current island if any (refresh info card)
-        if (selectedIslandId != null && selectedIslandElement != null)
-        {
-            ShowInfoCard(selectedIslandId);
-        }
     }
 
     private void UpdateLockOverlay(VisualElement lockElement, string id)
@@ -251,18 +242,111 @@ public class MapPopupController : MonoBehaviour
         lockElement.style.display = unlocked ? DisplayStyle.None : DisplayStyle.Flex;
     }
 
-    // ── Selection ──
-
-    private void SelectIsland(string id, VisualElement islandElement)
+    private void UpdatePlayerIndicator()
     {
-        // Deselect previous
+        if (playerIndicator == null) return;
+        
+        // Remove all old position classes
+        playerIndicator.RemoveFromClassList("map-island--farm");
+        playerIndicator.RemoveFromClassList("map-island--city");
+        playerIndicator.RemoveFromClassList("map-island--mine");
+        playerIndicator.RemoveFromClassList("map-island--haiphu");
+        playerIndicator.RemoveFromClassList("map-island--mocnhi");
+
+        // Add the current location's position class to perfectly align it
+        playerIndicator.AddToClassList($"map-island--{currentLocation}");
+    }
+
+    private void OnCompassClicked()
+    {
+        Debug.Log($"[Map] Compass clicked. Current location: {currentLocation}");
+        
+        // Find the visual element for the current island
+        VisualElement currentIslandElement = null;
+        switch (currentLocation)
+        {
+            case "farm": currentIslandElement = islandFarm; break;
+            case "city": currentIslandElement = islandCity; break;
+            case "mine": currentIslandElement = islandMine; break;
+            case "haiphu": currentIslandElement = islandHaiphu; break;
+            case "mocnhi": currentIslandElement = islandMocnhi; break;
+        }
+
+        // Programmatically select it to visually show where they are without triggering travel dialog
+        if (currentIslandElement != null)
+        {
+            // Deselect previous
+            selectedIslandElement?.RemoveFromClassList("map-island--selected");
+            
+            // Select current
+            selectedIslandId = currentLocation;
+            selectedIslandElement = currentIslandElement;
+            selectedIslandElement.AddToClassList("map-island--selected");
+        }
+    }
+
+    // ── Selection & Interaction ──
+
+    private void HandleIslandClick(string id, VisualElement islandElement)
+    {
+        // Deselect previous visually
         selectedIslandElement?.RemoveFromClassList("map-island--selected");
 
         selectedIslandId = id;
         selectedIslandElement = islandElement;
         selectedIslandElement?.AddToClassList("map-island--selected");
 
-        ShowInfoCard(id);
+        if (!locationData.ContainsKey(id)) return;
+        var loc = locationData[id];
+        bool unlocked = IsUnlocked(loc);
+
+        ConfirmDialogController dialog = FindObjectOfType<ConfirmDialogController>();
+
+        if (unlocked)
+        {
+            if (dialog != null)
+            {
+                dialog.Show(
+                    "XÁC NHẬN CHUYỂN ĐẢO",
+                    $"Bạn có chắc chắn muốn di chuyển đến {loc.name} không?",
+                    "Di chuyển",
+                    "Hủy",
+                    () => 
+                    {
+                        Debug.Log($"[Map] ✈ Di chuyển đến: {loc.name} (Scene: {loc.sceneName})");
+                        // TODO: SceneManager.LoadScene(loc.sceneName);
+                        Hide();
+                    },
+                    ConfirmDialogType.Info
+                );
+            }
+            else
+            {
+                Debug.Log($"[Map] ✈ Di chuyển đến: {loc.name} (Scene: {loc.sceneName})");
+                Hide();
+            }
+        }
+        else
+        {
+            string reqMsg = $"Cần đạt Cấp {loc.requiredLevel} để mở khóa {loc.name}.";
+            if (loc.requiresVipOrTicket) reqMsg += $"\n(Hoặc có VIP / Vé tương ứng)";
+
+            if (dialog != null)
+            {
+                dialog.Show(
+                    "ĐẢO CHƯA MỞ KHÓA",
+                    reqMsg,
+                    "Đóng",
+                    "",
+                    null,
+                    ConfirmDialogType.Warning
+                );
+            }
+            else
+            {
+                Debug.Log($"[Map] Chưa mở khóa: {loc.name}. {reqMsg}");
+            }
+        }
     }
 
     private void DeselectIsland()
@@ -270,87 +354,6 @@ public class MapPopupController : MonoBehaviour
         selectedIslandElement?.RemoveFromClassList("map-island--selected");
         selectedIslandId = null;
         selectedIslandElement = null;
-        HideInfoCard();
-    }
-
-    private void ShowInfoCard(string id)
-    {
-        if (!locationData.ContainsKey(id) || infoCard == null) return;
-
-        var loc = locationData[id];
-        bool unlocked = IsUnlocked(loc);
-
-        if (lblInfoIcon != null) lblInfoIcon.text = loc.icon;
-        if (lblInfoName != null) lblInfoName.text = loc.name;
-        if (lblInfoDesc != null) lblInfoDesc.text = loc.description;
-
-        // Status badge
-        if (infoStatusBadge != null)
-        {
-            infoStatusBadge.RemoveFromClassList("map-info-status--unlocked");
-            infoStatusBadge.RemoveFromClassList("map-info-status--locked");
-
-            if (unlocked)
-            {
-                infoStatusBadge.AddToClassList("map-info-status--unlocked");
-                if (lblInfoStatus != null) lblInfoStatus.text = "ĐÃ MỞ KHÓA";
-            }
-            else
-            {
-                infoStatusBadge.AddToClassList("map-info-status--locked");
-                if (lblInfoStatus != null) lblInfoStatus.text = "ĐANG KHÓA";
-            }
-        }
-
-        // Requirements
-        if (infoRequirements != null)
-        {
-            if (!unlocked && loc.requiredLevel > 0)
-            {
-                infoRequirements.style.display = DisplayStyle.Flex;
-
-                if (lblInfoReqLevel != null)
-                {
-                    string check = playerLevel >= loc.requiredLevel ? "✅" : "❌";
-                    lblInfoReqLevel.text = $"{check} Cần cấp {loc.requiredLevel} (hiện: Lv.{playerLevel})";
-                }
-                if (lblInfoReqExtra != null)
-                {
-                    if (loc.requiresVipOrTicket)
-                    {
-                        bool hasAccess = isVip ||
-                            (loc.id == "haiphu" && hasHaiphuTicket) ||
-                            (loc.id == "mocnhi" && hasMocnhiTicket);
-                        string check = hasAccess ? "✅" : "❌";
-                        lblInfoReqExtra.text = $"{check} VIP hoặc 🎫 {loc.ticketName}";
-                        lblInfoReqExtra.style.display = DisplayStyle.Flex;
-                    }
-                    else
-                    {
-                        lblInfoReqExtra.style.display = DisplayStyle.None;
-                    }
-                }
-            }
-            else
-            {
-                infoRequirements.style.display = DisplayStyle.None;
-            }
-        }
-
-        // Travel button
-        if (btnTravel != null)
-        {
-            btnTravel.SetEnabled(unlocked);
-            btnTravel.text = unlocked ? "🚀 DI CHUYỂN" : "🔒 CHƯA MỞ KHÓA";
-        }
-
-        infoCard.style.display = DisplayStyle.Flex;
-    }
-
-    private void HideInfoCard()
-    {
-        if (infoCard != null)
-            infoCard.style.display = DisplayStyle.None;
     }
 
     // ── Unlock Logic ──
@@ -370,24 +373,6 @@ public class MapPopupController : MonoBehaviour
         }
 
         return true;
-    }
-
-    // ── Actions ──
-
-    private void OnTravelClicked()
-    {
-        if (selectedIslandId == null || !locationData.ContainsKey(selectedIslandId)) return;
-
-        var loc = locationData[selectedIslandId];
-        if (!IsUnlocked(loc))
-        {
-            Debug.Log($"[Map] Chưa mở khóa: {loc.name}");
-            return;
-        }
-
-        Debug.Log($"[Map] ✈ Di chuyển đến: {loc.name} (Scene: {loc.sceneName})");
-        // TODO: SceneManager.LoadScene(loc.sceneName);
-        Hide();
     }
 
     // ── Cheat ──

@@ -15,7 +15,7 @@
 
 /* === MAP CONTAINER === */
 .map-container {
-    width: 900px; height: 600px;
+    width: 400px; height: 400px;
     background-color: var(--color-primary-navy);
     border-radius: var(--radius-panel);
     border-width: 1px; border-color: rgba(255, 255, 255, 0.1);
@@ -26,12 +26,13 @@
 .map-world {
     position: absolute; top: 0; left: 0; right: 0; bottom: 0;
     background-color: #0B1120; /* Deep dark navy ocean */
+    background-image: url('../Icons/MapBackground.png');
+    -unity-background-scale-mode: scale-to-fit;
 }
 
 /* === DECORATIVE WAVES === */
 .map-wave {
-    position: absolute; font-size: 16px;
-    color: rgba(255, 255, 255, 0.03); letter-spacing: 12px;
+    display: none;
 }
 
 .map-wave-1 { top: 100px; left: 50px; }
@@ -42,10 +43,15 @@
 /* === COMPASS === */
 .map-compass {
     position: absolute; bottom: 20px; right: 24px;
+    background-color: transparent; border-width: 0; padding: 0;
+    transition-property: scale; transition-duration: 0.1s;
 }
 
+.map-compass:hover { scale: 1.1; }
+.map-compass:active { scale: 0.9; }
+
 .map-compass-icon {
-    font-size: 32px; color: rgba(255, 255, 255, 0.15);
+    font-size: 40px; color: rgba(255, 255, 255, 0.7);
 }
 
 /* === TOP BAR === */
@@ -84,9 +90,9 @@
 
 .map-close-btn {
     width: 40px; height: 40px; border-radius: var(--radius-button);
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(128, 128, 128, 0.4);
     border-width: 0; padding: 0; align-items: center; justify-content: center;
-    font-size: 16px; -unity-font-style: bold; color: var(--color-bright-grey);
+    font-size: 16px; -unity-font-style: bold; color: #FFFFFF;
     transition-property: scale, background-color, color; transition-duration: 0.1s;
 }
 
@@ -95,96 +101,122 @@
 
 /* === ISLANDS === */
 .map-island {
-    position: absolute; align-items: center; cursor: link;
-    transition-property: scale; transition-duration: 0.15s;
+    position: absolute; 
+    width: 0; height: 0; /* Act as a precise anchor point */
+    align-items: center; justify-content: center;
+    cursor: link;
 }
 
-.map-island:hover { scale: 1.05; }
+/* We don't scale the anchor itself to avoid shifting, we scale the land instead */
 
-/* Land mass */
+/* Land mass (Invisible interactive hitboxes) */
 .map-island-land {
-    border-radius: 50%; position: absolute; z-index: 0;
-    opacity: 0.8; /* Slight fade in dark mode */
+    position: absolute;
+    left: 0; top: 0; translate: -50% -50%;
+    display: flex;
+    align-items: center; justify-content: center;
+    background-color: transparent;
+    border-width: 3px; border-color: transparent;
+    transition-property: background-color, border-color, scale, translate;
+    transition-duration: 0.2s;
+    cursor: link;
 }
 
-/* Retain original colors but slightly darker/desaturated for Cozy Dark */
+.map-island:hover .map-island-land {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.6);
+    scale: 1.05;
+    translate: -50% -55%;
+}
+
+/* Approximate shapes for the islands */
 .map-island-land--farm {
-    width: 140px; height: 100px; border-radius: 45% 55% 50% 48%;
-    background-color: #2E5A35; border-width: 2px; border-color: rgba(255, 255, 255, 0.1);
-    top: 10px; left: -15px;
+    width: 40%; height: 27.5%; border-radius: 45% 55% 50% 48%;
 }
 
 .map-island-land--city {
-    width: 130px; height: 90px; border-radius: 48% 52% 55% 42%;
-    background-color: #4A5568; border-width: 2px; border-color: rgba(255, 255, 255, 0.1);
-    top: 10px; left: -10px;
+    width: 35%; height: 25%; border-radius: 48% 52% 55% 42%;
 }
 
 .map-island-land--mine {
-    width: 110px; height: 80px; border-radius: 42% 58% 45% 52%;
-    background-color: #5D4037; border-width: 2px; border-color: rgba(255, 255, 255, 0.1);
-    top: 12px; left: -8px;
+    width: 50%; height: 35%; border-radius: 42% 58% 45% 52%;
 }
 
 .map-island-land--haiphu {
-    width: 120px; height: 85px; border-radius: 55% 45% 48% 52%;
-    background-color: #B08D20; border-width: 2px; border-color: rgba(255, 255, 255, 0.1);
-    top: 10px; left: -12px;
+    width: 37.5%; height: 25%; border-radius: 55% 45% 48% 52%;
 }
 
 .map-island-land--mocnhi {
-    width: 115px; height: 82px; border-radius: 50% 48% 52% 45%;
-    background-color: #1B4520; border-width: 2px; border-color: rgba(255, 255, 255, 0.1);
-    top: 12px; left: -10px;
+    width: 40%; height: 22.5%; border-radius: 50% 48% 52% 45%;
 }
 
-/* Island Pin */
+/* Island Pin (Hidden to focus on image interaction) */
 .map-island-pin {
-    width: 52px; height: 52px; border-radius: 26px;
-    background-color: var(--color-mystic-black);
-    border-width: 1px; border-color: rgba(255, 255, 255, 0.1);
-    align-items: center; justify-content: center; z-index: 2;
-    transition-property: translate, border-color, background-color; transition-duration: 0.15s;
-}
-
-.map-island:hover .map-island-pin { translate: 0 -4px; border-color: var(--color-accent-yellow); }
-
-.map-island-icon {
-    font-size: 26px; -unity-text-align: middle-center; margin: 0; padding: 0;
+    display: none;
 }
 
 /* Island Name */
 .map-island-name {
-    font-size: 12px; -unity-font-style: bold; color: var(--color-bright-grey);
-    -unity-text-align: upper-center; margin-top: 8px; padding: 4px 10px;
-    background-color: rgba(0, 0, 0, 0.6); border-radius: var(--radius-button);
-    border-width: 1px; border-color: rgba(255, 255, 255, 0.05); z-index: 2;
+    font-size: 14px; -unity-font-style: bold; color: var(--color-bright-grey);
+    -unity-text-align: upper-center; padding: 6px 14px;
+    background-color: rgba(0, 0, 0, 0.75); border-radius: 20px;
+    border-width: 1px; border-color: rgba(255, 255, 255, 0.1); z-index: 2;
+    position: absolute;
+    left: 0; top: 30px; translate: -50% 0;
+    transition-property: border-color, background-color; transition-duration: 0.15s;
+    pointer-events: none; /* Let clicks pass through to land */
+}
+
+.map-island:hover .map-island-name {
+    border-color: var(--color-accent-yellow); color: #FFF;
 }
 
 /* Lock overlay */
 .map-island-lock {
-    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    position: absolute; 
+    left: 0; top: 0; translate: -50% -50%;
     align-items: center; justify-content: center;
-    background-color: rgba(0, 0, 0, 0.6); border-radius: 50%; z-index: 3;
+    background-color: rgba(0, 0, 0, 0.8); border-radius: 50%; z-index: 3;
+    width: 48px; height: 48px;
+    pointer-events: none;
 }
 
-.map-island-lock-icon { font-size: 24px; -unity-text-align: middle-center; }
+.map-island-lock-icon { font-size: 28px; -unity-text-align: middle-center; }
 
-/* Selected State */
-.map-island--selected .map-island-pin {
-    border-color: var(--color-accent-yellow); background-color: rgba(255, 215, 0, 0.15);
-}
-
+/* Selected State (No pins now, just change name color) */
 .map-island--selected .map-island-name {
     background-color: var(--color-accent-yellow); color: var(--color-mystic-black);
 }
 
-/* Positions */
-.map-island--farm { left: 190px; top: 180px; }
-.map-island--city { left: 520px; top: 150px; }
-.map-island--mine { left: 380px; top: 80px; }
-.map-island--haiphu { left: 90px; top: 350px; }
-.map-island--mocnhi { left: 640px; top: 340px; }
+/* Positions (Using percentages so it scales perfectly with any container size) */
+.map-island--farm { left: 27.5%; top: 15%; }
+.map-island--city { left: 72.5%; top: 20%; }
+.map-island--mine { left: 30%; top: 50%; }
+.map-island--haiphu { left: 77.5%; top: 65%; }
+.map-island--mocnhi { left: 50%; top: 82.5%; }
+
+/* === PLAYER INDICATOR === */
+.map-player-indicator {
+    position: absolute;
+    width: 0; height: 0;
+    align-items: center; justify-content: center;
+    transition-property: opacity, translate;
+    transition-duration: 0.8s, 0.3s;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.map-indicator-star {
+    position: absolute;
+    font-size: 24px;
+    color: #FFD700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+    left: 0; top: -10px; translate: -50% -50%;
+}
+
+.map-player-indicator.map-indicator-blink {
+    opacity: 0.2;
+}
 
 /* === FLOATING INFO CARD === */
 .map-info-card {
@@ -268,6 +300,7 @@
 /* === CHEAT BAR === */
 .map-cheat-bar {
     position: absolute; bottom: 16px; right: 24px; flex-direction: row; z-index: 25;
+    display: none;
 }
 
 .map-cheat-btn {

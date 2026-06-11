@@ -38,14 +38,14 @@
                 <!-- Leaderboard -->
                 <ui:VisualElement class="sidebar-btn-shadow">
                     <ui:Button name="BtnLeaderboard" class="sidebar-btn sidebar-btn-leaderboard">
-                        <ui:Label text="🏆" class="sidebar-btn-icon" />
+                        <ui:VisualElement class="sidebar-btn-icon" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_02.png'); -unity-background-scale-mode: scale-to-fit;" />
                     </ui:Button>
                 </ui:VisualElement>
 
                 <!-- Daily Attendance -->
                 <ui:VisualElement class="sidebar-btn-shadow">
                     <ui:Button name="BtnCalendar" class="sidebar-btn sidebar-btn-calendar">
-                        <ui:Label text="📅" class="sidebar-btn-icon sidebar-btn-icon-white" />
+                        <ui:VisualElement class="sidebar-btn-icon sidebar-btn-icon-white" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_03.png'); -unity-background-scale-mode: scale-to-fit;" />
                     </ui:Button>
                 </ui:VisualElement>
 
@@ -59,21 +59,21 @@
                 <!-- Mail -->
                 <ui:VisualElement class="sidebar-btn-shadow">
                     <ui:Button name="BtnMail" class="sidebar-btn sidebar-btn-mail">
-                        <ui:Label text="✉" class="sidebar-btn-icon sidebar-btn-icon-white" />
+                        <ui:VisualElement class="sidebar-btn-icon sidebar-btn-icon-white" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_04.png'); -unity-background-scale-mode: scale-to-fit;" />
                     </ui:Button>
                 </ui:VisualElement>
 
                 <!-- Friends -->
                 <ui:VisualElement class="sidebar-btn-shadow">
                     <ui:Button name="BtnFriends" class="sidebar-btn sidebar-btn-friends">
-                        <ui:Label text="👥" class="sidebar-btn-icon sidebar-btn-icon-white" />
+                        <ui:VisualElement class="sidebar-btn-icon sidebar-btn-icon-white" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_01.png'); -unity-background-scale-mode: scale-to-fit;" />
                     </ui:Button>
                 </ui:VisualElement>
 
                 <!-- Shop (Temporary) -->
                 <ui:VisualElement class="sidebar-btn-shadow">
                     <ui:Button name="BtnShop" class="sidebar-btn sidebar-btn-shop">
-                        <ui:Label text="🛒" class="sidebar-btn-shop-icon" />
+                        <ui:VisualElement class="sidebar-btn-shop-icon" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_05.png'); -unity-background-scale-mode: scale-to-fit;" />
                         <ui:Label text="Shop" class="sidebar-btn-shop-text" />
                     </ui:Button>
                 </ui:VisualElement>
@@ -81,7 +81,7 @@
                 <!-- Map (Temporary) -->
                 <ui:VisualElement class="sidebar-btn-shadow" style="display: none;">
                     <ui:Button name="BtnMap" class="sidebar-btn sidebar-btn-map">
-                        <ui:Label text="🗺️" class="sidebar-btn-map-icon" />
+                        <ui:VisualElement class="sidebar-btn-map-icon" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_07.png'); -unity-background-scale-mode: scale-to-fit;" />
                         <ui:Label text="Map" class="sidebar-btn-map-text" />
                     </ui:Button>
                 </ui:VisualElement>
@@ -89,21 +89,21 @@
                 <!-- Build Mode -->
                 <ui:VisualElement class="sidebar-btn-shadow" style="display: none;">
                     <ui:Button name="BtnBuild" class="sidebar-btn sidebar-btn-build">
-                        <ui:Label text="🔨" class="sidebar-btn-icon sidebar-btn-icon-white" />
+                        <ui:VisualElement class="sidebar-btn-icon sidebar-btn-icon-white" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_08.png'); -unity-background-scale-mode: scale-to-fit;" />
                     </ui:Button>
                 </ui:VisualElement>
 
                 <!-- Fishing (Temporary) -->
                 <ui:VisualElement class="sidebar-btn-shadow" style="display: none;">
                     <ui:Button name="BtnFishing" class="sidebar-btn sidebar-btn-fishing">
-                        <ui:Label text="🎣" class="sidebar-btn-icon sidebar-btn-icon-white" />
+                        <ui:VisualElement class="sidebar-btn-icon sidebar-btn-icon-white" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_09.png'); -unity-background-scale-mode: scale-to-fit;" />
                     </ui:Button>
                 </ui:VisualElement>
 
                 <!-- Workshop (Temporary) -->
                 <ui:VisualElement class="sidebar-btn-shadow" style="display: none;">
                     <ui:Button name="BtnWorkshop" class="sidebar-btn sidebar-btn-workshop">
-                        <ui:Label text="🔨" class="sidebar-btn-icon sidebar-btn-icon-white" />
+                        <ui:VisualElement class="sidebar-btn-icon sidebar-btn-icon-white" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_10.png'); -unity-background-scale-mode: scale-to-fit;" />
                     </ui:Button>
                 </ui:VisualElement>
             </ui:VisualElement>
@@ -118,14 +118,14 @@
                 <!-- Piggy Bank (Moved here) -->
                 <ui:VisualElement class="settings-btn-shadow" style="margin-right: 10px;">
                     <ui:Button name="BtnPiggy" class="settings-btn">
-                        <ui:Label text="🐷" class="settings-btn-icon" style="font-size: 26px;" />
+                        <ui:VisualElement class="settings-btn-icon" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_06.png'); -unity-background-scale-mode: scale-to-fit; width: 26px; height: 26px;" />
                     </ui:Button>
                 </ui:VisualElement>
 
                 <!-- Currency (single) -->
                 <ui:VisualElement name="CurrencyDisplay" class="currency-item">
                     <ui:VisualElement class="currency-icon">
-                        <ui:Label text="◆" class="currency-icon-label" />
+                        <ui:VisualElement style="width: 22px; height: 22px; background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_16.png'); -unity-background-scale-mode: scale-to-fit;" />
                     </ui:VisualElement>
                     <ui:Label name="CurrencyValue" text="84.00" class="currency-value" />
                 </ui:VisualElement>
@@ -133,7 +133,7 @@
                 <!-- Settings -->
                 <ui:VisualElement class="settings-btn-shadow">
                     <ui:Button name="BtnSettings" class="settings-btn">
-                        <ui:Label text="⚙" class="settings-btn-icon" />
+                        <ui:VisualElement class="settings-btn-icon" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_12.png'); -unity-background-scale-mode: scale-to-fit;" />
                     </ui:Button>
                 </ui:VisualElement>
             </ui:VisualElement>
@@ -141,7 +141,7 @@
             <!-- Row 2: Bag / Inventory -->
             <ui:VisualElement class="bag-btn-shadow">
                 <ui:Button name="BtnBag" class="bag-btn">
-                    <ui:Label text="🎒" class="bag-btn-icon" />
+                    <ui:VisualElement class="bag-btn-icon" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_11.png'); -unity-background-scale-mode: scale-to-fit;" />
                 </ui:Button>
             </ui:VisualElement>
         </ui:VisualElement>
@@ -168,11 +168,11 @@
         <!-- ============================== -->
         <!-- 6. ACTION BUTTONS — Right      -->
         <!-- ============================== -->
-        <ui:VisualElement class="hud-right-actions">
+        <ui:VisualElement class="hud-right-actions" style="display: none;">
             <!-- Interact (hand) — largest -->
             <ui:VisualElement class="action-btn-shadow">
                 <ui:Button name="BtnInteract" class="action-btn action-btn-interact">
-                    <ui:Label text="✋" class="action-btn-icon action-btn-icon-dark" />
+                    <ui:VisualElement class="action-btn-icon action-btn-icon-dark" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_13.png'); -unity-background-scale-mode: scale-to-fit; -unity-background-image-tint-color: black;" />
                 </ui:Button>
             </ui:VisualElement>
 
@@ -190,7 +190,7 @@
         <ui:VisualElement class="hud-bottom-right">
             <ui:VisualElement class="jump-btn-shadow">
                 <ui:Button name="BtnJump" class="jump-btn">
-                    <ui:Label text="⬆" class="jump-btn-icon" />
+                    <ui:VisualElement class="jump-btn-icon" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_15.png'); -unity-background-scale-mode: scale-to-fit;" />
                 </ui:Button>
             </ui:VisualElement>
         </ui:VisualElement>

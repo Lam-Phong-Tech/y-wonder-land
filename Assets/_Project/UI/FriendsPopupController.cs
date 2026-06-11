@@ -67,6 +67,11 @@ public class FriendsPopupController : MonoBehaviour
             friendsDocument = GetComponent<UIDocument>();
         }
 
+        if (friendsDocument != null)
+        {
+            friendsDocument.sortingOrder = 100; // Force popup to render on top of HUD
+        }
+
         InitMockData();
     }
 
@@ -110,6 +115,8 @@ public class FriendsPopupController : MonoBehaviour
         {
             btnClose.clicked -= Hide;
             btnClose.clicked += Hide;
+            // Force close on pointer down to bypass any UI Toolkit event consumption issues
+            btnClose.RegisterCallback<PointerDownEvent>(evt => Hide());
         }
         overlay?.RegisterCallback<ClickEvent>(evt =>
         {

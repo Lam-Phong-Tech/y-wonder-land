@@ -24,7 +24,9 @@ public class TutorialManager : MonoBehaviour
         InteractResource,     // 12: Chop tree & mine rock
         FollowNPCToBuild,     // 13: Follow NPC to empty land
         InteractBuild,        // 14: Place a building
-        Complete              // 15: Tutorial complete, give rewards
+        FollowNPCToWorkshop,  // 15: Follow NPC to Workshop
+        InteractWorkshop,     // 16: Open Workshop and upgrade tool
+        Complete              // 17: Tutorial complete, give rewards
     }
 
     [Header("Current Progress")]
@@ -39,6 +41,7 @@ public class TutorialManager : MonoBehaviour
     public Transform targetMarket; // Quầy giao thương (Chợ)
     public Transform targetResourceArea; // Khu rừng / mỏ đá
     public Transform targetBuildArea; // Bãi đất trống để xây dựng
+    public Transform targetWorkshop; // Xưởng chế tạo
     public Transform highlightEffect; // Glowing effect on the farm tile
 
     private UIDocument hudDocument;
@@ -269,6 +272,27 @@ public class TutorialManager : MonoBehaviour
                 dynamicNodesList.Add(node);
             }
 
+            // Node 5: Workshop
+            if (targetWorkshop == null)
+            {
+                GameObject wsGo = new GameObject("TutorialNode_WorkshopFallback");
+                wsGo.transform.position = new Vector3(20f, 0.5f, 10f);
+                targetWorkshop = wsGo.transform;
+            }
+            if (targetWorkshop != null)
+            {
+                GameObject nodeGo = new GameObject("TutorialNode_Workshop");
+                nodeGo.transform.position = targetWorkshop.position;
+                YWonderLand.Tutorial.TutorialNode node = nodeGo.AddComponent<YWonderLand.Tutorial.TutorialNode>();
+                node.walkDialogues = new string[] { "Xây xong rồi thì mình ra Xưởng Chế Tạo nhé!", "Cậu cần phải nâng cấp dụng cụ để làm việc nhanh hơn." };
+                node.waitPlayerDialogues = new string[] { "Nhanh chân lên, bác thợ rèn đang đợi!" };
+                node.actionDialogues = new string[] { "Đây là Workshop! Hãy mở Xưởng lên và thử Nâng cấp Cuốc hoặc Rìu của cậu nhé. Nhớ là cần có Gỗ, Đá và POS đấy!" };
+                node.idleWarningDialogues = new string[] { "Mở Xưởng Chế Tạo lên nào!" };
+                node.OnPlayerArrivedAtNode = new UnityEngine.Events.UnityEvent();
+                node.OnPlayerArrivedAtNode.AddListener(OnNPCArrivedAtWorkshop);
+                dynamicNodesList.Add(node);
+            }
+
             guideNPC.tutorialNodes = dynamicNodesList.ToArray();
         }
 
@@ -400,6 +424,14 @@ public class TutorialManager : MonoBehaviour
             case TutorialStep.InteractBuild:
                 hintTitle = "X\u00e2y d\u1ef1ng!";
                 hintDesc = "M\u1edf ch\u1ebf \u0111\u1ed9 x\u00e2y (B), ch\u1ecdn 1 \u0111\u1ed3 v\u00e0 \u0111\u1eb7t xu\u1ed1ng.";
+                break;
+            case TutorialStep.FollowNPCToWorkshop:
+                hintTitle = "Theo NPC T\u00e2n Th\u1ee7!";
+                hintDesc = "\u0110i \u0111\u1ebfn X\u01b0\u1edfng ch\u1ebf t\u1ea1o.";
+                break;
+            case TutorialStep.InteractWorkshop:
+                hintTitle = "X\u01b0\u1edfng ch\u1ebf t\u1ea1o!";
+                hintDesc = "M\u1edf x\u01b0\u1edfng v\u00e0 n\u00e2ng c\u1ea5p v\u1eadt ph\u1ea9m.";
                 break;
         }
 
@@ -865,14 +897,58 @@ public class TutorialManager : MonoBehaviour
             
             GhostPlacementController.OnBuildingPlaced -= OnTutorialBuildingPlaced;
             
+            SetStep(TutorialStep.FollowNPCToWorkshop);
+            UpdateQuestHUD("[13/14] Theo NPC tới Xưởng Chế Tạo");
+            ShowSubtitle("Quá xịn! Xây dựng xong rồi, giờ chúng ta đi đến Xưởng Chế Tạo nhé!");
+            ShowInstructionBanner("Theo NPC Tân Thủ!", "Đến Xưởng Chế Tạo");
+
+            if (guideNPC != null && guideNPC.tutorialNodes.Length > 5)
+            {
+                guideNPC.StartNode(5);
+            }
+        }
+    }
+
+    private void OnNPCArrivedAtWorkshop()
+    {
+        if (currentStep == TutorialStep.FollowNPCToWorkshop)
+        {
+            SetStep(TutorialStep.InteractWorkshop);
+            UpdateQuestHUD("[14/14] Mở Xưởng và Nâng cấp 1 dụng cụ");
+            
+            ShowSubtitle("Hãy nhấn vào Xưởng để mở giao diện, và thử nâng cấp cái Cuốc hoặc Rìu của cậu nhé!");
+            ShowInstructionBanner(
+                "Nâng cấp Dụng Cụ!",
+                "Nâng cấp 1 dụng cụ bất kỳ tại Xưởng"
+            );
+
+            // Subscribe to workshop event
+            WorkshopPopupController.OnItemUpgraded -= OnTutorialItemUpgraded;
+            WorkshopPopupController.OnItemUpgraded += OnTutorialItemUpgraded;
+        }
+    }
+
+    private void OnTutorialItemUpgraded(string itemId)
+    {
+        if (currentStep == TutorialStep.InteractWorkshop)
+        {
+            if (guideNPC != null && guideNPC.tutorialNodes.Length > 5)
+            {
+                guideNPC.tutorialNodes[5].CompleteNodeTask();
+            }
+            
+            WorkshopPopupController.OnItemUpgraded -= OnTutorialItemUpgraded;
+            
             currentStep = TutorialStep.Complete;
             UpdateQuestHUD("Hoàn thành Hướng Dẫn Tân Thủ!");
-            ShowSubtitle("Tuyệt vời! Cậu đã nắm vững cách Trồng trọt, Chăn nuôi, Kiếm tiền và Xây dựng. Chúc cậu chơi game vui vẻ nhé!");
+            ShowSubtitle("Tuyệt vời! Cậu đã tốt nghiệp khóa Huấn luyện Nông dân rồi! Chúc cậu chơi game vui vẻ nhé!");
             
             ShowInstructionBanner(
                 "Hoàn Thành!",
-                "Bạn đã tốt nghiệp khóa Hướng Dẫn Tân Thủ!"
+                "Bạn đã hoàn thành Hướng Dẫn Tân Thủ!"
             );
+
+            GiveTutorialRewards();
 
             CancelInvoke(nameof(HideSubtitle));
             Invoke(nameof(HideSubtitle), 5f);

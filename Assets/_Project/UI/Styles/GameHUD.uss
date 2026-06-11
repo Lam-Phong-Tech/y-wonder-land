@@ -55,8 +55,8 @@
 
 .currency-item {
     flex-direction: row; align-items: center;
-    background-color: var(--color-neutral-surface);
-    border-radius: var(--radius-panel); border-width: var(--border-medium); border-color: var(--color-border);
+    background-color: rgba(58, 71, 102, 0.5);
+    border-radius: var(--radius-panel); border-width: var(--border-medium); border-color: rgba(255, 255, 255, 0.2);
     padding: 8px 14px; margin-right: 10px;
 }
 .currency-icon { width: 22px; height: 22px; margin-right: 8px; align-items: center; justify-content: center; }
@@ -65,32 +65,32 @@
 
 .settings-btn {
     width: 46px; height: 46px; border-radius: var(--radius-button);
-    background-color: var(--color-neutral-surface); border-width: var(--border-medium); border-color: var(--color-border);
+    background-color: rgba(58, 71, 102, 0.5); border-width: var(--border-medium); border-color: rgba(255, 255, 255, 0.2);
     align-items: center; justify-content: center; padding: 0;
     transition-property: background-color, border-color, scale; transition-duration: 0.15s;
 }
 .settings-btn:hover { border-color: var(--color-primary); scale: 1.05; }
 .settings-btn:active { scale: 0.95; }
-.settings-btn-icon { font-size: 24px; color: var(--color-text-white); width: 46px; height: 46px; }
+.settings-btn-icon { font-size: 24px; color: var(--color-text-white); width: 26px; height: 26px; }
 
 .bag-btn-shadow { margin-top: 10px; align-self: flex-end; }
 .bag-btn {
     width: 56px; height: 56px; border-radius: var(--radius-button);
-    background-color: var(--color-primary); border-width: 0;
+    background-color: rgba(58, 71, 102, 0.5); border-width: var(--border-medium); border-color: rgba(255, 255, 255, 0.2);
     align-items: center; justify-content: center; padding: 0;
-    transition-property: background-color, scale; transition-duration: 0.15s;
+    transition-property: background-color, border-color, scale; transition-duration: 0.15s;
 }
-.bag-btn:hover { background-color: var(--color-primary-hover); scale: 1.05; }
-.bag-btn:active { background-color: var(--color-primary-active); scale: 0.95; }
-.bag-btn-icon { width: 56px; height: 56px; }
+.bag-btn:hover { border-color: var(--color-primary); scale: 1.05; }
+.bag-btn:active { scale: 0.95; }
+.bag-btn-icon { width: 34px; height: 34px; }
 
 /* ── 4. LEFT SIDEBAR ── */
 .hud-left-sidebar { margin-top: 10px; }
 .sidebar-btn-shadow { margin-bottom: 10px; align-self: flex-start; }
 .sidebar-btn {
     width: 46px; height: 46px; border-radius: var(--radius-button);
-    border-width: var(--border-medium); border-color: var(--color-border);
-    background-color: var(--color-neutral-surface);
+    border-width: var(--border-medium); border-color: rgba(255, 255, 255, 0.2);
+    background-color: rgba(58, 71, 102, 0.5);
     align-items: center; justify-content: center; padding: 0;
     transition-property: background-color, border-color, scale; transition-duration: 0.15s;
 }
@@ -98,7 +98,8 @@
 .sidebar-btn:active { scale: 0.95; }
 
 .sidebar-btn-shop, .sidebar-btn-map { flex-direction: row; width: 100px; height: 46px; padding: 0 10px; }
-.sidebar-btn-shop-icon, .sidebar-btn-map-icon { font-size: 20px; width: 24px; height: 24px; }
+.sidebar-btn-icon { width: 26px; height: 26px; }
+.sidebar-btn-shop-icon, .sidebar-btn-map-icon { width: 26px; height: 26px; }
 .sidebar-btn-shop-text, .sidebar-btn-map-text { font-size: 14px; -unity-font-style: bold; color: var(--color-text-white); margin-left: 6px; }
 .sidebar-btn-piggy, .sidebar-btn-fishing, .sidebar-btn-build { width: 46px; height: 46px; }
 
@@ -115,7 +116,7 @@
 .action-btn-shadow { margin-bottom: 12px; }
 .action-btn { border-radius: 50%; align-items: center; justify-content: center; padding: 0; transition-property: background-color, scale; transition-duration: 0.15s; }
 
-.action-btn-interact { width: 64px; height: 64px; background-color: var(--color-surface-mid); border-width: var(--border-medium); border-color: var(--color-border); }
+.action-btn-interact { width: 64px; height: 64px; background-color: rgba(58, 71, 102, 0.5); border-width: var(--border-medium); border-color: rgba(255, 255, 255, 0.2); }
 .action-btn-interact:hover { border-color: var(--color-primary); scale: 1.05; }
 .action-btn-interact:active { scale: 0.95; }
 
@@ -123,15 +124,15 @@
 .action-btn-cancel:hover { background-color: var(--color-danger-hover); scale: 1.05; }
 .action-btn-cancel:active { background-color: var(--color-danger-active); scale: 0.95; }
 
-.action-btn-icon-dark { width: 64px; height: 64px; }
-.action-btn-icon-white { width: 52px; height: 52px; }
+.action-btn-icon-dark { width: 40px; height: 40px; }
+.action-btn-icon-white { width: 30px; height: 30px; }
 
 /* ── 7. MESSAGES BAR ── */
 .hud-bottom-center { position: absolute; bottom: 16px; left: 50%; translate: -50% 0; }
 .messages-bar {
     flex-direction: row; align-items: center;
-    background-color: var(--color-neutral-surface);
-    border-radius: var(--radius-panel); border-width: var(--border-medium); border-color: var(--color-border);
+    background-color: rgba(58, 71, 102, 0.5);
+    border-radius: var(--radius-panel); border-width: var(--border-medium); border-color: rgba(255, 255, 255, 0.2);
     padding: 10px 20px; min-width: 260px;
 }
 .messages-text { font-size: 14px; color: var(--color-text-secondary); flex-grow: 1; margin-left: 6px; margin-right: 12px; }
@@ -148,12 +149,12 @@
 .hud-bottom-right { position: absolute; bottom: 24px; right: 24px; }
 .jump-btn {
     width: 56px; height: 56px; border-radius: 50%;
-    background-color: var(--color-surface-mid); border-width: var(--border-medium); border-color: var(--color-border);
+    background-color: rgba(58, 71, 102, 0.5); border-width: var(--border-medium); border-color: rgba(255, 255, 255, 0.2);
     align-items: center; justify-content: center; transition-property: border-color, scale; transition-duration: 0.15s;
 }
 .jump-btn:hover { border-color: var(--color-primary); scale: 1.05; }
 .jump-btn:active { scale: 0.95; }
-.jump-btn-icon { width: 56px; height: 56px; }
+.jump-btn-icon { width: 34px; height: 34px; }
 
 .crosshair { position: absolute; left: 0; top: 0; right: 0; bottom: 0; align-items: center; justify-content: center; }
 .crosshair-dot { width: 8px; height: 8px; border-radius: 4px; background-color: rgba(255, 255, 255, 0.9); border-width: 1px; border-color: rgba(0, 0, 0, 0.5); }

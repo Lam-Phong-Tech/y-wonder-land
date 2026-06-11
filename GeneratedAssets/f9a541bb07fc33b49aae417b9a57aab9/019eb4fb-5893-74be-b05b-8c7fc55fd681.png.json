@@ -1,0 +1,28 @@
+{
+    "asset": "f9a541bb07fc33b49aae417b9a57aab9",
+    "fileName": "019eb4fb-5893-74be-b05b-8c7fc55fd681.png",
+    "prompt": "A high-quality sprite sheet containing 16 unique RPG farming game item icons in a perfect 4x4 grid. Style: Vibrant 2.5D, soft-shaded, juicy and colorful, premium casual mobile farming game style like Hay Day. Items: 1. Carrot, 2. Corn, 3. Tomato, 4. Watering Can, 5. Wooden Axe, 6. Gold Coin, 7. Shiny Diamond, 8. Wooden Log, 9. Stone Block, 10. Fish, 11. Fishing Bait, 12. Gift Box, 13. Red Apple, 14. Milk Bottle, 15. Wheat Bundle, 16. Energy Potion. Background: Perfectly solid flat grey (#737373) with NO shadows cast on the background and NO grid lines between icons. All icons must be clearly separated within their 256x256 grid cells.",
+    "negativePrompt": "",
+    "model": "game-ui-essentials-2",
+    "modelName": "Game UI Essentials 2.0",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelatePixelGridSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0,
+    "dimensions": {
+        "width": 1024,
+        "height": 1024
+    },
+    "spriteSheet": false,
+    "duration": 0.0
+}

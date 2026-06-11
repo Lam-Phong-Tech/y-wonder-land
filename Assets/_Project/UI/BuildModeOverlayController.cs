@@ -365,6 +365,12 @@ public class BuildModeOverlayController : MonoBehaviour
         // Hide GameHUD to prevent UI click overlaps
         SetGameHUDVisible(false);
 
+        // Shift Chat up to avoid overlapping build items
+        if (ChatPanelController.Instance != null)
+        {
+            ChatPanelController.Instance.ShiftForBuildMode(true);
+        }
+
         Debug.Log("[BuildMode] Build Mode opened");
     }
 
@@ -394,6 +400,12 @@ public class BuildModeOverlayController : MonoBehaviour
 
         // Show GameHUD again
         SetGameHUDVisible(true);
+
+        // Reset Chat position
+        if (ChatPanelController.Instance != null)
+        {
+            ChatPanelController.Instance.ShiftForBuildMode(false);
+        }
 
         Debug.Log("[BuildMode] Build Mode closed");
     }

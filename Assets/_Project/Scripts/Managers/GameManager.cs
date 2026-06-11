@@ -196,6 +196,13 @@ public class GameManager : MonoBehaviour
             hud.SetHUDVisible(currentState == GameState.Gameplay);
         }
 
+        // Toggle ChatPanel visibility based on gameplay state
+        ChatPanelController chat = FindFirstObjectByType<ChatPanelController>();
+        if (chat != null)
+        {
+            chat.SetChatVisible(currentState == GameState.Gameplay);
+        }
+
         switch (currentState)
         {
             case GameState.Login:
