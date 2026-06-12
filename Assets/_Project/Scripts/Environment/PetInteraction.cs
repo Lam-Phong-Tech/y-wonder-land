@@ -11,15 +11,10 @@ namespace YWonderLand.Environment
     public class PetInteraction : MonoBehaviour
     {
         private bool canPet = false;
-        private Animator playerAnimator;
-
-        // Mã Hash của parameter "Pet" trong Animator
-        private int petHash;
+        private PlayerController playerController;
 
         void Start()
         {
-            // Tối ưu hóa hiệu suất bằng cách hash chuỗi string
-            petHash = Animator.StringToHash("Pet");
             
             // Đảm bảo collider được set là trigger
             Collider col = GetComponent<Collider>();
@@ -34,10 +29,10 @@ namespace YWonderLand.Environment
             // Bấm phím P để vuốt ve (Sử dụng Input System mới)
             if (canPet && Keyboard.current != null && Keyboard.current.pKey.wasPressedThisFrame)
             {
-                if (playerAnimator != null)
+                if (playerController != null)
                 {
                     Debug.Log("[PetInteraction] Đang vuốt ve thú cưng!");
-                    playerAnimator.SetTrigger(petHash);
+                    playerController.PlayActionAnimation("Petting", 2.0f);
                 }
             }
         }
@@ -47,7 +42,7 @@ namespace YWonderLand.Environment
             if (other.CompareTag("Player"))
             {
                 canPet = true;
-                playerAnimator = other.GetComponent<Animator>();
+                playerController = other.GetComponent<PlayerController>();
             }
         }
 
@@ -56,7 +51,7 @@ namespace YWonderLand.Environment
             if (other.CompareTag("Player"))
             {
                 canPet = false;
-                playerAnimator = null;
+                playerController = null;
             }
         }
 

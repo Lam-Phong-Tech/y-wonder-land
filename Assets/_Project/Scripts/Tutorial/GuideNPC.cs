@@ -18,6 +18,13 @@ public class GuideNPC : MonoBehaviour
     [Header("NPC Identity")]
     public string npcName = "NPC Tân Thủ";
 
+    [Header("Animation Settings")]
+    [Tooltip("Tên của State hoạt ảnh đứng yên trong Animator")]
+    public string idleAnimName = "Idle";
+    [Tooltip("Tên của State hoạt ảnh chạy trong Animator")]
+    public string runAnimName = "Walking";
+    private string currentAnim = "";
+
     // Actions/Callbacks
     public Action<string> OnDialogueTriggered; // Triggers subtitle UI
     public Action OnSequenceCompleted;         // All nodes completed
@@ -100,7 +107,7 @@ public class GuideNPC : MonoBehaviour
 
         agent.SetDestination(node.transform.position);
         agent.isStopped = false;
-        SetAnimSpeed(agent.speed);
+        PlayAnimation(runAnimName);
 
         TriggerDialogue(GetRandomString(node.walkDialogues));
     }
@@ -127,18 +134,30 @@ public class GuideNPC : MonoBehaviour
             
             // Check Player Distance (Đợi người chơi nếu quá xa)
             float distToPlayer = Vector3.Distance(transform.position, playerTransform.position);
-            if (distToPlayer > waitDistance)
+            
+            if (agent.isStopped)
             {
-                agent.isStopped = true;
-                SetAnimSpeed(0f);
-                SpamChat(GetRandomString(currentNode.waitPlayerDialogues));
-                LookAtPlayer(); // NPC quay đầu lại nhìn người chơi thay vì nhìn thẳng
+                // Đang đứng chờ: Phải đợi người chơi lại thật gần (cách 1 đoạn) mới chịu đi tiếp
+                if (distToPlayer <= Mathf.Max(1.0f, waitDistance - 1.0f))
+                {
+                    agent.isStopped = false;
+                    PlayAnimation(runAnimName);
+                    chatSpamTimer = 0f; // Reset spam
+                }
+                else
+                {
+                    SpamChat(GetRandomString(currentNode.waitPlayerDialogues));
+                    LookAtPlayer(); // NPC quay đầu lại nhìn người chơi
+                }
             }
             else
             {
-                agent.isStopped = false;
-                SetAnimSpeed(agent.speed);
-                chatSpamTimer = 0f; // Reset spam nếu đang đi bình thường
+                // Đang đi bộ: Nếu người chơi tụt lại quá xa thì dừng lại
+                if (distToPlayer > waitDistance)
+                {
+                    agent.isStopped = true;
+                    PlayAnimation(idleAnimName);
+                }
             }
 
             // Tới đích chưa?
@@ -148,7 +167,7 @@ public class GuideNPC : MonoBehaviour
                 isWaitingForPlayerToReachNode = true;
                 
                 agent.isStopped = true;
-                SetAnimSpeed(0f);
+                PlayAnimation(idleAnimName);
                 
                 // Quay mặt về hướng player
                 LookAtPlayer();
@@ -226,8 +245,7 @@ public class GuideNPC : MonoBehaviour
                 isPlayerIdleWarningTriggered = true;
                 TutorialNode currentNode = tutorialNodes[currentNodeIndex];
                 TriggerDialogue(GetRandomString(currentNode.idleWarningDialogues));
-                var animator = GetComponent<Animator>();
-                if (animator != null) animator.SetTrigger("Wave");
+                // Player idle warning without wave
             }
         }
         else
@@ -238,10 +256,39 @@ public class GuideNPC : MonoBehaviour
         }
     }
 
-    private void SetAnimSpeed(float speed)
+    private void PlayAnimation(string animName)
     {
-        var animator = GetComponent<Animator>();
-        if (animator != null) animator.SetFloat("Speed", speed);
+        if (string.IsNullOrEmpty(animName)) return;
+
+        // Tìm tất cả Animator (cả ở cục Parent và Model con)
+        Animator[] animators = GetComponentsInChildren<Animator>();
+        Animator targetAnimator = null;
+
+        // Ưu tiên lấy Animator nào có gắn sẵn Controller (NPCAnimator)
+        foreach (var anim in animators)
+        {
+            if (anim.runtimeAnimatorController != null)
+            {
+                targetAnimator = anim;
+                break;
+            }
+        }
+
+        if (targetAnimator == null && animators.Length > 0)
+        {
+            targetAnimator = animators[0];
+        }
+
+        if (targetAnimator != null && currentAnim != animName)
+        {
+            Debug.Log($"[GuideNPC] Thay đổi hoạt ảnh thành -> {animName} (Trên object: {targetAnimator.gameObject.name})");
+            targetAnimator.CrossFadeInFixedTime(animName, 0.2f); // Chuyển đổi an toàn theo thời gian thực (0.2s)
+            currentAnim = animName;
+        }
+        else if (targetAnimator == null && currentAnim != animName)
+        {
+            Debug.LogWarning($"[GuideNPC] LỖI: Không tìm thấy Animator nào cho hoạt ảnh {animName}!");
+        }
     }
 
     private void TriggerDialogue(string dialogueText)

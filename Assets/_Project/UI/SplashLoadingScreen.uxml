@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
     <ui:Style src="Styles/DesignSystem.uss" />
     <ui:Style src="Styles/SplashLoadingScreen.uss" />
@@ -17,11 +17,11 @@
 
             <!-- Title Shadow Layer -->
             <ui:VisualElement class="splash-title-shadow-wrapper">
-                <ui:Label text="Y WONDER LAND" class="splash-title-shadow" />
+                <ui:Label text="Y WONDER GREEN FARM" class="splash-title-shadow" />
             </ui:VisualElement>
 
             <!-- Title Main Layer -->
-            <ui:Label text="Y WONDER LAND" class="splash-title" />
+            <ui:Label text="Y WONDER GREEN FARM" class="splash-title" />
 
             <!-- Subtitle -->
             <ui:Label text="CUỘC PHIÊU LƯU BẮT ĐẦU" class="splash-subtitle" />

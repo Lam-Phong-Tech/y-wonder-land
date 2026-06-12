@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
     <ui:Style src="Styles/DesignSystem.uss" />
     <ui:Style src="Styles/LoginScreen.uss" />
@@ -15,7 +15,7 @@
 
                 <!-- Header Bar -->
                 <ui:VisualElement class="login-header">
-                    <ui:Label text="Y WONDER LAND" class="game-title" />
+                    <ui:Label text="Y WONDER GREEN FARM" class="game-title" />
                     <ui:Label text="CUỘC PHIÊU LƯU BẮT ĐẦU" class="game-subtitle" />
                 </ui:VisualElement>
 

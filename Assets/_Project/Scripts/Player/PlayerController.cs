@@ -8,9 +8,12 @@ public class PlayerController : MonoBehaviour
 {
     [Header("Movement Settings")]
     public float moveSpeed = 4.0f;
+    public float sprintMultiplier = 1.6f;
     public float rotationSpeed = 15.0f;
     public float gravity = -9.81f;
     public float jumpHeight = 1.5f;
+
+    public static PlayerController Instance { get; private set; }
 
     private CharacterController controller;
     private Animator animator;
@@ -25,15 +28,25 @@ public class PlayerController : MonoBehaviour
     private InputAction interactAction;
     private InputAction attackAction;
 
-    // Animator parameter hash IDs for better performance
-    private int speedHash;
-    private int isMovingHash;
-    private int jumpHash;
-    private int sitHash;
-    private int feedHash;
-    private int plantHash;
-    private int chopHash;
-    private int petHash;
+    // Animation State
+    private string currentAnimState = "";
+    [Header("State")]
+    public bool isSwimming = false;
+    private float waterSurfaceY = 0f;
+    private bool isSprintUIHeld = false;
+    private float actionLockTimer = 0f;
+
+    [Header("Animation State Names")]
+    public string animIdle = "Idle";
+    public string animWalk = "Walk";
+    public string animRun = "Run";
+    public string animJump = "Jump";
+    public string animSwim = "Swimming";
+
+    void Awake()
+    {
+        Instance = this;
+    }
 
     void Start()
     {
@@ -52,15 +65,7 @@ public class PlayerController : MonoBehaviour
 
         DiscoverMainCamera();
 
-        // Cache Animator parameters
-        speedHash = Animator.StringToHash("Speed");
-        isMovingHash = Animator.StringToHash("IsMoving");
-        jumpHash = Animator.StringToHash("Jump");
-        sitHash = Animator.StringToHash("Sit");
-        feedHash = Animator.StringToHash("Feed");
-        plantHash = Animator.StringToHash("Plant");
-        chopHash = Animator.StringToHash("Chop");
-        petHash = Animator.StringToHash("Pet");
+        // No need to cache Animator parameters in Code-Driven Animation
     }
 
     private void DiscoverMainCamera()
@@ -104,31 +109,40 @@ public class PlayerController : MonoBehaviour
         bool isPointerOverUI = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
         bool attackPressed = attackAction != null && attackAction.triggered && !isPointerOverUI;
 
-        // Process Interaction / Actions
+        // Process Interaction / Actions (Attack, Fish, etc.)
+        // Bây giờ nếu ấn, chúng ta gọi thẳng PlayActionAnimation
         if (interactPressed)
         {
             Debug.Log("[PlayerController] Interact button pressed!");
-            // TODO: Bỏ hành động Trồng Cây ra khỏi nút Interact như đã trao đổi
         }
 
-        if (attackPressed)
+        if (attackPressed && actionLockTimer <= 0)
         {
             Debug.Log("[PlayerController] Attack button pressed!");
-            if (animator != null && HasParameter(animator, "Chop"))
-            {
-                animator.SetTrigger(chopHash);
-            }
+            PlayActionAnimation("TreeCutting", 3.0f);
         }
 
-        // Test Nút Câu Cá (Phím F)
-        if (Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame)
+        // --- KIỂM TRA ACTION LOCK ---
+        // Nếu nhân vật đang làm việc (chặt cây, câu cá...), khóa không cho chạy nhảy nhưng vẫn áp dụng trọng lực
+        if (actionLockTimer > 0)
         {
-            Debug.Log("[PlayerController] Nút Câu Cá (F) được bấm!");
-            if (animator != null && HasParameter(animator, "Feed"))
+            actionLockTimer -= Time.deltaTime;
+            
+            // Nếu vừa hết giờ múa (làm việc xong), cất đồ nghề đi
+            if (actionLockTimer <= 0)
             {
-                animator.SetTrigger(feedHash); // Feed đang được nối với Fishing
+                if (YWonderLand.Player.EquipmentManager.Instance != null)
+                {
+                    YWonderLand.Player.EquipmentManager.Instance.HideAllTools();
+                }
             }
+
+            // Apply gravity
+            playerVelocity.y += gravity * Time.deltaTime;
+            controller.Move(playerVelocity * Time.deltaTime);
+            return; // Ngừng xử lý di chuyển
         }
+        // ------------------------------
 
         Vector3 inputDir = new Vector3(inputVec.x, 0, inputVec.y).normalized;
         Vector3 moveDirection = Vector3.zero;
@@ -165,49 +179,132 @@ public class PlayerController : MonoBehaviour
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
             }
 
+            // Check Sprint
+            bool isSprinting = isSprintUIHeld || (Keyboard.current != null && Keyboard.current.leftShiftKey.isPressed);
+            // Tốc độ bơi bị giảm đi 30% so với đi bộ
+            float currentSpeed = moveSpeed * (isSprinting ? sprintMultiplier : 1f);
+            if (isSwimming) currentSpeed *= 0.7f;
+
             // Move the character controller
-            controller.Move(moveDirection * moveSpeed * Time.deltaTime);
+            controller.Move(moveDirection * currentSpeed * Time.deltaTime);
         }
 
-        // 4. Handle Jumping
-        if (jumpPressed && isGrounded)
+        // 4. Handle Jumping (Không cho nhảy khi đang bơi)
+        if (jumpPressed && isGrounded && !isSwimming)
         {
             // Physics formula for jump velocity: v = sqrt(h * -2 * g)
             playerVelocity.y = Mathf.Sqrt(jumpHeight * -2.0f * gravity);
-            
-            if (animator != null && HasParameter(animator, "Jump"))
-            {
-                animator.SetTrigger(jumpHash);
-            }
-            
+            CrossFadeAnim(animJump, 0.1f);
             Debug.Log("[PlayerController] Jump triggered!");
         }
 
-        // Apply gravity
-        playerVelocity.y += gravity * Time.deltaTime;
+        // Apply gravity & Buoyancy
+        if (!isSwimming)
+        {
+            playerVelocity.y += gravity * Time.deltaTime;
+        }
+        else
+        {
+            // Lực đẩy Archimes: Nổi trên mặt nước
+            // Giả sử tâm nhân vật (chân) cần nằm dưới mặt nước khoảng 1.2 mét để ngực vừa ngang mặt nước
+            float targetFeetY = waterSurfaceY - 1.2f;
+            float depth = targetFeetY - transform.position.y;
+            
+            // Lò xo nước: chìm càng sâu đẩy lên càng mạnh, cao quá thì rơi xuống nhẹ
+            playerVelocity.y = depth * 5f;
+            playerVelocity.y = Mathf.Clamp(playerVelocity.y, -10f, 5f);
+        }
         controller.Move(playerVelocity * Time.deltaTime);
 
-        // 5. Update Animator Parameters (for Character animations)
-        if (animator != null)
+        // Cập nhật lại trạng thái chạm đất sau khi đã di chuyển
+        isGrounded = controller.isGrounded;
+
+        // 5. Update Locomotion Animations
+        if (isSwimming)
         {
-            float currentSpeed = moveDirection.magnitude * moveSpeed;
-            if (HasParameter(animator, "Speed"))
+            // Nếu có di chuyển thì bơi lội, không thì bơi đứng (tạm dùng chung animation bơi)
+            CrossFadeAnim(animSwim, 0.2f);
+        }
+        else if (!isGrounded || playerVelocity.y > 0)
+        {
+            // Giữ trạng thái "Jump"
+            CrossFadeAnim(animJump, 0.2f);
+        }
+        else if (moveDirection.magnitude > 0.1f)
+        {
+            bool isSprinting = isSprintUIHeld || (Keyboard.current != null && Keyboard.current.leftShiftKey.isPressed);
+            if (isSprinting)
             {
-                animator.SetFloat(speedHash, currentSpeed);
+                CrossFadeAnim(animRun, 0.2f);
             }
-            if (HasParameter(animator, "IsMoving"))
+            else
             {
-                animator.SetBool(isMovingHash, moveDirection.magnitude > 0.1f);
+                CrossFadeAnim(animWalk, 0.2f);
             }
+        }
+        else
+        {
+            CrossFadeAnim(animIdle, 0.2f);
         }
     }
 
-    private bool HasParameter(Animator anim, string paramName)
+    public void SetSprintUI(bool isPressed)
     {
-        foreach (AnimatorControllerParameter param in anim.parameters)
+        isSprintUIHeld = isPressed;
+    }
+
+    /// <summary>
+    /// Gọi hàm này từ các script khác (Farm, Pet) để bắt nhân vật múa kỹ năng
+    /// </summary>
+    public void PlayActionAnimation(string animName, float duration, YWonderLand.Player.ToolType tool = YWonderLand.Player.ToolType.None)
+    {
+        if (animator == null) return;
+        actionLockTimer = duration;
+        CrossFadeAnim(animName, 0.1f);
+        
+        // Hiện công cụ tương ứng lên tay
+        if (YWonderLand.Player.EquipmentManager.Instance != null && tool != YWonderLand.Player.ToolType.None)
         {
-            if (param.name == paramName) return true;
+            YWonderLand.Player.EquipmentManager.Instance.ShowTool(tool);
         }
-        return false;
+
+        Debug.Log($"[PlayerController] Đang thực hiện hành động: {animName} trong {duration}s");
+    }
+
+    private void CrossFadeAnim(string animName, float transitionDuration = 0.2f)
+    {
+        if (animator != null && currentAnimState != animName)
+        {
+            animator.CrossFadeInFixedTime(animName, transitionDuration);
+            currentAnimState = animName;
+        }
+    }
+
+    // ── Xử lý chạm mặt nước ──
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Water"))
+        {
+            isSwimming = true;
+            waterSurfaceY = other.bounds.max.y;
+            Debug.Log($"[PlayerController] Xuống nước. Cao độ mặt nước: {waterSurfaceY}");
+        }
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        if (other.CompareTag("Water"))
+        {
+            waterSurfaceY = other.bounds.max.y;
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Water"))
+        {
+            isSwimming = false;
+            Debug.Log("[PlayerController] Lên bờ -> Chuyển về đi bộ.");
+        }
     }
 }

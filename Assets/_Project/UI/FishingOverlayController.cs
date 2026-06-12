@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -119,7 +119,7 @@ public class FishingOverlayController : MonoBehaviour
     private readonly List<FishItem> epicFish = new List<FishItem>
     {
         new FishItem("fish_02", "Cá Kiếm Vàng", "🐠", "Sử Thi", "Chú cá cảnh lấp lánh mang sắc vàng hoàng gia kiêu hãnh. Nhận +150 POS!", 150f, "#FFC107"),
-        new FishItem("gift_box_01", "Bao Lì Xì Event", "🎁", "Sự Kiện", "Bao lì xì rớt ra từ sự kiện sông nước Y WONDER LAND. Nhận +3 Vật phẩm sự kiện 🎫!", 0f, "#9C27B0")
+        new FishItem("gift_box_01", "Bao Lì Xì Event", "🎁", "Sự Kiện", "Bao lì xì rớt ra từ sự kiện sông nước Y WONDER GREEN FARM. Nhận +3 Vật phẩm sự kiện 🎫!", 0f, "#9C27B0")
     };
 
     private void Awake()

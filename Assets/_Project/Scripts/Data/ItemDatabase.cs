@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace YWonderLand.Data
@@ -6,7 +6,7 @@ namespace YWonderLand.Data
     /// <summary>
     /// Database chứa toàn bộ vật phẩm trong game. Dễ dàng tra cứu bằng hàm GetItem(id).
     /// </summary>
-    [CreateAssetMenu(fileName = "ItemDatabase", menuName = "Y Wonder Land/Item Database")]
+    [CreateAssetMenu(fileName = "ItemDatabase", menuName = "Y WONDER GREEN FARM/Item Database")]
     public class ItemDatabase : ScriptableObject
     {
         public List<ItemDefinition> items = new List<ItemDefinition>();

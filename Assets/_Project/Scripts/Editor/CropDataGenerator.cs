@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 using YWonderLand.Data;
 
@@ -6,11 +6,11 @@ namespace YWonderLand.EditorScripts
 {
     /// <summary>
     /// T\u1ef1 \u0111\u1ed9ng t\u1ea1o CropDatabase + CropDefinition assets cho demo.
-    /// Ch\u1ea1y qua menu: Y Wonder Land \u2192 Tools \u2192 Generate Crop Data
+    /// Ch\u1ea1y qua menu: Y WONDER GREEN FARM \u2192 Tools \u2192 Generate Crop Data
     /// </summary>
     public class CropDataGenerator
     {
-        [MenuItem("Y Wonder Land/Tools/Generate Crop Data")]
+        [MenuItem("Y WONDER GREEN FARM/Tools/Generate Crop Data")]
         public static void GenerateCropData()
         {
             if (!AssetDatabase.IsValidFolder("Assets/Resources"))

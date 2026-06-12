@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 using YWonderLand.Data;
 
@@ -20,7 +20,7 @@ namespace YWonderLand.EditorScripts
             GenerateItems();
         }
 
-        [MenuItem("Y Wonder Land/Tools/Generate Mock Items")]
+        [MenuItem("Y WONDER GREEN FARM/Tools/Generate Mock Items")]
         public static void GenerateItems()
         {
             if (!AssetDatabase.IsValidFolder("Assets/Resources"))

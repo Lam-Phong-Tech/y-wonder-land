@@ -1,11 +1,11 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace YWonderLand.Data
 {
     /// <summary>
     /// Định nghĩa cơ bản cho một vật phẩm trong game (ScriptableObject).
     /// </summary>
-    [CreateAssetMenu(fileName = "NewItem", menuName = "Y Wonder Land/Item Definition")]
+    [CreateAssetMenu(fileName = "NewItem", menuName = "Y WONDER GREEN FARM/Item Definition")]
     public class ItemDefinition : ScriptableObject
     {
         [Header("Thông tin cơ bản")]

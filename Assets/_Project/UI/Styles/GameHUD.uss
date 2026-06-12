@@ -103,8 +103,19 @@
 .sidebar-btn-shop-text, .sidebar-btn-map-text { font-size: 14px; -unity-font-style: bold; color: var(--color-text-white); margin-left: 6px; }
 .sidebar-btn-piggy, .sidebar-btn-fishing, .sidebar-btn-build { width: 46px; height: 46px; }
 
-/* ── 5. JOYSTICK ── */
+/* ── 5. JOYSTICK & SPRINT ── */
 .hud-bottom-left { position: absolute; bottom: 24px; left: 24px; }
+
+.sprint-btn-shadow { margin-bottom: 20px; margin-left: 10px; }
+.sprint-btn { 
+    width: 56px; height: 56px; border-radius: 50%;
+    background-color: rgba(58, 71, 102, 0.5); border-width: var(--border-medium); border-color: rgba(255, 255, 255, 0.2);
+    align-items: center; justify-content: center; transition-property: border-color, scale; transition-duration: 0.15s;
+}
+.sprint-btn:hover { border-color: var(--color-primary); scale: 1.05; }
+.sprint-btn:active { scale: 0.95; }
+.sprint-btn-icon { font-size: 26px; color: white; -unity-font-style: bold; padding-bottom: 2px; }
+
 .joystick-outer { width: 130px; height: 130px; border-radius: 65px; background-color: rgba(30, 35, 45, 0.6); border-width: 1px; border-color: rgba(255, 255, 255, 0.15); align-items: center; justify-content: center; }
 .joystick-inner { width: 48px; height: 48px; border-radius: 24px; background-color: rgba(255, 255, 255, 0.5); border-width: 1px; border-color: rgba(255, 255, 255, 0.8); }
 .joystick-arrow-container { position: absolute; width: 130px; height: 130px; align-items: center; justify-content: center; }
@@ -158,3 +169,19 @@
 
 .crosshair { position: absolute; left: 0; top: 0; right: 0; bottom: 0; align-items: center; justify-content: center; }
 .crosshair-dot { width: 8px; height: 8px; border-radius: 4px; background-color: rgba(255, 255, 255, 0.9); border-width: 1px; border-color: rgba(0, 0, 0, 0.5); }
+
+/* ── 9. INTERACTION PROMPT ── */
+.interaction-prompt {
+    position: absolute;
+    top: 55%; /* Nằm dưới crosshair một chút */
+    color: white;
+    font-size: 16px;
+    -unity-font-style: bold;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    background-color: rgba(0, 0, 0, 0.4);
+    padding: 4px 12px;
+    border-radius: 12px;
+    transition-property: opacity;
+    transition-duration: 0.1s;
+    opacity: 0; /* Ẩn mặc định */
+}

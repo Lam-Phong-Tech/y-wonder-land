@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -162,7 +162,7 @@ public class MailboxPopupController : MonoBehaviour
             "Quà Chào Mừng Tân Thủ!",
             "Hệ Thống",
             "10:00 02/06",
-            "Chào mừng bạn đến với Y WONDER LAND! Đây là món quà nhỏ từ Ban Quản Trị để giúp bạn khởi nghiệp nông trại của mình thuận lợi hơn. Hãy chăm sóc cây trồng và kết bạn thật nhiều nhé!",
+            "Chào mừng bạn đến với Y WONDER GREEN FARM! Đây là món quà nhỏ từ Ban Quản Trị để giúp bạn khởi nghiệp nông trại của mình thuận lợi hơn. Hãy chăm sóc cây trồng và kết bạn thật nhiều nhé!",
             true,
             welcomeGift
         ));

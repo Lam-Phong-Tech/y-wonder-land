@@ -1,5 +1,24 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-06-12
+### Added
+- **Hệ Thống Nước Thủy Động (Stylized Water URP):**
+  - Tạo Shader `StylizedWaterURP.shader` chuẩn URP hỗ trợ độ sâu nước (Shallow/Deep Color), bọt trắng đánh bờ (Foam), Normal Map cuộn sóng lấp lánh phản chiếu mặt trời.
+  - Tích hợp Normal Map lượn sóng tự nhiên tự động cuộn theo thời gian.
+  - Expose toàn bộ tham số sóng, bọt, màu sắc ra Material để người dùng tuỳ chỉnh.
+
+### Changed
+- **Cơ chế bơi lội & Animation:**
+  - Thêm hệ thống Lực đẩy Archimedes (Buoyancy) vào `PlayerController.cs`. Nhân vật sẽ tự động nổi bồng bềnh ngang ngực theo chính xác cao độ của mặt nước.
+  - Công khai tên các biến Animation (`animIdle`, `animWalk`, `animRun`, `animJump`, `animSwim`) ra Inspector để tái sử dụng một script `PlayerController.cs` cho cả mô hình Nam lẫn Nữ.
+  - Nới lỏng thời gian khóa hành động câu cá (Action Lock) lên 8.5 giây để khớp với hoạt ảnh.
+
+### Fixed
+- Lỗi **Câu cá xuyên thấu**: Chặn tia Laze quét đâm xuyên lòng đất. Tia Raycast giờ đây sẽ dừng lại ngay khi chạm vật cản cứng (mặt đất), ngăn ngừa việc đứng trên bờ nhìn xuống đất vẫn câu được cá ở biển ngầm.
+- Lỗi **Đè phím câu cá tự do**: Chuyển quyền quản lý nút `F` câu cá từ bộ đếm chung của Player sang bộ quét thông minh của `FarmInteractionController`, ngăn chặn nhân vật gõ cần câu xuống đất.
+- Lỗi **Rơi tự do xuống đáy bản đồ**: Sửa lỗi nhân vật bị rớt lọt qua khối trigger nước xuống vũ trụ bằng cơ chế tính toán lại trọng lực và thêm lực đẩy nổi.
+- Lỗi **Nam/Nữ lệch khớp tên Animation**: Khắc phục lỗi đơ hoạt ảnh khi nhân vật Nam gọi nhầm tên clip của Nữ bằng biến Public Inspector.
+
 ## [Unreleased] - 2026-06-11
 ### Changed
 - **Cập nhật Giao diện HUD (Glassmorphism):**

@@ -1,6 +1,6 @@
-# DESIGN SYSTEM: COZY DARK PALIA FRAMEWORK
+﻿# DESIGN SYSTEM: COZY DARK PALIA FRAMEWORK
 
-*(Hệ thống thiết kế giao diện chính thức cho dự án game 3D - Y WONDER LAND)*
+*(Hệ thống thiết kế giao diện chính thức cho dự án game 3D - Y WONDER GREEN FARM)*
 
 ---
 
@@ -99,7 +99,7 @@ All components must use these exact color values to maintain visual unity:
 
 ---
 
-### PART II: 8 "AI UI DISEASES" & PREVENTION IN Y WONDER LAND
+### PART II: 8 "AI UI DISEASES" & PREVENTION IN Y WONDER GREEN FARM
 
 #### 1. The "Glassmorphism & Sharp Edges" Addiction
 

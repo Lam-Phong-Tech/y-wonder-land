@@ -97,6 +97,123 @@ namespace YWonderLand.Environment
                         YWonderLand.UI.ResourceInteractionUIController.Instance.Hide();
                 }
             }
+
+            // Quét liên tục (Hover) tại vị trí con trỏ chuột
+            HandleHover(mouse.position.ReadValue());
+
+            // --- XỬ LÝ PHÍM TẮT DÀNH CHO TƯƠNG TÁC (Ví dụ: F để câu cá) ---
+            if (Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame)
+            {
+                if (currentHoverObject != null)
+                {
+                    FishingSpot spot = currentHoverObject.GetComponent<FishingSpot>();
+                    if (spot == null && currentHoverObject.transform.parent != null) spot = currentHoverObject.transform.parent.GetComponent<FishingSpot>();
+                    
+                    if (spot != null)
+                    {
+                        PlayerController player = GetComponent<PlayerController>();
+                        if (player != null) player.PlayActionAnimation("Fishing", 8.5f, YWonderLand.Player.ToolType.FishingRod);
+                        
+                        var fishingUI = Object.FindFirstObjectByType<FishingOverlayController>();
+                        if (fishingUI != null) fishingUI.Show();
+                    }
+                }
+            }
+        }
+
+        private RaycastHit[] hoverHitResults = new RaycastHit[30];
+        private GameObject currentHoverObject = null;
+        private string currentHoverPrompt = "";
+
+        private void HandleHover(Vector2 screenPos)
+        {
+            Ray ray = mainCamera.ScreenPointToRay(screenPos);
+            int hitCount = Physics.RaycastNonAlloc(ray, hoverHitResults, 100f);
+
+            // Sắp xếp kết quả quét từ gần đến xa
+            System.Array.Sort(hoverHitResults, 0, hitCount, System.Collections.Generic.Comparer<RaycastHit>.Create((a, b) => a.distance.CompareTo(b.distance)));
+
+            string foundPrompt = null;
+            GameObject foundObj = null;
+
+            for (int i = 0; i < hitCount; i++)
+            {
+                var hit = hoverHitResults[i];
+                if (hit.collider == null) continue;
+                if (hit.collider.gameObject.CompareTag("Player")) continue;
+
+                if (hit.collider.TryGetComponent<FarmAnimal>(out var animal) || (hit.collider.transform.parent != null && hit.collider.transform.parent.TryGetComponent<FarmAnimal>(out animal)))
+                {
+                    foundPrompt = "[Chuột Trái] Nựng thú cưng";
+                    foundObj = animal.gameObject;
+                    break;
+                }
+                else if (hit.collider.TryGetComponent<MerchantNPC>(out var merchant) || (hit.collider.transform.parent != null && hit.collider.transform.parent.TryGetComponent<MerchantNPC>(out merchant)))
+                {
+                    foundPrompt = "[Chuột Trái] Giao thương";
+                    foundObj = merchant.gameObject;
+                    break;
+                }
+                else if (hit.collider.TryGetComponent<FarmTile>(out var tile) || (hit.collider.transform.parent != null && hit.collider.transform.parent.TryGetComponent<FarmTile>(out tile)))
+                {
+                    foundObj = tile.gameObject;
+                    switch (tile.currentState)
+                    {
+                        case FarmTile.TileState.Soil: foundPrompt = "[Chuột Trái] Cuốc đất"; break;
+                        case FarmTile.TileState.Plowed: foundPrompt = "[Chuột Trái] Gieo hạt"; break;
+                        case FarmTile.TileState.Planted: foundPrompt = "[Chuột Trái] Tưới nước"; break;
+                        case FarmTile.TileState.Watered: foundPrompt = "[Chuột Trái] Theo dõi lớn lên"; break;
+                        case FarmTile.TileState.Ripe: foundPrompt = "[Chuột Trái] Thu hoạch"; break;
+                    }
+                    break;
+                }
+                else if (hit.collider.TryGetComponent<HarvestableResource>(out var resource) || (hit.collider.transform.parent != null && hit.collider.transform.parent.TryGetComponent<HarvestableResource>(out resource)))
+                {
+                    foundPrompt = "[Chuột Trái / Giữ] Chặt cây";
+                    foundObj = resource.gameObject;
+                    break;
+                }
+                else if (hit.collider.TryGetComponent<FishingSpot>(out var spot) || (hit.collider.transform.parent != null && hit.collider.transform.parent.TryGetComponent<FishingSpot>(out spot)))
+                {
+                    if (hit.distance <= 15f) // Ngăn cản bấm tít mù khơi
+                    {
+                        foundPrompt = "[F] Câu cá";
+                        foundObj = spot.gameObject;
+                    }
+                    break;
+                }
+                else if (!hit.collider.isTrigger)
+                {
+                    // Tia quét đâm trúng đất hoặc vật cản cứng -> Bị che khuất tầm nhìn, DỪNG QUÉT ngay lập tức!
+                    break;
+                }
+            }
+
+            // Cập nhật UI
+            if (foundPrompt != null)
+            {
+                if (foundObj != currentHoverObject || foundPrompt != currentHoverPrompt)
+                {
+                    currentHoverObject = foundObj;
+                    currentHoverPrompt = foundPrompt;
+                    if (GameHUDController.Instance != null)
+                    {
+                        GameHUDController.Instance.ShowInteractionPrompt(foundPrompt);
+                    }
+                }
+            }
+            else
+            {
+                if (currentHoverObject != null)
+                {
+                    currentHoverObject = null;
+                    currentHoverPrompt = "";
+                    if (GameHUDController.Instance != null)
+                    {
+                        GameHUDController.Instance.HideInteractionPrompt();
+                    }
+                }
+            }
         }
 
         private void HandleHold(Vector2 screenPos)
@@ -152,89 +269,81 @@ namespace YWonderLand.Environment
 
             Debug.Log($"[FarmInteraction] Bấm chuột! Tia laze trúng {hits.Length} vật thể.");
 
-            // 1. Try to find an Animal first among all hits
+            // 1. Dùng tia quét đã sắp xếp
+            System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+
             foreach (var hit in hits)
             {
-                Debug.Log($"[FarmInteraction] Tia đụng trúng: {hit.collider.gameObject.name} (Layer: {hit.collider.gameObject.layer})");
+                if (hit.collider.gameObject.CompareTag("Player")) continue;
 
                 FarmAnimal animal = hit.collider.GetComponent<FarmAnimal>();
                 if (animal != null)
                 {
-                    Debug.Log($"[FarmInteraction] TÌM THẤY CON THÚ: {animal.data.animalId}! Mở UI...");
-                    if (AnimalInteractionPopupController.Instance != null)
-                    {
-                        AnimalInteractionPopupController.Instance.Show(animal);
-                        Debug.Log("[FarmInteraction] Đã gọi lệnh mở UI thành công!");
-                    }
-                    else
-                    {
-                        Debug.LogError("[FarmInteraction] LỖI: AnimalInteractionPopupController.Instance bị NULL! Bảng UI chưa được kích hoạt đúng cách.");
-                    }
-                    return; // Handled animal, stop here
+                    if (AnimalInteractionPopupController.Instance != null) AnimalInteractionPopupController.Instance.Show(animal);
+                    return; 
                 }
-            }
 
-            // 2. If no animal, try to find a FarmTile
-            foreach (var hit in hits)
-            {
                 FarmTile tile = hit.collider.GetComponentInParent<FarmTile>() ?? hit.collider.GetComponent<FarmTile>();
                 if (tile != null)
                 {
                     float dist = 0f;
                     GameObject player = GameObject.FindWithTag("Player");
-                if (player != null)
-                {
-                    dist = Vector3.Distance(player.transform.position, tile.transform.position);
+                    if (player != null)
+                    {
+                        dist = Vector3.Distance(player.transform.position, tile.transform.position);
+                    }
+                    else
+                    {
+                        dist = Vector3.Distance(transform.position, tile.transform.position);
+                    }
+
+                    if (dist > interactRange)
+                    {
+                        Debug.Log($"[FarmInteraction] Too far from tile! dist={dist:F1} > max={interactRange}");
+                        return;
+                    }
+
+                    // Auto-select action based on tile state
+                    switch (tile.currentState)
+                    {
+                        case FarmTile.TileState.Soil:
+                            HandlePlow(tile);
+                            break;
+
+                        case FarmTile.TileState.Plowed:
+                            HandleOpenSeedSelection(tile);
+                            break;
+
+                        case FarmTile.TileState.Planted:
+                            HandleWater(tile);
+                            break;
+
+                        case FarmTile.TileState.Watered:
+                            // Show growth progress
+                            float pct = tile.GetGrowthPercentage();
+                            Debug.Log($"[FarmInteraction] Growing... {pct * 100:F0}%");
+                            break;
+
+                        case FarmTile.TileState.Ripe:
+                            HandleHarvest(tile);
+                            break;
+                    }
+                    return; // Handled tile, stop here
                 }
-                else
-                {
-                    dist = Vector3.Distance(transform.position, tile.transform.position);
-                }
 
-                if (dist > interactRange)
-                {
-                    Debug.Log($"[FarmInteraction] Too far from tile! dist={dist:F1} > max={interactRange}");
-                    return;
-                }
-
-                // Auto-select action based on tile state
-                switch (tile.currentState)
-                {
-                    case FarmTile.TileState.Soil:
-                        HandlePlow(tile);
-                        break;
-
-                    case FarmTile.TileState.Plowed:
-                        HandleOpenSeedSelection(tile);
-                        break;
-
-                    case FarmTile.TileState.Planted:
-                        HandleWater(tile);
-                        break;
-
-                    case FarmTile.TileState.Watered:
-                        // Show growth progress
-                        float pct = tile.GetGrowthPercentage();
-                        Debug.Log($"[FarmInteraction] Growing... {pct * 100:F0}%");
-                        break;
-
-                    case FarmTile.TileState.Ripe:
-                        HandleHarvest(tile);
-                        break;
-                }
-                return; // Handled tile, stop here
-                }
-            }
-
-            // 3. Try to find a MerchantNPC
-            foreach (var hit in hits)
-            {
                 MerchantNPC merchant = hit.collider.GetComponent<MerchantNPC>();
                 if (merchant != null)
                 {
-                    Debug.Log($"[FarmInteraction] TÌM THẤY MERCHANT: {hit.collider.gameObject.name}! Mở Shop...");
+                    Debug.Log($"[FarmInteraction] TÌM THẤY MERCHANT: {merchant.gameObject.name}! Mở Shop...");
                     merchant.Interact();
-                    return; // Handled merchant, stop here
+                    return; 
+                }
+
+                // Thêm kiểm tra chặn tia
+                if (!hit.collider.isTrigger)
+                {
+                    // Chạm đất hoặc tường, hủy quét xuyên
+                    break;
                 }
             }
         }
@@ -254,11 +363,11 @@ namespace YWonderLand.Environment
             {
                 Debug.Log("[FarmInteraction] Plowed tile!");
                 
-                // Múa động tác Cuốc đất (Dùng tạm animation Chop/Attack)
-                Animator anim = GetComponent<Animator>();
-                if (anim != null)
+                // Múa động tác Cuốc đất
+                PlayerController player = GetComponent<PlayerController>();
+                if (player != null)
                 {
-                    anim.SetTrigger("Chop");
+                    player.PlayActionAnimation("TreeCutting", 3.0f, YWonderLand.Player.ToolType.Axe);
                 }
             }
         }
@@ -271,10 +380,10 @@ namespace YWonderLand.Environment
             if (tile.InteractPlant("carrot_seed_01"))
             {
                 // Múa động tác gieo hạt
-                Animator anim = GetComponent<Animator>();
-                if (anim != null)
+                PlayerController player = GetComponent<PlayerController>();
+                if (player != null)
                 {
-                    anim.SetTrigger("Plant");
+                    player.PlayActionAnimation("Planting", 1.5f, YWonderLand.Player.ToolType.SeedBag); // "Planting" thay vì "Plant" để khớp với sơ đồ của user
                 }
             }
         }
@@ -305,10 +414,10 @@ namespace YWonderLand.Environment
                 Debug.Log($"[FarmInteraction] Planted {itemId}!");
                 
                 // Múa động tác gieo hạt
-                Animator anim = GetComponent<Animator>();
-                if (anim != null)
+                PlayerController player = GetComponent<PlayerController>();
+                if (player != null)
                 {
-                    anim.SetTrigger("Plant");
+                    player.PlayActionAnimation("Planting", 1.5f, YWonderLand.Player.ToolType.SeedBag);
                 }
             }
 

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.UIElements;
 
@@ -308,7 +308,7 @@ public class BoatCutscene : MonoBehaviour
         subtitleContainer.style.paddingTop = 16;
         subtitleContainer.style.paddingBottom = 16;
         
-        subtitleLabel = new Label("Chào mừng bạn đến với Y WONDER LAND...");
+        subtitleLabel = new Label("Chào mừng bạn đến với Y WONDER GREEN FARM...");
         subtitleLabel.style.fontSize = 18;
         subtitleLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
         subtitleLabel.style.color = new Color(1f, 0.988f, 0.968f, 1f); // Palia White
@@ -329,7 +329,7 @@ public class BoatCutscene : MonoBehaviour
         
         if (cutsceneTimer < 5.0f)
         {
-            subtitleLabel.text = "Chào mừng bạn đến với vùng đất kỳ diệu Y WONDER LAND!";
+            subtitleLabel.text = "Chào mừng bạn đến với vùng đất kỳ diệu Y WONDER GREEN FARM!";
         }
         else if (cutsceneTimer < 12.0f)
         {

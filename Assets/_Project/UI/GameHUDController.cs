@@ -9,6 +9,8 @@ using System.Collections;
 /// </summary>
 public class GameHUDController : MonoBehaviour
 {
+    public static GameHUDController Instance { get; private set; }
+
     [Header("References")]
     [SerializeField] private SettingsPopupController settingsPopup;
     [SerializeField] private InventoryPopupController inventoryPopup;
@@ -61,6 +63,8 @@ public class GameHUDController : MonoBehaviour
     private Button btnJump;
     private Button btnBag;
     private Button btnSettings;
+    private Button btnSprint;
+    private Label interactionPrompt;
 
 
 
@@ -155,6 +159,8 @@ public class GameHUDController : MonoBehaviour
         btnJump = root.Q<Button>("BtnJump");
         btnBag = root.Q<Button>("BtnBag");
         btnSettings = root.Q<Button>("BtnSettings");
+        btnSprint = root.Q<Button>("BtnSprint");
+        interactionPrompt = root.Q<Label>("InteractionPrompt");
 
 
     }
@@ -304,9 +310,21 @@ public class GameHUDController : MonoBehaviour
             Debug.Log("[GameHUD] Jump clicked");
         });
 
-
-
-        // Bag
+        if (btnSprint != null)
+        {
+            btnSprint.RegisterCallback<PointerDownEvent>(evt => 
+            {
+                if (PlayerController.Instance != null) PlayerController.Instance.SetSprintUI(true);
+            });
+            btnSprint.RegisterCallback<PointerUpEvent>(evt => 
+            {
+                if (PlayerController.Instance != null) PlayerController.Instance.SetSprintUI(false);
+            });
+            btnSprint.RegisterCallback<PointerOutEvent>(evt => 
+            {
+                if (PlayerController.Instance != null) PlayerController.Instance.SetSprintUI(false);
+            });
+        }        // Bag
         btnBag?.RegisterCallback<ClickEvent>(evt =>
         {
             HideAllPopups();
@@ -418,6 +436,11 @@ public class GameHUDController : MonoBehaviour
         }
     }
 
+    private void Awake()
+    {
+        Instance = this;
+    }
+
     private void Update()
     {
         // Không xử lý phím tắt nếu GameHUD đang bị ẩn (ví dụ: đang ở Login hoặc Cutscene)
@@ -514,5 +537,22 @@ public class GameHUDController : MonoBehaviour
                 mapPopup.Show();
             }
         }
+    }
+
+    public void ShowInteractionPrompt(string text)
+    {
+        if (interactionPrompt == null)
+        {
+            Debug.LogError("[GameHUDController] KHÔNG TÌM THẤY interactionPrompt! Vui lòng kiểm tra lại GameHUD.uxml xem đã có Label tên là 'InteractionPrompt' chưa.");
+            return;
+        }
+        interactionPrompt.text = text;
+        interactionPrompt.style.opacity = 1f;
+    }
+
+    public void HideInteractionPrompt()
+    {
+        if (interactionPrompt == null) return;
+        interactionPrompt.style.opacity = 0f;
     }
 }

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
     <ui:Style src="Styles/DesignSystem.uss" />
     <ui:Style src="Styles/ChatPanel.uss" />
@@ -9,7 +9,7 @@
         <!-- 1. COLLAPSED STATE (Sleek pill bar) -->
         <ui:VisualElement name="ChatCollapsed" class="chat-collapsed-bar">
             <!-- Last received message preview -->
-            <ui:Label name="LblLastMessage" text="Admin: Chào mừng bạn đến với Y WONDER LAND!" class="chat-last-message" />
+            <ui:Label name="LblLastMessage" text="Admin: Chào mừng bạn đến với Y WONDER GREEN FARM!" class="chat-last-message" />
             
             <!-- Quick control buttons -->
             <ui:VisualElement class="chat-collapsed-controls">

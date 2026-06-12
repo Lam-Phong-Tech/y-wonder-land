@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -86,7 +86,7 @@ public class ChatPanelController : MonoBehaviour
         ToggleExpand(false);
 
         // Add initial system message
-        ReceiveMessage("Hệ thống", "Chào mừng bạn đến với Y WONDER LAND! Hãy bắt đầu cuộc hành trình trồng trọt nào.", "#E67E22");
+        ReceiveMessage("Hệ thống", "Chào mừng bạn đến với Y WONDER GREEN FARM! Hãy bắt đầu cuộc hành trình trồng trọt nào.", "#E67E22");
     }
 
     private void RegisterCallbacks()
@@ -323,7 +323,7 @@ public class ChatPanelController : MonoBehaviour
         
         if (triggerText.Contains("hello") || triggerText.Contains("xin chào") || triggerText.Contains("hi"))
         {
-            aiMsg = "Chào bạn! Chúc bạn một ngày tốt lành tại Y WONDER LAND! 🌻";
+            aiMsg = "Chào bạn! Chúc bạn một ngày tốt lành tại Y WONDER GREEN FARM! 🌻";
         }
         else if (triggerText.Contains("nông trại") || triggerText.Contains("farm"))
         {
@@ -356,7 +356,7 @@ public class ChatPanelController : MonoBehaviour
                 "Mẹo nhỏ: Hãy nâng cấp công cụ để khai thác đá nhanh hơn!",
                 "Bạn có biết: Thú cưng sẽ tự động nhặt tài nguyên giúp bạn không?",
                 "Kết bạn thật nhiều để trao đổi nông sản qua Hòm thư nhé!",
-                "Lên cấp sẽ nhận được nhiều quà tặng độc quyền tại Y WONDER LAND đó."
+                "Lên cấp sẽ nhận được nhiều quà tặng độc quyền tại Y WONDER GREEN FARM đó."
             };
             aiMsg = tips[Random.Range(0, tips.Length)];
         }

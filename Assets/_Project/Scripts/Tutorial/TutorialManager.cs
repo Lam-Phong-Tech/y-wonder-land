@@ -1361,8 +1361,11 @@ public class TutorialManager : MonoBehaviour
     {
         if (Camera.main == null || Mouse.current == null) return;
 
+        Vector2 mousePos = Mouse.current.position.ReadValue();
+        if (float.IsNaN(mousePos.x) || float.IsNaN(mousePos.y)) return;
+
         // 1. Create ray from center of screen (or click point)
-        Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+        Ray ray = Camera.main.ScreenPointToRay(mousePos);
         RaycastHit hit;
 
         if (Physics.Raycast(ray, out hit, 10f))

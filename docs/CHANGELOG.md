@@ -1,4 +1,4 @@
-# Changelog — Y WONDER LAND
+﻿# Changelog — Y WONDER GREEN FARM
 # Format: Theo module, có ngày và danh sách files thay đổi
 
 > **⚠️ TRẠNG THÁI QC:** Tất cả các module UI hiện tại đều **CHƯA được QC review** bởi khách hàng.
@@ -140,7 +140,7 @@
 
 ### Added
 - **Splash Loading Screen** — Màn hình khởi động game hiển thị đầu tiên khi Play Mode:
-  - **Logo thương hiệu**: Chữ "Y WONDER LAND" cỡ 48px nét đậm trắng trên nền tối `#1E1E23`, có bóng đổ retro cứng `#3D3535` lệch 4px tạo hiệu ứng khắc chữ nổi.
+  - **Logo thương hiệu**: Chữ "Y WONDER GREEN FARM" cỡ 48px nét đậm trắng trên nền tối `#1E1E23`, có bóng đổ retro cứng `#3D3535` lệch 4px tạo hiệu ứng khắc chữ nổi.
   - **Phụ đề**: "CUỘC PHIÊU LƯU BẮT ĐẦU" màu vàng `#FFC107`, letter-spacing 6px tạo cảm giác trang trọng.
   - **Thanh tiến trình retro**: Chiều rộng 400px, chiều cao 24px, viền dày 3px `#3D3535`, nền xám `#3A3A42`. Vệt nạp màu vàng `#FFC107` bo góc 8px, chiều rộng thay đổi mượt mà từ 0% → 100% theo eased curve (smoothstep).
   - **Nhãn trạng thái động**: Thay đổi theo 5 mốc phần trăm — "Đang tải cấu hình nông trại..." → "Đang kết nối đến máy chủ Cloud..." → "Đang đồng bộ dữ liệu thế giới 3D..." → "Đang chuẩn bị giao diện..." → "Tải hoàn tất!".
@@ -521,7 +521,7 @@
 - Tích hợp chi tiết phân tích biểu hiện, tác hại và cách phòng tránh cụ thể cho **8 bệnh lý giao diện kinh điển của AI Agent** (lạm dụng glassmorphism/icon, loạn đơn vị, chột trạng thái, mù tương phản, cụt chữ...) trên từng nền tảng bằng cả hai ngôn ngữ.
 - Cung cấp **AI Agent Self-Check Protocol** với 15 câu hỏi kiểm tra chất lượng tự động giúp AI tự kiểm duyệt UI trước khi bàn giao.
 ### Changed
-- Cập nhật tài liệu thiết kế của dự án [DESIGN.md](file:///d:/LamGameUnity/BaChuKhuRung3D/docs/DESIGN.md) áp dụng các thông số thực tế của game **Y WONDER LAND** theo đúng khung chuẩn Universal và tích hợp các nguyên tắc ngăn ngừa bệnh UI để dự án trực tiếp áp dụng.
+- Cập nhật tài liệu thiết kế của dự án [DESIGN.md](file:///d:/LamGameUnity/BaChuKhuRung3D/docs/DESIGN.md) áp dụng các thông số thực tế của game **Y WONDER GREEN FARM** theo đúng khung chuẩn Universal và tích hợp các nguyên tắc ngăn ngừa bệnh UI để dự án trực tiếp áp dụng.
 ### Files changed
 - docs/DESIGN_SYSTEM_TEMPLATE.md (NEW)
 - docs/DESIGN.md (MODIFIED)
