@@ -200,7 +200,7 @@
         <!-- ============================== -->
         <ui:VisualElement name="Crosshair" class="crosshair" picking-mode="Ignore">
             <ui:VisualElement class="crosshair-dot" picking-mode="Ignore" />
-            <ui:Label name="InteractionPrompt" text="[Chuột Trái] Tương tác" class="interaction-prompt" picking-mode="Ignore" />
+            <ui:VisualElement name="InteractionContainer" class="interaction-container" picking-mode="Ignore" />
         </ui:VisualElement>
 
         <!-- ============================== -->
