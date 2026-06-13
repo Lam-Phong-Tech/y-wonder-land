@@ -32,6 +32,10 @@ public class FarmTile : MonoBehaviour
     [Header("Timing Configuration")]
     public float tutorialGrowthTime = 5f; // Fallback for tutorial
 
+    [Header("Model 3D")]
+    [Tooltip("BẬT nếu ô đất này dùng prefab cây 3D (gán ở CropDefinition) thay khối primitive. Khi BẬT: KHÔNG tạo khối đất/cây mặc định — phần đất do model mảnh đất của bạn lo.")]
+    [SerializeField] private bool useCustomCropModels = false;
+
     [Header("Crop Data (Auto-assigned)")]
     [SerializeField] private CropDefinition currentCrop;
 
@@ -47,12 +51,16 @@ public class FarmTile : MonoBehaviour
     private float growthTimer = 0f;
     private bool isGrowing = false;
 
+    // Model 3D thật của cây (khi useCustomCropModels = true)
+    private GameObject cropModelInstance;
+    private Vector3 cropModelBaseScale = Vector3.one;
+
     // Crop-specific color (used for primitive fallback visuals)
     private Color cropColor = Color.green;
 
     void Start()
     {
-        CreateFallbackVisuals();
+        if (!useCustomCropModels) CreateFallbackVisuals();
         UpdateVisuals();
     }
 
@@ -64,9 +72,14 @@ public class FarmTile : MonoBehaviour
 
             float totalGrowthTime = GetGrowthTime();
 
-            // Switch from seed Visual to growing Visual at 40% growth
-            if (growthTimer >= totalGrowthTime * 0.4f && seedVisual != null && seedVisual.activeSelf)
+            if (useCustomCropModels)
             {
+                // Model 3D phóng to dần theo % trưởng thành
+                ApplyCropGrowthScale();
+            }
+            else if (growthTimer >= totalGrowthTime * 0.4f && seedVisual != null && seedVisual.activeSelf)
+            {
+                // Switch from seed Visual to growing Visual at 40% growth (primitive)
                 if (seedVisual != null) seedVisual.SetActive(false);
                 if (growingVisual != null)
                 {
@@ -81,6 +94,7 @@ public class FarmTile : MonoBehaviour
                 // Ripe state reached
                 isGrowing = false;
                 currentState = TileState.Ripe;
+                if (useCustomCropModels) ApplyCropGrowthScale();
                 UpdateVisuals();
 
                 OnTileWatered?.Invoke(this); // Trigger update to show progress text at 100%
@@ -119,9 +133,16 @@ public class FarmTile : MonoBehaviour
             }
         }
 
-        // Recreate visuals with crop-specific color
-        DestroySeedAndGrowingVisuals();
-        CreateCropVisuals();
+        // Hiện cây: dùng model 3D thật hoặc primitive tùy cấu hình
+        if (useCustomCropModels)
+        {
+            SpawnCropModel();
+        }
+        else
+        {
+            DestroySeedAndGrowingVisuals();
+            CreateCropVisuals();
+        }
         UpdateVisuals();
 
         OnTilePlanted?.Invoke(this);
@@ -168,6 +189,8 @@ public class FarmTile : MonoBehaviour
         growthTimer = 0f;
         isGrowing = false;
 
+        if (cropModelInstance != null) { Destroy(cropModelInstance); cropModelInstance = null; }
+
         UpdateVisuals();
         OnTileHarvested?.Invoke(this);
         return true;
@@ -177,6 +200,41 @@ public class FarmTile : MonoBehaviour
     /// Get the CropDefinition for the currently planted crop (if any).
     /// </summary>
     public CropDefinition GetCurrentCrop() => currentCrop;
+
+    // ── Model 3D thật cho cây ──
+
+    private void SpawnCropModel()
+    {
+        if (cropModelInstance != null) { Destroy(cropModelInstance); cropModelInstance = null; }
+        if (currentCrop == null || currentCrop.cropPrefab == null)
+        {
+            Debug.LogWarning($"[FarmTile] useCustomCropModels BẬT nhưng CropDefinition của '{plantedSeedId}' chưa gán cropPrefab.");
+            return;
+        }
+
+        cropModelInstance = Instantiate(currentCrop.cropPrefab);
+        // SetParent(false): GIỮ NGUYÊN transform local của prefab (gồm góc xoay Blender ~ -90° trục X).
+        cropModelInstance.transform.SetParent(transform, false);
+        // Chỉ dời vị trí — KHÔNG đụng góc xoay/scale, để model đứng đúng như artist đã dựng.
+        cropModelInstance.transform.localPosition = new Vector3(0f, currentCrop.modelGroundOffset, 0f);
+        cropModelBaseScale = cropModelInstance.transform.localScale;
+
+        // Bỏ collider của model để tia click vẫn trúng FarmTile (không bị model chắn)
+        foreach (var col in cropModelInstance.GetComponentsInChildren<Collider>())
+            Destroy(col);
+
+        ApplyCropGrowthScale();
+    }
+
+    private void ApplyCropGrowthScale()
+    {
+        if (cropModelInstance == null) return;
+        float minScale = currentCrop != null ? currentCrop.seedlingScale : 0.25f;
+        // Lúc mới gieo (chưa tưới) để nhỏ nhất; tưới xong thì phóng to theo %.
+        float t = (currentState == TileState.Watered || currentState == TileState.Ripe) ? GetGrowthPercentage() : 0f;
+        float s = Mathf.Lerp(minScale, 1f, t);
+        cropModelInstance.transform.localScale = cropModelBaseScale * s;
+    }
 
     // ── Helper Visual Updates ──
 

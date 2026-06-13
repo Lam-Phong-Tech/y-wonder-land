@@ -24,6 +24,9 @@ namespace YWonderLand.Environment
         public float respawnTimeSec = 3600f; // Default 1 hour
         public float harvestDuration = 3f; // Seconds to harvest
 
+        [Tooltip("Khoảng cách tối đa (mét) để hiện gợi ý + cho phép chặt/đập. Đặt 1-2 cho gần giống Minecraft.")]
+        public float interactionRange = 2f;
+
         [Header("State")]
         public bool isHarvestable = true;
         public float currentProgress = 0f;
@@ -31,6 +34,8 @@ namespace YWonderLand.Environment
 
         private GameObject visualObject;
         private Collider resourceCollider;
+        private Quaternion _originalVisualRot = Quaternion.identity;
+        private bool _rotCaptured = false;
 
         void Awake()
         {
@@ -179,11 +184,16 @@ namespace YWonderLand.Environment
 
             currentProgress += deltaTime;
             
-            // Wiggle animation
+            // Wiggle animation (rung lắc TƯƠNG ĐỐI quanh hướng gốc, không phá hướng đứng của model)
             if (visualObject != null)
             {
+                if (!_rotCaptured)
+                {
+                    _originalVisualRot = visualObject.transform.localRotation;
+                    _rotCaptured = true;
+                }
                 float wiggle = Mathf.Sin(Time.time * 20f) * 5f;
-                visualObject.transform.localRotation = Quaternion.Euler(0, 0, wiggle);
+                visualObject.transform.localRotation = _originalVisualRot * Quaternion.Euler(0, 0, wiggle);
             }
 
             if (currentProgress >= harvestDuration)
@@ -198,9 +208,9 @@ namespace YWonderLand.Environment
         public void CancelHarvest()
         {
             currentProgress = 0f;
-            if (visualObject != null)
+            if (visualObject != null && _rotCaptured)
             {
-                visualObject.transform.localRotation = Quaternion.identity;
+                visualObject.transform.localRotation = _originalVisualRot;
             }
         }
 
@@ -226,6 +236,13 @@ namespace YWonderLand.Environment
                 spawner.SaveResourceState();
             
             CancelHarvest();
+        }
+
+        void OnDrawGizmosSelected()
+        {
+            // Vẽ vòng tròn tầm tương tác để dễ canh trong Scene view
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(transform.position, interactionRange);
         }
     }
 }

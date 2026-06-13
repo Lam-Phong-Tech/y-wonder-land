@@ -142,6 +142,25 @@ namespace YWonderLand.Environment
             return true;
         }
 
+        public bool Pet()
+        {
+            if (currentState == AnimalState.Dead) return false;
+
+            // TODO: Chèn hiệu ứng trái tim bay lên ở đây
+            string nameStr = data != null ? data.animalName : gameObject.name;
+            Debug.Log($"[FarmAnimal] Vuốt ve {nameStr}. Lên tim <3 !");
+
+            // Xoay mặt thú cưng về phía camera (chỉ xoay ngang, không lật model)
+            if (Camera.main != null && visualObject != null)
+            {
+                Vector3 lookPos = Camera.main.transform.position;
+                lookPos.y = visualObject.transform.position.y;
+                visualObject.transform.LookAt(lookPos);
+            }
+
+            return true;
+        }
+
         public bool Heal()
         {
             if (currentState != AnimalState.Sick) return false;
