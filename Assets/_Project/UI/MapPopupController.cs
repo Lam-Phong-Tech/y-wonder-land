@@ -193,6 +193,10 @@ public class MapPopupController : MonoBehaviour
         hasHaiphuTicket = false;
         hasMocnhiTicket = false;
 
+        // Đồng bộ vị trí hiện tại của người chơi từ IslandTravelManager (nếu có)
+        if (IslandTravelManager.Instance != null)
+            currentLocation = IslandTravelManager.Instance.CurrentIslandId;
+
         UpdateLevelDisplay();
         RefreshIslandStates();
         UpdatePlayerIndicator();
@@ -208,6 +212,7 @@ public class MapPopupController : MonoBehaviour
         }
 
         overlay.style.display = DisplayStyle.Flex;
+        UIPopupTracker.SetOpen(this, true);
         Debug.Log("[Map] Opened Visual World Map");
     }
 
@@ -217,6 +222,7 @@ public class MapPopupController : MonoBehaviour
         {
             blinkSchedule?.Pause();
             overlay.style.display = DisplayStyle.None;
+            UIPopupTracker.SetOpen(this, false);
             Debug.Log("[Map] Closed World Map");
         }
     }
@@ -311,11 +317,19 @@ public class MapPopupController : MonoBehaviour
                     $"Bạn có chắc chắn muốn di chuyển đến {loc.name} không?",
                     "Di chuyển",
                     "Hủy",
-                    () => 
+                    () =>
                     {
-                        Debug.Log($"[Map] ✈ Di chuyển đến: {loc.name} (Scene: {loc.sceneName})");
-                        // TODO: SceneManager.LoadScene(loc.sceneName);
                         Hide();
+                        Debug.Log($"[Map] ✈ Di chuyển đến: {loc.name} (id: {loc.id})");
+                        if (IslandTravelManager.Instance != null)
+                        {
+                            IslandTravelManager.Instance.TravelToIsland(loc.id);
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"[Map] Chưa có IslandTravelManager trong scene! Không thể tới {loc.name}. " +
+                                             "Hãy thêm GameObject 'IslandTravelManager' vào Scene 0.");
+                        }
                     },
                     ConfirmDialogType.Info
                 );
