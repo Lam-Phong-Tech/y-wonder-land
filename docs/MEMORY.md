@@ -485,3 +485,44 @@
 - **Tình huống**: Yêu cầu triển khai hệ thống Câu Cá (Phase 6). AI định lên plan code từ đầu.
 - **Phát hiện**: Trước đó, file `FishingOverlay.uxml` và `FishingOverlayController.cs` đã được xây dựng sẵn dưới dạng Mockup (dùng biến ảo `premiumBait = 2`).
 - **Bài học**: TRƯỚC KHI tạo UI mới hoặc viết controller mới cho một tính năng, luôn dùng `grep_search` quét thư mục `Assets/UI/` để xem tính năng đó đã từng được làm mockup hay chưa. Việc tận dụng mockup cũ và chỉ việc thay đổi logic đọc data thực tế (như gọi `InventoryManager.Instance.GetItemQuantity`) tiết kiệm đến 80% thời lượng. Khai báo biến thừa trong Mockup (như `premiumBait`) cần được xóa sạch để tránh rác.
+
+---
+
+## 🟢 BÀI HỌC PHIÊN DEMO GAMEPLAY (Cập nhật 14/06/2026)
+
+### 53. Scale NHÂN CHỒNG — coi chừng "bom phóng đại"
+- **Tình huống**: Model Nữ (artist A) mesh nhỏ; vừa chỉnh FBX `Scale Factor`, vừa để transform prefab scale lớn → kích thước phình theo cấp số nhân (có lúc to gấp 100 lần).
+- **Quy tắc**: `Size = mesh × Scale Factor × MỌI transform scale (root + con)` — tất cả NHÂN với nhau. **Chỉ để 1 chỗ lo size, các chỗ còn lại = 1.** Chuẩn nhất: dùng FBX Scale Factor để chỉnh, mọi transform scale giữ `1,1,1` → đồng bộ giữa các model, tránh lỗi ngầm (CharacterController, điểm gắn dụng cụ, name tag).
+
+### 54. Object "ăn theo" nhân vật phải độc lập với scale model
+- **Tình huống**: `FloatingNameTag` là con của nhân vật → Nữ scale 2 đẩy name tag lên cao gấp đôi (Nam scale 1 thì đúng).
+- **Quy tắc**: Object bám theo nhân vật mà không nên phụ thuộc scale (name tag, thanh máu nổi...) → **đừng parent vào nhân vật**, set toạ độ THẾ GIỚI mỗi frame: `pos = player.position + Vector3.up * offset`. Vừa độc lập scale, vừa đúng cho mọi nhân vật.
+
+### 55. Model Blender import có sẵn rotation -90° trục X — ĐỪNG reset về identity
+- **Tình huống**: Spawn model cây bằng `Instantiate(prefab, parent)` rồi gán `localRotation = Quaternion.identity` → cây nằm ngang.
+- **Nguyên nhân**: FBX Blender (Z-up) → Unity (Y-up) thường có sẵn rotation `~-90° X` ở prefab để đứng thẳng. Reset về identity là phá mất.
+- **Quy tắc**: Spawn prefab mà chỉ muốn dời vị trí → `Instantiate(prefab)` rồi `SetParent(parent, false)` (giữ transform local), CHỈ set `localPosition`, **KHÔNG đụng** `localRotation`/`localScale`.
+
+### 56. GetComponent vs FindObjectByType vs Instance — biết script gắn ở đâu
+- **Tình huống**: `FarmInteractionController` KHÔNG nằm trên nhân vật. Dùng `GetComponent<PlayerController>()` → `null` → lệnh múa animation bị bỏ qua (trong khi Pet/Feed dùng `FindFirstObjectByType` thì chạy).
+- **Quy tắc**: Trước khi `GetComponent<X>()`, chắc chắn script ĐANG nằm cùng GameObject với X. Không chắc → dùng singleton `X.Instance` hoặc `FindFirstObjectByType<X>()`. Trong dự án này: lấy nhân vật LUÔN dùng `PlayerController.Instance`.
+
+### 57. Tự đo độ dài clip animation thay vì gõ số cứng
+- **Tình huống**: Khóa hành động (trồng/cho ăn) cần đúng bằng độ dài clip; gõ số tay dễ lệch khi artist sửa clip.
+- **Giải pháp**: Truyền `duration = 0` → tự lấy `clip.length`: thử khớp theo TÊN qua `animator.runtimeAnimatorController.animationClips`; nếu tên clip ≠ tên state thì đọc clip THỰC TẾ đang phát sau 1 frame qua `GetCurrentAnimatorClipInfo`/`GetNextAnimatorClipInfo` (kiểm `IsInTransition`). Thêm tham số `speed` để tăng/giảm tốc (`animator.speed`, khóa = `clip.length / speed`, nhớ trả `animator.speed = 1` khi xong).
+
+### 58. Field "(Auto-assigned)" là dữ liệu RUNTIME — đừng set tay
+- **Tình huống**: User set `Current Crop` (FarmTile) khác nhau cho từng ô, tưởng mỗi ô trồng 1 loại. Thực ra field này bị code ghi đè lúc gieo (`InteractPlant`) — set tay vô tác dụng.
+- **Quy tắc**: Field ghi chú "(Auto-assigned)" / được gán lúc runtime → KHÔNG cấu hình tay. (Loại cây do HẠT người chơi chọn quyết định, không phải ô đất.)
+
+### 59. Chuyển đảo: Scene NỀN giữ UI, đảo phụ load Additive — khỏi prefab hoá UI
+- **Tình huống**: Lo mất UI khi đổi map.
+- **Giải pháp**: Để UI/Manager/Player ở **Scene nền (Scene 0) luôn giữ tải**; mỗi đảo là 1 scene riêng `LoadSceneAsync(Additive)` / `UnloadSceneAsync`, KHÔNG bao giờ unload scene nền → UI tự sống, không cần đóng gói prefab. Teleport thì tắt `CharacterController` + `PlayerController` 1 frame rồi bật lại (xem `IslandTravelManager`/`ScenePortal`).
+
+### 60. Công tắc UI trung tâm trả chuột + chặn click-xuyên
+- **Tình huống**: Camera khóa chuột khi gameplay; mở popup khó bấm; bấm xuyên popup trúng thế giới.
+- **Giải pháp**: 1 static `UIPopupTracker` (HashSet popup đang mở). Mỗi popup gọi `SetOpen(this, true/false)` trong Show/Hide. `ThirdPersonCamera` mỗi frame: có popup mở → mở chuột + ngừng xoay; `FarmInteractionController` early-return khi `UIPopupTracker.AnyOpen` để chặn tương tác thế giới.
+
+### 61. Tầm tương tác đo tới ĐIỂM CHẠM (hit.point), không phải pivot
+- **Tình huống**: Gate khoảng cách chặt cây đo từ nhân vật tới pivot cây → cây to thì không bao giờ "đủ gần".
+- **Quy tắc**: Đo khoảng cách tới `hit.point` (điểm tâm ngắm chạm bề mặt) cho trực quan, đúng với mọi kích cỡ vật thể. Đặt range trên TỪNG vật (`HarvestableResource.interactionRange`) như `FishingSpot` để chỉnh linh hoạt + vẽ gizmo cho dễ canh.

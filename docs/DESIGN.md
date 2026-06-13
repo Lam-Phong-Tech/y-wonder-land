@@ -143,7 +143,7 @@ All components must use these exact color values to maintain visual unity:
 2. [ ] Are primary buttons pure Flat Pill-shaped (no 3D drop shadows or bottom borders)?
 3. [ ] Are fonts properly assigned (Merriweather for Headers, Quicksand for Body)?
 4. [ ] Are panel corners extremely soft and cozy (24px to 32px)?
-5. [ ] Did you completely avoid glassmorphism and sharp minimalist edges?
+5. [ ] Did you keep glassmorphism limited to HUD only (not abused on popups) and avoid sharp minimalist edges?
 6. [ ] Have you written full `:hover`, `:active`, and `:disabled` styles?
 7. [ ] Does the UI feel like a "supportive frame" rather than an overpowering sci-fi dashboard?
 8. [ ] Are sliders styled with Accent Blue thumbs and Mystic Black tracks?
@@ -216,6 +216,6 @@ Bắt buộc dùng chính xác mã màu sau:
 
 #### 5. Bệnh lý UI & Tự kiểm tra
 
-* **Tuyệt đối không dùng Kính mờ (Glassmorphism):** Palia dùng Flat color + gradient mềm, không dùng blur hại máy.
+* **Không LẠM DỤNG Kính mờ (Glassmorphism):** Glass CHỈ dùng cho HUD (nền navy bán trong suốt để không che camera 3D). Popup chính vẫn dùng Flat color + gradient mềm, hạn chế blur hại máy.
 * **Tuyệt đối không dùng viền Neon, viền đen đặc, không đổ bóng (Drop Shadows):** Thiết kế phẳng 100%. Dùng viền mềm bán trong suốt hoặc không viền.
 * **Tương tác phẳng (Flat Interaction):** Nút bấm tuyệt đối KHÔNG có `border-bottom-width`. Khi nhấn chỉ dùng `scale: 0.98` hoặc đổi màu nền.

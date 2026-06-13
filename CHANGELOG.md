@@ -1,7 +1,37 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-06-14
+### Added
+- **Hệ thống Chuyển Đảo (Island Travel):**
+  - Tạo `IslandTravelManager.cs`: chuyển đảo bằng Additive Scene (Farm = scene nền luôn giữ tải → UI/Manager/Player không mất; đảo phụ load đè/unload). Cấu hình danh sách đảo + điểm spawn trong Inspector.
+  - Nối Bản đồ (`MapPopupController`) vào engine (gỡ `// TODO`): bấm đảo trên Map là dịch chuyển thật + đồng bộ chấm "bạn đang ở đây".
+  - Tạo `MapPortalTrigger.cs`: cổng portal vật lý — bước vào vùng trigger là tự mở Bản đồ.
+- **Công tắc UI trung tâm (`UIPopupTracker.cs`):** Theo dõi "có popup nào đang mở". Khi mở popup → camera tự TRẢ CHUỘT + ngừng xoay + chặn tương tác thế giới (tránh click xuyên UI). Đã nối Map/Shop/Inventory/Animal popup.
+- **Trồng cây chọn loại (P4):** Click ô đã cuốc → mở Túi đồ (tab Hạt giống) → chọn loại cây → **múa động tác trồng xong MỚI gieo hạt**. Tự tặng hạt khởi đầu (carrot/cabbage/corn) để demo có lựa chọn.
+- **Model 3D thật cho cây trồng:** `CropDefinition` thêm `Crop Prefab` + `Model Ground Offset` + `Seedling Scale`. `FarmTile` thêm cờ `Use Custom Crop Models` → spawn model thật theo loại cây chọn và phóng to dần khi lớn.
+- **Tầm tương tác cây/đá theo từng vật:** `HarvestableResource` thêm `Interaction Range` (mặc định 2m) + gizmo vàng; chỉ hiện gợi ý + cho chặt khi đứng đủ gần (đo tới điểm tâm ngắm).
+
+### Changed
+- **Animation hành động thông minh (`PlayerController`):** `PlayActionAnimation` tự đo ĐÚNG độ dài clip (truyền `0` = lấy độ dài clip, khỏi gõ số tay; fallback đọc clip thực tế đang phát). Thêm tham số `speed` (Trồng cây chạy x2 ~4.6s), tự trả tốc độ về thường khi xong.
+- **Phím tắt:** Gỡ phím `F` toàn cục mở câu cá (giờ chỉ câu khi chĩa tâm vào nước) và phím `R` toàn cục mở Workshop (nhường `R` cho Thu hoạch động vật) trong `GameHUDController`.
+- **Tài liệu `DESIGN.md` & `RULES.md`:** Làm rõ quy tắc glass — chỉ cấm LẠM DỤNG (glass cho HUD vẫn OK), thêm "không lạm dụng icon/emoji".
+
+### Fixed
+- **Anim tương tác động vật không chạy:** `FarmInteractionController` gọi nhầm anim `"Interact"` (không tồn tại) → đổi sang `"Petting"` / `"Feed"` thật.
+- **Anim trồng/cuốc không chạy:** `GetComponent<PlayerController>()` trả null vì controller không nằm trên nhân vật → đổi sang `PlayerController.Instance`.
+- **Chặt cây không có anim + cây xoay ngang:** Thêm anim `TreeCutting` lặp khi giữ chuột; rung cây lắc TƯƠNG ĐỐI quanh hướng gốc (không phá thế đứng model).
+- **Cây trồng bị nghiêng:** `FarmTile` giữ nguyên góc xoay gốc của prefab (Blender import -90° trục X), không reset `localRotation` về identity khi spawn.
+- **NullReference khi vuốt ve:** `FarmAnimal.Pet()` null-check `data` và `visualObject`.
+- **Name tag Nữ bay lên trời:** `FloatingNameTag` bám toạ độ THẾ GIỚI thay vì làm con của nhân vật → độc lập hoàn toàn với scale model.
+
 ## [Unreleased] - 2026-06-13
 ### Added
+- **Menu Tương Tác Nổi (Floating Action Menu):**
+  - Ra mắt hệ thống UI tương tác động (`GameHUD.uxml` & `GameHUD.uss`), thay thế hoàn toàn dòng chữ tĩnh nhàm chán cũ. UI được thiết kế theo phong cách Kính mờ (Glassmorphism), có hiệu ứng phóng to khi hover/active.
+  - Hỗ trợ **Mobile Friendly 100%**: Người chơi có thể dùng ngón tay bấm trực tiếp vào các nút nổi lơ lửng trên màn hình mà không cần dùng phím tắt PC.
+  - Tích hợp cho **Thú cưng (`FarmAnimal.cs`)**: Cung cấp Nút "Vuốt ve" (Pet), tự chèn Nút "Cho ăn" (nếu đói), "Chữa bệnh" (nếu ốm), "Thu hoạch" (nếu có sản phẩm). Bổ sung hoạt ảnh trái tim khi vuốt ve và thú cưng tự động ngoảnh mặt nhìn camera.
+  - Tích hợp cho **Tài nguyên (`HarvestableResource.cs`)**: Khi nhìn vào Cây cối hoặc Đá, Menu Nổi cung cấp Nút "Chặt cây" / "Đập đá". Mỗi click bằng 1 giây tiến trình, cho phép chặt cây bằng cách chạm màn hình thay vì đè phím mỏi tay.
+  - Cơ chế "Auto-giving": Tự động cấp Rìu/Cúp ảo vào túi đồ nếu người chơi không có vũ khí để thuận tiện cho việc test tính năng. Mọi thiếu sót về model 3D (Cúp/Rìu) được bắt lỗi mềm, không gây crash game.
 - **Kịch Bản Chào Hỏi NPC (Tutorial Waving & Pointing):**
   - Cập nhật `GuideNPC.cs` chạy chuỗi Coroutine `StartGreetingSequence` lúc khởi động game thay vì chạy đi ngay.
   - NPC tự động diễn hoạt ảnh Vẫy tay (Waving) khi người chơi ở cách xa hơn 5m, luôn hướng mặt nhìn theo người chơi.
@@ -13,17 +43,22 @@
   - Tích hợp 4 nút cảm xúc: Vẫy tay (👋), Chỉ trỏ (👉), Cười (😂), Nhảy (💃). Bấm vào 👋 và 👉 sẽ lập tức điều khiển nhân vật diễn xuất Animation tương ứng và tự đóng khung popup.
 
 ### Changed
+- **Tái Cấu Trúc Bản Đồ (Map1.prefab):** *(Thực hiện bởi Unity AI Assistant)*
+  - Gom 144 vật thể rải rác vào 7 thư mục cha chuyên biệt (`1_Terrain_&_Pathways`, `2_Pond_&_Water`, `3_Farm_Plots_&_Crops`, v.v.).
+  - Chuẩn hóa tên tiếng Anh (Naming Convention) với tiền tố phân loại và đánh số đuôi `00-based`.
+  - Thiết lập MeshCollider cho địa hình, công trình cứng. Loại bỏ Collider khỏi lá cây, thảm cỏ, và nông sản để nhân vật không bị kẹt khi nhảy hoặc di chuyển.
+  - Dọn sạch lỗi Console phát sinh từ việc ghi đè Prefab.
+- **Đồng bộ UI Lò Rèn (WorkshopPopup):** Viết lại toàn bộ CSS của giao diện Lò Rèn (phím R) sang phong cách Cozy Dark Palia phẳng hoàn toàn giống hệ thống Shop.
 - **Giao diện HUD (GameHUD):** Dời nút Chạy Nhanh (Sprint) tách rời khỏi Joystick, căn lề tĩnh dạng tuyệt đối (`position: absolute`) sang bên phải để nằm song song với cụm nút Mail / Leaderboard.
 - **Tối ưu Trải Nghiệm Khung Chat (UX):**
   - Ở trạng thái Chat thu gọn, bấm vào icon mặt cười vẫn gọi được Bảng Cảm Xúc lên.
   - Bấm vào đoạn tin nhắn text hiển thị trước ở thanh thu gọn sẽ tự động bung khung chat và đặt sẵn con trỏ chuột nhấp nháy vào ô nhập liệu để gõ liền mạch, không cần qua bước trung gian.
 
 ### Fixed
+- **Lỗi Phím F Câu Cá:** Sửa lỗi bấm F để câu cá không có tác dụng do hàm `GetComponent<PlayerController>()` trong `FarmInteractionController` bị sai bối cảnh. Đổi sang `Object.FindFirstObjectByType<PlayerController>()` để nhân vật hoạt động chính xác.
 - **Chặn kẹt Phím Tắt khi Gõ Chat:**
   - Bổ sung hàm giám sát `IsTyping()` trong `ChatPanelController`.
   - Khắc phục triệt để tình trạng gõ phím trong khung chat làm kích hoạt các kỹ năng/hành động lộn xộn. Giờ đây, khi đang focus vào ô gõ chữ, mọi chức năng: Di chuyển (WASD), Chạy nhảy (Shift/Space), Hành động (Chuột trái, F, P) hay Mở Popup (M, I, B, L, E, R, 1) đều tự động bị "đóng băng" cho tới khi gõ xong.
-
-
 ## [Unreleased] - 2026-06-12
 ### Added
 - **Hệ Thống Nước Thủy Động (Stylized Water URP):**
