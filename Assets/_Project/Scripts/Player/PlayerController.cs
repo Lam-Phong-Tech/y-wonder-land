@@ -35,6 +35,7 @@ public class PlayerController : MonoBehaviour
     private float waterSurfaceY = 0f;
     private bool isSprintUIHeld = false;
     private float actionLockTimer = 0f;
+    private float _actionSpeed = 1f;
 
     [Header("Animation State Names")]
     public string animIdle = "Idle";
@@ -120,8 +121,8 @@ public class PlayerController : MonoBehaviour
 
         if (attackPressed && actionLockTimer <= 0)
         {
-            Debug.Log("[PlayerController] Attack button pressed!");
-            PlayActionAnimation("TreeCutting", 3.0f);
+            // Bỏ hành động chặt cây gán cứng ở đây, nhường quyền điều khiển cho FarmInteractionController
+            Debug.Log("[PlayerController] Attack button pressed! (No hardcoded action)");
         }
 
         // --- KIỂM TRA ACTION LOCK ---
@@ -130,9 +131,10 @@ public class PlayerController : MonoBehaviour
         {
             actionLockTimer -= Time.deltaTime;
             
-            // Nếu vừa hết giờ múa (làm việc xong), cất đồ nghề đi
+            // Nếu vừa hết giờ múa (làm việc xong): trả tốc độ animation về bình thường + cất đồ nghề
             if (actionLockTimer <= 0)
             {
+                if (animator != null) animator.speed = 1f;
                 if (YWonderLand.Player.EquipmentManager.Instance != null)
                 {
                     YWonderLand.Player.EquipmentManager.Instance.HideAllTools();
@@ -174,11 +176,29 @@ public class PlayerController : MonoBehaviour
 
             moveDirection = camForward * inputDir.z + camRight * inputDir.x;
 
-            // Rotate character towards movement direction smoothly
-            if (moveDirection != Vector3.zero)
+            // Xử lý xoay nhân vật theo chuẩn PUBG
+            bool isFreeLooking = Keyboard.current != null && Keyboard.current.altKey.isPressed;
+            
+            if (!isFreeLooking)
             {
-                Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+                // 1. Không giữ Alt: Nhân vật MẶC ĐỊNH luôn quay mặt theo tâm ngắm của Camera (Camera Yaw)
+                ThirdPersonCamera tpc = mainCameraTransform != null ? mainCameraTransform.GetComponent<ThirdPersonCamera>() : null;
+                if (tpc != null)
+                {
+                    Quaternion targetRotation = Quaternion.Euler(0, tpc.Yaw, 0);
+                    // Dùng tốc độ xoay nhanh hơn một chút để snap mượt theo chuột
+                    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * 2.5f * Time.deltaTime);
+                }
+            }
+            else
+            {
+                // 2. Giữ phím Alt (Free Look): Camera quay tự do, nhân vật KHÔNG quay theo Camera.
+                // Thay vào đó, nhân vật chỉ xoay theo hướng đang chạy (nếu có di chuyển)
+                if (moveDirection != Vector3.zero)
+                {
+                    Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
+                    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+                }
             }
 
             // Check Sprint
@@ -258,19 +278,74 @@ public class PlayerController : MonoBehaviour
     /// <summary>
     /// Gọi hàm này từ các script khác (Farm, Pet) để bắt nhân vật múa kỹ năng
     /// </summary>
-    public void PlayActionAnimation(string animName, float duration, YWonderLand.Player.ToolType tool = YWonderLand.Player.ToolType.None)
+    public float PlayActionAnimation(string animName, float duration, YWonderLand.Player.ToolType tool = YWonderLand.Player.ToolType.None, float speed = 1f)
     {
-        if (animator == null) return;
-        actionLockTimer = duration;
-        CrossFadeAnim(animName, 0.1f);
-        
+        if (animator == null) return 0f;
+
+        speed = Mathf.Max(0.1f, speed);
+        _actionSpeed = speed;
+        animator.speed = speed;        // tăng/giảm tốc phát animation (2 = nhanh gấp đôi)
+
+        CrossFadeAnim(animName, 0.1f); // phát animation trước
+
+        // duration <= 0  ->  tự đo ĐÚNG độ dài clip (khỏi chỉnh tay theo artist)
+        if (duration <= 0f)
+        {
+            duration = GetClipLength(animName); // thử khớp theo TÊN clip (nhanh)
+            if (duration <= 0f)
+            {
+                // Tên clip không khớp tên state -> đọc clip THỰC TẾ đang phát sau 1 frame
+                duration = speed; // tạm: actionLockTimer = 1f, coroutine sẽ chỉnh đúng
+                StartCoroutine(SyncLockToPlayingClip());
+            }
+        }
+        actionLockTimer = duration / speed; // phát nhanh thì khóa ngắn lại
+
         // Hiện công cụ tương ứng lên tay
         if (YWonderLand.Player.EquipmentManager.Instance != null && tool != YWonderLand.Player.ToolType.None)
         {
             YWonderLand.Player.EquipmentManager.Instance.ShowTool(tool);
         }
 
-        Debug.Log($"[PlayerController] Đang thực hiện hành động: {animName} trong {duration}s");
+        Debug.Log($"[PlayerController] Hành động: {animName} (x{speed}) khóa {actionLockTimer:F2}s");
+        return actionLockTimer;
+    }
+
+    // Lấy độ dài (giây) của clip animation theo tên — để khóa hành động đúng bằng thời lượng clip.
+    private float GetClipLength(string animName)
+    {
+        if (animator == null || animator.runtimeAnimatorController == null) return 0f;
+        foreach (var clip in animator.runtimeAnimatorController.animationClips)
+        {
+            if (clip != null && clip.name == animName) return clip.length;
+        }
+        return 0f;
+    }
+
+    // Đọc clip ĐANG PHÁT (sau CrossFade) và khóa hành động đúng bằng độ dài clip đó.
+    // Dùng khi tên clip khác tên state nên không khớp được theo tên.
+    private System.Collections.IEnumerator SyncLockToPlayingClip()
+    {
+        yield return null; // đợi 1 frame cho crossfade vào cuộc
+        if (animator == null) yield break;
+
+        AnimationClip clip = null;
+        if (animator.IsInTransition(0))
+        {
+            var n = animator.GetNextAnimatorClipInfo(0);
+            if (n.Length > 0) clip = n[0].clip;
+        }
+        else
+        {
+            var c = animator.GetCurrentAnimatorClipInfo(0);
+            if (c.Length > 0) clip = c[0].clip;
+        }
+
+        if (clip != null)
+        {
+            actionLockTimer = clip.length / _actionSpeed;
+            Debug.Log($"[PlayerController] Khóa theo clip đang phát: {clip.name} = {clip.length:F2}s / x{_actionSpeed}");
+        }
     }
 
     private void CrossFadeAnim(string animName, float transitionDuration = 0.2f)

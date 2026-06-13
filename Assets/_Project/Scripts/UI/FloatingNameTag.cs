@@ -45,10 +45,10 @@ public class FloatingNameTag : MonoBehaviour
     {
         mainCamera = Camera.main;
 
-        // Root object parented to this character
+        // Root object — KHÔNG parent vào nhân vật để tránh bị ảnh hưởng bởi scale model (Nữ scale 100).
         nameTagRoot = new GameObject($"NameTag_{displayName}");
-        nameTagRoot.transform.SetParent(transform, false);
-        nameTagRoot.transform.localPosition = new Vector3(0, heightOffset, 0);
+        nameTagRoot.transform.position = transform.position + Vector3.up * heightOffset;
+        nameTagRoot.transform.localScale = Vector3.one;
 
         // TextMeshPro 3D component (NOT TextMeshProUGUI — that's for Canvas)
         nameText = nameTagRoot.AddComponent<TextMeshPro>();
@@ -94,6 +94,9 @@ public class FloatingNameTag : MonoBehaviour
         bool visible = dist <= maxVisibleDistance;
         nameTagRoot.SetActive(visible);
         if (!visible) return;
+
+        // Theo nhân vật ở toạ độ THẾ GIỚI — độc lập hoàn toàn với scale model (Nữ 100 hay Nam 1 đều đúng).
+        nameTagRoot.transform.position = transform.position + Vector3.up * heightOffset;
 
         // Billboard: always face camera
         nameTagRoot.transform.rotation = mainCamera.transform.rotation;
