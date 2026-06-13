@@ -23,6 +23,11 @@ public class GuideNPC : MonoBehaviour
     public string idleAnimName = "Idle";
     [Tooltip("Tên của State hoạt ảnh chạy trong Animator")]
     public string runAnimName = "Walking";
+    [Tooltip("Tên của State hoạt ảnh vẫy tay trong Animator")]
+    public string waveAnimName = "Waving";
+    [Tooltip("Tên của State hoạt ảnh chỉ trỏ trong Animator")]
+    public string pointAnimName = "Pointing";
+    
     private string currentAnim = "";
 
     // Actions/Callbacks
@@ -110,6 +115,59 @@ public class GuideNPC : MonoBehaviour
         PlayAnimation(runAnimName);
 
         TriggerDialogue(GetRandomString(node.walkDialogues));
+    }
+
+    public void StartGreetingSequence(int firstNodeIndex = 0)
+    {
+        StartCoroutine(GreetingRoutine(firstNodeIndex));
+    }
+
+    private System.Collections.IEnumerator GreetingRoutine(int nodeIndex)
+    {
+        // Vô hiệu hóa các cờ logic bình thường để NPC đứng yên
+        isWalkingToNode = false;
+        isWaitingForPlayerToReachNode = false;
+        isWaitingForPlayerTask = false;
+        if (agent != null && agent.isOnNavMesh) agent.isStopped = true;
+
+        if (playerTransform == null)
+        {
+            GameObject player = GameObject.FindWithTag("Player");
+            if (player != null) playerTransform = player.transform;
+        }
+
+        // 1. NPC đứng vẫy tay chào
+        PlayAnimation(waveAnimName);
+
+        // 2. Chờ người chơi tới gần (khoảng cách > 5m)
+        if (playerTransform != null)
+        {
+            while (Vector3.Distance(transform.position, playerTransform.position) > 5.0f)
+            {
+                LookAtPlayer(); // Liên tục quay mặt nhìn theo người chơi
+                yield return null;
+            }
+        }
+
+        // 3. Người chơi đã tới gần (<5m), dừng vẫy tay, chuyển sang chỉ trỏ
+        PlayAnimation(pointAnimName);
+        
+        // Quay mặt về hướng trạm tiếp theo thay vì nhìn người chơi
+        if (tutorialNodes != null && tutorialNodes.Length > nodeIndex)
+        {
+            Vector3 lookDirection = tutorialNodes[nodeIndex].transform.position - transform.position;
+            lookDirection.y = 0;
+            if (lookDirection != Vector3.zero)
+            {
+                transform.rotation = Quaternion.LookRotation(lookDirection);
+            }
+        }
+
+        // Đợi cho hoạt ảnh chỉ trỏ chạy xong (khoảng 1.5 giây)
+        yield return new WaitForSeconds(1.5f);
+
+        // 4. Trở lại guồng máy bình thường: chạy tới Node số 0
+        StartNode(nodeIndex);
     }
 
     void Update()

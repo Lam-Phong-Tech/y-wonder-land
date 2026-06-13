@@ -102,7 +102,8 @@ namespace YWonderLand.Environment
             HandleHover(mouse.position.ReadValue());
 
             // --- XỬ LÝ PHÍM TẮT DÀNH CHO TƯƠNG TÁC (Ví dụ: F để câu cá) ---
-            if (Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame)
+            bool isTyping = ChatPanelController.Instance != null && ChatPanelController.Instance.IsTyping();
+            if (!isTyping && Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame)
             {
                 if (currentHoverObject != null)
                 {

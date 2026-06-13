@@ -27,7 +27,8 @@ namespace YWonderLand.Environment
         void Update()
         {
             // Bấm phím P để vuốt ve (Sử dụng Input System mới)
-            if (canPet && Keyboard.current != null && Keyboard.current.pKey.wasPressedThisFrame)
+            bool isTyping = ChatPanelController.Instance != null && ChatPanelController.Instance.IsTyping();
+            if (!isTyping && canPet && Keyboard.current != null && Keyboard.current.pKey.wasPressedThisFrame)
             {
                 if (playerController != null)
                 {

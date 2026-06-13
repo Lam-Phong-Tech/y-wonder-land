@@ -268,3 +268,46 @@
     background-color: #3886B8;
     scale: 0.95;
 }
+
+/* ── 3. Emote Popup Grid (Phương án 2) ── */
+.emote-popup {
+    position: absolute;
+    bottom: 60px; /* Hiển thị ngay trên thanh footer của chat (footer height 56px) */
+    left: 12px;   /* Thẳng hàng với nút Emoji */
+    background-color: var(--color-mystic-black);
+    border-radius: 16px;
+    padding: 12px;
+    border-width: 2px;
+    border-color: rgba(255,255,255,0.1);
+}
+
+.emote-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 140px; /* Vừa đủ cho 2 cột nút (60px x 2 + margin) */
+    justify-content: space-between;
+}
+
+.emote-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    background-color: var(--color-deep-blue);
+    border-width: 0;
+    font-size: 24px;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+    padding: 0;
+    -unity-text-align: middle-center;
+    transition-property: background-color, scale;
+    transition-duration: 0.1s;
+}
+
+.emote-btn:hover {
+    background-color: var(--color-accent-blue);
+}
+
+.emote-btn:active {
+    scale: 0.9;
+}

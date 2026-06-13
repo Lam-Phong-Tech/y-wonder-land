@@ -1,5 +1,29 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-06-13
+### Added
+- **Kịch Bản Chào Hỏi NPC (Tutorial Waving & Pointing):**
+  - Cập nhật `GuideNPC.cs` chạy chuỗi Coroutine `StartGreetingSequence` lúc khởi động game thay vì chạy đi ngay.
+  - NPC tự động diễn hoạt ảnh Vẫy tay (Waving) khi người chơi ở cách xa hơn 5m, luôn hướng mặt nhìn theo người chơi.
+  - Khi khoảng cách bé hơn 5m, NPC tự động chuyển sang hoạt ảnh Chỉ đường (Pointing) về phía trạm số 1, giữ tư thế 1.5 giây rồi mới bắt đầu dắt người chơi đi.
+  - Công khai 2 biến Inspector `waveAnimName` và `pointAnimName` để team 3D tiện bề tinh chỉnh.
+- **Bảng Chọn Cảm Xúc (Emote Popup Grid):**
+  - Tận dụng icon mặt cười ☺ trên khung chat để làm nút Bật/Tắt một `EmotePopup` nằm gọn gàng ngay trên thanh chat.
+  - Thiết kế tuân thủ hoàn toàn `DESIGN.md` (nền Mystic Black, bo góc mềm 16px, nút bấm không đổ bóng lồi lõm).
+  - Tích hợp 4 nút cảm xúc: Vẫy tay (👋), Chỉ trỏ (👉), Cười (😂), Nhảy (💃). Bấm vào 👋 và 👉 sẽ lập tức điều khiển nhân vật diễn xuất Animation tương ứng và tự đóng khung popup.
+
+### Changed
+- **Giao diện HUD (GameHUD):** Dời nút Chạy Nhanh (Sprint) tách rời khỏi Joystick, căn lề tĩnh dạng tuyệt đối (`position: absolute`) sang bên phải để nằm song song với cụm nút Mail / Leaderboard.
+- **Tối ưu Trải Nghiệm Khung Chat (UX):**
+  - Ở trạng thái Chat thu gọn, bấm vào icon mặt cười vẫn gọi được Bảng Cảm Xúc lên.
+  - Bấm vào đoạn tin nhắn text hiển thị trước ở thanh thu gọn sẽ tự động bung khung chat và đặt sẵn con trỏ chuột nhấp nháy vào ô nhập liệu để gõ liền mạch, không cần qua bước trung gian.
+
+### Fixed
+- **Chặn kẹt Phím Tắt khi Gõ Chat:**
+  - Bổ sung hàm giám sát `IsTyping()` trong `ChatPanelController`.
+  - Khắc phục triệt để tình trạng gõ phím trong khung chat làm kích hoạt các kỹ năng/hành động lộn xộn. Giờ đây, khi đang focus vào ô gõ chữ, mọi chức năng: Di chuyển (WASD), Chạy nhảy (Shift/Space), Hành động (Chuột trái, F, P) hay Mở Popup (M, I, B, L, E, R, 1) đều tự động bị "đóng băng" cho tới khi gõ xong.
+
+
 ## [Unreleased] - 2026-06-12
 ### Added
 - **Hệ Thống Nước Thủy Động (Stylized Water URP):**

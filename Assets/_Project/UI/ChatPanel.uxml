@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
     <ui:Style src="Styles/DesignSystem.uss" />
     <ui:Style src="Styles/ChatPanel.uss" />
@@ -48,6 +48,16 @@
                     </ui:VisualElement>
                 </ui:VisualElement>
 
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- EMOTE POPUP GRID (Phương án 2) -->
+        <ui:VisualElement name="EmotePopup" class="emote-popup" style="display: none;">
+            <ui:VisualElement class="emote-grid">
+                <ui:Button name="BtnEmoteWave" class="emote-btn" text="👋" />
+                <ui:Button name="BtnEmotePoint" class="emote-btn" text="👉" />
+                <ui:Button name="BtnEmoteLaugh" class="emote-btn" text="😂" />
+                <ui:Button name="BtnEmoteDance" class="emote-btn" text="💃" />
             </ui:VisualElement>
         </ui:VisualElement>
 

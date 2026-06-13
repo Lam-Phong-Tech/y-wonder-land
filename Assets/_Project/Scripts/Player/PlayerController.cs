@@ -101,13 +101,15 @@ public class PlayerController : MonoBehaviour
         }
 
         // 2. Read Inputs via Input System Action Map
-        Vector2 inputVec = moveAction != null ? moveAction.ReadValue<Vector2>() : Vector2.zero;
-        bool jumpPressed = jumpAction != null && jumpAction.triggered;
-        bool interactPressed = interactAction != null && interactAction.triggered;
+        bool isTyping = ChatPanelController.Instance != null && ChatPanelController.Instance.IsTyping();
+
+        Vector2 inputVec = (!isTyping && moveAction != null) ? moveAction.ReadValue<Vector2>() : Vector2.zero;
+        bool jumpPressed = !isTyping && jumpAction != null && jumpAction.triggered;
+        bool interactPressed = !isTyping && interactAction != null && interactAction.triggered;
         
         // Kiểm tra xem chuột có đang nằm trên UI không để chặn click xuyên UI
         bool isPointerOverUI = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
-        bool attackPressed = attackAction != null && attackAction.triggered && !isPointerOverUI;
+        bool attackPressed = !isTyping && attackAction != null && attackAction.triggered && !isPointerOverUI;
 
         // Process Interaction / Actions (Attack, Fish, etc.)
         // Bây giờ nếu ấn, chúng ta gọi thẳng PlayActionAnimation

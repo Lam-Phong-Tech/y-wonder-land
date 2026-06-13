@@ -447,6 +447,10 @@ public class GameHUDController : MonoBehaviour
         if (uiDocument == null || uiDocument.rootVisualElement == null || uiDocument.rootVisualElement.style.display == DisplayStyle.None)
             return;
 
+        // Chặn các phím tắt nếu người chơi đang gõ phím trong khung chat
+        if (ChatPanelController.Instance != null && ChatPanelController.Instance.IsTyping())
+            return;
+
         var keyboard = UnityEngine.InputSystem.Keyboard.current;
         if (keyboard == null) return;
 

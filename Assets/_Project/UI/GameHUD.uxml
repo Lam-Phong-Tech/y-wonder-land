@@ -150,12 +150,6 @@
         <!-- 4. JOYSTICK & SPRINT — Bottom Left -->
         <!-- ============================== -->
         <ui:VisualElement class="hud-bottom-left">
-            <!-- Sprint Button -->
-            <ui:VisualElement class="sprint-btn-shadow">
-                <ui:Button name="BtnSprint" class="sprint-btn">
-                    <ui:Label text="⚡" class="sprint-btn-icon" />
-                </ui:Button>
-            </ui:VisualElement>
 
             <ui:VisualElement name="Joystick" class="joystick-outer">
                 <!-- Direction arrows -->
@@ -207,6 +201,15 @@
         <ui:VisualElement name="Crosshair" class="crosshair" picking-mode="Ignore">
             <ui:VisualElement class="crosshair-dot" picking-mode="Ignore" />
             <ui:Label name="InteractionPrompt" text="[Chuột Trái] Tương tác" class="interaction-prompt" picking-mode="Ignore" />
+        </ui:VisualElement>
+
+        <!-- ============================== -->
+        <!-- SPRINT BUTTON — Middle Left    -->
+        <!-- ============================== -->
+        <ui:VisualElement class="sprint-btn-shadow">
+            <ui:Button name="BtnSprint" class="sprint-btn">
+                <ui:Label text="⚡" class="sprint-btn-icon" />
+            </ui:Button>
         </ui:VisualElement>
 
     </ui:VisualElement>

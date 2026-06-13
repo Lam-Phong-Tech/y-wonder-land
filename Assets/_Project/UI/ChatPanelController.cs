@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -28,6 +28,13 @@ public class ChatPanelController : MonoBehaviour
     private Button btnEmojiExpanded;
     private TextField inputMessage;
     private Button btnSend;
+
+    // Emote Popup Elements
+    private VisualElement emotePopup;
+    private Button btnEmoteWave;
+    private Button btnEmotePoint;
+    private Button btnEmoteLaugh;
+    private Button btnEmoteDance;
 
     // State Variables
     private bool isExpanded = false;
@@ -80,6 +87,13 @@ public class ChatPanelController : MonoBehaviour
         inputMessage = root.Q<TextField>("InputMessage");
         btnSend = root.Q<Button>("BtnSend");
 
+        // Query Emote Elements
+        emotePopup = root.Q<VisualElement>("EmotePopup");
+        btnEmoteWave = root.Q<Button>("BtnEmoteWave");
+        btnEmotePoint = root.Q<Button>("BtnEmotePoint");
+        btnEmoteLaugh = root.Q<Button>("BtnEmoteLaugh");
+        btnEmoteDance = root.Q<Button>("BtnEmoteDance");
+
         RegisterCallbacks();
         
         // Initial state
@@ -95,12 +109,25 @@ public class ChatPanelController : MonoBehaviour
         btnExpand?.RegisterCallback<ClickEvent>(evt => ToggleExpand(true));
         btnCollapse?.RegisterCallback<ClickEvent>(evt => ToggleExpand(false));
 
+        // Click on the collapsed message text to expand and type immediately
+        lblLastMessage?.RegisterCallback<ClickEvent>(evt => 
+        {
+            ToggleExpand(true);
+            inputMessage?.Focus();
+        });
+
         // Send actions
         btnSend?.RegisterCallback<ClickEvent>(evt => SendMessageFromInput());
 
         // Emoji buttons
-        btnQuickEmoji?.RegisterCallback<ClickEvent>(evt => SendRandomEmoji());
-        btnEmojiExpanded?.RegisterCallback<ClickEvent>(evt => SendRandomEmoji());
+        btnQuickEmoji?.RegisterCallback<ClickEvent>(evt => ToggleEmotePopup());
+        btnEmojiExpanded?.RegisterCallback<ClickEvent>(evt => ToggleEmotePopup());
+
+        // Emote actions
+        btnEmoteWave?.RegisterCallback<ClickEvent>(evt => PlayEmote("Waving", 2.0f));
+        btnEmotePoint?.RegisterCallback<ClickEvent>(evt => PlayEmote("Pointing", 2.0f));
+        btnEmoteLaugh?.RegisterCallback<ClickEvent>(evt => PlayEmote("Laughing", 2.0f));
+        btnEmoteDance?.RegisterCallback<ClickEvent>(evt => PlayEmote("Dancing", 2.0f));
 
         // Text field enter key submit callback (UI Toolkit standard)
         inputMessage?.RegisterCallback<KeyDownEvent>(evt =>
@@ -180,6 +207,7 @@ public class ChatPanelController : MonoBehaviour
         {
             if (chatCollapsed != null) chatCollapsed.style.display = DisplayStyle.Flex;
             if (chatExpandedShadow != null) chatExpandedShadow.style.display = DisplayStyle.None;
+            if (emotePopup != null) emotePopup.style.display = DisplayStyle.None; // Hide emote popup when collapsing
         }
     }
 
@@ -258,6 +286,46 @@ public class ChatPanelController : MonoBehaviour
         }
 
         StartCoroutine(HandleAIResponseCheck(emoji));
+    }
+
+    /// <summary>
+    /// Check if the chat input field is currently focused by the user.
+    /// </summary>
+    public bool IsTyping()
+    {
+        if (inputMessage == null || inputMessage.focusController == null) return false;
+        return inputMessage.focusController.focusedElement == inputMessage;
+    }
+
+    /// <summary>
+    /// Toggle the visibility of the Emote Popup grid.
+    /// </summary>
+    private void ToggleEmotePopup()
+    {
+        if (emotePopup == null) return;
+        bool isCurrentlyVisible = emotePopup.style.display == DisplayStyle.Flex;
+        emotePopup.style.display = isCurrentlyVisible ? DisplayStyle.None : DisplayStyle.Flex;
+    }
+
+    /// <summary>
+    /// Play a social animation via PlayerController.
+    /// </summary>
+    private void PlayEmote(string animName, float duration)
+    {
+        if (PlayerController.Instance != null)
+        {
+            PlayerController.Instance.PlayActionAnimation(animName, duration);
+        }
+        else
+        {
+            Debug.LogWarning($"[ChatPanel] Không tìm thấy PlayerController để thực hiện hành động: {animName}");
+        }
+
+        // Tự động đóng popup sau khi chọn
+        if (emotePopup != null)
+        {
+            emotePopup.style.display = DisplayStyle.None;
+        }
     }
 
     /// <summary>

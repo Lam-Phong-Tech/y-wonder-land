@@ -499,10 +499,10 @@ public class TutorialManager : MonoBehaviour
         UpdateQuestHUD("[1/6] Đi theo NPC Tân Thủ tới mảnh đất hoang");
         Debug.Log("[TutorialManager] Onboarding Tutorial Started.");
 
-        // Khởi động Trạm Hướng Dẫn số 1
+        // Khởi động màn chào hỏi của NPC Tân Thủ trước khi vào trạm 1
         if (guideNPC != null)
         {
-            guideNPC.StartNode(0);
+            guideNPC.StartGreetingSequence(0);
         }
 
         // Force reset the tutorial tile so it doesn't get stuck if FarmManager loaded a saved state
