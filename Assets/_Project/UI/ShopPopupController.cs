@@ -229,6 +229,7 @@ public class ShopPopupController : MonoBehaviour
         UpdateBalance();
 
         overlay.style.display = DisplayStyle.Flex;
+        UIPopupTracker.SetOpen(this, true);
         Debug.Log($"[Shop] Opened: {data.shopName}");
     }
 
@@ -245,6 +246,7 @@ public class ShopPopupController : MonoBehaviour
         if (overlay != null)
         {
             overlay.style.display = DisplayStyle.None;
+            UIPopupTracker.SetOpen(this, false);
             Debug.Log("[Shop] Closed");
         }
     }

@@ -34,22 +34,27 @@ public class ThirdPersonCamera : MonoBehaviour
     public float inputSmoothing = 0.5f;
 
     [Header("Vertical Angle Limits")]
-    [Tooltip("Minimum pitch angle (negative = look slightly downward).")]
-    public float minVerticalAngle = -10f;
+    [Tooltip("Minimum pitch angle (0 = look straight forward, negative = look up). Khóa ở 0 để không nhìn dưới háng.")]
+    public float minVerticalAngle = 0f;
     [Tooltip("Maximum pitch angle (positive = look upward).")]
-    public float maxVerticalAngle = 50f;
+    public float maxVerticalAngle = 60f;
 
-    [Header("Ground Collision")]
-    [Tooltip("Minimum height above ground to prevent camera going underground.")]
-    public float minHeightAboveGround = 0.5f;
-    [Tooltip("Layer mask for ground collision check.")]
-    public LayerMask groundLayerMask = ~0;
+    [Header("Camera Collision")]
+    [Tooltip("Layer mask for obstacles (walls, ground) that should block the camera.")]
+    public LayerMask obstacleLayerMask = ~0;
+    [Tooltip("Radius of the camera sphere cast to prevent clipping through walls.")]
+    public float cameraCollisionRadius = 0.2f;
+    [Tooltip("Minimum distance the camera can get to the player when blocked.")]
+    public float minDistance = 1.0f;
 
     // Internal state
     private float yaw = 0f;
     private float pitch = 15f;
     private Vector2 smoothedInput = Vector2.zero;
     private bool cursorLocked = true;
+
+    // Properties for PlayerController
+    public float Yaw => yaw;
 
     // Input System
     private InputAction lookAction;
@@ -84,9 +89,24 @@ public class ThirdPersonCamera : MonoBehaviour
         if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
         {
             cursorLocked = !cursorLocked;
-            Cursor.lockState = cursorLocked ? CursorLockMode.Locked : CursorLockMode.None;
-            Cursor.visible = !cursorLocked;
         }
+
+        // Mỗi frame áp dụng trạng thái chuột THỰC TẾ: tự MỞ chuột khi có popup
+        // đang mở (UIPopupTracker.AnyOpen) hoặc khi người chơi nhấn ESC.
+        ApplyCursorState();
+    }
+
+    // Chuột chỉ thực sự khóa khi: người chơi muốn khóa VÀ không có popup nào đang mở.
+    private bool IsEffectivelyLocked()
+    {
+        return cursorLocked && !UIPopupTracker.AnyOpen;
+    }
+
+    private void ApplyCursorState()
+    {
+        bool locked = IsEffectivelyLocked();
+        Cursor.lockState = locked ? CursorLockMode.Locked : CursorLockMode.None;
+        Cursor.visible = !locked;
     }
 
     void LateUpdate()
@@ -99,7 +119,7 @@ public class ThirdPersonCamera : MonoBehaviour
 
         // 1. Read raw mouse input (skip rotation when cursor is unlocked)
         Vector2 rawInput = Vector2.zero;
-        if (cursorLocked)
+        if (IsEffectivelyLocked())
         {
             if (lookAction != null)
             {
@@ -132,8 +152,8 @@ public class ThirdPersonCamera : MonoBehaviour
         // Apply shoulder offset
         cameraPos += orbitRotation * Vector3.right * shoulderOffsetX;
 
-        // 6. Prevent going underground
-        cameraPos = ClampAboveGround(cameraPos);
+        // 6. Camera Collision (Ngăn xuyên tường và đất)
+        cameraPos = HandleCameraCollision(pivotPoint, cameraPos);
 
         // 7. Set camera transform directly (rigid = rock solid, no wobble)
         transform.position = cameraPos;
@@ -143,19 +163,34 @@ public class ThirdPersonCamera : MonoBehaviour
     }
 
     /// <summary>
-    /// Ensures the camera position stays above the ground surface.
+    /// Bắn SphereCast từ vai/ngực nhân vật về phía Camera. Nếu đụng tường/đất thì kéo Camera lại gần nhân vật.
+    /// Tự động bỏ qua các Collider thuộc về Player và các vùng Trigger vô hình.
     /// </summary>
-    private Vector3 ClampAboveGround(Vector3 pos)
+    private Vector3 HandleCameraCollision(Vector3 pivot, Vector3 targetCameraPos)
     {
-        if (Physics.Raycast(pos + Vector3.up * 50f, Vector3.down, out RaycastHit hit, 100f, groundLayerMask))
+        Vector3 direction = targetCameraPos - pivot;
+        float dist = direction.magnitude;
+        direction.Normalize();
+
+        RaycastHit[] hits = Physics.SphereCastAll(pivot, cameraCollisionRadius, direction, dist, obstacleLayerMask);
+        System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+
+        foreach (var hit in hits)
         {
-            float minY = hit.point.y + minHeightAboveGround;
-            if (pos.y < minY)
-            {
-                pos.y = minY;
-            }
+            // Bỏ qua nếu tia quét đụng trúng chính nhân vật (target) hoặc các mảnh con của nhân vật
+            if (target != null && (hit.collider.transform == target || hit.collider.transform.IsChildOf(target)))
+                continue;
+
+            // Bỏ qua các vùng Trigger (như mặt nước, vùng sáng) không có cản trở vật lý
+            if (hit.collider.isTrigger)
+                continue;
+
+            // Đặt camera tại điểm đụng
+            float hitDistance = Mathf.Max(hit.distance, minDistance);
+            return pivot + direction * hitDistance;
         }
-        return pos;
+
+        return targetCameraPos;
     }
 
     void OnDisable()

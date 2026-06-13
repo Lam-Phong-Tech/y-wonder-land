@@ -353,6 +353,7 @@ public class InventoryPopupController : MonoBehaviour
         if (overlay != null)
         {
             overlay.style.display = DisplayStyle.Flex;
+            UIPopupTracker.SetOpen(this, true);
             RefreshGrid();
             Debug.Log("[Inventory] Popup opened");
         }
@@ -363,6 +364,7 @@ public class InventoryPopupController : MonoBehaviour
         if (overlay != null)
         {
             overlay.style.display = DisplayStyle.None;
+            UIPopupTracker.SetOpen(this, false);
             Debug.Log("[Inventory] Popup closed");
         }
     }

@@ -57,11 +57,13 @@ public class AnimalInteractionPopupController : MonoBehaviour
         currentAnimal.OnAnimalStateChanged += RefreshUI; // Listen for changes
 
         container.style.display = DisplayStyle.Flex;
+        UIPopupTracker.SetOpen(this, true);
         RefreshUI(currentAnimal);
     }
 
     public void Hide()
     {
+        UIPopupTracker.SetOpen(this, false);
         if (container != null)
         {
             container.style.display = DisplayStyle.None;

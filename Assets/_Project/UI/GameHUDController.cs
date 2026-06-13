@@ -1,6 +1,15 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections;
+using System;
+using System.Collections.Generic;
+
+public struct InteractionAction
+{
+    public string keyName;
+    public string actionName;
+    public Action onClick;
+}
 
 /// <summary>
 /// Controller for the In-Game HUD.
@@ -64,7 +73,7 @@ public class GameHUDController : MonoBehaviour
     private Button btnBag;
     private Button btnSettings;
     private Button btnSprint;
-    private Label interactionPrompt;
+    private VisualElement interactionContainer;
 
 
 
@@ -160,7 +169,7 @@ public class GameHUDController : MonoBehaviour
         btnBag = root.Q<Button>("BtnBag");
         btnSettings = root.Q<Button>("BtnSettings");
         btnSprint = root.Q<Button>("BtnSprint");
-        interactionPrompt = root.Q<Label>("InteractionPrompt");
+        interactionContainer = root.Q<VisualElement>("InteractionContainer");
 
 
     }
@@ -472,24 +481,10 @@ public class GameHUDController : MonoBehaviour
             levelUpOverlay.TestLevelUp();
         }
 
-        if (keyboard.eKey.wasPressedThisFrame && eventPopup != null)
-        {
-            if (eventPopup.IsVisible())
-            {
-                eventPopup.Hide();
-            }
-            else
-            {
-                HideAllPopups();
-                eventPopup.Show();
-            }
-        }
+        // Đã xóa phím tắt E gọi Event Popup để nhường cho phím tắt Tương tác (Vuốt ve)
 
-        if (keyboard.fKey.wasPressedThisFrame && fishingOverlay != null)
-        {
-            HideAllPopups();
-            fishingOverlay.Show();
-        }
+        // [Đã gỡ] Phím F toàn cục mở câu cá. Câu cá giờ theo TÂM NGẮM: chỉ câu được khi
+        // chĩa tâm vào vùng nước (FishingSpot) — xử lý trong FarmInteractionController.
 
         if (keyboard.bKey.wasPressedThisFrame && buildModeOverlay != null)
         {
@@ -504,11 +499,8 @@ public class GameHUDController : MonoBehaviour
             }
         }
 
-        if (keyboard.rKey.wasPressedThisFrame && workshopPopup != null)
-        {
-            HideAllPopups();
-            workshopPopup.Show();
-        }
+        // [Đã gỡ] Phím R toàn cục mở Workshop — nhường R cho phím tắt Thu hoạch động vật.
+        // Workshop sẽ được mở qua click vào NPC tương ứng (giống Shop).
 
         if (keyboard.digit1Key.wasPressedThisFrame)
         {
@@ -543,20 +535,51 @@ public class GameHUDController : MonoBehaviour
         }
     }
 
-    public void ShowInteractionPrompt(string text)
+    public void ShowInteractionPrompts(List<InteractionAction> actions)
     {
-        if (interactionPrompt == null)
+        if (interactionContainer == null) return;
+        
+        interactionContainer.Clear();
+        
+        if (actions == null || actions.Count == 0)
         {
-            Debug.LogError("[GameHUDController] KHÔNG TÌM THẤY interactionPrompt! Vui lòng kiểm tra lại GameHUD.uxml xem đã có Label tên là 'InteractionPrompt' chưa.");
+            interactionContainer.style.display = DisplayStyle.None;
             return;
         }
-        interactionPrompt.text = text;
-        interactionPrompt.style.opacity = 1f;
+
+        interactionContainer.style.display = DisplayStyle.Flex;
+
+        foreach (var action in actions)
+        {
+            Button btn = new Button();
+            btn.AddToClassList("interaction-action-btn");
+            
+            // Add key hint if PC
+            if (!string.IsNullOrEmpty(action.keyName))
+            {
+                Label keyLabel = new Label(action.keyName);
+                keyLabel.AddToClassList("interaction-key-label");
+                btn.Add(keyLabel);
+            }
+            
+            Label actionLabel = new Label(action.actionName);
+            actionLabel.AddToClassList("interaction-action-label");
+            btn.Add(actionLabel);
+
+            // Gán sự kiện click
+            if (action.onClick != null)
+            {
+                btn.clicked += action.onClick;
+            }
+
+            interactionContainer.Add(btn);
+        }
     }
 
     public void HideInteractionPrompt()
     {
-        if (interactionPrompt == null) return;
-        interactionPrompt.style.opacity = 0f;
+        if (interactionContainer == null) return;
+        interactionContainer.style.display = DisplayStyle.None;
+        interactionContainer.Clear();
     }
 }
