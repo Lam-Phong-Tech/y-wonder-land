@@ -22,10 +22,30 @@ public class MapPortalTrigger : MonoBehaviour
     [Tooltip("Chỉ mở Bản đồ khi đang ở trạng thái Gameplay (không mở lúc cutscene/menu)")]
     [SerializeField] private bool onlyDuringGameplay = true;
 
+    [Header("Bảng tên trên đầu cổng")]
+    [Tooltip("Chữ nổi trên cổng cho người chơi dễ nhận biết")]
+    [SerializeField] private string portalLabel = "Cổng Dịch Chuyển";
+
+    [Tooltip("Độ cao bảng tên so với gốc cổng (m). Cổng cao thì tăng số này.")]
+    [SerializeField] private float nameTagHeight = 3.0f;
+
     private void Reset()
     {
         // Tự bật Is Trigger cho tiện khi mới gắn component
         if (TryGetComponent<Collider>(out var col)) col.isTrigger = true;
+    }
+
+    private void Start()
+    {
+        // Tự gắn bảng tên nổi trên đầu cổng (giống NPC) để người chơi dễ thấy đây là cổng đi đảo.
+        if (GetComponent<FloatingNameTag>() == null)
+        {
+            FloatingNameTag tag = gameObject.AddComponent<FloatingNameTag>();
+            tag.displayName = portalLabel;
+            tag.nameColor = FloatingNameTag.COLOR_CONFIRM; // xanh dương — phân biệt NPC (vàng) & Guide (tím)
+            tag.heightOffset = nameTagHeight;
+            tag.tmpFontSize = 3.5f;
+        }
     }
 
     private void OnTriggerEnter(Collider other)

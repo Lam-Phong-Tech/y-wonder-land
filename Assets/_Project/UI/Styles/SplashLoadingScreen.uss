@@ -11,7 +11,7 @@
     position: absolute;
     align-items: center;
     justify-content: center;
-    background-color: var(--color-primary-navy); /* Dark Navy Background */
+    background-color: rgb(5, 7, 12); /* gần như ĐEN -> hòa với nền đen của logo JPG (không bị ô vuông đen lòi ra) */
     transition-property: opacity;
     transition-duration: 0.5s;
     transition-timing-function: ease-in-out;
@@ -54,6 +54,32 @@
     justify-content: center;
     margin-bottom: 80px;
 }
+
+/* -- Brand Logo Image -- */
+.splash-brand-logo {
+    width: 240px;
+    height: 240px;
+    background-image: url("project:/Assets/_Project/UI/Sprites/Logo_YWonderHub.jpg");
+    -unity-background-scale-mode: scale-to-fit;
+    margin-bottom: 8px;
+}
+
+/* -- Title (per-word colors) -- */
+.splash-title-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+.splash-title-word {
+    font-size: 56px;
+    letter-spacing: 4px;
+    white-space: nowrap;
+    -unity-font-style: bold;
+    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
+}
+.splash-word-light { color: rgb(236, 240, 245); }
+.splash-word-green { color: var(--color-success); }
+.splash-word-blue { color: var(--color-accent-blue); }
 
 /* -- Title Shadow (Removed retro block, now just subtle soft shadow) -- */
 
@@ -149,7 +175,7 @@
 .splash-progress-fill {
     width: 0%;
     height: 100%;
-    background-color: var(--color-accent-blue); /* Palia Accent Blue */
+    background-color: var(--color-success); /* xanh lá glow — khớp thiết kế mới */
     border-radius: 8px; /* Pill shape */
     transition-property: width;
     transition-duration: 0.15s;
