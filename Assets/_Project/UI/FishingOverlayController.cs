@@ -322,6 +322,10 @@ public class FishingOverlayController : MonoBehaviour
             SelectBait(BaitType.None);
             UpdateUI();
 
+            // Trả chuột ỔN ĐỊNH + dừng tương tác thế giới khi đang câu (hết "lưỡng lự" con trỏ):
+            // báo cho ThirdPersonCamera mở khoá chuột và FarmInteractionController ngừng raycast.
+            UIPopupTracker.SetOpen(this, true);
+
             // Hide GameHUD to avoid overlap
             var hud = FindFirstObjectByType<GameHUDController>();
             if (hud != null) hud.SetHUDVisible(false);
@@ -340,12 +344,22 @@ public class FishingOverlayController : MonoBehaviour
             CancelFishing();
             fishingDocument.rootVisualElement.style.display = DisplayStyle.None;
 
+            // Khoá lại chuột cho gameplay (gỡ khỏi tracker)
+            UIPopupTracker.SetOpen(this, false);
+
             // Restore GameHUD
             var hud = FindFirstObjectByType<GameHUDController>();
             if (hud != null) hud.SetHUDVisible(true);
 
             Debug.Log("[Fishing] Exiting Fishing Mode");
         }
+    }
+
+    // An toàn: nếu overlay bị tắt/destroy lúc đang câu (vd đổi đảo) mà chưa kịp Hide(),
+    // vẫn gỡ khỏi UIPopupTracker để chuột không bị kẹt.
+    private void OnDisable()
+    {
+        UIPopupTracker.SetOpen(this, false);
     }
 
     private void UpdateUI()

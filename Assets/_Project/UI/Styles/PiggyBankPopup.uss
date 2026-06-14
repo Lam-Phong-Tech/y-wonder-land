@@ -104,13 +104,13 @@
 
 /* === LEFT: PACKAGE CARDS === */
 .piggy-packages {
-    width: 200px; flex-shrink: 0; flex-direction: column;
+    width: 240px; flex-shrink: 0; flex-direction: column;
 }
 
 .piggy-pkg-shadow { margin-bottom: 12px; }
 
 .piggy-pkg {
-    flex-direction: row; align-items: center; padding: 16px;
+    flex-direction: row; align-items: center; padding: 14px;
     background-color: var(--color-mystic-black);
     border-radius: 16px; border-width: 2px; border-color: transparent;
     transition-property: scale, border-color; transition-duration: 0.1s;
@@ -127,15 +127,17 @@
 }
 
 .piggy-pkg-icon {
-    font-size: 24px; margin-right: 12px; flex-shrink: 0; -unity-text-align: middle-center; padding: 0; margin-top: 0; margin-bottom: 0;
+    font-size: 20px; margin-right: 8px; flex-shrink: 0; -unity-text-align: middle-center; padding: 0; margin-top: 0; margin-bottom: 0;
 }
 
 .piggy-pkg-duration {
-    font-size: 14px; -unity-font-style: bold; color: var(--color-text-white); flex-grow: 1;
+    font-size: 14px; -unity-font-style: bold; color: var(--color-text-white);
+    flex-grow: 1; flex-shrink: 0; white-space: nowrap; /* KHÔNG co, KHÔNG cắt chữ "ngày" */
 }
 
 .piggy-pkg-rate {
-    font-size: 18px; -unity-font-style: bold; color: var(--color-accent-yellow); flex-shrink: 0; margin-left: 8px;
+    font-size: 16px; -unity-font-style: bold; color: var(--color-accent-yellow);
+    flex-shrink: 0; margin-left: 8px; white-space: nowrap;
 }
 
 .piggy-pkg-label { display: none; }

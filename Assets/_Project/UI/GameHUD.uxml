@@ -70,8 +70,8 @@
                     </ui:Button>
                 </ui:VisualElement>
 
-                <!-- Shop (Temporary) -->
-                <ui:VisualElement class="sidebar-btn-shadow">
+                <!-- Shop (Temporary) — ẩn: shop giờ mở qua NPC Mua/Bán -->
+                <ui:VisualElement class="sidebar-btn-shadow" style="display: none;">
                     <ui:Button name="BtnShop" class="sidebar-btn sidebar-btn-shop">
                         <ui:VisualElement class="sidebar-btn-shop-icon" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_05.png'); -unity-background-scale-mode: scale-to-fit;" />
                         <ui:Label text="Shop" class="sidebar-btn-shop-text" />
