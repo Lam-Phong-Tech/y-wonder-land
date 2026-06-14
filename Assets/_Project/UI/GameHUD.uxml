@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:Style src="Styles/DesignSystem.uss" />
+    <ui:Style src="Styles/GameHUD.uss" />
+
+    <ui:VisualElement class="hud-root" picking-mode="Ignore">
+
+        <!-- ============================== -->
+        <!-- 1. PLAYER INFO — Top Left      -->
+        <!-- ============================== -->
+        <ui:VisualElement class="hud-top-left">
+            <!-- Avatar + Name + Level + EXP -->
+            <ui:VisualElement name="PlayerInfo" class="player-info clickable-hud-element">
+                <ui:VisualElement class="player-avatar">
+                    <ui:Label text="👤" class="player-avatar-icon" />
+                </ui:VisualElement>
+                <ui:VisualElement class="player-details">
+                    <ui:Label name="PlayerName" text="YWonderPlayer" class="player-name" />
+                    <ui:VisualElement class="player-level-row">
+                        <ui:VisualElement class="player-level-badge">
+                            <ui:Label name="PlayerLevel" text="Level: 1" class="player-level-text" />
+                        </ui:VisualElement>
+                        <ui:Label name="PlayerEXP" text="0.00" class="player-exp-text" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Quest Notification Bubble -->
+            <ui:VisualElement name="QuestBubble" class="quest-bubble clickable-hud-element">
+                <ui:Label name="QuestText" text="Khám phá đảo hoang và tìm ngôi nhà đầu tiên!" class="quest-text" />
+                <ui:VisualElement class="quest-info-icon">
+                    <ui:Label text="i" class="quest-info-text" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Sidebar Buttons (below quest) -->
+            <ui:VisualElement class="hud-left-sidebar">
+                <!-- Leaderboard -->
+                <ui:VisualElement class="sidebar-btn-shadow">
+                    <ui:Button name="BtnLeaderboard" class="sidebar-btn sidebar-btn-leaderboard">
+                        <ui:VisualElement class="sidebar-btn-icon" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_02.png'); -unity-background-scale-mode: scale-to-fit;" />
+                    </ui:Button>
+                </ui:VisualElement>
+
+                <!-- Daily Attendance -->
+                <ui:VisualElement class="sidebar-btn-shadow">
+                    <ui:Button name="BtnCalendar" class="sidebar-btn sidebar-btn-calendar">
+                        <ui:VisualElement class="sidebar-btn-icon sidebar-btn-icon-white" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_03.png'); -unity-background-scale-mode: scale-to-fit;" />
+                    </ui:Button>
+                </ui:VisualElement>
+
+                <!-- Event -->
+                <ui:VisualElement class="sidebar-btn-shadow" style="display: none;">
+                    <ui:Button name="BtnEvent" class="sidebar-btn sidebar-btn-event">
+                        <ui:Label text="🎁" class="sidebar-btn-icon sidebar-btn-icon-white" />
+                    </ui:Button>
+                </ui:VisualElement>
+
+                <!-- Mail -->
+                <ui:VisualElement class="sidebar-btn-shadow">
+                    <ui:Button name="BtnMail" class="sidebar-btn sidebar-btn-mail">
+                        <ui:VisualElement class="sidebar-btn-icon sidebar-btn-icon-white" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_04.png'); -unity-background-scale-mode: scale-to-fit;" />
+                    </ui:Button>
+                </ui:VisualElement>
+
+                <!-- Friends -->
+                <ui:VisualElement class="sidebar-btn-shadow">
+                    <ui:Button name="BtnFriends" class="sidebar-btn sidebar-btn-friends">
+                        <ui:VisualElement class="sidebar-btn-icon sidebar-btn-icon-white" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_01.png'); -unity-background-scale-mode: scale-to-fit;" />
+                    </ui:Button>
+                </ui:VisualElement>
+
+                <!-- Shop (Temporary) — ẩn: shop giờ mở qua NPC Mua/Bán -->
+                <ui:VisualElement class="sidebar-btn-shadow" style="display: none;">
+                    <ui:Button name="BtnShop" class="sidebar-btn sidebar-btn-shop">
+                        <ui:VisualElement class="sidebar-btn-shop-icon" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_05.png'); -unity-background-scale-mode: scale-to-fit;" />
+                        <ui:Label text="Shop" class="sidebar-btn-shop-text" />
+                    </ui:Button>
+                </ui:VisualElement>
+
+                <!-- Map (Temporary) -->
+                <ui:VisualElement class="sidebar-btn-shadow" style="display: none;">
+                    <ui:Button name="BtnMap" class="sidebar-btn sidebar-btn-map">
+                        <ui:VisualElement class="sidebar-btn-map-icon" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_07.png'); -unity-background-scale-mode: scale-to-fit;" />
+                        <ui:Label text="Map" class="sidebar-btn-map-text" />
+                    </ui:Button>
+                </ui:VisualElement>
+
+                <!-- Build Mode -->
+                <ui:VisualElement class="sidebar-btn-shadow" style="display: none;">
+                    <ui:Button name="BtnBuild" class="sidebar-btn sidebar-btn-build">
+                        <ui:VisualElement class="sidebar-btn-icon sidebar-btn-icon-white" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_08.png'); -unity-background-scale-mode: scale-to-fit;" />
+                    </ui:Button>
+                </ui:VisualElement>
+
+                <!-- Fishing (Temporary) -->
+                <ui:VisualElement class="sidebar-btn-shadow" style="display: none;">
+                    <ui:Button name="BtnFishing" class="sidebar-btn sidebar-btn-fishing">
+                        <ui:VisualElement class="sidebar-btn-icon sidebar-btn-icon-white" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_09.png'); -unity-background-scale-mode: scale-to-fit;" />
+                    </ui:Button>
+                </ui:VisualElement>
+
+                <!-- Workshop (Temporary) -->
+                <ui:VisualElement class="sidebar-btn-shadow" style="display: none;">
+                    <ui:Button name="BtnWorkshop" class="sidebar-btn sidebar-btn-workshop">
+                        <ui:VisualElement class="sidebar-btn-icon sidebar-btn-icon-white" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_10.png'); -unity-background-scale-mode: scale-to-fit;" />
+                    </ui:Button>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ============================== -->
+        <!-- 2. TOP RIGHT — Currency + Settings + Bag -->
+        <!-- ============================== -->
+        <ui:VisualElement class="hud-top-right">
+            <!-- Row 1: Currency + Settings -->
+            <ui:VisualElement class="hud-top-right-row">
+                <!-- Piggy Bank (Moved here) -->
+                <ui:VisualElement class="settings-btn-shadow" style="margin-right: 10px;">
+                    <ui:Button name="BtnPiggy" class="settings-btn">
+                        <ui:VisualElement class="settings-btn-icon" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_06.png'); -unity-background-scale-mode: scale-to-fit; width: 26px; height: 26px;" />
+                    </ui:Button>
+                </ui:VisualElement>
+
+                <!-- Currency (single) -->
+                <ui:VisualElement name="CurrencyDisplay" class="currency-item">
+                    <ui:VisualElement class="currency-icon">
+                        <ui:VisualElement style="width: 22px; height: 22px; background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_16.png'); -unity-background-scale-mode: scale-to-fit;" />
+                    </ui:VisualElement>
+                    <ui:Label name="CurrencyValue" text="84.00" class="currency-value" />
+                </ui:VisualElement>
+
+                <!-- Settings -->
+                <ui:VisualElement class="settings-btn-shadow">
+                    <ui:Button name="BtnSettings" class="settings-btn">
+                        <ui:VisualElement class="settings-btn-icon" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_12.png'); -unity-background-scale-mode: scale-to-fit;" />
+                    </ui:Button>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Row 2: Bag / Inventory -->
+            <ui:VisualElement class="bag-btn-shadow">
+                <ui:Button name="BtnBag" class="bag-btn">
+                    <ui:VisualElement class="bag-btn-icon" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_11.png'); -unity-background-scale-mode: scale-to-fit;" />
+                </ui:Button>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ============================== -->
+        <!-- 4. JOYSTICK & SPRINT — Bottom Left -->
+        <!-- ============================== -->
+        <ui:VisualElement class="hud-bottom-left">
+
+            <ui:VisualElement name="Joystick" class="joystick-outer">
+                <!-- Direction arrows -->
+                <ui:VisualElement class="joystick-arrow-container">
+                    <ui:Label text="▲" class="joystick-arrow joystick-arrow-up" />
+                    <ui:Label text="▼" class="joystick-arrow joystick-arrow-down" />
+                    <ui:Label text="◄" class="joystick-arrow joystick-arrow-left" />
+                    <ui:Label text="►" class="joystick-arrow joystick-arrow-right" />
+                </ui:VisualElement>
+                <!-- Inner stick -->
+                <ui:VisualElement class="joystick-inner" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+
+
+        <!-- ============================== -->
+        <!-- 6. ACTION BUTTONS — Right      -->
+        <!-- ============================== -->
+        <ui:VisualElement class="hud-right-actions" style="display: none;">
+            <!-- Interact (hand) — largest -->
+            <ui:VisualElement class="action-btn-shadow">
+                <ui:Button name="BtnInteract" class="action-btn action-btn-interact">
+                    <ui:VisualElement class="action-btn-icon action-btn-icon-dark" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_13.png'); -unity-background-scale-mode: scale-to-fit; -unity-background-image-tint-color: black;" />
+                </ui:Button>
+            </ui:VisualElement>
+
+            <!-- Cancel -->
+            <ui:VisualElement class="action-btn-shadow">
+                <ui:Button name="BtnCancel" class="action-btn action-btn-cancel">
+                    <ui:Label text="✕" class="action-btn-icon action-btn-icon-white" />
+                </ui:Button>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ============================== -->
+        <!-- 7. JUMP BUTTON — Bottom Right  -->
+        <!-- ============================== -->
+        <ui:VisualElement class="hud-bottom-right">
+            <ui:VisualElement class="jump-btn-shadow">
+                <ui:Button name="BtnJump" class="jump-btn">
+                    <ui:VisualElement class="jump-btn-icon" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_15.png'); -unity-background-scale-mode: scale-to-fit;" />
+                </ui:Button>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <!-- ============================== -->
+        <!-- 8. CROSSHAIR — Center Screen   -->
+        <!-- ============================== -->
+        <ui:VisualElement name="Crosshair" class="crosshair" picking-mode="Ignore">
+            <ui:VisualElement class="crosshair-dot" picking-mode="Ignore" />
+            <ui:VisualElement name="InteractionContainer" class="interaction-container" picking-mode="Ignore" />
+        </ui:VisualElement>
+
+        <!-- ============================== -->
+        <!-- SPRINT BUTTON — Middle Left    -->
+        <!-- ============================== -->
+        <ui:VisualElement class="sprint-btn-shadow">
+            <ui:Button name="BtnSprint" class="sprint-btn">
+                <ui:Label text="⚡" class="sprint-btn-icon" />
+            </ui:Button>
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

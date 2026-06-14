@@ -1,0 +1,28 @@
+{
+    "asset": "409fe3687577cd548a6c022780ca8e1e",
+    "fileName": "019eaf85-3ade-7449-a88e-279db10d7d96.png",
+    "prompt": "Strictly front-facing orthographic view of a 3D upward arrow jump icon. Isolated object only, no pedestal, no display stand, no floor shadow. Minimalist 3D Onyx style: dark matte plastic, frosted glass elements, soft glowing neon cyan accents. Centered composition, high contrast, solid white background.",
+    "negativePrompt": "",
+    "model": "gemini-3.1-flash",
+    "modelName": "Gemini 3.1 Nano Banana 2",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelatePixelGridSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0,
+    "dimensions": {
+        "width": 1024,
+        "height": 1024
+    },
+    "spriteSheet": false,
+    "duration": 0.0
+}

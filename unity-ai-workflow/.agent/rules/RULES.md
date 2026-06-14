@@ -9,7 +9,7 @@
 
 | Rule | Standard | Override |
 |------|----------|---------|
-| **Minimum Version** | Unity 2022 LTS | `ProjectConfig.yaml → unity_version` |
+| **Minimum Version** | Unity 6 (6000.3.15f1) | `ProjectConfig.yaml → unity_version` |
 | **Render Pipeline** | URP | `ProjectConfig.yaml → render_pipeline` |
 | **Scripting Backend** | IL2CPP | `ProjectConfig.yaml → scripting_backend` |
 | **Target Platforms** | Read from ProjectConfig | — |

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:Style src="Styles/DesignSystem.uss" />
+    <ui:Style src="Styles/ProfilePopup.uss" />
+
+    <!-- Overlay -->
+    <ui:VisualElement name="ProfileOverlay" class="profile-overlay">
+
+        <!-- Wrapper -->
+        <ui:VisualElement class="profile-wrapper">
+
+            <!-- Panel -->
+            <ui:VisualElement class="profile-panel">
+
+                <!-- Header -->
+                <ui:VisualElement class="profile-header">
+                    <ui:Label text="HỒ SƠ NÔNG DÂN" class="profile-header-title" />
+                </ui:VisualElement>
+
+                <!-- Body (Left & Right columns) -->
+                <ui:VisualElement name="ProfileContent" class="profile-body">
+                    
+                    <!-- Left Section: Avatar and Level Info -->
+                    <ui:VisualElement name="ProfileLeft" class="profile-left">
+                        <ui:VisualElement name="ProfileAvatarLarge" class="profile-avatar-large">
+                            <ui:Label name="AvatarEmoji" class="avatar-emoji" text="🧑‍🌾" />
+                        </ui:VisualElement>
+                        <ui:Label name="ProfileName" class="profile-name" text="YWonderPlayer" />
+                        
+                        <ui:VisualElement class="profile-level-badge">
+                            <ui:Label text="⭐" class="profile-level-icon" />
+                            <ui:Label name="ProfileLevel" class="profile-level-text" text="Cấp độ: 10" />
+                        </ui:VisualElement>
+
+                        <ui:Button name="BtnEditProfile" text="✏️ Sửa tên" class="profile-edit-btn" />
+                    </ui:VisualElement>
+
+                    <!-- Right Section: Progress EXP and Stats Cards -->
+                    <ui:VisualElement name="ProfileRight" class="profile-right">
+                        
+                        <!-- EXP Bar -->
+                        <ui:VisualElement class="profile-exp-container">
+                            <ui:Label class="profile-section-title" text="🌱 Kinh nghiệm (EXP)" />
+                            <ui:VisualElement class="profile-exp-track">
+                                <ui:VisualElement name="ProfileExpFill" class="profile-exp-fill" style="width: 45%;" />
+                                <ui:Label name="ProfileExpText" class="profile-exp-text" text="450 / 1000 (45%)" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <!-- Agriculture Stats Grid -->
+                        <ui:VisualElement class="stats-grid-container">
+                            <ui:Label class="profile-section-title" text="🏆 Thành tích nông trại" />
+                            <ui:VisualElement class="stats-grid">
+                                
+                                <!-- Stat Card 1 -->
+                                <ui:VisualElement class="stat-card">
+                                    <ui:Label class="stat-card-emoji" text="🌾" />
+                                    <ui:VisualElement class="stat-card-info">
+                                        <ui:Label class="stat-card-title" text="Cây đã trồng" />
+                                        <ui:Label name="StatPlanted" class="stat-card-value" text="142" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+
+                                <!-- Stat Card 2 -->
+                                <ui:VisualElement class="stat-card">
+                                    <ui:Label class="stat-card-emoji" text="🪙" />
+                                    <ui:VisualElement class="stat-card-info">
+                                        <ui:Label class="stat-card-title" text="Sản lượng bán" />
+                                        <ui:Label name="StatSold" class="stat-card-value" text="350" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+
+                                <!-- Stat Card 3 -->
+                                <ui:VisualElement class="stat-card">
+                                    <ui:Label class="stat-card-emoji" text="🤝" />
+                                    <ui:VisualElement class="stat-card-info">
+                                        <ui:Label class="stat-card-title" text="Bạn đồng hành" />
+                                        <ui:Label name="StatFriends" class="stat-card-value" text="5" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+
+                                <!-- Stat Card 4 -->
+                                <ui:VisualElement class="stat-card">
+                                    <ui:Label class="stat-card-emoji" text="📅" />
+                                    <ui:VisualElement class="stat-card-info">
+                                        <ui:Label class="stat-card-title" text="Ngày tham gia" />
+                                        <ui:Label name="StatJoinedDate" class="stat-card-valueJoined" text="02/06/2026" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+
+            <!-- Close Button (X) -->
+            <ui:VisualElement class="profile-close-shadow">
+                <ui:Button name="BtnClose" text="✕" class="profile-close-btn" />
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:Style src="Styles/DesignSystem.uss" />
+    <ui:Style src="Styles/ChatPanel.uss" />
+
+    <!-- Root container anchored at bottom center of the screen -->
+    <ui:VisualElement name="ChatPanelRoot" class="chat-root" picking-mode="Ignore">
+
+        <!-- 1. COLLAPSED STATE (Sleek pill bar) -->
+        <ui:VisualElement name="ChatCollapsed" class="chat-collapsed-bar">
+            <!-- Last received message preview -->
+            <ui:Label name="LblLastMessage" text="Admin: Chào mừng bạn đến với Y WONDER GREEN FARM!" class="chat-last-message" />
+            
+            <!-- Quick control buttons -->
+            <ui:VisualElement class="chat-collapsed-controls">
+                <ui:Button name="BtnQuickEmoji" text="☺" class="chat-mini-btn" />
+                <ui:Button name="BtnExpand" text="▲" class="chat-mini-btn" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- 2. EXPANDED STATE (Rich chat box) -->
+        <!-- Wrapped in a shadow block for the retro vibe -->
+        <ui:VisualElement name="ChatExpandedShadow" class="chat-expanded-shadow">
+            <ui:VisualElement name="ChatExpanded" class="chat-expanded-panel">
+
+                <!-- Header Bar -->
+                <ui:VisualElement class="chat-header">
+                    <ui:Label text="KÊNH THẾ GIỚI" class="chat-header-title" />
+                    <!-- Collapse button -->
+                    <ui:Button name="BtnCollapse" text="▼" class="chat-collapse-btn" />
+                </ui:VisualElement>
+
+                <!-- Scrollable Chat History -->
+                <ui:ScrollView name="ScrollerHistory" class="chat-history-scroll" />
+
+                <!-- Footer Bar (Input + Send) -->
+                <ui:VisualElement class="chat-footer">
+                    <ui:Button name="BtnEmojiExpanded" text="☺" class="chat-footer-emoji-btn" />
+                    
+                    <!-- Text field container -->
+                    <ui:VisualElement class="chat-input-wrapper">
+                        <ui:TextField name="InputMessage" placeholder-text="Nhập tin nhắn..." class="chat-text-input" />
+                    </ui:VisualElement>
+
+                    <!-- Send button -->
+                    <ui:VisualElement class="chat-send-shadow">
+                        <ui:Button name="BtnSend" text="Gửi" class="chat-send-btn" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- EMOTE POPUP GRID (Phương án 2) -->
+        <ui:VisualElement name="EmotePopup" class="emote-popup" style="display: none;">
+            <ui:VisualElement class="emote-grid">
+                <ui:Button name="BtnEmoteWave" class="emote-btn" text="👋" />
+                <ui:Button name="BtnEmotePoint" class="emote-btn" text="👉" />
+                <ui:Button name="BtnEmoteLaugh" class="emote-btn" text="😂" />
+                <ui:Button name="BtnEmoteDance" class="emote-btn" text="💃" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,23 @@
+{
+    "asset": "775393f1ef136fe41904826f6802ad88",
+    "fileName": "019ea4f9-d55b-7f8e-9acb-b81ded825f35.glb",
+    "prompt": "a cute stylized low poly duck, rigged with a skeleton and an idle animation loop",
+    "negativePrompt": "",
+    "model": "model3d-tripo3-1",
+    "modelName": "Tripo 3.1",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "promptImageReferenceGuid": "473d4b8366333ce4b8e28f4bfa8e0b74",
+    "modelReferenceGuid": "",
+    "multiviewFrontGuid": "",
+    "multiviewBackGuid": "",
+    "multiviewLeftGuid": "",
+    "multiviewRightGuid": "",
+    "multiviewTopGuid": "",
+    "multiviewBottomGuid": "",
+    "multiviewLeftFrontGuid": "",
+    "multiviewRightFrontGuid": "",
+    "faceLimit": -1
+}

@@ -1,0 +1,210 @@
+/* ============================================================
+   ShopPopup.uss — Shop / Store Popup
+   Design System: Cozy Dark Palia
+   ============================================================ */
+
+/* === OVERLAY === */
+.shop-overlay {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(21, 26, 39, 0.7); /* Mystic Black 70% */
+    align-items: center; justify-content: center; display: none; z-index: 100;
+}
+
+/* === PANEL SHADOW === */
+.shop-panel-shadow { position: relative; }
+
+/* === PANEL === */
+.shop-panel {
+    width: 1024px; height: 600px;
+    background-color: var(--color-primary-navy);
+    border-radius: var(--radius-panel);
+    border-width: 1px; border-color: rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+}
+
+/* === HEADER === */
+.shop-header {
+    flex-direction: row; align-items: center; justify-content: center;
+    background-color: var(--color-deep-blue);
+    padding: 24px 20px;
+    border-bottom-width: 1px; border-bottom-color: rgba(255, 255, 255, 0.05);
+    min-height: 80px;
+}
+
+.shop-header-title {
+    font-size: 32px; -unity-font-style: bold;
+    color: var(--color-accent-yellow); -unity-text-align: middle-center;
+    letter-spacing: 2px; position: absolute; left: 0; right: 0;
+}
+
+/* === BALANCE PILL === */
+.shop-balance-pill {
+    position: absolute; left: 24px;
+    flex-direction: row; align-items: center;
+    background-color: var(--color-mystic-black);
+    border-radius: var(--radius-button); padding: 8px 16px;
+    border-width: 0; z-index: 2;
+}
+.shop-balance-icon { font-size: 18px; margin-right: 6px; padding: 0; -unity-text-align: middle-center; }
+.shop-balance-value { font-size: 16px; -unity-font-style: bold; color: var(--color-text-white); padding: 0; -unity-text-align: middle-center; }
+
+/* === CLOSE BUTTON === */
+.shop-close-btn-container { position: absolute; right: 16px; top: 16px; }
+.shop-close-btn {
+    width: 36px; height: 36px; border-radius: var(--radius-button);
+    background-color: rgba(255, 255, 255, 0.05); border-width: 0;
+    font-size: 18px; color: var(--color-text-white); -unity-font-style: bold;
+    padding: 0; align-items: center; justify-content: center;
+    transition-property: background-color, scale; transition-duration: 0.15s;
+}
+.shop-close-btn:hover { background-color: var(--color-danger); color: white; }
+.shop-close-btn:active { scale: 0.9; }
+
+/* === BODY (Sidebar + Grid + Detail) === */
+.shop-body { flex-direction: row; flex-grow: 1; }
+
+/* === LEFT SIDEBAR === */
+.shop-sidebar {
+    width: 180px; padding: 24px 16px;
+    background-color: rgba(0, 0, 0, 0.15); /* Slightly darker than Navy */
+    border-right-width: 1px; border-right-color: rgba(255, 255, 255, 0.05);
+    flex-shrink: 0;
+}
+
+.shop-sidebar-section {
+    font-size: 13px; -unity-font-style: bold;
+    color: var(--color-accent-blue); letter-spacing: 1px;
+    margin-bottom: 12px; margin-top: 8px; padding-bottom: 8px;
+    border-bottom-width: 1px; border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+.shop-sidebar-divider { height: 1px; background-color: rgba(255, 255, 255, 0.05); margin: 16px 0; }
+
+/* === TABS & FILTERS === */
+.shop-mode-tab, .shop-filter {
+    padding: 10px 14px; margin-bottom: 6px; border-radius: var(--radius-tab); border-width: 0;
+    background-color: transparent; font-size: 15px; -unity-font-style: bold;
+    color: var(--color-bright-grey); -unity-text-align: middle-left;
+    transition-property: background-color, color, scale; transition-duration: 0.1s;
+}
+.shop-mode-tab:hover, .shop-filter:hover { background-color: rgba(255, 255, 255, 0.05); color: var(--color-text-white); }
+.shop-mode-tab:active, .shop-filter:active { scale: 0.96; }
+
+.shop-mode-tab--active, .shop-filter--active {
+    background-color: var(--color-mystic-black); color: var(--color-accent-yellow);
+}
+.shop-mode-tab--active:hover, .shop-filter--active:hover { background-color: var(--color-mystic-black); }
+
+/* === GRID AREA === */
+.shop-grid-area { flex-grow: 1; padding: 24px; }
+.shop-grid-scroll { flex-grow: 1; }
+.shop-grid { flex-direction: row; flex-wrap: wrap; align-content: flex-start; }
+
+/* === ITEM CARD === */
+.shop-item-shadow { margin: 6px; }
+.shop-item {
+    width: 110px; height: 140px; border-radius: 16px;
+    background-color: var(--color-mystic-black); border-width: 2px; border-color: transparent;
+    align-items: center; justify-content: center; padding: 10px;
+    transition-property: scale, border-color; transition-duration: 0.1s;
+}
+.shop-item:hover { border-color: var(--color-accent-blue); scale: 1.05; }
+.shop-item:active { scale: 0.95; }
+.shop-item--selected { border-color: var(--color-accent-yellow); background-color: var(--color-deep-blue); }
+
+.shop-item-icon {
+    width: 64px; height: 64px; border-radius: 12px;
+    background-color: rgba(255, 255, 255, 0.05); align-items: center; justify-content: center;
+    margin-bottom: 8px;
+}
+.shop-item-icon-text { font-size: 32px; -unity-text-align: middle-center; }
+.shop-item-name {
+    font-size: 13px; -unity-font-style: bold; color: var(--color-text-white);
+    -unity-text-align: upper-center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100px; margin-bottom: 4px;
+}
+.shop-item-price { font-size: 12px; -unity-font-style: bold; color: var(--color-accent-yellow); -unity-text-align: upper-center; }
+
+/* === DETAIL PANEL === */
+.shop-detail-panel {
+    width: 260px; background-color: var(--color-deep-blue);
+    border-radius: var(--radius-panel); border-width: 0;
+    margin: 24px 24px 24px 0; padding: 20px;
+    align-items: center; justify-content: flex-start; flex-shrink: 0;
+}
+
+.shop-detail-empty {
+    font-size: 14px; color: var(--color-bright-grey); -unity-font-style: italic;
+    -unity-text-align: middle-center; margin-top: auto; margin-bottom: auto; white-space: normal;
+}
+
+.shop-detail-content { width: 100%; height: 100%; align-items: center; }
+
+.shop-detail-icon-wrap {
+    width: 80px; height: 80px; border-radius: 16px;
+    background-color: var(--color-mystic-black); align-items: center; justify-content: center;
+    margin-bottom: 12px;
+}
+.shop-detail-icon { font-size: 40px; -unity-text-align: middle-center; }
+.shop-detail-name { font-size: 18px; -unity-font-style: bold; color: var(--color-text-white); margin-bottom: 8px; -unity-text-align: middle-center; white-space: normal; }
+
+/* === PRICE ROW === */
+.shop-price-row { flex-direction: row; align-items: center; justify-content: center; margin-bottom: 12px; }
+.shop-price-icon { font-size: 16px; margin-right: 6px; -unity-text-align: middle-center; }
+.shop-price-text { font-size: 16px; -unity-font-style: bold; color: var(--color-accent-yellow); -unity-text-align: middle-center; }
+
+.shop-detail-divider { height: 1px; background-color: rgba(255, 255, 255, 0.05); width: 100%; margin-bottom: 12px; }
+
+.shop-detail-desc {
+    font-size: 13px; color: var(--color-bright-grey); margin-bottom: 12px;
+    white-space: normal; -unity-text-align: upper-center; flex-grow: 1; width: 100%;
+}
+
+.shop-detail-owned-badge {
+    background-color: var(--color-mystic-black); border-radius: 12px; padding: 6px 16px;
+    color: var(--color-text-white); font-size: 13px; -unity-font-style: bold; -unity-text-align: middle-center;
+    margin-bottom: 16px;
+}
+
+/* === QUANTITY SELECTOR === */
+.shop-qty-row { flex-direction: row; align-items: center; justify-content: center; margin-bottom: 16px; }
+.shop-qty-btn {
+    width: 36px; height: 36px; border-radius: 18px; border-width: 0;
+    background-color: rgba(255, 255, 255, 0.1);
+    font-size: 20px; -unity-font-style: bold; color: var(--color-text-white);
+    -unity-text-align: middle-center; padding: 0;
+    transition-property: scale, background-color; transition-duration: 0.1s;
+}
+.shop-qty-btn:hover { background-color: rgba(255, 255, 255, 0.2); }
+.shop-qty-btn:active { scale: 0.9; }
+
+.shop-qty-input { width: 60px; height: 36px; margin: 0 12px; padding: 0; }
+.shop-qty-input .unity-text-field__input {
+    background-color: var(--color-mystic-black); border-color: transparent; border-width: 0; border-radius: 12px;
+    color: var(--color-text-white); font-size: 16px; -unity-font-style: bold; -unity-text-align: middle-center;
+    padding: 0; margin: 0;
+}
+
+/* === TOTAL ROW === */
+.shop-total-row {
+    flex-direction: row; align-items: center; justify-content: center;
+    margin-bottom: 16px; padding: 8px 16px;
+    background-color: var(--color-mystic-black); border-radius: 12px; width: 100%;
+}
+.shop-total-label { font-size: 14px; -unity-font-style: bold; color: var(--color-bright-grey); margin-right: 8px; }
+.shop-total-value { font-size: 16px; -unity-font-style: bold; color: var(--color-accent-yellow); }
+
+/* === ACTION BUTTON (MUA / BÁN) === */
+.shop-btn-action {
+    width: 100%; padding: 12px 24px; border-radius: var(--radius-button); border-width: 0;
+    background-color: var(--color-accent-yellow); color: var(--color-mystic-black);
+    font-size: 16px; -unity-font-style: bold; -unity-text-align: middle-center; letter-spacing: 1px;
+    margin-top: auto; transition-property: scale, background-color; transition-duration: 0.1s;
+}
+.shop-btn-action:hover { background-color: #FFF890; }
+.shop-btn-action:active { scale: 0.97; background-color: #D0C350; }
+.shop-btn-action:disabled { background-color: var(--color-overcast-grey); color: rgba(21, 26, 39, 0.5); }
+
+/* Sell mode — change action button to Blue/Red */
+.shop-btn-action--sell { background-color: var(--color-accent-blue); color: var(--color-mystic-black); }
+.shop-btn-action--sell:hover { background-color: #6BC0F6; }
+.shop-btn-action--sell:active { background-color: #3886B8; scale: 0.97; }

@@ -1,0 +1,23 @@
+{
+    "asset": "8d004f86c58130946842da4874be9b77",
+    "fileName": "019eabd4-7263-7e2a-b2f3-af7250221da8.glb",
+    "prompt": "Stylized low-poly rock variant 1. Grey color, faceted surfaces. Optimized for mobile.",
+    "negativePrompt": "",
+    "model": "model3d-tripo3-1",
+    "modelName": "Tripo 3.1",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "promptImageReferenceGuid": "820313496c149664c8b24b5c90314c5c",
+    "modelReferenceGuid": "",
+    "multiviewFrontGuid": "",
+    "multiviewBackGuid": "",
+    "multiviewLeftGuid": "",
+    "multiviewRightGuid": "",
+    "multiviewTopGuid": "",
+    "multiviewBottomGuid": "",
+    "multiviewLeftFrontGuid": "",
+    "multiviewRightFrontGuid": "",
+    "faceLimit": -1
+}

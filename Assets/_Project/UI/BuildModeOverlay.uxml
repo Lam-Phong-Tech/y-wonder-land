@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:Style src="Styles/DesignSystem.uss" />
+    <ui:Style src="Styles/BuildModeOverlay.uss" />
+
+    <!-- Full Screen Build Mode Overlay -->
+    <ui:VisualElement name="BuildRoot" class="build-overlay" picking-mode="Ignore">
+
+        <!-- ================================ -->
+        <!-- CONTROL BAR — Top (Clean)        -->
+        <!-- ================================ -->
+        <ui:VisualElement class="build-control-bar">
+
+            <!-- Left: Balance Pill -->
+            <ui:VisualElement class="build-balance-pill">
+                <ui:Label text="◆" class="build-balance-icon" />
+                <ui:Label name="lblBuildBalance" text="5,000 POS" class="build-balance-value" />
+            </ui:VisualElement>
+
+            <!-- Center: Title -->
+            <ui:Label text="CHẾ ĐỘ XÂY DỰNG" class="build-title" />
+
+            <!-- Right: Exit Button Only -->
+            <ui:Button name="BtnExitBuild" text="✕" class="build-tool-btn build-tool-exit" />
+        </ui:VisualElement>
+
+        <!-- ================================ -->
+        <!-- CATEGORY SIDEBAR — Left          -->
+        <!-- ================================ -->
+        <ui:VisualElement class="build-category-sidebar">
+            <ui:Button name="CatBuildings" class="build-cat-btn build-cat-active">
+                <ui:Label text="⌂" class="build-cat-icon" />
+                <ui:Label text="Nhà cửa" class="build-cat-label" />
+            </ui:Button>
+            <ui:Button name="CatFarm" class="build-cat-btn">
+                <ui:Label text="♣" class="build-cat-icon" />
+                <ui:Label text="Nông trại" class="build-cat-label" />
+            </ui:Button>
+            <ui:Button name="CatFence" class="build-cat-btn">
+                <ui:Label text="▦" class="build-cat-icon" />
+                <ui:Label text="Hàng rào" class="build-cat-label" />
+            </ui:Button>
+            <ui:Button name="CatDecor" class="build-cat-btn">
+                <ui:Label text="✿" class="build-cat-icon" />
+                <ui:Label text="Trang trí" class="build-cat-label" />
+            </ui:Button>
+            <ui:Button name="CatPath" class="build-cat-btn">
+                <ui:Label text="═" class="build-cat-icon" />
+                <ui:Label text="Đường đi" class="build-cat-label" />
+            </ui:Button>
+        </ui:VisualElement>
+
+        <!-- ================================ -->
+        <!-- ITEM BAR — Bottom                -->
+        <!-- ================================ -->
+        <ui:VisualElement class="build-item-bar">
+            <ui:ScrollView name="ItemScrollView" mode="Horizontal" class="build-item-scroll">
+                <!-- Items will be generated dynamically by C# controller -->
+            </ui:ScrollView>
+        </ui:VisualElement>
+
+        <!-- ================================ -->
+        <!-- PLACEMENT CONTROLS — Center Bot  -->
+        <!-- Visible only when ghost is active -->
+        <!-- ================================ -->
+        <ui:VisualElement name="PlacementControls" class="build-placement-controls hidden">
+            <ui:Button name="BtnConfirmPlace" class="build-placement-btn build-placement-confirm">
+                <ui:Label text="✔" class="build-placement-btn-icon" />
+            </ui:Button>
+            <ui:Button name="BtnRotatePlace" class="build-placement-btn build-placement-rotate">
+                <ui:Label text="Xoay" class="build-placement-btn-icon" style="font-size: 14px;" />
+            </ui:Button>
+            <ui:Button name="BtnCancelPlace" class="build-placement-btn build-placement-cancel">
+                <ui:Label text="✕" class="build-placement-btn-icon" />
+            </ui:Button>
+        </ui:VisualElement>
+
+        <!-- ================================ -->
+        <!-- CONTEXTUAL MENU — Near building  -->
+        <!-- Visible when a placed building   -->
+        <!-- is clicked                       -->
+        <!-- ================================ -->
+        <ui:VisualElement name="ContextMenu" class="build-context-menu hidden">
+            <ui:Button name="BtnCtxRotate" class="build-ctx-btn">
+                <ui:Label text="⟳" class="build-ctx-icon" />
+                <ui:Label text="Xoay" class="build-ctx-label" />
+            </ui:Button>
+            <ui:Button name="BtnCtxMove" class="build-ctx-btn">
+                <ui:Label text="↔" class="build-ctx-icon" />
+                <ui:Label text="Nhấc" class="build-ctx-label" />
+            </ui:Button>
+            <ui:Button name="BtnCtxDelete" class="build-ctx-btn build-ctx-delete">
+                <ui:Label text="🗑" class="build-ctx-icon" />
+                <ui:Label text="Xóa" class="build-ctx-label" />
+            </ui:Button>
+        </ui:VisualElement>
+
+        <!-- ================================ -->
+        <!-- INFO TOOLTIP — Small popup       -->
+        <!-- Shows when "i" button is pressed -->
+        <!-- ================================ -->
+        <ui:VisualElement name="InfoTooltip" class="build-info-tooltip hidden">
+            <ui:Label name="InfoTooltipName" text="Nhà gỗ nhỏ" class="build-info-name" />
+            <ui:VisualElement class="build-info-row">
+                <ui:Label name="InfoTooltipSize" text="2x2" class="build-info-size" />
+                <ui:Label name="InfoTooltipPrice" text="500 POS" class="build-info-price" />
+            </ui:VisualElement>
+            <ui:Label name="InfoTooltipDesc" text="Ngôi nhà gỗ ấm cúng." class="build-info-desc" />
+        </ui:VisualElement>
+
+        <!-- ================================ -->
+        <!-- STATUS LABEL — Center Feedback   -->
+        <!-- ================================ -->
+        <ui:Label name="lblBuildStatus" text="" class="build-status-label hidden" />
+
+    </ui:VisualElement>
+</ui:UXML>

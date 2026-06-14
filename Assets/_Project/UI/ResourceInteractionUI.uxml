@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ui="UnityEngine.UIElements"
+    xsi:noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd">
+
+    <ui:VisualElement name="ResourceInteractionContainer" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: none; align-items: center; justify-content: center; picking-mode: Ignore;">
+
+        <!-- Thanh tiến trình chặt/đập — controller canh vị trí cố định ngay dưới tâm ngắm. -->
+        <!-- Style theo Design System "Palia Cozy Dark": rãnh mystic-black, viền tan, accent vàng. -->
+        <!-- Nền container = "rãnh"; padding 3px tạo khoảng lùi để phần vàng nằm gọn bên trong. -->
+        <ui:VisualElement name="FloatingBarContainer" style="position: absolute; width: 200px; height: 18px; picking-mode: Ignore; background-color: rgba(21, 26, 39, 0.88); border-radius: 9px; border-width: 2px; border-color: rgba(213, 184, 146, 0.55); padding: 3px; overflow: hidden;">
+
+            <!-- Phần lấp đầy (accent vàng Palia #FDEF70) -->
+            <ui:VisualElement name="ProgressBarFill" style="width: 0%; height: 100%; background-color: rgb(253, 239, 112); border-radius: 6px; transition-property: width; transition-duration: 0.1s;">
+                <!-- Highlight mềm phía trên cho cảm giác "cozy" -->
+                <ui:VisualElement style="position: absolute; top: 0; left: 0; right: 0; height: 45%; background-color: rgba(255, 255, 255, 0.28); border-top-left-radius: 6px; border-top-right-radius: 6px;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

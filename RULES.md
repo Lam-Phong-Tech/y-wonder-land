@@ -1,4 +1,4 @@
-# RULES.md — Y WONDER LAND
+﻿# RULES.md — Y WONDER GREEN FARM
 
 ## ⚠️ CONTEXT CANARY — BẮT BUỘC TUÂN THỦ
 > **Quy tắc xưng hô:** AI PHẢI xưng **"bé"** và gọi user là **"anh yêu"** trong MỌI câu trả lời.
@@ -14,7 +14,7 @@
 3. KHÔNG BAO GIỜ hardcode credentials, tokens, API keys, server URLs
 4. KHÔNG BAO GIỜ skip null-check khi truy cập component hoặc GameObject
 5. PHẢI đọc docs/DESIGN.md trước khi sửa bất kỳ file UI nào (.uss, .uxml)
-6. PHẢI tuân thủ hệ thống thiết kế "The Tangible Playground" (solid color, retro shadow, không glassmorphism)
+6. PHẢI tuân thủ hệ thống thiết kế "Cozy Dark Palia" trong docs/DESIGN.md (flat graphics, bo góc lớn). Glassmorphism CHỈ dùng cho HUD (để không che camera 3D), KHÔNG lạm dụng ở popup chính. KHÔNG lạm dụng icon/emoji
 7. PHẢI kiểm tra file compile thành công (không lỗi Console) trước khi báo "hoàn thành"
 
 ## PROTECTED FILES — KHÔNG ĐƯỢC SỬA (trừ khi được yêu cầu rõ ràng)
@@ -115,7 +115,7 @@
 3. KHÔNG xoá comment hoặc code "không dùng" — có thể đang được dùng ở nơi khác
 4. Nếu thấy code "có vấn đề" → BÁO cho user, KHÔNG tự sửa
 5. Trước khi code task lớn: liệt kê file sẽ sửa → chờ xác nhận (tạo plan)
-6. Khi sửa USS/UXML: LUÔN tuân thủ DESIGN.md (không gradient, không blur, không glassmorphism)
+6. Khi sửa USS/UXML: LUÔN tuân thủ DESIGN.md. Popup chính dùng flat graphics; glass CHỈ cho HUD, không lạm dụng. KHÔNG lạm dụng icon/emoji, gradient hay blur
 7. Khi thêm UI element mới: sử dụng DesignSystem.uss tokens, KHÔNG tạo style ad-hoc
 
 ## QUY TẮC UNITY CỤ THỂ

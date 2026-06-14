@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:Style src="Styles/DesignSystem.uss" />
+    <ui:Style src="Styles/WorkshopPopup.uss" />
+
+    <!-- Overlay -->
+    <ui:VisualElement name="WorkshopOverlay" class="workshop-overlay">
+
+        <!-- Panel Shadow (transparent wrapper, khop Memory #29) -->
+        <ui:VisualElement class="workshop-panel-shadow">
+
+            <!-- Panel -->
+            <ui:VisualElement class="workshop-panel">
+
+                <!-- Header (Cam) -->
+                <ui:VisualElement class="workshop-header">
+                    <ui:Label name="WorkshopTitle" text="." class="workshop-header-title" />
+                </ui:VisualElement>
+
+                <!-- Body: Sidebar + Detail -->
+                <ui:VisualElement class="workshop-body">
+
+                    <!-- Left: Tool List -->
+                    <ui:VisualElement class="workshop-sidebar">
+                        <ui:Label text="." class="workshop-sidebar-section" />
+                        <ui:ScrollView name="ToolListScroll" mode="Vertical" class="workshop-tool-scroll">
+                            <ui:VisualElement name="ToolListContainer" />
+                        </ui:ScrollView>
+                    </ui:VisualElement>
+
+                    <!-- Right: Tool Detail Panel -->
+                    <ui:VisualElement name="WorkshopDetailPanel" class="workshop-detail-panel">
+                        <!-- Empty State -->
+                        <ui:Label name="WorkshopDetailEmpty" text="." class="workshop-detail-empty" />
+
+                        <!-- Detail Content (2 columns: left icon + right info) -->
+                        <ui:VisualElement name="WorkshopDetailContent" class="workshop-detail-content">
+
+                            <!-- Left: Icon + Name + Effect -->
+                            <ui:VisualElement class="workshop-detail-left">
+                                <ui:VisualElement class="workshop-detail-icon-wrap">
+                                    <ui:Label name="LblToolIcon" text="." class="workshop-detail-icon" />
+                                </ui:VisualElement>
+                                <ui:Label name="LblToolName" text="." class="workshop-detail-name" />
+                                <ui:Label name="LblUpgradeEffect" text="." class="workshop-detail-effect" />
+                            </ui:VisualElement>
+
+                            <!-- Right: Requirements + Button -->
+                            <ui:VisualElement class="workshop-detail-right">
+                                <ui:Label text="." class="workshop-req-title" name="LblReqTitle" />
+
+                                <ui:VisualElement name="ReqContainer" class="workshop-req-container">
+                                    <!-- POS -->
+                                    <ui:VisualElement class="workshop-req-row">
+                                        <ui:Label text="." class="workshop-req-icon" />
+                                        <ui:Label text="POS" class="workshop-req-name" />
+                                        <ui:Label name="LblReqPOS" text="." class="workshop-req-value" />
+                                    </ui:VisualElement>
+
+                                    <!-- Wood -->
+                                    <ui:VisualElement class="workshop-req-row" name="RowReqWood">
+                                        <ui:Label text="." class="workshop-req-icon" />
+                                        <ui:Label text="." class="workshop-req-name" />
+                                        <ui:Label name="LblReqWood" text="." class="workshop-req-value" />
+                                    </ui:VisualElement>
+
+                                    <!-- Stone -->
+                                    <ui:VisualElement class="workshop-req-row" name="RowReqStone">
+                                        <ui:Label text="." class="workshop-req-icon" />
+                                        <ui:Label text="." class="workshop-req-name" />
+                                        <ui:Label name="LblReqStone" text="." class="workshop-req-value" />
+                                    </ui:VisualElement>
+
+                                    <!-- Iron -->
+                                    <ui:VisualElement class="workshop-req-row" name="RowReqIron">
+                                        <ui:Label text="." class="workshop-req-icon" />
+                                        <ui:Label text="." class="workshop-req-name" />
+                                        <ui:Label name="LblReqIron" text="." class="workshop-req-value" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+
+                                <!-- Spacer pushes button to bottom -->
+                                <ui:VisualElement style="flex-grow: 1;" />
+
+                                <!-- Action button -->
+                                <ui:Button name="BtnUpgrade" text="." class="workshop-btn-action" />
+                            </ui:VisualElement>
+
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+
+            <!-- Close Button (SAU panel, khop Memory #4) -->
+            <ui:VisualElement class="workshop-close-shadow">
+                <ui:Button name="BtnCloseWorkshop" text="." class="workshop-close-btn" />
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+
+</ui:UXML>

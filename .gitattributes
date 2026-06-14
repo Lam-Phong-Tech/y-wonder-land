@@ -15,9 +15,8 @@
 *.terrainlayer linguist-generated
 *.shadergraph linguist-generated
 *.shadersubgraph linguist-generated
-
 # Schema files
 *.xsd linguist-generated
-
 # Docs — not code
 *.md linguist-documentation
+*.fbx filter=lfs diff=lfs merge=lfs -text

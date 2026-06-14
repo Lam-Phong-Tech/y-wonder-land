@@ -1,0 +1,273 @@
+/* ============================================
+   Build Mode Overlay Styles — Cozy Dark Palia
+   Extends DesignSystem.uss
+   ============================================ */
+
+/* -- Overlay Root -- */
+.build-overlay {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+}
+
+/* ================================ */
+/* CONTROL BAR — Top (Minimal)      */
+/* ================================ */
+
+.build-control-bar {
+    position: absolute; top: 0; left: 0; right: 0; height: 56px;
+    background-color: rgba(21, 26, 39, 0.75); /* Hiệu ứng thấu kính / Glassmorphism */
+    flex-direction: row; align-items: center; justify-content: space-between;
+    padding: 0 16px;
+    border-bottom-width: 1px; border-color: rgba(255, 255, 255, 0.15);
+    flex-shrink: 0;
+}
+
+/* Balance Pill */
+.build-balance-pill {
+    flex-direction: row; align-items: center;
+    background-color: var(--color-mystic-black);
+    border-radius: var(--radius-button);
+    padding: 6px 16px;
+    border-width: 1px; border-color: rgba(255, 255, 255, 0.1);
+}
+
+.build-balance-icon {
+    font-size: 14px; color: var(--color-accent-yellow); margin-right: 6px;
+}
+
+.build-balance-value {
+    font-size: 14px; -unity-font-style: bold; color: var(--color-text-white);
+}
+
+/* Title */
+.build-title {
+    position: absolute; left: 0; right: 0;
+    font-size: 18px; -unity-font-style: bold;
+    color: var(--color-text-white);
+    -unity-text-align: middle-center;
+    letter-spacing: 4px; padding: 0 240px;
+    white-space: nowrap; text-overflow: ellipsis; overflow: hidden;
+}
+
+/* Tool Button Base */
+.build-tool-btn {
+    width: 40px; height: 40px; border-radius: var(--radius-button);
+    background-color: rgba(255, 255, 255, 0.1);
+    border-width: 0; padding: 0; align-items: center; justify-content: center;
+    font-size: 16px; -unity-font-style: bold; color: var(--color-bright-grey);
+    transition-property: scale, background-color, color; transition-duration: 0.1s;
+}
+
+/* Exit Button */
+.build-tool-exit { background-color: rgba(255, 255, 255, 0.1); }
+.build-tool-exit:hover { background-color: rgba(255, 75, 75, 0.8); color: #FFF; }
+.build-tool-exit:active { scale: 0.95; }
+
+/* ================================ */
+/* CATEGORY SIDEBAR — Left          */
+/* ================================ */
+
+.build-category-sidebar {
+    position: absolute; top: 72px; left: 12px; width: 80px; align-items: stretch;
+}
+
+.build-cat-btn {
+    flex-direction: column; align-items: center; justify-content: center;
+    padding: 8px 4px; margin-bottom: 8px;
+    border-radius: var(--radius-panel); border-width: 1px; border-color: rgba(255, 255, 255, 0.05);
+    background-color: var(--color-mystic-black);
+    transition-property: background-color, border-color, scale; transition-duration: 0.1s;
+    min-height: 64px;
+}
+
+.build-cat-btn:hover { background-color: rgba(255, 255, 255, 0.1); scale: 1.05; }
+.build-cat-btn:active { scale: 0.95; }
+
+.build-cat-active {
+    background-color: var(--color-accent-yellow);
+    border-color: var(--color-accent-yellow);
+}
+
+.build-cat-active:hover { background-color: #FFF890; }
+
+.build-cat-icon {
+    font-size: 24px; -unity-text-align: middle-center; margin-bottom: 2px;
+    color: var(--color-text-white);
+}
+.build-cat-active .build-cat-icon { color: var(--color-mystic-black); }
+
+.build-cat-label {
+    font-size: 10px; -unity-font-style: bold;
+    color: var(--color-bright-grey); -unity-text-align: middle-center; white-space: nowrap;
+}
+.build-cat-active .build-cat-label { color: var(--color-mystic-black); }
+
+
+/* ================================ */
+/* ITEM BAR — Bottom                */
+/* ================================ */
+
+.build-item-bar {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 120px;
+    background-color: rgba(21, 26, 39, 0.75); /* Hiệu ứng thấu kính / Glassmorphism */
+    border-top-width: 1px; border-color: rgba(255, 255, 255, 0.15);
+    padding: 8px 12px; padding-left: 104px; /* Nhường chỗ cho Sidebar bên trái để cân đối */
+    flex-direction: row; align-items: center;
+}
+
+.build-item-scroll { flex-grow: 1; flex-direction: row; }
+.build-item-scroll .unity-scroll-view__content-container { flex-direction: row; align-items: center; }
+
+/* Item Card */
+.build-item-card {
+    width: 80px; height: 96px;
+    background-color: var(--color-mystic-black);
+    border-radius: var(--radius-panel);
+    border-width: 1px; border-color: rgba(255, 255, 255, 0.05);
+    align-items: center; justify-content: center;
+    margin-right: 12px; padding: 6px 4px; flex-shrink: 0;
+    transition-property: border-color, background-color, scale; transition-duration: 0.1s;
+}
+
+.build-item-card:hover {
+    background-color: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.2); scale: 1.05;
+}
+
+.build-item-card:active { scale: 0.95; }
+
+.build-item-selected {
+    border-color: var(--color-accent-yellow); border-width: 2px;
+    background-color: rgba(253, 239, 112, 0.1);
+}
+
+.build-item-emoji { font-size: 28px; -unity-text-align: middle-center; margin-bottom: 2px; }
+
+.build-item-name {
+    font-size: 10px; color: var(--color-text-white); -unity-text-align: middle-center;
+    white-space: nowrap; text-overflow: ellipsis; overflow: hidden; max-width: 72px;
+}
+
+.build-item-price {
+    font-size: 11px; -unity-font-style: bold; color: var(--color-accent-yellow);
+    -unity-text-align: middle-center; margin-top: 2px;
+}
+
+/* Info badge */
+.build-item-info-badge {
+    position: absolute; top: 4px; right: 4px; width: 18px; height: 18px;
+    border-radius: 9px; background-color: rgba(255, 255, 255, 0.1);
+    align-items: center; justify-content: center;
+}
+.build-item-info-badge:hover { background-color: rgba(255, 255, 255, 0.3); }
+.build-item-info-icon { font-size: 10px; -unity-font-style: bold; color: var(--color-text-white); }
+
+
+/* ================================ */
+/* PLACEMENT CONTROLS — Bottom Ctr  */
+/* ================================ */
+
+.build-placement-controls {
+    position: absolute; width: 220px;
+    flex-direction: row; align-items: center; justify-content: center;
+}
+
+.build-placement-btn {
+    width: 64px; height: 64px; border-radius: 32px;
+    border-width: 0; align-items: center; justify-content: center;
+    margin: 0 8px; padding: 0;
+    transition-property: background-color, scale; transition-duration: 0.1s;
+}
+
+.build-placement-btn:hover { scale: 1.1; }
+.build-placement-btn:active { scale: 0.9; }
+
+.build-placement-btn-icon {
+    font-size: 24px; -unity-font-style: bold; -unity-text-align: middle-center; color: var(--color-text-white);
+}
+
+.build-placement-confirm { background-color: var(--color-success); }
+.build-placement-confirm:hover { background-color: var(--color-success-hover); }
+
+.build-placement-rotate { background-color: var(--color-accent-blue); }
+.build-placement-rotate:hover { background-color: #5580E5; }
+
+.build-placement-cancel { background-color: var(--color-danger); }
+.build-placement-cancel:hover { background-color: var(--color-danger-hover); }
+
+
+/* ================================ */
+/* CONTEXTUAL MENU — Near building  */
+/* ================================ */
+
+.build-context-menu {
+    position: absolute; flex-direction: row; align-items: center;
+    background-color: var(--color-primary-navy);
+    border-radius: var(--radius-panel);
+    border-width: 1px; border-color: rgba(255, 255, 255, 0.1);
+    padding: 8px 12px;
+}
+
+.build-ctx-btn {
+    flex-direction: column; align-items: center; justify-content: center;
+    padding: 6px 12px; margin: 0 4px; border-radius: var(--radius-button);
+    border-width: 0; background-color: transparent;
+    transition-property: background-color; transition-duration: 0.1s;
+}
+
+.build-ctx-btn:hover { background-color: rgba(255, 255, 255, 0.1); }
+.build-ctx-btn:active { background-color: rgba(255, 255, 255, 0.2); }
+
+.build-ctx-icon { font-size: 20px; -unity-text-align: middle-center; color: var(--color-text-white); margin-bottom: 2px; }
+.build-ctx-label { font-size: 10px; color: var(--color-bright-grey); -unity-text-align: middle-center; }
+
+.build-ctx-delete .build-ctx-icon { color: var(--color-danger); }
+.build-ctx-delete .build-ctx-label { color: var(--color-danger); }
+
+/* ================================ */
+/* INFO TOOLTIP — Small popup       */
+/* ================================ */
+
+.build-info-tooltip {
+    position: absolute; bottom: 140px; width: 220px;
+    background-color: var(--color-mystic-black);
+    border-radius: var(--radius-panel);
+    border-width: 1px; border-color: rgba(255, 255, 255, 0.1);
+    padding: 12px; align-items: center;
+}
+
+.build-info-name {
+    font-size: 14px; -unity-font-style: bold; color: var(--color-accent-yellow);
+    -unity-text-align: middle-center; margin-bottom: 6px;
+}
+
+.build-info-row { flex-direction: row; align-items: center; justify-content: center; margin-bottom: 6px; }
+
+.build-info-size {
+    font-size: 11px; color: var(--color-bright-grey);
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 6px; padding: 2px 6px; margin-right: 8px;
+}
+
+.build-info-price { font-size: 12px; -unity-font-style: bold; color: var(--color-accent-yellow); }
+
+.build-info-desc {
+    font-size: 12px; color: var(--color-bright-grey); -unity-text-align: middle-center; white-space: normal;
+}
+
+/* ================================ */
+/* STATUS LABEL — Center Feedback   */
+/* ================================ */
+
+.build-status-label {
+    position: absolute; top: 45%; left: 0; right: 0;
+    font-size: 20px; -unity-font-style: bold; color: var(--color-text-white);
+    -unity-text-align: middle-center; letter-spacing: 2px;
+    transition-property: opacity; transition-duration: 0.5s; transition-timing-function: ease-out;
+}
+.build-status-success { color: var(--color-success); }
+.build-status-error { color: var(--color-danger); }
+
+/* BuildMode CỐ Ý cuộn ngang (mode="Horizontal") -> bật lại thanh cuộn ngang cho
+   riêng nó, ghi đè rule ẩn toàn cục trong DesignSystem.uss (specificity cao hơn). */
+.build-item-scroll .unity-scroller--horizontal { display: flex; }
