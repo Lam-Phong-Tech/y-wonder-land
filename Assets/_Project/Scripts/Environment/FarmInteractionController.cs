@@ -214,7 +214,7 @@ namespace YWonderLand.Environment
         // --- CÁC HÀM XỬ LÝ SỰ KIỆN NÚT BẤM ---
         private void StartFishing(FishingSpot spot)
         {
-            PlayerController player = Object.FindFirstObjectByType<PlayerController>();
+            PlayerController player = PlayerController.Instance;
             if (player != null) player.PlayActionAnimation("Fishing", 8.5f, YWonderLand.Player.ToolType.FishingRod);
             
             var fishingUI = Object.FindFirstObjectByType<FishingOverlayController>();
@@ -223,21 +223,21 @@ namespace YWonderLand.Environment
 
         private void PetAnimal(FarmAnimal animal)
         {
-            PlayerController player = Object.FindFirstObjectByType<PlayerController>();
+            PlayerController player = PlayerController.Instance;
             if (player != null) player.PlayActionAnimation("Petting", 0f); // 0 = tự lấy đúng độ dài clip
             animal.Pet();
         }
 
         private void FeedAnimal(FarmAnimal animal)
         {
-            PlayerController player = Object.FindFirstObjectByType<PlayerController>();
+            PlayerController player = PlayerController.Instance;
             if (player != null) player.PlayActionAnimation("Feed", 0f); // 0 = tự lấy đúng độ dài clip (~6s)
             animal.Feed();
         }
 
         private void HealAnimal(FarmAnimal animal)
         {
-            PlayerController player = Object.FindFirstObjectByType<PlayerController>();
+            PlayerController player = PlayerController.Instance;
             // Chưa có animation "tiêm/chữa bệnh" riêng -> tạm dùng "Feed" (động tác đưa tay) cho đỡ trống
             if (player != null) player.PlayActionAnimation("Feed", 0f);
             animal.Heal();
@@ -257,7 +257,7 @@ namespace YWonderLand.Environment
             if (Vector3.Distance(clickPlayerPos, resource.transform.position) > resource.interactionRange + 1.5f)
                 return;
 
-            PlayerController player = Object.FindFirstObjectByType<PlayerController>();
+            PlayerController player = PlayerController.Instance;
             
             // Ép nhân vật múa hoạt ảnh và cầm rìu/cúp
             if (player != null) 
@@ -283,7 +283,8 @@ namespace YWonderLand.Environment
 
         private void PerformTileAction(FarmTile tile)
         {
-            float dist = Vector3.Distance(Object.FindFirstObjectByType<PlayerController>().transform.position, tile.transform.position);
+            if (PlayerController.Instance == null) return; // chống NullReferenceException khi player chưa spawn / đang teleport
+            float dist = Vector3.Distance(PlayerController.Instance.transform.position, tile.transform.position);
             if (dist > interactRange) return;
 
             switch (tile.currentState)

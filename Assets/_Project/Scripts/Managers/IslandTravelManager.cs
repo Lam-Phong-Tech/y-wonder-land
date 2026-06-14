@@ -92,64 +92,78 @@ public class IslandTravelManager : MonoBehaviour
         _isTraveling = true;
         IslandDef previous = islands.Find(i => i.id == CurrentIslandId);
 
-        // 1. Hiện màn hình chờ (tự tạo nếu thiếu — giống ScenePortal)
-        if (LoadingScreenController.Instance == null)
-        {
-            var loadingObj = new GameObject("LoadingScreenController");
-            loadingObj.AddComponent<LoadingScreenController>();
-        }
-        if (LoadingScreenController.Instance != null)
-        {
-            await LoadingScreenController.Instance.ShowLoadingAsync($"Đang tới {target.displayName}...");
-        }
-
-        // 2. Tạm khoá điều khiển để teleport không bị giật
+        // Khai báo trước try để khối finally luôn bật lại được điều khiển dù có lỗi.
         PlayerController player = PlayerController.Instance;
         CharacterController cc = player != null ? player.GetComponent<CharacterController>() : null;
-        if (cc != null) cc.enabled = false;
-        if (player != null) player.enabled = false;
 
-        // 3. Load đảo đích (nếu là scene phụ và chưa được load)
-        if (!target.isBaseScene && !string.IsNullOrEmpty(target.sceneName) && !IsSceneLoaded(target.sceneName))
+        // try/finally: nếu LoadSceneAsync ném lỗi (scene chưa thêm Build Settings, v.v.)
+        // thì finally VẪN bật lại Player/CharacterController, ẩn loading và mở khoá
+        // _isTraveling — tránh kẹt nhân vật đơ cứng vĩnh viễn giữa lúc demo.
+        try
         {
-            AsyncOperation loadOp = SceneManager.LoadSceneAsync(target.sceneName, LoadSceneMode.Additive);
-            while (loadOp != null && !loadOp.isDone) await Awaitable.NextFrameAsync();
-            Debug.Log($"[IslandTravel] Đã load đảo: {target.sceneName}");
-        }
+            // 1. Hiện màn hình chờ (tự tạo nếu thiếu — giống ScenePortal)
+            if (LoadingScreenController.Instance == null)
+            {
+                var loadingObj = new GameObject("LoadingScreenController");
+                loadingObj.AddComponent<LoadingScreenController>();
+            }
+            if (LoadingScreenController.Instance != null)
+            {
+                await LoadingScreenController.Instance.ShowLoadingAsync($"Đang tới {target.displayName}...");
+            }
 
-        // 4. Unload đảo cũ (chỉ unload scene phụ — KHÔNG bao giờ unload scene nền)
-        if (previous != null && !previous.isBaseScene && !string.IsNullOrEmpty(previous.sceneName)
-            && previous.id != target.id && IsSceneLoaded(previous.sceneName))
+            // 2. Tạm khoá điều khiển để teleport không bị giật
+            if (cc != null) cc.enabled = false;
+            if (player != null) player.enabled = false;
+
+            // 3. Load đảo đích (nếu là scene phụ và chưa được load)
+            if (!target.isBaseScene && !string.IsNullOrEmpty(target.sceneName) && !IsSceneLoaded(target.sceneName))
+            {
+                AsyncOperation loadOp = SceneManager.LoadSceneAsync(target.sceneName, LoadSceneMode.Additive);
+                while (loadOp != null && !loadOp.isDone) await Awaitable.NextFrameAsync();
+                Debug.Log($"[IslandTravel] Đã load đảo: {target.sceneName}");
+            }
+
+            // 4. Unload đảo cũ (chỉ unload scene phụ — KHÔNG bao giờ unload scene nền)
+            if (previous != null && !previous.isBaseScene && !string.IsNullOrEmpty(previous.sceneName)
+                && previous.id != target.id && IsSceneLoaded(previous.sceneName))
+            {
+                AsyncOperation unloadOp = SceneManager.UnloadSceneAsync(previous.sceneName);
+                while (unloadOp != null && !unloadOp.isDone) await Awaitable.NextFrameAsync();
+                Debug.Log($"[IslandTravel] Đã unload đảo cũ: {previous.sceneName}");
+            }
+
+            // 5. Thả nhân vật tới điểm spawn của đảo đích
+            if (player != null)
+            {
+                player.transform.position = target.spawnPosition;
+                player.transform.rotation = Quaternion.Euler(0, target.spawnYRotation, 0);
+                player.isSwimming = false; // reset trạng thái bơi phòng khi teleport ra khỏi vùng nước
+            }
+
+            // Đợi 1 frame cho Physics cập nhật trước khi bật lại CharacterController
+            await Awaitable.NextFrameAsync();
+
+            CurrentIslandId = target.id;
+            Debug.Log($"[IslandTravel] Đã tới đảo: {target.displayName} ({target.id})");
+        }
+        catch (System.Exception e)
         {
-            AsyncOperation unloadOp = SceneManager.UnloadSceneAsync(previous.sceneName);
-            while (unloadOp != null && !unloadOp.isDone) await Awaitable.NextFrameAsync();
-            Debug.Log($"[IslandTravel] Đã unload đảo cũ: {previous.sceneName}");
+            Debug.LogError($"[IslandTravel] Lỗi khi đi đảo '{targetId}': {e.Message}\n{e.StackTrace}");
         }
-
-        // 5. Thả nhân vật tới điểm spawn của đảo đích
-        if (player != null)
+        finally
         {
-            player.transform.position = target.spawnPosition;
-            player.transform.rotation = Quaternion.Euler(0, target.spawnYRotation, 0);
-            player.isSwimming = false; // reset trạng thái bơi phòng khi teleport ra khỏi vùng nước
+            // LUÔN bật lại điều khiển + ẩn loading + mở khoá, kể cả khi có lỗi ở trên.
+            if (cc != null) cc.enabled = true;
+            if (player != null) player.enabled = true;
+
+            if (LoadingScreenController.Instance != null)
+            {
+                await LoadingScreenController.Instance.HideLoadingAsync();
+            }
+
+            _isTraveling = false;
         }
-
-        // Đợi 1 frame cho Physics cập nhật trước khi bật lại CharacterController
-        await Awaitable.NextFrameAsync();
-
-        if (cc != null) cc.enabled = true;
-        if (player != null) player.enabled = true;
-
-        CurrentIslandId = target.id;
-        Debug.Log($"[IslandTravel] Đã tới đảo: {target.displayName} ({target.id})");
-
-        // 6. Ẩn màn hình chờ
-        if (LoadingScreenController.Instance != null)
-        {
-            await LoadingScreenController.Instance.HideLoadingAsync();
-        }
-
-        _isTraveling = false;
     }
 
     private bool IsSceneLoaded(string sceneName)

@@ -22,8 +22,6 @@ public class MapPortalTrigger : MonoBehaviour
     [Tooltip("Chỉ mở Bản đồ khi đang ở trạng thái Gameplay (không mở lúc cutscene/menu)")]
     [SerializeField] private bool onlyDuringGameplay = true;
 
-    private bool _playerInside = false;
-
     private void Reset()
     {
         // Tự bật Is Trigger cho tiện khi mới gắn component
@@ -33,9 +31,13 @@ public class MapPortalTrigger : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (!other.CompareTag("Player")) return;
-        if (_playerInside) return;          // tránh kích hoạt lặp khi vẫn đứng trong cổng
-        _playerInside = true;
 
+        // Chỉ mở Bản đồ khi đang ở Gameplay (không mở lúc cutscene/menu).
+        // LƯU Ý: KHÔNG dùng cờ "_playerInside" làm chống-mở-lặp nữa — vì khi
+        // IslandTravelManager teleport, nó TẮT CharacterController nên Unity có thể
+        // KHÔNG bao giờ bắn OnTriggerExit -> cờ sẽ kẹt true và cổng "chết" sau lần
+        // đầu. OnTriggerEnter vốn chỉ bắn 1 lần mỗi lần bước vào, và IsVisible() đã
+        // chặn việc mở lại khi bản đồ đang hiện -> đó là nguồn chống-lặp luôn chính xác.
         if (onlyDuringGameplay && GameManager.Instance != null
             && GameManager.Instance.currentState != GameManager.GameState.Gameplay)
             return;
@@ -48,10 +50,5 @@ public class MapPortalTrigger : MonoBehaviour
             mapPopup.Show();
             Debug.Log("[MapPortal] Nhân vật bước vào cổng -> mở Bản đồ.");
         }
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.CompareTag("Player")) _playerInside = false;
     }
 }

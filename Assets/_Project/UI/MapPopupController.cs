@@ -227,6 +227,13 @@ public class MapPopupController : MonoBehaviour
         }
     }
 
+    // An toàn: nếu popup bị tắt/destroy khi đang mở (vd đổi đảo) mà chưa kịp gọi Hide(),
+    // vẫn gỡ khỏi UIPopupTracker để chuột không bị kẹt + tương tác thế giới không chết.
+    private void OnDisable()
+    {
+        UIPopupTracker.SetOpen(this, false);
+    }
+
     public bool IsVisible()
     {
         return overlay != null && overlay.style.display == DisplayStyle.Flex;

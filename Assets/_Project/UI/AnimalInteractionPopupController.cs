@@ -49,6 +49,13 @@ public class AnimalInteractionPopupController : MonoBehaviour
         Hide();
     }
 
+    // An toàn: nếu popup bị tắt/destroy khi đang mở (vd đổi đảo) mà chưa kịp gọi Hide(),
+    // vẫn gỡ khỏi UIPopupTracker để chuột không bị kẹt + tương tác thế giới không chết.
+    private void OnDisable()
+    {
+        UIPopupTracker.SetOpen(this, false);
+    }
+
     public void Show(FarmAnimal animal)
     {
         if (animal == null || container == null) return;

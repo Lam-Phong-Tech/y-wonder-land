@@ -114,6 +114,9 @@ public class ShopPopupController : MonoBehaviour
         {
             YWonderLand.Managers.EconomyManager.Instance.OnPOSChanged -= OnBalanceChanged;
         }
+        // Gỡ khỏi UIPopupTracker phòng khi bị tắt/destroy lúc đang mở (vd đổi đảo)
+        // mà chưa kịp Hide() -> tránh chuột kẹt + tương tác thế giới chết.
+        UIPopupTracker.SetOpen(this, false);
     }
 
     private void OnBalanceChanged(long newBalance)
