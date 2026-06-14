@@ -10,16 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d7fd9488000d3734a9e00ee676215985, type: 3}
-  m_Name: GoldenHour
+  m_Name: Morning
   m_EditorClassIdentifier:
   components:
-  - {fileID: 5550001}
-  - {fileID: 5550002}
-  - {fileID: 5550003}
-  - {fileID: 5550004}
-  - {fileID: 5550005}
-  - {fileID: 5550006}
---- !u!114 &5550001
+  - {fileID: 5560001}
+  - {fileID: 5560002}
+  - {fileID: 5560003}
+  - {fileID: 5560004}
+  - {fileID: 5560005}
+  - {fileID: 5560006}
+--- !u!114 &5560001
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -34,11 +34,11 @@ MonoBehaviour:
   active: 1
   temperature:
     m_OverrideState: 1
-    m_Value: 12
+    m_Value: 3
   tint:
     m_OverrideState: 1
-    m_Value: 4
---- !u!114 &5550002
+    m_Value: 0
+--- !u!114 &5560002
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -53,20 +53,20 @@ MonoBehaviour:
   active: 1
   postExposure:
     m_OverrideState: 1
-    m_Value: -0.3
+    m_Value: 0.05
   contrast:
     m_OverrideState: 1
-    m_Value: 8
+    m_Value: 6
   colorFilter:
     m_OverrideState: 1
-    m_Value: {r: 1, g: 0.98, b: 0.94, a: 1}
+    m_Value: {r: 0.98, g: 0.99, b: 1, a: 1}
   hueShift:
     m_OverrideState: 0
     m_Value: 0
   saturation:
     m_OverrideState: 1
-    m_Value: 3
---- !u!114 &5550003
+    m_Value: 9
+--- !u!114 &5560003
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -81,14 +81,14 @@ MonoBehaviour:
   active: 1
   shadows:
     m_OverrideState: 1
-    m_Value: {r: 0.5, g: 0.58, b: 0.68, a: 0}
+    m_Value: {r: 0.6, g: 0.7, b: 0.85, a: 0}
   highlights:
     m_OverrideState: 1
-    m_Value: {r: 1, g: 0.89, b: 0.74, a: 0}
+    m_Value: {r: 1, g: 0.96, b: 0.86, a: 0}
   balance:
     m_OverrideState: 1
-    m_Value: 0
---- !u!114 &5550004
+    m_Value: -10
+--- !u!114 &5560004
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -104,7 +104,7 @@ MonoBehaviour:
   mode:
     m_OverrideState: 1
     m_Value: 1
---- !u!114 &5550005
+--- !u!114 &5560005
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -119,17 +119,17 @@ MonoBehaviour:
   active: 1
   threshold:
     m_OverrideState: 1
-    m_Value: 1.2
+    m_Value: 1
   intensity:
     m_OverrideState: 1
-    m_Value: 0.06
+    m_Value: 0.15
   scatter:
     m_OverrideState: 1
     m_Value: 0.7
   highQualityFiltering:
     m_OverrideState: 1
     m_Value: 1
---- !u!114 &5550006
+--- !u!114 &5560006
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -144,7 +144,7 @@ MonoBehaviour:
   active: 1
   intensity:
     m_OverrideState: 1
-    m_Value: 0.25
+    m_Value: 0.15
   smoothness:
     m_OverrideState: 1
     m_Value: 0.3
