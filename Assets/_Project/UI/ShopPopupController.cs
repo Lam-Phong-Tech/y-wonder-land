@@ -25,6 +25,7 @@ public class ShopPopupController : MonoBehaviour
     // Mode tabs
     private Button tabBuy;
     private Button tabSell;
+    private VisualElement modeSection; // khối "CHẾ ĐỘ" (label + 2 tab) — ẩn khi mở single-mode
 
     // Filters
     private Button filterAll;
@@ -137,6 +138,7 @@ public class ShopPopupController : MonoBehaviour
         // Mode tabs
         tabBuy = root.Q<Button>("TabBuy");
         tabSell = root.Q<Button>("TabSell");
+        modeSection = root.Q<VisualElement>("ModeSection");
 
         // Filters
         filterAll = root.Q<Button>("FilterAll");
@@ -220,7 +222,8 @@ public class ShopPopupController : MonoBehaviour
         // Set title
         if (shopTitle != null) shopTitle.text = data.shopName;
 
-        // Show/hide sell tab
+        // Reset hiển thị 2 tab về mặc định (phòng lần trước bị NPC Mua/Bán ẩn bớt 1 tab)
+        if (tabBuy != null) tabBuy.style.display = DisplayStyle.Flex;
         if (tabSell != null)
         {
             tabSell.style.display = data.hasSellTab ? DisplayStyle.Flex : DisplayStyle.None;
@@ -242,6 +245,40 @@ public class ShopPopupController : MonoBehaviour
     public void Show()
     {
         Show(CreateMockShopData());
+    }
+
+    /// <summary>Chế độ truy cập quầy: cả hai / chỉ Mua / chỉ Bán.</summary>
+    public enum ShopAccessMode { Both, BuyOnly, SellOnly }
+
+    /// <summary>
+    /// Mở shop theo chế độ truy cập — TÁCH RIÊNG quầy Mua và quầy Bán.
+    /// NPC Mua dùng BuyOnly (ẩn tab Bán), NPC Bán dùng SellOnly (ẩn tab Mua).
+    /// </summary>
+    public void Show(ShopAccessMode mode)
+    {
+        Show(); // dựng mock data + reset về Mua
+        ApplyAccessMode(mode);
+    }
+
+    private void ApplyAccessMode(ShopAccessMode mode)
+    {
+        bool canSell = currentShop != null && currentShop.hasSellTab;
+
+        // Mở bằng NPC Mua/Bán riêng -> ẨN HẲN khối "CHẾ ĐỘ" (label + 2 tab) cho gọn mắt.
+        // Chỉ giữ toggle khi mở chế độ Both (vd phím tắt cũ / NPC gộp).
+        if (modeSection != null)
+            modeSection.style.display = mode == ShopAccessMode.Both ? DisplayStyle.Flex : DisplayStyle.None;
+
+        if (mode == ShopAccessMode.SellOnly && canSell)
+        {
+            SetMode(true); // hiển thị danh sách Bán
+            if (shopTitle != null) shopTitle.text = "BÁN ĐỒ";
+        }
+        else
+        {
+            SetMode(false); // danh sách Mua
+            if (shopTitle != null && mode == ShopAccessMode.BuyOnly) shopTitle.text = "CỬA HÀNG";
+        }
     }
 
     public void Hide()

@@ -34,13 +34,13 @@
 
                     <!-- Left: Mode Tabs + Category Filters -->
                     <ui:VisualElement class="shop-sidebar">
-                        <!-- Mode tabs (Mua / Bán) -->
-                        <ui:Label text="CHẾ ĐỘ" class="shop-sidebar-section" />
-                        <ui:Button name="TabBuy" text="🛒 Mua" class="shop-mode-tab shop-mode-tab--active" />
-                        <ui:Button name="TabSell" text="💰 Bán" class="shop-mode-tab" />
-
-                        <!-- Divider -->
-                        <ui:VisualElement class="shop-sidebar-divider" />
+                        <!-- Mode tabs (Mua / Bán) — controller ẩn khối này khi mở bằng NPC Mua/Bán riêng -->
+                        <ui:VisualElement name="ModeSection">
+                            <ui:Label text="CHẾ ĐỘ" class="shop-sidebar-section" />
+                            <ui:Button name="TabBuy" text="🛒 Mua" class="shop-mode-tab shop-mode-tab--active" />
+                            <ui:Button name="TabSell" text="💰 Bán" class="shop-mode-tab" />
+                            <ui:VisualElement class="shop-sidebar-divider" />
+                        </ui:VisualElement>
 
                         <!-- Category filters -->
                         <ui:Label text="DANH MỤC" class="shop-sidebar-section" />

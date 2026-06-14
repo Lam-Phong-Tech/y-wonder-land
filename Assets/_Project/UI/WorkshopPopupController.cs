@@ -139,7 +139,8 @@ public class WorkshopPopupController : MonoBehaviour
     {
         if (overlay == null) return;
         overlay.style.display = DisplayStyle.Flex;
-        
+        UIPopupTracker.SetOpen(this, true); // trả chuột để bấm được nút nâng cấp
+
         selectedToolId = "";
         RefreshToolList();
         UpdateDetailPanel();
@@ -149,6 +150,14 @@ public class WorkshopPopupController : MonoBehaviour
     {
         if (overlay == null) return;
         overlay.style.display = DisplayStyle.None;
+        UIPopupTracker.SetOpen(this, false);
+    }
+
+    // An toàn: nếu popup bị tắt/destroy lúc đang mở (vd đổi đảo) mà chưa kịp Hide(),
+    // vẫn gỡ khỏi UIPopupTracker để chuột không bị kẹt + tương tác thế giới không chết.
+    private void OnDisable()
+    {
+        UIPopupTracker.SetOpen(this, false);
     }
 
     private void RefreshToolList()

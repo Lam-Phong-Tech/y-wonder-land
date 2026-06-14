@@ -158,7 +158,7 @@ namespace YWonderLand.Environment
                 else if (hit.collider.TryGetComponent<MerchantNPC>(out var merchant) || (hit.collider.transform.parent != null && hit.collider.transform.parent.TryGetComponent<MerchantNPC>(out merchant)))
                 {
                     foundObj = merchant.gameObject;
-                    foundActions.Add(new InteractionAction { keyName = "Click", actionName = "Giao thương", onClick = () => merchant.Interact() });
+                    foundActions.Add(new InteractionAction { keyName = "Click", actionName = merchant.GetInteractionLabel(), onClick = () => merchant.Interact() });
                     break;
                 }
                 else if (hit.collider.TryGetComponent<FarmTile>(out var tile) || (hit.collider.transform.parent != null && hit.collider.transform.parent.TryGetComponent<FarmTile>(out tile)))

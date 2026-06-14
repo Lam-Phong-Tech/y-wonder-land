@@ -213,6 +213,7 @@ public class PiggyBankPopupController : MonoBehaviour
         RefreshHistory();
 
         overlay.style.display = DisplayStyle.Flex;
+        UIPopupTracker.SetOpen(this, true); // trả chuột để bấm nút gửi tiết kiệm
         Debug.Log("[PiggyBank] Opened Heo Đất");
     }
 
@@ -221,8 +222,16 @@ public class PiggyBankPopupController : MonoBehaviour
         if (overlay != null)
         {
             overlay.style.display = DisplayStyle.None;
+            UIPopupTracker.SetOpen(this, false);
             Debug.Log("[PiggyBank] Closed Heo Đất");
         }
+    }
+
+    // An toàn: nếu popup bị tắt/destroy lúc đang mở mà chưa kịp Hide() -> gỡ tracker
+    // để chuột không bị kẹt.
+    private void OnDisable()
+    {
+        UIPopupTracker.SetOpen(this, false);
     }
 
     public bool IsVisible()
