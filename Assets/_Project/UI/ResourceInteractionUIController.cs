@@ -14,7 +14,6 @@ namespace YWonderLand.UI
         private VisualElement progressBarFill;
 
         private HarvestableResource currentTarget;
-        private Camera mainCamera;
 
         void Awake()
         {
@@ -31,8 +30,6 @@ namespace YWonderLand.UI
             container = root.Q<VisualElement>("ResourceInteractionContainer");
             floatingBarContainer = root.Q<VisualElement>("FloatingBarContainer");
             progressBarFill = root.Q<VisualElement>("ProgressBarFill");
-
-            mainCamera = Camera.main;
 
             Hide();
         }
@@ -60,21 +57,14 @@ namespace YWonderLand.UI
             // Update UI Progress
             UpdateProgress();
 
-            // Follow 3D Target
-            if (mainCamera != null && floatingBarContainer != null)
+            // Đặt thanh tiến trình CỐ ĐỊNH ngay dưới tâm ngắm (reticle) cho dễ quan sát khi đang
+            // chặt/đập. KHÔNG bám theo vật thể nữa -> tránh trôi/ghim mép màn hình khi cây cao
+            // đứng gần. Mắt người chơi đang nhìn tâm ngắm nên đây là chỗ dễ theo dõi nhất.
+            if (floatingBarContainer != null)
             {
-                // Mặc định cây cao 4m, đá cao 1.5m -> tính điểm neo UI ở trên đỉnh
-                float heightOffset = currentTarget.type == HarvestableResource.ResourceType.Tree ? 4.5f : 2.0f;
-                Vector3 worldPos = currentTarget.transform.position + Vector3.up * heightOffset;
-                
-                Vector2 screenPos = mainCamera.WorldToScreenPoint(worldPos);
-                
-                // Screen space (bottom-left = 0,0) to Panel space (top-left = 0,0)
-                screenPos.y = Screen.height - screenPos.y;
-                
-                // Căn giữa UI (width = 120, height = 24)
-                floatingBarContainer.style.left = screenPos.x - 60f;
-                floatingBarContainer.style.top = screenPos.y - 12f;
+                const float barW = 200f;   // khớp width trong ResourceInteractionUI.uxml
+                floatingBarContainer.style.left = (Screen.width - barW) / 2f;
+                floatingBarContainer.style.top = Screen.height / 2f + 40f; // ~40px dưới tâm ngắm
             }
         }
 
@@ -82,7 +72,8 @@ namespace YWonderLand.UI
         {
             if (currentTarget != null && progressBarFill != null)
             {
-                float pct = Mathf.Clamp01(currentTarget.currentProgress / currentTarget.harvestDuration);
+                float dur = currentTarget.harvestDuration > 0f ? currentTarget.harvestDuration : 1f; // tránh chia 0 -> NaN
+                float pct = Mathf.Clamp01(currentTarget.currentProgress / dur);
                 progressBarFill.style.width = Length.Percent(pct * 100f);
             }
         }
