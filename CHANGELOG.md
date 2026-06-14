@@ -1,5 +1,35 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-06-14 (Phiên chiều: NPC đa dịch vụ · UI polish · Golden Hour)
+### Added
+- **NPC đa dịch vụ (`MerchantNPC`):** 1 script dùng chung, enum `ServiceType {ShopBuy, ShopSell, Workshop, PiggyBank}` — click NPC mở đúng popup (Mua / Bán / Nâng cấp / Heo Đất). Tự gắn `FloatingNameTag` trên đầu (tên theo `npcName` hoặc mặc định theo dịch vụ), màu vàng gold phân biệt với Guide. Tạo prefab `NPCBuy/NPCSell/NPCWorkshop/NPCBank` + đặt vào FarmScene/CityScene.
+- **Tách quầy Mua/Bán (`ShopPopupController`):** enum `ShopAccessMode {Both, BuyOnly, SellOnly}` + `Show(mode)` — NPC Mua chỉ hiện tab Mua, NPC Bán chỉ hiện tab Bán (ẩn hẳn khối "CHẾ ĐỘ"), tự đổi tiêu đề.
+- **Ánh sáng xế chiều (Golden Hour):** Tạo Volume Profile `GoldenHour.asset` (URP) — WhiteBalance / ColorAdjustments / SplitToning / Tonemapping / Bloom / Vignette tông ấm, đã tinh chỉnh giảm chói (~70%: PostExposure -1, bloom gần tắt). Kèm hướng dẫn Sun (3400K góc thấp) + Ambient Gradient ấm + Fog cho FarmScene.
+
+### Changed
+- **Thanh tiến trình chặt/đập (`ResourceInteractionUI`):** Restyle Palia Cozy Dark + **ghim CỐ ĐỊNH dưới tâm ngắm** (bỏ bám theo vật thể → hết trôi/ghim mép màn hình khi cây cao).
+- **Nối `UIPopupTracker` cho Workshop / PiggyBank / Fishing:** Show/Hide/OnDisable → **trả chuột ổn định** để bấm nút (trước đây thiếu → chuột kẹt / "lưỡng lự").
+- **Ẩn nút Shop trên HUD** (shop giờ mở qua NPC Mua/Bán); nhãn hover NPC hiện theo loại dịch vụ.
+
+### Fixed
+- **Soft-lock đi đảo:** `IslandTravelManager.TravelToAsync` bọc `try/catch/finally` → LUÔN bật lại Player/CharacterController + ẩn loading + mở khoá `_isTraveling` dù scene load lỗi (hết kẹt đơ vĩnh viễn).
+- **Cổng portal chết sau lần đầu:** `MapPortalTrigger` bỏ cờ `_playerInside` (teleport tắt CharacterController → `OnTriggerExit` không bắn → cờ kẹt true). Dùng `mapPopup.IsVisible()` chống mở lặp + sửa thứ tự check Gameplay.
+- **Popup kẹt chuột khi đổi đảo:** 4 popup (Animal/Map/Shop/Inventory) thêm `OnDisable → UIPopupTracker.SetOpen(false)`.
+- **Thanh chặt cây không hiện:** bar bị neo 4.5m vọt ngoài đỉnh màn hình → ghim dưới tâm ngắm + clamp trong khung nhìn + guard chia-0.
+- **Chuẩn hoá `PlayerController.Instance`:** thay 6 chỗ `FindFirstObjectByType<PlayerController>` trong `FarmInteractionController` + null-guard (chống NRE khi player chưa spawn / đang teleport).
+- **UI vặt:** Workshop tab lẹm trái (bỏ `scale` hover) + **ẩn thanh cuộn ngang toàn cục** (`DesignSystem.uss`, BuildMode tự bật lại); Heo Đất tràn số "12 ngày → 12 ngà" (nới thẻ 200→240px, chữ không co/cắt); Bạn bè nút X đè "Làm mới" (`padding-right` 60→96px).
+
+### Changed Files (phiên chiều)
+- `Assets/_Project/Scripts/Environment/MerchantNPC.cs` [MODIFIED]
+- `Assets/_Project/Scripts/Environment/MapPortalTrigger.cs` [MODIFIED]
+- `Assets/_Project/Scripts/Environment/FarmInteractionController.cs` [MODIFIED]
+- `Assets/_Project/Scripts/Managers/IslandTravelManager.cs` [MODIFIED]
+- `Assets/_Project/UI/ShopPopupController.cs`, `WorkshopPopupController.cs`, `PiggyBankPopupController.cs`, `FishingOverlayController.cs`, `MapPopupController.cs`, `AnimalInteractionPopupController.cs`, `InventoryPopupController.cs` [MODIFIED]
+- `Assets/_Project/UI/ResourceInteractionUI.uxml` + `ResourceInteractionUIController.cs` [MODIFIED]
+- `Assets/_Project/UI/Styles/{DesignSystem,WorkshopPopup,PiggyBankPopup,FriendsPopup,BuildModeOverlay}.uss`, `GameHUD.uxml`, `ShopPopup.uxml`, `WorkshopPopup.uxml` [MODIFIED]
+- `Assets/_Project/Prefabs/NPC{Buy,Sell,Workshop,Bank}.prefab` [NEW]
+- `Assets/_Project/Settings/GoldenHour.asset` [NEW]
+
 ## [Unreleased] - 2026-06-14
 ### Added
 - **Hệ thống Chuyển Đảo (Island Travel):**
