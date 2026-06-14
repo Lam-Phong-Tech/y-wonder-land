@@ -236,3 +236,10 @@
 .unity-base-slider__dragger:active {
     background-color: rgba(255, 255, 255, 0.8);
 }
+
+/* Ẩn thanh cuộn NGANG ở mọi ScrollView (game dùng list/grid DỌC; grid thì wrap
+   xuống dòng nên không cần cuộn ngang). Tránh "slider" thừa hiện ra khi nội dung
+   lố vài px. Trường hợp cố ý cuộn ngang (BuildMode) tự bật lại trong file riêng. */
+.unity-scroller--horizontal {
+    display: none;
+}

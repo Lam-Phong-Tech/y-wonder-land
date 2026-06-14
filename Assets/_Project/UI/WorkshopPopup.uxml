@@ -23,7 +23,7 @@
                     <!-- Left: Tool List -->
                     <ui:VisualElement class="workshop-sidebar">
                         <ui:Label text="." class="workshop-sidebar-section" />
-                        <ui:ScrollView name="ToolListScroll" class="workshop-tool-scroll">
+                        <ui:ScrollView name="ToolListScroll" mode="Vertical" class="workshop-tool-scroll">
                             <ui:VisualElement name="ToolListContainer" />
                         </ui:ScrollView>
                     </ui:VisualElement>

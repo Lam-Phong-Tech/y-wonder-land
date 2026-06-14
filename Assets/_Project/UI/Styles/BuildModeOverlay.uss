@@ -267,3 +267,7 @@
 }
 .build-status-success { color: var(--color-success); }
 .build-status-error { color: var(--color-danger); }
+
+/* BuildMode CỐ Ý cuộn ngang (mode="Horizontal") -> bật lại thanh cuộn ngang cho
+   riêng nó, ghi đè rule ẩn toàn cục trong DesignSystem.uss (specificity cao hơn). */
+.build-item-scroll .unity-scroller--horizontal { display: flex; }

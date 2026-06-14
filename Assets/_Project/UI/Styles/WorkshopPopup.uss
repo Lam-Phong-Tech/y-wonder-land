@@ -69,6 +69,8 @@
 }
 
 .workshop-tool-scroll { flex-grow: 1; }
+/* Ẩn hẳn thanh cuộn NGANG (ScrollView mode=Vertical đã chặn, thêm rule cho chắc) */
+.workshop-tool-scroll .unity-scroller--horizontal { display: none; }
 
 /* === TOOL ITEM CARD === */
 .workshop-tool-item {
@@ -77,8 +79,10 @@
     padding: 10px 12px; margin-bottom: 8px; flex-direction: row; align-items: center;
     transition-property: scale, border-color, background-color; transition-duration: 0.1s;
 }
-.workshop-tool-item:hover { border-color: var(--color-accent-blue); scale: 1.02; }
-.workshop-tool-item:active { scale: 0.98; }
+/* KHÔNG dùng scale:1.02 khi hover — phóng to làm mép trái tab tràn ra ngoài vùng
+   clip của ScrollView -> bị "lẹm". Dùng đổi viền + nền làm phản hồi là đủ. */
+.workshop-tool-item:hover { border-color: var(--color-accent-blue); }
+.workshop-tool-item:active { scale: 0.98; } /* thu nhỏ thì an toàn, không tràn clip */
 
 .workshop-tool-item--active {
     border-color: var(--color-accent-yellow); background-color: var(--color-deep-blue);
