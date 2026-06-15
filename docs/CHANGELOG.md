@@ -5,6 +5,25 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-06-15] — Tưới cây (cầm xô), tự gom lá vào cây, tắt rung, dọn Splash
+
+### Added
+- **Hoạt ảnh tưới cây riêng**: động tác tưới gọi clip `Watering` riêng (tự đo độ dài clip), nhân vật cầm **bình tưới/xô** qua `EquipmentManager` (đúng pattern các nông cụ khác). Placeholder bình tưới được dựng lại có thân + quai xách + vòi + bông sen cho ra dáng.
+- **Tự gắn lá rời vào cây lúc runtime** (`HarvestableResource`): cây tự tìm các object lá ở gần theo tên (`leafNameContains`) + bán kính (`leafAttachRadius`) rồi `SetParent` vào thân — khỏi phải parent tay từng cây. Lá tự ẩn + tự đổ theo cây khi bị chặt. Dùng cache tĩnh để chỉ quét scene 1 lần.
+
+### Changed
+- **Tắt hẳn rung lắc cây/đá** khi chặt/đập (trước giảm còn 10%, nay bỏ luôn) — cây/đá đứng yên, chỉ chạy thanh tiến trình.
+- **Ẩn toàn bộ phần con (thân + lá)** khi cây bị chặt qua `SetVisualsActive`, thay cho việc chỉ ẩn con đầu tiên (tránh lá lơ lửng còn sót).
+- **Màn Splash**: nền đổi sang **đen thuần** (hòa với nền logo JPG), **xóa tiêu đề "YWONDER GREEN FARM"** và **dòng kẻ vàng** trang trí; giữ logo YWonderHub + dòng "CUỘC PHIÊU LƯU BẮT ĐẦU" + thanh tải.
+
+### Changed Files
+- `Assets/_Project/Scripts/Environment/FarmInteractionController.cs` [MODIFIED]
+- `Assets/_Project/Scripts/Environment/HarvestableResource.cs` [MODIFIED]
+- `Assets/_Project/Scripts/Player/EquipmentManager.cs` [MODIFIED]
+- `Assets/_Project/UI/SplashLoadingScreen.uxml` [MODIFIED]
+- `Assets/_Project/UI/Styles/SplashLoadingScreen.uss` [MODIFIED]
+
+---
 ## [2026-06-07] — Phase 5 & 6: Khai Thác Tài Nguyên và Câu Cá
 
 ### Added

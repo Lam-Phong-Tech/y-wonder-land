@@ -568,9 +568,9 @@ namespace YWonderLand.Environment
             if (tile.InteractWater())
             {
                 Debug.Log("[FarmInteraction] Watered tile! Growth timer started.");
-                // Múa động tác tưới -> cầm BÌNH TƯỚI
+                // Múa động tác TƯỚI bằng clip riêng "Watering" (duration 0 = tự đo độ dài clip) -> cầm BÌNH TƯỚI/XÔ
                 if (PlayerController.Instance != null)
-                    PlayerController.Instance.PlayActionAnimation("TreeCuttingV4", 1.5f, YWonderLand.Player.ToolType.WateringCan);
+                    PlayerController.Instance.PlayActionAnimation("Watering", 0f, YWonderLand.Player.ToolType.WateringCan);
             }
         }
 

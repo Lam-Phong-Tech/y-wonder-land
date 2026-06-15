@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using YWonderLand.Managers;
 
 namespace YWonderLand.Environment
@@ -27,6 +28,12 @@ namespace YWonderLand.Environment
         [Tooltip("Khoảng cách tối đa (mét) để hiện gợi ý + cho phép chặt/đập. Đặt 1-2 cho gần giống Minecraft.")]
         public float interactionRange = 2f;
 
+        [Header("Lá rời (tự gắn vào cây lúc chạy)")]
+        [Tooltip("Object lá nằm RỜI (không phải con của cây). Lúc chạy, các object có TÊN chứa từ khóa này và ở gần ngọn cây sẽ tự được gắn làm con của cây -> chặt xong lá tự ẩn + tự đổ theo. Để TRỐNG = tắt tính năng.")]
+        public string leafNameContains = "";
+        [Tooltip("Bán kính (mét, đo theo mặt phẳng ngang) quanh cây để 'nhận' lá rời làm con. Cây tán to thì tăng số này.")]
+        public float leafAttachRadius = 3f;
+
         [Header("State")]
         public bool isHarvestable = true;
         public float currentProgress = 0f;
@@ -48,6 +55,53 @@ namespace YWonderLand.Environment
             resourceCollider = GetComponent<Collider>();
             if (resourceCollider == null)
                 resourceCollider = gameObject.AddComponent<BoxCollider>();
+        }
+
+        void Start()
+        {
+            AttachNearbyLeaves();
+        }
+
+        // ── Tự gắn lá rời vào cây (chạy 1 lần lúc Start) ──
+        // Lá là object riêng, chỉ trùng vị trí với ngọn cây. Ta tìm lá gần nhất theo tên + bán kính
+        // rồi SetParent vào phần thân -> từ đó lá tự ẩn + tự đổ theo cây mà KHÔNG cần kéo tay từng cây.
+        private static List<Transform> _leafPool;       // tất cả candidate lá trong scene (quét 1 lần)
+        private static string _leafPoolKeyword;          // keyword đã dùng để build pool
+        private static readonly HashSet<Transform> _claimedLeaves = new HashSet<Transform>(); // lá đã bị 1 cây nhận
+
+        private void AttachNearbyLeaves()
+        {
+            if (string.IsNullOrEmpty(leafNameContains)) return;
+            if (visualObject == null) return;
+
+            // Build pool 1 lần cho mỗi keyword (cây thứ 2 trở đi dùng lại -> không quét scene lặp lại).
+            if (_leafPool == null || _leafPoolKeyword != leafNameContains)
+            {
+                _leafPool = new List<Transform>();
+                _leafPoolKeyword = leafNameContains;
+                _claimedLeaves.Clear();
+                var all = Object.FindObjectsByType<Transform>(FindObjectsSortMode.None);
+                foreach (var t in all)
+                {
+                    if (t != null && t.name.Contains(leafNameContains))
+                        _leafPool.Add(t);
+                }
+            }
+
+            Vector3 myPos = transform.position;
+            float r2 = leafAttachRadius * leafAttachRadius;
+            foreach (var leaf in _leafPool)
+            {
+                if (leaf == null || _claimedLeaves.Contains(leaf)) continue;
+                if (leaf.IsChildOf(transform)) continue; // đã thuộc cây này rồi
+                Vector3 d = leaf.position - myPos;
+                d.y = 0f; // so theo mặt phẳng ngang (lá phủ trên cao so với gốc)
+                if (d.sqrMagnitude <= r2)
+                {
+                    _claimedLeaves.Add(leaf);
+                    leaf.SetParent(visualObject.transform, true); // true = giữ nguyên vị trí/độ xoay thế giới
+                }
+            }
         }
 
         public void Initialize(string id, ResourceType type, string tool, string yieldItem)
@@ -158,9 +212,24 @@ namespace YWonderLand.Environment
         {
             isHarvestable = state;
             currentProgress = 0f;
-            
-            if (visualObject != null) visualObject.SetActive(state);
+
+            SetVisualsActive(state);
             if (resourceCollider != null) resourceCollider.enabled = state;
+        }
+
+        // Ẩn/hiện TOÀN BỘ phần nhìn thấy của cây (thân + tán lá + mọi object con),
+        // tránh trường hợp lá là object anh em của visualObject nên không bị ẩn theo khi chặt xong.
+        private void SetVisualsActive(bool state)
+        {
+            if (visualObject == gameObject)
+            {
+                // Fallback (không có con riêng): giữ hành vi cũ — bật/tắt chính object.
+                if (visualObject != null) visualObject.SetActive(state);
+                return;
+            }
+
+            for (int i = 0; i < transform.childCount; i++)
+                transform.GetChild(i).gameObject.SetActive(state);
         }
 
         /// <summary>
@@ -183,18 +252,8 @@ namespace YWonderLand.Environment
             // TODO: Apply tool level bonus (e.g. axe_02 reduces harvest duration)
 
             currentProgress += deltaTime;
-            
-            // Wiggle animation (rung lắc TƯƠNG ĐỐI quanh hướng gốc, không phá hướng đứng của model)
-            if (visualObject != null)
-            {
-                if (!_rotCaptured)
-                {
-                    _originalVisualRot = visualObject.transform.localRotation;
-                    _rotCaptured = true;
-                }
-                float wiggle = Mathf.Sin(Time.time * 20f) * 5f;
-                visualObject.transform.localRotation = _originalVisualRot * Quaternion.Euler(0, 0, wiggle);
-            }
+
+            // (Đã tắt hiệu ứng rung lắc cây/đá khi chặt/đập theo yêu cầu — giữ vật đứng yên.)
 
             if (currentProgress >= harvestDuration)
             {
@@ -279,7 +338,7 @@ namespace YWonderLand.Environment
             transform.RotateAround(pivot, axis, totalAngle - prevAngle);
             yield return new WaitForSeconds(0.5f); // nằm 1 lúc cho thấy rõ
 
-            if (visualObject != null) visualObject.SetActive(false);
+            SetVisualsActive(false); // ẩn cả thân lẫn lá
             // Dựng lại nguyên trạng cho lần respawn sau
             transform.position = startPos;
             transform.rotation = startRot;

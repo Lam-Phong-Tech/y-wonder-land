@@ -156,8 +156,12 @@ namespace YWonderLand.Player
         private GameObject BuildWateringCan(Transform hand)
         {
             var root = NewToolRoot("Placeholder_WateringCan", hand);
-            Prim(root.transform, PrimitiveType.Cylinder, new Vector3(0, 0.1f, 0), Vector3.zero, new Vector3(0.1f, 0.08f, 0.1f), new Color(0.3f, 0.55f, 0.7f)); // thân
-            Prim(root.transform, PrimitiveType.Cylinder, new Vector3(0.1f, 0.14f, 0), new Vector3(0, 0, 55), new Vector3(0.02f, 0.08f, 0.02f), new Color(0.3f, 0.55f, 0.7f)); // vòi
+            Color tin = new Color(0.3f, 0.55f, 0.7f);   // màu thiếc xanh
+            Prim(root.transform, PrimitiveType.Cylinder, new Vector3(0, 0.1f, 0), Vector3.zero, new Vector3(0.12f, 0.1f, 0.12f), tin);              // thân xô
+            Prim(root.transform, PrimitiveType.Cylinder, new Vector3(0, 0.21f, 0), Vector3.zero, new Vector3(0.13f, 0.012f, 0.13f), METAL);          // miệng xô
+            Prim(root.transform, PrimitiveType.Cylinder, new Vector3(0, 0.27f, 0), new Vector3(90, 0, 0), new Vector3(0.015f, 0.07f, 0.015f), METAL);// quai xách (vòng trên)
+            Prim(root.transform, PrimitiveType.Cylinder, new Vector3(0.16f, 0.16f, 0), new Vector3(0, 0, 50), new Vector3(0.022f, 0.1f, 0.022f), tin);// vòi
+            Prim(root.transform, PrimitiveType.Cylinder, new Vector3(0.22f, 0.22f, 0), new Vector3(0, 0, 50), new Vector3(0.045f, 0.015f, 0.045f), METAL);// bông sen tưới
             return root;
         }
 

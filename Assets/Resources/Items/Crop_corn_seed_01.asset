@@ -22,6 +22,6 @@ MonoBehaviour:
   growthStages: 3
   cropColor: {r: 1, g: 0.85, b: 0.2, a: 1}
   iconEmoji: "\U0001F33D"
-  cropPrefab: {fileID: 919132149155446097, guid: 848559c4d3261cc4a94de8d0bc728e4e, type: 3}
+  cropPrefab: {fileID: 919132149155446097, guid: a9a475149a5ebd04db8aa1a495008391, type: 3}
   modelGroundOffset: 0
   seedlingScale: 0.25
