@@ -344,6 +344,10 @@ public class FishingOverlayController : MonoBehaviour
             CancelFishing();
             fishingDocument.rootVisualElement.style.display = DisplayStyle.None;
 
+            // Thu dây câu + phao về
+            if (YWonderLand.Environment.FishingLineController.Instance != null)
+                YWonderLand.Environment.FishingLineController.Instance.Reel();
+
             // Khoá lại chuột cho gameplay (gỡ khỏi tracker)
             UIPopupTracker.SetOpen(this, false);
 

@@ -216,7 +216,11 @@ namespace YWonderLand.Environment
         {
             PlayerController player = PlayerController.Instance;
             if (player != null) player.PlayActionAnimation("Fishing", 8.5f, YWonderLand.Player.ToolType.FishingRod);
-            
+
+            // Chuẩn bị câu: lưu cao độ mặt nước, CHỜ Animation Event (frame vung cần) bắn dây ra.
+            if (FishingLineController.Instance != null && spot != null)
+                FishingLineController.Instance.PrepareCast(spot.transform.position.y);
+
             var fishingUI = Object.FindFirstObjectByType<FishingOverlayController>();
             if (fishingUI != null) fishingUI.Show();
         }
@@ -231,7 +235,7 @@ namespace YWonderLand.Environment
         private void FeedAnimal(FarmAnimal animal)
         {
             PlayerController player = PlayerController.Instance;
-            if (player != null) player.PlayActionAnimation("Feed", 0f); // 0 = tự lấy đúng độ dài clip (~6s)
+            if (player != null) player.PlayActionAnimation("Feed", 0f, YWonderLand.Player.ToolType.AnimalFeed); // cầm nắm cám rải xuống
             animal.Feed();
         }
 

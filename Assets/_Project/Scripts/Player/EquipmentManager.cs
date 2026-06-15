@@ -10,7 +10,8 @@ namespace YWonderLand.Player
         FishingRod,
         Hoe,
         SeedBag,
-        Pickaxe
+        Pickaxe,
+        AnimalFeed
     }
 
     /// <summary>
@@ -39,6 +40,9 @@ namespace YWonderLand.Player
 
         [Tooltip("Model cái Cúp (đập đá) gắn trên tay phải")]
         public GameObject pickaxeModel;
+
+        [Tooltip("Model nắm cám/thức ăn (cho ăn) gắn trên tay")]
+        public GameObject feedModel;
 
         [Header("Placeholder tự sinh (khi CHƯA có model 3D thật)")]
         [Tooltip("Tự tạo dụng cụ tạm bằng khối primitive nếu ô model còn trống")]
@@ -93,6 +97,7 @@ namespace YWonderLand.Player
             if (wateringCanModel == null) wateringCanModel = BuildWateringCan(rh);
             if (fishingRodModel == null) fishingRodModel = BuildFishingRod(rh);
             if (seedBagModel == null) seedBagModel = BuildSeedBag(lh);
+            if (feedModel == null) feedModel = BuildFeed(rh);
         }
 
         private GameObject NewToolRoot(string name, Transform hand)
@@ -170,6 +175,13 @@ namespace YWonderLand.Player
             return root;
         }
 
+        private GameObject BuildFeed(Transform hand)
+        {
+            var root = NewToolRoot("Placeholder_Feed", hand);
+            Prim(root.transform, PrimitiveType.Sphere, new Vector3(0, 0.02f, 0.03f), Vector3.zero, new Vector3(0.09f, 0.04f, 0.09f), new Color(0.85f, 0.72f, 0.3f)); // nắm cám vàng
+            return root;
+        }
+
         /// <summary>
         /// Gọi hàm này để hiện một công cụ cụ thể lên tay
         /// </summary>
@@ -198,6 +210,9 @@ namespace YWonderLand.Player
                 case ToolType.Pickaxe:
                     if (pickaxeModel != null) pickaxeModel.SetActive(true);
                     break;
+                case ToolType.AnimalFeed:
+                    if (feedModel != null) feedModel.SetActive(true);
+                    break;
             }
         }
 
@@ -212,6 +227,7 @@ namespace YWonderLand.Player
             if (hoeModel != null) hoeModel.SetActive(false);
             if (seedBagModel != null) seedBagModel.SetActive(false);
             if (pickaxeModel != null) pickaxeModel.SetActive(false);
+            if (feedModel != null) feedModel.SetActive(false);
         }
     }
 }
