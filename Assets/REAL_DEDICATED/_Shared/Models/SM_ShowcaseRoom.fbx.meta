@@ -10,7 +10,7 @@ ModelImporter:
       name: MI_ShowcaseBox
     second: {fileID: 2100000, guid: c233714cae9053742b98f8a0c8d2b1d0, type: 2}
   materials:
-    materialImportMode: 0
+    materialImportMode: 2
     materialName: 0
     materialSearch: 1
     materialLocation: 1
