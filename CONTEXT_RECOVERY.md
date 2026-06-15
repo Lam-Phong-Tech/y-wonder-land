@@ -1,6 +1,6 @@
 # 🌿 Y WONDER GREEN FARM - MEMENTO PROTOCOL (BẢN GHI NHỚ TIẾN ĐỘ)
 *Dự án: BaChuKhuRung3D (Game nông trại 3D YWONDERLAND)*
-*Ngày cập nhật: 14/06/2026*
+*Ngày cập nhật: 15/06/2026*
 
 ## 1. Bối cảnh phiên làm việc
 **Sprint Demo Gameplay** — khách yêu cầu demo (chiều 14/06): nhân vật Nam/Nữ chạy/nhảy/bơi, tương tác (câu cá, vuốt ve thú, trồng cây, chặt cây), và **đi lại giữa đảo Nông trại ↔ Thành phố**. Demo chạy trong **Unity Editor (Play Mode)**. Ưu tiên: **ỔN ĐỊNH** các tương tác.
@@ -13,6 +13,13 @@
 - **Trồng cây chọn loại (P4):** chọn hạt trong túi → **múa trồng xong mới gieo** → cây model 3D lớn dần.
 - **Chặt cây:** có anim TreeCutting khi giữ chuột, tầm chỉnh được, hết xoay ngang.
 - **UX:** chuột tự trả khi mở popup (`UIPopupTracker`); gỡ phím F/R toàn cục; name tag độc lập scale; anim tự đo độ dài clip + tham số speed.
+
+## 2b. Đã làm thêm 15/06 (chi tiết xem CHANGELOG mục 15/06)
+- **Dụng cụ cầm tay (`EquipmentManager`):** tự sinh placeholder primitive gắn vào xương bàn tay; đủ Rìu/Cúp/Cuốc/Bình tưới/Cần câu/Túi hạt/Nắm cám; gán model thật vào ô là tự thay. Mỗi hành động cầm đúng đồ nghề.
+- **Cây ĐỔ GỤC:** chặt/đập xong cây xoay quanh đáy đổ nghiêng rồi mới ẩn (`HarvestableResource.FallAndHide`).
+- **Câu cá có DÂY + PHAO (`FishingLineController`):** dây (LineRenderer) + phao bay vòng cung ra nước → nổi → tự thu về cần → ẩn. Chỉnh `castDelay`/`reelDelay`/`reelDuration` cho khớp animation.
+- **`AnimEventToolHider`:** relay cho Animation Event (ẩn cây giống lúc cắm / bung dây lúc vung cần) — gắn lên object có Animator.
+- **Animation lao động:** state chặt/đào/cuốc/tưới dùng chung **`TreeCuttingV4`**; có thêm anim `Watering`, `Plant`, `Planting`.
 
 ## 3. Việc CẦN SETUP trong Editor (user làm — AI không vào Editor được)
 - [ ] Tạo `CityScene` (Plane tạm) + thêm Build Settings + cấu hình `IslandTravelManager` (spawn từng đảo) + đặt cổng portal 2 bên.
@@ -32,4 +39,4 @@
 - `Current Crop` trong FarmTile là **auto-assigned lúc runtime**, set tay vô tác dụng — loại cây do hạt người chơi chọn.
 
 > [!TIP]
-> **Cho AI mới:** Script tương tác chính là `Assets/_Project/Scripts/Environment/FarmInteractionController.cs` (raycast tâm ngắm, xử lý cuốc/trồng/tưới/thu hoạch/chặt/câu/click NPC). Trồng trọt: `FarmTile.cs` + `CropDatabase`/`CropDefinition` (trong `Assets/Resources/`). Chuyển đảo: `IslandTravelManager.cs`. Animation hành động: `PlayerController.PlayActionAnimation()` (tự đo độ dài clip + speed). Đọc thêm `docs/MEMORY.md` mục 53–61 cho bài học phiên này.
+> **Cho AI mới:** Script tương tác chính là `Assets/_Project/Scripts/Environment/FarmInteractionController.cs` (raycast tâm ngắm, xử lý cuốc/trồng/tưới/thu hoạch/chặt/câu/click NPC). Trồng trọt: `FarmTile.cs` + `CropDatabase`/`CropDefinition` (trong `Assets/Resources/`). Chuyển đảo: `IslandTravelManager.cs`. Animation hành động: `PlayerController.PlayActionAnimation()` (tự đo độ dài clip + speed) — gọi `EquipmentManager.ShowTool()` để hiện dụng cụ trên tay. Dây câu: `FishingLineController.cs` (timed cast/reel). Animation Event: `AnimEventToolHider.cs` (gắn trên object có Animator). Đọc thêm `docs/MEMORY.md` mục 53–61 cho bài học phiên này.

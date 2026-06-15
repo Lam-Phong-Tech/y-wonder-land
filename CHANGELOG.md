@@ -1,5 +1,38 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-06-15 (Dụng cụ cầm tay · Cây đổ gục · Câu cá có dây · Animation lao động)
+### Added
+- **Hệ thống dụng cụ cầm tay (`EquipmentManager`):** tự sinh dụng cụ PLACEHOLDER bằng khối
+  primitive (Rìu/Cúp/Cuốc/Bình tưới/Cần câu/Túi hạt/Nắm cám) gắn vào **xương bàn tay** (tự
+  tìm qua Animator Humanoid) khi ô model còn trống; thêm `ToolType.Pickaxe` + `ToolType.AnimalFeed`;
+  ô chỉnh `Tool Position/Rotation Offset` để canh tay; log chẩn đoán (tìm xương tay, ShowTool).
+- **Dây câu + phao (`FishingLineController`) [NEW]:** dây câu = `LineRenderer` nối ngọn cần → phao;
+  khi câu: phao **bay vòng cung ra mặt nước** (ném thẳng trước mặt, đúng cao độ mặt nước), nổi nhấp
+  nhô, rồi **tự thu về ngọn cần** và ẩn. Timed sequence: `castDelay` (bung) → `reelDelay`/`reelDuration`
+  (thu) — chỉnh khớp frame animation, khỏi cần Animation Event.
+- **Cầu nối Animation Event (`AnimEventToolHider`) [NEW]:** gắn lên object có Animator. Hàm
+  `HideHeldTool` (ẩn cây giống tại frame cắm xuống đất) + `CastFishingLine` (bung dây tại frame vung cần).
+- **Model + prefab dụng cụ thật:** Rìu (Axe), Cúp (Pickaxe/BasicPickaxe), Cuốc (MetalHoe), Cần câu
+  (fishingrod), + anim Watering/Plant. Gán vào các ô trong EquipmentManager.
+
+### Changed
+- **Cây ĐỔ GỤC xuống đất (`HarvestableResource`):** chặt/đập xong cây xoay quanh **ĐÁY cây
+  (điểm chạm đất)** đổ nghiêng ~84° rồi mới ẩn — thay vì biến mất đột ngột / đổ lơ lửng.
+- **Gán đúng dụng cụ theo hành động (`FarmInteractionController`):** chặt cây→Rìu, đập đá→Cúp,
+  cuốc đất→Cuốc, tưới→Bình tưới, cho ăn→Nắm cám, câu→Cần câu, trồng→Cây giống. Đổi tên state
+  animation lao động sang **`TreeCuttingV4`** (chặt + đào + cuốc + tưới dùng chung anim bổ xuống).
+- **Câu cá:** `StartFishing` gọi `PrepareCast` (ném dây trước mặt ở cao độ FishingSpot);
+  `FishingOverlayController.Hide` gọi `Reel` (thu dây khi thoát).
+
+### Changed Files (15/06)
+- `Assets/_Project/Scripts/Player/EquipmentManager.cs` [MODIFIED]
+- `Assets/_Project/Scripts/Player/AnimEventToolHider.cs` [NEW]
+- `Assets/_Project/Scripts/Environment/FishingLineController.cs` [NEW]
+- `Assets/_Project/Scripts/Environment/HarvestableResource.cs` [MODIFIED]
+- `Assets/_Project/Scripts/Environment/FarmInteractionController.cs` [MODIFIED]
+- `Assets/_Project/UI/FishingOverlayController.cs` [MODIFIED]
+- Prefab dụng cụ: `Axe`, `Pickaxe`, `MetalHoe`, `fishingrod`; anim `Watering`, `Plant`, `Planting`, `TreeCuttingV4`
+
 ## [Unreleased] - 2026-06-14 (Phiên chiều: NPC đa dịch vụ · UI polish · Golden Hour)
 ### Added
 - **NPC đa dịch vụ (`MerchantNPC`):** 1 script dùng chung, enum `ServiceType {ShopBuy, ShopSell, Workshop, PiggyBank}` — click NPC mở đúng popup (Mua / Bán / Nâng cấp / Heo Đất). Tự gắn `FloatingNameTag` trên đầu (tên theo `npcName` hoặc mặc định theo dịch vụ), màu vàng gold phân biệt với Guide. Tạo prefab `NPCBuy/NPCSell/NPCWorkshop/NPCBank` + đặt vào FarmScene/CityScene.
