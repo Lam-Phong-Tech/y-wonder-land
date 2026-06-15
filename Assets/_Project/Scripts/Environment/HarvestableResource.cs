@@ -227,15 +227,62 @@ namespace YWonderLand.Environment
             }
 
             // VFX/SFX could be added here
-            
+
             respawnTimer = respawnTimeSec;
-            SetHarvestable(false);
-            
+
+            // CÂY thì cho ĐỔ xuống rồi mới biến mất; ĐÁ thì ẩn ngay như cũ.
+            if (type == ResourceType.Tree && visualObject != null && gameObject.activeInHierarchy)
+            {
+                isHarvestable = false;
+                currentProgress = 0f;
+                if (resourceCollider != null) resourceCollider.enabled = false;
+                if (_rotCaptured) visualObject.transform.localRotation = _originalVisualRot; // xoá rung trước khi đổ
+                StartCoroutine(FallAndHide());
+            }
+            else
+            {
+                SetHarvestable(false);
+                CancelHarvest();
+            }
+
             var spawner = GetComponentInParent<ResourceSpawner>();
             if (spawner != null)
                 spawner.SaveResourceState();
-            
-            CancelHarvest();
+        }
+
+        // Cho cây ĐỔ GỤC xuống đất rồi mới ẩn — xoay quanh ĐÁY cây (điểm chạm đất),
+        // không xoay quanh pivot object (tránh cảnh đổ lơ lửng giữa không trung).
+        private System.Collections.IEnumerator FallAndHide()
+        {
+            Vector3 startPos = transform.position;
+            Quaternion startRot = transform.rotation;
+
+            // Điểm tựa = đáy mesh (min Y) chiếu xuống vị trí gốc -> mép chân cây.
+            float baseY = transform.position.y;
+            var rend = visualObject != null ? visualObject.GetComponentInChildren<Renderer>() : null;
+            if (rend != null) baseY = rend.bounds.min.y;
+            Vector3 pivot = new Vector3(transform.position.x, baseY, transform.position.z);
+
+            Vector3 axis = transform.right; // trục ngang -> đổ nghiêng sang bên
+            const float totalAngle = 84f;
+            float dur = 0.9f, t = 0f, prevAngle = 0f;
+            while (t < dur)
+            {
+                t += Time.deltaTime;
+                float k = Mathf.Clamp01(t / dur);
+                k = k * k; // gia tốc rơi (chậm -> nhanh)
+                float targetAngle = totalAngle * k;
+                transform.RotateAround(pivot, axis, targetAngle - prevAngle);
+                prevAngle = targetAngle;
+                yield return null;
+            }
+            transform.RotateAround(pivot, axis, totalAngle - prevAngle);
+            yield return new WaitForSeconds(0.5f); // nằm 1 lúc cho thấy rõ
+
+            if (visualObject != null) visualObject.SetActive(false);
+            // Dựng lại nguyên trạng cho lần respawn sau
+            transform.position = startPos;
+            transform.rotation = startRot;
         }
 
         void OnDrawGizmosSelected()

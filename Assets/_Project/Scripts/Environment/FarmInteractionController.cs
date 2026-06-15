@@ -263,9 +263,9 @@ namespace YWonderLand.Environment
             if (player != null) 
             {
                 if (resource.type == HarvestableResource.ResourceType.Tree)
-                    player.PlayActionAnimation("TreeCutting", 1f, YWonderLand.Player.ToolType.Axe);
+                    player.PlayActionAnimation("TreeCuttingV4", 1f, YWonderLand.Player.ToolType.Axe);
                 else
-                    player.PlayActionAnimation("TreeCutting", 1f, YWonderLand.Player.ToolType.None); // Chưa có Cúp nên tạm dùng tay không
+                    player.PlayActionAnimation("TreeCuttingV4", 1f, YWonderLand.Player.ToolType.Pickaxe); // đập đá cầm Cúp
             }
 
             // Hiện thanh tiến trình
@@ -324,8 +324,8 @@ namespace YWonderLand.Environment
                     if (_chopAnimTimer <= 0f && PlayerController.Instance != null)
                     {
                         var chopTool = resource.type == HarvestableResource.ResourceType.Tree
-                            ? YWonderLand.Player.ToolType.Axe : YWonderLand.Player.ToolType.None;
-                        PlayerController.Instance.PlayActionAnimation("TreeCutting", 1.0f, chopTool);
+                            ? YWonderLand.Player.ToolType.Axe : YWonderLand.Player.ToolType.Pickaxe;
+                        PlayerController.Instance.PlayActionAnimation("TreeCuttingV4", 1.0f, chopTool);
                         _chopAnimTimer = 0.9f;
                     }
 
@@ -459,10 +459,10 @@ namespace YWonderLand.Environment
             {
                 Debug.Log("[FarmInteraction] Plowed tile!");
                 
-                // Múa động tác Cuốc đất
+                // Múa động tác Cuốc đất -> cầm CUỐC (Hoe), không phải rìu
                 if (PlayerController.Instance != null)
                 {
-                    PlayerController.Instance.PlayActionAnimation("TreeCutting", 3.0f, YWonderLand.Player.ToolType.Axe);
+                    PlayerController.Instance.PlayActionAnimation("TreeCuttingV4", 3.0f, YWonderLand.Player.ToolType.Hoe);
                 }
             }
         }
@@ -564,6 +564,9 @@ namespace YWonderLand.Environment
             if (tile.InteractWater())
             {
                 Debug.Log("[FarmInteraction] Watered tile! Growth timer started.");
+                // Múa động tác tưới -> cầm BÌNH TƯỚI
+                if (PlayerController.Instance != null)
+                    PlayerController.Instance.PlayActionAnimation("TreeCuttingV4", 1.5f, YWonderLand.Player.ToolType.WateringCan);
             }
         }
 
