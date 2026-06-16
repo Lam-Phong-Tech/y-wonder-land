@@ -1,6 +1,9 @@
-﻿# Data Schema — Y WONDER GREEN FARM
+﻿# Data Schema — YWONDERLAND (Bá Chủ Khu Rừng 3D)
 # Cập nhật: 2026-06-01
-# Backend: Unity Gaming Services (Cloud Save + Economy)
+
+> ⚠️ **LỖI THỜI (16/06/2026):** File này viết cho **UGS Cloud Save/Economy** — KHÔNG còn áp dụng.
+> Dự án đã chuyển sang **REST API riêng**. Lược đồ DB thật xem **`docs/DB_SCHEMA.md`**.
+> Giữ file này chỉ để tham khảo lịch sử mô hình dữ liệu.
 
 ## Quy Tắc Dữ Liệu
 1. KHÔNG xoá Cloud Save key đang có data — đánh dấu `_deprecated` và tạo key mới

@@ -5,6 +5,57 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-06-16] — Rà soát điểm mù tài liệu + Bộ tài liệu kỹ thuật
+
+### Added (tài liệu cho khách/BA)
+- **`Docs_KichBan/DiemMu_CanXinKhach.md`** [NEW]: audit 3 lớp (kịch bản khách + docs nội bộ + code thật) → liệt kê toàn bộ điểm mù cần khách làm rõ, nhóm theo hệ thống, đánh dấu mức 🔴 chặn code / 🟡 chặn cân bằng / ⚪ chặn bàn giao. Kèm 4 mục GATING (backend, API web, định danh đăng nhập, publish Android) + bảng mâu thuẫn nội bộ.
+- **`Docs_KichBan/TongKet_TaiLieu_CanCo.md`** [NEW]: tổng kết toàn bộ tài liệu dự án cần có, chia **Nhóm A (khách/BA cung cấp)** vs **Nhóm B (team tự viết)** vs **Nhóm C (viết lại)**; có câu nhắn mẫu gửi BA.
+
+### Added (tài liệu kỹ thuật — team tự viết)
+- **`docs/TECHNICAL_DESIGN.md`** [NEW] (TDD): kiến trúc backend REST offline-first, stack hiện tại vs cần chốt, luồng đăng nhập/tutorial đợt 1, lộ trình đợt 2–4, 8 rủi ro kỹ thuật đã biết.
+- **`docs/DB_SCHEMA.md`** [NEW] (ERD): lược đồ DB thật theo REST — bảng `users`/`profiles` (đã có) + đề xuất economy/inventory/transactions/farm/animal/piggy_bank/quests + danh mục tĩnh (item/crop/animal/shop catalog).
+- **`docs/SECURITY.md`** [NEW]: threat model, nguyên tắc **server-authoritative**, chống chỉnh giờ/double-spend/IAP giả, checklist anti-cheat đợt 2–3.
+- **`docs/BUILD_RELEASE.md`** [NEW]: runbook build Android (keystore → AAB → Play Console), checklist phát hành, versioning.
+
+### Changed (dọn mâu thuẫn UGS/Unity 2022 — Nhóm C)
+- `docs/ARCHITECTURE.md`: **viết lại theo REST** — bỏ bảng "UGS Services" + sơ đồ "UGS Cloud", thay bằng Backend Services thật, cấu trúc thư mục `_Project/` đúng thực tế, trỏ sang TDD/DB_SCHEMA/SECURITY/BUILD.
+- `docs/CONTEXT_RECOVERY.md`: prompt khởi động sửa **Unity 2022 + UGS + UniTask → Unity 6 + REST + Awaitable**; cập nhật danh sách file đọc.
+- `docs/DATA_SCHEMA.md`: gắn banner **LỖI THỜI**, trỏ sang `DB_SCHEMA.md` (tránh implement nhầm theo UGS).
+
+### Notes
+- Phát hiện cần xử lý ở đợt 2–3 (ghi trong TDD/SECURITY): POS đang `int` sẽ tràn → đổi `long`; PiggyBank tách rời EconomyManager (gửi/rút chưa trừ tiền thật); lãi Heo Đất phải tính giờ server (chống chỉnh giờ máy).
+
+### Changed Files
+- `Assets/_Project/Docs_KichBan/DiemMu_CanXinKhach.md`, `TongKet_TaiLieu_CanCo.md` [NEW]
+- `docs/TECHNICAL_DESIGN.md`, `docs/DB_SCHEMA.md`, `docs/SECURITY.md`, `docs/BUILD_RELEASE.md` [NEW]
+- `docs/ARCHITECTURE.md`, `docs/CONTEXT_RECOVERY.md`, `docs/DATA_SCHEMA.md` [MODIFIED]
+
+---
+## [2026-06-16] — Lưu trữ THẬT (REST API) — Đợt 1: Profile + Tutorial
+
+### Added
+- **Backend REST đợt 1** (theo kịch bản khách, KHÔNG dùng UGS): chuyển từ mock/PlayerPrefs sang lưu thật cho `player_profile` + cờ `tutorialCompleted`.
+- **Server stub** `server/` (Node/Express, lưu `data.json`): `/auth/register`, `/auth/login`, `GET|PUT /player/profile`. Token JWT đơn giản (chỉ dev/test, không production). Đã smoke-test end-to-end OK.
+- **Client Unity** `Assets/_Project/Scripts/Backend/`: `BackendConfig` (ScriptableObject URL/timeout), `ApiClient` (UnityWebRequest + Newtonsoft, try/catch + timeout), `AuthService` (login/register, cache token), `PlayerProfileService` (load/save profile, **offline-first** fallback cache PlayerPrefs).
+
+### Changed
+- `SystemsBootstrapper`: khởi tạo thêm `AuthService` + `PlayerProfileService`.
+- `GameManager.StartGame()` *(PROTECTED)*: đăng nhập + nạp profile chạy nền song song cutscene (không chặn UX, offline tự fallback).
+- `TutorialManager` *(PROTECTED)*: bỏ qua tutorial nếu hồ sơ đã `tutorialCompleted`; khi hoàn thành thì ghi cờ lên hồ sơ thật.
+- `docs/ARCHITECTURE.md` + `docs/API_CONTRACTS.md`: đính chính backend UGS → **REST API riêng**.
+
+### Notes
+- Auth đợt 1 dùng username = tên nhân vật + mật khẩu sinh/lưu local (CHƯA nối UI Login — để đợt 2).
+- KHÔNG cài package Unity mới (dùng UnityWebRequest + Newtonsoft sẵn có).
+
+### Changed Files
+- `server/*` [NEW] · `Assets/_Project/Scripts/Backend/*.cs` [NEW]
+- `Assets/_Project/Scripts/Core/SystemsBootstrapper.cs` [MODIFIED]
+- `Assets/_Project/Scripts/Managers/GameManager.cs` [MODIFIED]
+- `Assets/_Project/Scripts/Tutorial/TutorialManager.cs` [MODIFIED]
+- `docs/ARCHITECTURE.md`, `docs/API_CONTRACTS.md` [MODIFIED]
+
+---
 ## [2026-06-15] — Tưới cây (cầm xô), tự gom lá vào cây, tắt rung, dọn Splash
 
 ### Added
