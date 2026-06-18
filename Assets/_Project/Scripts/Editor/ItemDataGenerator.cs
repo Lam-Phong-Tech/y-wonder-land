@@ -95,7 +95,11 @@ namespace YWonderLand.EditorScripts
 
             // Vật nuôi (mua tại shop)
             AddItem(db, "chicken_01", "Gà", "Gà ta đẻ trứng.", "🐔", "animals", 500, 0, false);
+            AddItem(db, "rabbit_01", "Thỏ", "Thỏ con dễ thương.", "🐰", "animals", 400, 0, false);
+            AddItem(db, "ostrich_01", "Đà điểu", "Đà điểu cho trứng lớn.", "🦤", "animals", 800, 0, false);
+            AddItem(db, "goat_01", "Dê", "Dê cho sữa.", "🐐", "animals", 900, 0, false);
             AddItem(db, "cow_01", "Bò", "Bò sữa.", "🐄", "animals", 1500, 0, false);
+            AddItem(db, "deer_01", "Hươu", "Hươu cho nhung quý.", "🦌", "animals", 1800, 0, false);
             AddItem(db, "pig_01", "Heo", "Heo thịt.", "🐷", "animals", 1000, 0, false);
 
             // Câu cá

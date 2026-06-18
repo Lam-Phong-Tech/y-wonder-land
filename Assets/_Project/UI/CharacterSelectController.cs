@@ -14,6 +14,11 @@ public class CharacterSelectController : MonoBehaviour
     /// </summary>
     public static string PlayerName { get; private set; }
 
+    /// <summary>
+    /// Static property to access the chosen gender (0 = Male, 1 = Female) for default avatar.
+    /// </summary>
+    public static int PlayerGender { get; private set; }
+
     private UIDocument uiDocument;
 
     // Root screen
@@ -99,12 +104,7 @@ public class CharacterSelectController : MonoBehaviour
         SetLabelText(root, "ConfirmBody",
             "B\u1ea0N KH\u00d4NG TH\u1ec2 THAY \u0110\u1ed4I T\u00caN V\u00c0 GI\u1edaI T\u00cdNH SAU KHI X\u00c1C NH\u1eacN.\nB\u1ea1n ch\u1eafc ch\u1eafn mu\u1ed1n ti\u1ebfp t\u1ee5c?");
 
-        // Gender icons: replace M/F with symbols
-        Label maleIcon = root.Q<Label>(className: "charselect-gender-male");
-        if (maleIcon != null) maleIcon.text = "\u2642"; // ♂
-
-        Label femaleIcon = root.Q<Label>(className: "charselect-gender-female");
-        if (femaleIcon != null) femaleIcon.text = "\u2640"; // ♀
+        // Gender icons: replaced by background images in UXML/USS
 
         // Buttons
         var btnStart = root.Q<Button>("BtnStart");
@@ -119,7 +119,7 @@ public class CharacterSelectController : MonoBehaviour
         // Placeholder
         if (nameField != null)
         {
-            nameField.textEdition.placeholder = "Nh\u1eadp t\u00ean nh\u00e2n v\u1eadt (2-16 k\u00fd t\u1ef1)";
+            nameField.textEdition.placeholder = "Nh\u1eadp t\u00ean nh\u00e2n v\u1eadt (2-20 k\u00fd t\u1ef1)";
         }
     }
 
@@ -234,9 +234,9 @@ public class CharacterSelectController : MonoBehaviour
             return false;
         }
 
-        if (name.Length > 16)
+        if (name.Length > 20)
         {
-            ShowStatus("T\u00ean kh\u00f4ng \u0111\u01b0\u1ee3c v\u01b0\u1ee3t qu\u00e1 16 k\u00fd t\u1ef1", false);
+            ShowStatus("T\u00ean kh\u00f4ng \u0111\u01b0\u1ee3c v\u01b0\u1ee3t qu\u00e1 20 k\u00fd t\u1ef1", false);
             isNameValid = false;
             return false;
         }
@@ -299,6 +299,7 @@ public class CharacterSelectController : MonoBehaviour
     {
         // Store player name
         PlayerName = nameField?.value?.Trim() ?? "Player";
+        PlayerGender = selectedGender;
         Debug.Log($"[CharacterSelect] Confirmed! PlayerName: {PlayerName}, Gender: {(selectedGender == 0 ? "Male" : "Female")}");
 
         // Hide confirm dialog

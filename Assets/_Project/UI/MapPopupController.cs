@@ -313,7 +313,7 @@ public class MapPopupController : MonoBehaviour
         var loc = locationData[id];
         bool unlocked = IsUnlocked(loc);
 
-        ConfirmDialogController dialog = FindObjectOfType<ConfirmDialogController>();
+        ConfirmDialogController dialog = FindFirstObjectByType<ConfirmDialogController>();
 
         if (unlocked)
         {

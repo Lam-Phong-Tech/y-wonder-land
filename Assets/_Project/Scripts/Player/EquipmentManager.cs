@@ -11,7 +11,8 @@ namespace YWonderLand.Player
         Hoe,
         SeedBag,
         Pickaxe,
-        AnimalFeed
+        AnimalFeed,
+        Hammer
     }
 
     /// <summary>
@@ -43,6 +44,9 @@ namespace YWonderLand.Player
 
         [Tooltip("Model nắm cám/thức ăn (cho ăn) gắn trên tay")]
         public GameObject feedModel;
+
+        [Tooltip("Model cái Búa (gõ ô / xây dựng) gắn trên tay phải")]
+        public GameObject hammerModel;
 
         [Header("Placeholder tự sinh (khi CHƯA có model 3D thật)")]
         [Tooltip("Tự tạo dụng cụ tạm bằng khối primitive nếu ô model còn trống")]
@@ -98,6 +102,7 @@ namespace YWonderLand.Player
             if (fishingRodModel == null) fishingRodModel = BuildFishingRod(rh);
             if (seedBagModel == null) seedBagModel = BuildSeedBag(lh);
             if (feedModel == null) feedModel = BuildFeed(rh);
+            if (hammerModel == null) hammerModel = BuildHammer(rh);
         }
 
         private GameObject NewToolRoot(string name, Transform hand)
@@ -186,6 +191,14 @@ namespace YWonderLand.Player
             return root;
         }
 
+        private GameObject BuildHammer(Transform hand)
+        {
+            var root = NewToolRoot("Placeholder_Hammer", hand);
+            Prim(root.transform, PrimitiveType.Cylinder, new Vector3(0, 0.16f, 0), Vector3.zero, new Vector3(0.022f, 0.16f, 0.022f), WOOD);      // cán
+            Prim(root.transform, PrimitiveType.Cube, new Vector3(0, 0.33f, 0), new Vector3(0, 0, 90), new Vector3(0.07f, 0.1f, 0.07f), METAL);  // đầu búa ngang
+            return root;
+        }
+
         /// <summary>
         /// Gọi hàm này để hiện một công cụ cụ thể lên tay
         /// </summary>
@@ -217,6 +230,9 @@ namespace YWonderLand.Player
                 case ToolType.AnimalFeed:
                     if (feedModel != null) feedModel.SetActive(true);
                     break;
+                case ToolType.Hammer:
+                    if (hammerModel != null) hammerModel.SetActive(true);
+                    break;
             }
         }
 
@@ -232,6 +248,7 @@ namespace YWonderLand.Player
             if (seedBagModel != null) seedBagModel.SetActive(false);
             if (pickaxeModel != null) pickaxeModel.SetActive(false);
             if (feedModel != null) feedModel.SetActive(false);
+            if (hammerModel != null) hammerModel.SetActive(false);
         }
     }
 }

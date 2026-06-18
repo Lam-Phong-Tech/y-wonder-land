@@ -303,7 +303,41 @@ public class GameManager : MonoBehaviour
     public void StartGame()
     {
         playerName = CharacterSelectController.PlayerName ?? "Player";
+
+        // Đăng nhập + nạp hồ sơ người chơi (REST). Chạy NỀN song song với cutscene
+        // (cutscene dài ~15s >> timeout 5s) -> profile sẵn sàng trước khi Tutorial bắt đầu.
+        // Offline thì tự fallback dữ liệu local, KHÔNG chặn luồng vào game.
+        _ = SignInAndLoadProfileAsync();
+
         SetGameState(GameState.Cutscene);
+    }
+
+    private async Awaitable SignInAndLoadProfileAsync()
+    {
+        var auth = YWonderLand.Backend.AuthService.Instance;
+        var profile = YWonderLand.Backend.PlayerProfileService.Instance;
+        if (auth == null || profile == null) return;
+
+        // Đợt 1 CHƯA nối UI Login: dùng tên nhân vật làm username, mật khẩu sinh & lưu local.
+        string username = string.IsNullOrEmpty(playerName) ? "Player" : playerName;
+        string password = GetOrCreateLocalPassword(username);
+
+        await auth.EnsureSignedInAsync(username, password);
+        await profile.LoadProfileAsync();
+        profile.ApplyCharacterInfo(playerName, selectedCharacterIndex == 0 ? "male" : "female");
+    }
+
+    private string GetOrCreateLocalPassword(string username)
+    {
+        string key = "YW_LocalPwd_" + username;
+        string pwd = PlayerPrefs.GetString(key, "");
+        if (string.IsNullOrEmpty(pwd))
+        {
+            pwd = System.Guid.NewGuid().ToString("N");
+            PlayerPrefs.SetString(key, pwd);
+            PlayerPrefs.Save();
+        }
+        return pwd;
     }
 
     private void SpawnCharacterOnBoat()
@@ -408,9 +442,9 @@ public class GameManager : MonoBehaviour
             {
                 FloatingNameTag tag = spawnedCharacter.AddComponent<FloatingNameTag>();
                 tag.displayName = playerName ?? "Player";
-                tag.nameColor = FloatingNameTag.COLOR_ACHIEVEMENT; // #FFC107 — Gold/Achievement
+                tag.nameColor = Color.white; // Màu trắng giống Minecraft
                 tag.heightOffset = 2.2f;
-                tag.tmpFontSize = 3.5f;
+                tag.tmpFontSize = 2.5f; // Thu nhỏ lại theo yêu cầu
             }
             
             // Initially disable player controls and physics during cutscene

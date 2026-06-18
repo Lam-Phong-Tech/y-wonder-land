@@ -22,9 +22,7 @@
                     
                     <!-- Left Section: Avatar and Level Info -->
                     <ui:VisualElement name="ProfileLeft" class="profile-left">
-                        <ui:VisualElement name="ProfileAvatarLarge" class="profile-avatar-large">
-                            <ui:Label name="AvatarEmoji" class="avatar-emoji" text="🧑‍🌾" />
-                        </ui:VisualElement>
+                        <ui:VisualElement name="ProfileAvatarLarge" class="profile-avatar-large" />
                         <ui:Label name="ProfileName" class="profile-name" text="YWonderPlayer" />
                         
                         <ui:VisualElement class="profile-level-badge">

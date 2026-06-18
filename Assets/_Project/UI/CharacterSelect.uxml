@@ -23,9 +23,7 @@
                     <!-- Male Card -->
                     <ui:VisualElement class="charselect-card-shadow">
                         <ui:VisualElement name="MaleCard" class="charselect-card charselect-card-selected">
-                            <ui:VisualElement class="charselect-avatar charselect-avatar-male">
-                                <ui:Label text="M" class="charselect-gender-icon charselect-gender-male" />
-                            </ui:VisualElement>
+                            <ui:VisualElement class="charselect-avatar charselect-avatar-male" />
                             <ui:Label name="MaleLabel" text="NAM" class="charselect-name" />
                         </ui:VisualElement>
                     </ui:VisualElement>
@@ -33,9 +31,7 @@
                     <!-- Female Card -->
                     <ui:VisualElement class="charselect-card-shadow">
                         <ui:VisualElement name="FemaleCard" class="charselect-card">
-                            <ui:VisualElement class="charselect-avatar charselect-avatar-female">
-                                <ui:Label text="F" class="charselect-gender-icon charselect-gender-female" />
-                            </ui:VisualElement>
+                            <ui:VisualElement class="charselect-avatar charselect-avatar-female" />
                             <ui:Label name="FemaleLabel" text="NU" class="charselect-name" />
                         </ui:VisualElement>
                     </ui:VisualElement>
@@ -46,7 +42,7 @@
                     <ui:Label name="InputTitle" text="." class="charselect-input-title" />
                     <ui:VisualElement name="NameInputGroup" class="charselect-input-group">
                         <ui:Label text="@" class="charselect-input-icon" />
-                        <ui:TextField name="NameField" class="charselect-textfield" max-length="16" />
+                        <ui:TextField name="NameField" class="charselect-textfield" max-length="20" />
                     </ui:VisualElement>
                     <ui:Label name="NameStatus" class="charselect-status-message" />
                 </ui:VisualElement>

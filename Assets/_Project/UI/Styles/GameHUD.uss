@@ -117,7 +117,22 @@
 .sprint-btn-icon { font-size: 26px; color: white; -unity-font-style: bold; padding-bottom: 2px; }
 
 .joystick-outer { width: 130px; height: 130px; border-radius: 65px; background-color: rgba(30, 35, 45, 0.6); border-width: 1px; border-color: rgba(255, 255, 255, 0.15); align-items: center; justify-content: center; }
-.joystick-inner { width: 48px; height: 48px; border-radius: 24px; background-color: rgba(255, 255, 255, 0.5); border-width: 1px; border-color: rgba(255, 255, 255, 0.8); }
+.player-avatar {
+    width: 48px; height: 48px; border-radius: 24px;
+    background-color: var(--color-deep-blue);
+    align-items: center; justify-content: center;
+    border-width: 2px; border-color: rgba(255, 255, 255, 0.1);
+}
+
+.avatar-male {
+    background-image: url('project://database/Assets/_Project/UI/Sprites/Male_Avatar.jpg');
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+.avatar-female {
+    background-image: url('project://database/Assets/_Project/UI/Sprites/Female_avatar2.jpg');
+    -unity-background-scale-mode: scale-and-crop;
+}
 .joystick-arrow-container { position: absolute; width: 130px; height: 130px; align-items: center; justify-content: center; }
 .joystick-arrow { position: absolute; font-size: 14px; color: rgba(255, 255, 255, 0.4); }
 .joystick-arrow-up { top: 10px; } .joystick-arrow-down { bottom: 10px; } .joystick-arrow-left { left: 12px; } .joystick-arrow-right { right: 12px; }

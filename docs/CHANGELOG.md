@@ -5,6 +5,62 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-06-18] — Build Mode sinh prefab thật + Chuồng & thả thú từ túi đồ
+
+### Added
+- **`BuildPrefabLibrary`**: bảng ánh xạ "tên item Build → prefab THẬT" (kéo thả Inspector). Build Mode đặt ô đất/chuồng giờ sinh **prefab thật** (có FarmTile/collider…) thay khối Cube placeholder. Hỗ trợ `stretchToFootprint` (đất co vừa ô) + `yOffset` (chỉnh chìm/nổi) + khớp từ khóa **cụ thể nhất** (tránh nhầm chuồng).
+- **Hệ chuồng trại**: thanh Build có **Chuồng nhỏ (1x1) / vừa (2x2) / lớn (3x2)**. Đặt chuồng chạy animation Hammering. Mỗi loại chỉ nuôi loài đúng cỡ.
+- **`AnimalPenSpawner`**: click chuồng → mở **túi đồ (tab Thú nuôi)** chọn con vật → thả vào chuồng. Giới hạn loài theo `allowedAnimals` (map itemId→prefab) — không cho bò vào chuồng gà. `maxCapacity` (demo=1), `spawnHeightOffset` chỉnh độ cao con vật.
+- **Tab "Thú nuôi"** trong túi đồ (UXML + controller, lọc category `animals`).
+- **Vật phẩm con vật mới**: Đà điểu, Dê, Hươu, Thỏ (`ostrich_01/goat_01/deer_01/rabbit_01`) trong ItemDataGenerator; cấp sẵn để test (`EnsureStarterAnimals`).
+- **Ruộng 1x1** trên thanh Build (đặt từng ô đất nhỏ).
+
+### Changed
+- **Nhân vật xoay thẳng về ô đất** khi cuốc/gieo/tưới/thu hoạch (`PlayerController.FaceTowards`) — hết lệch do camera lệch vai GTA.
+- **Camera Build Mode** dốc hơn (góc ≥84°) để nhân vật ở giữa màn hình, không bị thanh chat che.
+
+### Fixed
+- **Prefab Build bị dựng đứng/lật**: giữ rotation gốc prefab (Blender xoay) + chỉ thêm yaw, không ghi đè.
+- **Thuyền cutscene lật ngang khi cập bến** (`BoatCutscene`): tự suy "góc bù model" từ rotation đã căn sẵn (`autoOffsetFromInitialRotation`) → thuyền giữ tư thế đúng khi xoay, nhân vật không rơi nước.
+
+### Changed Files
+- `Scripts/Environment/BuildPrefabLibrary.cs`, `AnimalPenSpawner.cs` [NEW]
+- `Scripts/Environment/GhostPlacementController.cs`, `FarmInteractionController.cs` [MODIFIED]
+- `Scripts/Player/PlayerController.cs`, `Scripts/Camera/BuildCameraController.cs`, `Scripts/Cutscenes/BoatCutscene.cs` [MODIFIED]
+- `UI/BuildModeOverlayController.cs`, `UI/InventoryPopup.uxml`, `UI/InventoryPopupController.cs` [MODIFIED]
+- `Scripts/Editor/ItemDataGenerator.cs`, `Scripts/Managers/InventoryManager.cs` [MODIFIED]
+
+---
+## [2026-06-17] — Thiết kế lại UI Onboarding + Gameplay tile/búa/camera
+
+> ⚠️ Phần **UI Onboarding** bên dưới có **sự hỗ trợ của Gemini Pro 3.1** (làm khi phiên Claude đạt giới hạn). Toàn bộ thay đổi phiên này **CHƯA commit** tại thời điểm ghi.
+
+### Changed — UI Onboarding (Gemini Pro hỗ trợ)
+- **Màn Login redesign**: bỏ chữ "Y WONDER GREEN FARM" + "CUỘC PHIÊU LƯU BẮT ĐẦU", thay bằng **logo Ywonder Hub** (`Y_Wonder_Hub_Logo2.png`, đã tách nền). Thêm **validate ≤ 20 ký tự** cho username/password ở cả form Đăng nhập lẫn Đăng ký (`max-length="20"` + check code).
+- **Character Select redesign**: thay ký tự ♂/♀ bằng **avatar ảnh** (`Male_Avatar.jpg`, `Female_avatar2.jpg`); lưu `PlayerGender` (static) để đặt avatar mặc định; validate tên nhân vật **2–20 ký tự** (trước 2–16).
+- **Đồng bộ 3 tông màu chủ đạo** (Cam `#eb6b2a` · Xanh lá `#7cb641` · Xanh biển `#2596be`) vào toàn bộ onboarding:
+  - Login: nút Cam viền hover Xanh lá; ô input focus viền Xanh lá; tab active Xanh biển viền Xanh lá.
+  - Character Select: nút/tiêu đề/thẻ giới tính/popup cảnh báo theo 3 tông; sửa USS (z-index, line-height).
+- **`FloatingNameTag` nâng cấp**: xóa thẻ `<mark>` bị lỗi khoảng cách ký tự dài; thêm **3D Quad làm nền** căn giữa tự động; sửa công thức tính chiều rộng nền (dùng padding tĩnh thay vì ×0.8) → tên dài không tràn.
+- **`GameManager`**: sửa lỗi đè màu tên nhân vật → khôi phục **màu trắng chuẩn** (thay vì vàng).
+- **Splash & Loading**: gỡ trang trí dư (ngôi sao, version tag); nền Splash đổi **mystic-black**; thanh tiến trình **Xanh lá**, logo text **Cam**.
+- **`LoadingScreenController`**: thêm tham số `destinationName` cho `ShowLoadingAsync` (hiện tên địa điểm đích khi chuyển scene).
+- Tinh chỉnh kèm theo: `GameHUD`, `ProfilePopup`, `BuildModeOverlay`, `BuildCameraController`, `GhostPlacementController`, `MapPopupController`.
+
+> ✅ **Chốt tên game chính thức = "Y WONDER GREEN FARM"** (18/06): tên loading mặc định Gemini đặt là đúng. Splash vẫn dùng **logo Ywonder Hub** (logo hình, không hiện chữ tên). Tài liệu kỹ thuật đã đồng bộ lại tên này (trước đó vài file ghi tạm "YWONDERLAND").
+
+### Added — Gameplay (phiên Claude 16/06, gộp ghi ở đây)
+- **`FarmTileMarker`**: ô vuông viền màu theo trạng thái đất (vàng=sẵn gieo, xanh=đang lớn, cam=chín), tự gắn vào mọi FarmTile.
+- **Hammer Build (kiểu Minecraft)**: `TilePlacementSystem` + `HammerBuildController` — cầm búa gõ ô trước mặt để lát (tốn 4 đá + 4 gỗ), ô preview sáng/đỏ. *(Phím G tạm — Bước 2 sẽ thay nút HUD.)*
+- **`NpcProximityInteract`**: bước vào vùng quanh NPC dịch vụ tự mở Shop/Workshop/Heo đất (không cần bấm).
+- **Camera PUBG/Free Fire**: nhân vật luôn quay lưng về người chơi theo yaw camera; bỏ camera trôi; giảm độ nhạy (0.8/0.6); Free-Look giữ Alt.
+
+### Changed Files (chính)
+- UI: `LoginScreen.uxml/.uss`, `LoginScreenController.cs`, `CharacterSelect.uxml/.uss`, `CharacterSelectController.cs` [MODIFIED]
+- Gameplay: `FarmTileMarker.cs`, `TilePlacementSystem.cs`, `HammerBuildController.cs`, `NpcProximityInteract.cs` [NEW]
+- `ThirdPersonCamera.cs`, `PlayerController.cs`, `EquipmentManager.cs` [MODIFIED]
+
+---
 ## [2026-06-16] — Rà soát điểm mù tài liệu + Bộ tài liệu kỹ thuật
 
 ### Added (tài liệu cho khách/BA)

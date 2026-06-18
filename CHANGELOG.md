@@ -1,5 +1,28 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-06-18 (Đồng bộ UI 3 màu chủ đạo, Tối ưu FloatingNameTag và Loading Screen)
+### Added
+- **Màu sắc thương hiệu UI:** Tích hợp 3 màu chủ đạo Cam (`#eb6b2a`), Xanh lá (`#7cb641`), Xanh biển (`#2596be`) vào các hệ thống UI chính.
+- **Tính năng báo tên địa điểm:** `LoadingScreenController` giờ hỗ trợ tuỳ chọn tham số tên bản đồ đích, giúp hiển thị tên địa điểm thay vì logo khi nhảy scene.
+
+### Changed
+- **Nền NameTag nổi:** Bỏ thẻ `<mark>` (lỗi hiển thị ký tự thụt đuôi), thay bằng 3D Quad (`bgObj`). Tối ưu thuật toán co giãn bằng padding tĩnh giúp nền không bị thụt khi tên quá dài. Sửa lỗi màu tên hiển thị (trắng chuẩn).
+- **Màn hình Đăng Nhập (`LoginScreen.uss`):** Nút đăng nhập/đăng ký màu Cam rực rỡ với viền hover Xanh lá. Tab đang chọn màu Xanh biển có viền Xanh lá bao quanh. Ô input focus hiện viền Xanh lá.
+- **Màn hình Tạo Nhân Vật (`CharacterSelect.uss`):** Đồng bộ thiết kế màu sắc (Orange, Green, Blue) với Login (nút bấm, tiêu đề, các thẻ, popup cảnh báo). Gỡ lỗi CSS USS cảnh báo (z-index, line-height).
+- **Màn hình Loading / Splash:** 
+  - Gọn gàng hơn (xoá sao trang trí, version tag). 
+  - Đổi chữ Logo từ "Y-WONDERLAND" thành "Y WONDER GREEN FARM".
+  - Nền Splash tối lại sang `mystic-black`. Thanh tiến trình mang màu Xanh lá (`success`), màu chữ mang màu Cam.
+
+### Changed Files (18/06)
+- `Assets/_Project/Scripts/Managers/GameManager.cs` [MODIFIED]
+- `Assets/_Project/Scripts/UI/FloatingNameTag.cs` [MODIFIED]
+- `Assets/_Project/Scripts/UI/LoadingScreenController.cs` [MODIFIED]
+- `Assets/_Project/UI/Styles/LoginScreen.uss` [MODIFIED]
+- `Assets/_Project/UI/Styles/CharacterSelect.uss` [MODIFIED]
+- `Assets/_Project/UI/SplashLoadingScreen.uxml/uss` [MODIFIED]
+- `Assets/_Project/UI/LoadingScreen.uxml/uss` [MODIFIED]
+
 ## [Unreleased] - 2026-06-15 (Dụng cụ cầm tay · Cây đổ gục · Câu cá có dây · Animation lao động)
 ### Added
 - **Hệ thống dụng cụ cầm tay (`EquipmentManager`):** tự sinh dụng cụ PLACEHOLDER bằng khối

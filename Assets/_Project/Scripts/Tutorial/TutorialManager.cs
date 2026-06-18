@@ -495,6 +495,15 @@ public class TutorialManager : MonoBehaviour
 
     public void StartTutorial()
     {
+        // Hồ sơ thật đã đánh dấu hoàn thành tutorial -> bỏ qua, không bắt người chơi làm lại.
+        var prof = YWonderLand.Backend.PlayerProfileService.Instance;
+        if (prof != null && prof.Profile != null && prof.Profile.tutorialCompleted)
+        {
+            currentStep = TutorialStep.Complete;
+            Debug.Log("[TutorialManager] Bỏ qua tutorial — hồ sơ đã hoàn thành trước đó.");
+            return;
+        }
+
         SetStep(TutorialStep.FollowNPC);
         UpdateQuestHUD("[1/6] Đi theo NPC Tân Thủ tới mảnh đất hoang");
         Debug.Log("[TutorialManager] Onboarding Tutorial Started.");
@@ -886,7 +895,7 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
-    private void OnTutorialBuildingPlaced(int price)
+    private void OnTutorialBuildingPlaced(string itemName, int price)
     {
         if (currentStep == TutorialStep.InteractBuild)
         {
@@ -949,6 +958,10 @@ public class TutorialManager : MonoBehaviour
             );
 
             GiveTutorialRewards();
+
+            // Ghi nhớ HOÀN THÀNH tutorial lên hồ sơ thật (cache local ngay + đẩy server).
+            if (YWonderLand.Backend.PlayerProfileService.Instance != null)
+                YWonderLand.Backend.PlayerProfileService.Instance.SetTutorialCompleted(true);
 
             CancelInvoke(nameof(HideSubtitle));
             Invoke(nameof(HideSubtitle), 5f);

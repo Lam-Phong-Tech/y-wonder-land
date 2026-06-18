@@ -10,9 +10,9 @@ public class GhostPlacementController : MonoBehaviour
     public static GhostPlacementController Instance { get; private set; }
 
     /// <summary>
-    /// Fired when a building is placed. Parameter is the item price.
+    /// Fired when a building is placed. Parameter is the item name and price.
     /// </summary>
-    public static event System.Action<int> OnBuildingPlaced;
+    public static event System.Action<string, int> OnBuildingPlaced;
 
     [Header("Ghost Settings")]
     [SerializeField] private Color validColor = new Color(0.2f, 0.9f, 0.3f, 0.4f);
@@ -279,7 +279,7 @@ public class GhostPlacementController : MonoBehaviour
         SpawnPlacedBuilding(worldPos, effectiveSize);
 
         // Notify listeners (UI controller handles balance deduction)
-        OnBuildingPlaced?.Invoke(currentItemPrice);
+        OnBuildingPlaced?.Invoke(currentItemName, currentItemPrice);
 
         Debug.Log($"[GhostPlacement] Placed '{currentItemName}' at grid ({currentGridCell.x},{currentGridCell.y}) rotation {rotationAngle}");
 
@@ -291,6 +291,16 @@ public class GhostPlacementController : MonoBehaviour
     {
         float cellSize = gridManager != null ? gridManager.CellSize : 1f;
 
+        // ƯU TIÊN: nếu có prefab THẬT khớp tên item (đất/hàng rào...) thì sinh prefab đó.
+        var lib = YWonderLand.Environment.BuildPrefabLibrary.Instance;
+        var entry = lib != null ? lib.Find(currentItemName) : null;
+        if (entry != null)
+        {
+            SpawnPrefabBuilding(entry, position, size, cellSize);
+            return;
+        }
+
+        // FALLBACK: chưa khai báo prefab -> khối Cube placeholder như cũ.
         GameObject building = GameObject.CreatePrimitive(PrimitiveType.Cube);
         building.name = $"Building_{currentItemName}_{currentGridCell.x}_{currentGridCell.y}";
         building.transform.position = position;
@@ -342,5 +352,50 @@ public class GhostPlacementController : MonoBehaviour
         int hash = currentItemName.GetHashCode();
         float hue = Mathf.Abs(hash % 360) / 360f;
         return Color.HSVToRGB(hue, 0.5f, 0.8f);
+    }
+
+    // ── Sinh PREFAB thật (đất có FarmTile, hàng rào...) ──
+
+    private void SpawnPrefabBuilding(YWonderLand.Environment.BuildPrefabLibrary.Entry entry, Vector3 position, Vector2Int size, float cellSize)
+    {
+        // Hạ về sát mặt đất (ghost được nâng lên ghostHeight*0.5 để xem preview) + offset chỉnh tay theo prefab.
+        Vector3 groundPos = position;
+        groundPos.y = position.y - ghostHeight * 0.5f + entry.yOffset;
+
+        // GIỮ rotation gốc của prefab (vd chuồng đã dựng nằm ngang sẵn), chỉ XOAY THÊM yaw khi người chơi bấm R.
+        // Tránh ghi đè rotation làm prefab bị dựng đứng/lệch hướng.
+        Quaternion finalRot = Quaternion.Euler(0, rotationAngle, 0) * entry.prefab.transform.rotation;
+        GameObject go = Instantiate(entry.prefab, groundPos, finalRot);
+        go.name = $"Building_{currentItemName}_{currentGridCell.x}_{currentGridCell.y}";
+
+        // Đất: co giãn cho vừa ô lưới. Hàng rào/trang trí: giữ nguyên prefab.
+        if (entry.stretchToFootprint)
+        {
+            StretchToFootprint(go, size.x * cellSize * 0.95f, size.y * cellSize * 0.95f);
+        }
+
+        // Cho phép Xóa/Di chuyển trong Build Mode (chỉ gán khi prefab chưa có tag riêng).
+        // FarmTile nhận diện qua component nên tag KHÔNG ảnh hưởng việc trồng cây.
+        if (go.CompareTag("Untagged")) go.tag = "PlacedBuilding";
+
+        Debug.Log($"[GhostPlacement] Item '{currentItemName}' → khớp '{entry.nameContains}' → prefab '{entry.prefab.name}' (stretch={entry.stretchToFootprint})");
+    }
+
+    /// <summary>Co giãn prefab theo trục X/Z (world) cho vừa footprint ô lưới, giữ nguyên chiều cao.</summary>
+    private void StretchToFootprint(GameObject go, float targetX, float targetZ)
+    {
+        var rends = go.GetComponentsInChildren<Renderer>();
+        if (rends.Length == 0) return;
+
+        Bounds b = rends[0].bounds;
+        for (int i = 1; i < rends.Length; i++) b.Encapsulate(rends[i].bounds);
+
+        float curX = b.size.x, curZ = b.size.z;
+        if (curX < 0.0001f || curZ < 0.0001f) return;
+
+        Vector3 s = go.transform.localScale;
+        s.x *= targetX / curX;
+        s.z *= targetZ / curZ;
+        go.transform.localScale = s;
     }
 }

@@ -1,4 +1,4 @@
-# 🛡️ SECURITY & ANTI-CHEAT — YWONDERLAND
+# 🛡️ SECURITY & ANTI-CHEAT — Y WONDER GREEN FARM
 
 > Tài liệu kỹ thuật **nội bộ team**. Mục tiêu: bảo vệ dữ liệu tiền/inventory/giao dịch khi game lên online.
 > Phiên bản: 0.1 — 16/06/2026. Trạng thái hiện tại: **game đang offline (PlayerPrefs)** → mọi giá trị client tự sửa được. Tài liệu này đặt ra mục tiêu cho đợt 2–3.

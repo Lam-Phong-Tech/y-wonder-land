@@ -1,4 +1,4 @@
-# 🚀 BUILD & RELEASE RUNBOOK — YWONDERLAND (Android)
+# 🚀 BUILD & RELEASE RUNBOOK — Y WONDER GREEN FARM (Android)
 
 > Quy trình build + phát hành Android lên Google Play Console. Tài liệu kỹ thuật **nội bộ team**.
 > Phiên bản: 0.1 — 16/06/2026. Engine: **Unity 6 (6000.3.15f1)**, URP.
@@ -10,7 +10,7 @@
 | Hạng mục | Giá trị | Trạng thái |
 |---|---|---|
 | Package name (ApplicationIdentifier) | vd `com.ywonderland.farm` | **CHỜ CHỐT** |
-| Tên app hiển thị | YWONDERLAND? | **CHỜ CHỐT** |
+| Tên app hiển thị | **Y WONDER GREEN FARM** | ✅ Đã chốt (18/06) |
 | Min SDK Android | đề xuất API 24 (Android 7.0) | **CHỜ CHỐT** |
 | Target SDK | mới nhất Play yêu cầu (API 34+) | theo Play |
 | Tài khoản Google Play Console | đã đăng ký ($25)? | **CHỜ CHỐT** — ai sở hữu |

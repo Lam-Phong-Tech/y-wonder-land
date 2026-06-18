@@ -42,6 +42,7 @@ public class GameHUDController : MonoBehaviour
 
     // Player Info
     private VisualElement playerInfo;
+    private VisualElement playerAvatar;
     private Label playerName;
     private Label playerLevel;
     private Label playerCurrencySmall;
@@ -115,6 +116,7 @@ public class GameHUDController : MonoBehaviour
         SetPlayerInfo("YWonderPlayer", 1);
         SetPlayerEXP(0.00f);
         SetQuest("Kh\u00e1m ph\u00e1 \u0111\u1ea3o hoang v\u00e0 t\u00ecm ng\u00f4i nh\u00e0 \u0111\u1ea7u ti\u00ean!");
+        UpdateAvatar();
 
         // Sync player name from GameManager (retry until available)
         StartCoroutine(SyncPlayerName());
@@ -138,6 +140,7 @@ public class GameHUDController : MonoBehaviour
     {
         // Player Info
         playerInfo = root.Q<VisualElement>("PlayerInfo");
+        playerAvatar = root.Q<VisualElement>("PlayerAvatar");
         playerName = root.Q<Label>("PlayerName");
         playerLevel = root.Q<Label>("PlayerLevel");
         playerCurrencySmall = root.Q<Label>("PlayerEXP");
@@ -382,6 +385,22 @@ public class GameHUDController : MonoBehaviour
     {
         if (playerName != null) playerName.text = name;
         if (playerLevel != null) playerLevel.text = $"Level: {level}";
+        UpdateAvatar();
+    }
+
+    public void UpdateAvatar()
+    {
+        if (playerAvatar != null)
+        {
+            playerAvatar.RemoveFromClassList("avatar-male");
+            playerAvatar.RemoveFromClassList("avatar-female");
+            
+            int gender = GameManager.Instance != null ? GameManager.Instance.selectedCharacterIndex : 0;
+            if (gender == 0)
+                playerAvatar.AddToClassList("avatar-male");
+            else
+                playerAvatar.AddToClassList("avatar-female");
+        }
     }
 
     /// <summary>

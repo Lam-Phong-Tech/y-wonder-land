@@ -1,5 +1,6 @@
 using UnityEngine;
 using YWonderLand.Managers;
+using YWonderLand.Backend;
 
 namespace YWonderLand.Core
 {
@@ -18,8 +19,12 @@ namespace YWonderLand.Core
             systemsGo.AddComponent<EconomyManager>();
             systemsGo.AddComponent<InventoryManager>();
             systemsGo.AddComponent<ToolManager>();
-            
-            Debug.Log("[Bootstrapper] Persistent Systems initialized (Economy, Inventory, Tools).");
+
+            // Backend (REST) — đăng nhập + hồ sơ người chơi. Offline-first.
+            systemsGo.AddComponent<AuthService>();
+            systemsGo.AddComponent<PlayerProfileService>();
+
+            Debug.Log("[Bootstrapper] Persistent Systems initialized (Economy, Inventory, Tools, Auth, Profile).");
         }
     }
 }

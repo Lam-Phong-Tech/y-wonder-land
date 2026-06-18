@@ -11,9 +11,7 @@
         <ui:VisualElement class="hud-top-left">
             <!-- Avatar + Name + Level + EXP -->
             <ui:VisualElement name="PlayerInfo" class="player-info clickable-hud-element">
-                <ui:VisualElement class="player-avatar">
-                    <ui:Label text="👤" class="player-avatar-icon" />
-                </ui:VisualElement>
+                <ui:VisualElement name="PlayerAvatar" class="player-avatar" />
                 <ui:VisualElement class="player-details">
                     <ui:Label name="PlayerName" text="YWonderPlayer" class="player-name" />
                     <ui:VisualElement class="player-level-row">

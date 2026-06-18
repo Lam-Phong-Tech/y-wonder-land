@@ -25,6 +25,7 @@ namespace YWonderLand.Environment
         private InventoryPopupController inventoryPopup;
         private string pendingSeedId; // Seed được chọn từ inventory, chờ gieo
         private FarmTile pendingPlantTile; // Tile đang chờ gieo hạt
+        private YWonderLand.Environment.AnimalPenSpawner pendingPen; // Chuồng đang chờ chọn con vật từ túi
 
         void Start()
         {
@@ -150,7 +151,7 @@ namespace YWonderLand.Environment
                     if (Vector3.Distance(hoverPlayerPos, hit.point) <= resource.interactionRange)
                     {
                         foundObj = resource.gameObject;
-                        string actionStr = resource.type == HarvestableResource.ResourceType.Tree ? "Chặt cây" : "Đập đá";
+                        string actionStr = resource.type == HarvestableResource.ResourceType.Tree ? "Chặt cây" : "Đào khoáng";
                         foundActions.Add(new InteractionAction { keyName = "Click", actionName = actionStr, onClick = () => ClickHarvestResource(resource) });
                     }
                     break;
@@ -159,6 +160,16 @@ namespace YWonderLand.Environment
                 {
                     foundObj = merchant.gameObject;
                     foundActions.Add(new InteractionAction { keyName = "Click", actionName = merchant.GetInteractionLabel(), onClick = () => merchant.Interact() });
+                    break;
+                }
+                else if (hit.collider.GetComponentInParent<YWonderLand.Environment.AnimalPenSpawner>() != null)
+                {
+                    var penS = hit.collider.GetComponentInParent<YWonderLand.Environment.AnimalPenSpawner>();
+                    if (penS.HasSpace)
+                    {
+                        foundObj = penS.gameObject;
+                        foundActions.Add(new InteractionAction { keyName = "Click", actionName = "Thả thú", onClick = () => OpenPenAnimalPicker(penS) });
+                    }
                     break;
                 }
                 else if (hit.collider.TryGetComponent<FarmTile>(out var tile) || (hit.collider.transform.parent != null && hit.collider.transform.parent.TryGetComponent<FarmTile>(out tile)))
@@ -269,7 +280,7 @@ namespace YWonderLand.Environment
                 if (resource.type == HarvestableResource.ResourceType.Tree)
                     player.PlayActionAnimation("TreeCuttingV4", 1f, YWonderLand.Player.ToolType.Axe);
                 else
-                    player.PlayActionAnimation("TreeCuttingV4", 1f, YWonderLand.Player.ToolType.Pickaxe); // đập đá cầm Cúp
+                    player.PlayActionAnimation("Mining", 1f, YWonderLand.Player.ToolType.Pickaxe); // đập đá cầm Cúp
             }
 
             // Hiện thanh tiến trình
@@ -290,6 +301,10 @@ namespace YWonderLand.Environment
             if (PlayerController.Instance == null) return; // chống NullReferenceException khi player chưa spawn / đang teleport
             float dist = Vector3.Distance(PlayerController.Instance.transform.position, tile.transform.position);
             if (dist > interactRange) return;
+
+            // Xoay nhân vật mặt THẲNG về ô đất trước khi cuốc/gieo/tưới — khớp đúng hướng,
+            // tránh lệch do camera lệch vai (GTA-style). Action lock sẽ giữ nguyên hướng này.
+            PlayerController.Instance.FaceTowards(tile.transform.position);
 
             switch (tile.currentState)
             {
@@ -329,7 +344,8 @@ namespace YWonderLand.Environment
                     {
                         var chopTool = resource.type == HarvestableResource.ResourceType.Tree
                             ? YWonderLand.Player.ToolType.Axe : YWonderLand.Player.ToolType.Pickaxe;
-                        PlayerController.Instance.PlayActionAnimation("TreeCuttingV4", 1.0f, chopTool);
+                        string animName = resource.type == HarvestableResource.ResourceType.Tree ? "TreeCuttingV4" : "Mining";
+                        PlayerController.Instance.PlayActionAnimation(animName, 1.0f, chopTool);
                         _chopAnimTimer = 0.9f;
                     }
 
@@ -431,12 +447,22 @@ namespace YWonderLand.Environment
                     return; // Handled tile, stop here
                 }
 
+                // Chuồng thú: click để mở túi đồ (tab Thú nuôi) chọn con vật thả vào chuồng.
+                var penSpawner = hit.collider.GetComponentInParent<YWonderLand.Environment.AnimalPenSpawner>();
+                if (penSpawner != null)
+                {
+                    Vector3 ppos = PlayerController.Instance != null ? PlayerController.Instance.transform.position : transform.position;
+                    if (Vector3.Distance(ppos, penSpawner.transform.position) <= interactRange)
+                        OpenPenAnimalPicker(penSpawner);
+                    return;
+                }
+
                 MerchantNPC merchant = hit.collider.GetComponent<MerchantNPC>();
                 if (merchant != null)
                 {
                     Debug.Log($"[FarmInteraction] TÌM THẤY MERCHANT: {merchant.gameObject.name}! Mở Shop...");
                     merchant.Interact();
-                    return; 
+                    return;
                 }
 
                 // Thêm kiểm tra chặn tia
@@ -466,7 +492,7 @@ namespace YWonderLand.Environment
                 // Múa động tác Cuốc đất -> cầm CUỐC (Hoe), không phải rìu
                 if (PlayerController.Instance != null)
                 {
-                    PlayerController.Instance.PlayActionAnimation("TreeCuttingV4", 3.0f, YWonderLand.Player.ToolType.Hoe);
+                    PlayerController.Instance.PlayActionAnimation("Hoeing", 3.0f, YWonderLand.Player.ToolType.Hoe);
                 }
             }
         }
@@ -513,8 +539,77 @@ namespace YWonderLand.Environment
             }
         }
 
+        // Mở túi đồ (tab Thú nuôi) để chọn con vật thả vào chuồng đang đứng.
+        private void OpenPenAnimalPicker(YWonderLand.Environment.AnimalPenSpawner pen)
+        {
+            if (pen == null) return;
+            pendingPen = pen;
+            pendingPlantTile = null; // tránh nhầm với luồng gieo hạt
+            if (PlayerController.Instance != null) PlayerController.Instance.FaceTowards(pen.transform.position);
+
+            EnsureStarterAnimals(); // demo: chắc chắn có vài con vật để test (production: mua từ shop)
+
+            if (inventoryPopup == null)
+                inventoryPopup = Object.FindFirstObjectByType<InventoryPopupController>();
+            if (inventoryPopup != null)
+            {
+                inventoryPopup.ShowAtTab("animals");
+                Debug.Log("[FarmInteraction] Mở Túi đồ (Thú nuôi) để chọn con vật thả vào chuồng.");
+            }
+        }
+
+        // Demo helper: đảm bảo túi có sẵn vài con vật để test thả chuồng (production: mua từ shop).
+        private void EnsureStarterAnimals()
+        {
+            var inv = YWonderLand.Managers.InventoryManager.Instance;
+            if (inv == null) return;
+
+            string[] starterAnimals = { "chicken_01", "rabbit_01", "ostrich_01", "goat_01", "cow_01", "deer_01" };
+            foreach (var a in starterAnimals)
+            {
+                if (inv.GetItemQuantity(a) <= 0)
+                {
+                    inv.AddItem(a, 2);
+                    Debug.Log($"[FarmInteraction] Bổ sung con vật cho demo: {a} +2");
+                }
+            }
+        }
+
+        // Người chơi chọn 1 con vật trong túi khi đang đứng ở chuồng -> kiểm tra + thả.
+        private void HandlePenAnimalSelected(string itemId)
+        {
+            var pen = pendingPen;
+            pendingPen = null; // dùng 1 lần — chọn sai loài thì bấm "Thả thú" lại
+            if (pen == null) return;
+
+            if (!pen.CanAccept(itemId))
+            {
+                Debug.Log($"[FarmInteraction] Chuồng '{pen.name}' KHÔNG nhận '{itemId}'. Danh sách cho phép: {pen.AllowedIdsText()} | Còn chỗ: {pen.HasSpace}");
+                return;
+            }
+
+            var inv = YWonderLand.Managers.InventoryManager.Instance;
+            if (inv != null && !inv.RemoveItem(itemId, 1))
+            {
+                Debug.Log($"[FarmInteraction] Không có '{itemId}' trong túi để thả.");
+                return;
+            }
+
+            if (PlayerController.Instance != null) PlayerController.Instance.FaceTowards(pen.transform.position);
+            pen.SpawnByItem(itemId);
+
+            if (inventoryPopup != null) inventoryPopup.Hide();
+        }
+
         private void OnInventoryItemSelected(string itemId)
         {
+            // Ưu tiên: đang chờ chọn con vật cho 1 chuồng -> xử lý thả thú.
+            if (pendingPen != null)
+            {
+                HandlePenAnimalSelected(itemId);
+                return;
+            }
+
             // Only handle seed selection when we have a pending tile
             if (pendingPlantTile == null) return;
             if (!itemId.Contains("seed")) return; // Only accept seed items

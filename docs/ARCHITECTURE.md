@@ -1,4 +1,4 @@
-# Kiến Trúc Hệ Thống — YWONDERLAND (Bá Chủ Khu Rừng 3D)
+# Kiến Trúc Hệ Thống — Y WONDER GREEN FARM (Bá Chủ Khu Rừng 3D)
 # Cập nhật: 2026-06-16
 
 > **Backend = REST API riêng** (Node/Express stub → production) + DB, theo kịch bản khách. **KHÔNG dùng UGS.**

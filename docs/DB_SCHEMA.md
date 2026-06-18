@@ -1,4 +1,4 @@
-# 🗄️ DATABASE SCHEMA / ERD — YWONDERLAND (REST)
+# 🗄️ DATABASE SCHEMA / ERD — Y WONDER GREEN FARM (REST)
 
 > Lược đồ DB thật theo **REST API riêng** (thay blueprint UGS cũ trong `docs/DATA_SCHEMA.md`).
 > Phiên bản: 0.1 — 16/06/2026. **Đợt 1** (users, profiles) đã hiện thực ở server stub bằng file JSON; phần còn lại là **đề xuất** cho PostgreSQL production.

@@ -93,12 +93,14 @@ public class BuildModeOverlayController : MonoBehaviour
                 new BuildItemData("\U0001F3E0", "Nh\u00e0 g\u1ed7 nh\u1ecf", "2x2", 500, "Ng\u00f4i nh\u00e0 g\u1ed7 \u1ea5m c\u00fang cho gia \u0111\u00ecnh nh\u1ecf."),
                 new BuildItemData("\U0001F3E1", "Nh\u00e0 g\u1ea1ch", "3x3", 1200, "Ng\u00f4i nh\u00e0 g\u1ea1ch v\u1eefng ch\u1eafc, r\u1ed9ng r\u00e3i."),
                 new BuildItemData("\U0001F3EA", "Kho ch\u1ee9a", "2x3", 800, "Kho l\u01b0u tr\u1eef n\u00f4ng s\u1ea3n v\u00e0 d\u1ee5ng c\u1ee5."),
-                new BuildItemData("\U0001F414", "Chu\u1ed3ng g\u00e0", "2x2", 600, "Nu\u00f4i g\u00e0 \u0111\u1ebb tr\u1ee9ng m\u1ed7i ng\u00e0y."),
-                new BuildItemData("\U0001F404", "Chu\u1ed3ng b\u00f2", "3x3", 1500, "Nu\u00f4i b\u00f2 l\u1ea5y s\u1eefa t\u01b0\u01a1i."),
+                new BuildItemData("\U0001F414", "Chu\u1ed3ng nh\u1ecf", "1x1", 600, "Chu\u1ed3ng nh\u1ecf cho lo\u00e0i nh\u1ecf: g\u00e0, v\u1ecbt, ng\u1ed7ng, th\u1ecf."),
+                new BuildItemData("\U0001F999", "Chu\u1ed3ng v\u1eeba", "2x2", 1000, "Chu\u1ed3ng v\u1eeba cho lo\u00e0i trung: \u0111\u00e0 \u0111i\u1ec3u, d\u00ea, l\u1ee3n."),
+                new BuildItemData("\U0001F404", "Chu\u1ed3ng l\u1edbn", "3x2", 1500, "Chu\u1ed3ng l\u1edbn cho lo\u00e0i to: b\u00f2."),
             }
         },
         { 1, new List<BuildItemData> // Nong trai
             {
+                new BuildItemData("\U0001F7EB", "Ru\u1ed9ng 1x1", "1x1", 50, "\u00d4 \u0111\u1ea5t canh t\u00e1c 1x1 \u2014 \u0111\u1eb7t t\u1eebng \u00f4 \u0111\u1ec3 tr\u1ed3ng c\u00e2y."),
                 new BuildItemData("\U0001F33F", "Ru\u1ed9ng 2x2", "2x2", 100, "\u00d4 \u0111\u1ea5t nh\u1ecf \u0111\u1ec3 gieo h\u1ea1t."),
                 new BuildItemData("\U0001F33E", "Ru\u1ed9ng 3x3", "3x3", 200, "\u00d4 \u0111\u1ea5t l\u1edbn, tr\u1ed3ng \u0111\u01b0\u1ee3c nhi\u1ec1u h\u01a1n."),
                 new BuildItemData("\U0001F3E1", "Nh\u00e0 k\u00ednh", "4x4", 2000, "Tr\u1ed3ng c\u00e2y quanh n\u0103m kh\u00f4ng lo th\u1eddi ti\u1ebft."),
@@ -796,7 +798,7 @@ public class BuildModeOverlayController : MonoBehaviour
         }
     }
 
-    private void OnBuildingPlacedHandler(int price)
+    private void OnBuildingPlacedHandler(string itemName, int price)
     {
         if (currentBalance < price)
         {
@@ -807,6 +809,15 @@ public class BuildModeOverlayController : MonoBehaviour
         currentBalance -= price;
         UpdateBalance();
         ShowStatusMessage($"\u0110\u1EB7t th\u00E0nh c\u00F4ng! (-{price} POS)", true);
+
+        // Kích hoạt Animation cho Player
+        if (PlayerController.Instance != null)
+        {
+            bool isFarmPlot = !string.IsNullOrEmpty(itemName) && (itemName.ToLower().Contains("ruộng") || itemName.ToLower().Contains("farm"));
+            string animName = isFarmPlot ? "Hoeing" : "Hammering";
+            var tool = isFarmPlot ? YWonderLand.Player.ToolType.Hoe : YWonderLand.Player.ToolType.Hammer;
+            PlayerController.Instance.PlayActionAnimation(animName, 0.5f, tool);
+        }
     }
 
     // ── Status Message (Fade-out) ──

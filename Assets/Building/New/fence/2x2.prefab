@@ -1,0 +1,115 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &5715954193932471816
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 11c3dfcbdb17028478c8ef9db078eac9, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 12.85179
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 11c3dfcbdb17028478c8ef9db078eac9, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.3935554
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 11c3dfcbdb17028478c8ef9db078eac9, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 6.976965
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 11c3dfcbdb17028478c8ef9db078eac9, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071067
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 11c3dfcbdb17028478c8ef9db078eac9, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 11c3dfcbdb17028478c8ef9db078eac9, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 11c3dfcbdb17028478c8ef9db078eac9, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 11c3dfcbdb17028478c8ef9db078eac9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 11c3dfcbdb17028478c8ef9db078eac9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 11c3dfcbdb17028478c8ef9db078eac9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 11c3dfcbdb17028478c8ef9db078eac9, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: cc3572444022dff478ef2f0960414ef1, type: 2}
+    - target: {fileID: 919132149155446097, guid: 11c3dfcbdb17028478c8ef9db078eac9, type: 3}
+      propertyPath: m_Name
+      value: 2x2
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 11c3dfcbdb17028478c8ef9db078eac9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5988987045284749743}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 11c3dfcbdb17028478c8ef9db078eac9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8119380909792591814}
+  m_SourcePrefab: {fileID: 100100000, guid: 11c3dfcbdb17028478c8ef9db078eac9, type: 3}
+--- !u!1 &4869041970459374425 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 11c3dfcbdb17028478c8ef9db078eac9, type: 3}
+  m_PrefabInstance: {fileID: 5715954193932471816}
+  m_PrefabAsset: {fileID: 0}
+--- !u!64 &5988987045284749743
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4869041970459374425}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 3636728310917832608, guid: 11c3dfcbdb17028478c8ef9db078eac9, type: 3}
+--- !u!114 &8119380909792591814
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4869041970459374425}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3964452d48e10394db941ff643497f21, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Environment.AnimalPenSpawner
+  allowedAnimals:
+  - itemId: ostrich_01
+    prefab: {fileID: 677585544327538527, guid: 7c6af30902bea1f49a5c91bf1fe267c2, type: 3}
+  - itemId: goat_01
+    prefab: {fileID: 5013609644891489658, guid: 519c87bda2c9b254da7adc561c005ca7, type: 3}
+  maxCapacity: 1
+  spawnHeightOffset: -0.5

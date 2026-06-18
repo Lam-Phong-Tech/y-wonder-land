@@ -28,6 +28,7 @@ public class InventoryPopupController : MonoBehaviour
     private Button tabSeeds;
     private Button tabFood;
     private Button tabOutfit;
+    private Button tabAnimals;
     private Button tabSpecial;
 
     private Button activeTab;
@@ -98,6 +99,7 @@ public class InventoryPopupController : MonoBehaviour
         tabSeeds = root.Q<Button>("TabSeeds");
         tabFood = root.Q<Button>("TabFood");
         tabOutfit = root.Q<Button>("TabOutfit");
+        tabAnimals = root.Q<Button>("TabAnimals");
         tabSpecial = root.Q<Button>("TabSpecial");
 
         // Query detail panel elements
@@ -152,6 +154,7 @@ public class InventoryPopupController : MonoBehaviour
         tabSeeds?.RegisterCallback<ClickEvent>(evt => SetActiveTab(tabSeeds, "seeds", "Hạt giống"));
         tabFood?.RegisterCallback<ClickEvent>(evt => SetActiveTab(tabFood, "food", "Thực phẩm"));
         tabOutfit?.RegisterCallback<ClickEvent>(evt => SetActiveTab(tabOutfit, "outfit", "Trang phục"));
+        tabAnimals?.RegisterCallback<ClickEvent>(evt => SetActiveTab(tabAnimals, "animals", "Thú nuôi"));
         tabSpecial?.RegisterCallback<ClickEvent>(evt => SetActiveTab(tabSpecial, "special", "Đặc biệt"));
 
         // Detail Action clicks
@@ -402,6 +405,9 @@ public class InventoryPopupController : MonoBehaviour
                 break;
             case "outfit":
                 SetActiveTab(tabOutfit, "outfit", "Trang ph\u1ee5c");
+                break;
+            case "animals":
+                SetActiveTab(tabAnimals, "animals", "Th\u00fa nu\u00f4i");
                 break;
             case "special":
                 SetActiveTab(tabSpecial, "special", "\u0110\u1eb7c bi\u1ec7t");

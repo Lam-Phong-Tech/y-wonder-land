@@ -60,6 +60,10 @@ namespace YWonderLand.Managers
                 inventoryData.slots.Add(new InventorySlot("hoe_01", 1));
                 inventoryData.slots.Add(new InventorySlot("watering_can_01", 1));
                 inventoryData.slots.Add(new InventorySlot("carrot_seed_01", 5));
+                // Demo: tặng sẵn vài con vật để test thả chuồng (production: mua từ shop)
+                inventoryData.slots.Add(new InventorySlot("chicken_01", 2));
+                inventoryData.slots.Add(new InventorySlot("ostrich_01", 2));
+                inventoryData.slots.Add(new InventorySlot("cow_01", 2));
             }
             else
             {

@@ -11,8 +11,8 @@ public class BuildCameraController : MonoBehaviour
     public static BuildCameraController Instance { get; private set; }
 
     [Header("Top-Down Settings")]
-    [SerializeField] private float defaultHeight = 15f;
-    [SerializeField] private float minHeight = 8f;
+    [SerializeField] private float defaultHeight = 8f;
+    [SerializeField] private float minHeight = 5f;
     [SerializeField] private float maxHeight = 30f;
     [SerializeField] private float panSpeed = 12f;
     [SerializeField] private float zoomSpeed = 3f;
@@ -101,8 +101,17 @@ public class BuildCameraController : MonoBehaviour
 
         // Calculate target position (above current look point)
         currentHeight = defaultHeight;
-        topDownFocusPoint = cam.transform.position + cam.transform.forward * 10f;
+        
+        // Focus directly on the player to keep character in center view
+        topDownFocusPoint = thirdPersonCam != null && thirdPersonCam.target != null 
+            ? thirdPersonCam.target.position 
+            : cam.transform.position + cam.transform.forward * 5f;
+            
         topDownFocusPoint.y = 0f;
+
+        // Ép góc nhìn dốc hơn (gần top-down) để nhân vật nằm GIỮA màn hình,
+        // không bị đẩy xuống mép dưới nơi thanh chat che (kể cả khi scene lưu góc cũ 75°).
+        topDownAngle = Mathf.Max(topDownAngle, 84f);
 
         // Start transition
         Vector3 targetPos = topDownFocusPoint + Vector3.up * currentHeight;

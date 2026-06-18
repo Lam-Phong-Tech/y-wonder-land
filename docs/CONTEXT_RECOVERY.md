@@ -1,4 +1,4 @@
-﻿# 🔄 Context Recovery — YWONDERLAND (Bá Chủ Khu Rừng 3D)
+﻿# 🔄 Context Recovery — Y WONDER GREEN FARM (Bá Chủ Khu Rừng 3D)
 
 # Dùng khi bắt đầu conversation MỚI với AI
 
@@ -11,7 +11,7 @@ Copy đoạn prompt bên dưới → paste vào chat mới → AI sẽ tự đ�
 ## Prompt khởi động (copy từ đây)
 
 ```
-Tôi đang phát triển game Unity 3D online tên YWONDERLAND (Bá Chủ Khu Rừng 3D).
+Tôi đang phát triển game Unity 3D online tên Y WONDER GREEN FARM (Bá Chủ Khu Rừng 3D).
 Workspace: d:\LamGameUnity\BaChuKhuRung3D
 Engine: Unity 6 (6000.3.15f1) — URP. Backend: REST API riêng (KHÔNG dùng UGS).
 

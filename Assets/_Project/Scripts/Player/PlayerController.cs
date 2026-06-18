@@ -176,29 +176,12 @@ public class PlayerController : MonoBehaviour
 
             moveDirection = camForward * inputDir.z + camRight * inputDir.x;
 
-            // Xử lý xoay nhân vật theo chuẩn PUBG
-            bool isFreeLooking = Keyboard.current != null && Keyboard.current.altKey.isPressed;
-            
-            if (!isFreeLooking)
+            // Khi GIỮ Free-Look: nhân vật KHÔNG quay theo camera; chỉ xoay theo hướng đang chạy.
+            // (Trường hợp mặc định — quay theo camera — xử lý mỗi frame ở dưới, kể cả khi đứng yên.)
+            if (IsFreeLook() && moveDirection != Vector3.zero)
             {
-                // 1. Không giữ Alt: Nhân vật MẶC ĐỊNH luôn quay mặt theo tâm ngắm của Camera (Camera Yaw)
-                ThirdPersonCamera tpc = mainCameraTransform != null ? mainCameraTransform.GetComponent<ThirdPersonCamera>() : null;
-                if (tpc != null)
-                {
-                    Quaternion targetRotation = Quaternion.Euler(0, tpc.Yaw, 0);
-                    // Dùng tốc độ xoay nhanh hơn một chút để snap mượt theo chuột
-                    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * 2.5f * Time.deltaTime);
-                }
-            }
-            else
-            {
-                // 2. Giữ phím Alt (Free Look): Camera quay tự do, nhân vật KHÔNG quay theo Camera.
-                // Thay vào đó, nhân vật chỉ xoay theo hướng đang chạy (nếu có di chuyển)
-                if (moveDirection != Vector3.zero)
-                {
-                    Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
-                    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-                }
+                Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
             }
 
             // Check Sprint
@@ -209,6 +192,18 @@ public class PlayerController : MonoBehaviour
 
             // Move the character controller
             controller.Move(moveDirection * currentSpeed * Time.deltaTime);
+        }
+
+        // MẶC ĐỊNH (không Free-Look): nhân vật LUÔN quay lưng về người chơi — mặt hướng theo camera.
+        // Chạy MỖI FRAME kể cả khi đứng yên -> xoay camera là nhân vật xoay theo (kiểu PUBG/Free Fire mobile).
+        if (!IsFreeLook() && mainCameraTransform != null)
+        {
+            ThirdPersonCamera tpc = mainCameraTransform.GetComponent<ThirdPersonCamera>();
+            if (tpc != null)
+            {
+                Quaternion targetRotation = Quaternion.Euler(0, tpc.Yaw, 0);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * 2.5f * Time.deltaTime);
+            }
         }
 
         // 4. Handle Jumping (Không cho nhảy khi đang bơi)
@@ -273,6 +268,25 @@ public class PlayerController : MonoBehaviour
     public void SetSprintUI(bool isPressed)
     {
         isSprintUIHeld = isPressed;
+    }
+
+    // ── Free-Look (kiểu PUBG/Free Fire) ──
+    private bool externalFreeLook = false;
+    /// <summary>Nút Free-Look trên HUD mobile gọi: giữ = ngó quanh (nhân vật đứng im), thả = về bình thường.</summary>
+    public void SetFreeLook(bool held) => externalFreeLook = held;
+    private bool IsFreeLook() => externalFreeLook || (Keyboard.current != null && Keyboard.current.altKey.isPressed);
+
+    /// <summary>
+    /// Xoay nhân vật mặt thẳng về một điểm trong thế giới (chỉ trục Y).
+    /// Dùng khi cuốc/gieo/tưới để nhân vật quay đúng về ô đất (camera lệch vai GTA nên
+    /// hướng camera KHÔNG trùng hướng tới ô đất — xoay tay cho khớp, tránh cuốc lệch).
+    /// </summary>
+    public void FaceTowards(Vector3 worldPoint)
+    {
+        Vector3 dir = worldPoint - transform.position;
+        dir.y = 0f;
+        if (dir.sqrMagnitude > 0.0001f)
+            transform.rotation = Quaternion.LookRotation(dir.normalized);
     }
 
     /// <summary>

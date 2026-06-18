@@ -31,7 +31,7 @@ public class ThirdPersonCamera : MonoBehaviour
     [Header("Input Smoothing")]
     [Tooltip("How much the mouse input is smoothed. 0 = no smoothing (raw), higher = smoother but more laggy.")]
     [Range(0f, 0.95f)]
-    public float inputSmoothing = 0.5f;
+    public float inputSmoothing = 0.1f;
 
     [Header("Vertical Angle Limits")]
     [Tooltip("Minimum pitch angle (0 = look straight forward, negative = look up). Khóa ở 0 để không nhìn dưới háng.")]
@@ -66,6 +66,12 @@ public class ThirdPersonCamera : MonoBehaviour
 
         // Initialize yaw from current camera direction
         yaw = transform.eulerAngles.y;
+
+        // Chống chóng mặt: ép input mượt KHÔNG quán tính + giảm độ nhạy về mức êm
+        // (áp dụng kể cả khi component trong scene còn lưu giá trị cũ cao).
+        inputSmoothing = Mathf.Clamp(inputSmoothing, 0f, 0.12f);
+        horizontalSensitivity = Mathf.Min(horizontalSensitivity, 0.8f);
+        verticalSensitivity = Mathf.Min(verticalSensitivity, 0.6f);
 
         // Find Look action from any PlayerInput in scene
         PlayerInput playerInput = null;
@@ -132,8 +138,9 @@ public class ThirdPersonCamera : MonoBehaviour
             }
         }
 
-        // 2. Smooth the input (prevents jitter from raw mouse delta spikes)
-        smoothedInput = Vector2.Lerp(rawInput, smoothedInput, inputSmoothing);
+        // 2. Mượt nhẹ, framerate-independent, KHÔNG quán tính trôi (dừng tay là camera dừng ngay).
+        float follow = 1f - Mathf.Pow(inputSmoothing, Time.deltaTime * 60f);
+        smoothedInput = Vector2.Lerp(smoothedInput, rawInput, follow);
 
         // 3. Apply smoothed input to yaw/pitch
         yaw += smoothedInput.x * horizontalSensitivity;

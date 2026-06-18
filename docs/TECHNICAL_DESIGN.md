@@ -1,4 +1,4 @@
-# 🔧 TECHNICAL DESIGN DOCUMENT (TDD) — YWONDERLAND
+# 🔧 TECHNICAL DESIGN DOCUMENT (TDD) — Y WONDER GREEN FARM
 
 > Tài liệu kỹ thuật **nội bộ team** (anh Lâm + bé). Mô tả kiến trúc backend thật theo **REST API riêng** (KHÔNG dùng UGS).
 > Phiên bản: 0.1 — 16/06/2026. Trạng thái: **Đợt 1 (Profile + Tutorial) đã chạy thật**; các đợt sau là đề xuất.

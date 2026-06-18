@@ -237,10 +237,20 @@ public class LoginScreenController : MonoBehaviour
             ShowStatus(loginStatus, "Vui lòng nhập tên đăng nhập", false);
             return;
         }
+        if (username.Length > 20)
+        {
+            ShowStatus(loginStatus, "Tên đăng nhập không được quá 20 ký tự", false);
+            return;
+        }
 
         if (string.IsNullOrWhiteSpace(password))
         {
             ShowStatus(loginStatus, "Vui lòng nhập mật khẩu", false);
+            return;
+        }
+        if (password.Length > 20)
+        {
+            ShowStatus(loginStatus, "Mật khẩu không được quá 20 ký tự", false);
             return;
         }
 
@@ -322,6 +332,11 @@ public class LoginScreenController : MonoBehaviour
             errorMessage = "Tên đăng nhập phải dài hơn 8 ký tự";
             return false;
         }
+        if (username.Length > 20)
+        {
+            errorMessage = "Tên đăng nhập không được quá 20 ký tự";
+            return false;
+        }
         if (!System.Text.RegularExpressions.Regex.IsMatch(username, @"^[a-zA-Z0-9_]+$"))
         {
             errorMessage = "Tên đăng nhập chỉ được chứa chữ, số và dấu gạch dưới (_)";
@@ -339,6 +354,11 @@ public class LoginScreenController : MonoBehaviour
         if (password.Length <= 8)
         {
             errorMessage = "Mật khẩu phải dài hơn 8 ký tự";
+            return false;
+        }
+        if (password.Length > 20)
+        {
+            errorMessage = "Mật khẩu không được quá 20 ký tự";
             return false;
         }
 
