@@ -26,6 +26,7 @@ namespace YWonderLand.Environment
         private string pendingSeedId; // Seed được chọn từ inventory, chờ gieo
         private FarmTile pendingPlantTile; // Tile đang chờ gieo hạt
         private YWonderLand.Environment.AnimalPenSpawner pendingPen; // Chuồng đang chờ chọn con vật từ túi
+        private FarmAnimal pendingFeedAnimal; // Con vật đang chờ chọn thức ăn từ túi
 
         void Start()
         {
@@ -243,11 +244,64 @@ namespace YWonderLand.Environment
             animal.Pet();
         }
 
+        /// <summary>Cổng public cho UI (popup Thú nuôi) gọi luồng cho ăn qua túi đồ.</summary>
+        public void BeginFeed(FarmAnimal animal) => FeedAnimal(animal);
+
+        // Cho ăn = mở túi (tab Thực phẩm) chọn thức ăn (tạm dùng Bắp ngô) -> animation Feed.
         private void FeedAnimal(FarmAnimal animal)
         {
-            PlayerController player = PlayerController.Instance;
-            if (player != null) player.PlayActionAnimation("Feed", 0f, YWonderLand.Player.ToolType.AnimalFeed); // cầm nắm cám rải xuống
+            if (animal == null) return;
+            pendingFeedAnimal = animal;
+            pendingPen = null;
+            pendingPlantTile = null;
+            if (PlayerController.Instance != null) PlayerController.Instance.FaceTowards(animal.transform.position);
+
+            EnsureStarterFeed(); // demo: chắc có Bắp ngô để chọn
+
+            if (inventoryPopup == null)
+                inventoryPopup = Object.FindFirstObjectByType<InventoryPopupController>();
+            if (inventoryPopup != null)
+            {
+                inventoryPopup.ShowAtTab("food");
+                Debug.Log("[FarmInteraction] Mở Túi (Thực phẩm) để chọn thức ăn cho động vật.");
+            }
+        }
+
+        // Người chơi chọn 1 thức ăn trong túi khi đang cho ăn -> trừ đồ + animation Feed.
+        private void HandleFeedSelected(string itemId)
+        {
+            var animal = pendingFeedAnimal;
+            pendingFeedAnimal = null;
+            if (animal == null) return;
+
+            var inv = YWonderLand.Managers.InventoryManager.Instance;
+            if (inv != null && !inv.RemoveItem(itemId, 1))
+            {
+                Debug.Log($"[FarmInteraction] Không có '{itemId}' trong túi để cho ăn.");
+                return;
+            }
+
+            var player = PlayerController.Instance;
+            if (player != null)
+            {
+                player.FaceTowards(animal.transform.position);
+                player.PlayActionAnimation("Feed", 0f, YWonderLand.Player.ToolType.AnimalFeed); // cầm nắm cám rải xuống
+            }
             animal.Feed();
+
+            if (inventoryPopup != null) inventoryPopup.Hide();
+        }
+
+        // Demo helper: đảm bảo túi có Bắp ngô để cho ăn (production: thu hoạch / mua).
+        private void EnsureStarterFeed()
+        {
+            var inv = YWonderLand.Managers.InventoryManager.Instance;
+            if (inv == null) return;
+            if (inv.GetItemQuantity("corn_01") <= 0)
+            {
+                inv.AddItem("corn_01", 5);
+                Debug.Log("[FarmInteraction] Bổ sung Bắp ngô cho demo: corn_01 +5");
+            }
         }
 
         private void HealAnimal(FarmAnimal animal)
@@ -603,6 +657,13 @@ namespace YWonderLand.Environment
 
         private void OnInventoryItemSelected(string itemId)
         {
+            // Ưu tiên: đang chờ chọn thức ăn để cho động vật ăn.
+            if (pendingFeedAnimal != null)
+            {
+                HandleFeedSelected(itemId);
+                return;
+            }
+
             // Ưu tiên: đang chờ chọn con vật cho 1 chuồng -> xử lý thả thú.
             if (pendingPen != null)
             {

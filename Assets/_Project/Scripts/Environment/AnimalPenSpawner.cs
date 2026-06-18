@@ -13,6 +13,9 @@ namespace YWonderLand.Environment
     /// </summary>
     public class AnimalPenSpawner : MonoBehaviour
     {
+        /// <summary>Bắn khi vừa thả 1 con vật vào chuồng (tham số = itemId). Dùng cho tutorial.</summary>
+        public static event System.Action<string> OnAnimalPlaced;
+
         [System.Serializable]
         public class AnimalOption
         {
@@ -83,6 +86,7 @@ namespace YWonderLand.Environment
             if (pen != null && fa != null) pen.AddAnimal(fa);
 
             Debug.Log($"[AnimalPen] Thả '{go.name}' (item {itemId}) vào chuồng '{name}' ({spawnedCount}/{maxCapacity}).");
+            OnAnimalPlaced?.Invoke(itemId);
             return true;
         }
     }

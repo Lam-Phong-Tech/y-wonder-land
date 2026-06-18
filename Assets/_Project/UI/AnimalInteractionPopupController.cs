@@ -116,12 +116,19 @@ public class AnimalInteractionPopupController : MonoBehaviour
     private void OnFeedClicked()
     {
         if (currentAnimal == null) return;
-        
-        // TODO: Check inventory for animal feed
-        // For demo, we just feed them without cost
-        if (currentAnimal.Feed())
+
+        // Đi CÙNG luồng với phím F: đóng popup -> mở túi đồ chọn thức ăn -> animation cho ăn.
+        var animal = currentAnimal;
+        Hide();
+
+        var fic = Object.FindFirstObjectByType<FarmInteractionController>();
+        if (fic != null)
         {
-            Debug.Log("[AnimalPopup] Fed the animal.");
+            fic.BeginFeed(animal);
+        }
+        else
+        {
+            Debug.LogWarning("[AnimalPopup] Không tìm thấy FarmInteractionController để mở luồng cho ăn.");
         }
     }
 

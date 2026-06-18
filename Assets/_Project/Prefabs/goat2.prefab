@@ -666,6 +666,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 7ea863ac2ff8dab40bde4ab5d1af4402, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8857131516749524597}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 7ea863ac2ff8dab40bde4ab5d1af4402, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 151443380405545008}
   m_SourcePrefab: {fileID: 100100000, guid: 7ea863ac2ff8dab40bde4ab5d1af4402, type: 3}
 --- !u!1 &5013609644891489658 stripped
 GameObject:
@@ -715,3 +718,23 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1.17, z: 1.31}
   m_Center: {x: 0, y: 0.59, z: 0.1}
+--- !u!114 &151443380405545008
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5013609644891489658}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 308651b8ca50ee84d837ad0e25ec933c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Environment.FarmAnimal
+  animalInstanceId: 
+  data: {fileID: 0}
+  currentState: 0
+  feedTimer: 0
+  produceTimer: 0
+  harvestsRemaining: 0
+  hasProductReady: 0
+  isVaccinated: 0

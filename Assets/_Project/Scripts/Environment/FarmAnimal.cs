@@ -36,6 +36,9 @@ namespace YWonderLand.Environment
 
         public event Action<FarmAnimal> OnAnimalStateChanged;
 
+        /// <summary>Bắn khi con vật vừa được CHO ĂN (khác OnAnimalStateChanged bắn cho mọi thay đổi). Dùng cho tutorial.</summary>
+        public static event Action<FarmAnimal> OnAnimalFed;
+
         void Awake()
         {
             if (string.IsNullOrEmpty(animalInstanceId))
@@ -121,6 +124,7 @@ namespace YWonderLand.Environment
             }
             UpdateVisuals();
             OnAnimalStateChanged?.Invoke(this);
+            OnAnimalFed?.Invoke(this);
             return true;
         }
 

@@ -814,9 +814,11 @@ public class BuildModeOverlayController : MonoBehaviour
         if (PlayerController.Instance != null)
         {
             bool isFarmPlot = !string.IsNullOrEmpty(itemName) && (itemName.ToLower().Contains("ruộng") || itemName.ToLower().Contains("farm"));
-            string animName = isFarmPlot ? "Hoeing" : "Hammering";
+            // Tên phải khớp STATE trong Animator (clip gõ búa của anh tên "Hammering2").
+            string animName = isFarmPlot ? "Hoeing" : "Hammering2";
             var tool = isFarmPlot ? YWonderLand.Player.ToolType.Hoe : YWonderLand.Player.ToolType.Hammer;
-            PlayerController.Instance.PlayActionAnimation(animName, 0.5f, tool);
+            // duration = 0 -> tự đo trọn độ dài clip (gõ búa phát hết, không bị cắt giữa chừng).
+            PlayerController.Instance.PlayActionAnimation(animName, 0f, tool);
         }
     }
 

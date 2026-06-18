@@ -57,3 +57,23 @@ Task đang làm dở: [mô tả task]
 File đang sửa: [danh sách files]
 Trạng thái: [đã xong gì, còn gì]
 ```
+
+---
+
+## 📌 TRẠNG THÁI MỚI NHẤT (cập nhật 18/06/2026)
+
+### Vừa hoàn thành
+- **Build Mode sinh prefab THẬT** (`BuildPrefabLibrary` map tên item → prefab): xây ô đất (Dirt + FarmTile) & chuồng trại (Nhỏ 1x1 / Vừa 2x2 / Lớn 3x2).
+- **Hệ chăn nuôi**: click chuồng → mở túi (tab Thú nuôi) chọn con vật → thả (giới hạn loài theo cỡ chuồng); cho ăn động vật qua túi (chọn Bắp ngô) → animation Feed.
+- **Tutorial VIẾT LẠI hoàn toàn** (flow mới, NPC ông lão khó tính): chặt cây → đào khoáng → xây ruộng → canh tác → xây chuồng → thả thú → cho ăn. Có công tắc `Force Run Tutorial For Testing` để chạy lại khi dev.
+- Camera PUBG, fix cuốc lệch (xoay về ô đất), fix thuyền cutscene lật.
+
+### Đang chờ / làm tiếp
+- **Tutorial Giai đoạn 2**: sang đảo thành phố (portal) → câu cá. (Hook `OnFishCaught` + `OnIslandArrived` CHƯA thêm — xem ghi chú trong code.)
+- **Số liệu cân bằng game** (giá item, thời gian cây/thú, EXP-level): chờ khách — xem `Docs_KichBan/DiemMu_CanXinKhach.md` + `TongKet_TaiLieu_CanCo.md`.
+- **Lưu trữ thật đợt 2–3**: Economy/Inventory/Farm/Animal lên REST (hiện PlayerPrefs local). Xem `docs/TECHNICAL_DESIGN.md` + `SECURITY.md`.
+- **Setup Editor cần làm tay**: gán waypoint tutorial, `Allowed Animals` cho prefab chuồng, `Feed Model`, chạy `Generate Mock Items` khi đổi item.
+
+### Lưu ý dev
+- Backend server stub chưa chạy thì game offline-first (cache local) — warning `ApiClient ConnectionError` là BÌNH THƯỜNG khi không bật server.
+- Nhiều giá trị (giá, thời gian, chi phí xây, lãi suất) đang là DEMO/tạm — chờ khách chốt.

@@ -5,6 +5,28 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-06-18] — Tutorial mới (NPC ông lão khó tính) + Cho ăn qua túi + sửa thuyền cutscene
+
+### Added
+- **Viết lại TutorialManager theo flow mới** (Giai đoạn 1 — đảo nông trại): Lên đảo (chào) → tới Cây → **chặt cây** → tới Mỏ → **đào khoáng** → tới Bãi ruộng → **xây ruộng** (Build) → cuốc → trồng → tưới → thu hoạch → tới Bãi chuồng → **xây chuồng** → **thả thú** → **cho ăn** → hoàn thành. (Bỏ bán chợ/workshop khỏi flow tân thủ; câu cá + sang đảo = Giai đoạn 2.)
+- **NPC dẫn 4 trạm** (Cây/Mỏ/Bãi ruộng/Bãi chuồng) — kéo Empty waypoint vào Inspector. Tự bắt ô đất người chơi vừa xây để theo dõi cuốc/trồng/tưới/thu hoạch.
+- **Giọng NPC ông lão ~70 tuổi khó tính** (xưng tôi–cậu): câu chào, giao việc, giục khi afk, càu nhàu. Thoại NPC cập nhật theo từng bước (hết lặp câu cũ).
+- **2 hook mới cho tutorial**: `AnimalPenSpawner.OnAnimalPlaced` (thả thú), `FarmAnimal.OnAnimalFed` (cho ăn).
+- **Công tắc `Force Run Tutorial For Testing`**: ép chạy lại tutorial dù hồ sơ đã hoàn thành (tiện dev; nhớ tắt khi release).
+- **Cho ăn động vật qua túi đồ**: click thú đói → mở túi (tab Thực phẩm) → chọn **Bắp ngô** → animation Feed (cầm `oat` tượng trưng) → trừ đồ. Cả nút "Cho Ăn" trong popup Thú nuôi cũng đi cùng luồng này.
+- Thêm vật phẩm **Đà điểu, Dê, Hươu, Thỏ** vào database; **Bắp ngô** chuyển category `items` → `food` (hiện ở túi để cho ăn).
+
+### Fixed
+- **Thuyền cutscene lật ngang khi cập bến**: tự suy "góc bù model" từ rotation đã căn sẵn → giữ tư thế đúng khi xoay, nhân vật không rơi nước.
+- **Animation gõ búa khi xây**: gọi đúng state `Hammering2` (trước gọi sai tên "Hammering" → nhân vật cầm búa nhưng không gõ).
+- **NPC lặp lại thoại cũ / câu thoại dồn dập / câu chào mất nhanh**: thoại chuyển bước hiện trễ 2.5s, câu chào kéo 9s.
+
+### Changed Files
+- `Scripts/Tutorial/TutorialManager.cs` *(viết lại)*, `Scripts/Environment/AnimalPenSpawner.cs`, `FarmAnimal.cs` [MODIFIED]
+- `Scripts/Environment/FarmInteractionController.cs`, `UI/AnimalInteractionPopupController.cs`, `UI/BuildModeOverlayController.cs` [MODIFIED]
+- `Scripts/Cutscenes/BoatCutscene.cs`, `Scripts/Editor/ItemDataGenerator.cs`, `Scripts/Managers/InventoryManager.cs` [MODIFIED]
+
+---
 ## [2026-06-18] — Build Mode sinh prefab thật + Chuồng & thả thú từ túi đồ
 
 ### Added

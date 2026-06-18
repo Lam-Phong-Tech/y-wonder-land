@@ -64,7 +64,7 @@ namespace YWonderLand.EditorScripts
             AddItem(db, "carrot_01", "C\u00E0 r\u1ED1t", "C\u00E0 r\u1ED1t t\u01B0\u01A1i.", "\ud83e\udd55", "items", 0, 15, true);
             AddItem(db, "cabbage_01", "Rau c\u1EA3i", "Rau c\u1EA3i xanh.", "\ud83e\udd6c", "items", 0, 20, true);
             AddItem(db, "watermelon_01", "D\u01B0a h\u1EA5u", "D\u01B0a h\u1EA5u ng\u1ECDt.", "\ud83c\udf49", "items", 0, 50, true);
-            AddItem(db, "corn_01", "B\u1EAFp ng\u00F4", "B\u1EAFp ng\u00F4 v\u00E0ng \u01B0\u01A1m.", "\ud83c\udf3d", "items", 0, 30, true);
+            AddItem(db, "corn_01", "B\u1EAFp ng\u00F4", "B\u1EAFp ng\u00F4 v\u00E0ng \u01B0\u01A1m. D\u00F9ng cho \u0111\u1ED9ng v\u1EADt \u0103n.", "\ud83c\udf3d", "food", 0, 30, true);
             AddItem(db, "pumpkin_01", "B\u00ED ng\u00F4", "B\u00ED ng\u00F4 to tr\u00F2n.", "\ud83c\udf83", "items", 0, 35, true);
             AddItem(db, "morning_glory_01", "Rau mu\u1ED1ng", "Rau mu\u1ED1ng xanh.", "\ud83c\udf3e", "items", 0, 10, true);
             AddItem(db, "sweet_potato_01", "Khoai lang", "Khoai lang ng\u1ECDt b\u00F9i.", "\ud83c\udf60", "items", 0, 18, true);
