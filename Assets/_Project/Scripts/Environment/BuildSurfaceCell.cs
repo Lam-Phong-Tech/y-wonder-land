@@ -14,8 +14,21 @@ namespace YWonderLand.Environment
         /// <summary>Danh sách mọi ô đất đang bật trong scene (đăng ký lúc OnEnable) — để quét/highlight.</summary>
         public static readonly List<BuildSurfaceCell> All = new List<BuildSurfaceCell>();
 
-        /// <summary>Ô đã có công trình chưa.</summary>
-        public bool IsOccupied { get; private set; }
+        /// <summary>Vật đang đặt trên ô (hàng rào / công trình / con vật). Null = ô trống.</summary>
+        public GameObject Occupant { get; private set; }
+
+        /// <summary>Ô đã có gì đó (rào/công trình/thú) chưa.</summary>
+        public bool IsOccupied => Occupant != null;
+
+        /// <summary>Ô trống hoàn toàn (để flood-fill đếm sức chứa).</summary>
+        public bool IsFree => Occupant == null;
+
+        /// <summary>Ô này có HÀNG RÀO (= 1 ô chuồng).</summary>
+        public bool HasFence => Occupant != null && Occupant.GetComponentInChildren<FenceAutoConnect>() != null;
+
+        /// <summary>Ô chuồng này đã có con vật đứng chưa.</summary>
+        public bool HasAnimal { get; private set; }
+        public void SetAnimal(bool v) => HasAnimal = v;
 
         private Collider _col;
         private Collider Col => _col != null ? _col : (_col = GetComponent<Collider>());
@@ -36,9 +49,26 @@ namespace YWonderLand.Environment
             get { Bounds b = Col.bounds; return new Vector2(b.size.x, b.size.z); }
         }
 
-        public void SetOccupied(bool occupied) => IsOccupied = occupied;
+        /// <summary>Gán vật chiếm ô (rào/công trình/thú). Truyền null để trả ô về trống.</summary>
+        public void SetOccupant(GameObject go) => Occupant = go;
+
+        /// <summary>Trả ô về trống.</summary>
+        public void Clear() => Occupant = null;
 
         void OnEnable() { if (!All.Contains(this)) All.Add(this); }
         void OnDisable() { All.Remove(this); }
+
+        // Hiển thị ô đất trong Scene view: XANH = ô trống đã tag, ĐỎ = ô có rào, VÀNG = ô bị chiếm khác.
+        void OnDrawGizmos()
+        {
+            if (Col == null) return;
+            Bounds b = Col.bounds;
+            Gizmos.color = HasAnimal ? new Color(0.3f, 0.7f, 1f, 0.9f)            // xanh dương = ô chuồng có thú
+                : HasFence ? new Color(1f, 0.3f, 0.3f, 0.85f)                    // đỏ = ô chuồng (rào) trống
+                : (IsOccupied ? new Color(1f, 0.9f, 0.3f, 0.7f)                  // vàng = ô bị chiếm khác
+                : new Color(0.3f, 1f, 0.45f, 0.5f));                             // xanh lá = ô đất trống
+            Gizmos.DrawWireCube(new Vector3(b.center.x, b.max.y, b.center.z),
+                new Vector3(b.size.x * 0.9f, 0.02f, b.size.z * 0.9f));
+        }
     }
 }

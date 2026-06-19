@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UIElements;
+using YWonderLand.Data;
 using YWonderLand.Environment;
 using YWonderLand.Managers;
 
@@ -12,6 +13,11 @@ public class AnimalInteractionPopupController : MonoBehaviour
     private VisualElement container;
     private Label lblAnimalName;
     private Label lblStatus;
+    private Label lblPrice;
+    private Label lblSlots;
+    private Label lblFoodMain;
+    private Label lblFoodAlt;
+    private Label lblProducts;
     private Button btnClose;
     private Button btnFeed;
     private Button btnHarvest;
@@ -35,7 +41,12 @@ public class AnimalInteractionPopupController : MonoBehaviour
         container = root.Q<VisualElement>("AnimalPopupContainer");
         lblAnimalName = root.Q<Label>("LblAnimalName");
         lblStatus = root.Q<Label>("LblStatus");
-        
+        lblPrice = root.Q<Label>("LblPrice");
+        lblSlots = root.Q<Label>("LblSlots");
+        lblFoodMain = root.Q<Label>("LblFoodMain");
+        lblFoodAlt = root.Q<Label>("LblFoodAlt");
+        lblProducts = root.Q<Label>("LblProducts");
+
         btnClose = root.Q<Button>("BtnClose");
         btnFeed = root.Q<Button>("BtnFeed");
         btnHarvest = root.Q<Button>("BtnHarvest");
@@ -65,7 +76,34 @@ public class AnimalInteractionPopupController : MonoBehaviour
 
         container.style.display = DisplayStyle.Flex;
         UIPopupTracker.SetOpen(this, true);
+        PopulateInfo(currentAnimal);
         RefreshUI(currentAnimal);
+    }
+
+    // Nạp bảng thông tin tĩnh của con vật (giá / ô chuồng / thức ăn / sản phẩm) từ AnimalDefinition.
+    private void PopulateInfo(FarmAnimal animal)
+    {
+        AnimalDefinition d = animal != null ? animal.data : null;
+        if (lblPrice != null) lblPrice.text = d != null ? $"{d.buyPrice} POS" : "—";
+        if (lblSlots != null) lblSlots.text = d != null ? $"{d.penSlots} ô" : "—";
+        if (lblFoodMain != null) lblFoodMain.text = d != null ? FoodText(d.foodMainName, d.foodMainAmount) : "—";
+        if (lblFoodAlt != null) lblFoodAlt.text = d != null ? FoodText(d.foodAltName, d.foodAltAmount) : "—";
+        if (lblProducts != null) lblProducts.text = d != null ? ProductText(d) : "—";
+    }
+
+    private static string FoodText(string name, int amount)
+    {
+        if (string.IsNullOrEmpty(name)) return "—";
+        return amount > 0 ? $"{amount}x {name}" : name;
+    }
+
+    private static string ProductText(AnimalDefinition d)
+    {
+        string main = FoodText(d.productMainName, d.productMainAmount);
+        string alt = FoodText(d.productAltName, d.productAltAmount);
+        if (main != "—" && alt != "—") return $"{main}, {alt}";
+        if (main != "—") return main;
+        return alt;
     }
 
     public void Hide()

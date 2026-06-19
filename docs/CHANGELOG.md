@@ -5,6 +5,25 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-06-20] — Điều khiển mobile + Build snap theo ô đất thật + Hệ chuồng từ hàng rào + Thông tin con vật
+
+### Added
+- **Điều khiển cảm ứng (GameHUD):** joystick ảo điều khiển di chuyển (`PlayerController.SetMoveInput`); nút **Sprint giữ-để-chạy** (fix `Clickable` nuốt event bằng `TrickleDown`); nút **Jump** (`TriggerJump`); nút **X hủy hoạt ảnh** (`CancelAction`, tự hiện khi `IsBusy`).
+- **Build snap theo Ô ĐẤT THẬT:** `BuildSurfaceCell` (gắn lên khối cube map, cube=0.8) thay lưới ảo lệch; ghost ướm vào tâm mặt trên khối. Tool Editor **"sơn vùng"** (`BuildSurfaceCellSetup`): kéo BoxCollider trùm vùng → gắn hàng loạt khối `cube*` trong vùng (+ collider). Gizmo hiện trạng ô.
+- **Hệ chuồng từ hàng rào (task #6):** rào = hộp vuông trên 1 ô → **ô có rào = ô chuồng**. `PenEnclosure.FindPen` BFS cụm ô-rào liền nhau (nhiều rào kề = chuồng to). Ngắm/click ô rào → "Thả thú" → chọn loài → validate `penSlots` vs số ô còn trống → thả (`SetAnimal`) hoặc `ScreenToast` báo lỗi. `AnimalPrefabLibrary` (itemId→prefab thú + spawnHeightOffset). Click thẳng (PC) + bấm chữ (mobile) đều chạy.
+- **Popup Thông tin con vật:** hiện giá mua / số ô chuồng / thức ăn chính-phụ / sản phẩm. Thêm trường vào `AnimalDefinition`; điền data 10 con qua generator (nguồn: bảng VatNuoi khách). Restyle popup theo Cozy Dark Palia.
+
+### Changed
+- **Tương tác ngắm theo điểm chạm/tâm** cho ổn định; **nút gợi ý "Chặt cây"... bấm/tap được** (fix picking-mode cha Ignore); tia ngắm **xuyên qua hàng rào + ô bị chiếm** để tới ô chuồng.
+- **Bỏ tính năng Vuốt ve** (Pet) khỏi tương tác con vật.
+
+### Changed Files
+- `Scripts/Player/PlayerController.cs`, `UI/GameHUD.uxml`, `UI/GameHUDController.cs`, `UI/Styles/GameHUD.uss`
+- `Scripts/Environment/{BuildSurfaceCell,PenEnclosure,AnimalPrefabLibrary,ScreenToast}.cs` [NEW], `GhostPlacementController.cs`, `FarmInteractionController.cs`, `PetInteraction.cs`
+- `Scripts/Editor/BuildSurfaceCellSetup.cs` [NEW], `Scripts/Editor/ItemDataGenerator.cs`, `Scripts/Data/AnimalDefinition.cs`
+- `UI/AnimalInteractionPopup.uxml`, `UI/AnimalInteractionPopupController.cs`, `UI/Styles/AnimalInteractionPopup.uss` [NEW]
+
+---
 ## [2026-06-19] — Build Mode trực quan: ghost mờ kiểu ROK + bù pivot + hàng rào tự nối
 
 ### Changed

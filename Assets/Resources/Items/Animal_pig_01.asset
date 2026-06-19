@@ -13,8 +13,17 @@ MonoBehaviour:
   m_Name: Animal_pig_01
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.AnimalDefinition
   animalId: pig_01
-  animalName: Heo
-  buyPrice: 1000
+  animalName: Heo con
+  buyPrice: 100
+  penSlots: 9
+  foodMainName: Khoai lang
+  foodMainAmount: 2
+  foodAltName: "B\xED ng\xF4"
+  foodAltAmount: 2
+  productMainName: Da heo
+  productMainAmount: 1
+  productAltName: "Th\u1ECBt heo"
+  productAltAmount: 50
   produceItemId: pork_01
   produceAmount: 2
   produceCycleTimeSec: 40

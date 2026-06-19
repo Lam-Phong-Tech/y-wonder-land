@@ -10,15 +10,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 4bedd19d44572c740b8924b880e17a2f, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 5.368099
+      value: 9.021698
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 4bedd19d44572c740b8924b880e17a2f, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.0803273
+      value: 0.18451378
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 4bedd19d44572c740b8924b880e17a2f, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 1.5847391
+      value: 3.1192858
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 4bedd19d44572c740b8924b880e17a2f, type: 3}
       propertyPath: m_LocalRotation.w
@@ -63,6 +63,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 4bedd19d44572c740b8924b880e17a2f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1233824118545266118}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 4bedd19d44572c740b8924b880e17a2f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5951385112802724321}
   m_SourcePrefab: {fileID: 100100000, guid: 4bedd19d44572c740b8924b880e17a2f, type: 3}
 --- !u!1 &1014974177791192945 stripped
 GameObject:
@@ -90,3 +93,23 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.9830959, y: 0.47645947, z: 0.7566711}
   m_Center: {x: -0.022663549, y: 0.05371563, z: 0.0011774749}
+--- !u!114 &5951385112802724321
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1014974177791192945}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 308651b8ca50ee84d837ad0e25ec933c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Environment.FarmAnimal
+  animalInstanceId: 
+  data: {fileID: 0}
+  currentState: 1
+  feedTimer: 0
+  produceTimer: 0
+  harvestsRemaining: 0
+  hasProductReady: 0
+  isVaccinated: 0

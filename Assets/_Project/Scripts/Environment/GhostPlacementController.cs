@@ -305,8 +305,6 @@ public class GhostPlacementController : MonoBehaviour
         // Chỉ đặt khi đang trỏ vào ô đất hợp lệ còn TRỐNG (snap theo cube, không theo lưới ảo).
         if (currentCell == null || currentCell.IsOccupied) return;
 
-        currentCell.SetOccupied(true);
-
         if (ghostIsPrefab && currentEntry != null)
         {
             // WYSIWYG: clone căn tâm (GIỮ script/collider) đặt đúng vị trí/xoay của ghost.
@@ -315,6 +313,7 @@ public class GhostPlacementController : MonoBehaviour
             go.transform.rotation = ghostObject.transform.rotation;
             go.name = $"Building_{currentItemName}_{currentCell.name}";
             if (go.CompareTag("Untagged")) go.tag = "PlacedBuilding";
+            currentCell.SetOccupant(go); // ghi vật vào ô (để biết ô có rào/công trình)
             Debug.Log($"[GhostPlacement] Đặt PREFAB '{currentEntry.prefab.name}' (căn tâm) tại {go.transform.position} trên ô '{currentCell.name}'");
         }
         else
@@ -346,6 +345,7 @@ public class GhostPlacementController : MonoBehaviour
             renderer.material = mat;
         }
         building.tag = "PlacedBuilding";
+        if (currentCell != null) currentCell.SetOccupant(building); // ghi vật vào ô
     }
 
     private Color GetBuildingColor()

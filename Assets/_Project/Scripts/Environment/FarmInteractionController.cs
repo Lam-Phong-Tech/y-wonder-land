@@ -27,6 +27,9 @@ namespace YWonderLand.Environment
         private FarmTile pendingPlantTile; // Tile đang chờ gieo hạt
         private YWonderLand.Environment.AnimalPenSpawner pendingPen; // Chuồng đang chờ chọn con vật từ túi
         private FarmAnimal pendingFeedAnimal; // Con vật đang chờ chọn thức ăn từ túi
+        private List<BuildSurfaceCell> pendingEnclosure; // Vùng quây (rào) đang chờ thả thú
+        private BuildSurfaceCell hoverEnclosureSeed;     // cache: ô đang rê để khỏi flood-fill mỗi frame
+        private List<BuildSurfaceCell> hoverEnclosure;   // cache: kết quả vùng quây của ô đang rê
 
         void Start()
         {
@@ -202,6 +205,31 @@ namespace YWonderLand.Environment
                     }
                     break;
                 }
+                else if (hit.collider.GetComponentInParent<BuildSurfaceCell>() is BuildSurfaceCell penCell && penCell != null)
+                {
+                    // Ô CÓ RÀO = 1 ô chuồng -> "Thả thú".
+                    if (penCell.HasFence)
+                    {
+                        if (penCell != hoverEnclosureSeed)
+                        {
+                            hoverEnclosureSeed = penCell;
+                            hoverEnclosure = PenEnclosure.FindPen(penCell);
+                        }
+                        if (hoverEnclosure != null)
+                        {
+                            foundObj = penCell.gameObject;
+                            var encl = hoverEnclosure;
+                            foundActions.Add(new InteractionAction { keyName = "Click", actionName = "Thả thú", onClick = () => OpenEnclosurePicker(encl) });
+                        }
+                        break;
+                    }
+                    if (!penCell.IsFree) continue; // ô bị chiếm bởi công trình khác -> xuyên qua
+                    break; // ô đất trống thường (không phải chuồng) -> bỏ
+                }
+                else if (hit.collider.GetComponentInParent<FenceAutoConnect>() != null)
+                {
+                    continue; // Xuyên qua HÀNG RÀO để thấy nền đất bên trong chuồng (tương tác thả thú)
+                }
                 else if (!hit.collider.isTrigger) break; // Bị che khuất
             }
 
@@ -252,6 +280,7 @@ namespace YWonderLand.Environment
             pendingFeedAnimal = animal;
             pendingPen = null;
             pendingPlantTile = null;
+            pendingEnclosure = null;
             if (PlayerController.Instance != null) PlayerController.Instance.FaceTowards(animal.transform.position);
 
             EnsureStarterFeed(); // demo: chắc có Bắp ngô để chọn
@@ -499,7 +528,16 @@ namespace YWonderLand.Environment
                     return; // Handled tile, stop here
                 }
 
-                // Chuồng thú: click để mở túi đồ (tab Thú nuôi) chọn con vật thả vào chuồng.
+                // Chuồng từ HÀNG RÀO: click thẳng vào ô rào -> mở túi chọn thú thả (PC click trực tiếp).
+                var penCellClick = hit.collider.GetComponentInParent<BuildSurfaceCell>();
+                if (penCellClick != null && penCellClick.HasFence)
+                {
+                    var pen = PenEnclosure.FindPen(penCellClick);
+                    if (pen != null) OpenEnclosurePicker(pen);
+                    return;
+                }
+
+                // Chuồng thú (kiểu cũ): click để mở túi đồ (tab Thú nuôi) chọn con vật thả vào chuồng.
                 var penSpawner = hit.collider.GetComponentInParent<YWonderLand.Environment.AnimalPenSpawner>();
                 if (penSpawner != null)
                 {
@@ -516,6 +554,9 @@ namespace YWonderLand.Environment
                     merchant.Interact();
                     return;
                 }
+
+                // Bỏ qua collider HÀNG RÀO để tia tới được ô chuồng/đất phía sau (click thả thú).
+                if (hit.collider.GetComponentInParent<FenceAutoConnect>() != null) continue;
 
                 // Thêm kiểm tra chặn tia
                 if (!hit.collider.isTrigger)
@@ -597,6 +638,7 @@ namespace YWonderLand.Environment
             if (pen == null) return;
             pendingPen = pen;
             pendingPlantTile = null; // tránh nhầm với luồng gieo hạt
+            pendingEnclosure = null;
             if (PlayerController.Instance != null) PlayerController.Instance.FaceTowards(pen.transform.position);
 
             EnsureStarterAnimals(); // demo: chắc chắn có vài con vật để test (production: mua từ shop)
@@ -608,6 +650,78 @@ namespace YWonderLand.Environment
                 inventoryPopup.ShowAtTab("animals");
                 Debug.Log("[FarmInteraction] Mở Túi đồ (Thú nuôi) để chọn con vật thả vào chuồng.");
             }
+        }
+
+        // Mở túi đồ (tab Thú nuôi) để chọn con vật thả vào VÙNG QUÂY (chuồng từ hàng rào).
+        private void OpenEnclosurePicker(List<BuildSurfaceCell> interior)
+        {
+            if (interior == null) return;
+            pendingEnclosure = interior;
+            pendingPen = null;
+            pendingFeedAnimal = null;
+            pendingPlantTile = null;
+
+            EnsureStarterAnimals(); // demo: có sẵn vài con để test
+
+            if (inventoryPopup == null)
+                inventoryPopup = Object.FindFirstObjectByType<InventoryPopupController>();
+            if (inventoryPopup != null)
+            {
+                inventoryPopup.ShowAtTab("animals");
+                int free = PenEnclosure.AvailableCount(interior);
+                Debug.Log($"[FarmInteraction] Mở Túi (Thú nuôi) — chuồng còn {free} ô trống.");
+            }
+        }
+
+        // Người chơi chọn con vật từ túi cho VÙNG QUÂY -> validate số ô rồi thả hoặc báo lỗi.
+        private void HandleEnclosureAnimalSelected(string itemId)
+        {
+            var interior = pendingEnclosure;
+            pendingEnclosure = null;
+            if (interior == null) return;
+
+            var def = YWonderLand.Managers.AnimalManager.Instance != null
+                ? YWonderLand.Managers.AnimalManager.Instance.GetDefinition(itemId) : null;
+            int need = def != null ? Mathf.Max(1, def.penSlots) : 1;
+            int free = PenEnclosure.AvailableCount(interior);
+
+            if (free < need)
+            {
+                ScreenToast.Show($"Chuồng không đủ chỗ! Cần {need} ô, còn {free} ô.");
+                if (inventoryPopup != null) inventoryPopup.Hide();
+                return;
+            }
+
+            // Gom 'need' ô chuồng còn trống cho con vật đứng + đánh dấu đã có thú.
+            var cells = new List<BuildSurfaceCell>();
+            foreach (var c in interior)
+            {
+                if (c != null && !c.HasAnimal) { cells.Add(c); if (cells.Count >= need) break; }
+            }
+            if (cells.Count < need) { ScreenToast.Show("Chuồng không đủ chỗ!"); return; }
+
+            Vector3 pos = cells[0].SurfaceCenter;
+            if (AnimalPrefabLibrary.Instance != null)
+                pos.y += AnimalPrefabLibrary.Instance.GetSpawnHeightOffset(itemId); // chỉnh cao theo pivot từng loài
+            GameObject prefab = AnimalPrefabLibrary.Instance != null ? AnimalPrefabLibrary.Instance.GetPrefab(itemId) : null;
+            GameObject go;
+            if (prefab != null)
+            {
+                go = Instantiate(prefab, pos, Quaternion.identity);
+                go.name = prefab.name;
+            }
+            else
+            {
+                go = new GameObject($"Animal_{itemId}");
+                go.transform.position = pos;
+                var faNew = go.AddComponent<FarmAnimal>();
+                if (def != null) faNew.Initialize(def);
+            }
+
+            foreach (var c in cells) c.SetAnimal(true); // đánh dấu ô chuồng đã có thú (KHÔNG ghi đè occupant rào)
+
+            ScreenToast.ShowInfo($"Đã thả {(def != null ? def.animalName : itemId)} ({need} ô).");
+            if (inventoryPopup != null) inventoryPopup.Hide();
         }
 
         // Demo helper: đảm bảo túi có sẵn vài con vật để test thả chuồng (production: mua từ shop).
@@ -662,7 +776,14 @@ namespace YWonderLand.Environment
                 return;
             }
 
-            // Ưu tiên: đang chờ chọn con vật cho 1 chuồng -> xử lý thả thú.
+            // Ưu tiên: đang chờ thả thú vào VÙNG QUÂY (chuồng từ hàng rào).
+            if (pendingEnclosure != null)
+            {
+                HandleEnclosureAnimalSelected(itemId);
+                return;
+            }
+
+            // Ưu tiên: đang chờ chọn con vật cho 1 chuồng (kiểu cũ) -> xử lý thả thú.
             if (pendingPen != null)
             {
                 HandlePenAnimalSelected(itemId);

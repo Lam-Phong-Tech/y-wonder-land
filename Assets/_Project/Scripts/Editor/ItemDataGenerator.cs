@@ -145,13 +145,50 @@ namespace YWonderLand.EditorScripts
                 AssetDatabase.CreateFolder("Assets/Resources", "Items");
             }
 
-            CreateAnimalEntry("chicken_01", "Gà", 500, 30f, "egg_01", 1, 10, 45f, true);
-            CreateAnimalEntry("cow_01", "Bò sữa", 1500, 45f, "milk_01", 1, 20, 60f, true);
-            CreateAnimalEntry("pig_01", "Heo", 1000, 40f, "pork_01", 2, 1, 55f, true);
+            // Base 3 con có sẵn luồng sản phẩm gameplay (produceItemId...)
+            CreateAnimalEntry("chicken_01", "Gà mái V2", 6, 30f, "egg_01", 1, 10, 45f, true);
+            CreateAnimalEntry("cow_01", "Bò sữa", 300, 45f, "milk_01", 1, 20, 60f, true);
+            CreateAnimalEntry("pig_01", "Heo con", 100, 40f, "pork_01", 2, 1, 55f, true);
+
+            // Thông tin chăn nuôi (giá/ô/thức ăn/sản phẩm) — nguồn: bảng VatNuoi khách gửi.
+            // Chỉ set trường hiển thị + tên/giá; GIỮ nguyên field gameplay (cycle, produceItemId) nếu asset đã có.
+            SetHusbandry("chicken_01", "Gà mái V2", 6, 1, "Bắp Ngô", 2, "Cám", 0, "Trứng gà", 1, "Thịt gà", 5);
+            SetHusbandry("cow_01", "Bò sữa", 300, 9, "Cỏ Voi", 2, "Khoai Lang", 4, "Sữa bò", 10, "Thịt bò", 50);
+            SetHusbandry("pig_01", "Heo con", 100, 9, "Khoai lang", 2, "Bí ngô", 2, "Da heo", 1, "Thịt heo", 50);
+            SetHusbandry("ostrich_01", "Đà điểu V2", 170, 1, "Dưa Hấu", 4, "Cám", 0, "Trứng đà điểu", 1, "Thịt đà điểu", 20);
+            SetHusbandry("deer_01", "Hươu", 400, 9, "Bắp Ngô", 5, "Cám", 0, "Nhung hươu", 2, "Thịt hươu", 40);
+            SetHusbandry("goat_01", "Dê con V2", 50, 9, "Bí ngô", 2, "Cỏ voi", 2, "Sữa dê", 2, "Thịt dê", 20);
+            SetHusbandry("rabbit_01", "Thỏ con V2", 5, 1, "Cà rốt", 1, "Bắp ngô", 1, "Lông thỏ", 8, "Thịt thỏ", 5);
+            SetHusbandry("goose_01", "Ngỗng con V2", 10, 1, "Bắp Cải", 2, "Bắp Ngô", 3, "Trứng ngỗng", 2, "Thịt ngỗng", 5);
+            SetHusbandry("duck_01", "Vịt V3", 8, 1, "Bắp Ngô", 1, "Cám", 0, "Trứng vịt", 1, "Thịt vịt", 5);
+            SetHusbandry("turtle_01", "Rùa con", 90, 1, "Rau Muống", 7, "Dưa hấu", 12, "Mai rùa", 1, "Thịt rùa", 10);
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            Debug.Log("[AnimalData] Generated Animal definitions!");
+            Debug.Log("[AnimalData] Generated/updated 10 animal definitions (kèm thông tin chăn nuôi)!");
+        }
+
+        // Set CHỈ thông tin hiển thị chăn nuôi + tên/giá; giữ field gameplay cũ nếu asset đã tồn tại.
+        private static void SetHusbandry(string id, string name, int price, int slots,
+            string foodMain, int foodMainAmt, string foodAlt, int foodAltAmt,
+            string prodMain, int prodMainAmt, string prodAlt, int prodAltAmt)
+        {
+            string path = "Assets/Resources/Items/Animal_" + id + ".asset";
+            var animal = AssetDatabase.LoadAssetAtPath<YWonderLand.Data.AnimalDefinition>(path);
+            if (animal == null)
+            {
+                animal = ScriptableObject.CreateInstance<YWonderLand.Data.AnimalDefinition>();
+                animal.animalId = id;
+                AssetDatabase.CreateAsset(animal, path);
+            }
+            animal.animalName = name;
+            animal.buyPrice = price;
+            animal.penSlots = slots;
+            animal.foodMainName = foodMain; animal.foodMainAmount = foodMainAmt;
+            animal.foodAltName = foodAlt; animal.foodAltAmount = foodAltAmt;
+            animal.productMainName = prodMain; animal.productMainAmount = prodMainAmt;
+            animal.productAltName = prodAlt; animal.productAltAmount = prodAltAmt;
+            EditorUtility.SetDirty(animal);
         }
 
         private static void CreateAnimalEntry(string id, string name, int price, float cycle, string prodId, int prodAmt, int maxHarv, float feed, bool sick)

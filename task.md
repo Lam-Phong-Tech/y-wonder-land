@@ -45,9 +45,20 @@
 - `[ ]` **Hiệu ứng thu thập**: khi thu thập (chặt/đào/thu hoạch...) làm vật phẩm **bay vào túi đồ** (animation item bay về icon túi).
 - `[ ]` **Hủy chuồng → thu lại tài nguyên**: cho phép phá chuồng và hoàn lại một phần vật liệu đã xây.
 - `[x]` **Bỏ tính năng Vuốt ve** (Pet) khỏi tương tác con vật. *(Gỡ nút E + hàm PetAnimal ở FarmInteractionController; vô hiệu hóa PetInteraction.cs. Còn: gỡ component PetInteraction khỏi prefab thú trong Editor.)*
-- `[ ]` **Thông tin con vật**: hiển thị giá mua, số ô đất chiếm, thức ăn chính, thức ăn phụ, sản phẩm thu hoạch. *(Chờ file dữ liệu khách gửi sau khi lên kế hoạch.)*
+- `[x]` **Thông tin con vật**: popup hiện giá mua / số ô chuồng / thức ăn chính / thức ăn phụ / sản phẩm — restyle Cozy Dark Palia. Thêm trường vào `AnimalDefinition` + điền data 10 con qua generator. **CẦN Editor**: chạy menu `YWonderLand ▸ Generate Animal Data` để nạp dữ liệu vào các asset `Animal_*.asset` (đảm bảo con vật spawn dùng đúng asset này).
 - `[ ]` **Trồng từng ô ruộng kiểu xây hàng rào**: mỗi loài thực vật tốn số ô khác nhau. *(Khách CHƯA gửi số ô/loài cây → quyết định 19/06: **tạm cho mỗi cây = 1 ô**, chỉnh lại khi có dữ liệu thật.)*
-- `[ ]` **Sức chứa chuồng động (đếm ô vùng quây) + validate thả thú theo số ô**: chuồng nay là vùng quây ghép từ hàng rào (auto-connect) → cần **đếm số ô bên trong vùng quây kín**. Số ô đó = sức chứa. Khi thả con vật: hệ thống tra **số ô con vật chiếm** → nếu chuồng còn đủ ô trống thì cho vào, không đủ thì **hiện thông báo lỗi trên màn hình**. *(Số ô mỗi con lấy từ "Thông tin con vật" — task chờ file khách.)*
+- `[x]` **Sức chứa chuồng động + validate thả thú theo số ô**: rào = hộp vuông trên 1 ô → **ô CÓ RÀO = ô chuồng**. Ngắm/click ô rào → "Thả thú" → chọn loài → validate `penSlots` vs số ô-rào liền nhau còn trống (`PenEnclosure.FindPen` BFS cụm ô-rША 4-kề; nhiều rào kề = chuồng to) → đủ thì thả (`SetAnimal`), thiếu thì `ScreenToast` báo lỗi. Click thẳng (PC) + bấm chữ (mobile) đều chạy. Gizmo hiện trạng ô.
+  - File mới: `PenEnclosure.cs` (flood-fill), `AnimalPrefabLibrary.cs` (map itemId→prefab thú), `ScreenToast.cs` (toast lỗi). Sửa `BuildSurfaceCell` (Occupant/HasFence/IsFree), `GhostPlacementController` (ghi occupant), `FarmInteractionController` (luồng thả vùng quây).
+  - **CẦN Editor**: thêm 1 GameObject gắn `AnimalPrefabLibrary` + điền itemId→prefab thú; hàng rào phải đặt qua Build Mode (để ghi occupant vào ô). Phụ thuộc hệ `BuildSurfaceCell` đã chạy.
+  - TODO: bước "xem thông tin loài trước khi thả" (confirm dialog) — hiện đang thả ngay khi chọn; báo lỗi đang dùng OnGUI toast (nâng UI Toolkit sau).
+
+### Nhiệm vụ 20/06 (ưu tiên mới)
+- `[ ]` **Xây mặt đường đá (paving)**: thêm loại công trình "đường đá" đặt được qua Build Mode (snap theo `BuildSurfaceCell` như đất/rào). Dùng để lát lối đi trang trí.
+- `[x]` **Validate ô chuồng + cho thả NHIỀU con nếu đủ ô**: đã làm — `AvailableCount` (ô-rào chưa có thú) ≥ `penSlots` thì cho thả, đánh dấu `SetAnimal`; chuồng 9 ô thả được 9 gà (mỗi con 1 ô); chuồng còn 8 ô **KHÔNG** nhét được bò (9 ô) → báo lỗi. *(Còn TODO: nếu muốn giới hạn LOÀI theo cỡ chuồng thì bổ sung sau.)*
+- `[ ]` **Hiển thị thông tin con vật ở 3 nơi** (chỉ thông tin cần thiết: giá / số ô / thức ăn / sản phẩm):
+  - `[x]` Khi **xem thông tin** (popup AnimalInteractionPopup) — đã làm.
+  - `[ ]` Khi **mua** (Shop popup) — thêm panel info khi chọn con giống.
+  - `[ ]` Khi **chọn trong túi đồ** (Inventory, tab Thú nuôi) — thêm info trước khi thả.
 
 ---
 

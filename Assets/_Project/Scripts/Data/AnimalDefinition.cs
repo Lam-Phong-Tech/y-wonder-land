@@ -16,6 +16,26 @@ namespace YWonderLand.Data
         [Tooltip("Giá mua tại shop (POS)")]
         public int buyPrice = 500;
 
+        [Header("Thông tin chăn nuôi (hiển thị)")]
+        [Tooltip("Số ô chuồng con vật chiếm (1 hoặc 9)")]
+        public int penSlots = 1;
+
+        [Tooltip("Thức ăn chính + số lượng")]
+        public string foodMainName;
+        public int foodMainAmount;
+
+        [Tooltip("Thức ăn phụ (thay thế) + số lượng. Để trống nếu không có.")]
+        public string foodAltName;
+        public int foodAltAmount;
+
+        [Tooltip("Sản phẩm chính + số lượng (hiển thị)")]
+        public string productMainName;
+        public int productMainAmount;
+
+        [Tooltip("Sản phẩm phụ + số lượng (hiển thị)")]
+        public string productAltName;
+        public int productAltAmount;
+
         [Header("Sản xuất")]
         [Tooltip("ID sản phẩm trong ItemDatabase (VD: egg_01)")]
         public string produceItemId;

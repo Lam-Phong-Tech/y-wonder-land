@@ -1,7 +1,19 @@
 # 🌿 Y WONDER GREEN FARM - MEMENTO PROTOCOL (BẢN GHI NHỚ TIẾN ĐỘ)
 
 *Dự án: BaChuKhuRung3D (Game nông trại 3D YWONDERLAND)*
-*Ngày cập nhật: 15/06/2026*
+*Ngày cập nhật: 20/06/2026*
+
+## 0. Cập nhật 20/06 (mới nhất)
+
+> Nhánh `feat/animal-husbandry`. Chi tiết xem CHANGELOG mục 20/06 + task.md.
+
+- **Điều khiển mobile (GameHUD):** joystick ảo di chuyển, nút Sprint giữ-để-chạy (fix Clickable nuốt event bằng **TrickleDown**), nút Jump, nút **X hủy hoạt ảnh**. Tương tác ngắm theo điểm chạm; nút gợi ý bấm/tap được (fix picking-mode cha Ignore).
+- **Bỏ tính năng Vuốt ve.**
+- **Build snap theo Ô ĐẤT THẬT** (`BuildSurfaceCell`, cube map = 0.8) thay lưới ảo. Tool Editor "sơn vùng" gắn hàng loạt. Gizmo hiện trạng ô (xanh lá=trống, đỏ=ô chuồng, xanh dương=có thú).
+- **Hệ chuồng từ hàng rào (#6 XONG):** rào = hộp vuông trên 1 ô → **ô có rào = ô chuồng**. `PenEnclosure.FindPen` đếm cụm ô-rào liền nhau; ngắm/click → "Thả thú" → validate `penSlots` vs ô trống → thả hoặc báo lỗi (ScreenToast). Cần gắn `AnimalPrefabLibrary` (itemId→prefab thú).
+- **Popup Thông tin con vật (#4 XONG):** giá/ô/thức ăn/sản phẩm; data 10 con từ bảng VatNuoi (chạy menu `Generate Animal Data`).
+- **Việc cần làm trong Editor:** gắn `BuildSurfaceCell` cho khối map ("sơn vùng"); gắn `AnimalPrefabLibrary` + điền prefab thú; chạy `Generate Animal Data`; gỡ component `PetInteraction` khỏi prefab thú.
+- **Task mới ưu tiên (20/06):** xây mặt đường đá; thông tin con vật khi MUA (shop) + khi chọn TÚI ĐỒ; (validate sức chứa + thả nhiều con = đã xong).
 
 ## 1. Bối cảnh phiên làm việc
 

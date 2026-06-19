@@ -14,7 +14,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.AnimalDefinition
   animalId: cow_01
   animalName: "B\xF2 s\u1EEFa"
-  buyPrice: 1500
+  buyPrice: 300
+  penSlots: 9
+  foodMainName: "C\u1ECF Voi"
+  foodMainAmount: 2
+  foodAltName: Khoai Lang
+  foodAltAmount: 4
+  productMainName: "S\u1EEFa b\xF2"
+  productMainAmount: 10
+  productAltName: "Th\u1ECBt b\xF2"
+  productAltAmount: 50
   produceItemId: milk_01
   produceAmount: 1
   produceCycleTimeSec: 45

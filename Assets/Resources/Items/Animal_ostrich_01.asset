@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6c8e84450f90274290001ce5b1ba686, type: 3}
+  m_Name: Animal_ostrich_01
+  m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.AnimalDefinition
+  animalId: ostrich_01
+  animalName: "\u0110\xE0 \u0111i\u1EC3u V2"
+  buyPrice: 170
+  penSlots: 1
+  foodMainName: "D\u01B0a H\u1EA5u"
+  foodMainAmount: 4
+  foodAltName: "C\xE1m"
+  foodAltAmount: 0
+  productMainName: "Tr\u1EE9ng \u0111\xE0 \u0111i\u1EC3u"
+  productMainAmount: 1
+  productAltName: "Th\u1ECBt \u0111\xE0 \u0111i\u1EC3u"
+  productAltAmount: 20
+  produceItemId: 
+  produceAmount: 1
+  produceCycleTimeSec: 35
+  maxHarvests: 0
+  feedIntervalSec: 30
+  canGetSick: 1
+  primitiveType: 0
+  animalColor: {r: 1, g: 1, b: 1, a: 1}
+  animalScale: {x: 0.5, y: 0.5, z: 0.5}
+  iconEmoji: "\U0001F414"

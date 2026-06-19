@@ -1,0 +1,88 @@
+/* AnimalInteractionPopup — Cozy Dark Palia (flat, không glass/shadow) */
+
+.ap-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(21, 26, 39, 0.7); /* Mystic Black overlay */
+}
+
+.ap-panel {
+    background-color: var(--color-neutral-surface); /* Primary Navy */
+    border-radius: var(--radius-panel);
+    border-width: 1px;
+    border-color: var(--color-border);
+    padding: 24px;
+    width: 360px;
+}
+
+/* Header */
+.ap-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+.ap-title { font-size: 24px; -unity-font-style: bold; color: var(--color-text-white); }
+
+.ap-close {
+    width: 36px; height: 36px;
+    border-radius: 18px;
+    background-color: var(--color-danger);
+    color: white;
+    font-size: 16px; -unity-font-style: bold;
+    border-width: 0;
+    transition-property: scale, background-color;
+    transition-duration: 0.12s;
+}
+.ap-close:hover { background-color: var(--color-danger-hover); scale: 1.05; }
+.ap-close:active { background-color: var(--color-danger-active); scale: 0.95; }
+
+.ap-status { font-size: 15px; color: var(--color-text-secondary); margin-bottom: 16px; }
+
+/* Bảng thông tin (Deep Blue card) */
+.ap-info {
+    background-color: var(--color-surface-mid);
+    border-radius: 16px;
+    padding-left: 16px; padding-right: 16px;
+    padding-top: 6px; padding-bottom: 6px;
+    margin-bottom: 16px;
+}
+.ap-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 8px; padding-bottom: 8px;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-border);
+}
+.ap-row-last { border-bottom-width: 0; }
+.ap-key { font-size: 14px; color: var(--color-text-secondary); }
+.ap-val { font-size: 15px; -unity-font-style: bold; color: var(--color-text-white); flex-shrink: 1; }
+
+/* Hành động */
+.ap-actions { flex-direction: column; }
+.ap-btn {
+    height: 44px;
+    margin-top: 8px;
+    border-radius: var(--radius-button);
+    font-size: 16px; -unity-font-style: bold;
+    border-width: 0;
+    transition-property: scale, background-color;
+    transition-duration: 0.12s;
+}
+.ap-btn-primary { background-color: var(--color-primary); color: var(--color-text-dark); }
+.ap-btn-primary:hover { background-color: var(--color-primary-hover); }
+.ap-btn-primary:active { background-color: var(--color-primary-active); scale: 0.98; }
+.ap-btn-primary:disabled { background-color: var(--color-overcast-grey); color: var(--color-text-dark); opacity: 0.6; }
+
+.ap-btn-secondary {
+    background-color: rgba(0, 0, 0, 0);
+    color: var(--color-accent-blue);
+    border-width: 1px; border-color: var(--color-accent-blue);
+}
+.ap-btn-secondary:hover { background-color: rgba(78, 176, 230, 0.15); }
+.ap-btn-secondary:active { scale: 0.98; }
+.ap-btn-secondary:disabled { opacity: 0.5; }
