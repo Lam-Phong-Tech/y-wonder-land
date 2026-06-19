@@ -5,6 +5,26 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-06-19] — Build Mode trực quan: ghost mờ kiểu ROK + bù pivot + hàng rào tự nối
+
+### Changed
+- **Bỏ lưới hiển thị** trong Build Mode theo yêu cầu khách (giữ logic snap ô, chỉ tắt phần vẽ lưới).
+- **Ghost preview = bản MỜ của chính prefab** (kiểu ROK/Hay Day): chọn item thấy luôn hình công trình mờ **xanh lá** (đặt được) / **đỏ** (không), theo chuột + snap lưới + xoay. Đặt = clone y hệt ghost (WYSIWYG). Item chưa khai báo prefab vẫn fallback khối Cube.
+- Stretch prefab (đất/hàng rào) lên **đúng 1 ô (100%)** để đặt liền kề khít sát.
+
+### Added
+- **Tự bù pivot lệch** (`MakeCenteredClone`): bọc prefab vào wrapper căn tâm cụm mesh → model artist export pivot lệch (vd Fence lệch 88m) vẫn hiện/đặt đúng ngay vị trí nhắm, xoay quanh tâm. Không cần sửa prefab.
+- **`FenceAutoConnect`**: hàng rào kề nhau (trực giao) tự **tắt cạnh tiếp giáp** ở cả hai → nối liền thành vùng quây (Minecraft-style), không cần nhiều prefab biến thể. Chọn cạnh tắt theo **vị trí thực** (không phụ thuộc tên), refresh sau 1 frame để vị trí ổn định.
+
+### Fixed
+- Ghost prefab "tàng hình"/đặt văng xa do pivot model lệch tâm → đã bù tự động.
+- Hàng rào tắt cạnh lung tung khi đặt nhiều ô → do tính tâm khi vị trí chưa ổn định + đo bounds khi cạnh đã tắt; đã chụp tâm 1 lần lúc đủ cạnh + delay 1 frame.
+
+### Changed Files
+- `Scripts/Environment/GhostPlacementController.cs` *(refactor ghost = prefab mờ + bù pivot)*, `FenceAutoConnect.cs` [NEW]
+- `UI/BuildModeOverlayController.cs` (tắt lưới)
+
+---
 ## [2026-06-18] — Tutorial mới (NPC ông lão khó tính) + Cho ăn qua túi + sửa thuyền cutscene
 
 ### Added

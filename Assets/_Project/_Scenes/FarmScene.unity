@@ -8613,11 +8613,11 @@ MonoBehaviour:
   - nameContains: "ru\u1ED9ng"
     prefab: {fileID: 2729896928635013558, guid: 0aa9141f7ec644a48a7c42434b30ea86, type: 3}
     stretchToFootprint: 1
-    yOffset: 0
-  - nameContains: "chu\u1ED3ng nh\u1ECF"
-    prefab: {fileID: 895396447835184268, guid: 6ab337164ceee5e45a458ead95373000, type: 3}
-    stretchToFootprint: 0
     yOffset: 0.5
+  - nameContains: "chu\u1ED3ng nh\u1ECF"
+    prefab: {fileID: 8219194268896682274, guid: 5b49a4cac1c346c499bb21faa4a9dd91, type: 3}
+    stretchToFootprint: 1
+    yOffset: 0.3
   - nameContains: "chu\u1ED3ng v\u1EEBa"
     prefab: {fileID: 4869041970459374425, guid: a57be90838618f84587dd0cc2ef96e6b, type: 3}
     stretchToFootprint: 0

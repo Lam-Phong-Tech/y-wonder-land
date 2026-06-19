@@ -60,9 +60,13 @@ Trạng thái: [đã xong gì, còn gì]
 
 ---
 
-## 📌 TRẠNG THÁI MỚI NHẤT (cập nhật 18/06/2026)
+## 📌 TRẠNG THÁI MỚI NHẤT (cập nhật 19/06/2026)
 
-### Vừa hoàn thành
+### Build Mode trực quan (19/06)
+- **Bỏ lưới hiển thị**; **ghost = bản mờ prefab thật** (xanh/đỏ kiểu ROK); **tự bù pivot lệch** (MakeCenteredClone) nên model artist lệch tâm vẫn đặt đúng.
+- **`FenceAutoConnect`**: hàng rào kề nhau tự nối liền (tắt cạnh giáp, Minecraft-style). Gắn script lên prefab Fence (có 4 cạnh con N/S/E/W).
+
+### Vừa hoàn thành (18/06)
 - **Build Mode sinh prefab THẬT** (`BuildPrefabLibrary` map tên item → prefab): xây ô đất (Dirt + FarmTile) & chuồng trại (Nhỏ 1x1 / Vừa 2x2 / Lớn 3x2).
 - **Hệ chăn nuôi**: click chuồng → mở túi (tab Thú nuôi) chọn con vật → thả (giới hạn loài theo cỡ chuồng); cho ăn động vật qua túi (chọn Bắp ngô) → animation Feed.
 - **Tutorial VIẾT LẠI hoàn toàn** (flow mới, NPC ông lão khó tính): chặt cây → đào khoáng → xây ruộng → canh tác → xây chuồng → thả thú → cho ăn. Có công tắc `Force Run Tutorial For Testing` để chạy lại khi dev.

@@ -355,10 +355,10 @@ public class BuildModeOverlayController : MonoBehaviour
         if (BuildCameraController.Instance != null)
             BuildCameraController.Instance.Activate();
 
-        // Show grid overlay
+        // Lưới hiển thị: ĐÃ TẮT theo yêu cầu khách (giữ logic snap ô, chỉ bỏ phần vẽ lưới).
         var gridRenderer = FindFirstObjectByType<BuildGridRenderer>();
         if (gridRenderer != null)
-            gridRenderer.Show();
+            gridRenderer.Hide();
 
         // Subscribe to building placed event for balance deduction
         GhostPlacementController.OnBuildingPlaced -= OnBuildingPlacedHandler;
