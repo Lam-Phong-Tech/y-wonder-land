@@ -104,8 +104,11 @@ public class PlayerController : MonoBehaviour
         // 2. Read Inputs via Input System Action Map
         bool isTyping = ChatPanelController.Instance != null && ChatPanelController.Instance.IsTyping();
 
-        Vector2 inputVec = (!isTyping && moveAction != null) ? moveAction.ReadValue<Vector2>() : Vector2.zero;
-        bool jumpPressed = !isTyping && jumpAction != null && jumpAction.triggered;
+        Vector2 keyboardVec = (!isTyping && moveAction != null) ? moveAction.ReadValue<Vector2>() : Vector2.zero;
+        // Gộp bàn phím (PC) + joystick ảo (mobile): joystick được ưu tiên khi đang kéo.
+        Vector2 inputVec = (!isTyping) ? Vector2.ClampMagnitude(keyboardVec + virtualMoveInput, 1f) : Vector2.zero;
+        bool jumpPressed = (!isTyping && jumpAction != null && jumpAction.triggered) || jumpQueuedFromUI;
+        jumpQueuedFromUI = false; // tiêu thụ cờ nhảy từ nút HUD (mỗi lần bấm = 1 lần nhảy)
         bool interactPressed = !isTyping && interactAction != null && interactAction.triggered;
         
         // Kiểm tra xem chuột có đang nằm trên UI không để chặn click xuyên UI
@@ -268,6 +271,36 @@ public class PlayerController : MonoBehaviour
     public void SetSprintUI(bool isPressed)
     {
         isSprintUIHeld = isPressed;
+    }
+
+    // ── Joystick ảo (mobile) ──
+    private Vector2 virtualMoveInput = Vector2.zero;
+    /// <summary>Joystick ảo trên HUD gọi mỗi frame khi kéo (x,y trong [-1,1]); thả tay gọi Vector2.zero.</summary>
+    public void SetMoveInput(Vector2 move) => virtualMoveInput = Vector2.ClampMagnitude(move, 1f);
+
+    // ── Nút Nhảy ảo (mobile) ──
+    private bool jumpQueuedFromUI = false;
+    /// <summary>Nút Nhảy trên HUD gọi: đặt cờ, được tiêu thụ ở Update kế tiếp (giống jumpAction.triggered).</summary>
+    public void TriggerJump() => jumpQueuedFromUI = true;
+
+    // ── Hủy hoạt ảnh (nút X trên HUD) ──
+    /// <summary>Nhân vật đang khóa trong một hoạt ảnh hành động (chặt/đào/cuốc/tưới/câu...).</summary>
+    public bool IsBusy => actionLockTimer > 0f;
+    /// <summary>Nút X trên HUD gọi: ngắt hoạt ảnh đang chạy, cất đồ nghề, ẩn thanh tiến trình, về Idle.</summary>
+    public void CancelAction()
+    {
+        if (actionLockTimer <= 0f) return;
+        actionLockTimer = 0f;
+        if (animator != null)
+        {
+            animator.speed = 1f;
+            CrossFadeAnim(animIdle, 0.1f);
+        }
+        if (YWonderLand.Player.EquipmentManager.Instance != null)
+            YWonderLand.Player.EquipmentManager.Instance.HideAllTools();
+        // Ẩn thanh tiến trình nếu đang chặt cây/đào khoáng.
+        if (YWonderLand.UI.ResourceInteractionUIController.Instance != null)
+            YWonderLand.UI.ResourceInteractionUIController.Instance.Hide();
     }
 
     // ── Free-Look (kiểu PUBG/Free Fire) ──

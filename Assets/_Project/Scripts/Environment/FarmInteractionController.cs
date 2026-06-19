@@ -73,8 +73,13 @@ namespace YWonderLand.Environment
                 return;
             }
 
-            if (mouse.leftButton.wasPressedThisFrame) HandleClick(mouse.position.ReadValue());
-            if (mouse.leftButton.isPressed) HandleHold(mouse.position.ReadValue());
+            // NGẮM THEO TÂM MÀN HÌNH (crosshair) cho ỔN ĐỊNH: giữ chuột là chặt đúng vật ở tâm,
+            // KHÔNG nhấp nháy/giật như khi raycast theo con trỏ (khi trúng khi trật). Khi con trỏ được
+            // mở khóa để bấm chữ gợi ý "Chặt cây", mục tiêu ở tâm KHÔNG đổi -> gợi ý đứng yên, bấm được.
+            Vector2 aimPos = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
+
+            if (mouse.leftButton.wasPressedThisFrame) HandleClick(aimPos);
+            if (mouse.leftButton.isPressed) HandleHold(aimPos);
             else if (mouse.leftButton.wasReleasedThisFrame)
             {
                 _chopAnimTimer = 0f;
@@ -88,7 +93,7 @@ namespace YWonderLand.Environment
             }
 
             // Quét và vẽ Menu Nổi
-            HandleHover(mouse.position.ReadValue());
+            HandleHover(aimPos);
 
             // Xử lý Phím tắt Tương tác (PC)
             bool isTyping = ChatPanelController.Instance != null && ChatPanelController.Instance.IsTyping();
@@ -133,7 +138,7 @@ namespace YWonderLand.Environment
                     currentAnimalState = animal.currentState;
                     currentHasProduct = animal.hasProductReady;
 
-                    foundActions.Add(new InteractionAction { keyName = "E", actionName = "Vuốt ve", onClick = () => PetAnimal(animal) });
+                    // [19/06] Đã bỏ tính năng "Vuốt ve" theo yêu cầu — chỉ còn Cho ăn / Thu hoạch / Chữa bệnh / Thông tin.
                     if (animal.currentState == FarmAnimal.AnimalState.Hungry)
                         foundActions.Add(new InteractionAction { keyName = "F", actionName = "Cho ăn", onClick = () => FeedAnimal(animal) });
                     if (animal.hasProductReady)
@@ -235,13 +240,6 @@ namespace YWonderLand.Environment
 
             var fishingUI = Object.FindFirstObjectByType<FishingOverlayController>();
             if (fishingUI != null) fishingUI.Show();
-        }
-
-        private void PetAnimal(FarmAnimal animal)
-        {
-            PlayerController player = PlayerController.Instance;
-            if (player != null) player.PlayActionAnimation("Petting", 0f); // 0 = tự lấy đúng độ dài clip
-            animal.Pet();
         }
 
         /// <summary>Cổng public cho UI (popup Thú nuôi) gọi luồng cho ăn qua túi đồ.</summary>

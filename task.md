@@ -30,14 +30,43 @@
 
 ---
 
-## 🐄 NHÁNH HIỆN TẠI: Chăn nuôi trong lồng (animal husbandry)
+## 🐄 NHÁNH HIỆN TẠI: Chăn nuôi trong lồng (animal husbandry) — ⭐ ƯU TIÊN CAO NHẤT
 > Sửa & bổ sung chức năng nuôi/trồng động vật trong chuồng.
+> **Đây là nhóm việc ưu tiên số 1.** Hoàn thành hết nhóm này rồi mới quay lại các task tồn đọng phía dưới.
 
-- `[ ]` (định hướng — điền dần khi làm)
+### Build theo Ô ĐẤT (surface-cell snapping) — 19/06
+- `[x]` **Sửa lệch grid**: bỏ snap theo lưới ảo (`cellSize=1` lệch khối cube `0.8` + origin nhảy theo player). Ghost giờ snap vào **TÂM MẶT TRÊN** của khối cube đất (`BuildSurfaceCell`).
+  - File mới: `BuildSurfaceCell.cs` (component đánh dấu ô: SurfaceCenter/FootprintSize/IsOccupied + registry), `Editor/BuildSurfaceCellSetup.cs` (menu gắn hàng loạt).
+  - Sửa `GhostPlacementController.cs`: raycast → `GetComponentInParent<BuildSurfaceCell>` → snap tâm ô; validate theo `IsOccupied`; stretch theo 0.8.
+  - **CẦN làm trong Editor**: map = 4000 khối "cube" (cỏ) + 400 "stone", KHÔNG nhóm, đảo méo mó, chỉ nửa phải buildable → kiểu **"sơn vùng"**: đặt nhiều BoxCollider ướm vùng buildable (lấn ra biển vô hại vì chỗ đó không có cube) → chọn hết → menu `Gắn BuildSurfaceCell theo VÙNG`; lỡ lấn khối không muốn → `Gỡ theo VÙNG`. Tag khối tên "cube*", tự thêm collider. Còn menu đệ quy + gỡ tất cả. Nếu khối gộp chung 1 mesh → đổi sang snap lưới 0.8 + 1 collider gộp.
+  - TODO sau: highlight các ô buildable khi mở Build Mode (đã có `BuildSurfaceCell.All`); nối hủy công trình → `SetOccupied(false)`.
+
+### Nhiệm vụ 19/06
+- `[ ]` **Hiệu ứng thu thập**: khi thu thập (chặt/đào/thu hoạch...) làm vật phẩm **bay vào túi đồ** (animation item bay về icon túi).
+- `[ ]` **Hủy chuồng → thu lại tài nguyên**: cho phép phá chuồng và hoàn lại một phần vật liệu đã xây.
+- `[x]` **Bỏ tính năng Vuốt ve** (Pet) khỏi tương tác con vật. *(Gỡ nút E + hàm PetAnimal ở FarmInteractionController; vô hiệu hóa PetInteraction.cs. Còn: gỡ component PetInteraction khỏi prefab thú trong Editor.)*
+- `[ ]` **Thông tin con vật**: hiển thị giá mua, số ô đất chiếm, thức ăn chính, thức ăn phụ, sản phẩm thu hoạch. *(Chờ file dữ liệu khách gửi sau khi lên kế hoạch.)*
+- `[ ]` **Trồng từng ô ruộng kiểu xây hàng rào**: mỗi loài thực vật tốn số ô khác nhau. *(Khách CHƯA gửi số ô/loài cây → quyết định 19/06: **tạm cho mỗi cây = 1 ô**, chỉnh lại khi có dữ liệu thật.)*
+- `[ ]` **Sức chứa chuồng động (đếm ô vùng quây) + validate thả thú theo số ô**: chuồng nay là vùng quây ghép từ hàng rào (auto-connect) → cần **đếm số ô bên trong vùng quây kín**. Số ô đó = sức chứa. Khi thả con vật: hệ thống tra **số ô con vật chiếm** → nếu chuồng còn đủ ô trống thì cho vào, không đủ thì **hiện thông báo lỗi trên màn hình**. *(Số ô mỗi con lấy từ "Thông tin con vật" — task chờ file khách.)*
 
 ---
 
-## Vấn đề còn tồn đọng (Pending Issues)
+## 📱 RÀ SOÁT MOBILE (19/06) — game hướng thị trường điện thoại
+> Rà soát phát hiện UI/điều khiển đang là PC-first. Sửa theo độ ưu tiên dưới.
+
+- `[x]` **#1 Joystick ảo điều khiển di chuyển**: nối `Joystick` (GameHUD.uxml) vào `PlayerController.SetMoveInput()` qua kéo pointer (GameHUDController) + thêm style núm `.joystick-inner`. Gộp bàn phím + joystick trong PlayerController. **Cần test trên Editor/thiết bị.**
+- `[x]` **#1b Nút Sprint giữ-để-chạy-nhanh (cảm ứng)**: PC bấm Shift đã chạy; sửa nút Sprint trên HUD dùng pointer capture (bỏ `PointerOutEvent` gây hủy sớm) → giữ nút là tăng tốc. Trên phone: 1 ngón giữ Sprint + 1 ngón joystick. **Cần test.**
+- `[x]` **#2 Nút Jump + Hủy hoạt ảnh (X)**: Jump → `PlayerController.TriggerJump()` (1-bấm-1-nhảy). **Bỏ nút bàn tay (Interact)** — tương tác qua các **nút gợi ý nổi** quanh tâm ngắm (đã bấm được, dùng chung `ShowInteractionPrompts`). Giữ **nút X** = `PlayerController.CancelAction()` (ngắt hoạt ảnh, cất đồ, ẩn thanh tiến trình), tự hiện khi `IsBusy`. **Ngắm theo TÂM màn hình** (ổn định, không giật; gợi ý đứng yên khi rê chuột tới bấm). **Nút gợi ý "Chặt cây" bấm/tap được** (mỗi lần = 1 nhát `ClickHarvestResource`); căn giữa dưới tâm, co theo nội dung để không chặn dải ngang. Giữ chuột ở tâm vẫn chặt liên tục như cũ.
+- `[ ]` **#3 Tương tác đổi `Mouse.current` → `Pointer.current`**: FarmInteractionController khóa cứng chuột (dòng 61-62) → trên mobile các **nút gợi ý nổi không xuất hiện** (vòng lặp thoát sớm). Đổi sang `Pointer.current` để hover/bấm chạy trên cảm ứng. Lưu ý multitouch: khi kéo joystick không được kích hoạt hành động ở tâm (chặn bằng kiểm tra con trỏ đang trên UI).
+- `[ ]` **#4 Camera xoay bằng kéo 1 ngón** (vùng phải màn hình): ThirdPersonCamera đang đọc chuột.
+- `[ ]` **#5 Safe Area + khóa Landscape + chỉnh Match**: reference 1200×800 (3:2) lệch tỉ lệ điện thoại; chưa xử lý tai thỏ.
+
+---
+
+## Vấn đề còn tồn đọng (Pending Issues) — ⏳ ƯU TIÊN THẤP
+> Làm SAU khi xong nhóm 19/06. Phần lớn liên quan **polish UI 2.5D + asset/artist** nên còn chờ tài nguyên.
+> Đánh giá nhanh: Login & Character Select **ĐÃ XONG**; các mục còn lại chủ yếu **chờ ảnh AI / artist** hoặc là việc polish dài hơi.
+
 - `[x]` **Login UI & Validation:** Thay thế dòng chữ Y WONDER GREEN FARM bằng logo Y Wonder Hub. Cập nhật UI và Logic để validate các trường đăng nhập, đăng ký tối đa 20 ký tự, đúng định dạng.
 - `[x]` **Character Select UI & Logic:** Thay thế chữ M/F bằng Avatar ảnh (Nam/Nữ) tương ứng. Đặt ảnh vừa chọn làm avatar mặc định. Validate đặt tên nhân vật tối đa 20 ký tự.
 - `[ ]` **Sửa lỗi Layout Popup cũ:** Cập nhật thêm các popup khác (Inventory, Friends, Map...) theo chuẩn Flat Graphics (Dark Theme) và sửa các lỗi chồng chéo layout nếu có.
@@ -47,7 +76,7 @@
 
 ---
 
-## Bước tiếp theo (Next Steps)
+## Bước tiếp theo (Next Steps) — ⏳ ƯU TIÊN THẤP (chờ asset/artist)
 - `[ ]` **Sản xuất Asset:** Chạy AI với bộ Prompt đã tạo để sinh ra bộ vật phẩm 2.5D mới (Cà chua, Hạt giống, Rìu, Cuốc, Khoáng sản...).
 - `[ ]` **Tích hợp UI Popup:** Đưa các sprite 2.5D mới vào Unity, xử lý tách nền và gắn vào các slot chứa đồ trong `InventoryPopup.uxml` và `ShopPopup.uxml`.
 - `[ ]` **Kiểm thử Rigging FBX:** Import thử một file FBX nhân vật mới do bạn Artist làm theo workflow chuẩn để kiểm tra thẻ Rig Humanoid trong Unity.

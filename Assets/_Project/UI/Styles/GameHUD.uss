@@ -136,6 +136,7 @@
 .joystick-arrow-container { position: absolute; width: 130px; height: 130px; align-items: center; justify-content: center; }
 .joystick-arrow { position: absolute; font-size: 14px; color: rgba(255, 255, 255, 0.4); }
 .joystick-arrow-up { top: 10px; } .joystick-arrow-down { bottom: 10px; } .joystick-arrow-left { left: 12px; } .joystick-arrow-right { right: 12px; }
+.joystick-inner { width: 56px; height: 56px; border-radius: 28px; background-color: rgba(255, 255, 255, 0.55); border-width: 1px; border-color: rgba(255, 255, 255, 0.45); }
 
 /* ── 6. ACTION BUTTONS ── */
 .hud-right-actions { position: absolute; right: 24px; bottom: 130px; align-items: center; }
@@ -189,9 +190,10 @@
 .interaction-container {
     position: absolute;
     top: 55%; /* Nằm dưới crosshair */
+    left: 50%;
+    translate: -50% 0; /* Co theo nội dung + căn GIỮA dưới tâm ngắm (KHÔNG full-width để khỏi chặn cả dải ngang) */
     align-items: center;
     flex-direction: row; /* Xếp ngang các nút */
-    justify-content: center;
 }
 
 .interaction-action-btn {

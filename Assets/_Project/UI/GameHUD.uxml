@@ -167,15 +167,9 @@
         <!-- ============================== -->
         <!-- 6. ACTION BUTTONS — Right      -->
         <!-- ============================== -->
+        <!-- Chỉ còn nút X (Hủy hoạt ảnh). Nút bàn tay Interact đã bỏ; tương tác qua các nút gợi ý nổi quanh tâm ngắm. -->
         <ui:VisualElement class="hud-right-actions" style="display: none;">
-            <!-- Interact (hand) — largest -->
-            <ui:VisualElement class="action-btn-shadow">
-                <ui:Button name="BtnInteract" class="action-btn action-btn-interact">
-                    <ui:VisualElement class="action-btn-icon action-btn-icon-dark" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_13.png'); -unity-background-scale-mode: scale-to-fit; -unity-background-image-tint-color: black;" />
-                </ui:Button>
-            </ui:VisualElement>
-
-            <!-- Cancel -->
+            <!-- Cancel — hủy hoạt ảnh đang chạy -->
             <ui:VisualElement class="action-btn-shadow">
                 <ui:Button name="BtnCancel" class="action-btn action-btn-cancel">
                     <ui:Label text="✕" class="action-btn-icon action-btn-icon-white" />
@@ -198,8 +192,10 @@
         <!-- ============================== -->
         <ui:VisualElement name="Crosshair" class="crosshair" picking-mode="Ignore">
             <ui:VisualElement class="crosshair-dot" picking-mode="Ignore" />
-            <ui:VisualElement name="InteractionContainer" class="interaction-container" picking-mode="Ignore" />
         </ui:VisualElement>
+
+        <!-- Nút gợi ý tương tác nổi: BẤM/TAP được (mỗi nhát = 1 lần chặt/cuốc...). Co theo nội dung để chỉ chặn đúng vùng nút. -->
+        <ui:VisualElement name="InteractionContainer" class="interaction-container" />
 
         <!-- ============================== -->
         <!-- SPRINT BUTTON — Middle Left    -->

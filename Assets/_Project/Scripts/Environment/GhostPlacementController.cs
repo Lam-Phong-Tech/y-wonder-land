@@ -19,6 +19,9 @@ public class GhostPlacementController : MonoBehaviour
     [SerializeField] private Color invalidColor = new Color(1f, 0.25f, 0.25f, 0.45f); // đỏ mờ — không đặt được
     [SerializeField] private float ghostHeight = 0.6f; // chỉ dùng cho fallback Cube
 
+    [Tooltip("Cạnh ô đất xây dựng (khối cube map = 0.8). Dùng co giãn hàng rào cho khít khối khi prefab cần stretch.")]
+    [SerializeField] private float surfaceCellSize = 0.8f;
+
     [Header("Raycast")]
     [SerializeField] private LayerMask groundMask = ~0;
 
@@ -33,10 +36,13 @@ public class GhostPlacementController : MonoBehaviour
     private string currentItemName = "";
     private int currentItemPrice = 0;
     private int rotationAngle = 0;
-    private Vector2Int currentGridCell;
     private bool currentPlacementValid = false;
     private float currentGroundY = 0f;
     private YWonderLand.Environment.BuildPrefabLibrary.Entry currentEntry;
+
+    // Surface-cell snapping: ô đất (cube) đang ngắm + vị trí snap (tâm mặt trên ô).
+    private YWonderLand.Environment.BuildSurfaceCell currentCell;
+    private Vector3 currentSnapPos;
 
     public bool IsPinned { get; private set; } = false;
     public Vector3 GhostPosition => ghostObject != null ? ghostObject.transform.position : Vector3.zero;
@@ -58,7 +64,7 @@ public class GhostPlacementController : MonoBehaviour
 
     void Update()
     {
-        if (!isActive || ghostObject == null || gridManager == null) return;
+        if (!isActive || ghostObject == null) return;
         if (IsPinned) return;
 
         if (mainCamera == null) mainCamera = Camera.main;
@@ -72,11 +78,14 @@ public class GhostPlacementController : MonoBehaviour
 
         if (Physics.Raycast(ray, out RaycastHit hit, 200f, groundMask))
         {
-            currentGridCell = gridManager.WorldToGrid(hit.point);
-            currentGroundY = hit.point.y;
+            // Snap vào Ô ĐẤT (BuildSurfaceCell) dưới con trỏ -> ghost ướm đúng TÂM MẶT TRÊN khối.
+            currentCell = hit.collider.GetComponentInParent<YWonderLand.Environment.BuildSurfaceCell>();
+            currentSnapPos = (currentCell != null) ? currentCell.SurfaceCenter : hit.point;
+            currentGroundY = currentSnapPos.y;
             ApplyGhostTransform();
 
-            currentPlacementValid = gridManager.CanPlace(currentGridCell, GetEffectiveSize());
+            // Chỉ đặt được khi đang trỏ vào ô đất hợp lệ và ô còn TRỐNG.
+            currentPlacementValid = (currentCell != null && !currentCell.IsOccupied);
             UpdateGhostColor(currentPlacementValid);
         }
 
@@ -119,11 +128,8 @@ public class GhostPlacementController : MonoBehaviour
     {
         rotationAngle = (rotationAngle + 90) % 360;
         ApplyGhostTransform();
-        if (gridManager != null)
-        {
-            currentPlacementValid = gridManager.CanPlace(currentGridCell, GetEffectiveSize());
-            UpdateGhostColor(currentPlacementValid);
-        }
+        currentPlacementValid = (currentCell != null && !currentCell.IsOccupied);
+        UpdateGhostColor(currentPlacementValid);
     }
 
     private Vector2Int GetEffectiveSize()
@@ -153,7 +159,7 @@ public class GhostPlacementController : MonoBehaviour
     // Ghost = bản mờ của prefab thật (bọc wrapper căn tâm để pivot lệch cũng đúng vị trí).
     private void BuildPrefabGhost()
     {
-        float cell = gridManager != null ? gridManager.CellSize : 1f;
+        float cell = surfaceCellSize;
         ghostObject = MakeCenteredClone(currentEntry.prefab, currentEntry.stretchToFootprint, currentItemSize, cell);
         ghostObject.name = "BuildGhost_" + currentEntry.prefab.name;
         ghostIsPrefab = true;
@@ -257,11 +263,9 @@ public class GhostPlacementController : MonoBehaviour
     // Đặt ghost đúng vị trí/xoay/scale (giống y lúc đặt thật).
     private void ApplyGhostTransform()
     {
-        if (ghostObject == null || gridManager == null) return;
+        if (ghostObject == null) return;
 
-        Vector2Int eff = GetEffectiveSize();
-        Vector3 worldPos = gridManager.GridToWorldCentered(currentGridCell, eff);
-        float cell = gridManager.CellSize;
+        Vector3 worldPos = currentSnapPos; // tâm mặt trên ô đất đang ngắm
 
         if (ghostIsPrefab)
         {
@@ -275,7 +279,10 @@ public class GhostPlacementController : MonoBehaviour
             worldPos.y = currentGroundY + ghostHeight * 0.5f;
             ghostObject.transform.position = worldPos;
             ghostObject.transform.rotation = Quaternion.Euler(0, rotationAngle, 0);
-            ghostObject.transform.localScale = new Vector3(eff.x * cell * 0.95f, ghostHeight, eff.y * cell * 0.95f);
+            // Khối fallback co theo kích thước ô đất (vd 0.8 x 0.8).
+            float fw = currentCell != null ? currentCell.FootprintSize.x : surfaceCellSize;
+            float fd = currentCell != null ? currentCell.FootprintSize.y : surfaceCellSize;
+            ghostObject.transform.localScale = new Vector3(fw, ghostHeight, fd);
         }
     }
 
@@ -294,25 +301,25 @@ public class GhostPlacementController : MonoBehaviour
 
     public void ConfirmPlacement()
     {
-        if (gridManager == null || ghostObject == null) return;
+        if (ghostObject == null) return;
+        // Chỉ đặt khi đang trỏ vào ô đất hợp lệ còn TRỐNG (snap theo cube, không theo lưới ảo).
+        if (currentCell == null || currentCell.IsOccupied) return;
 
-        Vector2Int eff = GetEffectiveSize();
-        gridManager.OccupyCells(currentGridCell, eff);
+        currentCell.SetOccupied(true);
 
         if (ghostIsPrefab && currentEntry != null)
         {
             // WYSIWYG: clone căn tâm (GIỮ script/collider) đặt đúng vị trí/xoay của ghost.
-            float cell = gridManager.CellSize;
-            GameObject go = MakeCenteredClone(currentEntry.prefab, currentEntry.stretchToFootprint, currentItemSize, cell);
+            GameObject go = MakeCenteredClone(currentEntry.prefab, currentEntry.stretchToFootprint, currentItemSize, surfaceCellSize);
             go.transform.position = ghostObject.transform.position;
             go.transform.rotation = ghostObject.transform.rotation;
-            go.name = $"Building_{currentItemName}_{currentGridCell.x}_{currentGridCell.y}";
+            go.name = $"Building_{currentItemName}_{currentCell.name}";
             if (go.CompareTag("Untagged")) go.tag = "PlacedBuilding";
-            Debug.Log($"[GhostPlacement] Đặt PREFAB '{currentEntry.prefab.name}' (căn tâm) tại {go.transform.position}");
+            Debug.Log($"[GhostPlacement] Đặt PREFAB '{currentEntry.prefab.name}' (căn tâm) tại {go.transform.position} trên ô '{currentCell.name}'");
         }
         else
         {
-            SpawnCubeBuilding(eff);
+            SpawnCubeBuilding(GetEffectiveSize());
         }
 
         OnBuildingPlaced?.Invoke(currentItemName, currentItemPrice);
@@ -321,12 +328,12 @@ public class GhostPlacementController : MonoBehaviour
 
     private void SpawnCubeBuilding(Vector2Int size)
     {
-        float cell = gridManager != null ? gridManager.CellSize : 1f;
+        float cell = surfaceCellSize;
         Vector3 pos = ghostObject.transform.position;
         pos.y = currentGroundY + ghostHeight * 0.75f;
 
         GameObject building = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        building.name = $"Building_{currentItemName}_{currentGridCell.x}_{currentGridCell.y}";
+        building.name = $"Building_{currentItemName}_{(currentCell != null ? currentCell.name : "cell")}";
         building.transform.position = pos;
         building.transform.rotation = Quaternion.Euler(0, rotationAngle, 0);
         building.transform.localScale = new Vector3(size.x * cell * 0.95f, ghostHeight * 1.5f, size.y * cell * 0.95f);

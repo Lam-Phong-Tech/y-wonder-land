@@ -68,13 +68,21 @@ public class GameHUDController : MonoBehaviour
     private Button btnBuild;
 
     // Action buttons
-    private Button btnInteract;
     private Button btnCancel;
     private Button btnJump;
     private Button btnBag;
     private Button btnSettings;
     private Button btnSprint;
     private VisualElement interactionContainer;
+
+    // Joystick ảo (mobile)
+    private VisualElement joystickOuter;
+    private VisualElement joystickKnob;
+    private int joystickPointerId = -1;
+    private const float JoystickRadius = 45f;
+
+    // Cụm nút phải: chỉ còn nút X (hủy hoạt ảnh), hiện khi nhân vật đang bận.
+    private VisualElement rightActionsContainer;
 
 
 
@@ -166,13 +174,15 @@ public class GameHUDController : MonoBehaviour
         btnBuild = root.Q<Button>("BtnBuild");
 
         // Actions
-        btnInteract = root.Q<Button>("BtnInteract");
         btnCancel = root.Q<Button>("BtnCancel");
         btnJump = root.Q<Button>("BtnJump");
         btnBag = root.Q<Button>("BtnBag");
         btnSettings = root.Q<Button>("BtnSettings");
         btnSprint = root.Q<Button>("BtnSprint");
         interactionContainer = root.Q<VisualElement>("InteractionContainer");
+        joystickOuter = root.Q<VisualElement>("Joystick");
+        joystickKnob = joystickOuter?.Q<VisualElement>(className: "joystick-inner");
+        rightActionsContainer = root.Q<VisualElement>(className: "hud-right-actions");
 
 
     }
@@ -306,37 +316,41 @@ public class GameHUDController : MonoBehaviour
                 Debug.Log("[GameHUD] Event clicked (no event popup assigned)");
         });
 
-        // Action buttons
-        btnInteract?.RegisterCallback<ClickEvent>(evt =>
-        {
-            Debug.Log("[GameHUD] Interact clicked");
-        });
-
+        // Nút X (Cancel) = HỦY HOẠT ẢNH đang chạy (chặt/đào/cuốc/tưới/câu...).
         btnCancel?.RegisterCallback<ClickEvent>(evt =>
         {
-            Debug.Log("[GameHUD] Cancel clicked");
+            if (PlayerController.Instance != null) PlayerController.Instance.CancelAction();
         });
 
         btnJump?.RegisterCallback<ClickEvent>(evt =>
         {
-            Debug.Log("[GameHUD] Jump clicked");
+            if (PlayerController.Instance != null) PlayerController.Instance.TriggerJump();
         });
 
         if (btnSprint != null)
         {
-            btnSprint.RegisterCallback<PointerDownEvent>(evt => 
+            // Giữ nút = chạy nhanh.
+            // Button có manipulator Clickable nuốt sự kiện pointer ở pha bubble -> ĐĂNG KÝ Ở PHA
+            // TrickleDown (capture) để callback chạy TRƯỚC Clickable. Clickable vẫn tự bắt con trỏ
+            // nên PointerUp luôn về đúng nút kể cả khi chuột/ngón nhích ra ngoài.
+            btnSprint.RegisterCallback<PointerDownEvent>(evt =>
             {
                 if (PlayerController.Instance != null) PlayerController.Instance.SetSprintUI(true);
-            });
-            btnSprint.RegisterCallback<PointerUpEvent>(evt => 
+            }, TrickleDown.TrickleDown);
+            btnSprint.RegisterCallback<PointerUpEvent>(evt =>
+            {
+                if (PlayerController.Instance != null) PlayerController.Instance.SetSprintUI(false);
+            }, TrickleDown.TrickleDown);
+            // Mất quyền bắt con trỏ (bị gián đoạn) -> dừng sprint cho an toàn.
+            btnSprint.RegisterCallback<PointerCaptureOutEvent>(evt =>
             {
                 if (PlayerController.Instance != null) PlayerController.Instance.SetSprintUI(false);
             });
-            btnSprint.RegisterCallback<PointerOutEvent>(evt => 
-            {
-                if (PlayerController.Instance != null) PlayerController.Instance.SetSprintUI(false);
-            });
-        }        // Bag
+        }
+
+        SetupJoystick();
+
+        // Bag
         btnBag?.RegisterCallback<ClickEvent>(evt =>
         {
             HideAllPopups();
@@ -475,6 +489,9 @@ public class GameHUDController : MonoBehaviour
         if (uiDocument == null || uiDocument.rootVisualElement == null || uiDocument.rootVisualElement.style.display == DisplayStyle.None)
             return;
 
+        // Hiện/ẩn nút X (hủy hoạt ảnh) theo trạng thái bận — chạy cả khi không có bàn phím (mobile).
+        UpdateCancelButton();
+
         // Chặn các phím tắt nếu người chơi đang gõ phím trong khung chat
         if (ChatPanelController.Instance != null && ChatPanelController.Instance.IsTyping())
             return;
@@ -554,6 +571,60 @@ public class GameHUDController : MonoBehaviour
         }
     }
 
+    // ───────────────────────────────────────────────
+    //  JOYSTICK ẢO (MOBILE) — kéo núm để di chuyển nhân vật
+    // ───────────────────────────────────────────────
+    private void SetupJoystick()
+    {
+        if (joystickOuter == null) return;
+        joystickOuter.RegisterCallback<PointerDownEvent>(OnJoystickDown);
+        joystickOuter.RegisterCallback<PointerMoveEvent>(OnJoystickMove);
+        joystickOuter.RegisterCallback<PointerUpEvent>(OnJoystickUp);
+        // Mất quyền bắt con trỏ (kéo ra ngoài / nhả ngoài vùng) -> reset cho an toàn
+        joystickOuter.RegisterCallback<PointerCaptureOutEvent>(evt => ResetJoystick());
+    }
+
+    private void OnJoystickDown(PointerDownEvent evt)
+    {
+        joystickPointerId = evt.pointerId;
+        joystickOuter.CapturePointer(evt.pointerId);
+        UpdateJoystick(joystickOuter.WorldToLocal((Vector2)evt.position));
+        evt.StopPropagation();
+    }
+
+    private void OnJoystickMove(PointerMoveEvent evt)
+    {
+        if (joystickPointerId != evt.pointerId || !joystickOuter.HasPointerCapture(evt.pointerId)) return;
+        UpdateJoystick(joystickOuter.WorldToLocal((Vector2)evt.position));
+    }
+
+    private void OnJoystickUp(PointerUpEvent evt)
+    {
+        if (joystickPointerId != evt.pointerId) return;
+        if (joystickOuter.HasPointerCapture(evt.pointerId)) joystickOuter.ReleasePointer(evt.pointerId);
+        ResetJoystick();
+    }
+
+    // Tính vector di chuyển từ vị trí chạm (local trong joystick-outer) rồi đẩy vào PlayerController.
+    private void UpdateJoystick(Vector2 localPos)
+    {
+        Vector2 center = new Vector2(joystickOuter.resolvedStyle.width * 0.5f, joystickOuter.resolvedStyle.height * 0.5f);
+        Vector2 offset = Vector2.ClampMagnitude(localPos - center, JoystickRadius);
+
+        if (joystickKnob != null) joystickKnob.style.translate = new Translate(offset.x, offset.y, 0);
+
+        // Trục Y của UI hướng XUỐNG -> đảo dấu để kéo lên = đi tới (forward).
+        Vector2 move = new Vector2(offset.x / JoystickRadius, -offset.y / JoystickRadius);
+        if (PlayerController.Instance != null) PlayerController.Instance.SetMoveInput(move);
+    }
+
+    private void ResetJoystick()
+    {
+        joystickPointerId = -1;
+        if (joystickKnob != null) joystickKnob.style.translate = new Translate(0, 0, 0);
+        if (PlayerController.Instance != null) PlayerController.Instance.SetMoveInput(Vector2.zero);
+    }
+
     public void ShowInteractionPrompts(List<InteractionAction> actions)
     {
         if (interactionContainer == null) return;
@@ -600,5 +671,14 @@ public class GameHUDController : MonoBehaviour
         if (interactionContainer == null) return;
         interactionContainer.style.display = DisplayStyle.None;
         interactionContainer.Clear();
+    }
+
+    // Nút X (hủy hoạt ảnh) chỉ hiện khi nhân vật đang khóa trong một hành động.
+    // Đặt TRƯỚC mọi early-return phụ thuộc bàn phím trong Update() để chạy cả trên mobile.
+    private void UpdateCancelButton()
+    {
+        if (rightActionsContainer == null) return;
+        bool busy = PlayerController.Instance != null && PlayerController.Instance.IsBusy;
+        rightActionsContainer.style.display = busy ? DisplayStyle.Flex : DisplayStyle.None;
     }
 }
