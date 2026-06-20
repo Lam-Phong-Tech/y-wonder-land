@@ -12,16 +12,24 @@
 - **Build snap theo Ô ĐẤT THẬT:** `BuildSurfaceCell` (gắn lên khối cube map, cube=0.8) thay lưới ảo lệch; ghost ướm vào tâm mặt trên khối. Tool Editor **"sơn vùng"** (`BuildSurfaceCellSetup`): kéo BoxCollider trùm vùng → gắn hàng loạt khối `cube*` trong vùng (+ collider). Gizmo hiện trạng ô.
 - **Hệ chuồng từ hàng rào (task #6):** rào = hộp vuông trên 1 ô → **ô có rào = ô chuồng**. `PenEnclosure.FindPen` BFS cụm ô-rào liền nhau (nhiều rào kề = chuồng to). Ngắm/click ô rào → "Thả thú" → chọn loài → validate `penSlots` vs số ô còn trống → thả (`SetAnimal`) hoặc `ScreenToast` báo lỗi. `AnimalPrefabLibrary` (itemId→prefab thú + spawnHeightOffset). Click thẳng (PC) + bấm chữ (mobile) đều chạy.
 - **Popup Thông tin con vật:** hiện giá mua / số ô chuồng / thức ăn chính-phụ / sản phẩm. Thêm trường vào `AnimalDefinition`; điền data 10 con qua generator (nguồn: bảng VatNuoi khách). Restyle popup theo Cozy Dark Palia.
+- **Thông tin con vật ở Shop + Túi đồ:** chèn "Thông tin nuôi" (giá/ô/thức ăn) vào mô tả khi chọn con vật. `AnimalManager.LookupDefinition` (tra Instance, fallback Resources → chạy kể cả khi scene chưa gắn AnimalManager).
+- **Mặt đường đá (paving):** item "Đường đá" trong Build Mode → map `BuildPrefabLibrary` (StoneSlab).
+- **Loadout test:** `InventoryManager.GiveTestLoadout()` + cờ `giveTestLoadoutOnStart` — nạp nông sản/sản phẩm/vật liệu/hạt + tiền để test NPC mua/bán.
 
 ### Changed
 - **Tương tác ngắm theo điểm chạm/tâm** cho ổn định; **nút gợi ý "Chặt cây"... bấm/tap được** (fix picking-mode cha Ignore); tia ngắm **xuyên qua hàng rào + ô bị chiếm** để tới ô chuồng.
 - **Bỏ tính năng Vuốt ve** (Pet) khỏi tương tác con vật.
+- **Dọn menu Build còn 3 mục** (Ruộng / Đường đá / Chuồng); ẩn 4 tab cũ.
+- **Fix ghost Build luôn báo đỏ:** `GhostPlacementController` đổi `Physics.Raycast` → `RaycastAll` + tìm `BuildSurfaceCell` gần nhất (bỏ qua collider nền/mesh đảo chắn trước).
+- **Lập task Hệ NPC** (theo kịch bản "10+ NPC"): shop keeper đa-NPC, Maid, Pet, NPC mỏ, NPC câu cá, AI chat (xem task.md).
 
 ### Changed Files
 - `Scripts/Player/PlayerController.cs`, `UI/GameHUD.uxml`, `UI/GameHUDController.cs`, `UI/Styles/GameHUD.uss`
 - `Scripts/Environment/{BuildSurfaceCell,PenEnclosure,AnimalPrefabLibrary,ScreenToast}.cs` [NEW], `GhostPlacementController.cs`, `FarmInteractionController.cs`, `PetInteraction.cs`
 - `Scripts/Editor/BuildSurfaceCellSetup.cs` [NEW], `Scripts/Editor/ItemDataGenerator.cs`, `Scripts/Data/AnimalDefinition.cs`
 - `UI/AnimalInteractionPopup.uxml`, `UI/AnimalInteractionPopupController.cs`, `UI/Styles/AnimalInteractionPopup.uss` [NEW]
+- `UI/ShopPopupController.cs`, `UI/InventoryPopupController.cs`, `UI/BuildModeOverlayController.cs`, `UI/BuildModeOverlay.uxml`
+- `Scripts/Managers/{AnimalManager,InventoryManager}.cs`, `task.md`
 
 ---
 ## [2026-06-19] — Build Mode trực quan: ghost mờ kiểu ROK + bù pivot + hàng rào tự nối

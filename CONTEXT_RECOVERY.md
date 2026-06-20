@@ -12,8 +12,11 @@
 - **Build snap theo Ô ĐẤT THẬT** (`BuildSurfaceCell`, cube map = 0.8) thay lưới ảo. Tool Editor "sơn vùng" gắn hàng loạt. Gizmo hiện trạng ô (xanh lá=trống, đỏ=ô chuồng, xanh dương=có thú).
 - **Hệ chuồng từ hàng rào (#6 XONG):** rào = hộp vuông trên 1 ô → **ô có rào = ô chuồng**. `PenEnclosure.FindPen` đếm cụm ô-rào liền nhau; ngắm/click → "Thả thú" → validate `penSlots` vs ô trống → thả hoặc báo lỗi (ScreenToast). Cần gắn `AnimalPrefabLibrary` (itemId→prefab thú).
 - **Popup Thông tin con vật (#4 XONG):** giá/ô/thức ăn/sản phẩm; data 10 con từ bảng VatNuoi (chạy menu `Generate Animal Data`).
-- **Việc cần làm trong Editor:** gắn `BuildSurfaceCell` cho khối map ("sơn vùng"); gắn `AnimalPrefabLibrary` + điền prefab thú; chạy `Generate Animal Data`; gỡ component `PetInteraction` khỏi prefab thú.
-- **Task mới ưu tiên (20/06):** xây mặt đường đá; thông tin con vật khi MUA (shop) + khi chọn TÚI ĐỒ; (validate sức chứa + thả nhiều con = đã xong).
+- **Thông tin con vật ở Shop + Túi đồ (XONG):** chèn "Thông tin nuôi" vào mô tả; tra qua `AnimalManager.LookupDefinition` (fallback Resources → chạy kể cả khi chưa gắn AnimalManager).
+- **Dọn menu Build còn 3 mục** (Ruộng/Đường đá/Chuồng); **đường đá** map StoneSlab; **fix ghost luôn đỏ** (RaycastAll tìm BuildSurfaceCell, bỏ qua mesh nền); **loadout test** (`InventoryManager.GiveTestLoadout` + cờ).
+- **Việc cần làm trong Editor:** gắn `BuildSurfaceCell` cho khối map ("sơn vùng"); 3 entry `BuildPrefabLibrary` (ruộng→Dirt, đường đá→StoneSlab, chuồng→Fence **stretch OFF**); gắn `AnimalPrefabLibrary` + prefab thú; gắn `AnimalManager`; chạy `Generate Animal Data`; gỡ component `PetInteraction` khỏi prefab thú.
+- **HỆ NPC (đã lập task — xem task.md):** kịch bản "10+ NPC". ĐÃ CÓ: Guide NPC (tutorial) + 1 Merchant mẫu. CHƯA: shop keeper đa-NPC (data-driven), Maid VIP, Pet, NPC mỏ (vé/quặng), NPC câu cá, AI Chat NPC.
+- **Còn dang dở (chăn nuôi):** hiệu ứng thu thập bay vào túi; hủy chuồng → hoàn tài nguyên; trồng từng ô ruộng. **Mobile còn:** #3 Mouse→Pointer, #4 camera 1 ngón, #5 safe area.
 
 ## 1. Bối cảnh phiên làm việc
 

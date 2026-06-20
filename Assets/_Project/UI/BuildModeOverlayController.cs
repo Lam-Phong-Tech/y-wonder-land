@@ -86,50 +86,14 @@ public class BuildModeOverlayController : MonoBehaviour
         }
     }
 
+    // Menu Build r\u00fat g\u1ecdn \u2014 ch\u1ec9 3 m\u1ee5c: Ru\u1ed9ng / \u0110\u01b0\u1eddng \u0111\u00e1 / Chu\u1ed3ng (r\u00e0o x\u1ecbn). 1 category duy nh\u1ea5t.
     private static readonly Dictionary<int, List<BuildItemData>> categoryData = new Dictionary<int, List<BuildItemData>>()
     {
-        { 0, new List<BuildItemData> // Nha cua
+        { 0, new List<BuildItemData> // X\u00e2y d\u1ef1ng
             {
-                new BuildItemData("\U0001F3E0", "Nh\u00e0 g\u1ed7 nh\u1ecf", "2x2", 500, "Ng\u00f4i nh\u00e0 g\u1ed7 \u1ea5m c\u00fang cho gia \u0111\u00ecnh nh\u1ecf."),
-                new BuildItemData("\U0001F3E1", "Nh\u00e0 g\u1ea1ch", "3x3", 1200, "Ng\u00f4i nh\u00e0 g\u1ea1ch v\u1eefng ch\u1eafc, r\u1ed9ng r\u00e3i."),
-                new BuildItemData("\U0001F3EA", "Kho ch\u1ee9a", "2x3", 800, "Kho l\u01b0u tr\u1eef n\u00f4ng s\u1ea3n v\u00e0 d\u1ee5ng c\u1ee5."),
-                new BuildItemData("\U0001F414", "Chu\u1ed3ng nh\u1ecf", "1x1", 600, "Chu\u1ed3ng nh\u1ecf cho lo\u00e0i nh\u1ecf: g\u00e0, v\u1ecbt, ng\u1ed7ng, th\u1ecf."),
-                new BuildItemData("\U0001F999", "Chu\u1ed3ng v\u1eeba", "2x2", 1000, "Chu\u1ed3ng v\u1eeba cho lo\u00e0i trung: \u0111\u00e0 \u0111i\u1ec3u, d\u00ea, l\u1ee3n."),
-                new BuildItemData("\U0001F404", "Chu\u1ed3ng l\u1edbn", "3x2", 1500, "Chu\u1ed3ng l\u1edbn cho lo\u00e0i to: b\u00f2."),
-            }
-        },
-        { 1, new List<BuildItemData> // Nong trai
-            {
-                new BuildItemData("\U0001F7EB", "Ru\u1ed9ng 1x1", "1x1", 50, "\u00d4 \u0111\u1ea5t canh t\u00e1c 1x1 \u2014 \u0111\u1eb7t t\u1eebng \u00f4 \u0111\u1ec3 tr\u1ed3ng c\u00e2y."),
-                new BuildItemData("\U0001F33F", "Ru\u1ed9ng 2x2", "2x2", 100, "\u00d4 \u0111\u1ea5t nh\u1ecf \u0111\u1ec3 gieo h\u1ea1t."),
-                new BuildItemData("\U0001F33E", "Ru\u1ed9ng 3x3", "3x3", 200, "\u00d4 \u0111\u1ea5t l\u1edbn, tr\u1ed3ng \u0111\u01b0\u1ee3c nhi\u1ec1u h\u01a1n."),
-                new BuildItemData("\U0001F3E1", "Nh\u00e0 k\u00ednh", "4x4", 2000, "Tr\u1ed3ng c\u00e2y quanh n\u0103m kh\u00f4ng lo th\u1eddi ti\u1ebft."),
-                new BuildItemData("\U0001F4A7", "Gi\u1ebfng n\u01b0\u1edbc", "1x1", 300, "Ngu\u1ed3n n\u01b0\u1edbc t\u01b0\u1edbi ti\u00eau g\u1ea7n ru\u1ed9ng."),
-            }
-        },
-        { 2, new List<BuildItemData> // Hang rao
-            {
-                new BuildItemData("\U0001FAB5", "R\u00e0o g\u1ed7", "1x1", 20, "H\u00e0ng r\u00e0o g\u1ed7 \u0111\u01a1n gi\u1ea3n."),
-                new BuildItemData("\U0001FAA8", "R\u00e0o \u0111\u00e1", "1x1", 50, "H\u00e0ng r\u00e0o \u0111\u00e1 ch\u1eafc ch\u1eafn."),
-                new BuildItemData("\U0001F6AA", "C\u1ed5ng g\u1ed7", "1x1", 80, "C\u1ed5ng ra v\u00e0o n\u00f4ng tr\u1ea1i."),
-                new BuildItemData("\U0001F338", "R\u00e0o hoa", "1x1", 40, "H\u00e0ng r\u00e0o trang tr\u00ed b\u1eb1ng hoa."),
-            }
-        },
-        { 3, new List<BuildItemData> // Trang tri
-            {
-                new BuildItemData("\U0001F332", "C\u00e2y c\u1ea3nh", "1x1", 30, "C\u00e2y xanh trang tr\u00ed s\u00e2n v\u01b0\u1eddn."),
-                new BuildItemData("\U0001F3EE", "\u0110\u00e8n l\u1ed3ng", "1x1", 60, "\u0110\u00e8n l\u1ed3ng s\u00e1ng lung linh ban \u0111\u00eam."),
-                new BuildItemData("\U0001FA91", "Gh\u1ebf \u0111\u00e1", "1x1", 45, "Gh\u1ebf ngh\u1ec9 ch\u00e2n trong v\u01b0\u1eddn."),
-                new BuildItemData("\U0001F5FF", "T\u01b0\u1ee3ng v\u01b0\u1eddn", "1x1", 120, "B\u1ee9c t\u01b0\u1ee3ng trang tr\u00ed ngh\u1ec7 thu\u1eadt."),
-                new BuildItemData("\U0001F33A", "B\u1ed3n hoa", "1x1", 35, "B\u1ed3n hoa nhi\u1ec1u m\u00e0u s\u1eafc."),
-            }
-        },
-        { 4, new List<BuildItemData> // Duong di
-            {
-                new BuildItemData("\U0001F6E4", "\u0110\u01b0\u1eddng \u0111\u1ea5t", "1x1", 10, "Con \u0111\u01b0\u1eddng \u0111\u1ea5t gi\u1ea3n d\u1ecb."),
-                new BuildItemData("\U0001F9F1", "\u0110\u01b0\u1eddng g\u1ea1ch", "1x1", 25, "\u0110\u01b0\u1eddng l\u00e1t g\u1ea1ch \u0111\u1ecf s\u1ea1ch s\u1ebd."),
-                new BuildItemData("\U0001FAA8", "\u0110\u01b0\u1eddng \u0111\u00e1", "1x1", 40, "\u0110\u01b0\u1eddng \u0111\u00e1 t\u1ef1 nhi\u00ean b\u1ec1n b\u1ec9."),
-                new BuildItemData("\U0001F309", "C\u1ea7u g\u1ed7 nh\u1ecf", "2x1", 150, "C\u1ea7u g\u1ed7 b\u1eafc qua su\u1ed1i nh\u1ecf."),
+                new BuildItemData("\U0001F33E", "Ru\u1ed9ng", "1x1", 50, "\u00d4 \u0111\u1ea5t canh t\u00e1c \u2014 \u0111\u1eb7t t\u1eebng \u00f4 \u0111\u1ec3 tr\u1ed3ng c\u00e2y."),
+                new BuildItemData("\U0001FAA8", "\u0110\u01b0\u1eddng \u0111\u00e1", "1x1", 40, "M\u1eb7t \u0111\u01b0\u1eddng \u0111\u00e1 l\u00e1t l\u1ed1i \u0111i."),
+                new BuildItemData("\U0001F404", "Chu\u1ed3ng", "1x1", 50, "H\u00e0ng r\u00e0o qu\u00e2y chu\u1ed3ng \u2014 gh\u00e9p nhi\u1ec1u \u00f4 th\u00e0nh chu\u1ed3ng to."),
             }
         }
     };

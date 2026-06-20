@@ -76,11 +76,21 @@ public class GhostPlacementController : MonoBehaviour
         Vector2 mousePos = mouse.position.ReadValue();
         Ray ray = mainCamera.ScreenPointToRay(new Vector3(mousePos.x, mousePos.y, 0));
 
-        if (Physics.Raycast(ray, out RaycastHit hit, 200f, groundMask))
+        var hits = Physics.RaycastAll(ray, 200f, groundMask);
+        if (hits.Length > 0)
         {
-            // Snap vào Ô ĐẤT (BuildSurfaceCell) dưới con trỏ -> ghost ướm đúng TÂM MẶT TRÊN khối.
-            currentCell = hit.collider.GetComponentInParent<YWonderLand.Environment.BuildSurfaceCell>();
-            currentSnapPos = (currentCell != null) ? currentCell.SurfaceCenter : hit.point;
+            System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+
+            // Tìm Ô ĐẤT (BuildSurfaceCell) GẦN NHẤT — bỏ qua collider nền/mesh đảo chắn phía trước.
+            currentCell = null;
+            Vector3 fallback = hits[0].point;
+            foreach (var h in hits)
+            {
+                var bsc = h.collider.GetComponentInParent<YWonderLand.Environment.BuildSurfaceCell>();
+                if (bsc != null) { currentCell = bsc; break; }
+            }
+
+            currentSnapPos = (currentCell != null) ? currentCell.SurfaceCenter : fallback;
             currentGroundY = currentSnapPos.y;
             ApplyGhostTransform();
 

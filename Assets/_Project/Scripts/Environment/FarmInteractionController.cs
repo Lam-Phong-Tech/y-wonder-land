@@ -680,8 +680,7 @@ namespace YWonderLand.Environment
             pendingEnclosure = null;
             if (interior == null) return;
 
-            var def = YWonderLand.Managers.AnimalManager.Instance != null
-                ? YWonderLand.Managers.AnimalManager.Instance.GetDefinition(itemId) : null;
+            var def = YWonderLand.Managers.AnimalManager.LookupDefinition(itemId);
             int need = def != null ? Mathf.Max(1, def.penSlots) : 1;
             int free = PenEnclosure.AvailableCount(interior);
 

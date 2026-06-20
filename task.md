@@ -53,12 +53,32 @@
   - TODO: bước "xem thông tin loài trước khi thả" (confirm dialog) — hiện đang thả ngay khi chọn; báo lỗi đang dùng OnGUI toast (nâng UI Toolkit sau).
 
 ### Nhiệm vụ 20/06 (ưu tiên mới)
-- `[ ]` **Xây mặt đường đá (paving)**: thêm loại công trình "đường đá" đặt được qua Build Mode (snap theo `BuildSurfaceCell` như đất/rào). Dùng để lát lối đi trang trí.
+- `[x]` **Xây mặt đường đá (paving)**: item "Đường đá" trong menu Build → map `BuildPrefabLibrary` (nameContains "đường đá" → StoneSlab, stretch ON). Snap theo `BuildSurfaceCell`. *(Cần điền entry trong Editor.)*
+- `[x]` **Dọn menu Build còn 3 mục**: 1 tab "Xây dựng" = Ruộng / Đường đá / Chuồng (rào xịn); ẩn 4 tab cũ. *(Cần BuildPrefabLibrary có 3 entry: ruộng→Dirt, đường đá→StoneSlab, chuồng→Fence (stretch Fence OFF).)*
+- `[x]` **Fix ghost luôn báo đỏ**: GhostPlacementController đổi `Physics.Raycast` → `RaycastAll` + tìm `BuildSurfaceCell` gần nhất (bỏ qua collider nền/mesh đảo chắn trước).
+- `[x]` **Loadout test (nhiều thức ăn + tiền)**: `InventoryManager.GiveTestLoadout()` + cờ `giveTestLoadoutOnStart` — nạp nông sản/sản phẩm/vật liệu/hạt + 100k POS để test NPC mua/bán.
+- `[x]` **AnimalManager.LookupDefinition (chắc ăn)**: tra def qua Instance, fallback load thẳng Resources → info/validate chạy kể cả khi scene chưa gắn AnimalManager.
 - `[x]` **Validate ô chuồng + cho thả NHIỀU con nếu đủ ô**: đã làm — `AvailableCount` (ô-rào chưa có thú) ≥ `penSlots` thì cho thả, đánh dấu `SetAnimal`; chuồng 9 ô thả được 9 gà (mỗi con 1 ô); chuồng còn 8 ô **KHÔNG** nhét được bò (9 ô) → báo lỗi. *(Còn TODO: nếu muốn giới hạn LOÀI theo cỡ chuồng thì bổ sung sau.)*
-- `[ ]` **Hiển thị thông tin con vật ở 3 nơi** (chỉ thông tin cần thiết: giá / số ô / thức ăn / sản phẩm):
-  - `[x]` Khi **xem thông tin** (popup AnimalInteractionPopup) — đã làm.
-  - `[ ]` Khi **mua** (Shop popup) — thêm panel info khi chọn con giống.
-  - `[ ]` Khi **chọn trong túi đồ** (Inventory, tab Thú nuôi) — thêm info trước khi thả.
+- `[x]` **Hiển thị thông tin con vật ở 3 nơi** (Tên/giá/thức ăn chính-phụ/số ô đất):
+  - `[x]` Khi **xem thông tin** (popup AnimalInteractionPopup).
+  - `[x]` Khi **mua** (Shop popup) — chèn "Thông tin nuôi" vào mô tả khi chọn con giống (`ShopPopupController.AnimalInfoText`).
+  - `[x]` Khi **chọn trong túi đồ** (Inventory) — chèn vào mô tả khi chọn con vật (`InventoryPopupController.AnimalInfoText`).
+  - *(Chèn vào mô tả nên không cần sửa UXML; nguồn data = `AnimalDefinition` — cần chạy `Generate Animal Data`.)*
+
+---
+
+## 👥 HỆ NPC (theo kịch bản "10+ NPC") — 20/06
+> Nguồn: `Docs_KichBan/YWONDERLAND_KichBan3D_ChiTiet.md` + `DanhSachCuaHang_Game3D.md`.
+> ĐÃ CÓ: **NPC Hướng dẫn** (tutorial, `GuideNPC`) + **1 Merchant NPC mẫu** (kiểu Hai Lúa). Còn lại chưa làm:
+
+- `[ ]` **Hệ Shop Keeper đa-NPC (data-driven)**: mỗi cửa hàng 1 NPC riêng, mỗi NPC có danh sách MUA/BÁN riêng. Hiện `ShopPopupController` hardcode 1 shop → tách thành `ShopData` (ScriptableObject/asset) gắn theo từng `MerchantNPC`.
+  - Nông trại/Đảo: **Farm Shop** (hạt giống + con giống), **Item Shop** (phân/thuốc/vắc-xin), **Fish Shop** (mua cá / bán mồi).
+  - Thành phố (~12 quầy): Bán cá, Workshop (nâng cấp dụng cụ), Verdant/YWonderLand, Mini Garden (mua nông sản), Hai Lúa, KNX (thẻ VIP), Maid Service, Pet Shop, Game Center, Store (thời trang), Gift Post, Heo Đất (tiết kiệm).
+- `[ ]` **Maid (Hầu gái VIP)**: NPC nữ follow player ở nông trại, **tự tưới/thu hoạch** (đặc quyền VIP). Thuê tại Maid Service. Anim: Idle/Walk/Water/Harvest/Bow.
+- `[ ]` **Pet (companion)**: mua ở Pet Shop → chạy theo chân (NavMesh, cách 1–2m), đứng yên→Sit, tap→Happy. Chỉ trang trí (không tham gia gameplay).
+- `[ ]` **NPC khu Mỏ** (`MineScene`, mở ở Lv10): NPC **bán vé đào mỏ** + NPC **mua quặng**.
+- `[ ]` **NPC Câu cá**: quầy bắt đầu câu / bán mồi (hiện chỉ có `FishingSpot` vùng nước, chưa có NPC quầy).
+- `[ ]` **AI Chat NPC** (P2 — nice to have): pool câu trả lời theo từ khóa, tự nhắn vào khung chat làm sôi động khi ít người.
 
 ---
 

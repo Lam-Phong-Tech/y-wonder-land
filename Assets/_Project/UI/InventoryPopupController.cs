@@ -331,12 +331,31 @@ public class InventoryPopupController : MonoBehaviour
         if (lblDetailIcon != null) lblDetailIcon.text = item.icon;
         if (lblDetailName != null) lblDetailName.text = item.name;
         if (lblDetailQty != null) lblDetailQty.text = $"x{item.quantity}";
-        if (lblDetailDesc != null) lblDetailDesc.text = item.description;
+        if (lblDetailDesc != null)
+        {
+            // Nếu là CON VẬT -> chèn thêm thông tin nuôi (giá / ô đất / thức ăn).
+            var animalDef = YWonderLand.Managers.AnimalManager.LookupDefinition(item.id);
+            lblDetailDesc.text = animalDef != null
+                ? item.description + AnimalInfoText(animalDef)
+                : item.description;
+        }
 
         if (btnDetailAction != null)
         {
             btnDetailAction.text = !string.IsNullOrEmpty(item.actionText) ? item.actionText : "Sử dụng";
         }
+    }
+
+    // Thông tin nuôi cơ bản của con vật (chèn vào mô tả): giá / số ô / thức ăn chính-phụ.
+    private static string AnimalInfoText(YWonderLand.Data.AnimalDefinition d)
+    {
+        string Food(string name, int amount) =>
+            string.IsNullOrEmpty(name) ? "—" : (amount > 0 ? $"{amount}x {name}" : name);
+
+        return $"\n\nThông tin nuôi:"
+             + $"\nGiá mua: {d.buyPrice} POS   |   Cần: {d.penSlots} ô đất"
+             + $"\nThức ăn chính: {Food(d.foodMainName, d.foodMainAmount)}"
+             + $"\nThức ăn phụ: {Food(d.foodAltName, d.foodAltAmount)}";
     }
 
     private void ShowEmptyDetails()

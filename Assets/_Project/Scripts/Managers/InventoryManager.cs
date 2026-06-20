@@ -34,6 +34,12 @@ namespace YWonderLand.Managers
 
         public event Action OnInventoryChanged;
 
+        [Header("Debug — Test (nhớ TẮT khi release)")]
+        [Tooltip("BẬT: lúc Play tự nạp nhiều thức ăn/nông sản/vật liệu/hạt + tiền vào túi để test NPC mua/bán.")]
+        [SerializeField] private bool giveTestLoadoutOnStart = false;
+        [Tooltip("Số POS cộng thêm khi nạp loadout test.")]
+        [SerializeField] private long testMoney = 100000;
+
         private const string INV_KEY = "YW_Inventory_Data";
         private InventoryData inventoryData;
 
@@ -48,6 +54,41 @@ namespace YWonderLand.Managers
             {
                 Destroy(gameObject);
             }
+        }
+
+        void Start()
+        {
+            if (giveTestLoadoutOnStart) GiveTestLoadout();
+        }
+
+        /// <summary>Nạp nhiều thức ăn/nông sản/vật liệu/hạt + tiền vào túi để TEST NPC mua/bán.</summary>
+        public void GiveTestLoadout()
+        {
+            // Nông sản + sản phẩm + thực phẩm + cá (đồ để BÁN / cho thú ăn)
+            string[] foods =
+            {
+                "carrot_01","cabbage_01","watermelon_01","corn_01","pumpkin_01",
+                "morning_glory_01","sweet_potato_01","grass_01",
+                "egg_01","milk_01","pork_01","bread_01","apple_01","fish_01","fish_02"
+            };
+            foreach (var id in foods) AddItem(id, 30);
+
+            // Vật liệu (để bán / xây)
+            foreach (var id in new[] { "wood_01","stone_01","iron_01","ore_01","brick_01" })
+                AddItem(id, 30);
+
+            // Hạt giống 8 loại
+            foreach (var id in new[] { "carrot_seed_01","cabbage_seed_01","watermelon_seed_01","corn_seed_01",
+                                       "pumpkin_seed_01","grass_seed_01","morning_glory_seed_01","sweet_potato_seed_01" })
+                AddItem(id, 15);
+
+            // Vật phẩm tiêu hao (phân/vắc-xin/thuốc/mồi)
+            foreach (var id in new[] { "fertilizer_01","vaccine_01","medicine_01","bait_01" })
+                AddItem(id, 15);
+
+            if (EconomyManager.Instance != null) EconomyManager.Instance.AddPOS(testMoney);
+
+            Debug.Log($"[Inventory] Đã nạp LOADOUT TEST: thức ăn/nông sản/vật liệu/hạt + {testMoney} POS.");
         }
 
         private void LoadInventory()

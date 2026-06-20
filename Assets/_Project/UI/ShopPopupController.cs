@@ -462,7 +462,14 @@ public class ShopPopupController : MonoBehaviour
 
         if (lblShopIcon != null) lblShopIcon.text = item.icon;
         if (lblShopName != null) lblShopName.text = item.name;
-        if (lblShopDesc != null) lblShopDesc.text = item.description;
+        if (lblShopDesc != null)
+        {
+            // Nếu là CON VẬT -> chèn thêm thông tin nuôi (giá / ô đất / thức ăn).
+            var animalDef = YWonderLand.Managers.AnimalManager.LookupDefinition(item.id);
+            lblShopDesc.text = animalDef != null
+                ? item.description + AnimalInfoText(animalDef)
+                : item.description;
+        }
 
         int unitPrice = isSellMode ? item.sellPrice : item.price;
         if (lblShopPrice != null) lblShopPrice.text = $"{unitPrice} POS";
@@ -483,6 +490,18 @@ public class ShopPopupController : MonoBehaviour
         {
             btnAction.text = isSellMode ? "BÁN" : "MUA";
         }
+    }
+
+    // Thông tin nuôi cơ bản của con vật (chèn vào mô tả): giá / số ô / thức ăn chính-phụ.
+    private static string AnimalInfoText(YWonderLand.Data.AnimalDefinition d)
+    {
+        string Food(string name, int amount) =>
+            string.IsNullOrEmpty(name) ? "—" : (amount > 0 ? $"{amount}x {name}" : name);
+
+        return $"\n\nThông tin nuôi:"
+             + $"\nGiá mua: {d.buyPrice} POS   |   Cần: {d.penSlots} ô đất"
+             + $"\nThức ăn chính: {Food(d.foodMainName, d.foodMainAmount)}"
+             + $"\nThức ăn phụ: {Food(d.foodAltName, d.foodAltAmount)}";
     }
 
     private void ShowEmptyDetails()
