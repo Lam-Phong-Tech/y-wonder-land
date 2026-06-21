@@ -37,9 +37,17 @@
                     <ui:Label text="Thức ăn phụ" class="ap-key" />
                     <ui:Label name="LblFoodAlt" text="—" class="ap-val" />
                 </ui:VisualElement>
-                <ui:VisualElement class="ap-row ap-row-last">
+                <ui:VisualElement class="ap-row">
                     <ui:Label text="Sản phẩm" class="ap-key" />
                     <ui:Label name="LblProducts" text="—" class="ap-val" />
+                </ui:VisualElement>
+                <ui:VisualElement class="ap-row">
+                    <ui:Label text="Độ no" class="ap-key" />
+                    <ui:Label name="LblHunger" text="—" class="ap-val" />
+                </ui:VisualElement>
+                <ui:VisualElement class="ap-row ap-row-last">
+                    <ui:Label text="Thu hoạch" class="ap-key" />
+                    <ui:Label name="LblHarvest" text="—" class="ap-val" />
                 </ui:VisualElement>
             </ui:VisualElement>
 

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cac8b9f5919afc44599c356803f7ca4a, type: 3}
+  m_Name: turtle_shell_01
+  m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.ItemDefinition
+  id: turtle_shell_01
+  itemName: "Mai r\xF9a"
+  description: "Mai r\xF9a c\u1EE9ng."
+  iconEmoji: "\U0001F422"
+  iconSprite: {fileID: 0}
+  category: products
+  buyPrice: 0
+  sellPrice: 38860
+  canSell: 1
+  isStackable: 1
+  maxStack: 999

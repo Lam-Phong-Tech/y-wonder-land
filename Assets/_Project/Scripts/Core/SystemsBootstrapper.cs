@@ -13,6 +13,10 @@ namespace YWonderLand.Core
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         public static void Initialize()
         {
+            // Cheap mobile win: cap FPS + tắt vsync để máy yếu không giật/nóng vô ích.
+            Application.targetFrameRate = 60;
+            QualitySettings.vSyncCount = 0;
+
             GameObject systemsGo = new GameObject("[Persistent Systems]");
             Object.DontDestroyOnLoad(systemsGo);
 

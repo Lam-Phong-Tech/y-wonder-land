@@ -30,6 +30,32 @@
 
 ---
 
+## 📌 QUYẾT ĐỊNH KHÁCH (20/06) — CÂU CÁ & ĐÀO ĐÁ CHỈ Ở ĐẢO THÀNH PHỐ
+> Khách chốt: **câu cá** và **đào đá** CHỈ diễn ra ở **đảo Thành phố (CityScene)**, KHÔNG có ở **đảo khởi đầu (Nông trại)**. Đảo khởi đầu tập trung trồng trọt + chăn nuôi.
+- `[x]` **Gate CÂU CÁ + ĐÀO ĐÁ theo đảo (code, chắc ăn)**: `FarmInteractionController.IsOnCityIsland()` (dựa `IslandTravelManager.CurrentIslandId == "city"`). Câu cá: ẩn nút + chặn `StartFishing` nếu không ở city. Đào đá (`HarvestableResource` type Stone): ẩn nút "Đào khoáng" + chặn HandleHold/ClickHarvestResource ở đảo khác (chặt cây vẫn được mọi đảo). → KHÔNG cần đụng vị trí biển/FishingSpot/đá.
+  - **CẦN Editor**: đảm bảo có FishingSpot BẬT ở khu nước thành phố (nếu nằm trong `farmOnlyObjects` thì gỡ ra/đặt riêng trong CityScene).
+- `[x]` **Sửa Tutorial bỏ bước đào đá** *(module QC, đã báo)*: sau Chặt cây → sang thẳng bãi ruộng (bỏ FollowToRock + MineRock). Đánh số lại các bước thành /13. Handler đào đá cũ thành dead-code (vô hại).
+
+---
+
+## ✅ PHIÊN 21/06 — ĐÃ LÀM (chuẩn bị demo thứ 2)
+> Lộ trình demo: `Docs_KichBan/LoTrinh_Demo_Thu2.md`. Mục tiêu: APK chơi được vòng lặp nông trại + thành phố, offline, model tạm.
+- `[x]` **Hệ NPC Shop data-driven** (chạm nhà → popup): ShopDefinition + ShopZoneTrigger + Show(ShopDefinition) + ShopDataGenerator (7 asset) + MerchantNPC.shopData. Tên shop nổi trên đầu NPC. **CẦN Editor**: chạy `Generate Shop Data`, gắn ShopZoneTrigger + collider trigger vào nhà NPC, kéo asset + kéo NPC vào `Name Tag Target`.
+- `[x]` **Hủy chuồng → hoàn 50% + trả con giống** (phím G / tap).
+- `[x]` **Economy số THẬT của khách**: giá hạt + nông sản + sản lượng + EXP 8 cây (ItemDataGenerator + CropDataGenerator theo `CayTrongLauNam.md`); 10 vật nuôi khớp `VatNuoi.md`. **CẦN Editor**: chạy `Generate Mock Items` + `Generate Crop Data` + `Generate Animal Data`.
+- `[x]` **Cây lớn theo MỐC THỜI GIAN** (đi đảo về vẫn lớn). *(Còn: offline thật cần lưu `growStartTime` ra đĩa/server — Bước 3 persistence.)*
+- `[x]` **Cây hết bóp dẹp** (bù scale ô đất) — **CẦN Editor**: chỉnh `Model Ground Offset` từng cây nếu lún.
+- `[x]` **Mobile #3 chạm tương tác** (Pointer) + **chặt cây GIỮ-ĐỂ-CHẶT** + thêm rìu/cúp/cần câu vào túi.
+- `[x]` **Chặt cây hết để lại lá** (so tên lá không phân biệt hoa/thường).
+- `[x]` **Bơi: nhảy leo lên bờ** + ghép nhiều Box Collider tag Water cho hồ hình dạng lạ.
+- `[x]` **Đổi đảo không ngập + nhẹ máy** (`farmOnlyObjects`) — **CẦN Editor**: kéo Water (+ cảnh nông trại) vào list.
+- `[x]` **Build Mode**: bỏ hẳn xoay; fix nút Tích/X "đứng lì".
+- `[x]` **Ẩn name tag trong cutscene** (hiện lại khi cập bến/skip). **Cap FPS 60** (cheap mobile win).
+- `[ ]` **CHỜ KHÁCH**: xác nhận "giá vốn nông sản" có phải giá BÁN không; thời gian lớn cây ngắn ngày (hiện demo 20-60s); giá con giống (đã theo VatNuoi).
+- `[ ]` **CẦN model 3D** (3D gửi sáng 22/06): 4 cây ngắn ngày còn lại (cabbage/sweet_potato/morning_glory/grass) → kéo vào `Crop Prefab`; 10 thú đã đủ model → gắn `AnimalPrefabLibrary`.
+
+---
+
 ## 🐄 NHÁNH HIỆN TẠI: Chăn nuôi trong lồng (animal husbandry) — ⭐ ƯU TIÊN CAO NHẤT
 > Sửa & bổ sung chức năng nuôi/trồng động vật trong chuồng.
 > **Đây là nhóm việc ưu tiên số 1.** Hoàn thành hết nhóm này rồi mới quay lại các task tồn đọng phía dưới.
@@ -43,7 +69,9 @@
 
 ### Nhiệm vụ 19/06
 - `[ ]` **Hiệu ứng thu thập**: khi thu thập (chặt/đào/thu hoạch...) làm vật phẩm **bay vào túi đồ** (animation item bay về icon túi).
-- `[ ]` **Hủy chuồng → thu lại tài nguyên**: cho phép phá chuồng và hoàn lại một phần vật liệu đã xây.
+- `[x]` **Hủy chuồng → thu lại tài nguyên**: ngắm ô rào ngoài gameplay → nút **"Hủy chuồng"** (phím G / tap) → `DemolishEnclosure`: trả con giống về túi (`AddItem`) → phá CẢ cụm rào (flood-fill `PenEnclosure.FindPen`) → hoàn **50% giá build** vào POS (`demolishRefundRate` chỉnh được). Ô tự `Clear()` + `ClearAnimal()` nên thả lại được ngay.
+  - Sửa `BuildSurfaceCell` (lưu `BuildCost` + `AnimalObject`/`AnimalItemId` ô neo), `GhostPlacementController` (ghi `SetBuildCost` lúc đặt), `FarmInteractionController` (action + `DemolishEnclosure` + lưu con vật vào ô neo lúc thả).
+  - TODO(khách chốt số): khi build cost nối vật liệu/`EconomyManager` thật thì hoàn ĐÚNG loại đã tốn (hiện build cost đang là mockup overlay, refund vào ví POS). Demolish trong Build Mode (menu ngữ cảnh `DeleteBuildingAt`) vẫn chỉ free lưới ảo cũ — chưa nối `BuildSurfaceCell` (việc riêng nếu cần).
 - `[x]` **Bỏ tính năng Vuốt ve** (Pet) khỏi tương tác con vật. *(Gỡ nút E + hàm PetAnimal ở FarmInteractionController; vô hiệu hóa PetInteraction.cs. Còn: gỡ component PetInteraction khỏi prefab thú trong Editor.)*
 - `[x]` **Thông tin con vật**: popup hiện giá mua / số ô chuồng / thức ăn chính / thức ăn phụ / sản phẩm — restyle Cozy Dark Palia. Thêm trường vào `AnimalDefinition` + điền data 10 con qua generator. **CẦN Editor**: chạy menu `YWonderLand ▸ Generate Animal Data` để nạp dữ liệu vào các asset `Animal_*.asset` (đảm bảo con vật spawn dùng đúng asset này).
 - `[ ]` **Trồng từng ô ruộng kiểu xây hàng rào**: mỗi loài thực vật tốn số ô khác nhau. *(Khách CHƯA gửi số ô/loài cây → quyết định 19/06: **tạm cho mỗi cây = 1 ô**, chỉnh lại khi có dữ liệu thật.)*
@@ -51,6 +79,57 @@
   - File mới: `PenEnclosure.cs` (flood-fill), `AnimalPrefabLibrary.cs` (map itemId→prefab thú), `ScreenToast.cs` (toast lỗi). Sửa `BuildSurfaceCell` (Occupant/HasFence/IsFree), `GhostPlacementController` (ghi occupant), `FarmInteractionController` (luồng thả vùng quây).
   - **CẦN Editor**: thêm 1 GameObject gắn `AnimalPrefabLibrary` + điền itemId→prefab thú; hàng rào phải đặt qua Build Mode (để ghi occupant vào ô). Phụ thuộc hệ `BuildSurfaceCell` đã chạy.
   - TODO: bước "xem thông tin loài trước khi thả" (confirm dialog) — hiện đang thả ngay khi chọn; báo lỗi đang dùng OnGUI toast (nâng UI Toolkit sau).
+
+### Nhiệm vụ 21/06 — Vật nuôi SỐNG theo thời gian + thanh HP
+- `[x]` **Vật nuôi lớn/ra sản phẩm theo MỐC THỜI GIAN** (`Time.timeAsDouble`, giống cây): đói + chu kỳ sản phẩm tính từ mốc, **đi đảo thành phố về vẫn chạy bù đúng**. Viết lại `FarmAnimal.cs` (bỏ cộng dồn `deltaTime`).
+- `[x]` **Gắn logic cho thú CÓ prefab**: trước đây thả thú có model chỉ ra khối trơ (không đói/không sản phẩm). Sửa `FarmInteractionController` thả thú → `AddComponent<FarmAnimal>()` + `Initialize(def, false)` (giữ model, chỉ thêm thanh HP). Nhận diện thú đổi sang `GetComponentInParent` (chắc ăn dù collider nằm ở con sâu).
+- `[x]` **Thanh HP (no/đói) nổi trên đầu** — billboard tự dựng bằng code (quad Unlit 2 mặt), **tự đo chiều cao theo model**, không cần artist. No đầy = xanh, đói = đỏ, bệnh = tím; có chấm vàng "có sản phẩm". Ẩn khi chết. Field `statusBarHeight` (0 = tự đo).
+- `[x]` **Popup hiện thời gian thu hoạch + tổng số lần thu** (quyết định khách: để trong popup, không nhồi lên đầu): `AnimalInteractionPopupController` thêm "No: X% · Vụ tới: 12s · Còn 37/38 lần thu" + đếm ngược SỐNG (Update 0.25s). Không sửa UXML.
+- `[x]` **Fix tràn chữ popup**: tách "Độ no" + "Thu hoạch" thành 2 DÒNG riêng trong bảng (thêm `LblHunger`/`LblHarvest` vào UXML), status về ngắn gọn, cho phép xuống dòng.
+- `[x]` **Cho ăn ĐÚNG tài liệu (bỏ ngô mặc định)**: `HandleFeedSelected` validate thức ăn theo `AnimalDefinition.foodMain/foodAlt` (so theo TÊN qua ItemDatabase) + trừ ĐÚNG số lượng (vd Bò sữa cần 2x Cỏ Voi hoặc 4x Khoai Lang); sai thức ăn → toast, không trừ đồ. `EnsureStarterFeed` cấp đúng thức ăn loài cho demo. **CẦN Editor**: đảm bảo ItemDatabase có item tên khớp ("Cỏ Voi", "Khoai Lang"...) — nếu thiếu sẽ có warning trong Console.
+- `[x]` **Wire ĐẦY ĐỦ logic vật nuôi theo VatNuoi.md (cả 10 con)**: trước đây chỉ 3 con base (gà/bò/heo) có logic + số demo, 7 con kia không có `produceItemId`/`maxHarvests` → thu ra rỗng + "∞ lần".
+  - Generator: thêm `SetAnimalGameplay` cho cả 10 con → `produceItemId`, `produceAmount` (=SL Pro1), `maxHarvests` (=Tổng lần thu VatNuoi), thịt vụ cuối. Tạo 17 item sản phẩm/thịt còn thiếu (giá bán theo cột "Giá Product 1/2" VatNuoi). Sửa giá egg/milk/pork theo VatNuoi; pig Pro1 đổi `pork_01`→`pigskin_01` (Da heo), thịt = pork_01.
+  - `AnimalDefinition` thêm `meatItemId`/`meatAmount`. `FarmAnimal.HarvestProduct`: vụ CUỐI (hết số lần thu) → cộng thịt (Pro2) + **con vật biến mất** + **giải phóng ô chuồng** (`ClearAnimal`, rào vẫn còn) → thả con mới được ngay. `FarmInteractionController` gán `occupiedCells` cho con vật lúc thả.
+- `[x]` **Fix tên + loại thức ăn cho khớp VatNuoi**: đổi `grass_01` "Cỏ khô"→**"Cỏ Voi"**, `cabbage_01` "Rau cải"→**"Bắp cải"**; chuyển **7 nông sản sang category "food"** để hiện trong tab cho ăn (trước đó là "items" → không chọn được). ⚠️ Nông sản giờ nằm tab "Thực phẩm" thay vì "items" — nếu Mini Garden/shop lọc theo category cần rà lại.
+- `[ ]` **CẦN Editor**: chạy lại `Generate Mock Items` + `Generate Animal Data` (data mới). Test thu hoạch 10 con + vụ cuối làm thịt.
+- `[ ]` **CHỜ KHÁCH**: chu kỳ thu hoạch đang để giây DEMO (25s) thay vì ngày thật — chờ khách quy đổi ngày→giây.
+- `[x]` **Khung CƠ BẢN cho 10 cây LÂU NĂM** (để anh gắn model): thêm 10 hạt giống + 10 sản phẩm (ItemDataGenerator) + 10 CropDefinition (CropDataGenerator, để trống `cropPrefab` cho anh kéo model). Tạm **1-lần-thu** như cây ngắn ngày. Giá Sa Chi/Sầu Riêng theo CayTrong.md, còn lại số DEMO. **CẦN Editor**: chạy `Generate Mock Items` → `Generate Crop Data`, rồi kéo model vào `Crop_<seed>.asset`.
+  - TODO Phase 2: **cơ chế thu NHIỀU LẦN** cho cây lâu năm (giống vật nuôi: ra quả nhiều vụ + vụ cuối) — FarmTile hiện chỉ 1 lần thu. Số liệu thật 7/10 cây chưa có (CayTrong.md mới có Sa Chi + Sầu Riêng + chanh dây).
+  - `[x]` Wire SHOP đầy đủ (ShopDataGenerator): Farm Shop bán **đủ 18 hạt** (8 ngắn + 10 lâu năm) + **đủ 10 con giống** (thêm vịt/ngỗng/rùa); Mini Garden mua **đủ nông sản + 10 SP cây lâu năm + 20 SP/thịt vật nuôi** (trước chỉ egg/milk/pork). Thêm hạt lâu năm + SP vào `GiveTestLoadout`. **CẦN Editor**: chạy lại `Generate Shop Data` + `Generate Mock Items`.
+- `[x]` **Thanh "khát nước" cho CÂY (behavior B — khách chốt)**: thanh nước nổi trên cây tụt dần theo `waterIntervalSec`; cạn = khát → cây **vẫn lớn** nhưng cộng dồn thời gian khát → lúc thu **giảm sản lượng + POS** (tới tối thiểu 50%), đúng kịch bản "quên tưới → héo, mất EXP". Tưới LẠI (action "Tưới nước" khi đang lớn) đổ đầy nước. `FarmTile`: thêm `lastWaterTime`/`dryAccumSec`/`LastCareFactor` + `WaterAgain()`/`GetWaterFraction()` + thanh billboard ĐỘC LẬP (không parent ô đất để né scale lệch). `FarmInteractionController`: Watered→"Tưới nước", phạt POS + toast. **KHÔNG đụng** phần spawn/scale model cây.
+  - TODO: visual "héo" trên model (đổi màu) chưa làm — hiện báo khát bằng thanh đỏ + toast khi thu (tránh tint material artist rủi ro). EXP phạt chờ hệ EXP.
+- `[x]` **THỜI GIAN THỰC + TƯỚI-GATE-LỚN (khách chốt 21/06)**: 1 ngày game = 24h thực.
+  - `GameTimeConfig.cs` (Core): hằng số `SecondsPerGameDay` (DEMO 60f · THẬT 86400f) + `Days()`/`Hours()` — **1 điểm chuyển demo↔thật**.
+  - Generator khai thời gian theo NGÀY/GIỜ game (cây 1 ngày lớn/tưới 10h; rau muống+cỏ voi 0.5 ngày; dưa hấu+bí ngô 2 ngày; thú theo VatNuoi: gà 2/bò 7/đà điểu 6/dê+ngỗng 3/vịt 1/thỏ 40/heo+hươu 180/rùa 300 ngày).
+  - **Tưới-gate-lớn**: cây CHỈ lớn khi còn nước; hết nước → NGỪNG lớn tới khi tưới lại (`FarmTile.growthAccrued`+`GetGrownSeconds`). Bỏ phạt sản lượng behavior B.
+  - **CẦN Editor**: chạy lại `Generate Crop Data` + `Generate Mock Items` + `Generate Animal Data`. Test ngoài tutorial (tutorial vẫn ép 5s).
+  - ⚠️ CÒN NỢ: lưu MỐC DateTime ra đĩa để offline lớn bù khi đổi sang 86400 (bản thật). `growStartTime` thành biến thừa (cảnh báo nhẹ).
+- `[x]` **Fix luồng Tutorial (2 bug)** — *(module QC, sửa tối thiểu, báo rõ)*:
+  - **Chặt cây/đào khoáng nhảy bước ngay**: `OnTreeArrived`/`OnRockArrived` auto-nhảy nếu túi đã có gỗ/đá — mà loadout test tặng sẵn `wood_01`/`stone_01` → bỏ đoạn auto-skip, bắt người chơi thực sự chặt 1 nhát (vẫn nghe `HarvestableResource.OnResourceHarvested`).
+  - **Thả thú không cập nhật nhiệm vụ**: tutorial nghe `AnimalPenSpawner.OnAnimalPlaced` (hệ CŨ) nhưng hệ chăn nuôi đã viết lại (BuildSurfaceCell). Thêm `FarmAnimal.OnAnimalSpawned` (bắn trong `FarmInteractionController` lúc thả) → tutorial nghe sự kiện mới. `FarmAnimal`/`FarmInteractionController` cũng sửa.
+- `[x]` **Chức năng MÚC NƯỚC (khách yêu cầu 21/06)** — ĐÃ LÀM:
+  - `WaterSource.cs` (component đánh dấu vùng ao múc được). Item `watering_water_01` "Nước tưới". Ngắm ao + bấm **"Múc nước"** → +5 xô/lần (`amountPerScoop`). Tưới cây **TỐN 1 xô**; hết → toast "Ra ao múc nước". KHÔNG animation (khách không cần). `FarmInteractionController` (nhận diện WaterSource + ScoopWater + HandleWater trừ nước). Loadout test có sẵn 30 xô.
+  - **CẦN Editor**: gắn 1 Collider(IsTrigger) + `WaterSource` lên bề mặt ao giữa đảo. KHÔNG gắn lên nước biển.
+- `[x]` **#2 Tách tab túi đồ**: sản phẩm (trứng/sữa/thịt + SP cây lâu năm) tách khỏi tab "Thú nuôi" → đổi tab "Đặc biệt" thành **"Sản phẩm"** (category `products`). Live animals giữ tab "Thú nuôi". Sửa ItemDataGenerator (category) + InventoryPopup.uxml + Controller.
+- `[x]` **#1 Ẩn tab filter shop không liên quan**: `ShopPopupController.UpdateFilterVisibility()` — chỉ hiện filter (Seeds/Animals/Tools/Items) có hàng trong shop đó; còn lại ẩn, giữ "Tất cả".
+  - **CẦN Editor**: chạy lại `Generate Mock Items` (item nước + đổi category sản phẩm) + `Generate Shop Data`.
+  - ⚠️ Lưu ý phụ: live-animal item `duck_01`/`goose_01`/`turtle_01` chưa có ItemDefinition (chỉ 7/10 con mua được ở shop) — bổ sung sau nếu cần bán 3 con này.
+- `[ ]` **CẦN Editor/test**: thả thú thử → chỉnh `statusBarHeight` nếu thanh lệch đầu; xác nhận prefab thú có Collider (nếu chưa, FarmAnimal tự thêm BoxCollider tạm). Đảm bảo đã chạy `Generate Animal Data` để có `produceCycleTimeSec`/`feedIntervalSec`/`maxHarvests` thật.
+
+## 🔍 RÀ SOÁT TRƯỚC DEMO (21/06 — anh review) — đối chiếu task/lộ trình
+> 13 điểm anh nêu khi chơi thử. Phần lớn TRÙNG; ➕ = GAP mới chưa có ở task/lộ trình.
+- `[x]` **#11 Khoá map** (chỉ Nông trại + Thành phố) — `IslandTravelManager` gate + toast "đảo đang khoá".
+- `[ ]` ➕ **#1 Thành phố thiếu biển**: biển nằm `farmOnlyObjects` → ẩn ở city. CityScene cần **water plane RIÊNG + FishingSpot** (Editor).
+- `[~]` **#2 NPC thành phố chưa đủ popup**: chỉ NPC shop mua/bán chạy. VIP/Maid/Pet/Game/Gift/Heo Đất = Phase 2 (xem mục "HỆ NPC").
+- `[~]` **#3/#4 Lưu/load**: CÓ lưu local (POS/túi/ô đất/thú qua PlayerPrefs, lúc Quit/Pause). CÒN NỢ: (a) persistence DateTime cho offline lớn-bù; (b) TẮT `giveTestLoadoutOnStart` khi build thật (đang BẬT tặng 100k+đồ mỗi lần vào).
+- `[~]` **#5/#8 Loop + công thức**: vòng lặp lõi chạy đúng; data khớp VatNuoi/CayTrong. Còn mock (#6) + **chưa có EXP/level**.
+- `[x]` **#6 Xây chuồng tốn GỖ + #7 Ruộng FREE + Build mode dùng VẬT LIỆU (không POS)**: `BuildModeOverlayController` đổi item sang `materialId`+amount (Ruộng=miễn phí · Đường đá=1 Đá · Chuồng=1 Gỗ/ô rào); menu hiện chi phí vật liệu + số gỗ/đá đang có. `GhostPlacementController` KIỂM + TRỪ vật liệu lúc đặt (thiếu → toast, không đặt). `BuildSurfaceCell` lưu `BuildMaterialId`+amount. Phá chuồng (`DemolishEnclosure`) HOÀN đúng vật liệu (đầy đủ) thay vì POS. Loadout test có 30 gỗ + 30 đá.
+- `[x]` ➕ **#9 Tái sinh tài nguyên**: `HarvestableResource.respawnTimeSec` thành SerializeField gọn (Header "Tái sinh" + tooltip), default đổi 3600→**60s** (demo). Cây + đá dùng chung → cả hai mọc lại. **CẦN Editor**: set `respawnTimeSec` trên prefab/đối tượng cây+đá CŨ (chọn nhiều → sửa 1 lần), vì chúng đã lưu 3600.
+- `[x]` ➕ **Build cost ra SerializeField**: `BuildModeOverlayController` thêm `penWoodCost`/`pathStoneCost` (Inspector) — đổi số không cần sửa code. Ruộng free.
+- `[ ]` ➕ **#10 Popup "Tính năng đang phát triển"** cho NPC chưa dùng được (nối #2). [gap]
+- `[ ]` ➕ **EXP/level system + HUD số** (POS/EXP/level hiện đúng) — chưa có, nhiều chỗ phụ thuộc. [gap]
+- `[ ]` ➕ **Âm thanh/nhạc nền** — demo có cần? [gap — hỏi khách/sếp]
+- `[ ]` **#12 Dọn data mock + tích hợp web** — Phase 2 (đã biết, nhiệm vụ lớn).
 
 ### Nhiệm vụ 20/06 (ưu tiên mới)
 - `[x]` **Xây mặt đường đá (paving)**: item "Đường đá" trong menu Build → map `BuildPrefabLibrary` (nameContains "đường đá" → StoneSlab, stretch ON). Snap theo `BuildSurfaceCell`. *(Cần điền entry trong Editor.)*
@@ -71,7 +150,11 @@
 > Nguồn: `Docs_KichBan/YWONDERLAND_KichBan3D_ChiTiet.md` + `DanhSachCuaHang_Game3D.md`.
 > ĐÃ CÓ: **NPC Hướng dẫn** (tutorial, `GuideNPC`) + **1 Merchant NPC mẫu** (kiểu Hai Lúa). Còn lại chưa làm:
 
-- `[ ]` **Hệ Shop Keeper đa-NPC (data-driven)**: mỗi cửa hàng 1 NPC riêng, mỗi NPC có danh sách MUA/BÁN riêng. Hiện `ShopPopupController` hardcode 1 shop → tách thành `ShopData` (ScriptableObject/asset) gắn theo từng `MerchantNPC`.
+- `[~]` **Hệ Shop Keeper đa-NPC (data-driven)** — ĐÃ CODE, chờ setup Editor + test:
+  - Cơ chế MỚI (sếp): **chạm NHÀ NPC → popup tự mở** (không click NPC). Tự mở · giữ mở khi đi ra · đóng bằng X. Thiết kế: `Docs_KichBan/ThietKe_NPCShop.md`.
+  - File: `ShopDefinition.cs` (SO, mỗi shop 1 asset, chỉ lưu ID — giá tra ItemDatabase), `ShopZoneTrigger.cs` (gắn nhà NPC, học MapPortalTrigger), `ShopPopupController.Show(ShopDefinition)` + lọc thu mua theo whitelist, `MerchantNPC` thêm field shopData (click vẫn chạy), `Editor/ShopDataGenerator.cs` (menu `YWonderLand ▸ Generate Shop Data` sinh 6 asset).
+  - **CẦN Editor**: chạy `Generate Shop Data` → 6 asset trong `Data/Shops/`; mỗi nhà NPC thêm BoxCollider(IsTrigger) + `ShopZoneTrigger` + kéo asset. Player có tag Player + CharacterController.
+  - Nhóm VIP/Maid/Pet/Game/Cosmetic/Gift = feature riêng, làm sau. **CHỜ KHÁCH**: chốt giá con giống (3 nguồn lệch); duck/goose/turtle chưa có trong ItemDatabase (sẽ cảnh báo nếu thêm vào buy list).
   - Nông trại/Đảo: **Farm Shop** (hạt giống + con giống), **Item Shop** (phân/thuốc/vắc-xin), **Fish Shop** (mua cá / bán mồi).
   - Thành phố (~12 quầy): Bán cá, Workshop (nâng cấp dụng cụ), Verdant/YWonderLand, Mini Garden (mua nông sản), Hai Lúa, KNX (thẻ VIP), Maid Service, Pet Shop, Game Center, Store (thời trang), Gift Post, Heo Đất (tiết kiệm).
 - `[ ]` **Maid (Hầu gái VIP)**: NPC nữ follow player ở nông trại, **tự tưới/thu hoạch** (đặc quyền VIP). Thuê tại Maid Service. Anim: Idle/Walk/Water/Harvest/Bow.
@@ -88,7 +171,7 @@
 - `[x]` **#1 Joystick ảo điều khiển di chuyển**: nối `Joystick` (GameHUD.uxml) vào `PlayerController.SetMoveInput()` qua kéo pointer (GameHUDController) + thêm style núm `.joystick-inner`. Gộp bàn phím + joystick trong PlayerController. **Cần test trên Editor/thiết bị.**
 - `[x]` **#1b Nút Sprint giữ-để-chạy-nhanh (cảm ứng)**: PC bấm Shift đã chạy; sửa nút Sprint trên HUD dùng pointer capture (bỏ `PointerOutEvent` gây hủy sớm) → giữ nút là tăng tốc. Trên phone: 1 ngón giữ Sprint + 1 ngón joystick. **Cần test.**
 - `[x]` **#2 Nút Jump + Hủy hoạt ảnh (X)**: Jump → `PlayerController.TriggerJump()` (1-bấm-1-nhảy). **Bỏ nút bàn tay (Interact)** — tương tác qua các **nút gợi ý nổi** quanh tâm ngắm (đã bấm được, dùng chung `ShowInteractionPrompts`). Giữ **nút X** = `PlayerController.CancelAction()` (ngắt hoạt ảnh, cất đồ, ẩn thanh tiến trình), tự hiện khi `IsBusy`. **Ngắm theo TÂM màn hình** (ổn định, không giật; gợi ý đứng yên khi rê chuột tới bấm). **Nút gợi ý "Chặt cây" bấm/tap được** (mỗi lần = 1 nhát `ClickHarvestResource`); căn giữa dưới tâm, co theo nội dung để không chặn dải ngang. Giữ chuột ở tâm vẫn chặt liên tục như cũ.
-- `[ ]` **#3 Tương tác đổi `Mouse.current` → `Pointer.current`**: FarmInteractionController khóa cứng chuột (dòng 61-62) → trên mobile các **nút gợi ý nổi không xuất hiện** (vòng lặp thoát sớm). Đổi sang `Pointer.current` để hover/bấm chạy trên cảm ứng. Lưu ý multitouch: khi kéo joystick không được kích hoạt hành động ở tâm (chặn bằng kiểm tra con trỏ đang trên UI).
+- `[x]` **#3 Tương tác đổi `Mouse.current` → `Pointer.current`**: `FarmInteractionController` giờ dùng `Pointer.current` + `pointer.press` (chung Mouse PC + Touchscreen mobile) → chạm tay chặt cây/trồng/mua chạy. PC vẫn chạy. *(Còn TODO multitouch: kéo joystick 1 ngón + tap ngón khác có thể kích hoạt hành động ở tâm — hiện chặn bằng `IsPointerOverGameObject` + `UIPopupTracker`; tinh chỉnh sau nếu lỗi.)*
 - `[ ]` **#4 Camera xoay bằng kéo 1 ngón** (vùng phải màn hình): ThirdPersonCamera đang đọc chuột.
 - `[ ]` **#5 Safe Area + khóa Landscape + chỉnh Match**: reference 1200×800 (3:2) lệch tỉ lệ điện thoại; chưa xử lý tai thỏ.
 

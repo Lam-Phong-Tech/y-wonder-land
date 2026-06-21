@@ -16,9 +16,12 @@ MonoBehaviour:
   harvestItemId: sweet_potato_01
   growthTimeSec: 50
   waterIntervalSec: 22
-  harvestYield: 3
-  expReward: 20
+  harvestYield: 1
+  expReward: 100
   posReward: 45
   growthStages: 3
   cropColor: {r: 0.6, g: 0.3, b: 0.15, a: 1}
   iconEmoji: "\U0001F360"
+  cropPrefab: {fileID: 6269143982238204557, guid: 3350483fc90fa884ba33196713dd3d0c, type: 3}
+  modelGroundOffset: 0
+  seedlingScale: 0.25

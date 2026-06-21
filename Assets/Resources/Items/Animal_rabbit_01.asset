@@ -24,11 +24,13 @@ MonoBehaviour:
   productMainAmount: 8
   productAltName: "Th\u1ECBt th\u1ECF"
   productAltAmount: 5
-  produceItemId: 
-  produceAmount: 1
-  produceCycleTimeSec: 35
-  maxHarvests: 0
-  feedIntervalSec: 30
+  produceItemId: rabbit_fur_01
+  produceAmount: 8
+  produceCycleTimeSec: 25
+  maxHarvests: 2
+  meatItemId: rabbit_meat_01
+  meatAmount: 5
+  feedIntervalSec: 40
   canGetSick: 1
   primitiveType: 0
   animalColor: {r: 1, g: 1, b: 1, a: 1}

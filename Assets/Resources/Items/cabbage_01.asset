@@ -13,13 +13,13 @@ MonoBehaviour:
   m_Name: cabbage_01
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.ItemDefinition
   id: cabbage_01
-  itemName: "Rau c\u1EA3i"
-  description: "Rau c\u1EA3i xanh."
+  itemName: "B\u1EAFp c\u1EA3i"
+  description: "B\u1EAFp c\u1EA3i xanh."
   iconEmoji: "\U0001F96C"
   iconSprite: {fileID: 0}
-  category: items
+  category: food
   buyPrice: 0
-  sellPrice: 20
+  sellPrice: 27
   canSell: 1
   isStackable: 1
   maxStack: 999

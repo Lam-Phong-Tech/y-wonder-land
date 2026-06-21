@@ -17,9 +17,9 @@ MonoBehaviour:
   description: "Th\u1ECBt heo t\u01B0\u01A1i."
   iconEmoji: "\U0001F969"
   iconSprite: {fileID: 0}
-  category: animals
+  category: products
   buyPrice: 0
-  sellPrice: 35
+  sellPrice: 1056
   canSell: 1
   isStackable: 1
   maxStack: 999

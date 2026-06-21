@@ -24,11 +24,13 @@ MonoBehaviour:
   productMainAmount: 1
   productAltName: "Th\u1ECBt heo"
   productAltAmount: 50
-  produceItemId: pork_01
-  produceAmount: 2
-  produceCycleTimeSec: 40
+  produceItemId: pigskin_01
+  produceAmount: 1
+  produceCycleTimeSec: 25
   maxHarvests: 1
-  feedIntervalSec: 55
+  meatItemId: pork_01
+  meatAmount: 50
+  feedIntervalSec: 40
   canGetSick: 1
   primitiveType: 0
   animalColor: {r: 1, g: 1, b: 1, a: 1}

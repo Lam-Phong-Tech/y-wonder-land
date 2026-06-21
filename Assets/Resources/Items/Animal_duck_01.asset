@@ -24,11 +24,13 @@ MonoBehaviour:
   productMainAmount: 1
   productAltName: "Th\u1ECBt v\u1ECBt"
   productAltAmount: 5
-  produceItemId: 
+  produceItemId: duck_egg_01
   produceAmount: 1
-  produceCycleTimeSec: 35
-  maxHarvests: 0
-  feedIntervalSec: 30
+  produceCycleTimeSec: 25
+  maxHarvests: 45
+  meatItemId: duck_meat_01
+  meatAmount: 5
+  feedIntervalSec: 40
   canGetSick: 1
   primitiveType: 0
   animalColor: {r: 1, g: 1, b: 1, a: 1}

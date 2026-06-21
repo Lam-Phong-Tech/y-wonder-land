@@ -48,12 +48,32 @@ public class FarmTile : MonoBehaviour
     public Action<FarmTile> OnTileWatered;
     public Action<FarmTile> OnTileHarvested;
 
-    private float growthTimer = 0f;
+    // MỐC THỜI GIAN bắt đầu lớn (giây, theo đồng hồ TOÀN CỤC Time.timeAsDouble).
+    // % lớn = (giờ hiện tại − mốc này) / thời_gian_lớn → KHÔNG phụ thuộc Update mỗi frame,
+    // nên đi thành phố / tắt ô đất cho nhẹ máy thì về farm cây vẫn "lớn bù" đúng thời gian đã trôi.
+    private double growStartTime = 0.0;
     private bool isGrowing = false;
+
+    // ── Nước/khát (behavior B: hết nước → cây héo, GIẢM sản lượng/POS, vẫn lớn & thu được) ──
+    private double lastWaterTime = 0.0;   // mốc tưới gần nhất (đầy nước)
+    private float growthAccrued = 0f;     // GIÂY tăng trưởng đã "ngấm nước" tích luỹ (tưới-gate-lớn)
+    private float dryAccumSec = 0f;       // (giữ cho tương thích; cơ chế mới = hết nước thì NGỪNG lớn, không phạt)
+    /// <summary>Hệ số chăm sóc 0.5..1 lúc thu (1 = không để khát; 0.5 = khát suốt). Nhân vào sản lượng/POS/EXP.</summary>
+    public float LastCareFactor { get; private set; } = 1f;
+
+    // Thanh nước nổi trên cây — billboard ĐỘC LẬP (KHÔNG parent vào ô đất để né scale lệch của Dirt).
+    private Transform waterBarRoot;
+    private Transform waterFillPivot;
+    private Renderer waterFillRenderer;
+    private Camera waterBarCam;
+    private const float WBAR_W = 0.8f;
+    private const float WBAR_H = 0.12f;
 
     // Model 3D thật của cây (khi useCustomCropModels = true)
     private GameObject cropModelInstance;
     private Vector3 cropModelBaseScale = Vector3.one;
+    // Scale THẾ GIỚI của ô đất (Dirt = 0.15,1,0.15) — bù lại để cây không bị bóp dẹp khi làm con của ô.
+    private Vector3 cropParentLossy = Vector3.one;
 
     // Crop-specific color (used for primitive fallback visuals)
     private Color cropColor = Color.green;
@@ -68,16 +88,20 @@ public class FarmTile : MonoBehaviour
     {
         if (isGrowing && currentState == TileState.Watered)
         {
-            growthTimer += Time.deltaTime;
+            // % lớn tính TỪ MỐC THỜI GIAN (đồng hồ toàn cục) — không cộng dồn mỗi frame.
+            float pct = GetGrowthPercentage();
 
-            float totalGrowthTime = GetGrowthTime();
+            // Cây đang lớn mà chưa có thanh nước (vd load từ save) → tạo cho chắc.
+            if (waterBarRoot == null) CreateWaterBar();
+
+            // Cơ chế MỚI (khách chốt): hết nước → cây NGỪNG lớn (GetGrownSeconds tự dừng cộng), phải tưới lại.
 
             if (useCustomCropModels)
             {
                 // Model 3D phóng to dần theo % trưởng thành
                 ApplyCropGrowthScale();
             }
-            else if (growthTimer >= totalGrowthTime * 0.4f && seedVisual != null && seedVisual.activeSelf)
+            else if (pct >= 0.4f && seedVisual != null && seedVisual.activeSelf)
             {
                 // Switch from seed Visual to growing Visual at 40% growth (primitive)
                 if (seedVisual != null) seedVisual.SetActive(false);
@@ -89,17 +113,121 @@ public class FarmTile : MonoBehaviour
                 }
             }
 
-            if (growthTimer >= totalGrowthTime)
+            if (pct >= 1f)
             {
                 // Ripe state reached
                 isGrowing = false;
                 currentState = TileState.Ripe;
                 if (useCustomCropModels) ApplyCropGrowthScale();
+                DestroyWaterBar(); // cây chín → khỏi cần nước nữa
                 UpdateVisuals();
 
                 OnTileWatered?.Invoke(this); // Trigger update to show progress text at 100%
             }
         }
+    }
+
+    // ── Thanh nước nổi trên cây (billboard độc lập) ──
+
+    void LateUpdate()
+    {
+        if (waterBarRoot == null) return;
+        if (waterBarCam == null) waterBarCam = Camera.main;
+
+        bool show = isGrowing && currentState == TileState.Watered;
+        if (waterBarRoot.gameObject.activeSelf != show) waterBarRoot.gameObject.SetActive(show);
+        if (!show) return;
+
+        // Vị trí: ngay trên ĐỈNH cây (theo bounds model nếu có, để bám theo lúc cây lớn dần).
+        float topY = transform.position.y + 1.0f;
+        if (cropModelInstance != null)
+        {
+            float maxY = float.MinValue; bool found = false;
+            foreach (var r in cropModelInstance.GetComponentsInChildren<Renderer>())
+            {
+                if (r == null) continue;
+                maxY = Mathf.Max(maxY, r.bounds.max.y);
+                found = true;
+            }
+            if (found) topY = maxY + 0.3f;
+        }
+        waterBarRoot.position = new Vector3(transform.position.x, topY, transform.position.z);
+        if (waterBarCam != null)
+            waterBarRoot.rotation = Quaternion.LookRotation(waterBarCam.transform.forward, waterBarCam.transform.up);
+
+        // Fill + màu: xanh dương (đầy) → đỏ (khát).
+        float frac = GetWaterFraction();
+        if (waterFillPivot != null) waterFillPivot.localScale = new Vector3(Mathf.Max(0.0001f, frac), 1f, 1f);
+        if (waterFillRenderer != null)
+        {
+            Color c = Color.Lerp(new Color(0.9f, 0.3f, 0.2f), new Color(0.25f, 0.6f, 1f), frac);
+            waterFillRenderer.material.SetColor("_BaseColor", c);
+            waterFillRenderer.material.color = c;
+        }
+    }
+
+    private void CreateWaterBar()
+    {
+        if (waterBarRoot != null) return;
+        var rootGo = new GameObject("WaterBar");
+        waterBarRoot = rootGo.transform; // KHÔNG parent (né scale ô đất lệch) — FarmTile tự quản vòng đời.
+
+        CreateWaterQuad(waterBarRoot, "BarBG", Vector3.zero,
+            new Vector3(WBAR_W, WBAR_H, 1f), new Color(0.12f, 0.12f, 0.14f, 1f));
+
+        var pivotGo = new GameObject("FillPivot");
+        waterFillPivot = pivotGo.transform;
+        waterFillPivot.SetParent(waterBarRoot, false);
+        waterFillPivot.localPosition = new Vector3(-WBAR_W * 0.5f, 0f, -0.01f);
+
+        var fill = CreateWaterQuad(waterFillPivot, "Fill", new Vector3(WBAR_W * 0.5f, 0f, 0f),
+            new Vector3(WBAR_W, WBAR_H * 0.78f, 1f), new Color(0.25f, 0.6f, 1f, 1f));
+        waterFillRenderer = fill.GetComponent<Renderer>();
+
+        waterBarCam = Camera.main;
+    }
+
+    private GameObject CreateWaterQuad(Transform parent, string nameStr, Vector3 localPos, Vector3 localScale, Color color)
+    {
+        var quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        quad.name = nameStr;
+        quad.transform.SetParent(parent, false);
+        quad.transform.localPosition = localPos;
+        quad.transform.localScale = localScale;
+
+        var col = quad.GetComponent<Collider>();
+        if (col != null) Destroy(col);
+
+        var r = quad.GetComponent<Renderer>();
+        if (r != null)
+        {
+            var mat = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+            mat.SetColor("_BaseColor", color);
+            mat.color = color;
+            mat.SetFloat("_Cull", 0f); // 2 mặt
+            r.material = mat;
+            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            r.receiveShadows = false;
+        }
+        return quad;
+    }
+
+    private void DestroyWaterBar()
+    {
+        if (waterBarRoot != null) { Destroy(waterBarRoot.gameObject); waterBarRoot = null; }
+        waterFillPivot = null;
+        waterFillRenderer = null;
+    }
+
+    void OnDisable()
+    {
+        // Tile bị tắt (đổi đảo cho nhẹ máy) → ẩn thanh nước độc lập theo.
+        if (waterBarRoot != null) waterBarRoot.gameObject.SetActive(false);
+    }
+
+    void OnDestroy()
+    {
+        DestroyWaterBar();
     }
 
     // ── Interaction Methods ──
@@ -154,11 +282,40 @@ public class FarmTile : MonoBehaviour
         if (currentState != TileState.Planted) return false;
 
         currentState = TileState.Watered;
-        growthTimer = 0f;
+        growStartTime = Time.timeAsDouble; // mốc bắt đầu lớn
         isGrowing = true;
+        lastWaterTime = Time.timeAsDouble; // đầy nước
+        growthAccrued = 0f;
+        dryAccumSec = 0f;
+        CreateWaterBar();
         UpdateVisuals();
         OnTileWatered?.Invoke(this);
         return true;
+    }
+
+    /// <summary>Tưới LẠI khi cây đang lớn → dồn phần đã ngấm vào kho rồi đổ đầy nước. Trả true nếu tưới được.</summary>
+    public bool WaterAgain()
+    {
+        if (currentState != TileState.Watered || !isGrowing) return false;
+        // Chốt phần tăng trưởng của lần tưới trước (tối đa 1 chu kỳ nước) vào kho, rồi reset đồng hồ nước.
+        growthAccrued += Mathf.Clamp((float)(Time.timeAsDouble - lastWaterTime), 0f, GetWaterInterval());
+        lastWaterTime = Time.timeAsDouble;
+        return true;
+    }
+
+    private float GetWaterInterval()
+    {
+        if (currentCrop != null && currentCrop.waterIntervalSec > 0f) return currentCrop.waterIntervalSec;
+        return 20f;
+    }
+
+    /// <summary>Mức nước còn lại 0..1 (1 = vừa tưới, 0 = khát). Dùng cho thanh nước + tính phạt.</summary>
+    public float GetWaterFraction()
+    {
+        if (currentCrop == null) return 1f;
+        float interval = Mathf.Max(1f, currentCrop.waterIntervalSec);
+        double elapsed = Time.timeAsDouble - lastWaterTime;
+        return Mathf.Clamp01(1f - (float)(elapsed / interval));
     }
 
     public bool InteractHarvest(out string harvestedItemId, out int amount)
@@ -181,13 +338,21 @@ public class FarmTile : MonoBehaviour
             amount = 5;
         }
 
+        // Behavior B: phạt theo thời gian KHÁT — sản lượng giảm dần tới tối thiểu 50%.
+        float totalGrow = GetGrowthTime();
+        float dryRatio = totalGrow > 0f ? Mathf.Clamp01(dryAccumSec / totalGrow) : 0f;
+        LastCareFactor = Mathf.Lerp(1f, 0.5f, dryRatio);
+        amount = Mathf.Max(1, Mathf.RoundToInt(amount * LastCareFactor));
+
         // Reset tile to Soil
         currentState = TileState.Soil;
         plantedSeedId = "";
         currentCrop = null;
         cropColor = Color.green;
-        growthTimer = 0f;
+        growStartTime = 0.0;
         isGrowing = false;
+        dryAccumSec = 0f;
+        DestroyWaterBar();
 
         if (cropModelInstance != null) { Destroy(cropModelInstance); cropModelInstance = null; }
 
@@ -218,6 +383,7 @@ public class FarmTile : MonoBehaviour
         // Chỉ dời vị trí — KHÔNG đụng góc xoay/scale, để model đứng đúng như artist đã dựng.
         cropModelInstance.transform.localPosition = new Vector3(0f, currentCrop.modelGroundOffset, 0f);
         cropModelBaseScale = cropModelInstance.transform.localScale;
+        cropParentLossy = transform.lossyScale; // nhớ scale ô đất để BÙ lại (chống bóp dẹp)
 
         // Bỏ collider của model để tia click vẫn trúng FarmTile (không bị model chắn)
         foreach (var col in cropModelInstance.GetComponentsInChildren<Collider>())
@@ -233,7 +399,40 @@ public class FarmTile : MonoBehaviour
         // Lúc mới gieo (chưa tưới) để nhỏ nhất; tưới xong thì phóng to theo %.
         float t = (currentState == TileState.Watered || currentState == TileState.Ripe) ? GetGrowthPercentage() : 0f;
         float s = Mathf.Lerp(minScale, 1f, t);
-        cropModelInstance.transform.localScale = cropModelBaseScale * s;
+
+        // Kích thước THẾ GIỚI mong muốn = base × % lớn. Chia cho scale ô đất (lossy) để cây
+        // hiện ĐÚNG tỉ lệ 3D thật, KHÔNG bị ô đất (0.15,1,0.15) bóp dẹp.
+        Vector3 world = cropModelBaseScale * s;
+        Vector3 L = cropParentLossy;
+        cropModelInstance.transform.localScale = new Vector3(
+            Mathf.Approximately(L.x, 0f) ? world.x : world.x / L.x,
+            Mathf.Approximately(L.y, 0f) ? world.y : world.y / L.y,
+            Mathf.Approximately(L.z, 0f) ? world.z : world.z / L.z);
+
+        // Neo ĐÁY cây xuống mặt ô → cây mọc TỪ DƯỚI LÊN (không phình 2 đầu); pivot ở đâu cũng đúng.
+        AnchorBaseToGround();
+    }
+
+    /// <summary>Dời model theo trục Y sao cho ĐÁY (bounds.min.y của model) luôn nằm trên mặt ô đất,
+    /// để khi scale lớn dần thì chỉ NGỌN vươn lên, gốc đứng yên (mọc thật, không dãn 2 đầu).</summary>
+    private void AnchorBaseToGround()
+    {
+        if (cropModelInstance == null) return;
+        var rends = cropModelInstance.GetComponentsInChildren<Renderer>();
+        if (rends == null || rends.Length == 0) return;
+
+        float minY = float.MaxValue;
+        foreach (var r in rends)
+        {
+            if (r == null) continue;
+            minY = Mathf.Min(minY, r.bounds.min.y);
+        }
+        if (minY >= float.MaxValue) return;
+
+        // Mặt ô = vị trí ô + tinh chỉnh modelGroundOffset (anh dùng số này để nâng/hạ cao độ chân cây).
+        float groundY = transform.position.y + (currentCrop != null ? currentCrop.modelGroundOffset : 0f);
+        float delta = groundY - minY;
+        cropModelInstance.transform.position += new Vector3(0f, delta, 0f);
     }
 
     // ── Helper Visual Updates ──
@@ -286,7 +485,18 @@ public class FarmTile : MonoBehaviour
     {
         if (currentState == TileState.Ripe) return 1f;
         if (!isGrowing) return 0f;
-        return Mathf.Clamp01(growthTimer / GetGrowthTime());
+        float total = GetGrowthTime();
+        if (total <= 0f) return 1f;
+        // TƯỚI-GATE-LỚN: chỉ tính giây đã "ngấm nước". Hết nước → ngừng cộng → cây không lớn tới khi tưới lại.
+        return Mathf.Clamp01(GetGrownSeconds() / total);
+    }
+
+    /// <summary>Giây tăng trưởng đã ngấm nước = kho tích luỹ + phần lần tưới hiện tại (CAP = 1 chu kỳ nước).</summary>
+    private float GetGrownSeconds()
+    {
+        float interval = GetWaterInterval();
+        float sinceWater = (float)(Time.timeAsDouble - lastWaterTime);
+        return growthAccrued + Mathf.Clamp(sinceWater, 0f, interval);
     }
 
     private void UpdateCropColor(GameObject visual)

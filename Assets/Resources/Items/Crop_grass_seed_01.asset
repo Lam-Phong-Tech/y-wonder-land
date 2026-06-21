@@ -16,9 +16,12 @@ MonoBehaviour:
   harvestItemId: grass_01
   growthTimeSec: 30
   waterIntervalSec: 15
-  harvestYield: 3
-  expReward: 5
+  harvestYield: 2
+  expReward: 175
   posReward: 10
   growthStages: 2
   cropColor: {r: 0.2, g: 0.6, b: 0.2, a: 1}
   iconEmoji: "\U0001F33F"
+  cropPrefab: {fileID: 7502525246004137508, guid: 35ad3642d8f693648bd9f75a03211f40, type: 3}
+  modelGroundOffset: 0
+  seedlingScale: 0.25

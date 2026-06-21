@@ -30,6 +30,35 @@ namespace YWonderLand.Environment
         public bool HasAnimal { get; private set; }
         public void SetAnimal(bool v) => HasAnimal = v;
 
+        /// <summary>Con vật ĐANG NEO tại ô này (chỉ ô đầu của cụm penSlots giữ tham chiếu; null nếu ô chỉ "mượn chỗ").</summary>
+        public GameObject AnimalObject { get; private set; }
+
+        /// <summary>itemId con giống đang neo tại ô — để trả con giống về túi khi phá chuồng.</summary>
+        public string AnimalItemId { get; private set; }
+
+        /// <summary>Đánh dấu ô là ô NEO của 1 con vật vừa thả (giữ tham chiếu GameObject + itemId để hoàn khi phá).</summary>
+        public void SetAnimalOccupant(GameObject go, string itemId)
+        {
+            AnimalObject = go;
+            AnimalItemId = itemId;
+            HasAnimal = true;
+        }
+
+        /// <summary>Trả ô chuồng về trạng thái không có thú.</summary>
+        public void ClearAnimal()
+        {
+            AnimalObject = null;
+            AnimalItemId = null;
+            HasAnimal = false;
+        }
+
+        /// <summary>SỐ LƯỢNG vật liệu đã tốn để xây vật đang chiếm ô — dùng hoàn lại khi phá chuồng/công trình.</summary>
+        public int BuildCost { get; private set; }
+        /// <summary>ID vật liệu đã tốn (wood_01/stone_01...). Rỗng = miễn phí (vd ô ruộng).</summary>
+        public string BuildMaterialId { get; private set; }
+        public void SetBuildCost(int cost) => BuildCost = cost; // giữ tương thích cũ
+        public void SetBuildMaterial(string materialId, int amount) { BuildMaterialId = materialId; BuildCost = amount; }
+
         private Collider _col;
         private Collider Col => _col != null ? _col : (_col = GetComponent<Collider>());
 

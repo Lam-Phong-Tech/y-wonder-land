@@ -17,9 +17,9 @@ MonoBehaviour:
   description: "C\xE0 r\u1ED1t t\u01B0\u01A1i."
   iconEmoji: "\U0001F955"
   iconSprite: {fileID: 0}
-  category: items
+  category: food
   buyPrice: 0
-  sellPrice: 15
+  sellPrice: 22
   canSell: 1
   isStackable: 1
   maxStack: 999

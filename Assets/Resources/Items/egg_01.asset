@@ -17,9 +17,9 @@ MonoBehaviour:
   description: "Tr\u1EE9ng g\xE0 ta."
   iconEmoji: "\U0001F95A"
   iconSprite: {fileID: 0}
-  category: animals
+  category: products
   buyPrice: 0
-  sellPrice: 25
+  sellPrice: 28
   canSell: 1
   isStackable: 1
   maxStack: 999

@@ -36,7 +36,9 @@ namespace YWonderLand.Managers
 
         [Header("Debug — Test (nhớ TẮT khi release)")]
         [Tooltip("BẬT: lúc Play tự nạp nhiều thức ăn/nông sản/vật liệu/hạt + tiền vào túi để test NPC mua/bán.")]
-        [SerializeField] private bool giveTestLoadoutOnStart = false;
+        // ⚠️ TẠM BẬT để test (InventoryManager tạo runtime nên không tick được Inspector).
+        // 👉 ĐỔI LẠI false trước khi build demo thật cho sếp.
+        [SerializeField] private bool giveTestLoadoutOnStart = true;
         [Tooltip("Số POS cộng thêm khi nạp loadout test.")]
         [SerializeField] private long testMoney = 100000;
 
@@ -77,14 +79,31 @@ namespace YWonderLand.Managers
             foreach (var id in new[] { "wood_01","stone_01","iron_01","ore_01","brick_01" })
                 AddItem(id, 30);
 
-            // Hạt giống 8 loại
+            // Hạt giống 8 cây ngắn ngày + 10 cây lâu năm
             foreach (var id in new[] { "carrot_seed_01","cabbage_seed_01","watermelon_seed_01","corn_seed_01",
-                                       "pumpkin_seed_01","grass_seed_01","morning_glory_seed_01","sweet_potato_seed_01" })
+                                       "pumpkin_seed_01","grass_seed_01","morning_glory_seed_01","sweet_potato_seed_01",
+                                       "banana_seed_01","coconut_seed_01","areca_seed_01","date_seed_01","sacha_seed_01",
+                                       "tea_seed_01","durian_seed_01","asparagus_seed_01","red_ginseng_seed_01","royal_ginseng_seed_01" })
                 AddItem(id, 15);
 
-            // Vật phẩm tiêu hao (phân/vắc-xin/thuốc/mồi)
+            // Sản phẩm vật nuôi + cây lâu năm (để test BÁN ở Mini Garden ngay, khỏi chờ thu hoạch)
+            foreach (var id in new[] {
+                "pigskin_01","ostrich_egg_01","deer_velvet_01","goat_milk_01","rabbit_fur_01",
+                "goose_egg_01","duck_egg_01","turtle_shell_01",
+                "chicken_meat_01","beef_01","ostrich_meat_01","deer_meat_01","goat_meat_01",
+                "rabbit_meat_01","goose_meat_01","duck_meat_01","turtle_meat_01",
+                "banana_01","coconut_01","areca_01","date_01","sacha_01","tea_01","durian_01",
+                "asparagus_01","red_ginseng_01","royal_ginseng_01" })
+                AddItem(id, 10);
+
+            // Vật phẩm tiêu hao (phân/vắc-xin/thuốc/mồi) + nước tưới (test, bình thường múc ở ao)
             foreach (var id in new[] { "fertilizer_01","vaccine_01","medicine_01","bait_01" })
                 AddItem(id, 15);
+            AddItem("watering_water_01", 30);
+
+            // Dụng cụ (cuốc/rìu/cúp/cần câu/xô) — đảm bảo có rìu để chặt cây, cúp để đập đá
+            foreach (var id in new[] { "hoe_01","axe_01","pickaxe_01","fishing_rod_01","watering_can_01" })
+                if (GetItemQuantity(id) <= 0) AddItem(id, 1);
 
             if (EconomyManager.Instance != null) EconomyManager.Instance.AddPOS(testMoney);
 
@@ -97,8 +116,11 @@ namespace YWonderLand.Managers
             if (string.IsNullOrEmpty(json))
             {
                 inventoryData = new InventoryData();
-                // Add default items for testing & tutorial
+                // Add default items for testing & tutorial — đủ BỘ DỤNG CỤ (cuốc/rìu/cúp/cần câu/xô)
                 inventoryData.slots.Add(new InventorySlot("hoe_01", 1));
+                inventoryData.slots.Add(new InventorySlot("axe_01", 1));          // rìu — chặt cây
+                inventoryData.slots.Add(new InventorySlot("pickaxe_01", 1));      // cúp — đập đá
+                inventoryData.slots.Add(new InventorySlot("fishing_rod_01", 1));  // cần câu
                 inventoryData.slots.Add(new InventorySlot("watering_can_01", 1));
                 inventoryData.slots.Add(new InventorySlot("carrot_seed_01", 5));
                 // Demo: tặng sẵn vài con vật để test thả chuồng (production: mua từ shop)

@@ -16,9 +16,12 @@ MonoBehaviour:
   harvestItemId: pumpkin_01
   growthTimeSec: 55
   waterIntervalSec: 24
-  harvestYield: 4
-  expReward: 25
+  harvestYield: 11
+  expReward: 125
   posReward: 70
   growthStages: 3
   cropColor: {r: 0.9, g: 0.5, b: 0.1, a: 1}
   iconEmoji: "\U0001F383"
+  cropPrefab: {fileID: 7698582702517547490, guid: 312452072b536dc47b69ee1a2cce0043, type: 3}
+  modelGroundOffset: 0
+  seedlingScale: 0.25

@@ -1,5 +1,73 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-06-21 (PHIÊN 2: Thời gian thực · Vật nuôi sống VatNuoi · Tưới-gate · Múc nước · Build vật liệu · Tutorial fix · Rà soát trước demo)
+### Added
+- **Vật nuôi SỐNG theo thời gian + thanh HP:** viết lại `FarmAnimal` — đói/ra sản phẩm tính theo MỐC THỜI GIAN (`Time.timeAsDouble`); thanh HP (no/đói) billboard trên đầu (tự đo cao theo model); `AnimalInteractionPopup` thêm dòng "Độ no / Thu hoạch" (đếm ngược vụ + X/Y lần). Gắn `FarmAnimal` cho cả con vật CÓ prefab (trước chỉ ra khối trơ).
+- **Logic vật nuôi đầy đủ theo VatNuoi (10 con):** `produceItemId`/`produceAmount`/`maxHarvests` + **vụ cuối LÀM THỊT** (con biến mất, trả ô chuồng). Tạo 17 item sản phẩm/thịt (giá theo VatNuoi). `AnimalDefinition` thêm `meatItemId`/`meatAmount`.
+- **Thanh NƯỚC cho cây + TƯỚI-GATE-LỚN:** thanh nước billboard tụt theo `waterIntervalSec`; cây **CHỈ lớn khi còn nước** (hết nước → ngừng lớn tới khi tưới lại). `FarmTile.growthAccrued`+`GetGrownSeconds`.
+- **Hệ thời gian thực `GameTimeConfig.cs`:** 1 ngày game = 24h thực; hằng số `SecondsPerGameDay` (DEMO 60f · THẬT 86400f) + `Days()`/`Hours()` — đổi 1 chỗ là cả cây+thú đổi. Generator khai theo ngày/giờ game.
+- **Khung 10 CÂY LÂU NĂM:** 10 hạt + 10 sản phẩm + 10 CropDefinition (tạm 1-lần-thu; thu-nhiều-lần Phase 2).
+- **MÚC NƯỚC tưới cây:** `WaterSource.cs` (vùng ao) + item `watering_water_01`. Ngắm ao bấm/click "Múc nước" → +5 xô; tưới TỐN 1 xô.
+- **Build cost = VẬT LIỆU (không POS):** Ruộng miễn phí · Đường đá 4 Đá · Chuồng 4 Gỗ/ô rào. Kiểm+trừ lúc đặt, hoàn đúng vật liệu khi phá. Chi phí ra **SerializeField** (`penWoodCost`/`pathStoneCost`). `BuildSurfaceCell` lưu `BuildMaterialId`.
+- **Popup "Tính năng đang phát triển":** `ShopZoneTrigger.comingSoon` → NPC chưa làm (VIP/Maid/Pet/Gift...) hiện toast thay vì lỗi.
+- **Tách tab túi đồ:** sản phẩm (trứng/sữa/thịt + SP cây) tách khỏi tab "Thú nuôi" → tab **"Sản phẩm"** (category `products`). Shop **ẩn tab filter** không có hàng.
+- **Wire SHOP đầy đủ:** Farm Shop 18 hạt + 10 con giống; Mini Garden mua đủ nông sản + SP cây lâu năm + 20 SP/thịt vật nuôi.
+
+### Changed
+- **Cho ăn ĐÚNG tài liệu:** validate thức ăn theo `AnimalDefinition.foodMain/foodAlt` (so theo TÊN qua ItemDatabase) + trừ đúng số lượng; sai loại → báo, không nhận. Sửa tên item (`Cỏ khô`→**Cỏ Voi**, `Rau cải`→**Bắp cải**), chuyển 7 nông sản sang category `food` (hiện ở tab cho ăn).
+- **Câu cá + đào đá CITY-ONLY:** gate bằng `IslandTravelManager.CurrentIslandId == "city"` (FarmInteractionController). Farm: ẩn nút + chặn; chặt cây vẫn mọi đảo.
+- **Tutorial bỏ bước đào đá:** sau Chặt cây → thẳng bãi ruộng; đánh số lại /13.
+- **Cây mọc TỪ DƯỚI LÊN:** `FarmTile.AnchorBaseToGround` neo đáy cây xuống đất (hết phình 2 đầu).
+- **Khoá map khác:** chỉ Nông trại + Thành phố; Mỏ/Hải Phú/Mộc Nhi → toast "đang khoá".
+- **Respawn ra SerializeField** (`HarvestableResource.respawnTimeSec`, default 60s demo). Cây + đá dùng chung.
+- **Loadout test:** thêm 18 hạt + sản phẩm/thịt + 30 nước tưới; **bật mặc định** (`giveTestLoadoutOnStart=true` — NHỚ tắt khi build).
+
+### Fixed
+- **Tutorial 2 bug:** chặt/đào nhảy bước ngay (loadout đã có gỗ/đá → bỏ auto-skip); thả thú không cập nhật nhiệm vụ (nghe `FarmAnimal.OnAnimalSpawned` flow mới thay `AnimalPenSpawner` cũ).
+- **Popup vật nuôi tràn chữ; warning 'Cám' & id rỗng; lỗi compile** (`ShopItem` struct so null, enum `ResourceType.Rock` không phải Stone, biến thừa `currentBalance`/`demolishRefundRate`).
+- **Cây model méo/dẹp:** do ô Dirt scale lệch + model xoay Blender. Thử "holder" → DẸP hơn → ĐÃ REVERT (giữ bù `cropParentLossy` cũ — đang đúng). Kết luận: chỉnh hình qua model/wrap empty, KHÔNG đụng code scale.
+
+### Decisions (khách chốt 21/06)
+- **1 ngày game = 24h thực** (cây/thú lớn theo ngày thật). Demo tạm 60s/ngày qua `GameTimeConfig`.
+- **Xây ruộng MIỄN PHÍ; xây chuồng tốn GỖ** (4/ô rào). Build dùng vật liệu, không tiền.
+- **Câu cá + đào đá chỉ ở Thành phố** (đã code gate).
+
+## [Unreleased] - 2026-06-21 (NPC Shop data-driven · Mốc thời gian cây · Economy số khách · Mobile chạm + giữ-chặt · Bơi/leo bờ · Chuẩn bị demo thứ 2)
+### Added
+- **Hệ NPC Shop data-driven — mở khi CHẠM NHÀ:** `ShopDefinition` (ScriptableObject, mỗi shop 1 asset chỉ lưu ID, giá tra `ItemDatabase`), `ShopZoneTrigger` (gắn nhà NPC, bước vào vùng → popup tự mở; **giữ mở, đóng bằng X**; tên shop nổi trên đầu NPC qua `nameTagTarget`; cũng route được Workshop/PiggyBank), `ShopPopupController.Show(ShopDefinition)` + lọc thu mua theo whitelist, `Editor/ShopDataGenerator.cs` (menu sinh 7 asset: Hạt giống&Vật nuôi / Vật phẩm / Siêu thị Cá / Mini Garden / Hai Lúa / Verdant / Thú Y). `MerchantNPC` thêm field `shopData`. Thiết kế: `Docs_KichBan/ThietKe_NPCShop.md`.
+- **Hủy chuồng → hoàn tài nguyên:** ngắm ô rào → nút **"Hủy chuồng"** (phím G / tap) → trả con giống về túi → phá cả cụm rào (flood-fill) → hoàn **50% giá build** (`demolishRefundRate`). `BuildSurfaceCell` lưu `BuildCost` + `AnimalObject`/`AnimalItemId`.
+- **Bơi: bật khỏi mặt nước + nhiều khối nước:** nhảy khi đang bơi → vọt lên **trèo lên bờ** (`swimLeapTimer`); đếm `waterVolumeCount` cho phép ghép **NHIỀU Box Collider tag "Water"** ướm hồ hình dạng lạ (rời 1 box không tụt bơi); `ResetSwimState` khi teleport.
+- **Tối ưu render khi đổi đảo:** `IslandTravelManager.farmOnlyObjects` — vật thể chỉ-Nông-trại (biển 10000, địa hình) **tự ẩn** khi sang đảo khác (hết ngập + đỡ render), bật lại khi về.
+- **Lộ trình + tài liệu demo:** `Docs_KichBan/LoTrinh_Demo_Thu2.md` (mục tiêu, P0/P1/P2, cắt, mobile 3 mức, phân vai). Convert 3 file Excel khách → `.md`: `CayTrong` (cây lâu năm), `CayTrongLauNam` (8 cây ngắn ngày), `CachTinh` (công thức thú).
+
+### Changed
+- **Cây lớn theo MỐC THỜI GIAN** (`FarmTile`): bỏ cộng dồn `Time.deltaTime` mỗi frame → lưu `growStartTime`, tính % từ thời gian THẬT đã trôi → đi đảo khác / tắt ô đất cho nhẹ máy thì về vẫn **lớn bù** đúng. Nền cho real-time + offline.
+- **Economy số thật của khách:** giá hạt + giá bán nông sản (`ItemDataGenerator`), sản lượng + EXP 8 cây (`CropDataGenerator`) theo `CayTrongLauNam`; 10 vật nuôi đã khớp `VatNuoi`. `Shop_FishShop` đổi tên "Siêu thị Cá", thêm `Shop_ThuY`.
+- **Mobile #3 — chạm tương tác:** `FarmInteractionController` đổi `Mouse.current` → `Pointer.current` (chung Mouse PC + Touchscreen) → chạm tay chặt/trồng/mua chạy.
+- **Chặt cây GIỮ-ĐỂ-CHẶT:** nút "Chặt cây" trên HUD thành **giữ-liên-tục** (`InteractionAction.onHoldStart/onHoldEnd` + `HoldChopResource`) thay vì tap 1 lần (hết cảnh "thả mới hiện ~50%"); túi mặc định + loadout test thêm **rìu/cúp/cần câu**.
+- **Build Mode bỏ HẲN xoay:** gỡ nút Xoay + phím R + menu ngữ cảnh Xoay; cụm đặt còn **Tích / X**.
+- **Cap FPS 60 + tắt vsync** (`SystemsBootstrapper`) — cheap mobile win.
+
+### Fixed
+- **Cây bị bóp dẹp:** ô đất Dirt scale (0.15,1,0.15) bóp cây con → `FarmTile` bù `cropParentLossy` → cây đúng tỉ lệ 3D.
+- **Chặt cây để lại lá:** `HarvestableResource.AttachNearbyLeaves` so khớp tên **KHÔNG phân biệt hoa/thường** ("leaf" khớp "Leaf") → tự gom lá rời vào cây → ẩn/đổ theo cây.
+- **Nút đặt Build "đứng lì":** `Show/HidePlacementControls` set thẳng inline `display` (trước đó inline của `UpdatePlacementControlsPosition` đè class `.hidden`) → xây/hủy xong nút Tích biến mất; nút X tắt được.
+- **Tiêu đề shop bị ghi đè:** mở qua `ShopDefinition` giữ TÊN RIÊNG shop trên popup (ApplyAccessMode không còn đè thành "CỬA HÀNG").
+- **Ngập nước khi tới Thành phố:** biển 10000 trong scene nền phủ city ở X=1000 → ẩn biển qua `farmOnlyObjects` khi rời nông trại.
+
+### Decisions (khách chốt)
+- **Câu cá & đào đá CHỈ ở đảo Thành phố** (không ở đảo khởi đầu) → cần sửa tutorial (bỏ bước đào đá ở nông trại). Fish Shop đảo bỏ, chỉ còn Siêu thị Cá thành phố.
+- **Demo thứ 2 = Nông trại + Thành phố, offline, model tạm.** CẮT: online/API/web, tối ưu sâu, 4 NPC feature (KNX/Game/Maid/Gift), bạn bè/chat, cosmetic/VIP/Pet, mỏ/đảo endgame.
+
+### Changed Files (21/06)
+- `Assets/_Project/Scripts/Data/ShopDefinition.cs` [NEW], `Scripts/Environment/ShopZoneTrigger.cs` [NEW], `Scripts/Editor/ShopDataGenerator.cs` [NEW]
+- `Scripts/Editor/CropDataGenerator.cs`, `Scripts/Editor/ItemDataGenerator.cs` [MODIFIED]
+- `UI/ShopPopupController.cs`, `UI/GameHUDController.cs`, `UI/BuildModeOverlayController.cs`, `UI/BuildModeOverlay.uxml` [MODIFIED]
+- `Scripts/Environment/{FarmInteractionController,FarmTile,HarvestableResource,BuildSurfaceCell,GhostPlacementController,MerchantNPC}.cs` [MODIFIED]
+- `Scripts/Player/PlayerController.cs`, `Scripts/Managers/{IslandTravelManager,InventoryManager}.cs`, `Scripts/Core/SystemsBootstrapper.cs`, `Scripts/Cutscenes/BoatCutscene.cs`, `Scripts/UI/FloatingNameTag.cs` [MODIFIED]
+- Data: `Data/Shops/Shop_*.asset`, `Resources/Items/Crop_*.asset` (qua generator)
+- Docs: `Docs_KichBan/{LoTrinh_Demo_Thu2,ThietKe_NPCShop,SpecShop_DraftMuaBan,CayTrong,CayTrongLauNam,CachTinh}.md`
+
 ## [Unreleased] - 2026-06-18 (Đồng bộ UI 3 màu chủ đạo, Tối ưu FloatingNameTag và Loading Screen)
 ### Added
 - **Màu sắc thương hiệu UI:** Tích hợp 3 màu chủ đạo Cam (`#eb6b2a`), Xanh lá (`#7cb641`), Xanh biển (`#2596be`) vào các hệ thống UI chính.

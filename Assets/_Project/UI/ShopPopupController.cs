@@ -58,7 +58,10 @@ public class ShopPopupController : MonoBehaviour
 
     // Current shop data
     private ShopData currentShop;
-    
+
+    // Whitelist ID hàng shop chấp nhận THU MUA (null/rỗng = thu mua mọi thứ bán được trong túi).
+    private List<string> sellFilterIds;
+
     // Database
     private YWonderLand.Data.ItemDatabase itemDatabase;
 
@@ -231,6 +234,7 @@ public class ShopPopupController : MonoBehaviour
 
         // Reset to Buy mode
         SetMode(false);
+        UpdateFilterVisibility(); // chỉ hiện tab filter có hàng trong shop này (#1)
         SetFilter(filterAll, "all");
         UpdateBalance();
 
@@ -244,6 +248,7 @@ public class ShopPopupController : MonoBehaviour
     /// </summary>
     public void Show()
     {
+        sellFilterIds = null; // luồng mock/legacy: thu mua mọi thứ bán được
         Show(CreateMockShopData());
     }
 
@@ -279,6 +284,73 @@ public class ShopPopupController : MonoBehaviour
             SetMode(false); // danh sách Mua
             if (shopTitle != null && mode == ShopAccessMode.BuyOnly) shopTitle.text = "CỬA HÀNG";
         }
+    }
+
+    /// <summary>
+    /// Mở shop theo 1 ShopDefinition (asset) — catalog riêng của từng NPC.
+    /// Giá/tên/icon tra từ ItemDatabase (nguồn duy nhất). Đây là cổng chính cho hệ NPC shop data-driven.
+    /// </summary>
+    public void Show(YWonderLand.Data.ShopDefinition def)
+    {
+        if (def == null) { Show(); return; }
+
+        // Whitelist thu mua: rỗng = thu mua mọi thứ bán được.
+        sellFilterIds = (def.sellItemIds != null && def.sellItemIds.Count > 0) ? def.sellItemIds : null;
+
+        Show(BuildShopDataFrom(def));      // set currentShop + title + tab + về chế độ Mua
+        ApplyAccessMode(MapAccessMode(def.accessMode));
+
+        // Giữ TÊN RIÊNG của shop trên tiêu đề (ApplyAccessMode vừa ghi đè thành "CỬA HÀNG"/"BÁN ĐỒ"
+        // cho luồng NPC Mua/Bán cũ — ở đây có tên riêng nên đặt lại để phân biệt từng cửa hàng).
+        if (shopTitle != null && !string.IsNullOrEmpty(def.shopName))
+            shopTitle.text = def.shopName;
+    }
+
+    private ShopAccessMode MapAccessMode(YWonderLand.Data.ShopDefinition.AccessMode m)
+    {
+        switch (m)
+        {
+            case YWonderLand.Data.ShopDefinition.AccessMode.BuyOnly:  return ShopAccessMode.BuyOnly;
+            case YWonderLand.Data.ShopDefinition.AccessMode.SellOnly: return ShopAccessMode.SellOnly;
+            default:                                                  return ShopAccessMode.Both;
+        }
+    }
+
+    // Dựng ShopData cho popup từ ShopDefinition: chỉ tra ID -> lấy giá/tên/icon trong ItemDatabase.
+    private ShopData BuildShopDataFrom(YWonderLand.Data.ShopDefinition def)
+    {
+        var data = new ShopData
+        {
+            shopName = def.shopName,
+            hasSellTab = def.HasSellTab,
+            buyItems = new List<ShopItem>(),
+            sellItems = new List<ShopItem>() // tab Bán nạp động từ túi đồ (lọc theo sellFilterIds)
+        };
+
+        if (itemDatabase != null && def.buyItemIds != null)
+        {
+            foreach (var id in def.buyItemIds)
+            {
+                var idef = itemDatabase.GetItem(id);
+                if (idef == null)
+                {
+                    Debug.LogWarning($"[Shop] '{def.shopName}': bỏ qua ID không có trong ItemDatabase: '{id}'");
+                    continue;
+                }
+                data.buyItems.Add(new ShopItem
+                {
+                    id = idef.id,
+                    icon = !string.IsNullOrEmpty(idef.iconEmoji) ? idef.iconEmoji : "📦",
+                    name = idef.itemName,
+                    price = idef.buyPrice,
+                    description = idef.description,
+                    category = idef.category,
+                    canSell = idef.canSell,
+                    sellPrice = idef.sellPrice
+                });
+            }
+        }
+        return data;
     }
 
     public void Hide()
@@ -321,6 +393,32 @@ public class ShopPopupController : MonoBehaviour
         ShowEmptyDetails();
     }
 
+    // #1: Chỉ hiện các tab filter có hàng trong shop hiện tại (gom category từ buy items + whitelist bán).
+    private void UpdateFilterVisibility()
+    {
+        var present = new HashSet<string>();
+        if (currentShop != null && currentShop.buyItems != null)
+            foreach (var it in currentShop.buyItems)
+                if (!string.IsNullOrEmpty(it.category)) present.Add(it.category); // ShopItem là struct → không so null
+        if (sellFilterIds != null && itemDatabase != null)
+            foreach (var id in sellFilterIds)
+            {
+                var d = itemDatabase.GetItem(id);
+                if (d != null && !string.IsNullOrEmpty(d.category)) present.Add(d.category);
+            }
+
+        SetFilterBtnVisible(filterSeeds, present.Contains("seeds"));
+        SetFilterBtnVisible(filterAnimals, present.Contains("animals"));
+        SetFilterBtnVisible(filterTools, present.Contains("tools"));
+        SetFilterBtnVisible(filterItems, present.Contains("items"));
+        // filterAll luôn hiện (xem tất cả).
+    }
+
+    private void SetFilterBtnVisible(Button b, bool show)
+    {
+        if (b != null) b.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
+    }
+
     private void SetFilter(Button filterBtn, string category)
     {
         // Update filter styles
@@ -353,6 +451,8 @@ public class ShopPopupController : MonoBehaviour
                     var def = itemDatabase.GetItem(slot.itemId);
                     if (def != null && def.canSell)
                     {
+                        // Shop có whitelist -> chỉ thu mua hàng trong danh sách (vd Mini Garden chỉ thu nông sản).
+                        if (sellFilterIds != null && !sellFilterIds.Contains(def.id)) continue;
                         itemsToDisplay.Add(new ShopItem
                         {
                             id = def.id,

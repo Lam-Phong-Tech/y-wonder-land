@@ -155,7 +155,7 @@ public class InventoryPopupController : MonoBehaviour
         tabFood?.RegisterCallback<ClickEvent>(evt => SetActiveTab(tabFood, "food", "Thực phẩm"));
         tabOutfit?.RegisterCallback<ClickEvent>(evt => SetActiveTab(tabOutfit, "outfit", "Trang phục"));
         tabAnimals?.RegisterCallback<ClickEvent>(evt => SetActiveTab(tabAnimals, "animals", "Thú nuôi"));
-        tabSpecial?.RegisterCallback<ClickEvent>(evt => SetActiveTab(tabSpecial, "special", "Đặc biệt"));
+        tabSpecial?.RegisterCallback<ClickEvent>(evt => SetActiveTab(tabSpecial, "products", "Sản phẩm"));
 
         // Detail Action clicks
         btnDetailAction?.RegisterCallback<ClickEvent>(evt =>

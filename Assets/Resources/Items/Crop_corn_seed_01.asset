@@ -16,12 +16,12 @@ MonoBehaviour:
   harvestItemId: corn_01
   growthTimeSec: 50
   waterIntervalSec: 22
-  harvestYield: 4
-  expReward: 25
+  harvestYield: 3
+  expReward: 100
   posReward: 60
   growthStages: 3
   cropColor: {r: 1, g: 0.85, b: 0.2, a: 1}
   iconEmoji: "\U0001F33D"
-  cropPrefab: {fileID: 919132149155446097, guid: a9a475149a5ebd04db8aa1a495008391, type: 3}
+  cropPrefab: {fileID: 2601761632728642304, guid: 285093b89849db04398a79afaa235e4e, type: 3}
   modelGroundOffset: 0
   seedlingScale: 0.25

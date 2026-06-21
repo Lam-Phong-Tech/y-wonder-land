@@ -56,9 +56,6 @@
             <ui:Button name="BtnConfirmPlace" class="build-placement-btn build-placement-confirm">
                 <ui:Label text="✔" class="build-placement-btn-icon" />
             </ui:Button>
-            <ui:Button name="BtnRotatePlace" class="build-placement-btn build-placement-rotate">
-                <ui:Label text="Xoay" class="build-placement-btn-icon" style="font-size: 14px;" />
-            </ui:Button>
             <ui:Button name="BtnCancelPlace" class="build-placement-btn build-placement-cancel">
                 <ui:Label text="✕" class="build-placement-btn-icon" />
             </ui:Button>
@@ -70,10 +67,6 @@
         <!-- is clicked                       -->
         <!-- ================================ -->
         <ui:VisualElement name="ContextMenu" class="build-context-menu hidden">
-            <ui:Button name="BtnCtxRotate" class="build-ctx-btn">
-                <ui:Label text="⟳" class="build-ctx-icon" />
-                <ui:Label text="Xoay" class="build-ctx-label" />
-            </ui:Button>
             <ui:Button name="BtnCtxMove" class="build-ctx-btn">
                 <ui:Label text="↔" class="build-ctx-icon" />
                 <ui:Label text="Nhấc" class="build-ctx-label" />

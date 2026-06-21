@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3334ccb6c504b8468a3bcc8773d485c, type: 3}
+  m_Name: Crop_durian_seed_01
+  m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.CropDefinition
+  seedItemId: durian_seed_01
+  harvestItemId: durian_01
+  growthTimeSec: 60
+  waterIntervalSec: 25
+  harvestYield: 5
+  expReward: 300
+  posReward: 0
+  growthStages: 5
+  cropColor: {r: 0.7, g: 0.6, b: 0.2, a: 1}
+  iconEmoji: "\U0001F96D"
+  cropPrefab: {fileID: 9207426958677319370, guid: 9db057d3530bdd549ab9f5383646b054, type: 3}
+  modelGroundOffset: 0
+  seedlingScale: 0.25

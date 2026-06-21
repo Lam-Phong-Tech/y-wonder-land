@@ -24,11 +24,13 @@ MonoBehaviour:
   productMainAmount: 2
   productAltName: "Th\u1ECBt h\u01B0\u01A1u"
   productAltAmount: 40
-  produceItemId: 
-  produceAmount: 1
-  produceCycleTimeSec: 35
-  maxHarvests: 0
-  feedIntervalSec: 30
+  produceItemId: deer_velvet_01
+  produceAmount: 2
+  produceCycleTimeSec: 25
+  maxHarvests: 2
+  meatItemId: deer_meat_01
+  meatAmount: 40
+  feedIntervalSec: 40
   canGetSick: 1
   primitiveType: 0
   animalColor: {r: 1, g: 1, b: 1, a: 1}

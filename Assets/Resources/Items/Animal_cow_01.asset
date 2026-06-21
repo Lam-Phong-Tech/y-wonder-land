@@ -25,10 +25,12 @@ MonoBehaviour:
   productAltName: "Th\u1ECBt b\xF2"
   productAltAmount: 50
   produceItemId: milk_01
-  produceAmount: 1
-  produceCycleTimeSec: 45
-  maxHarvests: 20
-  feedIntervalSec: 60
+  produceAmount: 10
+  produceCycleTimeSec: 25
+  maxHarvests: 38
+  meatItemId: beef_01
+  meatAmount: 50
+  feedIntervalSec: 40
   canGetSick: 1
   primitiveType: 0
   animalColor: {r: 1, g: 1, b: 1, a: 1}

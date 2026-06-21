@@ -18,6 +18,8 @@ public class AnimalInteractionPopupController : MonoBehaviour
     private Label lblFoodMain;
     private Label lblFoodAlt;
     private Label lblProducts;
+    private Label lblHunger;
+    private Label lblHarvest;
     private Button btnClose;
     private Button btnFeed;
     private Button btnHarvest;
@@ -46,6 +48,11 @@ public class AnimalInteractionPopupController : MonoBehaviour
         lblFoodMain = root.Q<Label>("LblFoodMain");
         lblFoodAlt = root.Q<Label>("LblFoodAlt");
         lblProducts = root.Q<Label>("LblProducts");
+        lblHunger = root.Q<Label>("LblHunger");
+        lblHarvest = root.Q<Label>("LblHarvest");
+        // Cho phép xuống dòng nếu chữ dài (chống tràn ra ngoài panel).
+        if (lblHarvest != null) lblHarvest.style.whiteSpace = WhiteSpace.Normal;
+        if (lblStatus != null) lblStatus.style.whiteSpace = WhiteSpace.Normal;
 
         btnClose = root.Q<Button>("BtnClose");
         btnFeed = root.Q<Button>("BtnFeed");
@@ -106,6 +113,45 @@ public class AnimalInteractionPopupController : MonoBehaviour
         return alt;
     }
 
+    // Đếm ngược vụ thu là số "sống" → cập nhật định kỳ khi popup đang mở.
+    private float refreshTimer;
+    void Update()
+    {
+        if (currentAnimal == null || container == null) return;
+        if (container.style.display == DisplayStyle.None) return;
+        refreshTimer += Time.deltaTime;
+        if (refreshTimer >= 0.25f)
+        {
+            refreshTimer = 0f;
+            RefreshUI(currentAnimal);
+        }
+    }
+
+    // "Vụ tới 12s · 20/20 lần" — gộp đếm ngược + tổng số lần thu (gọn cho 1 dòng).
+    private static string HarvestInfoText(FarmAnimal animal)
+    {
+        if (animal == null || animal.data == null) return "—";
+
+        float t = animal.GetTimeToNextProduceSec();
+        string when;
+        if (t < 0f) when = "Hết vụ";
+        else if (t <= 0.5f) when = "<color=#5BD66B>Sẵn sàng</color>";
+        else when = "Vụ tới " + FormatDuration(t);
+
+        string count = animal.IsInfiniteHarvest
+            ? "∞ lần"
+            : $"{Mathf.Max(0, animal.harvestsRemaining)}/{animal.MaxHarvests} lần";
+
+        return when + " · " + count;
+    }
+
+    private static string FormatDuration(float sec)
+    {
+        if (sec < 60f) return Mathf.CeilToInt(sec) + "s";
+        if (sec < 3600f) return Mathf.FloorToInt(sec / 60f) + "m" + Mathf.CeilToInt(sec % 60f) + "s";
+        return Mathf.FloorToInt(sec / 3600f) + "h" + Mathf.FloorToInt((sec % 3600f) / 60f) + "m";
+    }
+
     public void Hide()
     {
         UIPopupTracker.SetOpen(this, false);
@@ -139,6 +185,10 @@ public class AnimalInteractionPopupController : MonoBehaviour
             statusStr += " - <color=#00AA00>Có sản phẩm!</color>";
         }
         lblStatus.text = "Trạng thái: " + statusStr;
+
+        // Độ no + thời gian/số lần thu → mỗi cái 1 DÒNG RIÊNG trong bảng (tránh tràn chữ).
+        if (lblHunger != null) lblHunger.text = Mathf.RoundToInt(animal.GetHungerFraction() * 100f) + "%";
+        if (lblHarvest != null) lblHarvest.text = HarvestInfoText(animal);
 
         // Button visibility
         bool isDead = animal.currentState == FarmAnimal.AnimalState.Dead;

@@ -18,7 +18,7 @@ MonoBehaviour:
   iconEmoji: "\U0001F955"
   iconSprite: {fileID: 0}
   category: seeds
-  buyPrice: 10
+  buyPrice: 12
   sellPrice: 5
   canSell: 1
   isStackable: 1

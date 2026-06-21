@@ -19,6 +19,7 @@ namespace YWonderLand.Environment
         [Tooltip("Layer mask cho FarmTile raycasting")]
         [SerializeField] private LayerMask farmTileLayer = ~0; // Default: all layers
 
+
         [Header("References")]
         [SerializeField] private Camera mainCamera;
 
@@ -54,6 +55,7 @@ namespace YWonderLand.Environment
         }
 
         private HarvestableResource currentHarvestTarget;
+        private HarvestableResource _buttonHeldResource; // tài nguyên đang GIỮ nút "Chặt cây" trên HUD (mobile)
         private float _chopAnimTimer = 0f; // Đếm giờ để lặp animation chặt/đập khi đang giữ chuột
 
         void Update()
@@ -61,8 +63,17 @@ namespace YWonderLand.Environment
             if (GameManager.Instance != null && GameManager.Instance.currentState != GameManager.GameState.Gameplay) return;
             if (UIPopupTracker.AnyOpen) return; // Đang mở popup -> ngừng tương tác thế giới (tránh click xuyên qua UI)
 
-            var mouse = Mouse.current;
-            if (mouse == null || mainCamera == null) return;
+            // Pointer = lớp CHUNG cho Mouse (PC) lẫn Touchscreen (mobile) -> chạm tay cũng chạy.
+            var pointer = Pointer.current;
+            if (pointer == null || mainCamera == null) return;
+
+            // GIỮ nút "Chặt cây"/"Đào khoáng" trên HUD: ngón đang trên UI nên xử lý chặt liên tục TRƯỚC
+            // khi đoạn dưới bỏ qua tương tác (vì con trỏ trên UI). Thả nút -> onHoldEnd gỡ cờ này.
+            if (_buttonHeldResource != null)
+            {
+                HoldChopResource(_buttonHeldResource);
+                return;
+            }
 
             if (UnityEngine.EventSystems.EventSystem.current != null && UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
             {
@@ -81,9 +92,9 @@ namespace YWonderLand.Environment
             // mở khóa để bấm chữ gợi ý "Chặt cây", mục tiêu ở tâm KHÔNG đổi -> gợi ý đứng yên, bấm được.
             Vector2 aimPos = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
 
-            if (mouse.leftButton.wasPressedThisFrame) HandleClick(aimPos);
-            if (mouse.leftButton.isPressed) HandleHold(aimPos);
-            else if (mouse.leftButton.wasReleasedThisFrame)
+            if (pointer.press.wasPressedThisFrame) HandleClick(aimPos);
+            if (pointer.press.isPressed) HandleHold(aimPos);
+            else if (pointer.press.wasReleasedThisFrame)
             {
                 _chopAnimTimer = 0f;
                 if (currentHarvestTarget != null)
@@ -108,6 +119,7 @@ namespace YWonderLand.Environment
                     if (action.keyName == "E" && Keyboard.current.eKey.wasPressedThisFrame) action.onClick?.Invoke();
                     if (action.keyName == "R" && Keyboard.current.rKey.wasPressedThisFrame) action.onClick?.Invoke();
                     if (action.keyName == "H" && Keyboard.current.hKey.wasPressedThisFrame) action.onClick?.Invoke();
+                    if (action.keyName == "G" && Keyboard.current.gKey.wasPressedThisFrame) action.onClick?.Invoke();
                 }
             }
         }
@@ -135,7 +147,8 @@ namespace YWonderLand.Environment
                 if (hit.collider == null) continue;
                 if (hit.collider.gameObject.CompareTag("Player")) continue;
 
-                if (hit.collider.TryGetComponent<FarmAnimal>(out var animal) || (hit.collider.transform.parent != null && hit.collider.transform.parent.TryGetComponent<FarmAnimal>(out animal)))
+                var animal = hit.collider.GetComponentInParent<FarmAnimal>();
+                if (animal != null)
                 {
                     foundObj = animal.gameObject;
                     currentAnimalState = animal.currentState;
@@ -157,11 +170,27 @@ namespace YWonderLand.Environment
                     // Chỉ hiện nút khi TÂM NGẮM chạm bề mặt cây/đá trong tầm với (resource.interactionRange).
                     // Đo từ nhân vật tới ĐIỂM CHẠM (hit.point) cho trực quan, đúng cả với cây to.
                     Vector3 hoverPlayerPos = PlayerController.Instance != null ? PlayerController.Instance.transform.position : transform.position;
-                    if (Vector3.Distance(hoverPlayerPos, hit.point) <= resource.interactionRange)
+                    // ĐÀO ĐÁ chỉ ở thành phố → ở đảo khác KHÔNG hiện nút "Đào khoáng" (chặt cây vẫn hiện).
+                    bool resourceUsable = resource.type != HarvestableResource.ResourceType.Rock || IsOnCityIsland();
+                    if (resourceUsable && Vector3.Distance(hoverPlayerPos, hit.point) <= resource.interactionRange)
                     {
                         foundObj = resource.gameObject;
                         string actionStr = resource.type == HarvestableResource.ResourceType.Tree ? "Chặt cây" : "Đào khoáng";
-                        foundActions.Add(new InteractionAction { keyName = "Click", actionName = actionStr, onClick = () => ClickHarvestResource(resource) });
+                        var res = resource; // capture cho closure
+                        foundActions.Add(new InteractionAction
+                        {
+                            keyName = "Click",
+                            actionName = actionStr,
+                            // GIỮ nút = chặt liên tục (mobile). Giữ -> đặt cờ; thả -> gỡ cờ + ẩn thanh tiến trình.
+                            onHoldStart = () => { _buttonHeldResource = res; },
+                            onHoldEnd = () =>
+                            {
+                                _buttonHeldResource = null;
+                                _chopAnimTimer = 0f;
+                                if (YWonderLand.UI.ResourceInteractionUIController.Instance != null)
+                                    YWonderLand.UI.ResourceInteractionUIController.Instance.Hide();
+                            }
+                        });
                     }
                     break;
                 }
@@ -190,7 +219,7 @@ namespace YWonderLand.Environment
                         case FarmTile.TileState.Soil: actName = "Cuốc đất"; break;
                         case FarmTile.TileState.Plowed: actName = "Gieo hạt"; break;
                         case FarmTile.TileState.Planted: actName = "Tưới nước"; break;
-                        case FarmTile.TileState.Watered: actName = "Theo dõi"; break;
+                        case FarmTile.TileState.Watered: actName = "Tưới nước"; break;
                         case FarmTile.TileState.Ripe: actName = "Thu hoạch"; break;
                     }
                     foundActions.Add(new InteractionAction { keyName = "Click", actionName = actName, onClick = () => PerformTileAction(tile) });
@@ -198,10 +227,22 @@ namespace YWonderLand.Environment
                 }
                 else if (hit.collider.TryGetComponent<FishingSpot>(out var spot) || (hit.collider.transform.parent != null && hit.collider.transform.parent.TryGetComponent<FishingSpot>(out spot)))
                 {
-                    if (hit.distance <= 15f)
+                    if (hit.distance <= 15f && IsFishingAllowedHere())
                     {
                         foundObj = spot.gameObject;
                         foundActions.Add(new InteractionAction { keyName = "F", actionName = "Câu cá", onClick = () => StartFishing(spot) });
+                    }
+                    break;
+                }
+                else if (hit.collider.GetComponentInParent<WaterSource>() is WaterSource waterSrc && waterSrc != null)
+                {
+                    // Vùng ao MÚC ĐƯỢC (không phải nước biển) → bấm "Múc nước" lấy xô nước về túi.
+                    Vector3 wPlayerPos = PlayerController.Instance != null ? PlayerController.Instance.transform.position : transform.position;
+                    if (Vector3.Distance(wPlayerPos, hit.point) <= waterSrc.interactRange)
+                    {
+                        foundObj = waterSrc.gameObject;
+                        var ws = waterSrc;
+                        foundActions.Add(new InteractionAction { keyName = "Click", actionName = "Múc nước", onClick = () => ScoopWater(ws) });
                     }
                     break;
                 }
@@ -220,6 +261,7 @@ namespace YWonderLand.Environment
                             foundObj = penCell.gameObject;
                             var encl = hoverEnclosure;
                             foundActions.Add(new InteractionAction { keyName = "Click", actionName = "Thả thú", onClick = () => OpenEnclosurePicker(encl) });
+                            foundActions.Add(new InteractionAction { keyName = "G", actionName = "Hủy chuồng", onClick = () => DemolishEnclosure(encl) });
                         }
                         break;
                     }
@@ -257,8 +299,22 @@ namespace YWonderLand.Environment
         }
 
         // --- CÁC HÀM XỬ LÝ SỰ KIỆN NÚT BẤM ---
+        // Đang ở đảo Thành phố? (CÂU CÁ + ĐÀO ĐÁ chỉ ở thành phố — khách chốt 20/06).
+        private bool IsOnCityIsland()
+        {
+            var itm = IslandTravelManager.Instance;
+            return itm != null && itm.CurrentIslandId == "city";
+        }
+        private bool IsFishingAllowedHere() => IsOnCityIsland();
+
         private void StartFishing(FishingSpot spot)
         {
+            if (!IsFishingAllowedHere())
+            {
+                ScreenToast.Show("Chỉ câu cá được ở Đảo Thành phố thôi!");
+                return;
+            }
+
             PlayerController player = PlayerController.Instance;
             if (player != null) player.PlayActionAnimation("Fishing", 8.5f, YWonderLand.Player.ToolType.FishingRod);
 
@@ -283,7 +339,7 @@ namespace YWonderLand.Environment
             pendingEnclosure = null;
             if (PlayerController.Instance != null) PlayerController.Instance.FaceTowards(animal.transform.position);
 
-            EnsureStarterFeed(); // demo: chắc có Bắp ngô để chọn
+            EnsureStarterFeed(animal); // demo: cấp ĐÚNG thức ăn của loài (theo tài liệu) để chọn
 
             if (inventoryPopup == null)
                 inventoryPopup = Object.FindFirstObjectByType<InventoryPopupController>();
@@ -294,19 +350,38 @@ namespace YWonderLand.Environment
             }
         }
 
-        // Người chơi chọn 1 thức ăn trong túi khi đang cho ăn -> trừ đồ + animation Feed.
+        // Người chơi chọn 1 thức ăn trong túi khi đang cho ăn -> VALIDATE đúng thức ăn của loài
+        // (theo tài liệu: Thức ăn chính / phụ + số lượng) -> trừ đúng số -> animation Feed.
         private void HandleFeedSelected(string itemId)
         {
             var animal = pendingFeedAnimal;
-            pendingFeedAnimal = null;
             if (animal == null) return;
+            var def = animal.data;
 
-            var inv = YWonderLand.Managers.InventoryManager.Instance;
-            if (inv != null && !inv.RemoveItem(itemId, 1))
+            // Tên hiển thị của thức ăn vừa chọn (để so với foodMainName/foodAltName của loài).
+            string selName = GetItemDisplayName(itemId);
+            int required = 0;
+            string matchedName = null;
+            if (def != null && NameMatches(selName, def.foodMainName)) { required = Mathf.Max(1, def.foodMainAmount); matchedName = def.foodMainName; }
+            else if (def != null && NameMatches(selName, def.foodAltName)) { required = Mathf.Max(1, def.foodAltAmount); matchedName = def.foodAltName; }
+
+            if (required <= 0)
             {
-                Debug.Log($"[FarmInteraction] Không có '{itemId}' trong túi để cho ăn.");
+                // Sai thức ăn: KHÔNG trừ đồ, giữ túi mở để chọn lại.
+                ScreenToast.Show($"{(def != null ? def.animalName : "Thú")} không ăn '{selName}'! Cần: {FoodOptionsText(def)}.");
                 return;
             }
+
+            var inv = YWonderLand.Managers.InventoryManager.Instance;
+            int have = inv != null ? inv.GetItemQuantity(itemId) : 0;
+            if (have < required)
+            {
+                ScreenToast.Show($"Cần {required}x {matchedName}, túi chỉ có {have}.");
+                return;
+            }
+            if (inv != null) inv.RemoveItem(itemId, required);
+
+            pendingFeedAnimal = null;
 
             var player = PlayerController.Instance;
             if (player != null)
@@ -315,20 +390,74 @@ namespace YWonderLand.Environment
                 player.PlayActionAnimation("Feed", 0f, YWonderLand.Player.ToolType.AnimalFeed); // cầm nắm cám rải xuống
             }
             animal.Feed();
+            ScreenToast.ShowInfo($"Đã cho {(def != null ? def.animalName : "thú")} ăn {required}x {matchedName}.");
 
             if (inventoryPopup != null) inventoryPopup.Hide();
         }
 
-        // Demo helper: đảm bảo túi có Bắp ngô để cho ăn (production: thu hoạch / mua).
-        private void EnsureStarterFeed()
+        // Demo helper: cấp ĐÚNG thức ăn của loài (chính + phụ) để test, thay vì luôn dùng ngô.
+        // Production: người chơi tự trồng/mua thức ăn đúng loại.
+        private void EnsureStarterFeed(FarmAnimal animal)
         {
             var inv = YWonderLand.Managers.InventoryManager.Instance;
-            if (inv == null) return;
-            if (inv.GetItemQuantity("corn_01") <= 0)
+            if (inv == null || animal == null || animal.data == null) return;
+            GiveFoodForDemo(inv, animal.data.foodMainName, Mathf.Max(1, animal.data.foodMainAmount) * 3);
+            // Bỏ qua thức ăn phụ amount 0 (vd 'Cám' — không phải item trong game) → tránh cảnh báo thừa.
+            if (animal.data.foodAltAmount > 0)
+                GiveFoodForDemo(inv, animal.data.foodAltName, animal.data.foodAltAmount * 3);
+        }
+
+        private void GiveFoodForDemo(YWonderLand.Managers.InventoryManager inv, string foodName, int amount)
+        {
+            string id = ResolveItemIdByName(foodName);
+            if (string.IsNullOrEmpty(id))
             {
-                inv.AddItem("corn_01", 5);
-                Debug.Log("[FarmInteraction] Bổ sung Bắp ngô cho demo: corn_01 +5");
+                if (!string.IsNullOrEmpty(foodName))
+                    Debug.LogWarning($"[FarmInteraction] Không tìm thấy item khớp tên thức ăn '{foodName}' trong ItemDatabase (kiểm tra lại tên trong AnimalDefinition vs ItemDatabase).");
+                return;
             }
+            if (inv.GetItemQuantity(id) <= 0) inv.AddItem(id, amount);
+        }
+
+        // ── Tra cứu tên ↔ id thức ăn qua ItemDatabase ──
+        private YWonderLand.Data.ItemDatabase _foodDb;
+        private YWonderLand.Data.ItemDatabase FoodDb
+        {
+            get
+            {
+                if (_foodDb == null) _foodDb = Resources.Load<YWonderLand.Data.ItemDatabase>("ItemDatabase");
+                return _foodDb;
+            }
+        }
+
+        private string GetItemDisplayName(string itemId)
+        {
+            var def = FoodDb != null ? FoodDb.GetItem(itemId) : null;
+            return def != null && !string.IsNullOrEmpty(def.itemName) ? def.itemName : itemId;
+        }
+
+        private string ResolveItemIdByName(string displayName)
+        {
+            var db = FoodDb;
+            if (db == null || db.items == null || string.IsNullOrEmpty(displayName)) return null;
+            foreach (var it in db.items)
+                if (it != null && NameMatches(it.itemName, displayName)) return it.id;
+            return null;
+        }
+
+        private static bool NameMatches(string a, string b)
+        {
+            if (string.IsNullOrEmpty(a) || string.IsNullOrEmpty(b)) return false;
+            return string.Equals(a.Trim(), b.Trim(), System.StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static string FoodOptionsText(YWonderLand.Data.AnimalDefinition d)
+        {
+            if (d == null) return "—";
+            string m = !string.IsNullOrEmpty(d.foodMainName) ? $"{Mathf.Max(1, d.foodMainAmount)}x {d.foodMainName}" : null;
+            string a = !string.IsNullOrEmpty(d.foodAltName) ? $"{Mathf.Max(1, d.foodAltAmount)}x {d.foodAltName}" : null;
+            if (m != null && a != null) return $"{m} hoặc {a}";
+            return m ?? a ?? "—";
         }
 
         private void HealAnimal(FarmAnimal animal)
@@ -349,6 +478,13 @@ namespace YWonderLand.Environment
 
         private void ClickHarvestResource(HarvestableResource resource)
         {
+            // ĐÀO ĐÁ chỉ ở thành phố — ở đảo khác thì chặn (chặt cây vẫn bình thường).
+            if (resource != null && resource.type == HarvestableResource.ResourceType.Rock && !IsOnCityIsland())
+            {
+                ScreenToast.Show("Chỉ đào đá được ở Đảo Thành phố thôi!");
+                return;
+            }
+
             Vector3 clickPlayerPos = PlayerController.Instance != null ? PlayerController.Instance.transform.position : transform.position;
             if (Vector3.Distance(clickPlayerPos, resource.transform.position) > resource.interactionRange + 1.5f)
                 return;
@@ -377,6 +513,37 @@ namespace YWonderLand.Environment
             }
         }
 
+        // Chặt/đập LIÊN TỤC 1 tài nguyên trong lúc GIỮ nút HUD (mobile). Tăng tiến độ theo thời gian
+        // thật + lặp animation mỗi ~0.9s -> giống hệt giữ chuột trên thế giới, nhưng kích hoạt từ nút.
+        private void HoldChopResource(HarvestableResource resource)
+        {
+            if (resource == null || !resource.isHarvestable) { _buttonHeldResource = null; return; }
+
+            PlayerController player = PlayerController.Instance;
+            Vector3 ppos = player != null ? player.transform.position : transform.position;
+            if (Vector3.Distance(ppos, resource.transform.position) > resource.interactionRange + 1.5f) return; // quá xa -> khựng
+
+            _chopAnimTimer -= Time.deltaTime;
+            if (_chopAnimTimer <= 0f && player != null)
+            {
+                var tool = resource.type == HarvestableResource.ResourceType.Tree
+                    ? YWonderLand.Player.ToolType.Axe : YWonderLand.Player.ToolType.Pickaxe;
+                string anim = resource.type == HarvestableResource.ResourceType.Tree ? "TreeCuttingV4" : "Mining";
+                player.PlayActionAnimation(anim, 1.0f, tool);
+                _chopAnimTimer = 0.9f;
+            }
+
+            if (YWonderLand.UI.ResourceInteractionUIController.Instance != null)
+                YWonderLand.UI.ResourceInteractionUIController.Instance.Show(resource);
+
+            if (resource.Harvest(Time.deltaTime))
+            {
+                if (YWonderLand.UI.ResourceInteractionUIController.Instance != null)
+                    YWonderLand.UI.ResourceInteractionUIController.Instance.Hide();
+                _buttonHeldResource = null; // gãy rồi -> dừng
+            }
+        }
+
         private void PerformTileAction(FarmTile tile)
         {
             if (PlayerController.Instance == null) return; // chống NullReferenceException khi player chưa spawn / đang teleport
@@ -392,7 +559,7 @@ namespace YWonderLand.Environment
                 case FarmTile.TileState.Soil: HandlePlow(tile); break;
                 case FarmTile.TileState.Plowed: HandleOpenSeedSelection(tile); break;
                 case FarmTile.TileState.Planted: HandleWater(tile); break;
-                case FarmTile.TileState.Watered: break;
+                case FarmTile.TileState.Watered: HandleWater(tile); break;
                 case FarmTile.TileState.Ripe: HandleHarvest(tile); break;
             }
         }
@@ -407,6 +574,9 @@ namespace YWonderLand.Environment
                 HarvestableResource resource = hit.collider.GetComponent<HarvestableResource>();
                 if (resource != null)
                 {
+                    // ĐÀO ĐÁ chỉ ở thành phố — bỏ qua tảng đá nếu đang ở đảo khác (chặt cây thì vẫn được).
+                    if (resource.type == HarvestableResource.ResourceType.Rock && !IsOnCityIsland()) continue;
+
                     // Quá xa thì không cho chặt/đập (đo tới điểm chạm, khớp với lúc hiện gợi ý)
                     Vector3 holdPlayerPos = PlayerController.Instance != null ? PlayerController.Instance.transform.position : transform.position;
                     if (Vector3.Distance(holdPlayerPos, hit.point) > resource.interactionRange)
@@ -477,7 +647,16 @@ namespace YWonderLand.Environment
                 if (animal != null)
                 {
                     if (AnimalInteractionPopupController.Instance != null) AnimalInteractionPopupController.Instance.Show(animal);
-                    return; 
+                    return;
+                }
+
+                // Múc nước bằng TÂM NGẮM (click) — giống chặt cây/đào, chạy cả PC lẫn mobile.
+                var waterSrcClick = hit.collider.GetComponentInParent<WaterSource>();
+                if (waterSrcClick != null)
+                {
+                    Vector3 wpos = PlayerController.Instance != null ? PlayerController.Instance.transform.position : transform.position;
+                    if (Vector3.Distance(wpos, hit.point) <= waterSrcClick.interactRange) ScoopWater(waterSrcClick);
+                    return;
                 }
 
                 FarmTile tile = hit.collider.GetComponentInParent<FarmTile>() ?? hit.collider.GetComponent<FarmTile>();
@@ -516,9 +695,7 @@ namespace YWonderLand.Environment
                             break;
 
                         case FarmTile.TileState.Watered:
-                            // Show growth progress
-                            float pct = tile.GetGrowthPercentage();
-                            Debug.Log($"[FarmInteraction] Growing... {pct * 100:F0}%");
+                            HandleWater(tile); // tưới LẠI bằng tâm ngắm (giống nút gợi ý)
                             break;
 
                         case FarmTile.TileState.Ripe:
@@ -708,6 +885,11 @@ namespace YWonderLand.Environment
             {
                 go = Instantiate(prefab, pos, Quaternion.identity);
                 go.name = prefab.name;
+                // Gắn logic vật nuôi (đói/sản phẩm theo mốc thời gian) lên CHÍNH model thật.
+                // false = không sinh khối primitive, chỉ thêm thanh HP nổi trên đầu.
+                var fa = go.GetComponent<FarmAnimal>();
+                if (fa == null) fa = go.AddComponent<FarmAnimal>();
+                if (def != null) fa.Initialize(def, false);
             }
             else
             {
@@ -717,10 +899,81 @@ namespace YWonderLand.Environment
                 if (def != null) faNew.Initialize(def);
             }
 
-            foreach (var c in cells) c.SetAnimal(true); // đánh dấu ô chuồng đã có thú (KHÔNG ghi đè occupant rào)
+            // Ô ĐẦU = ô neo: giữ tham chiếu con vật + itemId (để trả con giống khi phá chuồng).
+            // Các ô còn lại chỉ "mượn chỗ" (HasAnimal=true, không giữ GameObject).
+            cells[0].SetAnimalOccupant(go, itemId);
+            for (int i = 1; i < cells.Count; i++) cells[i].SetAnimal(true);
+
+            // Cho con vật biết nó chiếm ô nào → tự trả ô về trống khi làm thịt vụ cuối.
+            var spawned = go.GetComponent<FarmAnimal>();
+            if (spawned != null)
+            {
+                spawned.occupiedCells = new List<BuildSurfaceCell>(cells);
+                FarmAnimal.RaiseSpawned(spawned); // báo tutorial: đã thả thú (flow mới)
+            }
 
             ScreenToast.ShowInfo($"Đã thả {(def != null ? def.animalName : itemId)} ({need} ô).");
             if (inventoryPopup != null) inventoryPopup.Hide();
+        }
+
+        // Phá CẢ CỤM rào (chuồng): trả con giống về túi → gỡ hàng rào → hoàn 1 phần giá build.
+        private void DemolishEnclosure(List<BuildSurfaceCell> pen)
+        {
+            if (pen == null || pen.Count == 0) return;
+
+            var inv = YWonderLand.Managers.InventoryManager.Instance;
+            int refundWood = 0;
+            int refundStone = 0;
+            int returnedAnimals = 0;
+            int removedFences = 0;
+
+            foreach (var c in pen)
+            {
+                if (c == null) continue;
+
+                // 1) Trả con giống về túi (chỉ ô NEO mới giữ tham chiếu thật).
+                if (c.AnimalObject != null)
+                {
+                    if (inv != null && !string.IsNullOrEmpty(c.AnimalItemId))
+                    {
+                        inv.AddItem(c.AnimalItemId, 1);
+                        returnedAnimals++;
+                    }
+                    Destroy(c.AnimalObject);
+                }
+                c.ClearAnimal();
+
+                // 2) Cộng dồn VẬT LIỆU đã tốn để hoàn (rào lưu vật liệu lúc đặt).
+                if (c.BuildMaterialId == "wood_01") refundWood += c.BuildCost;
+                else if (c.BuildMaterialId == "stone_01") refundStone += c.BuildCost;
+                c.SetBuildMaterial("", 0);
+
+                // 3) Gỡ hàng rào khỏi ô (FenceAutoConnect.OnDisable tự refresh các cạnh còn lại).
+                if (c.Occupant != null) { Destroy(c.Occupant); removedFences++; }
+                c.Clear();
+            }
+
+            // 4) Hoàn lại VẬT LIỆU đã tốn (đầy đủ — phá đồ của mình thì trả lại đúng loại).
+            if (inv != null)
+            {
+                if (refundWood > 0) inv.AddItem("wood_01", refundWood);
+                if (refundStone > 0) inv.AddItem("stone_01", refundStone);
+            }
+
+            // 5) Dọn cache + ẩn gợi ý (ô không còn là chuồng nữa).
+            hoverEnclosureSeed = null;
+            hoverEnclosure = null;
+            pendingEnclosure = null;
+            currentHoverObject = null;
+            currentActions.Clear();
+            if (GameHUDController.Instance != null) GameHUDController.Instance.HideInteractionPrompt();
+
+            string msg = $"Đã phá chuồng ({removedFences} ô rào)";
+            if (returnedAnimals > 0) msg += $", trả {returnedAnimals} con về túi";
+            if (refundWood > 0) msg += $", +{refundWood} Gỗ";
+            if (refundStone > 0) msg += $", +{refundStone} Đá";
+            ScreenToast.ShowInfo(msg + ".");
+            Debug.Log($"[FarmInteraction] Phá chuồng: {removedFences} rào, trả {returnedAnimals} con, hoàn {refundWood} gỗ + {refundStone} đá.");
         }
 
         // Demo helper: đảm bảo túi có sẵn vài con vật để test thả chuồng (production: mua từ shop).
@@ -833,19 +1086,40 @@ namespace YWonderLand.Environment
         private void HandleWater(FarmTile tile)
         {
             var inv = YWonderLand.Managers.InventoryManager.Instance;
-            if (inv != null && inv.GetItemQuantity("watering_can_01") <= 0)
+
+            // CẦN nước tưới (múc từ ao trên đảo). Hết → báo, không tưới được.
+            if (inv == null || inv.GetItemQuantity("watering_water_01") <= 0)
             {
-                Debug.Log("[FarmInteraction] Auto-giving watering_can_01 for demo purposes.");
-                inv.AddItem("watering_can_01", 1);
+                ScreenToast.Show("Hết nước tưới! Ra ao trên đảo bấm \"Múc nước\" trước đã.");
+                return;
             }
 
-            if (tile.InteractWater())
+            // Đảm bảo có xô (dụng cụ) để cầm khi múa tưới.
+            if (inv.GetItemQuantity("watering_can_01") <= 0) inv.AddItem("watering_can_01", 1);
+
+            // Tưới LẦN ĐẦU (Planted → bắt đầu lớn) hoặc TƯỚI LẠI (đang lớn → đổ đầy nước chống khát).
+            bool watered = false;
+            if (tile.currentState == FarmTile.TileState.Planted) watered = tile.InteractWater();
+            else if (tile.currentState == FarmTile.TileState.Watered) watered = tile.WaterAgain();
+
+            if (watered)
             {
-                Debug.Log("[FarmInteraction] Watered tile! Growth timer started.");
+                inv.RemoveItem("watering_water_01", 1); // TỐN 1 xô nước mỗi lần tưới
                 // Múa động tác TƯỚI bằng clip riêng "Watering" (duration 0 = tự đo độ dài clip) -> cầm BÌNH TƯỚI/XÔ
                 if (PlayerController.Instance != null)
                     PlayerController.Instance.PlayActionAnimation("Watering", 0f, YWonderLand.Player.ToolType.WateringCan);
             }
+        }
+
+        // Múc nước ở ao (vùng WaterSource) → +xô nước vào túi. KHÔNG animation (khách không yêu cầu).
+        private void ScoopWater(WaterSource src)
+        {
+            var inv = YWonderLand.Managers.InventoryManager.Instance;
+            if (inv == null) return;
+            int amt = src != null ? Mathf.Max(1, src.amountPerScoop) : 5;
+            inv.AddItem("watering_water_01", amt);
+            int total = inv.GetItemQuantity("watering_water_01");
+            ScreenToast.ShowInfo($"Múc được {amt} xô nước! (Tổng: {total})");
         }
 
         private void HandleHarvest(FarmTile tile)
@@ -871,15 +1145,21 @@ namespace YWonderLand.Environment
 
                 if (crop != null)
                 {
-                    // Add POS reward
+                    float care = tile.LastCareFactor; // <1 nếu cây từng bị khát (behavior B)
+
+                    // Add POS reward (giảm theo độ chăm sóc)
                     if (YWonderLand.Managers.EconomyManager.Instance != null)
                     {
-                        YWonderLand.Managers.EconomyManager.Instance.AddPOS(crop.posReward);
-                        Debug.Log($"[FarmInteraction] +{crop.posReward} POS");
+                        int pos = Mathf.RoundToInt(crop.posReward * care);
+                        YWonderLand.Managers.EconomyManager.Instance.AddPOS(pos);
+                        Debug.Log($"[FarmInteraction] +{pos} POS (care {care:0.00})");
                     }
 
-                    // TODO: Add EXP when level system is implemented
-                    Debug.Log($"[FarmInteraction] +{crop.expReward} EXP (not yet implemented)");
+                    // TODO: Add EXP when level system is implemented (cũng nhân care)
+                    Debug.Log($"[FarmInteraction] +{Mathf.RoundToInt(crop.expReward * care)} EXP (not yet implemented)");
+
+                    if (care < 0.99f)
+                        ScreenToast.Show($"Cây thiếu nước → sản lượng & POS giảm {Mathf.RoundToInt((1f - care) * 100f)}%!");
                 }
 
                 // Save farm state

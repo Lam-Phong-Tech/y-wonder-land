@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using YWonderLand.Data;
+using static YWonderLand.Core.GameTimeConfig; // Days()/Hours() — quy đổi thời gian thật
 
 namespace YWonderLand.EditorScripts
 {
@@ -29,20 +30,33 @@ namespace YWonderLand.EditorScripts
             db.ClearCrops();
 
             // 8 lo\u1ea1i c\u00e2y tr\u1ed3ng theo k\u1ecbch b\u1ea3n (demo: 30-60s growth)
-            AddCrop(db, "carrot_seed_01", "carrot_01", 45f, 20f, 3, 20, 50, 3, new Color(1f, 0.55f, 0.1f), "\ud83e\udd55");
-            AddCrop(db, "cabbage_seed_01", "cabbage_01", 40f, 18f, 3, 15, 40, 3, new Color(0.3f, 0.8f, 0.3f), "\ud83e\udd6c");
-            AddCrop(db, "watermelon_seed_01", "watermelon_01", 60f, 25f, 5, 30, 80, 3, new Color(0.1f, 0.6f, 0.1f), "\ud83c\udf49");
-            AddCrop(db, "corn_seed_01", "corn_01", 50f, 22f, 4, 25, 60, 3, new Color(1f, 0.85f, 0.2f), "\ud83c\udf3d");
-            AddCrop(db, "pumpkin_seed_01", "pumpkin_01", 55f, 24f, 4, 25, 70, 3, new Color(0.9f, 0.5f, 0.1f), "\ud83c\udf83");
-            AddCrop(db, "morning_glory_seed_01", "morning_glory_01", 30f, 15f, 2, 10, 25, 2, new Color(0.4f, 0.7f, 0.3f), "\ud83c\udf3e");
-            AddCrop(db, "sweet_potato_seed_01", "sweet_potato_01", 50f, 22f, 3, 20, 45, 3, new Color(0.6f, 0.3f, 0.15f), "\ud83c\udf60");
-            AddCrop(db, "grass_seed_01", "grass_01", 30f, 15f, 3, 5, 10, 2, new Color(0.2f, 0.6f, 0.2f), "\ud83c\udf3f");
+            AddCrop(db, "carrot_seed_01", "carrot_01", Days(1f), Hours(10f), 1, 25, 50, 3, new Color(1f, 0.55f, 0.1f), "\ud83e\udd55");
+            AddCrop(db, "cabbage_seed_01", "cabbage_01", Days(1f), Hours(10f), 1, 35, 40, 3, new Color(0.3f, 0.8f, 0.3f), "\ud83e\udd6c");
+            AddCrop(db, "watermelon_seed_01", "watermelon_01", Days(2f), Hours(10f), 1, 50, 80, 3, new Color(0.1f, 0.6f, 0.1f), "\ud83c\udf49");
+            AddCrop(db, "corn_seed_01", "corn_01", Days(1f), Hours(10f), 3, 100, 60, 3, new Color(1f, 0.85f, 0.2f), "\ud83c\udf3d");
+            AddCrop(db, "pumpkin_seed_01", "pumpkin_01", Days(2f), Hours(10f), 11, 125, 70, 3, new Color(0.9f, 0.5f, 0.1f), "\ud83c\udf83");
+            AddCrop(db, "morning_glory_seed_01", "morning_glory_01", Days(0.5f), Hours(6f), 1, 60, 25, 2, new Color(0.4f, 0.7f, 0.3f), "\ud83c\udf3e");
+            AddCrop(db, "sweet_potato_seed_01", "sweet_potato_01", Days(1f), Hours(10f), 1, 100, 45, 3, new Color(0.6f, 0.3f, 0.15f), "\ud83c\udf60");
+            AddCrop(db, "grass_seed_01", "grass_01", Days(0.5f), Hours(6f), 2, 175, 10, 2, new Color(0.2f, 0.6f, 0.2f), "\ud83c\udf3f");
+
+            // \u2500\u2500 C\u00c2Y L\u00c2U N\u0102M (10 c\u00e2y) \u2014 khung C\u01a0 B\u1ea2N: t\u1ea1m 1-L\u1ea6N-THU nh\u01b0 c\u00e2y ng\u1eafn ng\u00e0y (thu-nhi\u1ec1u-l\u1ea7n = Phase 2).
+            // growthTime/water = gi\u00e2y DEMO. cropPrefab \u0111\u1ec3 TR\u1ed0NG \u2192 anh k\u00e9o model v\u00e0o t\u1eebng Crop_<seed>.asset.
+            AddCrop(db, "banana_seed_01", "banana_01", Days(2f), Hours(10f), 3, 150, 0, 5, new Color(0.85f, 0.8f, 0.2f), "\ud83c\udf4c");
+            AddCrop(db, "coconut_seed_01", "coconut_01", Days(2f), Hours(10f), 2, 150, 0, 5, new Color(0.6f, 0.45f, 0.25f), "\ud83e\udd65");
+            AddCrop(db, "areca_seed_01", "areca_01", Days(2f), Hours(10f), 3, 150, 0, 5, new Color(0.55f, 0.7f, 0.3f), "\ud83c\udf34");
+            AddCrop(db, "date_seed_01", "date_01", Days(2f), Hours(10f), 4, 200, 0, 5, new Color(0.6f, 0.35f, 0.15f), "\ud83c\udf34");
+            AddCrop(db, "sacha_seed_01", "sacha_01", Days(2f), Hours(10f), 5, 200, 0, 5, new Color(0.3f, 0.6f, 0.3f), "\ud83c\udf30");
+            AddCrop(db, "tea_seed_01", "tea_01", Days(2f), Hours(10f), 5, 180, 0, 5, new Color(0.2f, 0.55f, 0.25f), "\ud83c\udf75");
+            AddCrop(db, "durian_seed_01", "durian_01", Days(2f), Hours(10f), 5, 300, 0, 5, new Color(0.7f, 0.6f, 0.2f), "\ud83e\udd6d");
+            AddCrop(db, "asparagus_seed_01", "asparagus_01", Days(2f), Hours(10f), 4, 150, 0, 4, new Color(0.4f, 0.7f, 0.3f), "\ud83c\udf31");
+            AddCrop(db, "red_ginseng_seed_01", "red_ginseng_01", Days(2f), Hours(10f), 1, 250, 0, 5, new Color(0.7f, 0.2f, 0.2f), "\ud83c\udf3f");
+            AddCrop(db, "royal_ginseng_seed_01", "royal_ginseng_01", Days(2f), Hours(10f), 1, 400, 0, 5, new Color(0.8f, 0.15f, 0.2f), "\ud83c\udf3f");
 
             EditorUtility.SetDirty(db);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
-            Debug.Log("[CropData] Generated CropDatabase with 8 crops!");
+            Debug.Log("[CropData] Generated CropDatabase with 18 crops (8 ng\u1eafn ng\u00e0y + 10 l\u00e2u n\u0103m)!");
         }
 
         private static void AddCrop(CropDatabase db, string seedId, string harvestId,

@@ -24,6 +24,10 @@ public class FloatingNameTag : MonoBehaviour
     [Header("Visibility")]
     public float maxVisibleDistance = 30f;
 
+    /// <summary>Ẩn TẤT CẢ name tag (vd trong cutscene để người chơi tập trung quang cảnh).
+    /// Đặt false để hiện lại (lúc cập bến hoặc bấm skip).</summary>
+    public static bool GloballyHidden = false;
+
     // Design System color constants
     public static readonly Color COLOR_HERO = new Color(0.357f, 0.259f, 0.953f, 1f);       // #5B42F3
     public static readonly Color COLOR_CONFIRM = new Color(0.176f, 0.482f, 1f, 1f);        // #2D7BFF
@@ -105,6 +109,9 @@ public class FloatingNameTag : MonoBehaviour
     void LateUpdate()
     {
         if (nameTagRoot == null) return;
+
+        // Ẩn toàn cục (vd trong cutscene) — hiện lại khi cập bến/skip.
+        if (GloballyHidden) { nameTagRoot.SetActive(false); return; }
 
         // Always refresh camera reference (GameManager swaps cameras between states)
         mainCamera = Camera.main;

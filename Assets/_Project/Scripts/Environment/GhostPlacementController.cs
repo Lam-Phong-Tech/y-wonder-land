@@ -34,7 +34,14 @@ public class GhostPlacementController : MonoBehaviour
     private bool isActive = false;
     private Vector2Int currentItemSize = new Vector2Int(1, 1);
     private string currentItemName = "";
-    private int currentItemPrice = 0;
+    private int currentItemPrice = 0;          // = SỐ LƯỢNG vật liệu cần (0 = miễn phí)
+    private string currentMaterialId = "";     // id vật liệu (wood_01/stone_01...); "" = miễn phí
+
+    // Tên hiển thị vật liệu theo id (cho thông báo thiếu vật liệu).
+    private static string MatLabel(string id)
+    {
+        return id == "wood_01" ? "Gỗ" : id == "stone_01" ? "Đá" : id == "iron_01" ? "Sắt" : id;
+    }
     private int rotationAngle = 0;
     private bool currentPlacementValid = false;
     private float currentGroundY = 0f;
@@ -104,19 +111,30 @@ public class GhostPlacementController : MonoBehaviour
 
     // ── Activation ──
 
-    public void Activate(string itemName, Vector2Int size, int price)
+    public void Activate(string itemName, Vector2Int size, string materialId, int materialAmount)
     {
         currentItemName = itemName;
         currentItemSize = size;
-        currentItemPrice = price;
+        currentMaterialId = materialId;
+        currentItemPrice = materialAmount;
         rotationAngle = 0;
         isActive = true;
         IsPinned = false;
 
         if (gridManager == null) gridManager = BuildGridManager.Instance;
 
+        // Lấy thư viện prefab. Nếu Instance chưa set (GameObject đang inactive / Awake chưa chạy /
+        // bị cái rỗng giành Instance) -> tự tìm trong scene kể cả object inactive, để KHÔNG im lặng rơi về Cube.
         var lib = YWonderLand.Environment.BuildPrefabLibrary.Instance;
+        if (lib == null)
+            lib = Object.FindFirstObjectByType<YWonderLand.Environment.BuildPrefabLibrary>(FindObjectsInactive.Include);
+
         currentEntry = lib != null ? lib.Find(itemName) : null;
+
+        if (lib == null)
+            Debug.LogWarning("[GhostPlacement] KHÔNG tìm thấy BuildPrefabLibrary trong scene -> ghost dùng Cube. Hãy thêm 1 GameObject ĐANG BẬT gắn BuildPrefabLibrary.");
+        else if (currentEntry == null)
+            Debug.LogWarning($"[GhostPlacement] '{itemName}' không khớp entry nào trong BuildPrefabLibrary -> ghost dùng Cube. Kiểm tra 'Name Contains' + đã gán Prefab chưa.");
 
         BuildGhost();
         Debug.Log($"[GhostPlacement] Activated '{itemName}' size ({size.x},{size.y}) — ghost={(ghostIsPrefab ? "PREFAB mờ" : "Cube")}");
@@ -315,6 +333,18 @@ public class GhostPlacementController : MonoBehaviour
         // Chỉ đặt khi đang trỏ vào ô đất hợp lệ còn TRỐNG (snap theo cube, không theo lưới ảo).
         if (currentCell == null || currentCell.IsOccupied) return;
 
+        // Chi phí VẬT LIỆU: đủ → trừ; thiếu → KHÔNG đặt + báo. (0/"" = miễn phí, vd ô ruộng.)
+        if (currentItemPrice > 0 && !string.IsNullOrEmpty(currentMaterialId))
+        {
+            var inv = YWonderLand.Managers.InventoryManager.Instance;
+            if (inv == null || inv.GetItemQuantity(currentMaterialId) < currentItemPrice)
+            {
+                YWonderLand.Environment.ScreenToast.Show($"Không đủ vật liệu! Cần {currentItemPrice} {MatLabel(currentMaterialId)} để xây.");
+                return;
+            }
+            inv.RemoveItem(currentMaterialId, currentItemPrice);
+        }
+
         if (ghostIsPrefab && currentEntry != null)
         {
             // WYSIWYG: clone căn tâm (GIỮ script/collider) đặt đúng vị trí/xoay của ghost.
@@ -324,6 +354,7 @@ public class GhostPlacementController : MonoBehaviour
             go.name = $"Building_{currentItemName}_{currentCell.name}";
             if (go.CompareTag("Untagged")) go.tag = "PlacedBuilding";
             currentCell.SetOccupant(go); // ghi vật vào ô (để biết ô có rào/công trình)
+            currentCell.SetBuildMaterial(currentMaterialId, currentItemPrice); // lưu vật liệu để hoàn khi phá
             Debug.Log($"[GhostPlacement] Đặt PREFAB '{currentEntry.prefab.name}' (căn tâm) tại {go.transform.position} trên ô '{currentCell.name}'");
         }
         else
@@ -355,7 +386,11 @@ public class GhostPlacementController : MonoBehaviour
             renderer.material = mat;
         }
         building.tag = "PlacedBuilding";
-        if (currentCell != null) currentCell.SetOccupant(building); // ghi vật vào ô
+        if (currentCell != null)
+        {
+            currentCell.SetOccupant(building); // ghi vật vào ô
+            currentCell.SetBuildMaterial(currentMaterialId, currentItemPrice); // lưu vật liệu để hoàn khi phá
+        }
     }
 
     private Color GetBuildingColor()

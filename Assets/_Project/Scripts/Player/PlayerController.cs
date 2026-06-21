@@ -33,6 +33,11 @@ public class PlayerController : MonoBehaviour
     [Header("State")]
     public bool isSwimming = false;
     private float waterSurfaceY = 0f;
+    // Cửa sổ "bật khỏi mặt nước" sau khi bấm Nhảy lúc đang bơi: tạm ngắt lực đẩy để vọt lên trèo bờ.
+    private float swimLeapTimer = 0f;
+    // Số khối nước (trigger tag "Water") nhân vật đang nằm trong. Cho phép GHÉP NHIỀU BOX để
+    // ướm hồ hình dạng lạ — chỉ tắt bơi khi rời HẾT (đếm về 0), không bị giật giữa các box.
+    private int waterVolumeCount = 0;
     private bool isSprintUIHeld = false;
     private float actionLockTimer = 0f;
     private float _actionSpeed = 1f;
@@ -209,17 +214,23 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        // 4. Handle Jumping (Không cho nhảy khi đang bơi)
-        if (jumpPressed && isGrounded && !isSwimming)
+        // 4. Handle Jumping — nhảy trên cạn HOẶC bật lên khỏi mặt nước để trèo lên bờ.
+        if (jumpPressed && (isGrounded || isSwimming))
         {
             // Physics formula for jump velocity: v = sqrt(h * -2 * g)
             playerVelocity.y = Mathf.Sqrt(jumpHeight * -2.0f * gravity);
             CrossFadeAnim(animJump, 0.1f);
+            // Nhảy DƯỚI NƯỚC: mở cửa sổ ngắt lực đẩy để gravity + lực nhảy đưa nhân vật
+            // vọt lên TRÊN mặt nước (giữ hướng tiến tới bờ là leo lên được).
+            if (isSwimming) swimLeapTimer = 0.6f;
             Debug.Log("[PlayerController] Jump triggered!");
         }
 
-        // Apply gravity & Buoyancy
-        if (!isSwimming)
+        if (swimLeapTimer > 0f) swimLeapTimer -= Time.deltaTime;
+
+        // Apply gravity & Buoyancy. Trong lúc "bật khỏi nước" (swimLeapTimer) -> dùng gravity, KHÔNG ghim lực đẩy.
+        bool buoyancyActive = isSwimming && swimLeapTimer <= 0f;
+        if (!buoyancyActive)
         {
             playerVelocity.y += gravity * Time.deltaTime;
         }
@@ -229,7 +240,7 @@ public class PlayerController : MonoBehaviour
             // Giả sử tâm nhân vật (chân) cần nằm dưới mặt nước khoảng 1.2 mét để ngực vừa ngang mặt nước
             float targetFeetY = waterSurfaceY - 1.2f;
             float depth = targetFeetY - transform.position.y;
-            
+
             // Lò xo nước: chìm càng sâu đẩy lên càng mạnh, cao quá thì rơi xuống nhẹ
             playerVelocity.y = depth * 5f;
             playerVelocity.y = Mathf.Clamp(playerVelocity.y, -10f, 5f);
@@ -240,7 +251,7 @@ public class PlayerController : MonoBehaviour
         isGrounded = controller.isGrounded;
 
         // 5. Update Locomotion Animations
-        if (isSwimming)
+        if (isSwimming && swimLeapTimer <= 0f)
         {
             // Nếu có di chuyển thì bơi lội, không thì bơi đứng (tạm dùng chung animation bơi)
             CrossFadeAnim(animSwim, 0.2f);
@@ -409,9 +420,10 @@ public class PlayerController : MonoBehaviour
     {
         if (other.CompareTag("Water"))
         {
+            waterVolumeCount++;
             isSwimming = true;
             waterSurfaceY = other.bounds.max.y;
-            Debug.Log($"[PlayerController] Xuống nước. Cao độ mặt nước: {waterSurfaceY}");
+            Debug.Log($"[PlayerController] Xuống nước (khối #{waterVolumeCount}). Cao độ mặt nước: {waterSurfaceY}");
         }
     }
 
@@ -427,8 +439,24 @@ public class PlayerController : MonoBehaviour
     {
         if (other.CompareTag("Water"))
         {
-            isSwimming = false;
-            Debug.Log("[PlayerController] Lên bờ -> Chuyển về đi bộ.");
+            waterVolumeCount = Mathf.Max(0, waterVolumeCount - 1);
+            // Chỉ thật sự "lên bờ" khi đã rời HẾT mọi khối nước (đếm về 0).
+            if (waterVolumeCount == 0)
+            {
+                isSwimming = false;
+                Debug.Log("[PlayerController] Lên bờ -> Chuyển về đi bộ.");
+            }
         }
+    }
+
+    /// <summary>
+    /// Đặt lại sạch trạng thái bơi — gọi khi teleport/đổi đảo. Cần vì tắt collider nước
+    /// (ẩn biển lúc đổi đảo) có thể KHÔNG bắn OnTriggerExit -> waterVolumeCount kẹt > 0.
+    /// </summary>
+    public void ResetSwimState()
+    {
+        isSwimming = false;
+        waterVolumeCount = 0;
+        swimLeapTimer = 0f;
     }
 }

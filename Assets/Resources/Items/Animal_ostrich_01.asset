@@ -24,11 +24,13 @@ MonoBehaviour:
   productMainAmount: 1
   productAltName: "Th\u1ECBt \u0111\xE0 \u0111i\u1EC3u"
   productAltAmount: 20
-  produceItemId: 
+  produceItemId: ostrich_egg_01
   produceAmount: 1
-  produceCycleTimeSec: 35
-  maxHarvests: 0
-  feedIntervalSec: 30
+  produceCycleTimeSec: 25
+  maxHarvests: 30
+  meatItemId: ostrich_meat_01
+  meatAmount: 20
+  feedIntervalSec: 40
   canGetSick: 1
   primitiveType: 0
   animalColor: {r: 1, g: 1, b: 1, a: 1}

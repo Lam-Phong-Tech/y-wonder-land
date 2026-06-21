@@ -9,6 +9,11 @@ public struct InteractionAction
     public string keyName;
     public string actionName;
     public Action onClick;
+
+    // GIỮ-ĐỂ-LẶP (vd chặt cây): set 2 cái này thay cho onClick. Giữ nút -> onHoldStart, thả -> onHoldEnd.
+    // Việc lặp hành động mỗi frame do logic bên ngoài lo (đặt cờ lúc Start, xử lý trong Update).
+    public Action onHoldStart;
+    public Action onHoldEnd;
 }
 
 /// <summary>
@@ -656,8 +661,21 @@ public class GameHUDController : MonoBehaviour
             actionLabel.AddToClassList("interaction-action-label");
             btn.Add(actionLabel);
 
-            // Gán sự kiện click
-            if (action.onClick != null)
+            // Gán sự kiện: GIỮ-ĐỂ-LẶP (vd chặt cây) hoặc click thường.
+            if (action.onHoldStart != null || action.onHoldEnd != null)
+            {
+                var holdStart = action.onHoldStart;
+                var holdEnd = action.onHoldEnd;
+                Button heldBtn = btn;
+                btn.RegisterCallback<PointerDownEvent>(evt =>
+                {
+                    holdStart?.Invoke();
+                    heldBtn.CapturePointer(evt.pointerId); // bắt con trỏ -> nhả ngoài nút vẫn nhận PointerUp
+                }, TrickleDown.TrickleDown);
+                btn.RegisterCallback<PointerUpEvent>(evt => holdEnd?.Invoke(), TrickleDown.TrickleDown);
+                btn.RegisterCallback<PointerCaptureOutEvent>(evt => holdEnd?.Invoke()); // mất bắt -> dừng an toàn
+            }
+            else if (action.onClick != null)
             {
                 btn.clicked += action.onClick;
             }

@@ -64,6 +64,9 @@ public class BoatCutscene : MonoBehaviour
         startPosition = transform.position;
         cutsceneTimer = 0f;
 
+        // Ẩn name tag trong lúc cutscene để người chơi tập trung quang cảnh (hiện lại ở EndCutscene).
+        FloatingNameTag.GloballyHidden = true;
+
         if (waypoints.Count > 0)
         {
             Transform lastWaypoint = waypoints[waypoints.Count - 1];
@@ -422,6 +425,9 @@ public class BoatCutscene : MonoBehaviour
         if (!isCutscenePlaying) return; // Prevent double trigger
         isCutscenePlaying = false;
         Debug.Log("[BoatCutscene] Boat Cutscene Completed!");
+
+        // Hiện lại name tag khi cập bến / bấm skip / timeout (EndCutscene là điểm hội tụ chung).
+        FloatingNameTag.GloballyHidden = false;
         
         // Clean up UI
         if (cutsceneUIDocument != null)

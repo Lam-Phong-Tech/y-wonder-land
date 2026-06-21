@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b90b00c31d91fd9448e840c5c25b68d9, type: 3}
+  m_Name: Shop_FarmShop
+  m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.ShopDefinition
+  shopName: "C\u1EEDa h\xE0ng H\u1EA1t gi\u1ED1ng & V\u1EADt nu\xF4i"
+  accessMode: 1
+  buyItemIds:
+  - carrot_seed_01
+  - cabbage_seed_01
+  - watermelon_seed_01
+  - corn_seed_01
+  - pumpkin_seed_01
+  - grass_seed_01
+  - morning_glory_seed_01
+  - sweet_potato_seed_01
+  - banana_seed_01
+  - coconut_seed_01
+  - areca_seed_01
+  - date_seed_01
+  - sacha_seed_01
+  - tea_seed_01
+  - durian_seed_01
+  - asparagus_seed_01
+  - red_ginseng_seed_01
+  - royal_ginseng_seed_01
+  - chicken_01
+  - rabbit_01
+  - ostrich_01
+  - goat_01
+  - cow_01
+  - deer_01
+  - pig_01
+  - duck_01
+  - goose_01
+  - turtle_01
+  sellItemIds: []

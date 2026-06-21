@@ -36,12 +36,10 @@ public class BuildModeOverlayController : MonoBehaviour
     // UI Elements — Placement Controls (confirm/rotate/cancel)
     private VisualElement placementControls;
     private Button btnConfirmPlace;
-    private Button btnRotatePlace;
     private Button btnCancelPlace;
 
     // UI Elements — Contextual Menu (for placed buildings)
     private VisualElement contextMenu;
-    private Button btnCtxRotate;
     private Button btnCtxMove;
     private Button btnCtxDelete;
 
@@ -60,9 +58,6 @@ public class BuildModeOverlayController : MonoBehaviour
     private int selectedItemIndex = -1;
     private VisualElement selectedCardElement;
 
-    // Mock balance
-    private int currentBalance = 5000;
-
     // Context-selected building
     private GameObject contextSelectedBuilding;
 
@@ -73,30 +68,51 @@ public class BuildModeOverlayController : MonoBehaviour
         public string emoji;
         public string name;
         public string size;
-        public int price;
+        public string materialId;   // "" = miễn phí
+        public int materialAmount;  // số lượng vật liệu cần
         public string description;
 
-        public BuildItemData(string emoji, string name, string size, int price, string description)
+        public BuildItemData(string emoji, string name, string size, string materialId, int materialAmount, string description)
         {
             this.emoji = emoji;
             this.name = name;
             this.size = size;
-            this.price = price;
+            this.materialId = materialId;
+            this.materialAmount = materialAmount;
             this.description = description;
+        }
+
+        // Chữ chi phí hiển thị trên menu Build (thay "X POS").
+        public string CostText()
+        {
+            if (materialAmount <= 0 || string.IsNullOrEmpty(materialId)) return "Miễn phí";
+            string mat = materialId == "wood_01" ? "Gỗ" : materialId == "stone_01" ? "Đá" : materialId == "iron_01" ? "Sắt" : materialId;
+            return $"{materialAmount} {mat}";
         }
     }
 
-    // Menu Build r\u00fat g\u1ecdn \u2014 ch\u1ec9 3 m\u1ee5c: Ru\u1ed9ng / \u0110\u01b0\u1eddng \u0111\u00e1 / Chu\u1ed3ng (r\u00e0o x\u1ecbn). 1 category duy nh\u1ea5t.
-    private static readonly Dictionary<int, List<BuildItemData>> categoryData = new Dictionary<int, List<BuildItemData>>()
+    [Header("Chi ph\u00ed x\u00e2y (t\u00f9y ch\u1ec9nh trong Inspector)")]
+    [Tooltip("S\u1ed1 G\u1ed6 t\u1ed1n khi x\u00e2y 1 \u00f4 r\u00e0o (Chu\u1ed3ng).")]
+    [SerializeField] private int penWoodCost = 4;
+    [Tooltip("S\u1ed1 \u0110\u00c1 t\u1ed1n khi l\u00e1t 1 \u00f4 \u0110\u01b0\u1eddng \u0111\u00e1.")]
+    [SerializeField] private int pathStoneCost = 4;
+
+    // Menu Build r\u00fat g\u1ecdn \u2014 3 m\u1ee5c: Ru\u1ed9ng (free) / \u0110\u01b0\u1eddng \u0111\u00e1 / Chu\u1ed3ng. D\u1ef1ng RUNTIME \u0111\u1ec3 l\u1ea5y chi ph\u00ed t\u1eeb SerializeField.
+    private Dictionary<int, List<BuildItemData>> categoryData;
+
+    private void BuildCategoryData()
     {
-        { 0, new List<BuildItemData> // X\u00e2y d\u1ef1ng
-            {
-                new BuildItemData("\U0001F33E", "Ru\u1ed9ng", "1x1", 50, "\u00d4 \u0111\u1ea5t canh t\u00e1c \u2014 \u0111\u1eb7t t\u1eebng \u00f4 \u0111\u1ec3 tr\u1ed3ng c\u00e2y."),
-                new BuildItemData("\U0001FAA8", "\u0110\u01b0\u1eddng \u0111\u00e1", "1x1", 40, "M\u1eb7t \u0111\u01b0\u1eddng \u0111\u00e1 l\u00e1t l\u1ed1i \u0111i."),
-                new BuildItemData("\U0001F404", "Chu\u1ed3ng", "1x1", 50, "H\u00e0ng r\u00e0o qu\u00e2y chu\u1ed3ng \u2014 gh\u00e9p nhi\u1ec1u \u00f4 th\u00e0nh chu\u1ed3ng to."),
+        categoryData = new Dictionary<int, List<BuildItemData>>()
+        {
+            { 0, new List<BuildItemData>
+                {
+                    new BuildItemData("\U0001F33E", "Ru\u1ed9ng", "1x1", "", 0, "\u00d4 \u0111\u1ea5t canh t\u00e1c \u2014 \u0111\u1eb7t t\u1eebng \u00f4 \u0111\u1ec3 tr\u1ed3ng c\u00e2y. (Mi\u1ec5n ph\u00ed)"),
+                    new BuildItemData("\U0001FAA8", "\u0110\u01b0\u1eddng \u0111\u00e1", "1x1", "stone_01", pathStoneCost, $"M\u1eb7t \u0111\u01b0\u1eddng \u0111\u00e1 l\u00e1t l\u1ed1i \u0111i. ({pathStoneCost} \u0110\u00e1)"),
+                    new BuildItemData("\U0001F404", "Chu\u1ed3ng", "1x1", "wood_01", penWoodCost, $"H\u00e0ng r\u00e0o qu\u00e2y chu\u1ed3ng \u2014 gh\u00e9p nhi\u1ec1u \u00f4 th\u00e0nh chu\u1ed3ng to. ({penWoodCost} G\u1ed7/\u00f4 r\u00e0o)"),
+                }
             }
-        }
-    };
+        };
+    }
 
     // ── Unity Lifecycle ──
 
@@ -109,6 +125,8 @@ public class BuildModeOverlayController : MonoBehaviour
             Destroy(gameObject);
             return;
         }
+
+        BuildCategoryData(); // dựng danh mục build từ chi phí trong Inspector
     }
 
     void OnEnable()
@@ -135,12 +153,6 @@ public class BuildModeOverlayController : MonoBehaviour
         var keyboard = Keyboard.current;
         var mouse = Mouse.current;
         if (keyboard == null || mouse == null) return;
-
-        // R = Rotate (when placing)
-        if (keyboard.rKey.wasPressedThisFrame && state == BuildState.Placing)
-        {
-            OnRotatePlacement();
-        }
 
         // Escape = Exit build mode or cancel placement
         if (keyboard.escapeKey.wasPressedThisFrame)
@@ -234,12 +246,10 @@ public class BuildModeOverlayController : MonoBehaviour
         // Placement controls
         placementControls = root.Q<VisualElement>("PlacementControls");
         btnConfirmPlace = root.Q<Button>("BtnConfirmPlace");
-        btnRotatePlace = root.Q<Button>("BtnRotatePlace");
         btnCancelPlace = root.Q<Button>("BtnCancelPlace");
 
         // Contextual menu
         contextMenu = root.Q<VisualElement>("ContextMenu");
-        btnCtxRotate = root.Q<Button>("BtnCtxRotate");
         btnCtxMove = root.Q<Button>("BtnCtxMove");
         btnCtxDelete = root.Q<Button>("BtnCtxDelete");
 
@@ -275,11 +285,9 @@ public class BuildModeOverlayController : MonoBehaviour
 
         // Placement controls
         btnConfirmPlace?.RegisterCallback<ClickEvent>(evt => OnConfirmPlacement());
-        btnRotatePlace?.RegisterCallback<ClickEvent>(evt => OnRotatePlacement());
         btnCancelPlace?.RegisterCallback<ClickEvent>(evt => OnCancelPlacement());
 
         // Contextual menu
-        btnCtxRotate?.RegisterCallback<ClickEvent>(evt => OnCtxRotate());
         btnCtxMove?.RegisterCallback<ClickEvent>(evt => OnCtxMove());
         btnCtxDelete?.RegisterCallback<ClickEvent>(evt => OnCtxDelete());
     }
@@ -461,7 +469,7 @@ public class BuildModeOverlayController : MonoBehaviour
             nameLabel.AddToClassList("build-item-name");
             card.Add(nameLabel);
 
-            var priceLabel = new Label($"{item.price} POS");
+            var priceLabel = new Label(item.CostText());
             priceLabel.AddToClassList("build-item-price");
             card.Add(priceLabel);
 
@@ -514,7 +522,7 @@ public class BuildModeOverlayController : MonoBehaviour
         if (GhostPlacementController.Instance != null)
         {
             Vector2Int size = ParseSize(item.size);
-            GhostPlacementController.Instance.Activate(item.name, size, item.price);
+            GhostPlacementController.Instance.Activate(item.name, size, item.materialId, item.materialAmount);
         }
 
         // Show placement controls (confirm/rotate/cancel)
@@ -543,12 +551,19 @@ public class BuildModeOverlayController : MonoBehaviour
 
     private void ShowPlacementControls()
     {
-        placementControls?.RemoveFromClassList("hidden");
+        if (placementControls == null) return;
+        placementControls.RemoveFromClassList("hidden");
+        // Set thẳng inline để cùng "ngôn ngữ" với UpdatePlacementControlsPosition (nó cũng set inline).
+        placementControls.style.display = DisplayStyle.Flex;
     }
 
     private void HidePlacementControls()
     {
-        placementControls?.AddToClassList("hidden");
+        if (placementControls == null) return;
+        placementControls.AddToClassList("hidden");
+        // BẮT BUỘC set inline None: UpdatePlacementControlsPosition đã set inline Flex (đè class .hidden)
+        // -> chỉ add class sẽ KHÔNG ẩn được, khiến nút Tích/X "đứng lì" sau khi xây/hủy.
+        placementControls.style.display = DisplayStyle.None;
     }
 
     private void OnConfirmPlacement()
@@ -566,15 +581,6 @@ public class BuildModeOverlayController : MonoBehaviour
         // Unpin so the next one follows mouse immediately
         ghost.SetPinned(false);
         HidePlacementControls();
-    }
-
-    private void OnRotatePlacement()
-    {
-        var ghost = GhostPlacementController.Instance;
-        if (ghost != null && ghost.IsActive)
-        {
-            ghost.Rotate();
-        }
     }
 
     private void OnCancelPlacement()
@@ -639,15 +645,6 @@ public class BuildModeOverlayController : MonoBehaviour
     {
         contextMenu?.AddToClassList("hidden");
         contextSelectedBuilding = null;
-    }
-
-    private void OnCtxRotate()
-    {
-        if (contextSelectedBuilding == null) return;
-
-        contextSelectedBuilding.transform.Rotate(0, 90, 0);
-        ShowStatusMessage("\\u0110\\u00e3 xoay!", true);
-        HideContextMenu();
     }
 
     private void OnCtxMove()
@@ -720,7 +717,7 @@ public class BuildModeOverlayController : MonoBehaviour
                 if (parts.Length >= 2) itemName = parts[1];
             }
 
-            GhostPlacementController.Instance.Activate(itemName, size, 0);
+            GhostPlacementController.Instance.Activate(itemName, size, "", 0); // đặt lại công trình đã có → miễn phí (không trừ lại vật liệu)
             state = BuildState.Placing;
             ShowPlacementControls();
         }
@@ -741,7 +738,7 @@ public class BuildModeOverlayController : MonoBehaviour
 
         if (infoTooltipName != null) infoTooltipName.text = item.name;
         if (infoTooltipSize != null) infoTooltipSize.text = item.size;
-        if (infoTooltipPrice != null) infoTooltipPrice.text = $"{item.price} POS";
+        if (infoTooltipPrice != null) infoTooltipPrice.text = item.CostText();
         if (infoTooltipDesc != null) infoTooltipDesc.text = item.description;
 
         infoTooltip?.RemoveFromClassList("hidden");
@@ -756,23 +753,21 @@ public class BuildModeOverlayController : MonoBehaviour
 
     private void UpdateBalance()
     {
-        if (lblBuildBalance != null)
-        {
-            lblBuildBalance.text = $"{currentBalance:N0} POS";
-        }
+        if (lblBuildBalance == null) return;
+        // Build mode dùng VẬT LIỆU → hiện số gỗ/đá người chơi đang có (thay vì POS).
+        var inv = YWonderLand.Managers.InventoryManager.Instance;
+        if (inv != null)
+            lblBuildBalance.text = $"🪵 {inv.GetItemQuantity("wood_01")} Gỗ   🪨 {inv.GetItemQuantity("stone_01")} Đá";
+        else
+            lblBuildBalance.text = "🪵 0 Gỗ   🪨 0 Đá";
     }
 
     private void OnBuildingPlacedHandler(string itemName, int price)
     {
-        if (currentBalance < price)
-        {
-            ShowStatusMessage($"Kh\u00F4ng \u0111\u1EE7 POS! C\u1EA7n {price} POS.", false);
-            return;
-        }
-
-        currentBalance -= price;
-        UpdateBalance();
-        ShowStatusMessage($"\u0110\u1EB7t th\u00E0nh c\u00F4ng! (-{price} POS)", true);
+        // V\u1EADt li\u1EC7u \u0111\u00E3 \u0111\u01B0\u1EE3c KI\u1EC2M + TR\u1EEA \u1EDF GhostPlacementController.ConfirmPlacement (n\u1EBFu thi\u1EBFu th\u00EC kh\u00F4ng \u0111\u1EB7t \u0111\u01B0\u1EE3c).
+        // \u0110\u00E2y ch\u1EC9 b\u00E1o th\u00E0nh c\u00F4ng + m\u00FAa ho\u1EA1t \u1EA3nh.
+        ShowStatusMessage("\u0110\u1EB7t th\u00E0nh c\u00F4ng!", true);
+        UpdateBalance(); // c\u1EADp nh\u1EADt l\u1EA1i s\u1ED1 g\u1ED7/\u0111\u00E1 c\u00F2n l\u1EA1i
 
         // Kích hoạt Animation cho Player
         if (PlayerController.Instance != null)

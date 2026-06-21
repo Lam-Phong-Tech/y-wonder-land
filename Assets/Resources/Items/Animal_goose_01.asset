@@ -24,11 +24,13 @@ MonoBehaviour:
   productMainAmount: 2
   productAltName: "Th\u1ECBt ng\u1ED7ng"
   productAltAmount: 5
-  produceItemId: 
-  produceAmount: 1
-  produceCycleTimeSec: 35
-  maxHarvests: 0
-  feedIntervalSec: 30
+  produceItemId: goose_egg_01
+  produceAmount: 2
+  produceCycleTimeSec: 25
+  maxHarvests: 30
+  meatItemId: goose_meat_01
+  meatAmount: 5
+  feedIntervalSec: 40
   canGetSick: 1
   primitiveType: 0
   animalColor: {r: 1, g: 1, b: 1, a: 1}

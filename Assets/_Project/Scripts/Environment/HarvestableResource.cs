@@ -22,8 +22,13 @@ namespace YWonderLand.Environment
         public string yieldItemId; // e.g. "wood_01", "stone_01"
         public int minYield = 1;
         public int maxYield = 3;
-        public float respawnTimeSec = 3600f; // Default 1 hour
-        public float harvestDuration = 3f; // Seconds to harvest
+
+        [Header("Tái sinh (respawn) — tùy chỉnh dễ dàng")]
+        [Tooltip("Bao lâu (GIÂY) cây/đá MỌC LẠI sau khi chặt/đào xong. Demo nên để NGẮN (vd 60). 3600 = 1 giờ.\nMẹo: chọn NHIỀU prefab/đối tượng trong Hierarchy rồi sửa 1 lần là áp cho hết.")]
+        public float respawnTimeSec = 60f;
+
+        [Tooltip("Thời gian (giây) phải GIỮ để chặt/đào xong 1 lần.")]
+        public float harvestDuration = 3f;
 
         [Tooltip("Khoảng cách tối đa (mét) để hiện gợi ý + cho phép chặt/đập. Đặt 1-2 cho gần giống Minecraft.")]
         public float interactionRange = 2f;
@@ -83,7 +88,8 @@ namespace YWonderLand.Environment
                 var all = Object.FindObjectsByType<Transform>(FindObjectsSortMode.None);
                 foreach (var t in all)
                 {
-                    if (t != null && t.name.Contains(leafNameContains))
+                    // So khớp KHÔNG phân biệt hoa/thường: "leaf" khớp cả "Leaf", "LEAF", "Tree_Leaf"...
+                    if (t != null && t.name.IndexOf(leafNameContains, System.StringComparison.OrdinalIgnoreCase) >= 0)
                         _leafPool.Add(t);
                 }
             }
