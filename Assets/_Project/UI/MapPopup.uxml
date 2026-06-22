@@ -58,6 +58,9 @@
                             <ui:Label text="⛏️" class="map-island-icon" />
                         </ui:VisualElement>
                         <ui:Label text="Mỏ đá" class="map-island-name" />
+                        <ui:VisualElement name="LockMine" class="map-island-lock">
+                            <ui:Label text="🔒" class="map-island-lock-icon" />
+                        </ui:VisualElement>
                     </ui:VisualElement>
 
                     <!-- ═══ ISLAND: Đảo Hải Phú (bottom-left) ═══ -->

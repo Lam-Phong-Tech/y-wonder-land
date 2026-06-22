@@ -86,6 +86,13 @@ public class GameHUDController : MonoBehaviour
     private int joystickPointerId = -1;
     private const float JoystickRadius = 45f;
 
+    // Vùng nhìn (mobile) — kéo 1 ngón nửa phải để xoay camera
+    private VisualElement lookZone;
+    private int lookPointerId = -1;
+    private Vector2 lookLastPos;
+
+    private YWonderLand.Managers.ExperienceManager _expMgr;
+
     // Cụm nút phải: chỉ còn nút X (hủy hoạt ảnh), hiện khi nhân vật đang bận.
     private VisualElement rightActionsContainer;
 
@@ -139,6 +146,18 @@ public class GameHUDController : MonoBehaviour
             SetCurrency(YWonderLand.Managers.EconomyManager.Instance.GetPOS());
             YWonderLand.Managers.EconomyManager.Instance.OnPOSChanged += SetCurrency;
         }
+
+        // EXP/Level (tối giản) — hiện cấp + % EXP thật, cập nhật khi cộng EXP.
+        _expMgr = YWonderLand.Managers.ExperienceManager.Instance;
+        if (_expMgr != null)
+        {
+            if (playerLevel != null) playerLevel.text = $"Level: {_expMgr.Level}";
+            SetPlayerEXP(_expMgr.ExpPercent);
+            _expMgr.OnEXPChanged += OnExpChanged;
+        }
+
+        // Nhạc nền (tự tạo AudioManager; thiếu file Resources/Audio/bgm thì im, không lỗi).
+        YWonderLand.Managers.AudioManager.Instance?.PlayMusic("bgm");
     }
 
     void OnDisable()
@@ -147,6 +166,15 @@ public class GameHUDController : MonoBehaviour
         {
             YWonderLand.Managers.EconomyManager.Instance.OnPOSChanged -= SetCurrency;
         }
+
+        if (_expMgr != null) _expMgr.OnEXPChanged -= OnExpChanged;
+    }
+
+    // Cập nhật cấp + % EXP lên HUD khi ExperienceManager báo đổi.
+    private void OnExpChanged(int level, float percent)
+    {
+        if (playerLevel != null) playerLevel.text = $"Level: {level}";
+        SetPlayerEXP(percent);
     }
 
     private void QueryElements(VisualElement root)
@@ -187,6 +215,7 @@ public class GameHUDController : MonoBehaviour
         interactionContainer = root.Q<VisualElement>("InteractionContainer");
         joystickOuter = root.Q<VisualElement>("Joystick");
         joystickKnob = joystickOuter?.Q<VisualElement>(className: "joystick-inner");
+        lookZone = root.Q<VisualElement>("LookZone");
         rightActionsContainer = root.Q<VisualElement>(className: "hud-right-actions");
 
 
@@ -354,6 +383,7 @@ public class GameHUDController : MonoBehaviour
         }
 
         SetupJoystick();
+        SetupLookZone();
 
         // Bag
         btnBag?.RegisterCallback<ClickEvent>(evt =>
@@ -475,7 +505,8 @@ public class GameHUDController : MonoBehaviour
         {
             if (GameManager.Instance != null && !string.IsNullOrEmpty(GameManager.Instance.playerName))
             {
-                SetPlayerInfo(GameManager.Instance.playerName, 1);
+                int lvl = _expMgr != null ? _expMgr.Level : 1;
+                SetPlayerInfo(GameManager.Instance.playerName, lvl);
                 Debug.Log($"[GameHUD] Synced player name: {GameManager.Instance.playerName}");
                 yield break;
             }
@@ -628,6 +659,44 @@ public class GameHUDController : MonoBehaviour
         joystickPointerId = -1;
         if (joystickKnob != null) joystickKnob.style.translate = new Translate(0, 0, 0);
         if (PlayerController.Instance != null) PlayerController.Instance.SetMoveInput(Vector2.zero);
+    }
+
+    // ───────────────────────────────────────────────
+    //  VÙNG NHÌN (MOBILE) — kéo 1 ngón nửa phải để xoay camera (giống joystick nửa trái)
+    // ───────────────────────────────────────────────
+    private void SetupLookZone()
+    {
+        if (lookZone == null) return;
+        lookZone.RegisterCallback<PointerDownEvent>(OnLookDown);
+        lookZone.RegisterCallback<PointerMoveEvent>(OnLookMove);
+        lookZone.RegisterCallback<PointerUpEvent>(OnLookUp);
+        lookZone.RegisterCallback<PointerCaptureOutEvent>(evt => lookPointerId = -1);
+    }
+
+    private void OnLookDown(PointerDownEvent evt)
+    {
+        if (UIPopupTracker.AnyOpen) return;
+        lookPointerId = evt.pointerId;
+        lookZone.CapturePointer(evt.pointerId);
+        lookLastPos = (Vector2)evt.position;
+        evt.StopPropagation();
+    }
+
+    private void OnLookMove(PointerMoveEvent evt)
+    {
+        if (lookPointerId != evt.pointerId || !lookZone.HasPointerCapture(evt.pointerId)) return;
+        Vector2 cur = (Vector2)evt.position;
+        Vector2 delta = cur - lookLastPos;
+        lookLastPos = cur;
+        if (!UIPopupTracker.AnyOpen && ThirdPersonCamera.Instance != null)
+            ThirdPersonCamera.Instance.AddTouchLook(delta);
+    }
+
+    private void OnLookUp(PointerUpEvent evt)
+    {
+        if (lookPointerId != evt.pointerId) return;
+        if (lookZone.HasPointerCapture(evt.pointerId)) lookZone.ReleasePointer(evt.pointerId);
+        lookPointerId = -1;
     }
 
     public void ShowInteractionPrompts(List<InteractionAction> actions)

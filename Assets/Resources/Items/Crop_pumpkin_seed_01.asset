@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.CropDefinition
   seedItemId: pumpkin_seed_01
   harvestItemId: pumpkin_01
-  growthTimeSec: 55
-  waterIntervalSec: 24
+  growthTimeSec: 120
+  waterIntervalSec: 25
   harvestYield: 11
   expReward: 125
   posReward: 70

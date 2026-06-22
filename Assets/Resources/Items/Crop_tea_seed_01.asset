@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.CropDefinition
   seedItemId: tea_seed_01
   harvestItemId: tea_01
-  growthTimeSec: 60
+  growthTimeSec: 120
   waterIntervalSec: 25
   harvestYield: 5
   expReward: 180

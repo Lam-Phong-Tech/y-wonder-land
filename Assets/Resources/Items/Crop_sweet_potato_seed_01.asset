@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.CropDefinition
   seedItemId: sweet_potato_seed_01
   harvestItemId: sweet_potato_01
-  growthTimeSec: 50
-  waterIntervalSec: 22
+  growthTimeSec: 60
+  waterIntervalSec: 25
   harvestYield: 1
   expReward: 100
   posReward: 45

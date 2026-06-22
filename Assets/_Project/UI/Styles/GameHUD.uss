@@ -45,7 +45,7 @@
     transition-property: scale, border-color; transition-duration: 0.15s;
 }
 .quest-bubble:hover { border-color: var(--color-border-focus); scale: 1.02; }
-.quest-text { font-size: 12px; color: var(--color-text-white); flex-grow: 1; flex-shrink: 1; white-space: normal; margin-right: 8px; line-height: 16px; }
+.quest-text { font-size: 12px; color: var(--color-text-white); flex-grow: 1; flex-shrink: 1; white-space: normal; margin-right: 8px; }
 .quest-info-icon { width: 24px; height: 24px; flex-shrink: 0; }
 .quest-info-text { font-size: 12px; -unity-font-style: bold; color: var(--color-primary); margin: 0; padding: 0; -unity-text-align: middle-center; }
 
@@ -105,6 +105,9 @@
 
 /* ── 5. JOYSTICK & SPRINT ── */
 .hud-bottom-left { position: absolute; bottom: 24px; left: 24px; }
+
+/* Vùng nhìn (mobile): nửa PHẢI màn hình, trong suốt, chỉ để bắt kéo 1 ngón xoay camera. */
+.hud-look-zone { position: absolute; top: 0; bottom: 0; right: 0; width: 50%; }
 
 .sprint-btn-shadow { position: absolute; left: 140px; top: 200px; }
 .sprint-btn { 

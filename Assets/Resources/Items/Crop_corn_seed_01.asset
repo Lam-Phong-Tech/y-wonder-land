@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.CropDefinition
   seedItemId: corn_seed_01
   harvestItemId: corn_01
-  growthTimeSec: 50
-  waterIntervalSec: 22
+  growthTimeSec: 60
+  waterIntervalSec: 25
   harvestYield: 3
   expReward: 100
   posReward: 60

@@ -89,6 +89,10 @@ public class TutorialManager : MonoBehaviour
     private bool hasShownHint;
     private const float HINT_TIMEOUT = 120f;
 
+    // Chống kẹt: tự nhảy bước ĐI THEO NPC nếu quá lâu không tới (NPC kẹt ngoài NavMesh / người chơi lạc).
+    private bool hasAutoAdvanced;
+    private const float FOLLOW_AUTOSKIP = 90f;
+
     // Ô đất đã biết TRƯỚC khi xây (để phát hiện ô ruộng mới sinh ra)
     private HashSet<FarmTile> knownTilesBeforeBuild = new HashSet<FarmTile>();
 
@@ -192,6 +196,40 @@ public class TutorialManager : MonoBehaviour
             HandleInteractionRaycast();
 
         CheckTimeoutHint();
+        CheckFollowAutoAdvance();
+    }
+
+    // Chống kẹt tutorial: nếu bước ĐI THEO NPC quá lâu không tới nơi (NPC kẹt ngoài NavMesh, người
+    // chơi lạc đường), TỰ ĐỘNG tiến bước thay vì khoá tutorial vĩnh viễn. Chỉ áp cho bước đi-theo
+    // (bước hành động như chặt/cuốc/trồng vẫn bắt người chơi tự làm).
+    private void CheckFollowAutoAdvance()
+    {
+        if (hasAutoAdvanced) return;
+        if (Time.time - stepStartTime < FOLLOW_AUTOSKIP) return;
+
+        switch (currentStep)
+        {
+            case TutorialStep.FollowToTree:
+                hasAutoAdvanced = true;
+                Debug.Log("[Tutorial] Auto-nhảy: FollowToTree quá lâu -> tự tới Cây.");
+                OnTreeArrived();
+                break;
+            case TutorialStep.FollowToRock:
+                hasAutoAdvanced = true;
+                Debug.Log("[Tutorial] Auto-nhảy: FollowToRock quá lâu -> tự tới Mỏ.");
+                OnRockArrived();
+                break;
+            case TutorialStep.FollowToFarmPlot:
+                hasAutoAdvanced = true;
+                Debug.Log("[Tutorial] Auto-nhảy: FollowToFarmPlot quá lâu -> tự tới bãi ruộng.");
+                OnFarmPlotArrived();
+                break;
+            case TutorialStep.FollowToPenArea:
+                hasAutoAdvanced = true;
+                Debug.Log("[Tutorial] Auto-nhảy: FollowToPenArea quá lâu -> tự tới bãi chuồng.");
+                OnPenArrived();
+                break;
+        }
     }
 
     private void CheckTimeoutHint()
@@ -266,6 +304,7 @@ public class TutorialManager : MonoBehaviour
         currentStep = newStep;
         stepStartTime = Time.time;
         hasShownHint = false;
+        hasAutoAdvanced = false;
     }
 
     private IEnumerator SetupHUDReferences()

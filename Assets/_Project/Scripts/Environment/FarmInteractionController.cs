@@ -19,6 +19,14 @@ namespace YWonderLand.Environment
         [Tooltip("Layer mask cho FarmTile raycasting")]
         [SerializeField] private LayerMask farmTileLayer = ~0; // Default: all layers
 
+        [Header("Sản lượng tài nguyên (khách chốt)")]
+        [Tooltip("Chặt xong 1 CÂY nhận bao nhiêu gỗ (khách: 10). Ép cứng nên không cần chỉnh từng cây trong scene.")]
+        [SerializeField] private int treeYield = 10;
+        [Tooltip("Đào xong 1 KHỐI ĐÁ nhận bao nhiêu đá (khách: 10).")]
+        [SerializeField] private int rockYield = 10;
+        [Tooltip("EXP nhận mỗi lần chặt cây / đào đá xong (hệ Level tối giản).")]
+        [SerializeField] private int resourceExp = 5;
+
 
         [Header("References")]
         [SerializeField] private Camera mainCamera;
@@ -52,6 +60,46 @@ namespace YWonderLand.Environment
             {
                 inventoryPopup.OnItemUsed -= OnInventoryItemSelected;
             }
+        }
+
+        // Chặt/đào 1 nhịp rồi TỰ bắn toast khi HOÀN TẤT. Gọi trực tiếp (không qua event tĩnh
+        // OnResourceHarvested dùng chung với Tutorial — vì 1 subscriber ném exception sẽ làm
+        // các handler sau bị skip → mất toast). Lấy số lượng nhận được qua chênh lệch túi đồ.
+        private bool HarvestResourceTick(HarvestableResource resource, float delta)
+        {
+            if (resource == null) return false;
+
+            // Ép sản lượng cố định theo yêu cầu khách (10 gỗ / 10 đá) — set field public của resource,
+            // KHÔNG sửa file QC HarvestableResource.cs. Áp mỗi nhịp cho chắc (idempotent).
+            int forced = resource.type == HarvestableResource.ResourceType.Tree ? treeYield : rockYield;
+            if (forced > 0)
+            {
+                resource.minYield = forced;
+                resource.maxYield = forced;
+            }
+
+            // Nhiều cây/đá trong scene để TRỐNG yieldItemId -> không có đồ vào túi + toast không ra số.
+            // Bù id mặc định theo loại (gỗ/đá) để đồ vào túi đúng và đếm được số lượng.
+            if (string.IsNullOrEmpty(resource.yieldItemId))
+                resource.yieldItemId = resource.type == HarvestableResource.ResourceType.Tree ? "wood_01" : "stone_01";
+
+            string yieldId = resource.yieldItemId;
+            var inv = YWonderLand.Managers.InventoryManager.Instance;
+            int before = (inv != null && !string.IsNullOrEmpty(yieldId)) ? inv.GetItemQuantity(yieldId) : 0;
+
+            bool done = resource.Harvest(delta);
+            if (done)
+            {
+                int gained = (inv != null && !string.IsNullOrEmpty(yieldId)) ? inv.GetItemQuantity(yieldId) - before : 0;
+                string verb = resource.type == HarvestableResource.ResourceType.Tree ? "Chặt cây" : "Đào khoáng";
+                if (gained > 0)
+                    ScreenToast.ShowInfo($"{verb}: +{gained} {GetItemDisplayName(yieldId)}");
+                else
+                    ScreenToast.ShowInfo($"{verb} xong!");
+                YWonderLand.Managers.ExperienceManager.Instance?.AddEXP(resourceExp);
+                YWonderLand.Managers.AudioManager.Instance?.PlaySFX("chop");
+            }
+            return done;
         }
 
         private HarvestableResource currentHarvestTarget;
@@ -316,7 +364,7 @@ namespace YWonderLand.Environment
             }
 
             PlayerController player = PlayerController.Instance;
-            if (player != null) player.PlayActionAnimation("Fishing", 8.5f, YWonderLand.Player.ToolType.FishingRod);
+            if (player != null) player.PlayActionAnimation("Fishing", 8.7f, YWonderLand.Player.ToolType.FishingRod); // khớp cửa sổ căn cá 8.7s
 
             // Chuẩn bị câu: lưu cao độ mặt nước, CHỜ Animation Event (frame vung cần) bắn dây ra.
             if (FishingLineController.Instance != null && spot != null)
@@ -473,6 +521,11 @@ namespace YWonderLand.Environment
             if (animal.HarvestProduct(out string itemId, out int amount))
             {
                 Managers.InventoryManager.Instance?.AddItem(itemId, amount);
+
+                // Vụ cuối: HarvestProduct tự huỷ con vật (làm thịt) + đã có toast "Làm thịt..." riêng.
+                // Chỉ báo thu sản phẩm khi con vật CÒN SỐNG để khỏi đè toast làm thịt.
+                if (animal != null && !string.IsNullOrEmpty(itemId) && amount > 0)
+                    ScreenToast.ShowInfo($"Thu hoạch: +{amount} {GetItemDisplayName(itemId)}");
             }
         }
 
@@ -505,7 +558,7 @@ namespace YWonderLand.Environment
                 YWonderLand.UI.ResourceInteractionUIController.Instance.Show(resource);
 
             // Tăng tiến độ chặt (1 giây / click). (Ví dụ cây 3 máu thì click 3 phát là gãy)
-            if (resource.Harvest(1.0f))
+            if (HarvestResourceTick(resource, 1.0f))
             {
                 // Nếu gãy rồi thì ẩn thanh tiến trình
                 if (YWonderLand.UI.ResourceInteractionUIController.Instance != null)
@@ -536,7 +589,7 @@ namespace YWonderLand.Environment
             if (YWonderLand.UI.ResourceInteractionUIController.Instance != null)
                 YWonderLand.UI.ResourceInteractionUIController.Instance.Show(resource);
 
-            if (resource.Harvest(Time.deltaTime))
+            if (HarvestResourceTick(resource, Time.deltaTime))
             {
                 if (YWonderLand.UI.ResourceInteractionUIController.Instance != null)
                     YWonderLand.UI.ResourceInteractionUIController.Instance.Hide();
@@ -606,7 +659,7 @@ namespace YWonderLand.Environment
                         YWonderLand.UI.ResourceInteractionUIController.Instance.Show(resource);
                     }
                     
-                    if (resource.Harvest(Time.deltaTime))
+                    if (HarvestResourceTick(resource, Time.deltaTime))
                     {
                         // Completed
                         currentHarvestTarget = null;
@@ -1085,6 +1138,10 @@ namespace YWonderLand.Environment
 
         private void HandleWater(FarmTile tile)
         {
+            // CHẶN SPAM: đang múa động tác (tưới/cuốc...) thì bỏ qua click mới -> không tưới chồng
+            // nhiều lần + không tốn nước thừa + không tăng tiến độ ô theo số lần click.
+            if (PlayerController.Instance != null && PlayerController.Instance.IsBusy) return;
+
             var inv = YWonderLand.Managers.InventoryManager.Instance;
 
             // CẦN nước tưới (múc từ ao trên đảo). Hết → báo, không tưới được.
@@ -1155,11 +1212,25 @@ namespace YWonderLand.Environment
                         Debug.Log($"[FarmInteraction] +{pos} POS (care {care:0.00})");
                     }
 
-                    // TODO: Add EXP when level system is implemented (cũng nhân care)
-                    Debug.Log($"[FarmInteraction] +{Mathf.RoundToInt(crop.expReward * care)} EXP (not yet implemented)");
+                    // Cộng EXP thật (hệ tối giản) — nhân theo độ chăm sóc.
+                    int exp = Mathf.RoundToInt(crop.expReward * care);
+                    YWonderLand.Managers.ExperienceManager.Instance?.AddEXP(exp);
+                    YWonderLand.Managers.AudioManager.Instance?.PlaySFX("harvest");
 
                     if (care < 0.99f)
-                        ScreenToast.Show($"Cây thiếu nước → sản lượng & POS giảm {Mathf.RoundToInt((1f - care) * 100f)}%!");
+                    {
+                        // Thiếu nước → toast đỏ kèm số % giảm (gộp với báo thu hoạch).
+                        ScreenToast.Show($"Thu hoạch: +{amount} {GetItemDisplayName(harvestId)} (thiếu nước -{Mathf.RoundToInt((1f - care) * 100f)}%)");
+                    }
+                    else
+                    {
+                        ScreenToast.ShowInfo($"Thu hoạch: +{amount} {GetItemDisplayName(harvestId)}");
+                    }
+                }
+                else
+                {
+                    // Cây không có CropDefinition (vd cây lâu năm khung tạm) — vẫn báo thu hoạch.
+                    ScreenToast.ShowInfo($"Thu hoạch: +{amount} {GetItemDisplayName(harvestId)}");
                 }
 
                 // Save farm state

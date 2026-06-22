@@ -47,17 +47,38 @@ public class ThirdPersonCamera : MonoBehaviour
     [Tooltip("Minimum distance the camera can get to the player when blocked.")]
     public float minDistance = 1.0f;
 
+    [Header("Touch Look (Mobile)")]
+    [Tooltip("Độ nhạy xoay NGANG khi kéo 1 ngón trên màn hình (mobile). Tách riêng với chuột.")]
+    public float touchHorizontalSensitivity = 0.15f;
+    [Tooltip("Độ nhạy xoay DỌC khi kéo 1 ngón (mobile).")]
+    public float touchVerticalSensitivity = 0.12f;
+
     // Internal state
     private float yaw = 0f;
     private float pitch = 15f;
     private Vector2 smoothedInput = Vector2.zero;
     private bool cursorLocked = true;
+    private Vector2 _touchLookDelta; // cộng dồn delta kéo ngón trong frame, áp 1 lần ở LateUpdate
+
+    // Singleton để GameHUDController (vùng nhìn mobile) đẩy delta vào.
+    public static ThirdPersonCamera Instance { get; private set; }
 
     // Properties for PlayerController
     public float Yaw => yaw;
 
     // Input System
     private InputAction lookAction;
+
+    void Awake()
+    {
+        Instance = this;
+    }
+
+    /// <summary>Mobile: cộng delta kéo 1 ngón (đơn vị panel UI) để xoay camera. Gọi từ GameHUDController.</summary>
+    public void AddTouchLook(Vector2 delta)
+    {
+        _touchLookDelta += delta;
+    }
 
     void Start()
     {
@@ -145,6 +166,15 @@ public class ThirdPersonCamera : MonoBehaviour
         // 3. Apply smoothed input to yaw/pitch
         yaw += smoothedInput.x * horizontalSensitivity;
         pitch -= smoothedInput.y * verticalSensitivity;
+
+        // 3b. Kéo chạm mobile (cộng thẳng, không qua smoothing chuột). Trục Y panel hướng XUỐNG
+        //     -> kéo NGÓN lên (delta.y âm) thì pitch tăng = nhìn lên. Dừng tay là dừng ngay.
+        if (_touchLookDelta != Vector2.zero)
+        {
+            yaw += _touchLookDelta.x * touchHorizontalSensitivity;
+            pitch -= _touchLookDelta.y * touchVerticalSensitivity;
+            _touchLookDelta = Vector2.zero;
+        }
 
         // 4. Clamp vertical angle
         pitch = Mathf.Clamp(pitch, minVerticalAngle, maxVerticalAngle);

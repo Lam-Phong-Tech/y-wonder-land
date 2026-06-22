@@ -672,6 +672,7 @@ public class ShopPopupController : MonoBehaviour
                 if (YWonderLand.Managers.EconomyManager.Instance.GetPOS() < totalCost)
                 {
                     Debug.Log($"[Shop] Không đủ POS để mua thú!");
+                    YWonderLand.Environment.ScreenToast.Show("Không đủ POS để mua thú!");
                     return;
                 }
 
@@ -690,11 +691,18 @@ public class ShopPopupController : MonoBehaviour
                     }
                 }
 
-                if (spawnedCount == 0) return; // Completely failed to spawn any
+                if (spawnedCount == 0)
+                {
+                    // Mua thú nhưng chuồng đã đầy/chưa có chuồng → báo người chơi.
+                    YWonderLand.Environment.ScreenToast.Show("Chuồng đã đầy! Xây thêm chuồng trước khi mua thú.");
+                    return;
+                }
 
                 int actualCost = unitPrice * spawnedCount;
                 YWonderLand.Managers.EconomyManager.Instance.SpendPOS(actualCost);
                 Debug.Log($"[Shop] Mua {spawnedCount}x {item.name} — Trừ {actualCost} POS.");
+                YWonderLand.Environment.ScreenToast.ShowInfo($"Đã mua: {spawnedCount}x {item.name}  (-{actualCost} POS)");
+                YWonderLand.Managers.AudioManager.Instance?.PlaySFX("coin");
             }
             else
             {
@@ -702,10 +710,13 @@ public class ShopPopupController : MonoBehaviour
                 if (!YWonderLand.Managers.EconomyManager.Instance.SpendPOS(totalCost))
                 {
                     Debug.Log($"[Shop] Không đủ POS!");
+                    YWonderLand.Environment.ScreenToast.Show("Không đủ POS để mua!");
                     return;
                 }
                 YWonderLand.Managers.InventoryManager.Instance.AddItem(item.id, selectedQty);
                 Debug.Log($"[Shop] Mua {selectedQty}x {item.name} — Trừ {totalCost} POS.");
+                YWonderLand.Environment.ScreenToast.ShowInfo($"Đã mua: {selectedQty}x {item.name}  (-{totalCost} POS)");
+                YWonderLand.Managers.AudioManager.Instance?.PlaySFX("coin");
             }
         }
         else
@@ -714,11 +725,14 @@ public class ShopPopupController : MonoBehaviour
             if (!YWonderLand.Managers.InventoryManager.Instance.RemoveItem(item.id, selectedQty))
             {
                 Debug.Log($"[Shop] Không đủ item để bán!");
+                YWonderLand.Environment.ScreenToast.Show("Không đủ vật phẩm để bán!");
                 return;
             }
 
             YWonderLand.Managers.EconomyManager.Instance.AddPOS(totalCost);
             Debug.Log($"[Shop] Bán {selectedQty}x {item.name} — Nhận {totalCost} POS.");
+            YWonderLand.Environment.ScreenToast.ShowInfo($"Đã bán: {selectedQty}x {item.name}  (+{totalCost} POS)");
+            YWonderLand.Managers.AudioManager.Instance?.PlaySFX("coin");
             
             OnItemSold?.Invoke(item.id, selectedQty);
             

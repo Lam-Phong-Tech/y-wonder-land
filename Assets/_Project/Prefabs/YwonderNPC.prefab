@@ -8,6 +8,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -5044046326479771771, guid: 9d418400307062944858500c5875a078, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 4412fca2145e3ab4baf1ccb704ab3618, type: 2}
     - target: {fileID: 1126760756012429810, guid: 9d418400307062944858500c5875a078, type: 3}
       propertyPath: m_LocalScale.x
       value: 2
@@ -126,6 +130,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Environment.MerchantNPC
   serviceType: 0
+  shopData: {fileID: 0}
   interactionLabel: 
   npcName: 
 --- !u!95 &3166517624310409503

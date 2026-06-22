@@ -6,6 +6,12 @@
     <ui:VisualElement class="hud-root" picking-mode="Ignore">
 
         <!-- ============================== -->
+        <!-- 0. LOOK ZONE — nửa phải: kéo 1 ngón xoay camera (mobile). -->
+        <!-- Đặt làm con ĐẦU TIÊN để mọi nút/gợi ý vẽ ĐÈ LÊN TRÊN (ưu tiên chạm). -->
+        <!-- ============================== -->
+        <ui:VisualElement name="LookZone" class="hud-look-zone" />
+
+        <!-- ============================== -->
         <!-- 1. PLAYER INFO — Top Left      -->
         <!-- ============================== -->
         <ui:VisualElement class="hud-top-left">

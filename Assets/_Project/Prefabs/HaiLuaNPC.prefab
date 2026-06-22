@@ -64,6 +64,10 @@ PrefabInstance:
       propertyPath: m_ConstrainProportionsScale
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: -5474606262206307988, guid: cb5388e49d72bc647bd1a8d73a3c8cc0, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 3b40607ac98dcc0499ec31df4c37fe8b, type: 2}
     - target: {fileID: -4939089417908552812, guid: cb5388e49d72bc647bd1a8d73a3c8cc0, type: 3}
       propertyPath: m_Name
       value: HaiLuaNPC
@@ -126,6 +130,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Environment.MerchantNPC
   serviceType: 0
+  shopData: {fileID: 0}
   interactionLabel: 
   npcName: 
 --- !u!95 &189118069492952921
@@ -163,5 +168,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Environment.MerchantNPC
   serviceType: 0
+  shopData: {fileID: 0}
   interactionLabel: 
   npcName: 

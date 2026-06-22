@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.CropDefinition
   seedItemId: carrot_seed_01
   harvestItemId: carrot_01
-  growthTimeSec: 45
-  waterIntervalSec: 20
+  growthTimeSec: 60
+  waterIntervalSec: 25
   harvestYield: 1
   expReward: 25
   posReward: 50

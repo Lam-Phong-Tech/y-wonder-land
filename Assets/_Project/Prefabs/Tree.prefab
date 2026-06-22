@@ -59,7 +59,7 @@ MonoBehaviour:
   leafAttachRadius: 5
   isHarvestable: 1
   currentProgress: 0
-  respawnTimer: 0
+  respawnTimer: 3600
 --- !u!1 &8660575751522222307
 GameObject:
   m_ObjectHideFlags: 0

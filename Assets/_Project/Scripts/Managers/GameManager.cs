@@ -38,6 +38,19 @@ public class GameManager : MonoBehaviour
     public string playerName;
     private GameObject spawnedCharacter;
 
+    [Header("Resume / Save (người chơi quay lại)")]
+    [Tooltip("BẬT để LUÔN chạy Login + Cutscene từ đầu (test phần mở đầu), bỏ qua save người chơi cũ.")]
+    [SerializeField] private bool alwaysStartFresh = false;
+
+    // Khoá PlayerPrefs cho luồng resume (người chơi cũ vào thẳng game)
+    private const string K_HasSave = "YW_HasSave";
+    private const string K_CharIdx = "YW_CharIndex";
+    private const string K_Name = "YW_PlayerName";
+    private const string K_PosX = "YW_PosX";
+    private const string K_PosY = "YW_PosY";
+    private const string K_PosZ = "YW_PosZ";
+    private const string K_Yaw = "YW_PosYaw";
+
     void Awake()
     {
         if (Instance == null)
@@ -54,9 +67,13 @@ public class GameManager : MonoBehaviour
     {
         // Auto-discover any missing camera references at startup
         DiscoverCameras();
-        
-        // Initial setup
-        SetGameState(GameState.Login);
+
+        // Người chơi CŨ (đã có save) -> BỎ QUA Login + Cutscene, vào thẳng game ở vị trí cũ.
+        // Người chơi MỚI (hoặc bật alwaysStartFresh để test) -> chạy Login như bình thường.
+        if (!alwaysStartFresh && PlayerPrefs.GetInt(K_HasSave, 0) == 1)
+            ResumeGame();
+        else
+            SetGameState(GameState.Login);
     }
 
     private void DiscoverCameras()
@@ -508,5 +525,111 @@ public class GameManager : MonoBehaviour
         
         // Switch to gameplay state
         SetGameState(GameState.Gameplay);
+    }
+
+    // ──────────────────────────────────────────────
+    //  RESUME — người chơi quay lại (bỏ cutscene, giữ vị trí)
+    // ──────────────────────────────────────────────
+
+    /// <summary>Vào THẲNG game cho người chơi cũ: spawn nhân vật ở vị trí đã lưu, KHÔNG chạy cutscene.</summary>
+    public void ResumeGame()
+    {
+        selectedCharacterIndex = PlayerPrefs.GetInt(K_CharIdx, 0);
+        playerName = PlayerPrefs.GetString(K_Name, "Player");
+
+        Vector3 pos = new Vector3(
+            PlayerPrefs.GetFloat(K_PosX, 0f),
+            PlayerPrefs.GetFloat(K_PosY, 2f),
+            PlayerPrefs.GetFloat(K_PosZ, 0f));
+        float yaw = PlayerPrefs.GetFloat(K_Yaw, 0f);
+
+        // Đăng nhập + nạp hồ sơ chạy nền (offline tự fallback) — giống StartGame.
+        _ = SignInAndLoadProfileAsync();
+
+        SpawnCharacterAt(pos, yaw);
+        if (spawnedCharacter == null)
+        {
+            Debug.LogWarning("[GameManager] RESUME spawn thất bại -> quay về Login.");
+            SetGameState(GameState.Login);
+            return;
+        }
+
+        SetGameState(GameState.Gameplay);
+        Debug.Log($"[GameManager] RESUME: vào thẳng game tại {pos}, char={selectedCharacterIndex}.");
+    }
+
+    // Spawn nhân vật ở 1 vị trí mặt đất (dùng cho resume) — KHÔNG gắn lên thuyền.
+    private void SpawnCharacterAt(Vector3 pos, float yaw)
+    {
+        if (spawnedCharacter != null) Destroy(spawnedCharacter);
+
+        GameObject prefab = (selectedCharacterIndex == 0) ? malePrefab : femalePrefab;
+        if (prefab == null)
+        {
+            Debug.LogError("[GameManager] RESUME spawn lỗi: thiếu malePrefab/femalePrefab.");
+            return;
+        }
+
+        spawnedCharacter = Instantiate(prefab, pos, Quaternion.Euler(0f, yaw, 0f));
+        spawnedCharacter.tag = "Player";
+        spawnedCharacter.SetActive(true);
+
+        if (spawnedCharacter.GetComponent<FloatingNameTag>() == null)
+        {
+            FloatingNameTag tag = spawnedCharacter.AddComponent<FloatingNameTag>();
+            tag.displayName = playerName ?? "Player";
+            tag.nameColor = Color.white;
+            tag.heightOffset = 2.2f;
+            tag.tmpFontSize = 2.5f;
+        }
+
+        // Tắt điều khiển/CC trước; SetGameState(Gameplay) sẽ bật lại sau khi vị trí đã đặt xong.
+        PlayerController controller = spawnedCharacter.GetComponent<PlayerController>();
+        if (controller != null) controller.enabled = false;
+        CharacterController cc = spawnedCharacter.GetComponent<CharacterController>();
+        if (cc != null) cc.enabled = false;
+    }
+
+    // Lưu vị trí + nhân vật khi thoát/chuyển nền. Chỉ lưu TOẠ ĐỘ khi đang ở Nông trại (base scene)
+    // để resume không thả nhầm vào toạ độ thành phố (city scene chưa load lúc khởi động).
+    private void SavePlayerPosition()
+    {
+        if (currentState != GameState.Gameplay || spawnedCharacter == null) return;
+
+        string island = IslandTravelManager.Instance != null ? IslandTravelManager.Instance.CurrentIslandId : "farm";
+        if (island == "farm")
+        {
+            Vector3 p = spawnedCharacter.transform.position;
+            PlayerPrefs.SetFloat(K_PosX, p.x);
+            PlayerPrefs.SetFloat(K_PosY, p.y);
+            PlayerPrefs.SetFloat(K_PosZ, p.z);
+            PlayerPrefs.SetFloat(K_Yaw, spawnedCharacter.transform.eulerAngles.y);
+        }
+        PlayerPrefs.SetInt(K_CharIdx, selectedCharacterIndex);
+        PlayerPrefs.SetString(K_Name, playerName ?? "Player");
+        PlayerPrefs.SetInt(K_HasSave, 1);
+        PlayerPrefs.Save();
+    }
+
+    void OnApplicationPause(bool paused)
+    {
+        if (paused) SavePlayerPosition();
+    }
+
+    void OnApplicationQuit()
+    {
+        SavePlayerPosition();
+    }
+
+    // Tiện TEST: xoá save để chơi lại từ Login + Cutscene như người chơi mới.
+    // Chuột phải vào component GameManager trong Inspector -> "Clear Save...".
+    [ContextMenu("Clear Save (test chơi lại từ đầu)")]
+    public void ClearSave()
+    {
+        PlayerPrefs.DeleteKey(K_HasSave);
+        PlayerPrefs.DeleteKey(K_PosX); PlayerPrefs.DeleteKey(K_PosY); PlayerPrefs.DeleteKey(K_PosZ);
+        PlayerPrefs.DeleteKey(K_Yaw); PlayerPrefs.DeleteKey(K_CharIdx); PlayerPrefs.DeleteKey(K_Name);
+        PlayerPrefs.Save();
+        Debug.Log("[GameManager] Đã xoá save — lần tới sẽ chạy lại Login + Cutscene.");
     }
 }

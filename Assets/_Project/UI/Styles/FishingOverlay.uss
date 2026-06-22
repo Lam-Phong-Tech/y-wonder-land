@@ -1,141 +1,69 @@
 /* ============================================
-   Fishing Overlay — The Tangible Playground
+   Fishing Overlay — Cozy Dark Palia
+   Bản GỌN: chỉ 1 popup căn-thời-gian ở góc phải.
    ============================================ */
 
 .fish-root {
-    width: 100%; height: 100%; position: absolute; padding: 16px;
+    width: 100%; height: 100%; position: absolute;
 }
 
-/* ── Top Bar ── */
-.fish-top-bar {
-    flex-direction: row; align-items: center; justify-content: space-between;
-    width: 100%; position: absolute; top: 16px; left: 16px; right: 16px; padding-right: 32px;
-}
-
-.fish-exit-btn {
-    padding: 10px 24px;
-    background-color: rgba(255, 75, 75, 0.2);
-    border-width: 1px; border-color: rgba(255, 75, 75, 0.5);
-    border-radius: var(--radius-button);
-    color: #FF4B4B; font-size: 14px; -unity-font-style: bold;
-    transition-property: scale, background-color; transition-duration: 0.1s;
-}
-
-.fish-exit-btn:hover { background-color: rgba(255, 75, 75, 0.4); }
-.fish-exit-btn:active { scale: 0.95; }
-
-.fish-status-container { flex-direction: row; align-items: center; }
-
-.fish-status-pill {
-    background-color: rgba(0, 0, 0, 0.6);
-    border-radius: 12px; border-width: 1px; border-color: rgba(255, 255, 255, 0.1);
-    padding: 8px 16px; margin-left: 12px;
-}
-
-.fish-status-text {
-    font-size: 14px; -unity-font-style: bold; color: var(--color-accent-yellow);
-}
-
-/* ── Ready Panel (Cast) ── */
-.fish-ready-panel {
-    position: absolute; bottom: 32px; right: 32px;
+/* ── Popup chính (góc phải, canh giữa dọc) ── */
+.fish-panel {
+    position: absolute; right: 32px; top: 50%; translate: 0 -50%;
+    width: 440px;
     background-color: var(--color-primary-navy);
     border-width: 1px; border-color: rgba(255, 255, 255, 0.1);
     border-radius: var(--radius-panel);
-    padding: 20px; width: 320px; align-items: center;
+    padding: 24px;
 }
 
-.fish-ready-label {
-    font-size: 13px; -unity-font-style: bold; color: var(--color-bright-grey);
-    letter-spacing: 1px; margin-bottom: 16px;
+/* ── Header: tiêu đề + nút đóng ── */
+.fish-panel-header {
+    flex-direction: row; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
 }
 
-.fish-bait-row {
-    flex-direction: row; justify-content: space-between; width: 100%; margin-bottom: 16px;
+.fish-panel-title {
+    font-size: 26px; -unity-font-style: bold; color: var(--color-text-white);
+    letter-spacing: 1px;
 }
 
-.fish-bait-btn {
-    flex: 1; font-size: 12px; -unity-font-style: bold; padding: 12px 4px;
-    background-color: rgba(0, 0, 0, 0.3);
-    border-width: 1px; border-color: rgba(255, 255, 255, 0.05);
-    border-radius: var(--radius-button);
-    color: var(--color-bright-grey); margin: 0 4px;
-    transition-property: background-color, color, border-color; transition-duration: 0.1s;
+.fish-close-x {
+    width: 38px; height: 38px; padding: 0;
+    background-color: rgba(255, 255, 255, 0.08);
+    border-width: 0; border-radius: 19px;
+    color: var(--color-bright-grey); font-size: 18px; -unity-font-style: bold;
+    transition-property: scale, background-color, color; transition-duration: 0.1s;
 }
 
-.fish-bait-btn:hover {
-    background-color: rgba(255, 255, 255, 0.1); color: var(--color-text-white);
-}
+.fish-close-x:hover { background-color: rgba(255, 75, 75, 0.35); color: var(--color-text-white); }
+.fish-close-x:active { scale: 0.92; }
 
-.fish-ready-panel .active-bait {
+/* ── Số lượt câu trong ngày ── */
+.fish-turns-pill {
+    align-self: flex-start;
     background-color: var(--color-mystic-black);
-    border-color: var(--color-accent-yellow);
-    color: var(--color-accent-yellow);
+    border-radius: 14px; padding: 8px 18px; margin-bottom: 18px;
 }
 
-/* Cast Button */
-.fish-cast-shadow { width: 100%; }
-
-.fish-cast-btn {
-    width: 100%; padding: 14px;
-    background-color: var(--color-accent-yellow);
-    border-width: 0; border-radius: var(--radius-button);
-    color: var(--color-mystic-black); font-size: 16px; -unity-font-style: bold;
-    transition-property: scale, background-color; transition-duration: 0.1s;
-}
-
-.fish-cast-btn:hover { background-color: #FFD54F; }
-.fish-cast-btn:active { scale: 0.95; }
-
-/* ── Waiting Panel ── */
-.fish-waiting-panel {
-    position: absolute; top: 40%; left: 50%; translate: -50% -50%; align-items: center;
-}
-
-.fish-bobber-container { align-items: center; margin-bottom: 24px; }
-
-.fish-bobber-emoji {
-    font-size: 64px; transition-property: translate; transition-duration: 0.3s;
-}
-
-.fish-bobber-text {
-    font-size: 14px; -unity-font-style: bold; color: var(--color-accent-yellow);
-    background-color: rgba(0, 0, 0, 0.6); border-radius: 8px; padding: 8px 16px; margin-top: 12px;
-}
-
-.fish-cancel-btn {
-    padding: 10px 24px; background-color: rgba(0, 0, 0, 0.6);
-    border-width: 1px; border-color: rgba(255, 255, 255, 0.2); border-radius: var(--radius-button);
-    color: var(--color-text-white); font-size: 14px; -unity-font-style: bold;
-    transition-property: scale, background-color; transition-duration: 0.1s;
-}
-
-.fish-cancel-btn:hover { background-color: rgba(255, 255, 255, 0.1); }
-.fish-cancel-btn:active { scale: 0.95; }
-
-/* ── QTE Panel ── */
-.fish-qte-panel {
-    position: absolute; top: 40%; left: 50%; translate: -50% -50%;
-    background-color: var(--color-primary-navy);
-    border-width: 1px; border-color: rgba(255, 255, 255, 0.1);
-    border-radius: var(--radius-panel); padding: 24px; align-items: center; width: 400px;
-}
-
-.fish-qte-title {
+.fish-turns-text {
     font-size: 18px; -unity-font-style: bold; color: var(--color-accent-yellow);
-    letter-spacing: 1px; margin-bottom: 4px;
 }
 
-.fish-qte-subtitle {
-    font-size: 13px; color: var(--color-bright-grey); margin-bottom: 20px;
+/* ── Hướng dẫn ngắn ── */
+.fish-hint {
+    font-size: 18px; -unity-font-style: bold; color: var(--color-bright-grey);
+    white-space: normal; -unity-text-align: middle-center;
+    margin-bottom: 20px;
 }
 
-.qte-gauge-wrapper { width: 100%; margin-bottom: 12px; }
+/* ── Thanh căn cá (to, rõ) ── */
+.qte-gauge-wrapper { width: 100%; margin-bottom: 14px; }
 
 .qte-gauge-track {
-    height: 24px; width: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    border-width: 1px; border-color: rgba(255, 255, 255, 0.1); border-radius: 12px;
+    height: 34px; width: 100%;
+    background-color: var(--color-mystic-black);
+    border-width: 1px; border-color: rgba(255, 255, 255, 0.1); border-radius: 17px;
     position: relative; overflow: hidden;
 }
 
@@ -144,106 +72,38 @@
 }
 
 .qte-pointer {
-    width: 4px; height: 120%; top: -10%;
-    background-color: var(--color-text-white); border-radius: 2px; position: absolute;
+    width: 6px; height: 130%; top: -15%;
+    background-color: var(--color-text-white); border-radius: 3px; position: absolute;
 }
 
+/* ── Thanh thời gian còn lại ── */
 .qte-timer-wrapper {
-    width: 100%; height: 8px; background-color: rgba(0, 0, 0, 0.5);
-    border-radius: 4px; margin-bottom: 24px; overflow: hidden;
+    width: 100%; height: 10px; background-color: var(--color-mystic-black);
+    border-radius: 5px; margin-bottom: 22px; overflow: hidden;
 }
 
 .qte-timer-bar {
-    height: 100%; background-color: var(--color-accent-yellow); width: 100%;
+    height: 100%; background-color: var(--color-accent-blue); width: 100%;
 }
 
-.fish-pull-shadow { width: 100%; }
-
-.fish-pull-btn {
-    width: 100%; padding: 14px;
-    background-color: var(--color-blue-ocean);
+/* ── Nút hành động (pill vàng) ── */
+.fish-action-btn {
+    width: 100%; padding: 15px;
+    background-color: var(--color-accent-yellow);
     border-width: 0; border-radius: var(--radius-button);
-    color: var(--color-text-white); font-size: 16px; -unity-font-style: bold;
+    color: var(--color-mystic-black); font-size: 20px; -unity-font-style: bold;
     transition-property: scale, background-color; transition-duration: 0.1s;
 }
 
-.fish-pull-btn:hover { background-color: #4B90FF; }
-.fish-pull-btn:active { scale: 0.95; }
+.fish-action-btn:hover { background-color: #FFD54F; }
+.fish-action-btn:active { scale: 0.97; }
+.fish-action-btn:disabled { background-color: var(--color-overcast-grey); opacity: 0.6; }
 
-/* ── Result Panel (Modal) ── */
-.fish-result-shadow {
-    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(0, 0, 0, 0.7); align-items: center; justify-content: center;
+/* Khi đang căn cá -> nút chuyển xanh đại dương cho rõ "GIẬT" */
+.fish-action-btn--pull {
+    background-color: var(--color-blue-ocean); color: var(--color-text-white);
 }
+.fish-action-btn--pull:hover { background-color: #4B90FF; }
 
-.fish-result-panel {
-    width: 380px; background-color: var(--color-primary-navy);
-    border-width: 1px; border-color: rgba(255, 255, 255, 0.1);
-    border-radius: var(--radius-panel); overflow: hidden; align-items: center;
-}
-
-.fish-result-header {
-    width: 100%; padding: 16px; align-items: center;
-}
-
-.success-bg { background-color: var(--color-accent-yellow); }
-.success-bg .fish-result-title-label { color: var(--color-mystic-black); }
-
-.fail-bg { background-color: rgba(255, 75, 75, 0.8); }
-.fail-bg .fish-result-title-label { color: var(--color-text-white); }
-
-.fish-result-title-label {
-    font-size: 16px; -unity-font-style: bold; letter-spacing: 1px;
-}
-
-.fish-result-body { align-items: center; padding: 24px; width: 100%; }
-
-.fish-result-emoji { font-size: 64px; margin-bottom: 12px; }
-
-.fish-result-name {
-    font-size: 22px; -unity-font-style: bold; color: var(--color-accent-yellow); margin-bottom: 8px;
-}
-
-.fish-result-rarity {
-    font-size: 13px; -unity-font-style: bold; color: var(--color-bright-grey);
-    background-color: rgba(0, 0, 0, 0.3); border-radius: 8px; padding: 6px 16px; margin-bottom: 16px;
-}
-
-.fish-result-desc {
-    font-size: 14px; color: var(--color-text-white); -unity-text-align: middle-center; white-space: normal;
-}
-
-.fish-result-btn-shadow { width: 100%; padding: 0 24px 24px 24px; }
-
-.fish-result-close-btn {
-    width: 100%; padding: 12px; background-color: rgba(255, 255, 255, 0.1);
-    border-width: 1px; border-color: rgba(255, 255, 255, 0.1); border-radius: var(--radius-button);
-    color: var(--color-text-white); font-size: 14px; -unity-font-style: bold;
-    transition-property: scale, background-color; transition-duration: 0.1s;
-}
-
-.fish-result-close-btn:hover { background-color: rgba(255, 255, 255, 0.2); }
-.fish-result-close-btn:active { scale: 0.95; }
-
-/* ── Cheat Bar ── */
-.fish-cheat-bar {
-    position: absolute; bottom: 12px; left: 12px; flex-direction: row; align-items: center;
-    background-color: rgba(0, 0, 0, 0.6); border-radius: 8px; padding: 6px 12px;
-}
-
-.fish-cheat-label {
-    font-size: 12px; -unity-font-style: bold; color: var(--color-accent-yellow); margin-right: 8px;
-}
-
-.fish-cheat-btn {
-    font-size: 11px; padding: 4px 10px; background-color: rgba(255, 255, 255, 0.1);
-    border-width: 0; border-radius: 6px; color: #FFF; margin-right: 6px;
-}
-
-.fish-cheat-btn:hover { background-color: rgba(255, 255, 255, 0.2); }
-
-.fish-cheat-toggle { font-size: 11px; color: #FFF; }
-.fish-cheat-toggle .unity-toggle__text { color: #FFF; margin-left: 4px; }
-
-/* Utility Hidden */
+/* Utility */
 .hidden { display: none; }

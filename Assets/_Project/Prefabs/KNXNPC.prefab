@@ -48,9 +48,13 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 729457293694998984, guid: d8fbcf282ab7b6a449a30fb9da8f2494, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 2abd2acd8e7bfef45b99c355c2ed1e2b, type: 2}
     - target: {fileID: 1999880445076042702, guid: d8fbcf282ab7b6a449a30fb9da8f2494, type: 3}
       propertyPath: m_Name
-      value: GreennWhite
+      value: KNXNPC
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

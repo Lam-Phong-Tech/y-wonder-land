@@ -74,14 +74,15 @@ namespace YWonderLand.EditorScripts
             AddItem(db, "mine_ticket_01", "V\u00E9 \u0111\u00E0o m\u1ECF", "Th\u00EAm 5 l\u01B0\u1EE3t \u0111\u00E0o qu\u1EB7ng.", "\ud83c\udfab", "items", 100, 0, false);
 
             // Nông sản (8 loại tương ứng 8 seed)
-            AddItem(db, "carrot_01", "C\u00E0 r\u1ED1t", "C\u00E0 r\u1ED1t t\u01B0\u01A1i.", "\ud83e\udd55", "food", 0, 22, true);
-            AddItem(db, "cabbage_01", "B\u1EAFp c\u1EA3i", "B\u1EAFp c\u1EA3i xanh.", "\ud83e\udd6c", "food", 0, 27, true);
-            AddItem(db, "watermelon_01", "D\u01B0a h\u1EA5u", "D\u01B0a h\u1EA5u ng\u1ECDt.", "\ud83c\udf49", "food", 0, 27, true);
-            AddItem(db, "corn_01", "B\u1EAFp ng\u00F4", "B\u1EAFp ng\u00F4 v\u00E0ng \u01B0\u01A1m. D\u00F9ng cho \u0111\u1ED9ng v\u1EADt \u0103n.", "\ud83c\udf3d", "food", 0, 15, true);
-            AddItem(db, "pumpkin_01", "B\u00ED ng\u00F4", "B\u00ED ng\u00F4 to tr\u00F2n.", "\ud83c\udf83", "food", 0, 4, true);
-            AddItem(db, "morning_glory_01", "Rau mu\u1ED1ng", "Rau mu\u1ED1ng xanh.", "\ud83c\udf3e", "food", 0, 30, true);
-            AddItem(db, "sweet_potato_01", "Khoai lang", "Khoai lang ng\u1ECDt b\u00F9i.", "\ud83c\udf60", "food", 0, 48, true);
-            AddItem(db, "grass_01", "C\u1ECF Voi", "C\u1ECF voi t\u01B0\u01A1i l\u00E0m th\u1EE9c \u0103n.", "\ud83c\udf3f", "food", 0, 38, true);
+            // N\u00F4ng s\u1EA3n NG\u1EAEN NG\u00C0Y = TH\u1EE8C \u0102N CH\u0102N NU\u00D4I, KH\u00D4NG b\u00E1n (kh\u00E1ch ch\u1ED1t 22/06): sellPrice 0 + canSell=false.
+            AddItem(db, "carrot_01", "C\u00E0 r\u1ED1t", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83e\udd55", "food", 0, 0, false);
+            AddItem(db, "cabbage_01", "B\u1EAFp c\u1EA3i", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83e\udd6c", "food", 0, 0, false);
+            AddItem(db, "watermelon_01", "D\u01B0a h\u1EA5u", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83c\udf49", "food", 0, 0, false);
+            AddItem(db, "corn_01", "B\u1EAFp ng\u00F4", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83c\udf3d", "food", 0, 0, false);
+            AddItem(db, "pumpkin_01", "B\u00ED ng\u00F4", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83c\udf83", "food", 0, 0, false);
+            AddItem(db, "morning_glory_01", "Rau mu\u1ED1ng", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83c\udf3e", "food", 0, 0, false);
+            AddItem(db, "sweet_potato_01", "Khoai lang", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83c\udf60", "food", 0, 0, false);
+            AddItem(db, "grass_01", "C\u1ECF Voi", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83c\udf3f", "food", 0, 0, false);
             
             // Sản phẩm chăn nuôi
             // S\u1EA3n ph\u1EA9m ch\u00EDnh (Pro1) \u2014 gi\u00E1 b\u00E1n theo c\u1ED9t "Gi\u00E1 Product 1" trong VatNuoi.md
@@ -139,14 +140,17 @@ namespace YWonderLand.EditorScripts
             AddItem(db, "bread_01", "B\u00E1nh m\u00EC", "B\u00E1nh m\u00EC th\u01A1m ngon.", "\ud83c\udf5e", "food", 20, 5, true);
             AddItem(db, "apple_01", "T\u00E1o \u0111\u1ECF", "T\u00E1o ch\u00EDn \u0111\u1ECF ng\u1ECDt l\u1ECBm.", "\ud83c\udf4e", "food", 10, 2, true);
 
-            // Vật nuôi (mua tại shop)
-            AddItem(db, "chicken_01", "Gà", "Gà ta đẻ trứng.", "🐔", "animals", 500, 0, false);
-            AddItem(db, "rabbit_01", "Thỏ", "Thỏ con dễ thương.", "🐰", "animals", 400, 0, false);
-            AddItem(db, "ostrich_01", "Đà điểu", "Đà điểu cho trứng lớn.", "🦤", "animals", 800, 0, false);
-            AddItem(db, "goat_01", "Dê", "Dê cho sữa.", "🐐", "animals", 900, 0, false);
-            AddItem(db, "cow_01", "Bò", "Bò sữa.", "🐄", "animals", 1500, 0, false);
-            AddItem(db, "deer_01", "Hươu", "Hươu cho nhung quý.", "🦌", "animals", 1800, 0, false);
-            AddItem(db, "pig_01", "Heo", "Heo thịt.", "🐷", "animals", 1000, 0, false);
+            // Vật nuôi (mua tại shop) — GIÁ MUA = cột "USDT" trong VatNuoi.xlsx (KHÁCH CHỐT 22/06).
+            AddItem(db, "chicken_01", "Gà", "Gà ta đẻ trứng.", "🐔", "animals", 6, 0, false);
+            AddItem(db, "rabbit_01", "Thỏ", "Thỏ con dễ thương.", "🐰", "animals", 5, 0, false);
+            AddItem(db, "ostrich_01", "Đà điểu", "Đà điểu cho trứng lớn.", "🦤", "animals", 170, 0, false);
+            AddItem(db, "goat_01", "Dê", "Dê cho sữa.", "🐐", "animals", 50, 0, false);
+            AddItem(db, "cow_01", "Bò", "Bò sữa.", "🐄", "animals", 300, 0, false);
+            AddItem(db, "deer_01", "Hươu", "Hươu cho nhung quý.", "🦌", "animals", 400, 0, false);
+            AddItem(db, "pig_01", "Heo", "Heo thịt.", "🐷", "animals", 100, 0, false);
+            AddItem(db, "duck_01", "Vịt", "Vịt cho trứng.", "🦆", "animals", 8, 0, false);
+            AddItem(db, "goose_01", "Ngỗng", "Ngỗng cho trứng to.", "🦢", "animals", 10, 0, false);
+            AddItem(db, "turtle_01", "Rùa", "Rùa cho mai quý.", "🐢", "animals", 90, 0, false);
 
             // Câu cá
             AddItem(db, "fish_01", "Cá chép", "Cá chép tươi sống.", "🐟", "food", 0, 50, true);

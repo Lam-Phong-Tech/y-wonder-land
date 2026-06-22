@@ -26,11 +26,11 @@ MonoBehaviour:
   productAltAmount: 50
   produceItemId: milk_01
   produceAmount: 10
-  produceCycleTimeSec: 25
+  produceCycleTimeSec: 420
   maxHarvests: 38
   meatItemId: beef_01
   meatAmount: 50
-  feedIntervalSec: 40
+  feedIntervalSec: 60
   canGetSick: 1
   primitiveType: 0
   animalColor: {r: 1, g: 1, b: 1, a: 1}

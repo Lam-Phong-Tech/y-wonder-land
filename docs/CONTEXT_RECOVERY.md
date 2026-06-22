@@ -61,43 +61,33 @@ Trạng thái: [đã xong gì, còn gì]
 
 ---
 
-## 📌 TRẠNG THÁI MỚI NHẤT (cập nhật 21/06/2026)
+## 📌 TRẠNG THÁI MỚI NHẤT (cập nhật 22/06/2026 — PHIÊN 3)
 
-### 🎯 ĐANG CRUNCH DEMO — deadline build APK THỨ 2 (xem `Docs_KichBan/LoTrinh_Demo_Thu2.md`)
-- **Mục tiêu:** APK chơi được vòng lặp Nông trại + Thành phố, OFFLINE, model tạm chỗ thiếu. CẮT: online/API/web, tối ưu sâu, 4 NPC feature (KNX/Game/Maid/Gift), bạn bè/chat, cosmetic/VIP/Pet, mỏ/đảo endgame.
+### 🎯 ĐANG CRUNCH DEMO — đã BUILD APK thử (đang tối ưu dung lượng + chờ khách chốt giá bán)
+- **Mục tiêu:** APK chơi được vòng lặp Nông trại + Thành phố, OFFLINE. Đã build thử (1.2GB → đang giảm texture).
 - **Team:** 1 dev + AI. Anh tự kiêm QC (được sửa thẳng module QC khi yêu cầu).
 
-### Vừa hoàn thành — PHIÊN 2 (21/06, RẤT lớn)
-- **Vật nuôi SỐNG theo thời gian** (`FarmAnimal` viết lại): đói/ra sản phẩm theo MỐC THỜI GIAN; **thanh HP (no/đói)** billboard trên đầu; **vụ cuối LÀM THỊT** (con biến mất, trả ô chuồng). Logic 10 con đầy đủ theo VatNuoi (produce + maxHarvests + meat). Tạo 17 item sản phẩm/thịt.
-- **Cho ăn ĐÚNG tài liệu**: mỗi con ăn đúng thức ăn (Bò=Cỏ Voi/Khoai Lang...), sai loại → báo. Sửa tên `Cỏ khô→Cỏ Voi`, `Rau cải→Bắp cải`; nông sản chuyển category `food`.
-- **THỜI GIAN THỰC** (`GameTimeConfig.cs`): 1 ngày game = 24h thực; **`SecondsPerGameDay`** (DEMO 60f · THẬT 86400f) = 1 ĐIỂM chuyển. **TƯỚI-GATE-LỚN**: cây chỉ lớn khi còn nước.
-- **Thanh nước cây** + **MÚC NƯỚC** (`WaterSource` + item `watering_water_01`; tưới tốn 1 xô). **Cây mọc từ dưới lên** (`AnchorBaseToGround`).
-- **Khung 10 cây LÂU NĂM** (hạt + SP + CropDefinition, tạm 1-lần-thu).
-- **Build cost = VẬT LIỆU** (Ruộng FREE · Đường 4 Đá · Chuồng 4 Gỗ/ô) — kiểm+trừ+hoàn; chi phí ra **SerializeField** (`penWoodCost`/`pathStoneCost` trên `BuildModeOverlayController`).
-- **Câu cá + đào đá CITY-ONLY** (gate `IslandTravelManager.CurrentIslandId=="city"`). **Khoá map** Mỏ/Hải Phú/Mộc Nhi.
-- **Tutorial**: bỏ bước đào đá (/13) + fix 2 bug (nhảy bước, thả thú). **Popup "đang phát triển"** cho NPC chưa làm (`ShopZoneTrigger.comingSoon`).
-- **UI**: tách tab "Sản phẩm" khỏi "Thú nuôi"; shop ẩn tab filter không có hàng; fix popup thú tràn chữ.
-- **Respawn** cây+đá ra SerializeField (`respawnTimeSec` default 60s). **Shop wire đầy đủ** (18 hạt + 10 con; Mini Garden mua hết SP).
+### Vừa hoàn thành — PHIÊN 3 (22/06) — xem CHANGELOG entry 22/06 cho đầy đủ
+- **Toast** mọi hành động (thu hoạch/chặt-đào/mua-bán/câu cá). **EXP/Level tối giản** (`ExperienceManager` + HUD số thật). **Âm thanh KHUNG** (`AudioManager`, cần thả file `Resources/Audio/`).
+- **Mobile #4** (camera kéo 1 ngón — `LookZone`) + **#5** (`UISafeArea`). **Resume người chơi cũ** (có save → bỏ Login+Cutscene vào thẳng game ở vị trí cũ).
+- **Câu cá BẢN TẠM** (ẩn popup, 8.7s tự +1 cá). **Tưới không spam** (kiểm `IsBusy`). **Tutorial chống kẹt** (auto-nhảy bước đi-theo-NPC 90s). **Map khóa đảo Mỏ** + đổi thông báo "Chưa đủ điều kiện để di chuyển". **Ẩn nút cheat** trong Map.
+- **Áp GIÁ KHÁCH CHỐT (22/06):** giá MUA con giống = cột **USDT** (+ thêm 3 con vịt/ngỗng/rùa); nông sản ngắn ngày = **THỨC ĂN không bán**. Chặt cây=**10 gỗ**/đào đá=**10 đá**.
 
-### ⚠️ Việc Editor đang CHỜ ANH (quan trọng — nút thắt demo)
-- **Chạy 4 generator**: `Generate Mock Items` → `Generate Crop Data` → `Generate Animal Data` → `Generate Shop Data`.
-- **Gắn model**: cây (Crop Prefab) · 10 thú (`AnimalPrefabLibrary`).
-- **Gắn trigger/component**: `WaterSource`+collider lên ao · `ShopZoneTrigger`(+collider) cho nhà NPC · `HarvestableResource` Tree=cây/Rock=đá (đá ở CityScene).
-- **#1 Thành phố cần BIỂN riêng**: anh đã thêm water plane (tag Water, y=-6) — còn thêm **collider** + **FishingSpot** ở khu nước city.
-- **Set `respawnTimeSec`** ngắn (60s) trên prefab/đối tượng cây+đá CŨ (đang lưu 3600 — chọn nhiều, sửa 1 lần).
-- **Mark Static + shadow/texture** (mobile mức 2) → **build APK** test máy thật.
+### ⚠️ Việc Editor đang CHỜ ANH (nút thắt build)
+- **Chạy lại 4 generator** (số giá mới): `Generate Mock Items` → `Crop Data` → `Animal Data` → `Shop Data`.
+- **Gắn model**: cây (Crop Prefab) · 10 thú (`AnimalPrefabLibrary`). **Gắn**: `WaterSource`/`ShopZoneTrigger`/`HarvestableResource` (Tree/Rock) · `UISafeArea` lên GameHUD · City: collider+FishingSpot.
+- **TỐI ƯU APK (đang làm):** GPU Instancing (xong) · Static map1/stonemap+nhà city (xong) · **GIẢM TEXTURE NPC 2048→512+ASTC** (APK 1.2GB do texture NPC `.glb` = 96%, 4 con 256MB) — dùng menu `Tools/Tối ưu Mobile/Nén Texture` hoặc chỉnh tay → **build lại đo**.
+- Player Settings: Switch Platform Android · IL2CPP+ARM64 · package name · **Landscape (xong)** · thêm **CityScene vào Build Settings**. Xem `Docs_KichBan/TruocKhiBuild_Checklist.md`.
 
 ### Còn lại / Phase 2 (không chặn demo)
-- **EXP/level system + HUD số** (chưa có hệ thống; phạt EXP đang log).
-- **Persistence offline (DateTime)**: cây/thú lớn-bù khi đóng app vài ngày — CẦN khi đổi `SecondsPerGameDay`→86400.
-- **Cây lâu năm thu-NHIỀU-lần** (hiện 1-lần). 3 item `duck/goose/turtle_01` chưa có ItemDefinition.
-- **Mobile #4 camera kéo, #5 safe area**. **Âm thanh/nhạc**. **Lưu trữ REST đợt 2-3**.
-- **Visual "héo" cây** (đổi màu) chưa làm — báo khát bằng thanh đỏ.
+- **Exploit kinh tế** (phá chuồng dupe · 2 hệ chuồng AnimalPen-vs-BuildSurfaceCell · thú chết kẹt ô · đổi giờ máy reset lượt câu · POS lưu `(int)` tràn). Xem memory [[qc-audit-blindspots]].
+- **Persistence DateTime offline** (cây/thú lớn-bù). **Thêm Chanh dây + dọn 7 cây lâu năm thừa** (khách chốt còn 3).
+- **Settings volume/graphics chưa áp** · nhiều popup chỉ log không trao thưởng · **CHỜ KHÁCH chốt giá BÁN sản phẩm + cân bằng lời** (phiếu `PhieuHoi_Khach_GiaCa.docx`).
 
 ### 🔧 Lưu ý dev QUAN TRỌNG (đọc kỹ)
-- **`giveTestLoadoutOnStart = true`** (InventoryManager, tạo runtime nên không có Inspector) → mỗi lần Play tặng 100k POS + cả kho đồ. **NHỚ đổi `false` trước khi build demo thật.**
-- **`GameTimeConfig.SecondsPerGameDay = 60f`** (demo). Đổi 86400 cho bản thật + làm persistence DateTime.
-- **Test cây/thú phải NGOÀI tutorial** (tutorial ép cây lớn 5s — `GetGrowthTime` override khi `TutorialManager.IsActive`). Tắt `Force Run Tutorial For Testing`.
-- **KHÔNG đụng code scale model cây** trong FarmTile (bù `cropParentLossy` đang đúng) — chỉnh hình qua model/wrap empty.
-- Warning `ApiClient ConnectionError` (offline) là BÌNH THƯỜNG. NPC chưa làm warn "ShopZone chưa gán" → giờ thành "đang phát triển".
-- **Module QC** đã sửa phiên này (báo rõ): `FarmTile`, `TutorialManager`, `FarmInteractionController`, `HarvestableResource`.
+- **`giveTestLoadoutOnStart = false`** (ĐÃ TẮT cho build). Muốn test có sẵn đồ thì tạm đổi `true`, build để `false`.
+- **Độ "lời":** ĐỪNG nói "kinh tế thủng/lời 300-500 lần" — SAI (bỏ qua thức ăn + 9 tháng + giới hạn lần thu). Lời thật ~250-400%. Giá BÁN chờ khách chốt.
+- **`GameTimeConfig.SecondsPerGameDay = 60f`** (demo). Đổi 86400 cho bản thật + persistence DateTime.
+- **Test cây/thú NGOÀI tutorial** (tutorial ép cây lớn 5s). Tắt `Force Run Tutorial For Testing`.
+- **KHÔNG đụng code scale model cây** trong FarmTile (bù `cropParentLossy` đang đúng).
+- **Module QC đã sửa phiên này** (báo rõ): `GameHUDController`, `TutorialManager`, `FarmInteractionController`, `FishingOverlay*`. NPC dùng glTF importer (không có nút Extract Textures).

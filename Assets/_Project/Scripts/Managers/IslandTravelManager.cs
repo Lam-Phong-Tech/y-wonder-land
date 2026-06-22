@@ -86,7 +86,7 @@ public class IslandTravelManager : MonoBehaviour
         if (targetId != "farm" && targetId != "city")
         {
             Debug.Log($"[IslandTravel] Đảo '{targetId}' đang KHOÁ (demo).");
-            YWonderLand.Environment.ScreenToast.Show("Đảo này đang khoá — sắp mở trong bản cập nhật tới!");
+            YWonderLand.Environment.ScreenToast.Show("Chưa đủ điều kiện để di chuyển.");
             return;
         }
 

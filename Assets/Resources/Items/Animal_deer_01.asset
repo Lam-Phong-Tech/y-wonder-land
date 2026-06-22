@@ -26,11 +26,11 @@ MonoBehaviour:
   productAltAmount: 40
   produceItemId: deer_velvet_01
   produceAmount: 2
-  produceCycleTimeSec: 25
+  produceCycleTimeSec: 10800
   maxHarvests: 2
   meatItemId: deer_meat_01
   meatAmount: 40
-  feedIntervalSec: 40
+  feedIntervalSec: 60
   canGetSick: 1
   primitiveType: 0
   animalColor: {r: 1, g: 1, b: 1, a: 1}

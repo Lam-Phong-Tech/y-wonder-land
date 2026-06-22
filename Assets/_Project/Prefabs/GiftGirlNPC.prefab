@@ -10,8 +10,12 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -3814039587312786999, guid: 75f4d01e43ad0f743a849a8c974c6862, type: 3}
       propertyPath: m_Name
-      value: RedDressGirl
+      value: GiftGirlNPC
       objectReference: {fileID: 0}
+    - target: {fileID: -2263430307227039563, guid: 75f4d01e43ad0f743a849a8c974c6862, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: d4c9e66f770133c46a01a3cb74eacff9, type: 2}
     - target: {fileID: 5070275473056788731, guid: 75f4d01e43ad0f743a849a8c974c6862, type: 3}
       propertyPath: m_LocalPosition.x
       value: -18.687134

@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.CropDefinition
   seedItemId: cabbage_seed_01
   harvestItemId: cabbage_01
-  growthTimeSec: 40
-  waterIntervalSec: 18
+  growthTimeSec: 60
+  waterIntervalSec: 25
   harvestYield: 1
   expReward: 35
   posReward: 40

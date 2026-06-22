@@ -1,5 +1,54 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-06-22 (PHIÊN 3: Toast · EXP/Audio · Mobile #4/#5 · Resume · QC audit · Áp giá khách chốt · Tối ưu APK · Hỏi khách)
+
+### Added
+- **Toast thông báo MỌI hành động:** thu hoạch cây/thú · chặt cây/đào đá · mua/bán shop · câu cá. `ScreenToast.ShowInfo` (xanh) thành công, `Show` (đỏ) lỗi.
+- **Hệ EXP/Level TỐI GIẢN:** `ExperienceManager.cs` (singleton tự tạo, lưu PlayerPrefs, ngưỡng 100+(lv-1)*50, bắn `LevelUpOverlay`). HUD hiện Level + % EXP THẬT (hết "Level 1/0.00" cứng). Cộng EXP khi thu hoạch cây (`crop.expReward`) + chặt/đào (`resourceExp`=5).
+- **Âm thanh KHUNG:** `AudioManager.cs` (tải `Resources/Audio/<tên>`, thiếu file bỏ qua êm). Nối nhạc nền `bgm` + SFX `chop`/`harvest`/`coin`. **CẦN thả file audio vào `Assets/Resources/Audio/`.**
+- **Mobile #4 — camera kéo 1 ngón:** `LookZone` (nửa phải hud-root) → `GameHUDController` bắt pointer → `ThirdPersonCamera.AddTouchLook` (sensitivity touch riêng + `Instance`). PC khóa con trỏ ở tâm nên không đụng.
+- **Mobile #5 — safe area:** `UISafeArea.cs` (đệm root UIDocument theo `Screen.safeArea`). Match PanelSettings đã = 0.5.
+- **Resume người chơi cũ:** `GameManager` có save (`YW_HasSave`) → BỎ Login+Cutscene vào thẳng game ở vị trí cũ; lưu vị trí lúc Quit/Pause (chỉ khi ở Nông trại); cờ `alwaysStartFresh` + ContextMenu "Clear Save".
+- **Câu cá BẢN TẠM:** ẩn popup, bấm F → đợi `castDuration` (8.7s) → tự +1 cá + toast (giữ code minigame căn-giờ để sửa sau).
+- **Editor tool `TextureSizeReducer.cs`:** menu ép texture Max 512 + ASTC (giảm dung lượng build).
+- **Map: khóa đảo Mỏ** (`LockMine` icon + `IsUnlocked("mine")=false` cứng, scene chưa có).
+
+### Changed
+- **Sản lượng tài nguyên (khách chốt):** chặt 1 cây = **10 Gỗ** · đào 1 đá = **10 Đá** (SerializeField `treeYield`/`rockYield`); `HarvestResourceTick` bù `yieldItemId` mặc định (`wood_01`/`stone_01`) nếu trống → đồ vào túi đúng + toast ra số.
+- **Giá MUA con giống = cột USDT** (khách chốt): bò 300, gà 6, đà điểu 170, hươu 400, heo 100, dê 50, rùa 90, ngỗng 10, thỏ 5, vịt 8 + **thêm 3 con** vịt/ngỗng/rùa vào shop.
+- **Nông sản ngắn ngày = THỨC ĂN, KHÔNG bán** (khách chốt): 8 món `sellPrice 0 + canSell false` → shop tự lọc.
+- **Thông báo map khóa** → "Chưa đủ điều kiện để di chuyển" (MapPopup dialog + IslandTravel toast).
+- **Câu cá:** xóa "Nhận +X POS" trong mô tả cá (câu chỉ cho CÁ; bán shop mới ra tiền).
+- **`giveTestLoadoutOnStart = false`** (TẮT cho bản build demo).
+- **Animation câu cá** 8.5→8.7s khớp cửa sổ căn cá.
+
+### Fixed
+- **Tưới nước SPAM:** `HandleWater` kiểm `PlayerController.IsBusy` → click khi đang múa tưới bị bỏ qua (hết tốn nước thừa + nhảy tiến độ).
+- **Toast chặt/đào không hiện:** đổi từ event tĩnh `OnResourceHarvested` (dùng chung Tutorial — 1 handler throw chặn cả chuỗi) → gọi TRỰC TIẾP tại call-site.
+- **Tutorial CHỐNG KẸT:** `CheckFollowAutoAdvance` tự nhảy bước "đi theo NPC" sau 90s (NPC kẹt NavMesh).
+- **Ẩn nút CHEAT Level/VIP** trong Map popup (cờ `showCheatButtons=false`).
+- **Warning `line-height`** trong GameHUD.uss (UI Toolkit không hỗ trợ — gỡ).
+- **Lỗi biên dịch chặn cả assembly:** 2 thư mục lạ `UI-Nhien`/`BinMin-Dev` (trùng `AuthManager` của project BulletHell) — đã xóa.
+
+### Optimization (mobile) — Editor/asset
+- GPU Instancing material cube/cây/đá · Static `map1`/`stonemap` + nhà city · Far Clip ~150-200 + Fog · khóa Landscape.
+- **APK 1.2GB → texture chiếm 96%** (Build Report: 4 con NPC `.glb` 256MB/con do texture nhúng quá to). Xử: **ép texture NPC 2048→512 + ASTC**.
+
+### Decisions (khách/sếp chốt 22/06)
+- **Giá MUA con giống = cột USDT** (đã áp).
+- **Rau ngắn ngày = thức ăn chăn nuôi, KHÔNG bán** (đã áp).
+- **Cây lâu năm = CHỈ 3 loại** (Sa Chi, Sầu Riêng, Chanh dây) — demo tạm giữ 10, dọn sau.
+- **Giá BÁN sản phẩm + cân bằng lời = khách làm việc sau** (chưa chốt). ⚠️ Đính chính: "lời 300-500 lần/kinh tế thủng" là SAI (bỏ qua thức ăn + 9 tháng + giới hạn lần thu) — lời thật ~250-400%.
+
+### Docs
+- `RaSoat_SoLieu_MauThuan.md` (rà soát mâu thuẫn số liệu) · `PhieuHoi_Khach_DeHieu.md` (viết lại) + `PhieuHoi_Khach_GiaCa.docx` (gửi khách) · `ToiUu_Mobile_Checklist.md` · `TruocKhiBuild_Checklist.md`.
+
+### Còn nợ (Phase 2 / chưa làm)
+- Exploit kinh tế (phá chuồng dupe · 2 hệ chuồng AnimalPen-vs-BuildSurfaceCell · thú chết kẹt ô · đổi giờ máy reset lượt câu · POS lưu `(int)` tràn ~2,1 tỉ).
+- Persistence DateTime offline (cây/thú lớn-bù) · thêm Chanh dây + dọn 7 cây lâu năm · Settings volume/graphics chưa áp · nhiều popup chỉ log không trao thưởng.
+
+---
+
 ## [Unreleased] - 2026-06-21 (PHIÊN 2: Thời gian thực · Vật nuôi sống VatNuoi · Tưới-gate · Múc nước · Build vật liệu · Tutorial fix · Rà soát trước demo)
 ### Added
 - **Vật nuôi SỐNG theo thời gian + thanh HP:** viết lại `FarmAnimal` — đói/ra sản phẩm tính theo MỐC THỜI GIAN (`Time.timeAsDouble`); thanh HP (no/đói) billboard trên đầu (tự đo cao theo model); `AnimalInteractionPopup` thêm dòng "Độ no / Thu hoạch" (đếm ngược vụ + X/Y lần). Gắn `FarmAnimal` cho cả con vật CÓ prefab (trước chỉ ra khối trơ).

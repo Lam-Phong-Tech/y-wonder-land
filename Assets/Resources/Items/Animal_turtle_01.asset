@@ -26,11 +26,11 @@ MonoBehaviour:
   productAltAmount: 10
   produceItemId: turtle_shell_01
   produceAmount: 1
-  produceCycleTimeSec: 25
+  produceCycleTimeSec: 18000
   maxHarvests: 1
   meatItemId: turtle_meat_01
   meatAmount: 10
-  feedIntervalSec: 40
+  feedIntervalSec: 420
   canGetSick: 1
   primitiveType: 0
   animalColor: {r: 1, g: 1, b: 1, a: 1}

@@ -36,9 +36,9 @@ namespace YWonderLand.Managers
 
         [Header("Debug — Test (nhớ TẮT khi release)")]
         [Tooltip("BẬT: lúc Play tự nạp nhiều thức ăn/nông sản/vật liệu/hạt + tiền vào túi để test NPC mua/bán.")]
-        // ⚠️ TẠM BẬT để test (InventoryManager tạo runtime nên không tick được Inspector).
-        // 👉 ĐỔI LẠI false trước khi build demo thật cho sếp.
-        [SerializeField] private bool giveTestLoadoutOnStart = true;
+        // ⚠️ ĐÃ TẮT cho bản BUILD DEMO (22/06) — người chơi KHÔNG được tặng sẵn tiền/đồ.
+        // 👉 Muốn test lại trong Editor (có sẵn tiền/đồ) thì tạm đổi về true, build thì để false.
+        [SerializeField] private bool giveTestLoadoutOnStart = false;
         [Tooltip("Số POS cộng thêm khi nạp loadout test.")]
         [SerializeField] private long testMoney = 100000;
 

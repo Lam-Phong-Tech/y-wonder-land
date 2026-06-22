@@ -12,6 +12,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: MaidNPC
       objectReference: {fileID: 0}
+    - target: {fileID: 1003558873527211692, guid: 5d8d89ef7f5203b42aba2c7571b16e4d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 5b884607e384785499a17f95342a421a, type: 2}
     - target: {fileID: 2842577089966694861, guid: 5d8d89ef7f5203b42aba2c7571b16e4d, type: 3}
       propertyPath: m_LocalScale.x
       value: 2
@@ -123,6 +127,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Environment.MerchantNPC
   serviceType: 0
+  shopData: {fileID: 0}
   interactionLabel: 
   npcName: 
 --- !u!95 &393399269070531254

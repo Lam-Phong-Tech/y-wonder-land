@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.CropDefinition
   seedItemId: royal_ginseng_seed_01
   harvestItemId: royal_ginseng_01
-  growthTimeSec: 60
+  growthTimeSec: 120
   waterIntervalSec: 25
   harvestYield: 1
   expReward: 400

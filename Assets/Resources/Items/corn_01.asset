@@ -14,13 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.ItemDefinition
   id: corn_01
   itemName: "B\u1EAFp ng\xF4"
-  description: "B\u1EAFp ng\xF4 v\xE0ng \u01B0\u01A1m. D\xF9ng cho \u0111\u1ED9ng
-    v\u1EADt \u0103n."
+  description: "Th\u1EE9c \u0103n ch\u0103n nu\xF4i (kh\xF4ng b\xE1n)."
   iconEmoji: "\U0001F33D"
   iconSprite: {fileID: 0}
   category: food
   buyPrice: 0
-  sellPrice: 15
-  canSell: 1
+  sellPrice: 0
+  canSell: 0
   isStackable: 1
   maxStack: 999

@@ -526,3 +526,13 @@
 ### 61. Tầm tương tác đo tới ĐIỂM CHẠM (hit.point), không phải pivot
 - **Tình huống**: Gate khoảng cách chặt cây đo từ nhân vật tới pivot cây → cây to thì không bao giờ "đủ gần".
 - **Quy tắc**: Đo khoảng cách tới `hit.point` (điểm tâm ngắm chạm bề mặt) cho trực quan, đúng với mọi kích cỡ vật thể. Đặt range trên TỪNG vật (`HarvestableResource.interactionRange`) như `FishingSpot` để chỉnh linh hoạt + vẽ gizmo cho dễ canh.
+
+### 62. APK NẶNG = gần như luôn do TEXTURE — đọc Build Report đừng đoán (22/06)
+- **Tình huống**: Build APK ra **1.2GB**. Tưởng do model/code.
+- **Chẩn đoán**: Đọc **Build Report** trong `Editor.log` (sau build): "Uncompressed usage by category" + danh sách asset nặng nhất. Kết quả: **Textures 96.3%**; 4 con NPC `.glb` **256MB/con** do texture nhúng cực to. Mesh chỉ 58MB. → Instancing/Static KHÔNG liên quan dung lượng file (chỉ giảm draw call).
+- **Quy tắc**: Texture nhân vật/đồ trên mobile để **Max Size 512 + ASTC** là đủ (màn hình nhỏ). NPC dùng **glTF importer** → KHÔNG có nút "Extract Textures" như FBX; nếu texture là file rời thì chỉnh Max Size thẳng (multi-select hoặc menu `Tools/Tối ưu Mobile/Nén Texture`). 2048→512 = giảm ~16 lần.
+
+### 63. ĐỪNG tính "lời X lần" kiểu tổng-thu ÷ giá-mua (22/06)
+- **Tình huống**: Báo "mua bò 300, bán cả đời 164k → lời 547 lần → kinh tế thủng" → làm hoang mang sai.
+- **Sai ở đâu**: Con số đó BỎ QUA (a) chi phí **thức ăn** cả đời (~40k/con bò, người chơi tự trồng tốn công), (b) **thời gian** (bò 38 vụ × 7 ngày = ~9 tháng game = 9 tháng thật ở 1day=1day), (c) số lần thu **GIỚI HẠN** (đã tính trong tổng-thu).
+- **Quy tắc**: Lời = (doanh thu − thức ăn − giá mua) và xét theo CHU KỲ/THỜI GIAN. Công thức của khách (CachTinh) tính cả thức ăn → lời thật **~250-400%**, hợp lý. Khi báo cáo kinh tế cho người ra quyết định, luôn trừ chi phí vận hành + nêu thời gian hoàn vốn.

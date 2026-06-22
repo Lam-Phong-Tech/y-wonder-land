@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.CropDefinition
   seedItemId: asparagus_seed_01
   harvestItemId: asparagus_01
-  growthTimeSec: 60
+  growthTimeSec: 120
   waterIntervalSec: 25
   harvestYield: 4
   expReward: 150

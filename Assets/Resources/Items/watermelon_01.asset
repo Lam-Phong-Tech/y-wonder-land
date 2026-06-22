@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.ItemDefinition
   id: watermelon_01
   itemName: "D\u01B0a h\u1EA5u"
-  description: "D\u01B0a h\u1EA5u ng\u1ECDt."
+  description: "Th\u1EE9c \u0103n ch\u0103n nu\xF4i (kh\xF4ng b\xE1n)."
   iconEmoji: "\U0001F349"
   iconSprite: {fileID: 0}
   category: food
   buyPrice: 0
-  sellPrice: 27
-  canSell: 1
+  sellPrice: 0
+  canSell: 0
   isStackable: 1
   maxStack: 999

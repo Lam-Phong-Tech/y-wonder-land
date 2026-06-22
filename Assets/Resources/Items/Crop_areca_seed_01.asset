@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.CropDefinition
   seedItemId: areca_seed_01
   harvestItemId: areca_01
-  growthTimeSec: 60
+  growthTimeSec: 120
   waterIntervalSec: 25
   harvestYield: 3
   expReward: 150
