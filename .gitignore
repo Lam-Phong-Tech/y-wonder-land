@@ -85,3 +85,6 @@ Assets/Building/Map1*
 /.utmp/
 /Assets/OptimizedNPCAssets/
 /Assets/OptimizedNPCAssets.meta
+
+# File khóa tạm của Word/Office (~$...) khi đang mở .docx
+~$*
