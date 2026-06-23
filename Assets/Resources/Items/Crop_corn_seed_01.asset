@@ -25,3 +25,8 @@ MonoBehaviour:
   cropPrefab: {fileID: 2601761632728642304, guid: 285093b89849db04398a79afaa235e4e, type: 3}
   modelGroundOffset: 0
   seedlingScale: 0.25
+  plotSlots: 1
+  maxHarvests: 1
+  reHarvestCycleSec: 0
+  finalProductItemId: 
+  finalProductAmount: 0

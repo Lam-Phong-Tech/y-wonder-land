@@ -84,7 +84,9 @@ public class GameHUDController : MonoBehaviour
     private VisualElement joystickOuter;
     private VisualElement joystickKnob;
     private int joystickPointerId = -1;
-    private const float JoystickRadius = 45f;
+    // Tầm kéo núm + chuẩn hoá input. Đi theo size .joystick-outer trong GameHUD.uss
+    // (outer 164 → bán kính ~57). Đổi size joystick thì chỉnh số này theo tỉ lệ.
+    private const float JoystickRadius = 57f;
 
     // Vùng nhìn (mobile) — kéo 1 ngón nửa phải để xoay camera
     private VisualElement lookZone;
@@ -363,23 +365,17 @@ public class GameHUDController : MonoBehaviour
 
         if (btnSprint != null)
         {
-            // Giữ nút = chạy nhanh.
-            // Button có manipulator Clickable nuốt sự kiện pointer ở pha bubble -> ĐĂNG KÝ Ở PHA
-            // TrickleDown (capture) để callback chạy TRƯỚC Clickable. Clickable vẫn tự bắt con trỏ
-            // nên PointerUp luôn về đúng nút kể cả khi chuột/ngón nhích ra ngoài.
-            btnSprint.RegisterCallback<PointerDownEvent>(evt =>
+            // BẤM 1 LẦN = bật/tắt chạy nhanh (toggle). Bấm lần nữa để tắt.
+            // Nút sáng (class "sprint-btn-active") khi đang bật để người chơi biết trạng thái.
+            btnSprint.RegisterCallback<ClickEvent>(evt =>
             {
-                if (PlayerController.Instance != null) PlayerController.Instance.SetSprintUI(true);
-            }, TrickleDown.TrickleDown);
-            btnSprint.RegisterCallback<PointerUpEvent>(evt =>
-            {
-                if (PlayerController.Instance != null) PlayerController.Instance.SetSprintUI(false);
-            }, TrickleDown.TrickleDown);
-            // Mất quyền bắt con trỏ (bị gián đoạn) -> dừng sprint cho an toàn.
-            btnSprint.RegisterCallback<PointerCaptureOutEvent>(evt =>
-            {
-                if (PlayerController.Instance != null) PlayerController.Instance.SetSprintUI(false);
+                if (PlayerController.Instance == null) return;
+                bool on = PlayerController.Instance.ToggleSprintUI();
+                btnSprint.EnableInClassList("sprint-btn-active", on);
             });
+            // Đồng bộ hiệu ứng nút với trạng thái hiện tại (HUD có thể bật lại sau khi đã toggle).
+            if (PlayerController.Instance != null)
+                btnSprint.EnableInClassList("sprint-btn-active", PlayerController.Instance.IsSprintUIOn);
         }
 
         SetupJoystick();

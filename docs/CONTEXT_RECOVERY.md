@@ -61,7 +61,23 @@ Trạng thái: [đã xong gì, còn gì]
 
 ---
 
-## 📌 TRẠNG THÁI MỚI NHẤT (cập nhật 22/06/2026 — PHIÊN 3)
+## 📌 TRẠNG THÁI MỚI NHẤT (cập nhật 23/06/2026 — PHIÊN 4)
+
+### 🎯 Đang ở đâu
+Đã **áp bộ giá Point mới (USDT×26)** từ 3 file CayTrong2/CayTrongLauNam2/VatNuoi2 + làm **cây lâu năm thu nhiều lần + số ô (chanh dây 20 ô)** + **nhãn info nổi trên cây** + **vòng quay/điểm danh 15 ngày** + **EXP/Level (250+5/cap90, ngày×10)** + nhiều **mobile UI**. Vừa **FIX bug lớn GameManager bị xoá** → game chạy lại trơn.
+
+### 🔴 Bài học QUAN TRỌNG phiên này
+Manager do `SystemsBootstrapper` tạo (**Economy/Inventory/Tool**) KHÔNG được gắn lên object CHUNG với manager khác (vd `_GameManager`): singleton trùng gọi `Destroy(gameObject)` sẽ **huỷ cả object** → mất GameManager. ĐÃ đổi 3 manager đó sang **`Destroy(this)`** (chỉ huỷ component).
+
+### ⚠️ Việc Editor đang chờ
+- Chạy generator: **Generate Mock Items → Crop Data → Shop Data** (assets đã đổi phần lớn). Kéo model chanh leo vào `Crop_passion_fruit_seed_01`.
+- **TẮT `giveTestLoadoutOnStart=false` trước khi build** (đang BẬT test). Có thể gỡ component InventoryManager thừa khỏi `_GameManager`.
+
+### 🔜 Việc tiếp theo
+- **Gói B — hệ BỆNH vật nuôi** (tỉ lệ/thời điểm phát bệnh, vắc-xin phòng, thuốc trị, chết theo mốc loài) — `AnimalDefinition` chưa có field bệnh. Phân bón. Chốt EXP cột "lần cuối" vs ngày×10.
+
+---
+## 📌 (PHIÊN 3 — 22/06, lịch sử)
 
 ### 🎯 ĐANG CRUNCH DEMO — đã BUILD APK thử (đang tối ưu dung lượng + chờ khách chốt giá bán)
 - **Mục tiêu:** APK chơi được vòng lặp Nông trại + Thành phố, OFFLINE. Đã build thử (1.2GB → đang giảm texture).

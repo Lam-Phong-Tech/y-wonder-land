@@ -342,6 +342,8 @@ public class SettingsPopupController : MonoBehaviour
             overlay.style.display = DisplayStyle.Flex;
             Debug.Log("[Settings] Popup opened");
         }
+        if (settingsDocument != null) settingsDocument.sortingOrder = 100; // render TRÊN HUD + thanh chat
+        UIPopupTracker.SetOpen(this, true); // khoá camera/tương tác + để chat tự ẩn
     }
 
     /// <summary>
@@ -354,6 +356,7 @@ public class SettingsPopupController : MonoBehaviour
             overlay.style.display = DisplayStyle.None;
             Debug.Log("[Settings] Popup closed");
         }
+        UIPopupTracker.SetOpen(this, false);
     }
 
     /// <summary>

@@ -1,5 +1,36 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-06-23 (PHIÊN 4: Áp giá Point ×26 · Cây lâu năm thu nhiều lần + số ô · Vòng quay + điểm danh 15 ngày · EXP/Level · Mobile UI · FIX GameManager bị xoá)
+
+### Added
+- **Vòng quay may mắn** (tab mới trong EventPopup): vòng tròn quay THẬT (emoji quanh vành + kim + ô giữa hiện quà), 12 ô weighted random, **3 lượt/ngày** (reset ngày thật, PlayerPrefs), **TRAO THƯỞNG THẬT** (AddItem/AddPOS). Tỉ lệ khách chốt + con/cây khác lấp + "chúc may mắn" 60%.
+- **Điểm danh TÂN THỦ 15 ngày** (viết lại tab Attendance, dựng 15 ô động): N1=26pt · N3=4 gỗ · N5=26pt · N7=10 bắp · N10=10 bí ngô · N11=8 gỗ · N15=1 thỏ. Trao THẬT, 1 lần/ngày thật.
+- **Cây LÂU NĂM thu NHIỀU LẦN** (Gói A): `CropDefinition` thêm `plotSlots/maxHarvests/reHarvestCycleSec/finalProduct*`; `FarmTile` vòng đời chín→thu→ra quả lại→VỤ CUỐI (Sa Chi 9 lần/Sầu Riêng 12/chanh dây 2). `SetPerennial` trong CropDataGenerator.
+- **Cây NHIỀU Ô (giàn)**: chanh dây = 20 ô — master-slave (`PlantWithSlots`: trồng 1 ô master + chiếm 19 ô slave gần nhất, thả khi thu vụ cuối).
+- **Nhãn chữ NỔI trên cây** (TextMesh billboard): % lớn / chín sau ~Xs / số lần thu — đếm ngược sống (bù info cây còn thiếu so với con vật).
+- **Chanh leo (chanh dây)**: thêm crop data (lâu năm, hạt 1560, bán 57).
+- **Safe Area TOÀN CỤC**: `SafeAreaInstaller` tự gắn `UISafeArea` cho MỌI UIDocument; `ToiUu_DaManHinh_Checklist.md`. 3 file `.md` so sánh số liệu mới (CayTrong2/CayTrongLauNam2/VatNuoi2).
+
+### Changed
+- **ÁP BỘ GIÁ MỚI (file …2.xlsx khách gửi):** MỌI giá = **Point = USDT × 26**; giá BÁN hạ để giữ lời ~250%. 54 mục trong `ItemDataGenerator`. Con giống: Bò 7800/Hươu 10400/Gà 156… Giá bán: sữa bò **50**, da heo 7042, mai rùa 11893, Hộp Sa Chi 194, chanh leo 57… (1 USDT = 26 Point.)
+- **Gia cầm BỎ THỊT** (gà/vịt/ngỗng/đà điểu): `meatItemId` rỗng → chỉ lấy trứng, hết số lần thu thì biến mất; gỡ 4 thịt gia cầm khỏi Mini Garden.
+- **EXP/Level (khách chốt):** ramp **250 + (cấp−1)×5**, Level Cap **90**; EXP thu hoạch = **số ngày × 10** (cây/thú); đào khoáng **15**.
+- **Mobile UI:** nút búa Build chuyển sang PHẢI (trên Jump); phóng to nút điều khiển ~**+27%** (joystick/sidebar/settings/bag/sprint/jump/X); Sprint **giữ→bấm-toggle**; PanelSettings ref 1280×720; popup clamp max-w/h %.
+- **Vắc-xin 30 / thuốc 70** (giá mua).
+
+### Fixed
+- **🔴 GAME MANAGER BỊ XOÁ khi Play (làm KẸT cả game, không spawn nhân vật/cutscene):** gốc rễ = `InventoryManager` (+ Economy/Tool) do `SystemsBootstrapper` tạo TRƯỚC (BeforeSceneLoad) → bản trùng gắn trên `_GameManager` gọi **`Destroy(gameObject)` → huỷ NHẦM cả GameManager**. **SỬA: 3 manager bootstrap đổi `Destroy(gameObject)` → `Destroy(this)`** (chỉ huỷ component trùng). Thêm GameManager singleton `!= this` + `ResetStaticInstance` (chống lỗi domain-reload-off). KHÔNG phải lỗi domain reload như nghi ban đầu.
+- **Settings bị thanh chat đè:** Settings `sortingOrder=100` + đăng ký `UIPopupTracker`; ChatPanel tự ẩn khi có popup.
+- **iPhone lẹm nút mép phải** (hud-root `inset:0` + Safe Area); nút búa joystick đè (chuyển phải); vòng quay title đè nội dung (layout cột + selector 2-class).
+
+### Editor TODO
+- Chạy lại generator: Generate Mock Items → Crop Data → Shop Data. Kéo model chanh leo vào `Crop_passion_fruit_seed_01`.
+- **⚠️ TẮT `giveTestLoadoutOnStart = false` TRƯỚC KHI BUILD** (đang BẬT để test). Cân nhắc gỡ component InventoryManager thừa khỏi `_GameManager`.
+
+### Còn nợ (phase tiếp)
+- **Gói B — hệ BỆNH vật nuôi** (tỉ lệ/thời điểm phát bệnh, vắc-xin PHÒNG, thuốc TRỊ trừ item, chết theo mốc loài). `AnimalDefinition` chưa có field bệnh.
+- Phân bón; chốt EXP "lần cuối doc" (số to) vs ngày×10.
+
 ## [Unreleased] - 2026-06-22 (PHIÊN 3: Toast · EXP/Audio · Mobile #4/#5 · Resume · QC audit · Áp giá khách chốt · Tối ưu APK · Hỏi khách)
 
 ### Added

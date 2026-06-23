@@ -35,4 +35,4 @@ MonoBehaviour:
   primitiveType: 0
   animalColor: {r: 1, g: 1, b: 1, a: 1}
   animalScale: {x: 0.5, y: 0.5, z: 0.5}
-  iconEmoji: "\U0001F414"
+  iconEmoji: "\U0001F422"

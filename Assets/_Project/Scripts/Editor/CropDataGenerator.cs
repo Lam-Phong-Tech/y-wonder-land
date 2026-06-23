@@ -51,12 +51,20 @@ namespace YWonderLand.EditorScripts
             AddCrop(db, "asparagus_seed_01", "asparagus_01", Days(2f), Hours(10f), 4, 150, 0, 4, new Color(0.4f, 0.7f, 0.3f), "\ud83c\udf31");
             AddCrop(db, "red_ginseng_seed_01", "red_ginseng_01", Days(2f), Hours(10f), 1, 250, 0, 5, new Color(0.7f, 0.2f, 0.2f), "\ud83c\udf3f");
             AddCrop(db, "royal_ginseng_seed_01", "royal_ginseng_01", Days(2f), Hours(10f), 1, 400, 0, 5, new Color(0.8f, 0.15f, 0.2f), "\ud83c\udf3f");
+            // Chanh leo (chanh d\u00e2y) \u2014 c\u00e2y l\u00e2u n\u0103m th\u1ee9 3 kh\u00e1ch ch\u1ed1t. yield=10 qu\u1ea3/v\u1ee5 (CayTrong Pro1), exp t\u1ea1m; b\u00e1n 325. K\u00e9o model cay_chanh_day_.prefab v\u00e0o Crop_passion_fruit_seed_01.asset.
+            AddCrop(db, "passion_fruit_seed_01", "passion_fruit_01", Days(2f), Hours(10f), 10, 20, 0, 5, new Color(0.5f, 0.2f, 0.6f), "\ud83c\udf47");
+
+            // Cây LÂU NĂM: số ô + thu NHIỀU LẦN + sản phẩm vụ cuối (theo CayTrongLauNam2.xlsx).
+            // (seedId, số ô, số lần thu, chu kỳ ra quả, idSP vụ cuối, SL vụ cuối)
+            SetPerennial("sacha_seed_01", 1, 9, Days(28f), "sacha_01", 46);
+            SetPerennial("durian_seed_01", 1, 12, Days(28f), "durian_01", 29);
+            SetPerennial("passion_fruit_seed_01", 20, 2, Days(90f), "passion_fruit_01", 35);
 
             EditorUtility.SetDirty(db);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
-            Debug.Log("[CropData] Generated CropDatabase with 18 crops (8 ng\u1eafn ng\u00e0y + 10 l\u00e2u n\u0103m)!");
+            Debug.Log("[CropData] Generated CropDatabase with 19 crops (8 ng\u1eafn ng\u00e0y + 11 l\u00e2u n\u0103m)!");
         }
 
         private static void AddCrop(CropDatabase db, string seedId, string harvestId,
@@ -85,6 +93,21 @@ namespace YWonderLand.EditorScripts
 
             EditorUtility.SetDirty(crop);
             db.AddCropEntry(crop);
+        }
+
+        // Set thông số CÂY LÂU NĂM lên Crop_<seedId>.asset (chạy SAU AddCrop). Cây ngắn ngày giữ default (1 ô, 1 lần thu).
+        private static void SetPerennial(string seedId, int plotSlots, int maxHarvests, float reHarvestCycleSec,
+            string finalProductId, int finalProductAmount)
+        {
+            string path = "Assets/Resources/Items/Crop_" + seedId + ".asset";
+            var crop = AssetDatabase.LoadAssetAtPath<CropDefinition>(path);
+            if (crop == null) { Debug.LogWarning($"[CropData] Chưa có Crop_{seedId} để set cây lâu năm (AddCrop phải chạy trước)."); return; }
+            crop.plotSlots = plotSlots;
+            crop.maxHarvests = maxHarvests;
+            crop.reHarvestCycleSec = reHarvestCycleSec;
+            crop.finalProductItemId = finalProductId;
+            crop.finalProductAmount = finalProductAmount;
+            EditorUtility.SetDirty(crop);
         }
     }
 }

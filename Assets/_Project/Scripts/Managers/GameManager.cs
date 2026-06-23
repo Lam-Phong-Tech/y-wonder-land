@@ -53,15 +53,28 @@ public class GameManager : MonoBehaviour
 
     void Awake()
     {
-        if (Instance == null)
+        // Singleton CHỐNG LỖI: chỉ huỷ nếu có 1 GameManager KHÁC đang sống (Instance != this).
+        // Sửa lỗi TỰ HUỶ khi "Enter Play Mode" tắt Domain/Scene Reload — static Instance từ lần Play
+        // trước vẫn trỏ vào CHÍNH object này, khiến code cũ (else Destroy) huỷ nhầm chính mình.
+        if (Instance != null && Instance != this)
         {
-            Instance = this;
-        }
-        else
-        {
+            Debug.LogWarning($"[GameManager] Đã có GameManager khác đang chạy — huỷ bản trùng trên '{gameObject.name}'.");
             Destroy(gameObject);
+            return;
         }
+        Instance = this;
     }
+
+    // QUAN TRỌNG (khuyến nghị từ Unity AI): khi "Enter Play Mode" TẮT Domain Reload, static Instance
+    // KHÔNG tự reset giữa các lần Play → có thể còn trỏ vào object đã huỷ (fake-null) làm Awake nhầm.
+    // Reset về null THẬT trước khi scene load để Awake luôn gán đúng. (Build luôn reload nên không cần.)
+#if UNITY_EDITOR
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetStaticInstance()
+    {
+        Instance = null;
+    }
+#endif
 
     void Start()
     {

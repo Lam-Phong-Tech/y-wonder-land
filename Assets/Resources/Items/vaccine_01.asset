@@ -18,8 +18,8 @@ MonoBehaviour:
   iconEmoji: "\U0001F489"
   iconSprite: {fileID: 0}
   category: items
-  buyPrice: 80
-  sellPrice: 40
+  buyPrice: 30
+  sellPrice: 15
   canSell: 1
   isStackable: 1
   maxStack: 999

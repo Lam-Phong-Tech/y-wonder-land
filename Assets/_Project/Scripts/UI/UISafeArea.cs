@@ -17,6 +17,13 @@ public class UISafeArea : MonoBehaviour
     private Rect lastSafe = new Rect(-1f, -1f, -1f, -1f);
     private Vector2 lastScreen = Vector2.zero;
 
+    /// <summary>Cho installer bật xem trước safe area trong Editor/Device Simulator (build luôn áp).</summary>
+    public bool ApplyInEditor
+    {
+        get => applyInEditor;
+        set { applyInEditor = value; lastSafe = new Rect(-1f, -1f, -1f, -1f); } // ép tính lại
+    }
+
     void OnEnable()
     {
         doc = GetComponent<UIDocument>();

@@ -284,6 +284,16 @@ public class PlayerController : MonoBehaviour
         isSprintUIHeld = isPressed;
     }
 
+    /// <summary>Nút Sprint trên HUD bấm 1 lần = bật/tắt chạy nhanh. Trả về trạng thái mới (true = đang chạy nhanh).</summary>
+    public bool ToggleSprintUI()
+    {
+        isSprintUIHeld = !isSprintUIHeld;
+        return isSprintUIHeld;
+    }
+
+    /// <summary>Trạng thái chạy nhanh đang bật từ nút HUD (để HUD đồng bộ hiệu ứng nút).</summary>
+    public bool IsSprintUIOn => isSprintUIHeld;
+
     // ── Joystick ảo (mobile) ──
     private Vector2 virtualMoveInput = Vector2.zero;
     /// <summary>Joystick ảo trên HUD gọi mỗi frame khi kéo (x,y trong [-1,1]); thả tay gọi Vector2.zero.</summary>

@@ -61,6 +61,27 @@ public class FarmTile : MonoBehaviour
     /// <summary>Hệ số chăm sóc 0.5..1 lúc thu (1 = không để khát; 0.5 = khát suốt). Nhân vào sản lượng/POS/EXP.</summary>
     public float LastCareFactor { get; private set; } = 1f;
 
+    // ── Cây LÂU NĂM: thu NHIỀU LẦN (theo CropDefinition.maxHarvests / reHarvestCycleSec) ──
+    private int harvestsRemaining = 1;   // số lần thu còn lại
+    private bool isReGrowing = false;    // đang RA QUẢ LẠI giữa các lần thu (dùng reHarvestCycleSec)
+    /// <summary>Sản phẩm VỤ CUỐI thu ở lần harvest cuối (caller đọc sau InteractHarvest). Rỗng nếu không có.</summary>
+    public string LastFinalProductId { get; private set; } = "";
+    public int LastFinalProductAmount { get; private set; } = 0;
+
+    // ── Cây NHIỀU Ô (giàn, vd chanh dây 20 ô): master giữ list slave; slave trỏ về master (bị khoá) ──
+    [HideInInspector] public FarmTile masterTile = null;          // != null → ô này bị 1 giàn chiếm
+    private System.Collections.Generic.List<FarmTile> slaveTiles; // != null → ô này là master nhiều ô
+    /// <summary>Ô đã cuốc và CHƯA bị giàn nào chiếm (dùng để tìm ô cho cây nhiều ô).</summary>
+    public bool IsPlowedFree => currentState == TileState.Plowed && masterTile == null;
+    public void OccupyAsSlot(FarmTile master) { masterTile = master; }
+    public void RegisterSlaves(System.Collections.Generic.List<FarmTile> slaves) { slaveTiles = slaves; }
+    private void FreeSlaves()
+    {
+        if (slaveTiles == null) return;
+        foreach (var s in slaveTiles) if (s != null) s.masterTile = null;
+        slaveTiles = null;
+    }
+
     // Thanh nước nổi trên cây — billboard ĐỘC LẬP (KHÔNG parent vào ô đất để né scale lệch của Dirt).
     private Transform waterBarRoot;
     private Transform waterFillPivot;
@@ -77,6 +98,10 @@ public class FarmTile : MonoBehaviour
 
     // Crop-specific color (used for primitive fallback visuals)
     private Color cropColor = Color.green;
+
+    // Nhãn chữ NỔI trên cây (billboard) — hiện % lớn / chín sau ~Xs / số lần thu (cho người chơi xem trực quan, đếm ngược sống).
+    private Transform cropInfoRoot;
+    private TextMesh cropInfoTM;
 
     void Start()
     {
@@ -131,6 +156,7 @@ public class FarmTile : MonoBehaviour
 
     void LateUpdate()
     {
+        UpdateCropInfoLabel(); // chữ nổi trên cây — chạy độc lập với thanh nước (hiện cả lúc cây đã chín)
         if (waterBarRoot == null) return;
         if (waterBarCam == null) waterBarCam = Camera.main;
 
@@ -244,10 +270,12 @@ public class FarmTile : MonoBehaviour
 
     public bool InteractPlant(string seedId)
     {
-        if (currentState != TileState.Plowed) return false;
+        if (currentState != TileState.Plowed || masterTile != null) return false;
 
         plantedSeedId = seedId;
         currentState = TileState.Planted;
+        harvestsRemaining = 1;
+        isReGrowing = false;
 
         // Lookup CropDefinition from CropDatabase
         var cropDb = Resources.Load<CropDatabase>("CropDatabase");
@@ -257,7 +285,8 @@ public class FarmTile : MonoBehaviour
             if (currentCrop != null)
             {
                 cropColor = currentCrop.cropColor;
-                Debug.Log($"[FarmTile] Planted {seedId} → crop found, growth={currentCrop.growthTimeSec}s, yield={currentCrop.harvestYield}");
+                harvestsRemaining = Mathf.Max(1, currentCrop.maxHarvests);
+                Debug.Log($"[FarmTile] Planted {seedId} → crop found, growth={currentCrop.growthTimeSec}s, yield={currentCrop.harvestYield}, lanThu={harvestsRemaining}");
             }
         }
 
@@ -279,7 +308,7 @@ public class FarmTile : MonoBehaviour
 
     public bool InteractWater()
     {
-        if (currentState != TileState.Planted) return false;
+        if (currentState != TileState.Planted || masterTile != null) return false;
 
         currentState = TileState.Watered;
         growStartTime = Time.timeAsDouble; // mốc bắt đầu lớn
@@ -344,6 +373,35 @@ public class FarmTile : MonoBehaviour
         LastCareFactor = Mathf.Lerp(1f, 0.5f, dryRatio);
         amount = Mathf.Max(1, Mathf.RoundToInt(amount * LastCareFactor));
 
+        // Mặc định chưa có sản phẩm vụ cuối (caller đọc 2 field này sau khi gọi).
+        LastFinalProductId = "";
+        LastFinalProductAmount = 0;
+
+        harvestsRemaining = Mathf.Max(0, harvestsRemaining - 1);
+
+        // CÂY LÂU NĂM còn lần thu → quay lại RA QUẢ tiếp (KHÔNG về đất trống, GIỮ model + lặp chu kỳ).
+        if (currentCrop != null && currentCrop.maxHarvests > 1 && harvestsRemaining > 0)
+        {
+            isReGrowing = true;
+            currentState = TileState.Watered;
+            isGrowing = true;
+            growStartTime = Time.timeAsDouble;
+            lastWaterTime = Time.timeAsDouble;
+            growthAccrued = 0f;
+            dryAccumSec = 0f;
+            CreateWaterBar();
+            UpdateVisuals();
+            OnTileHarvested?.Invoke(this);
+            return true;
+        }
+
+        // LẦN CUỐI (hoặc cây ngắn ngày 1-lần): thu thêm sản phẩm VỤ CUỐI (nếu có) rồi cây biến mất.
+        if (currentCrop != null && !string.IsNullOrEmpty(currentCrop.finalProductItemId) && currentCrop.finalProductAmount > 0)
+        {
+            LastFinalProductId = currentCrop.finalProductItemId;
+            LastFinalProductAmount = currentCrop.finalProductAmount;
+        }
+
         // Reset tile to Soil
         currentState = TileState.Soil;
         plantedSeedId = "";
@@ -351,8 +409,12 @@ public class FarmTile : MonoBehaviour
         cropColor = Color.green;
         growStartTime = 0.0;
         isGrowing = false;
+        isReGrowing = false;
+        harvestsRemaining = 1;
         dryAccumSec = 0f;
+        FreeSlaves(); // cây nhiều ô hết đời → thả các ô slave cho trồng lại
         DestroyWaterBar();
+        if (cropInfoRoot != null) { Destroy(cropInfoRoot.gameObject); cropInfoRoot = null; cropInfoTM = null; }
 
         if (cropModelInstance != null) { Destroy(cropModelInstance); cropModelInstance = null; }
 
@@ -443,7 +505,12 @@ public class FarmTile : MonoBehaviour
         TutorialManager tm = FindFirstObjectByType<TutorialManager>();
         if (tm != null && tm.IsActive()) return 5f; // Trực tiếp trả về 5s để bỏ qua giá trị lưu trong Inspector
 
-        if (currentCrop != null) return currentCrop.growthTimeSec;
+        if (currentCrop != null)
+        {
+            // Cây lâu năm đang RA QUẢ LẠI → dùng chu kỳ tái sinh thay vì thời gian lớn ban đầu.
+            if (isReGrowing && currentCrop.reHarvestCycleSec > 0f) return currentCrop.reHarvestCycleSec;
+            return currentCrop.growthTimeSec;
+        }
         return tutorialGrowthTime;
     }
 
@@ -479,6 +546,91 @@ public class FarmTile : MonoBehaviour
                 }
                 break;
         }
+    }
+
+    // ── Nhãn chữ nổi trên cây (đếm ngược + số lần thu) ──
+    private void CreateCropInfo()
+    {
+        if (cropInfoRoot != null) return;
+        var go = new GameObject("CropInfo");
+        cropInfoRoot = go.transform;
+        cropInfoTM = go.AddComponent<TextMesh>();
+        cropInfoTM.text = "";
+        cropInfoTM.characterSize = 0.085f;
+        cropInfoTM.fontSize = 70;
+        cropInfoTM.anchor = TextAnchor.LowerCenter;
+        cropInfoTM.alignment = TextAlignment.Center;
+        cropInfoTM.color = Color.white;
+        cropInfoTM.richText = true;
+        var mr = go.GetComponent<MeshRenderer>();
+        if (mr != null)
+        {
+            mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            mr.receiveShadows = false;
+        }
+    }
+
+    private void UpdateCropInfoLabel()
+    {
+        bool show = currentCrop != null &&
+            (currentState == TileState.Watered || currentState == TileState.Ripe || currentState == TileState.Planted);
+        if (!show)
+        {
+            if (cropInfoRoot != null) cropInfoRoot.gameObject.SetActive(false);
+            return;
+        }
+        if (cropInfoRoot == null) CreateCropInfo();
+        cropInfoRoot.gameObject.SetActive(true);
+
+        // Vị trí trên đỉnh cây + xoay mặt về camera (billboard).
+        float topY = transform.position.y + 1.35f;
+        if (cropModelInstance != null)
+        {
+            float maxY = float.MinValue; bool found = false;
+            foreach (var r in cropModelInstance.GetComponentsInChildren<Renderer>())
+            { if (r == null) continue; maxY = Mathf.Max(maxY, r.bounds.max.y); found = true; }
+            if (found) topY = maxY + 0.6f;
+        }
+        cropInfoRoot.position = new Vector3(transform.position.x, topY, transform.position.z);
+        var cam = Camera.main;
+        if (cam != null) cropInfoRoot.rotation = Quaternion.LookRotation(cam.transform.forward, cam.transform.up);
+
+        if (cropInfoTM != null) cropInfoTM.text = GetStatusText();
+    }
+
+    /// <summary>Dòng trạng thái cây: % lớn / chín sau ~Xs / số lần thu / cần tưới.</summary>
+    public string GetStatusText()
+    {
+        if (currentCrop == null) return "";
+        switch (currentState)
+        {
+            case TileState.Ripe:
+            {
+                string s = "<color=#5BD66B>Đã chín</color>";
+                if (currentCrop.maxHarvests > 1) s += $"\nCòn {harvestsRemaining}/{currentCrop.maxHarvests} lần";
+                return s;
+            }
+            case TileState.Watered:
+            {
+                float pct = GetGrowthPercentage();
+                float remain = Mathf.Max(0f, GetGrowthTime() - GetGrownSeconds());
+                string s = $"Lớn {Mathf.RoundToInt(pct * 100f)}%";
+                if (remain > 0.4f) s += $" · chín ~{FormatSec(remain)}";
+                if (GetWaterFraction() < 0.12f) s += "\n<color=#E06666>cần tưới</color>";
+                if (currentCrop.maxHarvests > 1) s += $"\nlần {(currentCrop.maxHarvests - harvestsRemaining) + 1}/{currentCrop.maxHarvests}";
+                return s;
+            }
+            case TileState.Planted:
+                return "<color=#FFD54F>Chưa tưới</color>";
+            default:
+                return "";
+        }
+    }
+
+    private static string FormatSec(float s)
+    {
+        if (s >= 60f) return $"{Mathf.FloorToInt(s / 60f)}m{Mathf.RoundToInt(s % 60f):00}s";
+        return $"{Mathf.RoundToInt(s)}s";
     }
 
     public float GetGrowthPercentage()

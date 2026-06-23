@@ -38,7 +38,7 @@ namespace YWonderLand.Managers
         [Tooltip("BẬT: lúc Play tự nạp nhiều thức ăn/nông sản/vật liệu/hạt + tiền vào túi để test NPC mua/bán.")]
         // ⚠️ ĐÃ TẮT cho bản BUILD DEMO (22/06) — người chơi KHÔNG được tặng sẵn tiền/đồ.
         // 👉 Muốn test lại trong Editor (có sẵn tiền/đồ) thì tạm đổi về true, build thì để false.
-        [SerializeField] private bool giveTestLoadoutOnStart = false;
+        [SerializeField] private bool giveTestLoadoutOnStart = true; // ⚠️ BẬT TẠM để test trong Editor — NHỚ trả về false khi build!
         [Tooltip("Số POS cộng thêm khi nạp loadout test.")]
         [SerializeField] private long testMoney = 100000;
 
@@ -52,9 +52,12 @@ namespace YWonderLand.Managers
                 Instance = this;
                 LoadInventory();
             }
-            else
+            else if (Instance != this)
             {
-                Destroy(gameObject);
+                // ĐÃ có InventoryManager khác (vd SystemsBootstrapper tạo trước) → chỉ huỷ COMPONENT này,
+                // KHÔNG Destroy(gameObject): vì component này có thể nằm CHUNG object với GameManager
+                // → Destroy(gameObject) sẽ huỷ nhầm cả GameManager! (đây là lỗi đã làm mất GameManager.)
+                Destroy(this);
             }
         }
 

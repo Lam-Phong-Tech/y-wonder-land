@@ -25,3 +25,8 @@ MonoBehaviour:
   cropPrefab: {fileID: 9207426958677319370, guid: 9db057d3530bdd549ab9f5383646b054, type: 3}
   modelGroundOffset: 0
   seedlingScale: 0.25
+  plotSlots: 1
+  maxHarvests: 12
+  reHarvestCycleSec: 1680
+  finalProductItemId: durian_01
+  finalProductAmount: 29

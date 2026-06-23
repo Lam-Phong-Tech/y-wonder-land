@@ -224,10 +224,19 @@ public class AnimalInteractionPopupController : MonoBehaviour
     {
         if (currentAnimal == null) return;
 
+        // Chu kỳ ra sản phẩm (lấy TRƯỚC khi harvest vì vụ cuối có thể huỷ con vật).
+        float animalDays = (currentAnimal.data != null)
+            ? currentAnimal.data.produceCycleTimeSec / YWonderLand.Core.GameTimeConfig.SecondsPerGameDay : 0f;
+
         if (currentAnimal.HarvestProduct(out string itemId, out int amount))
         {
             Debug.Log($"[AnimalPopup] Harvested {amount} of {itemId}");
             InventoryManager.Instance?.AddItem(itemId, amount);
+
+            // EXP (khách chốt 22/06: số NGÀY 1 chu kỳ ra sản phẩm × 10).
+            int aexp = Mathf.Max(1, Mathf.RoundToInt(animalDays * 10f));
+            ExperienceManager.Instance?.AddEXP(aexp);
+
             // Optionally hide after harvest
             Hide();
         }

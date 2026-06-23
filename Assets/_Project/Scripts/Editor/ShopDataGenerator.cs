@@ -28,9 +28,10 @@ namespace YWonderLand.EditorTools
                     // Hạt cây NGẮN NGÀY (8)
                     "carrot_seed_01", "cabbage_seed_01", "watermelon_seed_01", "corn_seed_01",
                     "pumpkin_seed_01", "grass_seed_01", "morning_glory_seed_01", "sweet_potato_seed_01",
-                    // Hạt cây LÂU NĂM (10)
+                    // Hạt cây LÂU NĂM (11)
                     "banana_seed_01", "coconut_seed_01", "areca_seed_01", "date_seed_01", "sacha_seed_01",
                     "tea_seed_01", "durian_seed_01", "asparagus_seed_01", "red_ginseng_seed_01", "royal_ginseng_seed_01",
+                    "passion_fruit_seed_01",
                     // Con giống (10)
                     "chicken_01", "rabbit_01", "ostrich_01", "goat_01", "cow_01", "deer_01", "pig_01",
                     "duck_01", "goose_01", "turtle_01"
@@ -52,15 +53,16 @@ namespace YWonderLand.EditorTools
                     // Nông sản NGẮN NGÀY (8)
                     "carrot_01", "cabbage_01", "watermelon_01", "corn_01", "pumpkin_01",
                     "morning_glory_01", "sweet_potato_01", "grass_01",
-                    // Sản phẩm cây LÂU NĂM (10)
+                    // Sản phẩm cây LÂU NĂM (11)
                     "banana_01", "coconut_01", "areca_01", "date_01", "sacha_01",
                     "tea_01", "durian_01", "asparagus_01", "red_ginseng_01", "royal_ginseng_01",
+                    "passion_fruit_01",
                     // Sản phẩm chăn nuôi CHÍNH (10)
                     "egg_01", "milk_01", "pigskin_01", "ostrich_egg_01", "deer_velvet_01", "goat_milk_01",
                     "rabbit_fur_01", "goose_egg_01", "duck_egg_01", "turtle_shell_01",
-                    // THỊT (vụ cuối, 10)
-                    "pork_01", "chicken_meat_01", "beef_01", "ostrich_meat_01", "deer_meat_01",
-                    "goat_meat_01", "rabbit_meat_01", "goose_meat_01", "duck_meat_01", "turtle_meat_01"
+                    // THỊT vụ cuối (6 — gia cầm gà/vịt/ngỗng/đà điểu chỉ lấy trứng, KHÔNG có thịt)
+                    "pork_01", "beef_01", "deer_meat_01",
+                    "goat_meat_01", "rabbit_meat_01", "turtle_meat_01"
                 });
 
             // 5) Hai Lúa — phân/vắc-xin/thuốc (BuyOnly)

@@ -19,7 +19,7 @@ MonoBehaviour:
   iconSprite: {fileID: 0}
   category: products
   buyPrice: 0
-  sellPrice: 3428
+  sellPrice: 1084
   canSell: 1
   isStackable: 1
   maxStack: 999

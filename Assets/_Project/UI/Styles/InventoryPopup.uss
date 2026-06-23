@@ -12,6 +12,7 @@
 
 .inventory-panel {
     width: 900px; height: 600px;
+    max-width: 96%; max-height: 92%; /* không tràn trên màn nhỏ (phone landscape ngắn) */
     background-color: var(--color-primary-navy);
     border-radius: var(--radius-panel);
     border-width: 1px; border-color: rgba(255, 255, 255, 0.1);

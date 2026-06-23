@@ -24,8 +24,10 @@ namespace YWonderLand.Environment
         [SerializeField] private int treeYield = 10;
         [Tooltip("Đào xong 1 KHỐI ĐÁ nhận bao nhiêu đá (khách: 10).")]
         [SerializeField] private int rockYield = 10;
-        [Tooltip("EXP nhận mỗi lần chặt cây / đào đá xong (hệ Level tối giản).")]
+        [Tooltip("EXP nhận mỗi lần CHẶT CÂY xong (hệ Level tối giản).")]
         [SerializeField] private int resourceExp = 5;
+        [Tooltip("EXP nhận mỗi lần ĐÀO KHOÁNG xong (khách chốt 22/06: 15).")]
+        [SerializeField] private int mineExp = 15;
 
 
         [Header("References")]
@@ -96,7 +98,8 @@ namespace YWonderLand.Environment
                     ScreenToast.ShowInfo($"{verb}: +{gained} {GetItemDisplayName(yieldId)}");
                 else
                     ScreenToast.ShowInfo($"{verb} xong!");
-                YWonderLand.Managers.ExperienceManager.Instance?.AddEXP(resourceExp);
+                int rexp = resource.type == HarvestableResource.ResourceType.Rock ? mineExp : resourceExp;
+                YWonderLand.Managers.ExperienceManager.Instance?.AddEXP(rexp);
                 YWonderLand.Managers.AudioManager.Instance?.PlaySFX("chop");
             }
             return done;
@@ -518,9 +521,17 @@ namespace YWonderLand.Environment
 
         private void HarvestAnimal(FarmAnimal animal)
         {
+            // Lấy chu kỳ ra sản phẩm TRƯỚC khi harvest (vụ cuối có thể huỷ con vật).
+            float animalDays = (animal != null && animal.data != null)
+                ? animal.data.produceCycleTimeSec / YWonderLand.Core.GameTimeConfig.SecondsPerGameDay : 0f;
+
             if (animal.HarvestProduct(out string itemId, out int amount))
             {
                 Managers.InventoryManager.Instance?.AddItem(itemId, amount);
+
+                // EXP (khách chốt 22/06: số NGÀY 1 chu kỳ ra sản phẩm × 10).
+                int aexp = Mathf.Max(1, Mathf.RoundToInt(animalDays * 10f));
+                Managers.ExperienceManager.Instance?.AddEXP(aexp);
 
                 // Vụ cuối: HarvestProduct tự huỷ con vật (làm thịt) + đã có toast "Làm thịt..." riêng.
                 // Chỉ báo thu sản phẩm khi con vật CÒN SỐNG để khỏi đè toast làm thịt.
@@ -1132,8 +1143,55 @@ namespace YWonderLand.Environment
 
             yield return new WaitForSeconds(dur);
 
-            if (tile != null && tile.InteractPlant(seedId))
+            if (tile != null && PlantWithSlots(tile, seedId))
                 Debug.Log($"[FarmInteraction] Gieo hạt {seedId} SAU khi múa xong!");
+        }
+
+        // Trồng cây có thể CHIẾM NHIỀU Ô (giàn): cây nhiều ô (vd chanh dây 20 ô) cần thêm ô trống gần nhất.
+        private bool PlantWithSlots(FarmTile master, string seedId)
+        {
+            int slots = 1;
+            var cropDb = Resources.Load<CropDatabase>("CropDatabase");
+            var crop = cropDb != null ? cropDb.GetCropBySeedId(seedId) : null;
+            if (crop != null) slots = Mathf.Max(1, crop.plotSlots);
+
+            if (slots <= 1) return master.InteractPlant(seedId);
+
+            // Cây nhiều ô: cần thêm (slots-1) ô ĐÃ CUỐC & còn trống gần nhất.
+            var extras = FindNearbyPlowedTiles(master, slots - 1);
+            if (extras.Count < slots - 1)
+            {
+                ScreenToast.Show($"Cần {slots} ô đất đã cuốc để trồng {GetItemDisplayName(seedId)} (giàn) — còn thiếu {slots - 1 - extras.Count} ô.");
+                return false;
+            }
+
+            if (!master.InteractPlant(seedId)) return false;
+            foreach (var t in extras) t.OccupyAsSlot(master);
+            master.RegisterSlaves(extras);
+            Debug.Log($"[FarmInteraction] Trồng {seedId} chiếm {slots} ô (1 master + {extras.Count} ô giàn).");
+            return true;
+        }
+
+        // Tìm 'count' ô đã cuốc & còn trống GẦN NHẤT quanh master (theo khoảng cách thế giới).
+        private System.Collections.Generic.List<FarmTile> FindNearbyPlowedTiles(FarmTile master, int count)
+        {
+            var all = new System.Collections.Generic.List<FarmTile>(
+                FindObjectsByType<FarmTile>(FindObjectsSortMode.None));
+            Vector3 origin = master.transform.position;
+            all.Sort((a, b) =>
+                (a.transform.position - origin).sqrMagnitude.CompareTo((b.transform.position - origin).sqrMagnitude));
+
+            var result = new System.Collections.Generic.List<FarmTile>();
+            foreach (var t in all)
+            {
+                if (t == master) continue;
+                if (t.IsPlowedFree)
+                {
+                    result.Add(t);
+                    if (result.Count >= count) break;
+                }
+            }
+            return result;
         }
 
         private void HandleWater(FarmTile tile)
@@ -1191,6 +1249,13 @@ namespace YWonderLand.Environment
                     Debug.Log($"[FarmInteraction] Harvested {amount}x {harvestId}!");
                 }
 
+                // Cây LÂU NĂM — vụ cuối: thu thêm sản phẩm Product2 (FarmTile đã set sẵn LastFinalProduct).
+                if (inv != null && !string.IsNullOrEmpty(tile.LastFinalProductId) && tile.LastFinalProductAmount > 0)
+                {
+                    inv.AddItem(tile.LastFinalProductId, tile.LastFinalProductAmount);
+                    ScreenToast.ShowInfo($"Vụ cuối: +{tile.LastFinalProductAmount} {GetItemDisplayName(tile.LastFinalProductId)}");
+                }
+
                 // Add rewards from CropDefinition
                 CropDefinition crop = null;
                 var cropDb = Resources.Load<CropDatabase>("CropDatabase");
@@ -1212,8 +1277,9 @@ namespace YWonderLand.Environment
                         Debug.Log($"[FarmInteraction] +{pos} POS (care {care:0.00})");
                     }
 
-                    // Cộng EXP thật (hệ tối giản) — nhân theo độ chăm sóc.
-                    int exp = Mathf.RoundToInt(crop.expReward * care);
+                    // Cộng EXP thật (khách chốt 22/06: số NGÀY trồng × 10).
+                    float cropDays = crop.growthTimeSec / YWonderLand.Core.GameTimeConfig.SecondsPerGameDay;
+                    int exp = Mathf.Max(1, Mathf.RoundToInt(cropDays * 10f));
                     YWonderLand.Managers.ExperienceManager.Instance?.AddEXP(exp);
                     YWonderLand.Managers.AudioManager.Instance?.PlaySFX("harvest");
 

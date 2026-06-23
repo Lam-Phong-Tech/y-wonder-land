@@ -34,11 +34,13 @@ namespace YWonderLand.Managers
         private const string LEVEL_KEY = "YW_Level";
         private const string EXP_KEY = "YW_ExpInLevel";
 
-        public int Level => level;
-        public float ExpPercent => Mathf.Clamp01((float)expInLevel / ExpForNext(level)) * 100f;
+        public const int MAX_LEVEL = 90; // khách chốt 22/06 (tạm)
 
-        // EXP cần để lên cấp kế: ramp nhẹ (cấp 1->2 cần 100, mỗi cấp +50).
-        private static int ExpForNext(int lv) => 100 + Mathf.Max(0, lv - 1) * 50;
+        public int Level => level;
+        public float ExpPercent => level >= MAX_LEVEL ? 100f : Mathf.Clamp01((float)expInLevel / ExpForNext(level)) * 100f;
+
+        // EXP cần để lên cấp kế (khách chốt 22/06): cấp 1->2 cần 250, mỗi cấp +5.
+        private static int ExpForNext(int lv) => 250 + Mathf.Max(0, lv - 1) * 5;
 
         void Awake()
         {
@@ -50,17 +52,18 @@ namespace YWonderLand.Managers
 
         public void AddEXP(int amount)
         {
-            if (amount <= 0) return;
+            if (amount <= 0 || level >= MAX_LEVEL) return;
             expInLevel += amount;
 
             bool leveledUp = false;
-            // Cộng dồn nhiều cấp nếu EXP đủ.
-            while (expInLevel >= ExpForNext(level))
+            // Cộng dồn nhiều cấp nếu EXP đủ (dừng ở cấp tối đa).
+            while (level < MAX_LEVEL && expInLevel >= ExpForNext(level))
             {
                 expInLevel -= ExpForNext(level);
                 level++;
                 leveledUp = true;
             }
+            if (level >= MAX_LEVEL) expInLevel = 0; // đạt cấp tối đa
 
             PlayerPrefs.SetInt(LEVEL_KEY, level);
             PlayerPrefs.SetInt(EXP_KEY, expInLevel);

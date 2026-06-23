@@ -250,15 +250,15 @@
 }
 
 .attendance-grid {
-    flex-direction: row; justify-content: space-between; align-items: center;
-    flex-grow: 1; margin-bottom: 24px; padding: 0; flex-shrink: 0;
+    flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: center; align-content: center;
+    flex-grow: 1; margin-bottom: 12px; padding: 0; flex-shrink: 1;
 }
 
 .day-slot {
-    width: 86px; height: 130px;
+    width: 80px; height: 98px; margin: 3px;
     background-color: var(--color-mystic-black);
     border-width: 1px; border-color: rgba(255, 255, 255, 0.1);
-    border-radius: 16px; padding: 10px 6px;
+    border-radius: 12px; padding: 6px 4px;
     align-items: center; justify-content: space-between;
     position: relative; flex-shrink: 0;
     transition-property: border-color, background-color, scale; transition-duration: 0.15s;
@@ -274,7 +274,7 @@
 .day-slot.current .day-slot-title { color: var(--color-accent-yellow); -unity-font-style: bold; }
 
 .day-slot-special {
-    width: 104px; background-color: rgba(230, 126, 34, 0.15); border-color: #E67E22;
+    width: 90px; background-color: rgba(230, 126, 34, 0.15); border-color: #E67E22;
 }
 
 .day-slot-special:hover { background-color: rgba(230, 126, 34, 0.25); }
@@ -293,7 +293,7 @@
     -unity-text-align: upper-center; margin: 4px 0 0 0; padding: 0;
 }
 
-.day-slot-emoji { font-size: 30px; -unity-text-align: middle-center; margin: 0; padding: 0; }
+.day-slot-emoji { font-size: 24px; -unity-text-align: middle-center; margin: 0; padding: 0; }
 
 .day-slot-amount {
     color: var(--color-text-white); font-size: 14px; -unity-font-style: bold;
@@ -324,3 +324,43 @@
 .claim-attendance-btn:hover { background-color: #FFD54F; }
 .claim-attendance-btn:active { scale: 0.95; }
 .claim-attendance-btn:disabled { background-color: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.3); }
+
+/* === VÒNG QUAY MAY MẮN === */
+/* Selector 2-class để CHẮC CHẮN đè .event-body (flex-direction: row) → tránh title đè nội dung */
+.event-body.event-wheel-panel { flex-direction: column; align-items: center; }
+.wheel-desc { font-size: 14px; -unity-font-style: bold; color: var(--color-text-secondary); -unity-text-align: middle-center; margin-bottom: 4px; flex-shrink: 0; }
+
+/* Sân khấu căn giữa vòng tròn */
+.wheel-stage { width: 100%; flex-grow: 1; align-items: center; justify-content: center; position: relative; }
+
+/* Kim chỉ tam giác (chỉ xuống), căn giữa trên đỉnh vòng tròn */
+.wheel-pointer-row { position: absolute; top: 2px; left: 0; right: 0; align-items: center; }
+.wheel-pointer {
+    width: 0; height: 0;
+    border-left-width: 12px; border-right-width: 12px; border-top-width: 20px;
+    border-left-color: rgba(0, 0, 0, 0); border-right-color: rgba(0, 0, 0, 0);
+    border-top-color: var(--color-accent-yellow); border-bottom-width: 0;
+}
+
+/* Vòng tròn quay — transition trên 'rotate' để quay mượt rồi chậm dần */
+.wheel-circle {
+    width: 236px; height: 236px; border-radius: 118px;
+    border-width: 6px; border-color: var(--color-accent-yellow);
+    background-color: rgba(20, 24, 36, 0.92);
+    align-items: center; justify-content: center; position: relative;
+    transition-property: rotate; transition-duration: 3s; transition-timing-function: ease-out;
+}
+.wheel-emoji { font-size: 22px; position: absolute; -unity-text-align: middle-center; }
+
+/* Ô giữa hiện quà trúng (KHÔNG quay) */
+.wheel-hub {
+    position: absolute; width: 70px; height: 70px; border-radius: 35px;
+    background-color: var(--color-primary-navy);
+    border-width: 3px; border-color: var(--color-accent-yellow);
+    -unity-text-align: middle-center; font-size: 32px;
+}
+
+.wheel-result { font-size: 16px; -unity-font-style: bold; color: var(--color-accent-yellow); -unity-text-align: middle-center; height: 22px; margin: 4px 0; flex-shrink: 0; }
+.wheel-footer { flex-direction: row; align-items: center; justify-content: center; height: 50px; flex-shrink: 0; }
+.wheel-spins-left { font-size: 14px; -unity-font-style: bold; color: var(--color-text-white); margin-right: 20px; }
+.wheel-spin-btn { padding: 8px 50px; }

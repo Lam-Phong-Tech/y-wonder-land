@@ -27,6 +27,17 @@ public class EventPopupController : MonoBehaviour
     private VisualElement panelBundle;
     private VisualElement panelAttendance;
 
+    // Vòng quay may mắn
+    private Button tabWheel;
+    private VisualElement panelWheel;
+    private VisualElement wheelCircle;
+    private Label wheelHub;
+    private Button btnSpin;
+    private Label lblSpinsLeft;
+    private Label lblWheelResult;
+    private float wheelAngle = 0f;
+    private bool isSpinning = false;
+
     // Grids
     private VisualElement exchangeGrid;
     private VisualElement bundleGrid;
@@ -79,22 +90,65 @@ public class EventPopupController : MonoBehaviour
         new BundleItem { icon = "👑", name = "Gói VIP 30 ngày", desc = "VIP 30 ngày + 2000 UPOS", oldPrice = 500000, newPrice = 299000, tag = "-40%", soldOut = true },
     };
 
-    // ── Mock Data (Attendance) ──
+    // ── Điểm danh TÂN THỦ 15 ngày (khách chốt 22/06: trao thưởng THẬT, chỉ 1 lần/ngày thật) ──
     private Button btnClaimAttendance;
-    private List<VisualElement> daySlots = new List<VisualElement>();
-    private int claimedDays = 2; // Days 1 & 2 claimed initially
-    private bool hasClaimedToday = false; // Player can claim for Day 3 today
+    private VisualElement attendanceGrid;
+    private int claimedDays = 0;
+    private bool hasClaimedToday = false;
 
-    private Dictionary<int, string> dayRewards = new Dictionary<int, string>
+    private const int AttendanceTotalDays = 15;
+    private const string AttDaysKey = "YW_AttendanceClaimedDays";
+    private const string AttDateKey = "YW_AttendanceLastDate";
+
+    private struct DayReward
     {
-        { 1, "🪙 500 Cá vàng" },
-        { 2, "🥕 5 Hạt giống Cà rốt" },
-        { 3, "🪙 1000 Cá vàng" },
-        { 4, "🧪 2 Phân bón siêu tốc" },
-        { 5, "🍎 5 Quả Táo" },
-        { 6, "💎 2 Kim cương" },
-        { 7, "🐢 1 Rùa con quý hiếm!" }
+        public string itemId; public string name; public string emoji;
+        public int qty; public bool isPoint; public bool isNothing;
+    }
+
+    // Lịch thưởng: chỉ các ngày mốc có quà; ngày khác = vẫn điểm danh, không quà.
+    private DayReward GetDayReward(int day)
+    {
+        switch (day)
+        {
+            case 1:  return new DayReward { isPoint = true,        name = "Point",   emoji = "🪙", qty = 26 };
+            case 3:  return new DayReward { itemId = "wood_01",    name = "Gỗ",      emoji = "🪵", qty = 4 };
+            case 5:  return new DayReward { isPoint = true,        name = "Point",   emoji = "🪙", qty = 26 };
+            case 7:  return new DayReward { itemId = "corn_01",    name = "Bắp ngô", emoji = "🌽", qty = 10 };
+            case 10: return new DayReward { itemId = "pumpkin_01", name = "Bí ngô",  emoji = "🎃", qty = 10 };
+            case 11: return new DayReward { itemId = "wood_01",    name = "Gỗ",      emoji = "🪵", qty = 8 };
+            case 15: return new DayReward { itemId = "rabbit_01",  name = "Thỏ",     emoji = "🐰", qty = 1 };
+            default: return new DayReward { isNothing = true, name = "—", emoji = "📅", qty = 0 };
+        }
+    }
+
+    // ── Vòng quay may mắn (khách chốt 22/06: 3 lượt/ngày, trao thưởng thật) ──
+    private struct WheelPrize
+    {
+        public string itemId; public string name; public string emoji;
+        public int qty; public int weight; public bool isNothing;
+    }
+
+    private readonly List<WheelPrize> wheelPrizes = new List<WheelPrize>
+    {
+        new WheelPrize { itemId = "goat_01",            name = "Dê",           emoji = "🐐", qty = 1,  weight = 1 },
+        new WheelPrize { itemId = "duck_01",            name = "Vịt",          emoji = "🦆", qty = 1,  weight = 3 },
+        new WheelPrize { itemId = "rabbit_01",          name = "Thỏ",          emoji = "🐰", qty = 1,  weight = 5 },
+        new WheelPrize { itemId = "wood_01",            name = "Gỗ",           emoji = "🪵", qty = 4,  weight = 10 },
+        new WheelPrize { itemId = "stone_01",           name = "Đá lát đường", emoji = "🪨", qty = 4,  weight = 5 },
+        new WheelPrize { itemId = "corn_01",            name = "Bắp ngô",      emoji = "🌽", qty = 5,  weight = 1 },
+        new WheelPrize { itemId = "cabbage_01",         name = "Bắp cải",      emoji = "🥬", qty = 5,  weight = 1 },
+        new WheelPrize { itemId = "grass_01",           name = "Cỏ voi",       emoji = "🌿", qty = 5,  weight = 1 },
+        new WheelPrize { itemId = "chicken_01",         name = "Gà",           emoji = "🐔", qty = 1,  weight = 3 },
+        new WheelPrize { itemId = "carrot_seed_01",     name = "Hạt cà rốt",   emoji = "🥕", qty = 10, weight = 5 },
+        new WheelPrize { itemId = "watermelon_seed_01", name = "Hạt dưa hấu",  emoji = "🍉", qty = 5,  weight = 5 },
+        new WheelPrize { name = "Chúc may mắn lần sau", emoji = "🍀", qty = 0,  weight = 60, isNothing = true },
     };
+
+    private const int MaxSpinsPerDay = 3;
+    private const string SpinDateKey = "YW_WheelSpinDate";
+    private const string SpinCountKey = "YW_WheelSpinCount";
+    private int spinsUsedToday = 0;
 
     // ── Lifecycle ──
 
@@ -127,6 +181,15 @@ public class EventPopupController : MonoBehaviour
         panelBundle = root.Q<VisualElement>("PanelBundle");
         panelAttendance = root.Q<VisualElement>("PanelAttendance");
 
+        // Vòng quay
+        tabWheel = root.Q<Button>("TabWheel");
+        panelWheel = root.Q<VisualElement>("PanelWheel");
+        wheelCircle = root.Q<VisualElement>("WheelCircle");
+        wheelHub = root.Q<Label>("WheelHub");
+        btnSpin = root.Q<Button>("BtnSpin");
+        lblSpinsLeft = root.Q<Label>("LblSpinsLeft");
+        lblWheelResult = root.Q<Label>("LblWheelResult");
+
         // Exchange/Bundle Grids
         exchangeGrid = root.Q<VisualElement>("ExchangeGrid");
         bundleGrid = root.Q<VisualElement>("BundleGrid");
@@ -137,16 +200,7 @@ public class EventPopupController : MonoBehaviour
 
         // Attendance
         btnClaimAttendance = root.Q<Button>("BtnClaimAttendance");
-        
-        daySlots.Clear();
-        for (int i = 1; i <= 7; i++)
-        {
-            var slot = root.Q<VisualElement>($"DaySlot{i}");
-            if (slot != null)
-            {
-                daySlots.Add(slot);
-            }
-        }
+        attendanceGrid = root.Q<VisualElement>("AttendanceGrid");
     }
 
     private void RegisterCallbacks()
@@ -160,8 +214,10 @@ public class EventPopupController : MonoBehaviour
         tabExchange?.RegisterCallback<ClickEvent>(evt => SwitchTab(0));
         tabBundle?.RegisterCallback<ClickEvent>(evt => SwitchTab(1));
         tabAttendance?.RegisterCallback<ClickEvent>(evt => SwitchTab(2));
+        tabWheel?.RegisterCallback<ClickEvent>(evt => SwitchTab(3));
 
         btnClaimAttendance?.RegisterCallback<ClickEvent>(evt => ClaimDailyReward());
+        btnSpin?.RegisterCallback<ClickEvent>(evt => OnSpin());
     }
 
     // ── Public API ──
@@ -180,6 +236,8 @@ public class EventPopupController : MonoBehaviour
         PopulateExchangeGrid();
         PopulateBundleGrid();
         UpdateAttendanceGridUI();
+        BuildWheel();
+        RefreshWheel();
 
         overlay.style.display = DisplayStyle.Flex;
         Debug.Log("[Event] Opened Event Hub popup on tab " + tabIndex);
@@ -206,10 +264,12 @@ public class EventPopupController : MonoBehaviour
         tabExchange?.RemoveFromClassList("event-tab--active");
         tabBundle?.RemoveFromClassList("event-tab--active");
         tabAttendance?.RemoveFromClassList("event-tab--active");
+        tabWheel?.RemoveFromClassList("event-tab--active");
 
         if (tabIndex == 0) tabExchange?.AddToClassList("event-tab--active");
         else if (tabIndex == 1) tabBundle?.AddToClassList("event-tab--active");
         else if (tabIndex == 2) tabAttendance?.AddToClassList("event-tab--active");
+        else if (tabIndex == 3) tabWheel?.AddToClassList("event-tab--active");
 
         if (panelExchange != null)
             panelExchange.style.display = tabIndex == 0 ? DisplayStyle.Flex : DisplayStyle.None;
@@ -217,6 +277,8 @@ public class EventPopupController : MonoBehaviour
             panelBundle.style.display = tabIndex == 1 ? DisplayStyle.Flex : DisplayStyle.None;
         if (panelAttendance != null)
             panelAttendance.style.display = tabIndex == 2 ? DisplayStyle.Flex : DisplayStyle.None;
+        if (panelWheel != null)
+            panelWheel.style.display = tabIndex == 3 ? DisplayStyle.Flex : DisplayStyle.None;
     }
 
     // ── Exchange Grid ──
@@ -370,53 +432,218 @@ public class EventPopupController : MonoBehaviour
 
     // ── Attendance Grid ──
 
+    // Đọc tiến độ điểm danh + xem hôm nay đã điểm danh chưa (theo NGÀY THẬT).
+    private void LoadAttendance()
+    {
+        claimedDays = PlayerPrefs.GetInt(AttDaysKey, 0);
+        hasClaimedToday = PlayerPrefs.GetString(AttDateKey, "") == System.DateTime.Now.ToString("yyyyMMdd");
+    }
+
     private void UpdateAttendanceGridUI()
     {
-        for (int i = 0; i < daySlots.Count; i++)
+        LoadAttendance();
+
+        if (attendanceGrid != null)
         {
-            var slot = daySlots[i];
-            int dayNumber = i + 1;
-
-            slot.RemoveFromClassList("claimed");
-            slot.RemoveFromClassList("current");
-
-            if (dayNumber <= claimedDays)
+            attendanceGrid.Clear();
+            for (int day = 1; day <= AttendanceTotalDays; day++)
             {
-                slot.AddToClassList("claimed");
-            }
-            else if (dayNumber == claimedDays + 1 && !hasClaimedToday)
-            {
-                slot.AddToClassList("current");
+                var r = GetDayReward(day);
+                bool special = (day == AttendanceTotalDays);
+
+                var slot = new VisualElement();
+                slot.AddToClassList("day-slot");
+                if (special) slot.AddToClassList("day-slot-special");
+                if (day <= claimedDays) slot.AddToClassList("claimed");
+                else if (day == claimedDays + 1 && !hasClaimedToday) slot.AddToClassList("current");
+
+                var title = new Label($"Ngày {day}");
+                title.AddToClassList("day-slot-title");
+                if (special) title.AddToClassList("title-special");
+                slot.Add(title);
+
+                var emoji = new Label(r.emoji);
+                emoji.AddToClassList("day-slot-emoji");
+                if (special) emoji.AddToClassList("emoji-special");
+                slot.Add(emoji);
+
+                var amount = new Label(r.isNothing ? "—" : (r.isPoint ? $"+{r.qty}" : $"x{r.qty}"));
+                amount.AddToClassList("day-slot-amount");
+                if (special) amount.AddToClassList("amount-special");
+                slot.Add(amount);
+
+                var overlay = new VisualElement();
+                overlay.AddToClassList("claimed-overlay");
+                var check = new Label("✔️");
+                check.AddToClassList("claimed-check");
+                overlay.Add(check);
+                slot.Add(overlay);
+
+                attendanceGrid.Add(slot);
             }
         }
 
         if (btnClaimAttendance != null)
         {
-            if (hasClaimedToday)
+            if (claimedDays >= AttendanceTotalDays)
             {
-                btnClaimAttendance.text = "Đã điểm danh";
+                btnClaimAttendance.text = "Đã hoàn thành!";
+                btnClaimAttendance.SetEnabled(false);
+            }
+            else if (hasClaimedToday)
+            {
+                btnClaimAttendance.text = "Đã điểm danh hôm nay";
                 btnClaimAttendance.SetEnabled(false);
             }
             else
             {
-                int nextDay = claimedDays + 1;
-                btnClaimAttendance.text = nextDay <= 7 ? $"Điểm danh (Ngày {nextDay})" : "Đã hoàn thành!";
-                btnClaimAttendance.SetEnabled(nextDay <= 7);
+                btnClaimAttendance.text = $"Điểm danh (Ngày {claimedDays + 1})";
+                btnClaimAttendance.SetEnabled(true);
             }
         }
     }
 
     private void ClaimDailyReward()
     {
-        if (hasClaimedToday || claimedDays >= 7) return;
+        LoadAttendance();
+        if (hasClaimedToday || claimedDays >= AttendanceTotalDays) return;
 
         claimedDays++;
+        var r = GetDayReward(claimedDays);
+
+        // Trao thưởng THẬT.
+        if (!r.isNothing && r.qty > 0)
+        {
+            if (r.isPoint)
+                YWonderLand.Managers.EconomyManager.Instance?.AddPOS(r.qty);
+            else if (!string.IsNullOrEmpty(r.itemId))
+                YWonderLand.Managers.InventoryManager.Instance?.AddItem(r.itemId, r.qty);
+        }
+
+        PlayerPrefs.SetInt(AttDaysKey, claimedDays);
+        PlayerPrefs.SetString(AttDateKey, System.DateTime.Now.ToString("yyyyMMdd"));
+        PlayerPrefs.Save();
         hasClaimedToday = true;
 
-        string reward = dayRewards.ContainsKey(claimedDays) ? dayRewards[claimedDays] : "Quà ngẫu nhiên";
-        Debug.Log($"[Event] Điểm danh Ngày {claimedDays} thành công! Phần thưởng: {reward}");
+        string msg = r.isNothing
+            ? $"📅 Đã điểm danh Ngày {claimedDays}!"
+            : $"📅 Ngày {claimedDays}: nhận {r.name} {(r.isPoint ? "+" : "x")}{r.qty}!";
+        YWonderLand.Environment.ScreenToast.ShowInfo(msg);
 
         UpdateAttendanceGridUI();
+    }
+
+    // ── Vòng quay may mắn ──
+
+    // Dựng emoji các phần thưởng quanh vành vòng tròn.
+    private void BuildWheel()
+    {
+        if (wheelCircle == null) return;
+        wheelCircle.Clear();
+
+        int n = wheelPrizes.Count;
+        float seg = 360f / n;
+        const float radius = 92f;   // bán kính đặt emoji
+        const float center = 112f;  // tâm content-box vòng (236 - 2*6 viền = 224 → /2)
+        for (int i = 0; i < n; i++)
+        {
+            float ang = i * seg * Mathf.Deg2Rad;
+            float x = center + radius * Mathf.Sin(ang);
+            float y = center - radius * Mathf.Cos(ang);
+
+            var e = new Label(wheelPrizes[i].emoji);
+            e.AddToClassList("wheel-emoji");
+            e.style.position = Position.Absolute;
+            e.style.left = x - 12;
+            e.style.top = y - 14;
+            wheelCircle.Add(e);
+        }
+    }
+
+    // Đếm lượt quay theo NGÀY THẬT (reset khi sang ngày mới).
+    private void LoadSpins()
+    {
+        string today = System.DateTime.Now.ToString("yyyyMMdd");
+        if (PlayerPrefs.GetString(SpinDateKey, "") != today)
+        {
+            PlayerPrefs.SetString(SpinDateKey, today);
+            PlayerPrefs.SetInt(SpinCountKey, 0);
+            spinsUsedToday = 0;
+        }
+        else
+        {
+            spinsUsedToday = PlayerPrefs.GetInt(SpinCountKey, 0);
+        }
+    }
+
+    private void RefreshWheel()
+    {
+        LoadSpins();
+        int left = Mathf.Max(0, MaxSpinsPerDay - spinsUsedToday);
+        if (lblSpinsLeft != null) lblSpinsLeft.text = $"Lượt còn: {left}/{MaxSpinsPerDay}";
+        if (btnSpin != null)
+        {
+            btnSpin.SetEnabled(left > 0);
+            btnSpin.text = left > 0 ? "🎡 QUAY" : "Hết lượt hôm nay";
+        }
+    }
+
+    private void OnSpin()
+    {
+        if (isSpinning) return;
+        LoadSpins();
+        if (spinsUsedToday >= MaxSpinsPerDay) return;
+
+        // Chọn quà theo TRỌNG SỐ.
+        int total = 0;
+        foreach (var p in wheelPrizes) total += p.weight;
+        if (total <= 0) return;
+        int roll = UnityEngine.Random.Range(0, total);
+        int acc = 0, idx = wheelPrizes.Count - 1;
+        for (int i = 0; i < wheelPrizes.Count; i++)
+        {
+            acc += wheelPrizes[i].weight;
+            if (roll < acc) { idx = i; break; }
+        }
+        WheelPrize won = wheelPrizes[idx];
+
+        // Trừ lượt (lưu ngay).
+        spinsUsedToday++;
+        PlayerPrefs.SetInt(SpinCountKey, spinsUsedToday);
+        PlayerPrefs.Save();
+
+        isSpinning = true;
+        if (btnSpin != null) { btnSpin.SetEnabled(false); btnSpin.text = "Đang quay..."; }
+        if (lblWheelResult != null) lblWheelResult.text = "";
+        if (wheelHub != null) wheelHub.text = "🎡";
+
+        // Quay 5 vòng + dừng sao cho emoji TRÚNG nằm trên đỉnh (dưới kim).
+        float seg = 360f / wheelPrizes.Count;
+        float targetMod = (360f - (idx * seg) % 360f) % 360f;
+        float curMod = ((wheelAngle % 360f) + 360f) % 360f;
+        float delta = ((targetMod - curMod) % 360f + 360f) % 360f;
+        wheelAngle += 360f * 5 + delta;
+        if (wheelCircle != null)
+            wheelCircle.style.rotate = new Rotate(new Angle(wheelAngle, AngleUnit.Degree));
+
+        // Quay xong (~3s khớp transition-duration) → hiện quà + trao thưởng.
+        wheelCircle?.schedule.Execute(() => RevealWheelResult(won)).StartingIn(3150);
+    }
+
+    private void RevealWheelResult(WheelPrize won)
+    {
+        isSpinning = false;
+
+        // Trao thưởng THẬT vào túi đồ.
+        if (!won.isNothing && !string.IsNullOrEmpty(won.itemId) && won.qty > 0)
+            YWonderLand.Managers.InventoryManager.Instance?.AddItem(won.itemId, won.qty);
+
+        if (wheelHub != null) wheelHub.text = won.emoji;
+        string msg = won.isNothing ? "🍀 Chúc may mắn lần sau!" : $"🎉 Trúng: {won.name} x{won.qty}!";
+        if (lblWheelResult != null) lblWheelResult.text = msg;
+        YWonderLand.Environment.ScreenToast.ShowInfo(msg);
+
+        RefreshWheel();
     }
 
     // ── Helpers ──

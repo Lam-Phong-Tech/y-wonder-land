@@ -18,7 +18,7 @@ MonoBehaviour:
   iconEmoji: "\U0001F404"
   iconSprite: {fileID: 0}
   category: animals
-  buyPrice: 300
+  buyPrice: 7800
   sellPrice: 0
   canSell: 0
   isStackable: 1

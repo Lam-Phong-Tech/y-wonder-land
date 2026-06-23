@@ -39,6 +39,7 @@ public class ChatPanelController : MonoBehaviour
     // State Variables
     private bool isExpanded = false;
     private bool isChatVisible = true;
+    private bool wasPopupOpen = false; // theo dõi trạng thái popup để ẩn/hiện chat
     private List<float> messageTimestamps = new List<float>();
 
     // Mock quick emojis
@@ -145,6 +146,15 @@ public class ChatPanelController : MonoBehaviour
     /// </summary>
     private void Update()
     {
+        // Đang mở popup (Settings/Túi/Shop...) → ẨN chat để không đè lên nhau; đóng popup → hiện lại.
+        bool popupOpen = UIPopupTracker.AnyOpen;
+        if (popupOpen != wasPopupOpen)
+        {
+            wasPopupOpen = popupOpen;
+            if (root != null) root.style.display = popupOpen ? DisplayStyle.None : DisplayStyle.Flex;
+        }
+        if (popupOpen) return; // chat đang ẩn → bỏ qua phím Enter
+
         if (!isChatVisible) return;
 
         var keyboard = Keyboard.current;
