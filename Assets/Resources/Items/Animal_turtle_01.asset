@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.AnimalDefinition
   animalId: turtle_01
   animalName: "R\xF9a con"
-  buyPrice: 90
+  buyPrice: 2340
   penSlots: 1
   foodMainName: "Rau Mu\u1ED1ng"
   foodMainAmount: 7
@@ -31,6 +31,8 @@ MonoBehaviour:
   meatItemId: turtle_meat_01
   meatAmount: 10
   feedIntervalSec: 420
+  noFeedDeathSec: 300
+  fedLifeSec: 600
   canGetSick: 1
   primitiveType: 0
   animalColor: {r: 1, g: 1, b: 1, a: 1}

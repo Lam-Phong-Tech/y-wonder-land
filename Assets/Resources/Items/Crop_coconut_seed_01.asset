@@ -16,6 +16,8 @@ MonoBehaviour:
   harvestItemId: coconut_01
   growthTimeSec: 120
   waterIntervalSec: 25
+  noWaterDeathSec: 20
+  wateredLifeSec: 50
   harvestYield: 2
   expReward: 150
   posReward: 0

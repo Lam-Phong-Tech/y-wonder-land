@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.AnimalDefinition
   animalId: rabbit_01
   animalName: "Th\u1ECF con V2"
-  buyPrice: 5
+  buyPrice: 130
   penSlots: 1
   foodMainName: "C\xE0 r\u1ED1t"
   foodMainAmount: 1
@@ -31,6 +31,8 @@ MonoBehaviour:
   meatItemId: rabbit_meat_01
   meatAmount: 5
   feedIntervalSec: 60
+  noFeedDeathSec: 60
+  fedLifeSec: 120
   canGetSick: 1
   primitiveType: 0
   animalColor: {r: 1, g: 1, b: 1, a: 1}

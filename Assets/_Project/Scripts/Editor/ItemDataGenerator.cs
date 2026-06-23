@@ -214,16 +214,16 @@ namespace YWonderLand.EditorScripts
             // produceCycle/feed để giây DEMO (số ngày thật chờ khách quy đổi).  (cycle 25s, feed 40s)
             // Chu kỳ thu / cho ăn = NGÀY THẬT theo VatNuoi (quy đổi qua Days()). Con chu kỳ dài (heo/hươu/rùa)
             // là vật nuôi "đầu tư dài hạn" — demo chỉnh nhanh bằng SecondsPerGameDay nếu cần.
-            SetAnimalGameplay("chicken_01", "egg_01", 1, 45, "", 0, Days(2f), Days(1f)); // gia cầm: chỉ lấy trứng, BỎ thịt (khách 22/06)
-            SetAnimalGameplay("cow_01", "milk_01", 10, 38, "beef_01", 50, Days(7f), Days(1f));
-            SetAnimalGameplay("pig_01", "pigskin_01", 1, 1, "pork_01", 50, Days(180f), Days(1f));
-            SetAnimalGameplay("ostrich_01", "ostrich_egg_01", 1, 30, "", 0, Days(6f), Days(1f)); // gia cầm: chỉ lấy trứng, BỎ thịt
-            SetAnimalGameplay("deer_01", "deer_velvet_01", 2, 2, "deer_meat_01", 40, Days(180f), Days(1f));
-            SetAnimalGameplay("goat_01", "goat_milk_01", 2, 60, "goat_meat_01", 20, Days(3f), Days(1f));
-            SetAnimalGameplay("rabbit_01", "rabbit_fur_01", 8, 2, "rabbit_meat_01", 5, Days(40f), Days(1f));
-            SetAnimalGameplay("goose_01", "goose_egg_01", 2, 30, "", 0, Days(3f), Days(1f)); // gia cầm: chỉ lấy trứng, BỎ thịt
-            SetAnimalGameplay("duck_01", "duck_egg_01", 1, 45, "", 0, Days(1f), Days(0.5f)); // gia cầm: chỉ lấy trứng, BỎ thịt
-            SetAnimalGameplay("turtle_01", "turtle_shell_01", 1, 1, "turtle_meat_01", 10, Days(300f), Days(7f));
+            SetAnimalGameplay("chicken_01", "egg_01", 1, 45, "", 0, Days(2f), Days(1f), Days(1f), Days(2f)); // gia cầm: chỉ lấy trứng, BỎ thịt (khách 22/06)
+            SetAnimalGameplay("cow_01", "milk_01", 10, 38, "beef_01", 50, Days(7f), Days(1f), Days(1f), Days(2f));
+            SetAnimalGameplay("pig_01", "pigskin_01", 1, 1, "pork_01", 50, Days(180f), Days(1f), Days(1f), Days(2f));
+            SetAnimalGameplay("ostrich_01", "ostrich_egg_01", 1, 30, "", 0, Days(6f), Days(1f), Days(1f), Days(2f)); // gia cầm: chỉ lấy trứng, BỎ thịt
+            SetAnimalGameplay("deer_01", "deer_velvet_01", 2, 2, "deer_meat_01", 40, Days(180f), Days(1f), Days(1f), Days(2f));
+            SetAnimalGameplay("goat_01", "goat_milk_01", 2, 60, "goat_meat_01", 20, Days(3f), Days(1f), Days(1f), Days(2f));
+            SetAnimalGameplay("rabbit_01", "rabbit_fur_01", 8, 2, "rabbit_meat_01", 5, Days(40f), Days(1f), Days(1f), Days(2f));
+            SetAnimalGameplay("goose_01", "goose_egg_01", 2, 30, "", 0, Days(3f), Days(1f), Days(1f), Days(2f)); // gia cầm: chỉ lấy trứng, BỎ thịt
+            SetAnimalGameplay("duck_01", "duck_egg_01", 1, 45, "", 0, Days(1f), Days(0.5f), Days(1f), Days(2f)); // gia cầm: chỉ lấy trứng, BỎ thịt (đói từ 12h = thanh 50%)
+            SetAnimalGameplay("turtle_01", "turtle_shell_01", 1, 1, "turtle_meat_01", 10, Days(300f), Days(7f), Days(5f), Days(10f)); // rùa: chưa ăn 5 ngày chết / cho ăn 10 ngày
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -232,7 +232,7 @@ namespace YWonderLand.EditorScripts
 
         // Set logic gameplay theo VatNuoi (giữ nguyên phần hiển thị do SetHusbandry set trước đó).
         private static void SetAnimalGameplay(string id, string produceId, int produceAmt, int maxHarv,
-            string meatId, int meatAmt, float cycle, float feed)
+            string meatId, int meatAmt, float cycle, float feed, float noFeedDeath, float fedLife)
         {
             string path = "Assets/Resources/Items/Animal_" + id + ".asset";
             var a = AssetDatabase.LoadAssetAtPath<YWonderLand.Data.AnimalDefinition>(path);
@@ -248,6 +248,8 @@ namespace YWonderLand.EditorScripts
             a.meatAmount = meatAmt;
             a.produceCycleTimeSec = cycle;
             a.feedIntervalSec = feed;
+            a.noFeedDeathSec = noFeedDeath; // chưa cho ăn sống bao lâu (24h / rùa 5 ngày)
+            a.fedLifeSec = fedLife;         // cho ăn 1 lần sống bao lâu (48h / rùa 10 ngày)
             a.canGetSick = true;
             EditorUtility.SetDirty(a);
         }

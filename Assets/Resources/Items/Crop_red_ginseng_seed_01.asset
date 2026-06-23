@@ -16,6 +16,8 @@ MonoBehaviour:
   harvestItemId: red_ginseng_01
   growthTimeSec: 120
   waterIntervalSec: 25
+  noWaterDeathSec: 20
+  wateredLifeSec: 50
   harvestYield: 1
   expReward: 250
   posReward: 0

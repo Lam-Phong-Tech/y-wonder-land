@@ -20,8 +20,18 @@ namespace YWonderLand.Data
         [Tooltip("Thời gian trưởng thành. Demo: 30-60s, Production: 86400 (24h)")]
         public float growthTimeSec = 45f;
 
-        [Tooltip("Tần suất cần tưới nước. Demo: 15-30s, Production: 36000 (10h)")]
+        [Tooltip("Tần suất cần tưới nước. Demo: 15-30s, Production: 36000 (10h). (CŨ — không còn dùng để tính chết.)")]
         public float waterIntervalSec = 20f;
+
+        [Tooltip("THỜI GIAN SỐNG khi gieo mà CHƯA tưới lần nào (giây) = đồng hồ chết ban đầu. " +
+                 "Cây ngắn ngày (khách chốt) = 8h game. Thanh nước/máu lúc mới gieo đầy tới mốc này; cạn = cây chết. " +
+                 "0 = không chết khi chưa tưới. Khách cho số riêng từng cây thì điền vào đây.")]
+        public float noWaterDeathSec = 0f;
+
+        [Tooltip("THỜI GIAN SỐNG sau MỖI lần tưới (giây) = sức chứa thanh nước/máu. " +
+                 "Cây ngắn ngày (khách chốt) = 20h game. Tưới = đổ đầy về mốc này; cạn = cây chết. " +
+                 "0 = không chết vì thiếu nước. Phải < thời gian lớn để buộc tưới ≥2 lần mới kịp thu.")]
+        public float wateredLifeSec = 0f;
 
         [Header("Phần thưởng")]
         [Tooltip("Số lượng sản phẩm thu hoạch mỗi vụ")]

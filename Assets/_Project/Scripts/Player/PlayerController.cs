@@ -39,6 +39,7 @@ public class PlayerController : MonoBehaviour
     // ướm hồ hình dạng lạ — chỉ tắt bơi khi rời HẾT (đếm về 0), không bị giật giữa các box.
     private int waterVolumeCount = 0;
     private bool isSprintUIHeld = false;
+    private bool autoRunForward = false; // AUTO-RUN: nút chạy nhanh -> tự tiến thẳng, vuốt màn hình để lái
     private float actionLockTimer = 0f;
     private float _actionSpeed = 1f;
 
@@ -112,6 +113,12 @@ public class PlayerController : MonoBehaviour
         Vector2 keyboardVec = (!isTyping && moveAction != null) ? moveAction.ReadValue<Vector2>() : Vector2.zero;
         // Gộp bàn phím (PC) + joystick ảo (mobile): joystick được ưu tiên khi đang kéo.
         Vector2 inputVec = (!isTyping) ? Vector2.ClampMagnitude(keyboardVec + virtualMoveInput, 1f) : Vector2.zero;
+
+        // AUTO-RUN: nút chạy nhanh bật -> tự tiến THẲNG theo hướng camera (vuốt màn hình để lái).
+        // Đang kéo joystick thì joystick ưu tiên; thả ra lại tự tiến.
+        if (autoRunForward && !isTyping && inputVec.magnitude < 0.1f)
+            inputVec = new Vector2(0f, 1f);
+
         bool jumpPressed = (!isTyping && jumpAction != null && jumpAction.triggered) || jumpQueuedFromUI;
         jumpQueuedFromUI = false; // tiêu thụ cờ nhảy từ nút HUD (mỗi lần bấm = 1 lần nhảy)
         bool interactPressed = !isTyping && interactAction != null && interactAction.triggered;
@@ -293,6 +300,17 @@ public class PlayerController : MonoBehaviour
 
     /// <summary>Trạng thái chạy nhanh đang bật từ nút HUD (để HUD đồng bộ hiệu ứng nút).</summary>
     public bool IsSprintUIOn => isSprintUIHeld;
+
+    /// <summary>Nút "chạy nhanh" trên HUD: bật/tắt AUTO-RUN — nhân vật tự tiến thẳng theo hướng camera,
+    /// người chơi chỉ vuốt màn hình để đổi hướng (khỏi phải kéo joystick). Trả về trạng thái mới.</summary>
+    public bool ToggleAutoRun()
+    {
+        autoRunForward = !autoRunForward;
+        isSprintUIHeld = autoRunForward; // auto-run = chạy ở tốc độ nhanh
+        return autoRunForward;
+    }
+    /// <summary>Auto-run đang bật (để HUD đồng bộ hiệu ứng nút).</summary>
+    public bool IsAutoRunOn => autoRunForward;
 
     // ── Joystick ảo (mobile) ──
     private Vector2 virtualMoveInput = Vector2.zero;

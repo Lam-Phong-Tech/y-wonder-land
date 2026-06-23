@@ -14,11 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.CropDefinition
   seedItemId: morning_glory_seed_01
   harvestItemId: morning_glory_01
-  growthTimeSec: 30
+  growthTimeSec: 60
   waterIntervalSec: 15
+  noWaterDeathSec: 20
+  wateredLifeSec: 50
   harvestYield: 1
   expReward: 60
-  posReward: 25
+  posReward: 0
   growthStages: 2
   cropColor: {r: 0.4, g: 0.7, b: 0.3, a: 1}
   iconEmoji: "\U0001F33E"

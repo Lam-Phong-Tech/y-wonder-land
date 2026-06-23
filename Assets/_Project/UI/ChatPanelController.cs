@@ -40,6 +40,8 @@ public class ChatPanelController : MonoBehaviour
     private bool isExpanded = false;
     private bool isChatVisible = true;
     private bool wasPopupOpen = false; // theo dõi trạng thái popup để ẩn/hiện chat
+    private bool keyboardShifted = false; // mobile: chat đang được đẩy lên tránh bàn phím mềm
+    private float? buildModeBottom = null; // !=null khi build mode đẩy chat lên (để khôi phục sau khi gõ xong)
     private List<float> messageTimestamps = new List<float>();
 
     // Mock quick emojis
@@ -154,6 +156,8 @@ public class ChatPanelController : MonoBehaviour
             if (root != null) root.style.display = popupOpen ? DisplayStyle.None : DisplayStyle.Flex;
         }
         if (popupOpen) return; // chat đang ẩn → bỏ qua phím Enter
+
+        UpdateKeyboardAvoidance(); // mobile: đẩy chat LÊN khi bàn phím mềm che ô nhập
 
         if (!isChatVisible) return;
 
@@ -462,16 +466,41 @@ public class ChatPanelController : MonoBehaviour
     /// </summary>
     public void ShiftForBuildMode(bool isBuildMode)
     {
-        if (root != null)
+        buildModeBottom = isBuildMode ? 136f : (float?)null; // 136 = trên thanh vật liệu build 120px
+        if (!keyboardShifted) ApplyBaseBottom(); // đang gõ (bàn phím đẩy lên) thì giữ, khôi phục sau
+    }
+
+    // Trả chat về đáy "nền" hiện tại: build mode (136) hoặc mặc định USS (16px).
+    private void ApplyBaseBottom()
+    {
+        if (root == null) return;
+        if (buildModeBottom.HasValue) root.style.bottom = buildModeBottom.Value;
+        else root.style.bottom = StyleKeyword.Null;
+    }
+
+    // Mobile: khi focus ô chat, bàn phím mềm bật lên che ô nhập → đẩy panel chat LÊN trên bàn phím.
+    // PC không có bàn phím mềm nên không kích hoạt. CẦN TEST TRÊN MÁY THẬT: TouchScreenKeyboard.area
+    // chỉ có giá trị trên thiết bị (Editor/Simulator luôn = 0 → fallback ước lượng 45% chiều cao màn).
+    private void UpdateKeyboardAvoidance()
+    {
+        if (root == null) return;
+
+        bool typing = IsTyping();
+        bool softKeyboard = TouchScreenKeyboard.visible || Application.isMobilePlatform;
+
+        if (typing && softKeyboard)
         {
-            if (isBuildMode)
-            {
-                root.style.bottom = 136f; // Move up above the 120px build item bar
-            }
-            else
-            {
-                root.style.bottom = StyleKeyword.Null; // Reset to CSS default (16px)
-            }
+            float panelH = (root.panel != null) ? root.panel.visualTree.layout.height : 720f;
+            float kbScreenH = TouchScreenKeyboard.area.height;
+            if (kbScreenH < 1f) kbScreenH = Screen.height * 0.45f; // .area chưa trả → ước lượng ~45% màn
+            float kbPanel = kbScreenH / Mathf.Max(1f, Screen.height) * panelH;
+            root.style.bottom = kbPanel + 16f; // ngồi ngay trên bàn phím + lề
+            keyboardShifted = true;
+        }
+        else if (keyboardShifted)
+        {
+            keyboardShifted = false;
+            ApplyBaseBottom(); // bàn phím đóng → về nền (build mode hoặc mặc định)
         }
     }
 

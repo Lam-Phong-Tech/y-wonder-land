@@ -14,11 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.CropDefinition
   seedItemId: pumpkin_seed_01
   harvestItemId: pumpkin_01
-  growthTimeSec: 120
+  growthTimeSec: 60
   waterIntervalSec: 25
+  noWaterDeathSec: 20
+  wateredLifeSec: 50
   harvestYield: 11
   expReward: 125
-  posReward: 70
+  posReward: 0
   growthStages: 3
   cropColor: {r: 0.9, g: 0.5, b: 0.1, a: 1}
   iconEmoji: "\U0001F383"

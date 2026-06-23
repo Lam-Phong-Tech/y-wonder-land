@@ -59,6 +59,9 @@ public class ThirdPersonCamera : MonoBehaviour
     private Vector2 smoothedInput = Vector2.zero;
     private bool cursorLocked = true;
     private Vector2 _touchLookDelta; // cộng dồn delta kéo ngón trong frame, áp 1 lần ở LateUpdate
+    // Base "1x" độ nhạy (chốt sau Start clamp) — để SetUserSensitivity scale cả PC + mobile theo 1 slider.
+    private float baseH, baseV, baseTH, baseTV;
+    private bool baseCaptured = false;
 
     // Singleton để GameHUDController (vùng nhìn mobile) đẩy delta vào.
     public static ThirdPersonCamera Instance { get; private set; }
@@ -80,6 +83,18 @@ public class ThirdPersonCamera : MonoBehaviour
         _touchLookDelta += delta;
     }
 
+    /// <summary>Đặt độ nhạy camera từ Settings (1 slider 0..1, scale CẢ chuột PC + chạm mobile). 0.5 = mức gốc (1x).</summary>
+    public void SetUserSensitivity(float t01)
+    {
+        t01 = Mathf.Clamp01(t01);
+        if (!baseCaptured) return; // chưa chốt base (chưa Start) → áp sau khi Start
+        float mult = Mathf.Lerp(0.4f, 1.6f, t01); // t=0.5 → 1x (giữ cảm giác gốc)
+        horizontalSensitivity = baseH * mult;
+        verticalSensitivity = baseV * mult;
+        touchHorizontalSensitivity = baseTH * mult;
+        touchVerticalSensitivity = baseTV * mult;
+    }
+
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
@@ -93,6 +108,12 @@ public class ThirdPersonCamera : MonoBehaviour
         inputSmoothing = Mathf.Clamp(inputSmoothing, 0f, 0.12f);
         horizontalSensitivity = Mathf.Min(horizontalSensitivity, 0.8f);
         verticalSensitivity = Mathf.Min(verticalSensitivity, 0.6f);
+
+        // Chốt mức "1x" (base) sau khi clamp, rồi áp độ nhạy người chơi đã lưu (Settings — 1 slider).
+        baseH = horizontalSensitivity; baseV = verticalSensitivity;
+        baseTH = touchHorizontalSensitivity; baseTV = touchVerticalSensitivity;
+        baseCaptured = true;
+        SetUserSensitivity(PlayerPrefs.GetFloat("YW_CamSensitivity", 0.5f));
 
         // Find Look action from any PlayerInput in scene
         PlayerInput playerInput = null;

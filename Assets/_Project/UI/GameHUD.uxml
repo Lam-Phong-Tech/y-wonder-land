@@ -135,11 +135,19 @@
                 </ui:VisualElement>
             </ui:VisualElement>
 
-            <!-- Row 2: Bag / Inventory -->
-            <ui:VisualElement class="bag-btn-shadow">
-                <ui:Button name="BtnBag" class="bag-btn">
-                    <ui:VisualElement class="bag-btn-icon" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_11.png'); -unity-background-scale-mode: scale-to-fit;" />
-                </ui:Button>
+            <!-- Row 2: Build (TRÁI) + Bag / Inventory -->
+            <ui:VisualElement class="hud-bag-row">
+                <!-- Build Mode — nút búa: chuyển lên đây, BÊN TRÁI túi đồ (khách yêu cầu) -->
+                <ui:VisualElement class="build-btn-shadow">
+                    <ui:Button name="BtnBuild" class="build-btn">
+                        <ui:VisualElement class="build-btn-icon" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_08.png'); -unity-background-scale-mode: scale-to-fit;" />
+                    </ui:Button>
+                </ui:VisualElement>
+                <ui:VisualElement class="bag-btn-shadow">
+                    <ui:Button name="BtnBag" class="bag-btn">
+                        <ui:VisualElement class="bag-btn-icon" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_11.png'); -unity-background-scale-mode: scale-to-fit;" />
+                    </ui:Button>
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
 
@@ -180,12 +188,6 @@
         <!-- 7. JUMP BUTTON — Bottom Right  -->
         <!-- ============================== -->
         <ui:VisualElement class="hud-bottom-right">
-            <!-- Build Mode — nút búa: bật/tắt Build Mode. Đặt BÊN PHẢI (trên nút Jump) để không vướng joystick. -->
-            <ui:VisualElement class="build-btn-shadow">
-                <ui:Button name="BtnBuild" class="build-btn">
-                    <ui:VisualElement class="build-btn-icon" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_08.png'); -unity-background-scale-mode: scale-to-fit;" />
-                </ui:Button>
-            </ui:VisualElement>
             <ui:VisualElement class="jump-btn-shadow">
                 <ui:Button name="BtnJump" class="jump-btn">
                     <ui:VisualElement class="jump-btn-icon" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_15.png'); -unity-background-scale-mode: scale-to-fit;" />

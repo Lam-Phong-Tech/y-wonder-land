@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.AnimalDefinition
   animalId: cow_01
   animalName: "B\xF2 s\u1EEFa"
-  buyPrice: 300
+  buyPrice: 7800
   penSlots: 9
   foodMainName: "C\u1ECF Voi"
   foodMainAmount: 2
@@ -31,6 +31,8 @@ MonoBehaviour:
   meatItemId: beef_01
   meatAmount: 50
   feedIntervalSec: 60
+  noFeedDeathSec: 60
+  fedLifeSec: 120
   canGetSick: 1
   primitiveType: 0
   animalColor: {r: 1, g: 1, b: 1, a: 1}

@@ -16,9 +16,11 @@ MonoBehaviour:
   harvestItemId: corn_01
   growthTimeSec: 60
   waterIntervalSec: 25
+  noWaterDeathSec: 20
+  wateredLifeSec: 50
   harvestYield: 3
   expReward: 100
-  posReward: 60
+  posReward: 0
   growthStages: 3
   cropColor: {r: 1, g: 0.85, b: 0.2, a: 1}
   iconEmoji: "\U0001F33D"

@@ -16,6 +16,8 @@ MonoBehaviour:
   harvestItemId: passion_fruit_01
   growthTimeSec: 120
   waterIntervalSec: 25
+  noWaterDeathSec: 20
+  wateredLifeSec: 50
   harvestYield: 10
   expReward: 20
   posReward: 0

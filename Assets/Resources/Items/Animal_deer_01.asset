@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.AnimalDefinition
   animalId: deer_01
   animalName: "H\u01B0\u01A1u"
-  buyPrice: 400
+  buyPrice: 10400
   penSlots: 9
   foodMainName: "B\u1EAFp Ng\xF4"
   foodMainAmount: 5
@@ -31,6 +31,8 @@ MonoBehaviour:
   meatItemId: deer_meat_01
   meatAmount: 40
   feedIntervalSec: 60
+  noFeedDeathSec: 60
+  fedLifeSec: 120
   canGetSick: 1
   primitiveType: 0
   animalColor: {r: 1, g: 1, b: 1, a: 1}

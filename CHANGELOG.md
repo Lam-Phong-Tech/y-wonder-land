@@ -1,5 +1,44 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-06-23 (PHIÊN 5: Cây/Thú CHẾT thật + PERSISTENCE real-time (build mode + chuồng) + Rà soát kinh tế thú)
+
+### Added
+- **CÂY CHẾT THIẾU NƯỚC (khách chốt — mô hình "thanh máu"):** `CropDefinition` thêm `noWaterDeathSec` + `wateredLifeSec`. Cây ngắn ngày: gieo KHÔNG tưới → chết sau **8h**; tưới → đầy **20h**, cạn là chết; tưới lại reset. `FarmTile` đếm theo thanh máu, nhãn hiện đếm-ngược-héo. Bỏ qua chết trong Tutorial.
+- **THÚ CHẾT ĐÓI (khách chốt — "thanh máu"):** `AnimalDefinition` thêm `noFeedDeathSec` + `fedLifeSec`. Đa số thú: chưa cho ăn **24h** chết / cho ăn **48h**; **rùa 5/10 ngày**; vịt cảnh báo đói từ 12h (thanh<50%). **Tách "bệnh" khỏi "đói"** (Sick để dành Gói B). Chết = **biến mất + trả ô chuồng** (hết "thú chết kẹt ô"). Thanh đói cập nhật **mỗi frame** (`RefreshHungerFill`).
+- **PERSISTENCE REAL-TIME (cây + công trình + thú):** đổi `FarmTile`/`FarmAnimal` sang **wall-clock (Unix giây, `RealNow`)** → lớn-bù/đói-bù/chết-bù đúng qua đóng-mở app.
+  - **`PlacedBuilding.cs` [NEW]** + `GhostPlacementController.PlaceFromSave()`: đánh dấu + dựng lại công trình build mode (Ruộng/Chuồng/Đường), KHÔNG trừ vật liệu.
+  - **`BuildPersistence.cs` [NEW]:** lưu/khôi phục công trình + **cây trên ruộng** + **con vật trong chuồng** theo vị trí `BuildSurfaceCell` (khoá `YW_BuildState`). Lưu lúc đóng app + khi đặt công trình. Tự gắn qua GhostPlacementController.
+  - Stage 1 (`FarmManager`): viết lại save/load dùng **timestamp thật** thay `growthPercent` (cũ load lại reset cây về 0%). Thêm công tắc **`autoSpawnTiles` (mặc định TẮT)**.
+
+### Changed
+- **Cây ngắn ngày: TẤT CẢ chín 24h** (`Days(1)` — BA xác nhận). Trước: dưa hấu/bí ngô 48h, rau muống/cỏ voi 12h → về hết 24h.
+- **Tutorial tua nhanh 24s** (trước 5s) — `FarmTile.GetGrowthTime` + `TutorialManager:448`. Ngoài tutorial dùng `growthTimeSec` thật (24h tính TỪ LẦN TƯỚI ĐẦU; lớn theo thời gian thật, KHÔNG còn "gate nước").
+- **Nhãn nổi trên cây nhỏ lại** (characterSize 0.085→0.035 + tự co vừa thanh nước) — hết chèn UI khác.
+- **Generator:** `CropDataGenerator` set 8h/20h; `ItemDataGenerator.SetAnimalGameplay` thêm noFeed/fedLife (24h/48h · rùa 5/10 ngày).
+
+### Docs / Audit
+- **RÀ SOÁT KINH TẾ THÚ** (`RaSoat_SoLieu_MauThuan.md`, mục 23/06): đối chiếu `VatNuoi2.xlsx` (cả tab "Thuyết minh cách tính" — đọc thẳng .xlsx vì .md thiếu) ↔ generator. **Giá mua/bán/sản lượng/số lần thu = KHỚP 100%.** Công thức `maxHarvests = floor(số ngày nuôi ÷ chu kỳ thu)` đúng. Gia cầm chỉ-trứng = **khách chốt, giữ nguyên**. **Chi phí bệnh (vắc-xin/thuốc) chưa áp (Gói B) → lời game > bảng tới khi làm bệnh.** Trứng vịt 4.5→làm tròn 5.
+- Thêm ghi chú "cây ngắn ngày chín 24h" vào `CayTrong2.md`. Xoá `CayTrong.md` + `CayTrongLauNam.md` (cũ, đã có bản …2).
+
+### Fixed
+- **"Thú chết kẹt ô":** thú chết đói nay tự `ClearAnimal()` + Destroy → ô chuồng trống lại, thả con mới được.
+- Cảnh báo `CS0414` field `growthAccrued` thừa (đã gỡ sau khi cây lớn theo thời gian thật).
+
+### Editor TODO (đã làm phần lớn phiên này)
+- ✅ Chạy lại generator (Crop + Animal) — số chết/24h đã bake.
+- ✅ Tắt `Force Run Tutorial For Testing` (đang ép cây tua 5s mọi lúc).
+- `BuildPersistence` tự gắn qua GhostPlacementController (hoặc gắn tay lên `[BuildPrefabLibrary]`). `FarmManager.autoSpawnTiles` để TẮT (mặc định) nếu không muốn 10 ô lưới.
+
+### Còn nợ (phase sau — KHÁCH hẹn)
+- **Gói B — hệ BỆNH thú** (vắc-xin phòng + thuốc trị + phát bệnh ngẫu nhiên theo tỉ lệ/thời điểm VatNuoi2). Xong → chi phí khớp bảng (~250-400%).
+- Persistence offline **server-time** (chỉnh-giờ-máy hiện tua được). Cây giàn nhiều ô (chanh dây) chưa persist. Phân bón. Chốt EXP "lần cuối" vs ngày×10.
+
+### Changed Files (PHIÊN 5)
+- `Scripts/Data/{CropDefinition,AnimalDefinition}.cs` · `Scripts/Editor/{CropDataGenerator,ItemDataGenerator}.cs` [MODIFIED]
+- `Scripts/Environment/{FarmTile,FarmAnimal,GhostPlacementController,TilePlacementSystem}.cs` · `Scripts/Managers/FarmManager.cs` · `Scripts/Tutorial/TutorialManager.cs` [MODIFIED]
+- `Scripts/Environment/{PlacedBuilding,BuildPersistence}.cs` [NEW]
+- `Docs_KichBan/{RaSoat_SoLieu_MauThuan,CayTrong2}.md` [MODIFIED] · xoá `{CayTrong,CayTrongLauNam}.md`
+
 ## [Unreleased] - 2026-06-23 (PHIÊN 4: Áp giá Point ×26 · Cây lâu năm thu nhiều lần + số ô · Vòng quay + điểm danh 15 ngày · EXP/Level · Mobile UI · FIX GameManager bị xoá)
 
 ### Added

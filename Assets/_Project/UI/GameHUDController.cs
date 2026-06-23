@@ -85,8 +85,8 @@ public class GameHUDController : MonoBehaviour
     private VisualElement joystickKnob;
     private int joystickPointerId = -1;
     // Tầm kéo núm + chuẩn hoá input. Đi theo size .joystick-outer trong GameHUD.uss
-    // (outer 164 → bán kính ~57). Đổi size joystick thì chỉnh số này theo tỉ lệ.
-    private const float JoystickRadius = 57f;
+    // (outer 200 → bán kính ~70). Đổi size joystick thì chỉnh số này theo tỉ lệ.
+    private const float JoystickRadius = 70f;
 
     // Vùng nhìn (mobile) — kéo 1 ngón nửa phải để xoay camera
     private VisualElement lookZone;
@@ -365,17 +365,17 @@ public class GameHUDController : MonoBehaviour
 
         if (btnSprint != null)
         {
-            // BẤM 1 LẦN = bật/tắt chạy nhanh (toggle). Bấm lần nữa để tắt.
+            // BẤM 1 LẦN = bật/tắt AUTO-RUN: nhân vật tự tiến thẳng, vuốt màn hình để lái (khách yêu cầu).
             // Nút sáng (class "sprint-btn-active") khi đang bật để người chơi biết trạng thái.
             btnSprint.RegisterCallback<ClickEvent>(evt =>
             {
                 if (PlayerController.Instance == null) return;
-                bool on = PlayerController.Instance.ToggleSprintUI();
+                bool on = PlayerController.Instance.ToggleAutoRun();
                 btnSprint.EnableInClassList("sprint-btn-active", on);
             });
             // Đồng bộ hiệu ứng nút với trạng thái hiện tại (HUD có thể bật lại sau khi đã toggle).
             if (PlayerController.Instance != null)
-                btnSprint.EnableInClassList("sprint-btn-active", PlayerController.Instance.IsSprintUIOn);
+                btnSprint.EnableInClassList("sprint-btn-active", PlayerController.Instance.IsAutoRunOn);
         }
 
         SetupJoystick();

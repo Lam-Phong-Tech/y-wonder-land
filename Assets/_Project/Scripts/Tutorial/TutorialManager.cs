@@ -445,7 +445,7 @@ public class TutorialManager : MonoBehaviour
                 targetFarmTile.OnTilePlanted += OnTilePlanted;
                 targetFarmTile.OnTileWatered += OnTileWatered;
                 targetFarmTile.OnTileHarvested += OnTileHarvested;
-                targetFarmTile.tutorialGrowthTime = 5f;
+                targetFarmTile.tutorialGrowthTime = 24f; // tutorial tua nhanh 24s (đồng bộ override ở FarmTile.GetGrowthTime)
             }
 
             SetStep(TutorialStep.PlowTile);

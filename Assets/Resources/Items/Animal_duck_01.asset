@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.AnimalDefinition
   animalId: duck_01
   animalName: "V\u1ECBt V3"
-  buyPrice: 8
+  buyPrice: 208
   penSlots: 1
   foodMainName: "B\u1EAFp Ng\xF4"
   foodMainAmount: 1
@@ -28,9 +28,11 @@ MonoBehaviour:
   produceAmount: 1
   produceCycleTimeSec: 60
   maxHarvests: 45
-  meatItemId: duck_meat_01
-  meatAmount: 5
+  meatItemId: 
+  meatAmount: 0
   feedIntervalSec: 30
+  noFeedDeathSec: 60
+  fedLifeSec: 120
   canGetSick: 1
   primitiveType: 0
   animalColor: {r: 1, g: 1, b: 1, a: 1}

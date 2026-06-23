@@ -61,7 +61,32 @@ Trạng thái: [đã xong gì, còn gì]
 
 ---
 
-## 📌 TRẠNG THÁI MỚI NHẤT (cập nhật 23/06/2026 — PHIÊN 4)
+## 📌 TRẠNG THÁI MỚI NHẤT (cập nhật 23/06/2026 — PHIÊN 5)
+
+### 🎯 Đang ở đâu
+Làm xong **vòng đời CHẾT thật + PERSISTENCE real-time** cho cả CÂY và THÚ:
+- **Cây:** chết thiếu nước (thanh máu **8h** chưa tưới / **20h** có tưới — khách chốt) · tất cả cây ngắn ngày chín **24h** (BA) · tutorial tua **24s** · nhãn nổi nhỏ lại vừa thanh nước.
+- **Thú:** chết đói (**24h/48h** · rùa **5/10 ngày** — khách chốt) · **tách bệnh khỏi đói** · chết = **biến mất + trả ô** · thanh đói mượt mỗi frame.
+- **Persistence:** đổi cây+thú sang **wall-clock** → đóng/mở app **lớn-bù/đói-bù/chết-bù** đúng. Lưu/khôi phục **công trình build mode (Ruộng/Chuồng/Đường) + cây + con vật** theo ô `BuildSurfaceCell` (`BuildPersistence.cs` + `PlacedBuilding.cs` mới).
+- **Rà soát kinh tế thú** xong (`RaSoat_SoLieu_MauThuan.md` mục 23/06): giá mua/bán khớp `VatNuoi2` **100%**; gia cầm chỉ-trứng = khách chốt; **chi phí bệnh chưa áp → lời game > bảng** tới khi làm Gói B.
+
+### 🔴 Bài học/kiến trúc QUAN TRỌNG phiên này
+- **Ô TRỒNG đến từ build mode** (`GhostPlacement` đặt prefab **Dirt** trên `BuildSurfaceCell`), KHÔNG phải `TilePlacementSystem` (gõ búa — không dùng) hay lưới `FarmManager` (đã ẩn). Persistence phải bám đúng `BuildSurfaceCell`. (Lúc đầu bé phủ nhầm 2 hệ kia → mất công.)
+- **`Time.timeAsDouble` reset khi đóng app** → đã đổi cây+thú sang **Unix wall-clock (`RealNow`)** để bù offline. (Chỉnh-giờ-máy còn tua được → server-time sau.)
+- File QC đã sửa (có phép, báo rõ): `FarmTile`, `GhostPlacementController` (Build Mode), `TutorialManager:448`.
+
+### ⚠️ Việc Editor (phần lớn ĐÃ làm)
+- ✅ Chạy lại generator (Crop + Animal) — số chết/24h đã bake.
+- ✅ Tắt `Force Run Tutorial For Testing` (ép cây tua 5s mọi lúc).
+- `BuildPersistence` tự gắn (hoặc gắn tay `[BuildPrefabLibrary]`). `FarmManager.autoSpawnTiles` = TẮT mặc định (không spawn 10 ô lưới).
+
+### 🔜 Việc tiếp theo (KHÁCH hẹn PHASE SAU)
+- **Gói B — hệ BỆNH thú** (vắc-xin phòng + thuốc trị + phát bệnh theo tỉ lệ/thời điểm `VatNuoi2`). Xong → lời khớp bảng (~250-400%).
+- Persistence offline **server-time** (chống tua giờ máy). Cây giàn (chanh dây) chưa persist. Phân bón. Chốt EXP "lần cuối" vs ngày×10.
+
+---
+
+## 📌 (PHIÊN 4 — 23/06, lịch sử)
 
 ### 🎯 Đang ở đâu
 Đã **áp bộ giá Point mới (USDT×26)** từ 3 file CayTrong2/CayTrongLauNam2/VatNuoi2 + làm **cây lâu năm thu nhiều lần + số ô (chanh dây 20 ô)** + **nhãn info nổi trên cây** + **vòng quay/điểm danh 15 ngày** + **EXP/Level (250+5/cap90, ngày×10)** + nhiều **mobile UI**. Vừa **FIX bug lớn GameManager bị xoá** → game chạy lại trơn.

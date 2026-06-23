@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.AnimalDefinition
   animalId: chicken_01
   animalName: "G\xE0 m\xE1i V2"
-  buyPrice: 6
+  buyPrice: 156
   penSlots: 1
   foodMainName: "B\u1EAFp Ng\xF4"
   foodMainAmount: 2
@@ -28,9 +28,11 @@ MonoBehaviour:
   produceAmount: 1
   produceCycleTimeSec: 120
   maxHarvests: 45
-  meatItemId: chicken_meat_01
-  meatAmount: 5
+  meatItemId: 
+  meatAmount: 0
   feedIntervalSec: 60
+  noFeedDeathSec: 60
+  fedLifeSec: 120
   canGetSick: 1
   primitiveType: 0
   animalColor: {r: 1, g: 1, b: 1, a: 1}

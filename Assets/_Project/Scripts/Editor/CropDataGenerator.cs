@@ -29,15 +29,16 @@ namespace YWonderLand.EditorScripts
 
             db.ClearCrops();
 
-            // 8 lo\u1ea1i c\u00e2y tr\u1ed3ng theo k\u1ecbch b\u1ea3n (demo: 30-60s growth)
-            AddCrop(db, "carrot_seed_01", "carrot_01", Days(1f), Hours(10f), 1, 25, 50, 3, new Color(1f, 0.55f, 0.1f), "\ud83e\udd55");
-            AddCrop(db, "cabbage_seed_01", "cabbage_01", Days(1f), Hours(10f), 1, 35, 40, 3, new Color(0.3f, 0.8f, 0.3f), "\ud83e\udd6c");
-            AddCrop(db, "watermelon_seed_01", "watermelon_01", Days(2f), Hours(10f), 1, 50, 80, 3, new Color(0.1f, 0.6f, 0.1f), "\ud83c\udf49");
-            AddCrop(db, "corn_seed_01", "corn_01", Days(1f), Hours(10f), 3, 100, 60, 3, new Color(1f, 0.85f, 0.2f), "\ud83c\udf3d");
-            AddCrop(db, "pumpkin_seed_01", "pumpkin_01", Days(2f), Hours(10f), 11, 125, 70, 3, new Color(0.9f, 0.5f, 0.1f), "\ud83c\udf83");
-            AddCrop(db, "morning_glory_seed_01", "morning_glory_01", Days(0.5f), Hours(6f), 1, 60, 25, 2, new Color(0.4f, 0.7f, 0.3f), "\ud83c\udf3e");
-            AddCrop(db, "sweet_potato_seed_01", "sweet_potato_01", Days(1f), Hours(10f), 1, 100, 45, 3, new Color(0.6f, 0.3f, 0.15f), "\ud83c\udf60");
-            AddCrop(db, "grass_seed_01", "grass_01", Days(0.5f), Hours(6f), 2, 175, 10, 2, new Color(0.2f, 0.6f, 0.2f), "\ud83c\udf3f");
+            // 8 lo\u1ea1i c\u00e2y NG\u1eaeN NG\u00c0Y \u2014 BA ch\u1ed1t: ch\u00edn trong 24h = Days(1f) cho T\u1ea4T C\u1ea2 (demo 60s/c\u00e2y). Tutorial tua nhanh 24s (\u00e9p \u1edf FarmTile).
+            // Cây NGẮN NGÀY = THỨC ĂN chăn nuôi, KHÔNG bán → posReward = 0 (kiếm tiền qua vòng vật nuôi, khách chốt 22/06).
+            AddCrop(db, "carrot_seed_01", "carrot_01", Days(1f), Hours(10f), 1, 25, 0, 3, new Color(1f, 0.55f, 0.1f), "\ud83e\udd55");
+            AddCrop(db, "cabbage_seed_01", "cabbage_01", Days(1f), Hours(10f), 1, 35, 0, 3, new Color(0.3f, 0.8f, 0.3f), "\ud83e\udd6c");
+            AddCrop(db, "watermelon_seed_01", "watermelon_01", Days(1f), Hours(10f), 1, 50, 0, 3, new Color(0.1f, 0.6f, 0.1f), "\ud83c\udf49");
+            AddCrop(db, "corn_seed_01", "corn_01", Days(1f), Hours(10f), 3, 100, 0, 3, new Color(1f, 0.85f, 0.2f), "\ud83c\udf3d");
+            AddCrop(db, "pumpkin_seed_01", "pumpkin_01", Days(1f), Hours(10f), 11, 125, 0, 3, new Color(0.9f, 0.5f, 0.1f), "\ud83c\udf83");
+            AddCrop(db, "morning_glory_seed_01", "morning_glory_01", Days(1f), Hours(6f), 1, 60, 0, 2, new Color(0.4f, 0.7f, 0.3f), "\ud83c\udf3e");
+            AddCrop(db, "sweet_potato_seed_01", "sweet_potato_01", Days(1f), Hours(10f), 1, 100, 0, 3, new Color(0.6f, 0.3f, 0.15f), "\ud83c\udf60");
+            AddCrop(db, "grass_seed_01", "grass_01", Days(1f), Hours(6f), 2, 175, 0, 2, new Color(0.2f, 0.6f, 0.2f), "\ud83c\udf3f");
 
             // \u2500\u2500 C\u00c2Y L\u00c2U N\u0102M (10 c\u00e2y) \u2014 khung C\u01a0 B\u1ea2N: t\u1ea1m 1-L\u1ea6N-THU nh\u01b0 c\u00e2y ng\u1eafn ng\u00e0y (thu-nhi\u1ec1u-l\u1ea7n = Phase 2).
             // growthTime/water = gi\u00e2y DEMO. cropPrefab \u0111\u1ec3 TR\u1ed0NG \u2192 anh k\u00e9o model v\u00e0o t\u1eebng Crop_<seed>.asset.
@@ -84,6 +85,10 @@ namespace YWonderLand.EditorScripts
             crop.harvestItemId = harvestId;
             crop.growthTimeSec = growthTime;
             crop.waterIntervalSec = waterInterval;
+            // Đồng hồ CHẾT (khách chốt cây ngắn ngày): chưa tưới sống 8h, mỗi lần tưới đầy 20h.
+            // Cây lâu năm tạm dùng chung số này (số tạm — chỉnh riêng từng cây khi khách cho số).
+            crop.noWaterDeathSec = Hours(8f);
+            crop.wateredLifeSec = Hours(20f);
             crop.harvestYield = yield;
             crop.expReward = exp;
             crop.posReward = pos;

@@ -75,7 +75,9 @@
 .settings-btn:active { scale: 0.95; }
 .settings-btn-icon { font-size: 30px; color: var(--color-text-white); width: 33px; height: 33px; }
 
-.bag-btn-shadow { margin-top: 10px; align-self: flex-end; }
+/* Row 2 góc phải-trên: Build (trái) + Bag — xếp ngang */
+.hud-bag-row { flex-direction: row; align-items: center; margin-top: 10px; }
+.bag-btn-shadow { align-self: center; }
 .bag-btn {
     width: 70px; height: 70px; border-radius: var(--radius-button);
     background-color: rgba(58, 71, 102, 0.5); border-width: var(--border-medium); border-color: rgba(255, 255, 255, 0.2);
@@ -106,7 +108,8 @@
 .sidebar-btn-piggy, .sidebar-btn-fishing, .sidebar-btn-build { width: 58px; height: 58px; }
 
 /* ── 5. JOYSTICK & SPRINT ── */
-.hud-bottom-left { position: absolute; bottom: 24px; left: 24px; }
+/* Joystick: dịch VÀO TRONG (left 84 để KHỎI đè nút sidebar 58px mép trái) + LÊN, vẫn bên trái */
+.hud-bottom-left { position: absolute; bottom: 60px; left: 84px; }
 
 /* Vùng nhìn (mobile): nửa PHẢI màn hình, trong suốt, chỉ để bắt kéo 1 ngón xoay camera. */
 .hud-look-zone { position: absolute; top: 0; bottom: 0; right: 0; width: 50%; }
@@ -123,7 +126,7 @@
 .sprint-btn-active { background-color: var(--color-primary); border-color: var(--color-primary); }
 .sprint-btn-icon { font-size: 32px; color: white; -unity-font-style: bold; padding-bottom: 2px; }
 
-.joystick-outer { width: 164px; height: 164px; border-radius: 82px; background-color: rgba(30, 35, 45, 0.6); border-width: 1px; border-color: rgba(255, 255, 255, 0.15); align-items: center; justify-content: center; }
+.joystick-outer { width: 200px; height: 200px; border-radius: 100px; background-color: rgba(30, 35, 45, 0.6); border-width: 1px; border-color: rgba(255, 255, 255, 0.15); align-items: center; justify-content: center; }
 .player-avatar {
     width: 48px; height: 48px; border-radius: 24px;
     background-color: var(--color-deep-blue);
@@ -140,10 +143,10 @@
     background-image: url('project://database/Assets/_Project/UI/Sprites/Female_avatar2.jpg');
     -unity-background-scale-mode: scale-and-crop;
 }
-.joystick-arrow-container { position: absolute; width: 164px; height: 164px; align-items: center; justify-content: center; }
+.joystick-arrow-container { position: absolute; width: 200px; height: 200px; align-items: center; justify-content: center; }
 .joystick-arrow { position: absolute; font-size: 17px; color: rgba(255, 255, 255, 0.4); }
 .joystick-arrow-up { top: 10px; } .joystick-arrow-down { bottom: 10px; } .joystick-arrow-left { left: 12px; } .joystick-arrow-right { right: 12px; }
-.joystick-inner { width: 72px; height: 72px; border-radius: 36px; background-color: rgba(255, 255, 255, 0.55); border-width: 1px; border-color: rgba(255, 255, 255, 0.45); }
+.joystick-inner { width: 88px; height: 88px; border-radius: 44px; background-color: rgba(255, 255, 255, 0.55); border-width: 1px; border-color: rgba(255, 255, 255, 0.45); }
 
 /* ── 6. ACTION BUTTONS ── */
 .hud-right-actions { position: absolute; right: 24px; bottom: 130px; align-items: center; }
@@ -180,10 +183,11 @@
 #BtnEmoji { font-size: 30px; padding-bottom: 4px; }
 
 /* ── 8. JUMP BUTTON ── */
-.hud-bottom-right { position: absolute; bottom: 24px; right: 24px; align-items: flex-end; }
+/* Jump nâng cao hơn (khách yêu cầu ~2cm) — số px dễ chỉnh nếu cần */
+.hud-bottom-right { position: absolute; bottom: 90px; right: 24px; align-items: flex-end; }
 
 /* Nút búa (Build) bên phải, nằm trên nút Jump — tròn cho khớp Jump */
-.build-btn-shadow { margin-bottom: 14px; }
+.build-btn-shadow { margin-right: 10px; align-self: center; }
 .build-btn {
     width: 72px; height: 72px; border-radius: 50%;
     background-color: rgba(58, 71, 102, 0.5); border-width: var(--border-medium); border-color: rgba(255, 255, 255, 0.2);
@@ -195,13 +199,13 @@
 .build-btn-icon { width: 38px; height: 38px; -unity-background-image-tint-color: white; }
 
 .jump-btn {
-    width: 72px; height: 72px; border-radius: 50%;
+    width: 96px; height: 96px; border-radius: 50%;
     background-color: rgba(58, 71, 102, 0.5); border-width: var(--border-medium); border-color: rgba(255, 255, 255, 0.2);
     align-items: center; justify-content: center; transition-property: border-color, scale; transition-duration: 0.15s;
 }
 .jump-btn:hover { border-color: var(--color-primary); scale: 1.05; }
 .jump-btn:active { scale: 0.95; }
-.jump-btn-icon { width: 44px; height: 44px; }
+.jump-btn-icon { width: 58px; height: 58px; }
 
 .crosshair { position: absolute; left: 0; top: 0; right: 0; bottom: 0; align-items: center; justify-content: center; }
 .crosshair-dot { width: 8px; height: 8px; border-radius: 4px; background-color: rgba(255, 255, 255, 0.9); border-width: 1px; border-color: rgba(0, 0, 0, 0.5); }

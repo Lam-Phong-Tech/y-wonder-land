@@ -14,11 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.CropDefinition
   seedItemId: watermelon_seed_01
   harvestItemId: watermelon_01
-  growthTimeSec: 120
+  growthTimeSec: 60
   waterIntervalSec: 25
+  noWaterDeathSec: 20
+  wateredLifeSec: 50
   harvestYield: 1
   expReward: 50
-  posReward: 80
+  posReward: 0
   growthStages: 3
   cropColor: {r: 0.1, g: 0.6, b: 0.1, a: 1}
   iconEmoji: "\U0001F349"

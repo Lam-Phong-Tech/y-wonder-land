@@ -67,6 +67,13 @@ public class GhostPlacementController : MonoBehaviour
     {
         mainCamera = Camera.main;
         gridManager = BuildGridManager.Instance;
+
+        // Tự gắn BuildPersistence (lưu/khôi phục công trình build) nếu scene chưa có — khỏi cần gắn tay.
+        if (Object.FindFirstObjectByType<YWonderLand.Environment.BuildPersistence>(FindObjectsInactive.Include) == null)
+        {
+            gameObject.AddComponent<YWonderLand.Environment.BuildPersistence>();
+            Debug.Log("[GhostPlacement] Tự gắn BuildPersistence để lưu/khôi phục công trình build.");
+        }
     }
 
     void Update()
@@ -353,6 +360,15 @@ public class GhostPlacementController : MonoBehaviour
             go.transform.rotation = ghostObject.transform.rotation;
             go.name = $"Building_{currentItemName}_{currentCell.name}";
             if (go.CompareTag("Untagged")) go.tag = "PlacedBuilding";
+
+            // Đánh dấu để PERSISTENCE dựng lại đúng prefab khi mở lại game.
+            var pb = go.AddComponent<YWonderLand.Environment.PlacedBuilding>();
+            pb.itemName = currentItemName;
+            pb.footprintX = currentItemSize.x;
+            pb.footprintY = currentItemSize.y;
+            pb.materialId = currentMaterialId;
+            pb.cost = currentItemPrice;
+
             currentCell.SetOccupant(go); // ghi vật vào ô (để biết ô có rào/công trình)
             currentCell.SetBuildMaterial(currentMaterialId, currentItemPrice); // lưu vật liệu để hoàn khi phá
             Debug.Log($"[GhostPlacement] Đặt PREFAB '{currentEntry.prefab.name}' (căn tâm) tại {go.transform.position} trên ô '{currentCell.name}'");
@@ -364,6 +380,41 @@ public class GhostPlacementController : MonoBehaviour
 
         OnBuildingPlaced?.Invoke(currentItemName, currentItemPrice);
         // Giữ ghost để đặt tiếp nhiều cái.
+    }
+
+    /// <summary>Đặt LẠI 1 công trình từ SAVE (persistence): clone prefab + đặt đúng vị trí/góc + gán vào ô.
+    /// KHÔNG trừ vật liệu (đã trả khi xây lần đầu), KHÔNG bắn OnBuildingPlaced. Trả object (null nếu thiếu prefab/lib).</summary>
+    public GameObject PlaceFromSave(string itemName, Vector2Int size, Vector3 position, Quaternion rotation,
+                                    YWonderLand.Environment.BuildSurfaceCell cell, string materialId, int cost)
+    {
+        var lib = YWonderLand.Environment.BuildPrefabLibrary.Instance;
+        if (lib == null) lib = Object.FindFirstObjectByType<YWonderLand.Environment.BuildPrefabLibrary>(FindObjectsInactive.Include);
+        var entry = lib != null ? lib.Find(itemName) : null;
+        if (entry == null || entry.prefab == null)
+        {
+            Debug.LogWarning($"[GhostPlacement] PlaceFromSave: không tra được prefab cho '{itemName}' → bỏ qua.");
+            return null;
+        }
+
+        GameObject go = MakeCenteredClone(entry.prefab, entry.stretchToFootprint, size, surfaceCellSize);
+        go.transform.position = position;   // dùng đúng transform đã lưu (đã gồm yOffset/căn tâm)
+        go.transform.rotation = rotation;
+        go.name = $"Building_{itemName}_restored";
+        if (go.CompareTag("Untagged")) go.tag = "PlacedBuilding";
+
+        var pb = go.AddComponent<YWonderLand.Environment.PlacedBuilding>();
+        pb.itemName = itemName;
+        pb.footprintX = size.x;
+        pb.footprintY = size.y;
+        pb.materialId = materialId;
+        pb.cost = cost;
+
+        if (cell != null)
+        {
+            cell.SetOccupant(go);
+            cell.SetBuildMaterial(materialId, cost);
+        }
+        return go;
     }
 
     private void SpawnCubeBuilding(Vector2Int size)

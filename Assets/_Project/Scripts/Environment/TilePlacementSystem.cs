@@ -19,10 +19,17 @@ namespace YWonderLand.Environment
 
         public int TileCount => _tiles.Count;
 
+        private const string SAVE_KEY = "YW_PlacedTiles";
+
         private void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
+        }
+
+        private void Start()
+        {
+            LoadTiles(); // khôi phục ô tự xây + cây (real-time lớn-bù/chết-bù)
         }
 
         public Vector2Int WorldToCell(Vector3 p)
@@ -52,6 +59,81 @@ namespace YWonderLand.Environment
 
             _tiles[c] = go;
             return go;
+        }
+
+        // ─────────── PERSISTENCE (Stage 2): lưu ô TỰ XÂY + cây trên đó, độc lập FarmManager ───────────
+
+        /// <summary>Lưu mọi ô đã lát (toạ độ + cao độ) + trạng thái cây (tái dùng FarmTile.ExportSaveOrNull).</summary>
+        public void SaveTiles()
+        {
+            var data = new PlacedTilesSave { tiles = new List<PlacedTileSave>() };
+            foreach (var kv in _tiles)
+            {
+                if (kv.Value == null) continue;
+                var ft = kv.Value.GetComponent<FarmTile>();
+                data.tiles.Add(new PlacedTileSave
+                {
+                    cx = kv.Key.x,
+                    cy = kv.Key.y,
+                    groundY = kv.Value.transform.position.y,
+                    crop = ft != null ? ft.ExportSaveOrNull() : null   // null nếu ô trống
+                });
+            }
+            PlayerPrefs.SetString(SAVE_KEY, JsonUtility.ToJson(data));
+            PlayerPrefs.Save();
+            Debug.Log($"[TilePlacement] Saved {data.tiles.Count} placed tiles.");
+        }
+
+        private void LoadTiles()
+        {
+            if (!PlayerPrefs.HasKey(SAVE_KEY)) return;
+            var data = JsonUtility.FromJson<PlacedTilesSave>(PlayerPrefs.GetString(SAVE_KEY));
+            if (data == null || data.tiles == null) return;
+
+            var pending = new List<PendingCrop>();
+            foreach (var e in data.tiles)
+            {
+                if (e == null) continue;
+                var go = PlaceTile(new Vector2Int(e.cx, e.cy), e.groundY); // dựng lại ô (đăng ký _tiles, KHÔNG trừ vật liệu)
+                if (go == null) continue;
+                // chỉ gắn cây cho ô có cây (state > Soil); ô trống chỉ cần dựng lại ô.
+                if (e.crop != null && e.crop.state > (int)FarmTile.TileState.Soil)
+                {
+                    var ft = go.GetComponent<FarmTile>();
+                    if (ft != null) pending.Add(new PendingCrop { tile = ft, crop = e.crop });
+                }
+            }
+            if (pending.Count > 0) StartCoroutine(RestoreCropsNextFrame(pending));
+            Debug.Log($"[TilePlacement] Recreated {data.tiles.Count} tiles ({pending.Count} có cây).");
+        }
+
+        // Chờ 1 frame cho FarmTile.Start() chạy (visual sẵn sàng) rồi mới gắn cây.
+        private System.Collections.IEnumerator RestoreCropsNextFrame(List<PendingCrop> pending)
+        {
+            var db = Resources.Load<YWonderLand.Data.CropDatabase>("CropDatabase");
+            yield return null;
+            foreach (var p in pending)
+                if (p.tile != null) p.tile.RestoreSave(p.crop, db);
+        }
+
+        private void OnApplicationPause(bool paused) { if (paused) SaveTiles(); }
+        private void OnApplicationQuit() { SaveTiles(); }
+
+        private class PendingCrop { public FarmTile tile; public FarmTile.CropSave crop; }
+
+        [System.Serializable]
+        private class PlacedTileSave
+        {
+            public int cx;
+            public int cy;
+            public float groundY;
+            public FarmTile.CropSave crop;
+        }
+
+        [System.Serializable]
+        private class PlacedTilesSave
+        {
+            public List<PlacedTileSave> tiles;
         }
     }
 }

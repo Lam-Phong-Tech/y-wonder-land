@@ -107,7 +107,9 @@ public class AnimalInteractionPopupController : MonoBehaviour
     private static string ProductText(AnimalDefinition d)
     {
         string main = FoodText(d.productMainName, d.productMainAmount);
-        string alt = FoodText(d.productAltName, d.productAltAmount);
+        // Chỉ hiện sản phẩm phụ (THỊT) nếu con vật THẬT SỰ ra thịt. Gia cầm bỏ thịt (meatItemId rỗng) → ẩn,
+        // tránh popup ghi "5x Thịt gà" trong khi gameplay không cho thịt.
+        string alt = string.IsNullOrEmpty(d.meatItemId) ? "—" : FoodText(d.productAltName, d.productAltAmount);
         if (main != "—" && alt != "—") return $"{main}, {alt}";
         if (main != "—") return main;
         return alt;

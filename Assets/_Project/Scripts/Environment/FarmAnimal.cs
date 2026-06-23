@@ -6,7 +6,7 @@ namespace YWonderLand.Environment
 {
     /// <summary>
     /// Logic vật nuôi: ĐÓI và RA SẢN PHẨM tính theo MỐC THỜI GIAN (đồng hồ toàn cục
-    /// Time.timeAsDouble) GIỐNG CÂY (FarmTile.growStartTime) — đi đảo thành phố về vẫn
+    /// RealNow()) GIỐNG CÂY (FarmTile.growStartTime) — đi đảo thành phố về vẫn
     /// "chạy bù" đúng thời gian đã trôi, không phụ thuộc Update mỗi frame.
     ///
     /// Gắn được lên CẢ prefab model thật (gọi Initialize(def, false) để KHÔNG sinh khối
@@ -38,10 +38,12 @@ namespace YWonderLand.Environment
         public bool isVaccinated = false;
 
         // ── MỐC THỜI GIAN (đồng hồ toàn cục) ──
-        // No đầy lại từ lúc này; đói dần tới khi (now - feedRefTime) >= feedIntervalSec.
+        // No đầy lại từ lúc này; đói dần tới khi (now - feedRefTime) >= cửa sổ sống (noFeedDeathSec chưa ăn / fedLifeSec đã ăn).
         private double feedRefTime;
         // Bắt đầu chu kỳ sản phẩm hiện tại từ lúc này.
         private double produceRefTime;
+        // Đã cho ăn lần nào chưa: false → dùng noFeedDeathSec (vd 24h); true → fedLifeSec (vd 48h). Khách chốt thanh-máu.
+        private bool hasBeenFed = false;
 
         [Header("Thanh HP (no/đói) nổi trên đầu")]
         [Tooltip("Chiều cao thanh HP so với gốc con vật (m). 0 = tự đo theo model.")]
@@ -102,8 +104,9 @@ namespace YWonderLand.Environment
             hasProductReady = false;
             isVaccinated = false;
 
-            feedRefTime = Time.timeAsDouble;
-            produceRefTime = Time.timeAsDouble;
+            feedRefTime = RealNow();
+            produceRefTime = RealNow();
+            hasBeenFed = false;
 
             ownsPrimitiveBody = createPrimitiveBody;
             if (createPrimitiveBody) CreatePrimitiveBody();
@@ -121,32 +124,28 @@ namespace YWonderLand.Environment
         {
             if (data == null || currentState == AnimalState.Dead) return;
 
-            double now = Time.timeAsDouble;
+            double now = RealNow();
+            float window = CurrentHungerWindow(); // chưa ăn → noFeedDeathSec; đã ăn → fedLifeSec
+            feedTimer = (float)(now - feedRefTime); // cache cho save cũ
 
-            // ── ĐÓI theo mốc thời gian ──
-            float hungerInterval = Mathf.Max(1f, data.feedIntervalSec);
-            double hungerElapsed = now - feedRefTime;
-            feedTimer = (float)hungerElapsed; // cập nhật cache cho save cũ
+            // ── CHẾT ĐÓI khi thanh máu cạn (khách chốt thanh-máu). 'Bệnh' nay là hệ RIÊNG, KHÔNG set từ đói. ──
+            if (window > 0f && (now - feedRefTime) >= window && !IsTutorialActive())
+            {
+                DieFromHunger(); // khách chốt: chết là BIẾN MẤT + trả ô chuồng, không để xác
+                return;
+            }
 
-            AnimalState newState = currentState;
+            // Cảnh báo ĐÓI (thanh máu < 50%) — giữ trạng thái Bệnh nếu đang bệnh (hệ bệnh lo riêng).
             if (currentState != AnimalState.Sick)
             {
-                if (hungerElapsed >= hungerInterval * 2.5f) newState = AnimalState.Dead;
-                else if (hungerElapsed >= hungerInterval * 1.5f) newState = AnimalState.Sick;
-                else if (hungerElapsed >= hungerInterval) newState = AnimalState.Hungry;
-                else newState = AnimalState.Healthy;
-            }
-            else
-            {
-                // Đang bệnh: chỉ tiếp tục xấu đi tới chết, KHÔNG tự khỏi (phải chữa).
-                if (hungerElapsed >= hungerInterval * 2.5f) newState = AnimalState.Dead;
-            }
-
-            if (newState != currentState)
-            {
-                currentState = newState;
-                UpdateVisuals();
-                OnAnimalStateChanged?.Invoke(this);
+                AnimalState hungerState = (window > 0f && GetHungerFraction() < 0.5f)
+                    ? AnimalState.Hungry : AnimalState.Healthy;
+                if (hungerState != currentState)
+                {
+                    currentState = hungerState;
+                    UpdateVisuals();
+                    OnAnimalStateChanged?.Invoke(this);
+                }
             }
 
             // ── RA SẢN PHẨM theo mốc thời gian (độc lập với đói; chỉ dừng khi Bệnh/Chết) ──
@@ -174,9 +173,24 @@ namespace YWonderLand.Environment
         public float GetHungerFraction()
         {
             if (data == null) return 1f;
-            float interval = Mathf.Max(1f, data.feedIntervalSec);
-            double elapsed = Time.timeAsDouble - feedRefTime;
-            return Mathf.Clamp01(1f - (float)(elapsed / interval));
+            float window = CurrentHungerWindow();
+            if (window <= 0f) return 1f;
+            double elapsed = RealNow() - feedRefTime;
+            return Mathf.Clamp01(1f - (float)(elapsed / window));
+        }
+
+        /// <summary>Cửa sổ SỐNG hiện tại (giây): chưa cho ăn → noFeedDeathSec; đã cho ăn → fedLifeSec. 0 = không chết đói.</summary>
+        private float CurrentHungerWindow()
+        {
+            if (data == null) return 0f;
+            return hasBeenFed ? data.fedLifeSec : data.noFeedDeathSec;
+        }
+
+        /// <summary>Đang trong Tutorial? (ép KHÔNG chết đói để người mới khỏi nản — giống cây).</summary>
+        private bool IsTutorialActive()
+        {
+            var tm = FindFirstObjectByType<TutorialManager>();
+            return tm != null && tm.IsActive();
         }
 
         public bool IsInfiniteHarvest => data != null && data.maxHarvests <= 0;
@@ -189,7 +203,7 @@ namespace YWonderLand.Environment
             if (!CanProduce()) return -1f;
             if (hasProductReady) return 0f;
             float cycle = Mathf.Max(0.1f, data.produceCycleTimeSec);
-            double elapsed = Time.timeAsDouble - produceRefTime;
+            double elapsed = RealNow() - produceRefTime;
             return Mathf.Max(0f, cycle - (float)elapsed);
         }
 
@@ -206,8 +220,9 @@ namespace YWonderLand.Environment
         {
             if (currentState == AnimalState.Dead) return false;
 
-            feedRefTime = Time.timeAsDouble; // no đầy lại
+            feedRefTime = RealNow(); // no đầy lại (cửa sổ fedLifeSec)
             feedTimer = 0f;
+            hasBeenFed = true;               // từ giờ dùng cửa sổ fedLifeSec (dài hơn noFeedDeathSec)
             if (currentState == AnimalState.Hungry)
             {
                 currentState = AnimalState.Healthy;
@@ -229,7 +244,7 @@ namespace YWonderLand.Environment
             amount = data.produceAmount;
 
             hasProductReady = false;
-            produceRefTime = Time.timeAsDouble; // bắt đầu chu kỳ kế từ bây giờ
+            produceRefTime = RealNow(); // bắt đầu chu kỳ kế từ bây giờ
             produceTimer = 0f;
             if (!IsInfiniteHarvest) harvestsRemaining--;
 
@@ -266,6 +281,25 @@ namespace YWonderLand.Environment
             Destroy(gameObject);
         }
 
+        /// <summary>Chết ĐÓI (khách chốt): báo toast, TRẢ ô chuồng về trống, rồi XOÁ con vật — KHÔNG để lại xác.</summary>
+        private void DieFromHunger()
+        {
+            if (data != null)
+                ScreenToast.Show($"{data.animalName} đã chết đói! Nhớ cho ăn đúng giờ.");
+
+            // Trả ô chuồng về trống (rào vẫn còn) để thả con mới — không để xác kẹt ô.
+            if (occupiedCells != null)
+            {
+                foreach (var c in occupiedCells)
+                    if (c != null) c.ClearAnimal();
+                occupiedCells = null;
+            }
+
+            currentState = AnimalState.Dead;
+            OnAnimalStateChanged?.Invoke(this); // báo popup/listener cập nhật trước khi xoá
+            Destroy(gameObject);
+        }
+
         public bool Pet()
         {
             if (currentState == AnimalState.Dead) return false;
@@ -277,8 +311,9 @@ namespace YWonderLand.Environment
             if (currentState != AnimalState.Sick) return false;
 
             currentState = AnimalState.Healthy;
-            feedRefTime = Time.timeAsDouble; // chữa cũng cho no lại tạm
+            feedRefTime = RealNow(); // chữa cũng cho no lại tạm
             feedTimer = 0f;
+            hasBeenFed = true;
             isVaccinated = true;
 
             UpdateVisuals();
@@ -378,6 +413,8 @@ namespace YWonderLand.Environment
             // Quay mặt thanh theo hướng camera (billboard phẳng).
             barRoot.rotation = Quaternion.LookRotation(barCamera.transform.forward, barCamera.transform.up);
 
+            RefreshHungerFill(); // thanh đói tụt LIÊN TỤC mỗi frame, không chỉ lúc đổi trạng thái
+
             // Pulse nhẹ dấu sản phẩm
             if (productIndicator != null && productIndicator.activeSelf)
             {
@@ -390,19 +427,8 @@ namespace YWonderLand.Environment
 
         public void UpdateVisuals()
         {
-            // Thanh HP: fill theo độ no + đổi màu xanh→đỏ
-            if (hungerFillPivot != null)
-            {
-                float frac = GetHungerFraction();
-                hungerFillPivot.localScale = new Vector3(Mathf.Max(0.0001f, frac), 1f, 1f);
-                if (hungerFillRenderer != null)
-                {
-                    Color c = Color.Lerp(new Color(0.9f, 0.25f, 0.2f), new Color(0.3f, 0.85f, 0.3f), frac);
-                    if (currentState == AnimalState.Sick) c = new Color(0.6f, 0.4f, 0.85f); // tím = bệnh
-                    hungerFillRenderer.material.SetColor("_BaseColor", c);
-                    hungerFillRenderer.material.color = c;
-                }
-            }
+            // Thanh HP fill: cập nhật LIÊN TỤC ở LateUpdate (RefreshHungerFill) — đây chỉ refresh 1 phát lúc đổi trạng thái.
+            RefreshHungerFill();
 
             if (productIndicator != null)
                 productIndicator.SetActive(hasProductReady && currentState != AnimalState.Dead);
@@ -420,6 +446,21 @@ namespace YWonderLand.Environment
                     visualObject.transform.localRotation = Quaternion.identity;
                     visualObject.transform.localPosition = Vector3.zero;
                 }
+            }
+        }
+
+        /// <summary>Cập nhật fill + màu thanh đói theo độ no hiện tại. Gọi MỖI FRAME (đói tụt liên tục, khớp popup).</summary>
+        private void RefreshHungerFill()
+        {
+            if (hungerFillPivot == null) return;
+            float frac = GetHungerFraction();
+            hungerFillPivot.localScale = new Vector3(Mathf.Max(0.0001f, frac), 1f, 1f);
+            if (hungerFillRenderer != null)
+            {
+                Color c = Color.Lerp(new Color(0.9f, 0.25f, 0.2f), new Color(0.3f, 0.85f, 0.3f), frac);
+                if (currentState == AnimalState.Sick) c = new Color(0.6f, 0.4f, 0.85f); // tím = bệnh
+                hungerFillRenderer.material.SetColor("_BaseColor", c);
+                hungerFillRenderer.material.color = c;
             }
         }
 
@@ -493,13 +534,40 @@ namespace YWonderLand.Environment
             harvestsRemaining = harvests;
             hasProductReady = ready;
             isVaccinated = vacc;
+            hasBeenFed = true; // con vật load lại → coi như đã cho ăn (dùng fedLifeSec)
 
             // Quy đổi tiến trình đã lưu (giây) về mốc thời gian tương đương để chạy tiếp mượt.
-            feedRefTime = Time.timeAsDouble - fTimer;
-            produceRefTime = Time.timeAsDouble - pTimer;
+            feedRefTime = RealNow() - fTimer;
+            produceRefTime = RealNow() - pTimer;
 
             if (ownsPrimitiveBody && visualObject == null) CreatePrimitiveBody();
             if (barRoot == null) CreateStatusBar();
+            UpdateVisuals();
+        }
+
+        // ───────────────── PERSISTENCE (real-time, đói-bù / chết-bù) ─────────────────
+
+        /// <summary>Mốc thời gian ĐỜI THỰC (Unix giây). Thay Time.timeAsDouble (reset khi đóng app) để thú
+        /// đói-bù + chết-bù đúng qua các phiên. ⚠️ Chỉnh giờ máy có thể tua (chống gian lận = server-time, Phase sau).</summary>
+        private static double RealNow() => System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() / 1000.0;
+
+        // Accessor cho persistence đọc mốc thời gian (private) — lưu ra đĩa.
+        public double FeedRefUnix => feedRefTime;
+        public double ProduceRefUnix => produceRefTime;
+        public bool HasBeenFed => hasBeenFed;
+
+        /// <summary>Khôi phục trạng thái thú từ save (persistence): set thẳng mốc Unix → Update tự đói-bù/chết-bù
+        /// theo thời gian thực đã trôi (gọi SAU Initialize, đè lại mốc no/sản phẩm).</summary>
+        public void RestoreAnimalState(double feedRefUnix, double produceRefUnix, bool fed, int harvests, bool product, bool vacc)
+        {
+            feedRefTime = feedRefUnix;
+            produceRefTime = produceRefUnix;
+            hasBeenFed = fed;
+            harvestsRemaining = harvests;
+            hasProductReady = product;
+            isVaccinated = vacc;
+            feedTimer = (float)(RealNow() - feedRefTime);
+            produceTimer = (float)(RealNow() - produceRefTime);
             UpdateVisuals();
         }
     }

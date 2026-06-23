@@ -16,9 +16,11 @@ MonoBehaviour:
   harvestItemId: sweet_potato_01
   growthTimeSec: 60
   waterIntervalSec: 25
+  noWaterDeathSec: 20
+  wateredLifeSec: 50
   harvestYield: 1
   expReward: 100
-  posReward: 45
+  posReward: 0
   growthStages: 3
   cropColor: {r: 0.6, g: 0.3, b: 0.15, a: 1}
   iconEmoji: "\U0001F360"

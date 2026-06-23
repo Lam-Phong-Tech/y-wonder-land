@@ -9,6 +9,45 @@
 
 ---
 
+## 🆕 CẬP NHẬT 23/06/2026 — RÀ SOÁT LẠI theo `VatNuoi2.xlsx` (bảng MỚI) + tab "Thuyết minh cách tính"
+
+> Rà lại toàn bộ kinh tế vật nuôi sau khi đã áp bộ giá Point (USDT×26). Đọc THẲNG file `.xlsx` vì `VatNuoi2.md` chỉ export **sheet đầu** (thiếu tab công thức). **Phần lớn "nút thắt" cũ ở mục A/B bên dưới ĐÃ GIẢI QUYẾT** (đã chốt + áp USDT×26; đã thêm Chanh dây + 3 con Rùa/Ngỗng/Vịt vào shop).
+
+### ✅ Đã KHỚP 100% với VatNuoi2 (không cần sửa)
+| Mục | Kết quả |
+|---|---|
+| **Giá mua** = Định Giá = `USDT × 26` | ✓ cả 10 con (Bò 7800 · Hươu 10400 · Gà 156 · Rùa 2340…) |
+| **Giá bán SP chính (Pro1)** | ✓ khớp (sữa bò 50 · mai rùa 11893 · nhung hươu 24735 · da heo 7042…) |
+| **Giá bán thịt (Pro2)** | ✓ khớp (thịt bò 325 · thịt rùa 1084…) |
+| **Số lần thu** = `floor(số ngày nuôi ÷ chu kỳ thu hoạch)` | ✓ `maxHarvests` khớp công thức (Bò 270/7→38 · Gà 90/2→45 · Đà điểu 180/6→30…) |
+| **Sản lượng/vụ · thịt/vụ · chu kỳ thu** | ✓ khớp |
+| **Giá vắc-xin 30 · thuốc 70 (đơn vị)** | ✓ khớp (Bò: 4 vắc×30=120 · 10 thuốc×70=700) |
+
+→ **Giá MUA/BÁN trong game = ĐÚNG bảng VatNuoi2.** Mục A/B (3 thang giá) coi như XONG (chọn USDT×26).
+
+### ⚠️ Điểm cần lưu (KHÔNG phải lỗi áp số)
+
+**1. Gia cầm (gà · đà điểu · ngỗng · vịt) = CHỈ LẤY TRỨNG, BỎ THỊT — KHÁCH CHỐT, GIỮ NGUYÊN (không sửa).**
+Trong VatNuoi2, THỊT chiếm phần lớn doanh thu gia cầm: gà **76%** · đà điểu **63%** · ngỗng **80%** · vịt **89%**. Bỏ thịt → lời gia cầm thấp hơn % bảng (vịt gần huề vốn). **Đây là quyết định khách — code đã làm đúng (`meatItemId` rỗng cho 4 gia cầm), KHÔNG đổi.** (Trong game thức ăn tự trồng/sellPrice 0 nên gia cầm vẫn lời = trứng − giá mua.)
+
+**2. Công thức CHI PHÍ có tính TIỀN BỆNH → game CHƯA áp (để Gói B, khách hẹn phase sau).**
+```
+Tổng chi phí = TỉLệBệnh × (Định giá + Thức ăn + Vắc-xin + Thuốc)
+             + (1 − TỉLệBệnh) × (Định giá + Thức ăn + Vắc-xin)
+```
+(vắc-xin LUÔN tốn · thuốc chỉ khi phát bệnh). Game chưa có hệ bệnh → chưa trừ vắc-xin/thuốc → **lời game hiện CAO HƠN bảng**. Làm Gói B (bệnh) xong thì chi phí mới về đúng bảng (~250–400%). **Đây là lý do số bảng nhìn "phức tạp" — nó gắn với hệ bệnh chưa làm.**
+
+**3. Trứng vịt:** bảng ghi giá **4.5**, game làm tròn **= 5** (lệch +0.5; GIỮ 5 vì game không bán lẻ 0.5).
+
+**4. (Bảng tự sai, game ĐÚNG):** vài ô "Tổng Product 1" trong VatNuoi2 tính lệch cho **hươu/thỏ** (quên nhân số-lượng/vụ → under-count). Game dùng số per-vụ (`produceAmount` hươu 2 · thỏ 8) nên **cho đủ sản lượng**, không ảnh hưởng.
+
+### Kết luận 23/06
+- **Số liệu mua/bán vật nuôi: ĐÚNG bảng VatNuoi2.** Không cần sửa số.
+- **Lời thực tế > bảng** do chưa trừ chi phí bệnh → sẽ cân về đúng bảng **sau khi làm Gói B (hệ bệnh)** — khách hẹn phase sau.
+- Mục A/B/C/D/E bên dưới là bản **21/06** (số CŨ, trước khi áp USDT×26) — giữ làm lịch sử.
+
+---
+
 ## A. TÓM TẮT — 9 ĐIỂM
 
 | # | Vấn đề | Mô tả ngắn | Trạng thái |

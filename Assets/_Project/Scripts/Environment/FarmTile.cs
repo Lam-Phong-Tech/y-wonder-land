@@ -1,6 +1,7 @@
 using UnityEngine;
 using System;
 using YWonderLand.Data;
+using YWonderLand.Environment; // ScreenToast (toast báo cây chết)
 
 /// <summary>
 /// FarmTile nâng cấp: tích hợp CropDefinition, visual stages theo loại cây,
@@ -30,7 +31,7 @@ public class FarmTile : MonoBehaviour
     public GameObject ripeVisual;      // Visual showing final product
 
     [Header("Timing Configuration")]
-    public float tutorialGrowthTime = 5f; // Fallback for tutorial
+    public float tutorialGrowthTime = 24f; // Fallback cho tutorial (tua nhanh 24s) — khớp override ở GetGrowthTime
 
     [Header("Model 3D")]
     [Tooltip("BẬT nếu ô đất này dùng prefab cây 3D (gán ở CropDefinition) thay khối primitive. Khi BẬT: KHÔNG tạo khối đất/cây mặc định — phần đất do model mảnh đất của bạn lo.")]
@@ -48,17 +49,18 @@ public class FarmTile : MonoBehaviour
     public Action<FarmTile> OnTileWatered;
     public Action<FarmTile> OnTileHarvested;
 
-    // MỐC THỜI GIAN bắt đầu lớn (giây, theo đồng hồ TOÀN CỤC Time.timeAsDouble).
+    // MỐC THỜI GIAN bắt đầu lớn (giây, theo đồng hồ TOÀN CỤC RealNow()).
     // % lớn = (giờ hiện tại − mốc này) / thời_gian_lớn → KHÔNG phụ thuộc Update mỗi frame,
     // nên đi thành phố / tắt ô đất cho nhẹ máy thì về farm cây vẫn "lớn bù" đúng thời gian đã trôi.
-    private double growStartTime = 0.0;
+    private double growStartTime = 0.0;  // mốc bắt đầu LỚN = lần TƯỚI ĐẦU (24h tính từ đây, khách chốt)
     private bool isGrowing = false;
 
-    // ── Nước/khát (behavior B: hết nước → cây héo, GIẢM sản lượng/POS, vẫn lớn & thu được) ──
-    private double lastWaterTime = 0.0;   // mốc tưới gần nhất (đầy nước)
-    private float growthAccrued = 0f;     // GIÂY tăng trưởng đã "ngấm nước" tích luỹ (tưới-gate-lớn)
-    private float dryAccumSec = 0f;       // (giữ cho tương thích; cơ chế mới = hết nước thì NGỪNG lớn, không phạt)
-    /// <summary>Hệ số chăm sóc 0.5..1 lúc thu (1 = không để khát; 0.5 = khát suốt). Nhân vào sản lượng/POS/EXP.</summary>
+    // ── Thanh nước = THANH MÁU (đồng hồ sống). Khách chốt: gieo mà CHƯA tưới sống noWaterDeathSec (cây 8h);
+    //    mỗi lần TƯỚI đổ đầy wateredLifeSec (cây 20h); cạn về 0 = CHẾT. Lớn theo thời gian thật, KHÔNG gate nước. ──
+    private double plantedTime = 0.0;     // mốc GIEO HẠT (đếm chết khi chưa tưới lần nào)
+    private double lastWaterTime = 0.0;   // mốc TƯỚI gần nhất (đổ đầy thanh máu)
+    private float dryAccumSec = 0f;       // (cũ — chỉ còn đọc ở LastCareFactor, luôn 0)
+    /// <summary>(CŨ) Hệ số chăm sóc — nay luôn = 1 (cơ chế phạt sản lượng thay bằng CHẾT). Giữ cho caller cũ.</summary>
     public float LastCareFactor { get; private set; } = 1f;
 
     // ── Cây LÂU NĂM: thu NHIỀU LẦN (theo CropDefinition.maxHarvests / reHarvestCycleSec) ──
@@ -102,6 +104,7 @@ public class FarmTile : MonoBehaviour
     // Nhãn chữ NỔI trên cây (billboard) — hiện % lớn / chín sau ~Xs / số lần thu (cho người chơi xem trực quan, đếm ngược sống).
     private Transform cropInfoRoot;
     private TextMesh cropInfoTM;
+    private MeshFilter cropInfoMF;   // để đo bề rộng chữ → CO nhãn cho vừa thanh nước (WBAR_W), né chữ to tràn màn hình
 
     void Start()
     {
@@ -111,15 +114,24 @@ public class FarmTile : MonoBehaviour
 
     void Update()
     {
+        // CHẾT vì THIẾU NƯỚC (khách chốt): thanh nước = THANH MÁU. Áp cho CẢ lúc chưa tưới (Planted, đồng hồ 8h)
+        // lẫn đang lớn (Watered, đồng hồ 20h từ lần tưới). Cạn về 0 = chết. Bỏ qua trong Tutorial (người mới khỏi nản).
+        if (currentCrop != null
+            && (currentState == TileState.Planted || currentState == TileState.Watered)
+            && GetWaterFraction() <= 0f
+            && !IsTutorialActive())
+        {
+            DieFromDrought();
+            return;
+        }
+
         if (isGrowing && currentState == TileState.Watered)
         {
-            // % lớn tính TỪ MỐC THỜI GIAN (đồng hồ toàn cục) — không cộng dồn mỗi frame.
+            // % lớn theo THỜI GIAN THẬT từ lần tưới đầu (không gate nước; thiếu nước thì CHẾT, không đứng hình).
             float pct = GetGrowthPercentage();
 
             // Cây đang lớn mà chưa có thanh nước (vd load từ save) → tạo cho chắc.
             if (waterBarRoot == null) CreateWaterBar();
-
-            // Cơ chế MỚI (khách chốt): hết nước → cây NGỪNG lớn (GetGrownSeconds tự dừng cộng), phải tưới lại.
 
             if (useCustomCropModels)
             {
@@ -157,10 +169,14 @@ public class FarmTile : MonoBehaviour
     void LateUpdate()
     {
         UpdateCropInfoLabel(); // chữ nổi trên cây — chạy độc lập với thanh nước (hiện cả lúc cây đã chín)
+
+        // Thanh máu hiện CẢ khi chưa tưới (Planted — để nhắc tưới) lẫn đang lớn (Watered). Tạo lười nếu chưa có.
+        bool show = (currentState == TileState.Watered)
+                 || (currentState == TileState.Planted && currentCrop != null && currentCrop.noWaterDeathSec > 0f);
+        if (show && waterBarRoot == null) CreateWaterBar();
         if (waterBarRoot == null) return;
         if (waterBarCam == null) waterBarCam = Camera.main;
 
-        bool show = isGrowing && currentState == TileState.Watered;
         if (waterBarRoot.gameObject.activeSelf != show) waterBarRoot.gameObject.SetActive(show);
         if (!show) return;
 
@@ -274,6 +290,7 @@ public class FarmTile : MonoBehaviour
 
         plantedSeedId = seedId;
         currentState = TileState.Planted;
+        plantedTime = RealNow(); // mốc gieo — đồng hồ CHẾT khi chưa tưới (noWaterDeathSec)
         harvestsRemaining = 1;
         isReGrowing = false;
 
@@ -311,10 +328,9 @@ public class FarmTile : MonoBehaviour
         if (currentState != TileState.Planted || masterTile != null) return false;
 
         currentState = TileState.Watered;
-        growStartTime = Time.timeAsDouble; // mốc bắt đầu lớn
+        growStartTime = RealNow(); // mốc bắt đầu LỚN (24h tính từ lần tưới đầu)
         isGrowing = true;
-        lastWaterTime = Time.timeAsDouble; // đầy nước
-        growthAccrued = 0f;
+        lastWaterTime = RealNow(); // đổ đầy thanh máu (wateredLifeSec)
         dryAccumSec = 0f;
         CreateWaterBar();
         UpdateVisuals();
@@ -322,13 +338,11 @@ public class FarmTile : MonoBehaviour
         return true;
     }
 
-    /// <summary>Tưới LẠI khi cây đang lớn → dồn phần đã ngấm vào kho rồi đổ đầy nước. Trả true nếu tưới được.</summary>
+    /// <summary>Tưới LẠI khi cây đang lớn → ĐỔ ĐẦY thanh máu (wateredLifeSec), lùi mốc chết. Lớn vẫn chạy theo thời gian thật.</summary>
     public bool WaterAgain()
     {
         if (currentState != TileState.Watered || !isGrowing) return false;
-        // Chốt phần tăng trưởng của lần tưới trước (tối đa 1 chu kỳ nước) vào kho, rồi reset đồng hồ nước.
-        growthAccrued += Mathf.Clamp((float)(Time.timeAsDouble - lastWaterTime), 0f, GetWaterInterval());
-        lastWaterTime = Time.timeAsDouble;
+        lastWaterTime = RealNow(); // đổ đầy lại thanh máu
         return true;
     }
 
@@ -338,13 +352,72 @@ public class FarmTile : MonoBehaviour
         return 20f;
     }
 
-    /// <summary>Mức nước còn lại 0..1 (1 = vừa tưới, 0 = khát). Dùng cho thanh nước + tính phạt.</summary>
+    /// <summary>Thanh MÁU 0..1. Planted (chưa tưới): tụt theo noWaterDeathSec từ lúc gieo (cây 8h).
+    /// Watered: tụt theo wateredLifeSec từ lần tưới gần nhất (cây 20h). 0 = chết (xem DieFromDrought).
+    /// Field = 0 → trả 1 (loại đó KHÔNG chết vì thiếu nước).</summary>
     public float GetWaterFraction()
     {
         if (currentCrop == null) return 1f;
-        float interval = Mathf.Max(1f, currentCrop.waterIntervalSec);
-        double elapsed = Time.timeAsDouble - lastWaterTime;
-        return Mathf.Clamp01(1f - (float)(elapsed / interval));
+        if (currentState == TileState.Planted)
+        {
+            float win = currentCrop.noWaterDeathSec;
+            if (win <= 0f) return 1f;
+            return Mathf.Clamp01(1f - (float)((RealNow() - plantedTime) / win));
+        }
+        if (currentState == TileState.Watered)
+        {
+            float win = currentCrop.wateredLifeSec;
+            if (win <= 0f) return 1f;
+            return Mathf.Clamp01(1f - (float)((RealNow() - lastWaterTime) / win));
+        }
+        return 1f;
+    }
+
+    /// <summary>Số giây còn lại trước khi CHẾT vì thiếu nước (theo cửa sổ hiện tại). float.MaxValue nếu không chết.</summary>
+    private float GetLifeRemainingSec()
+    {
+        if (currentCrop == null) return float.MaxValue;
+        if (currentState == TileState.Planted)
+        {
+            if (currentCrop.noWaterDeathSec <= 0f) return float.MaxValue;
+            return Mathf.Max(0f, currentCrop.noWaterDeathSec - (float)(RealNow() - plantedTime));
+        }
+        if (currentState == TileState.Watered)
+        {
+            if (currentCrop.wateredLifeSec <= 0f) return float.MaxValue;
+            return Mathf.Max(0f, currentCrop.wateredLifeSec - (float)(RealNow() - lastWaterTime));
+        }
+        return float.MaxValue;
+    }
+
+    /// <summary>Cây CHẾT vì thiếu nước (thanh máu cạn): ô về Đất trống, MẤT giống, dọn model/thanh nước/nhãn,
+    /// thả ô giàn (cây nhiều ô). KHÔNG trao sản phẩm, KHÔNG tính là thu hoạch (không bắn OnTileHarvested).</summary>
+    private void DieFromDrought()
+    {
+        currentState = TileState.Soil;
+        plantedSeedId = "";
+        currentCrop = null;
+        cropColor = Color.green;
+        growStartTime = 0.0;
+        plantedTime = 0.0;
+        isGrowing = false;
+        isReGrowing = false;
+        harvestsRemaining = 1;
+        dryAccumSec = 0f;
+        FreeSlaves(); // cây nhiều ô chết → thả các ô slave cho trồng lại
+        DestroyWaterBar();
+        if (cropInfoRoot != null) { Destroy(cropInfoRoot.gameObject); cropInfoRoot = null; cropInfoTM = null; cropInfoMF = null; }
+        if (cropModelInstance != null) { Destroy(cropModelInstance); cropModelInstance = null; }
+        UpdateVisuals();
+
+        ScreenToast.Show("Cây đã héo chết vì thiếu nước! Nhớ tưới đúng giờ nhé.");
+    }
+
+    /// <summary>Có đang trong Tutorial không (tutorial ép lớn nhanh → KHÔNG cho cây chết, người mới khỏi nản).</summary>
+    private bool IsTutorialActive()
+    {
+        TutorialManager tm = FindFirstObjectByType<TutorialManager>();
+        return tm != null && tm.IsActive();
     }
 
     public bool InteractHarvest(out string harvestedItemId, out int amount)
@@ -385,9 +458,8 @@ public class FarmTile : MonoBehaviour
             isReGrowing = true;
             currentState = TileState.Watered;
             isGrowing = true;
-            growStartTime = Time.timeAsDouble;
-            lastWaterTime = Time.timeAsDouble;
-            growthAccrued = 0f;
+            growStartTime = RealNow();
+            lastWaterTime = RealNow();
             dryAccumSec = 0f;
             CreateWaterBar();
             UpdateVisuals();
@@ -414,7 +486,7 @@ public class FarmTile : MonoBehaviour
         dryAccumSec = 0f;
         FreeSlaves(); // cây nhiều ô hết đời → thả các ô slave cho trồng lại
         DestroyWaterBar();
-        if (cropInfoRoot != null) { Destroy(cropInfoRoot.gameObject); cropInfoRoot = null; cropInfoTM = null; }
+        if (cropInfoRoot != null) { Destroy(cropInfoRoot.gameObject); cropInfoRoot = null; cropInfoTM = null; cropInfoMF = null; }
 
         if (cropModelInstance != null) { Destroy(cropModelInstance); cropModelInstance = null; }
 
@@ -501,9 +573,9 @@ public class FarmTile : MonoBehaviour
 
     private float GetGrowthTime()
     {
-        // Ép dùng thời gian ngắn nếu đang trong Tutorial
+        // Ép TUA NHANH nếu đang trong Tutorial (khách chốt 24s). Ngoài tutorial dùng growthTimeSec thật (24h cây ngắn ngày).
         TutorialManager tm = FindFirstObjectByType<TutorialManager>();
-        if (tm != null && tm.IsActive()) return 5f; // Trực tiếp trả về 5s để bỏ qua giá trị lưu trong Inspector
+        if (tm != null && tm.IsActive()) return 24f; // Tutorial = 24s (tua nhanh, bỏ qua growthTimeSec thật)
 
         if (currentCrop != null)
         {
@@ -555,8 +627,9 @@ public class FarmTile : MonoBehaviour
         var go = new GameObject("CropInfo");
         cropInfoRoot = go.transform;
         cropInfoTM = go.AddComponent<TextMesh>();
+        cropInfoMF = go.GetComponent<MeshFilter>(); // TextMesh tự thêm MeshFilter — dùng đo bề rộng để co nhãn
         cropInfoTM.text = "";
-        cropInfoTM.characterSize = 0.085f;
+        cropInfoTM.characterSize = 0.035f; // NHỎ (tránh chèn UI khác); còn co thêm cho không vượt thanh nước ở FitCropInfoToWidth
         cropInfoTM.fontSize = 70;
         cropInfoTM.anchor = TextAnchor.LowerCenter;
         cropInfoTM.alignment = TextAlignment.Center;
@@ -596,6 +669,21 @@ public class FarmTile : MonoBehaviour
         if (cam != null) cropInfoRoot.rotation = Quaternion.LookRotation(cam.transform.forward, cam.transform.up);
 
         if (cropInfoTM != null) cropInfoTM.text = GetStatusText();
+        FitCropInfoToWidth(); // co nhãn cho VỪA thanh nước, không tràn màn hình
+    }
+
+    /// <summary>Co nhãn nổi cho bề rộng KHÔNG vượt thanh nước (WBAR_W): chữ dài tự thu nhỏ, chữ ngắn giữ cỡ gốc.
+    /// Đo bằng mesh local bounds (không phụ thuộc góc billboard) nên ổn định mọi hướng camera.</summary>
+    private void FitCropInfoToWidth()
+    {
+        if (cropInfoRoot == null || cropInfoTM == null) return;
+        if (cropInfoMF == null) cropInfoMF = cropInfoTM.GetComponent<MeshFilter>();
+        var mesh = cropInfoMF != null ? cropInfoMF.sharedMesh : null;
+        if (mesh == null) return;
+        float localW = mesh.bounds.size.x;
+        if (localW <= 0.0001f) return; // chưa dựng mesh (text rỗng/đầu frame) → giữ nguyên
+        float scale = Mathf.Min(1f, WBAR_W / localW); // chỉ THU NHỎ, không phóng to quá thanh nước
+        cropInfoRoot.localScale = new Vector3(scale, scale, scale);
     }
 
     /// <summary>Dòng trạng thái cây: % lớn / chín sau ~Xs / số lần thu / cần tưới.</summary>
@@ -616,12 +704,19 @@ public class FarmTile : MonoBehaviour
                 float remain = Mathf.Max(0f, GetGrowthTime() - GetGrownSeconds());
                 string s = $"Lớn {Mathf.RoundToInt(pct * 100f)}%";
                 if (remain > 0.4f) s += $" · chín ~{FormatSec(remain)}";
-                if (GetWaterFraction() < 0.12f) s += "\n<color=#E06666>cần tưới</color>";
+                // Thanh máu xuống thấp → báo còn bao lâu CHẾT nếu không tưới.
+                if (GetWaterFraction() < 0.4f)
+                    s += $"\n<color=#E06666>cần tưới · héo ~{FormatSec(GetLifeRemainingSec())}</color>";
                 if (currentCrop.maxHarvests > 1) s += $"\nlần {(currentCrop.maxHarvests - harvestsRemaining) + 1}/{currentCrop.maxHarvests}";
                 return s;
             }
             case TileState.Planted:
-                return "<color=#FFD54F>Chưa tưới</color>";
+            {
+                string s = "<color=#FFD54F>Chưa tưới</color>";
+                if (currentCrop.noWaterDeathSec > 0f)
+                    s += $"\n<color=#E06666>héo ~{FormatSec(GetLifeRemainingSec())}</color>";
+                return s;
+            }
             default:
                 return "";
         }
@@ -639,16 +734,16 @@ public class FarmTile : MonoBehaviour
         if (!isGrowing) return 0f;
         float total = GetGrowthTime();
         if (total <= 0f) return 1f;
-        // TƯỚI-GATE-LỚN: chỉ tính giây đã "ngấm nước". Hết nước → ngừng cộng → cây không lớn tới khi tưới lại.
+        // Lớn theo THỜI GIAN THẬT từ lần tưới đầu (khách chốt 24h cây ngắn ngày). KHÔNG gate nước nữa —
+        // thiếu nước thì CHẾT chứ không "đứng hình". Đi đảo/tắt ô vẫn lớn bù đúng (mốc RealNow()).
         return Mathf.Clamp01(GetGrownSeconds() / total);
     }
 
-    /// <summary>Giây tăng trưởng đã ngấm nước = kho tích luỹ + phần lần tưới hiện tại (CAP = 1 chu kỳ nước).</summary>
+    /// <summary>Giây đã lớn = thời gian thật trôi từ lần TƯỚI ĐẦU (growStartTime).</summary>
     private float GetGrownSeconds()
     {
-        float interval = GetWaterInterval();
-        float sinceWater = (float)(Time.timeAsDouble - lastWaterTime);
-        return growthAccrued + Mathf.Clamp(sinceWater, 0f, interval);
+        if (!isGrowing) return 0f;
+        return Mathf.Max(0f, (float)(RealNow() - growStartTime));
     }
 
     private void UpdateCropColor(GameObject visual)
@@ -817,5 +912,117 @@ public class FarmTile : MonoBehaviour
             r.material = new Material(Shader.Find("Universal Render Pipeline/Lit"));
             r.material.color = color;
         }
+    }
+
+    // ───────────────────────── PERSISTENCE (real-time, lớn-bù / chết-bù) ─────────────────────────
+
+    /// <summary>Mốc thời gian ĐỜI THỰC (Unix giây). Thay Time.timeAsDouble (reset khi đóng app) để cây
+    /// lớn-bù + chết-bù đúng qua các phiên. ⚠️ Chỉnh giờ máy có thể tua — chống gian lận = server-time (Phase sau).</summary>
+    private static double RealNow() => System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() / 1000.0;
+
+    /// <summary>Gói lưu trạng thái 1 ô (FarmManager ghi posKey + serialize ra đĩa).</summary>
+    [System.Serializable]
+    public class CropSave
+    {
+        public string posKey;
+        public int state;
+        public string seedId;
+        public double plantedUnix;
+        public double lastWaterUnix;
+        public double growStartUnix;
+        public int harvestsRemaining;
+        public bool isReGrowing;
+    }
+
+    /// <summary>Xuất trạng thái để LƯU. null nếu không cần (đất trống, ô slave của giàn, cây nhiều-ô chưa hỗ trợ).</summary>
+    public CropSave ExportSaveOrNull()
+    {
+        if (currentState == TileState.Soil) return null;
+        if (masterTile != null) return null;                                // ô slave → master lo
+        if (currentCrop != null && currentCrop.plotSlots > 1) return null;  // cây nhiều ô (giàn): chưa hỗ trợ lưu
+        return new CropSave
+        {
+            state = (int)currentState,
+            seedId = plantedSeedId,
+            plantedUnix = plantedTime,
+            lastWaterUnix = lastWaterTime,
+            growStartUnix = growStartTime,
+            harvestsRemaining = harvestsRemaining,
+            isReGrowing = isReGrowing,
+        };
+    }
+
+    /// <summary>Khôi phục trạng thái cây từ save + GIẢI QUYẾT thời gian offline đã trôi (lớn-bù / chết-bù).
+    /// Dùng mốc thực nên đóng app vài tiếng/ngày → mở lại cây tự chín hoặc đã héo chết đúng.</summary>
+    public void RestoreSave(CropSave s, CropDatabase db)
+    {
+        if (s == null) return;
+
+        currentState = (TileState)s.state;
+        plantedSeedId = s.seedId;
+        plantedTime = s.plantedUnix;
+        lastWaterTime = s.lastWaterUnix;
+        growStartTime = s.growStartUnix;
+        harvestsRemaining = Mathf.Max(1, s.harvestsRemaining);
+        isReGrowing = s.isReGrowing;
+
+        if (currentState == TileState.Soil || currentState == TileState.Plowed) { UpdateVisuals(); return; }
+
+        // Tra cứu crop + dựng cây.
+        if (db != null && !string.IsNullOrEmpty(plantedSeedId))
+        {
+            currentCrop = db.GetCropBySeedId(plantedSeedId);
+            if (currentCrop != null) cropColor = currentCrop.cropColor;
+        }
+        if (currentCrop == null) // không tra được → để đất trống cho an toàn
+        {
+            currentState = TileState.Soil; plantedSeedId = ""; UpdateVisuals(); return;
+        }
+
+        if (useCustomCropModels) SpawnCropModel();
+        else { DestroySeedAndGrowingVisuals(); CreateCropVisuals(); }
+
+        double now = RealNow();
+
+        // CHƯA tưới (Planted): chết nếu offline vượt noWaterDeathSec.
+        if (currentState == TileState.Planted)
+        {
+            if (currentCrop.noWaterDeathSec > 0f && now >= plantedTime + currentCrop.noWaterDeathSec)
+            { DieFromDrought(); return; }
+            UpdateVisuals();
+            return;
+        }
+
+        // ĐÃ chín khi lưu (Ripe): giữ nguyên chín, chờ thu hoạch (không đánh giá chết).
+        if (currentState == TileState.Ripe)
+        {
+            isGrowing = false;
+            if (useCustomCropModels) ApplyCropGrowthScale();
+            UpdateVisuals();
+            return;
+        }
+
+        // ĐÃ tưới, đang lớn (Watered): so MỐC chín vs MỐC chết để biết offline đã chín hay đã chết.
+        isGrowing = true;
+        double ripeAt = growStartTime + GetGrowthTime();
+        double deathAt = (currentCrop.wateredLifeSec > 0f)
+                         ? lastWaterTime + currentCrop.wateredLifeSec
+                         : double.PositiveInfinity;
+
+        if (deathAt < ripeAt && now >= deathAt) { DieFromDrought(); return; }   // hết nước trước khi chín → đã chết
+        if (ripeAt <= deathAt && now >= ripeAt)                                  // kịp chín → đã chín
+        {
+            isGrowing = false;
+            currentState = TileState.Ripe;
+            if (useCustomCropModels) ApplyCropGrowthScale();
+            DestroyWaterBar();
+            UpdateVisuals();
+            return;
+        }
+
+        // Vẫn đang lớn → dựng thanh nước, để Update sống tiếp bình thường.
+        CreateWaterBar();
+        if (useCustomCropModels) ApplyCropGrowthScale();
+        UpdateVisuals();
     }
 }

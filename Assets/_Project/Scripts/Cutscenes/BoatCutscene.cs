@@ -420,6 +420,30 @@ public class BoatCutscene : MonoBehaviour
         EndCutscene();
     }
 
+    /// <summary>Đặt thuyền NGAY tại bến (waypoint cuối) — gọi khi RESUME (bỏ cutscene) để thuyền
+    /// không nằm lại điểm xuất phát. Dùng lại logic teleport của SkipCutscene.</summary>
+    public void SnapToDock()
+    {
+        if (waypoints == null || waypoints.Count == 0) return;
+        ComputeModelOffset(); // suy offset tư thế thuyền (StartCutscene chưa chạy khi resume)
+
+        Transform finalWaypoint = waypoints[waypoints.Count - 1];
+        if (finalWaypoint == null) return;
+
+        transform.position = finalWaypoint.position;
+        if (waypoints.Count > 1 && waypoints[waypoints.Count - 2] != null)
+        {
+            Vector3 arrivalDir = (finalWaypoint.position - waypoints[waypoints.Count - 2].position).normalized;
+            if (arrivalDir != Vector3.zero) transform.rotation = Quaternion.LookRotation(arrivalDir) * modelOffset;
+        }
+        else
+        {
+            transform.rotation = finalWaypoint.rotation;
+        }
+        isCutscenePlaying = false;
+        Debug.Log("[BoatCutscene] SnapToDock — đặt thuyền tại bến (resume).");
+    }
+
     private void EndCutscene()
     {
         if (!isCutscenePlaying) return; // Prevent double trigger

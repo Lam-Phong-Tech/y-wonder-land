@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.AnimalDefinition
   animalId: goat_01
   animalName: "D\xEA con V2"
-  buyPrice: 50
+  buyPrice: 1300
   penSlots: 9
   foodMainName: "B\xED ng\xF4"
   foodMainAmount: 2
@@ -31,6 +31,8 @@ MonoBehaviour:
   meatItemId: goat_meat_01
   meatAmount: 20
   feedIntervalSec: 60
+  noFeedDeathSec: 60
+  fedLifeSec: 120
   canGetSick: 1
   primitiveType: 0
   animalColor: {r: 1, g: 1, b: 1, a: 1}

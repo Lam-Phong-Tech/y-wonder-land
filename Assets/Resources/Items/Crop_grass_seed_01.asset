@@ -14,11 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.CropDefinition
   seedItemId: grass_seed_01
   harvestItemId: grass_01
-  growthTimeSec: 30
+  growthTimeSec: 60
   waterIntervalSec: 15
+  noWaterDeathSec: 20
+  wateredLifeSec: 50
   harvestYield: 2
   expReward: 175
-  posReward: 10
+  posReward: 0
   growthStages: 2
   cropColor: {r: 0.2, g: 0.6, b: 0.2, a: 1}
   iconEmoji: "\U0001F33F"

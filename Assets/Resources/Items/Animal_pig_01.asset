@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.AnimalDefinition
   animalId: pig_01
   animalName: Heo con
-  buyPrice: 100
+  buyPrice: 2600
   penSlots: 9
   foodMainName: Khoai lang
   foodMainAmount: 2
@@ -31,6 +31,8 @@ MonoBehaviour:
   meatItemId: pork_01
   meatAmount: 50
   feedIntervalSec: 60
+  noFeedDeathSec: 60
+  fedLifeSec: 120
   canGetSick: 1
   primitiveType: 0
   animalColor: {r: 1, g: 1, b: 1, a: 1}

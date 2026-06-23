@@ -567,6 +567,10 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+        // Thuyền: resume bỏ cutscene -> tự đặt thuyền tại bến (kẻo nó nằm lại điểm xuất phát).
+        var boat = FindFirstObjectByType<BoatCutscene>();
+        if (boat != null) boat.SnapToDock();
+
         SetGameState(GameState.Gameplay);
         Debug.Log($"[GameManager] RESUME: vào thẳng game tại {pos}, char={selectedCharacterIndex}.");
     }

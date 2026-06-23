@@ -60,6 +60,14 @@ namespace YWonderLand.Data
         [Tooltip("Tần suất cho ăn (giây). Demo: 30s, Production: 28800 (8h)")]
         public float feedIntervalSec = 30f;
 
+        [Tooltip("THỜI GIAN SỐNG khi THẢ mà CHƯA cho ăn lần nào (giây) = đồng hồ chết đói ban đầu. " +
+                 "Khách chốt: đa số thú 24h game, rùa 5 ngày. 0 = không chết đói.")]
+        public float noFeedDeathSec = 0f;
+
+        [Tooltip("THỜI GIAN SỐNG sau MỖI lần cho ăn (giây) = sức chứa thanh máu. " +
+                 "Khách chốt: đa số thú 48h game, rùa 10 ngày. Cho ăn = đổ đầy về mốc này; cạn = chết. 0 = không chết đói.")]
+        public float fedLifeSec = 0f;
+
         [Tooltip("Có thể bị bệnh nếu không tiêm vaccine")]
         public bool canGetSick = true;
 
