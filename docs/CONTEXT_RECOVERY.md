@@ -64,6 +64,12 @@ Trạng thái: [đã xong gì, còn gì]
 ## 📌 TRẠNG THÁI MỚI NHẤT (cập nhật 24/06/2026 — PHIÊN 6)
 
 ### 🎯 Đang ở đâu
+- Vừa có số liệu khách đổi mới `Assets/_Project/Docs_KichBan/SuaLai4VatNuoi.xlsx/.md`: chỉ sửa 4 Product 1 của Hươu/Dê/Ngỗng/Thỏ theo công thức `Tổng Product 1 = Tổng chu kỳ thu * Số lượng Pro1`. Giá đã áp: nhung hươu 12368, sữa dê 12, trứng ngỗng 14, lông thỏ 21. Giữ gia cầm chỉ-trứng, không bật thịt ngỗng.
+- Icon sản phẩm mới từ `Assets/Sprites/icon/SanPham/` đã được gắn cho 34 item có tên ảnh rõ ràng: sản phẩm cây lâu năm, đồ ăn/cá, sản phẩm vật nuôi, phân bón/thuốc/mồi/vé/quà. `ItemDataGenerator.AssignIconTextures()` cũng đã map các đường dẫn này để chạy lại mock data không mất icon. Chưa gán thịt gia cầm vì gameplay đang chốt gia cầm chỉ lấy trứng.
+- QC kinh tế: NPC shop data-driven và shop mở bằng nút HUD/legacy mock đều đã tra `ItemDatabase` cho giá mua/bán/tên/icon; không còn giữ giá mock cũ trong luồng HUD.
+- Hotfix shop vật nuôi: mua thú không spawn thẳng vào chuồng cũ nữa; shop trừ POS và thêm animal item vào túi, còn sức chứa chuồng chỉ kiểm khi người chơi thả thú vào chuồng build-mode.
+- UI/QC mới: Confirm dialog tự bring-to-front để không bị Settings đè; Login screen có nút `✕ Thoát game` đóng app thật cho bản Windows/stop Play Mode trong Editor; khi Build Mode đang mở, `FarmInteractionController` chặn tương tác thế giới để không click xuyên vào thú/chuồng.
+- Rich demo loadout tăng mạnh: 500.000 POS, vật liệu xây dựng 1000 mỗi loại, food/product 500, seed 300, consumable 300, nước tưới 500.
 - Backend demo tối thiểu đã online ở `https://ywonder.net/game-api` và client có `Assets/Resources/BackendConfig.asset` trỏ đúng URL này. Hiện backend chỉ chứng minh được `auth/register`, `auth/login`, `player/profile`, cờ `tutorialCompleted`; inventory/POS/farm/build vẫn là local PlayerPrefs trong client.
 - Login/Register UI đã gọi backend thật. Sau login thành công, client preload profile để tài khoản rich skip tutorial ổn định kể cả khi người test bấm Skip cutscene nhanh.
 - Tài khoản test giàu cho khách: `DemoRich01`/`DemoRich01` tới `DemoRich05`/`DemoRich05`. Tất cả profile server có `tutorialCompleted=true`, level 25; client nhận diện rich account và cấp `GiveTestLoadout()` (100.000 POS + nhiều item) khi vào gameplay. Tài khoản mới sạch: `DemoNew01`/`DemoNew01`.

@@ -12,6 +12,7 @@
         <!-- Layer 2: Login Panel with Retro Shadow -->
         <ui:VisualElement class="login-shadow">
             <ui:VisualElement class="login-panel">
+                <ui:Button name="BtnQuitApp" text="✕ Thoát game" tooltip="Thoát ứng dụng" class="login-close-btn" />
 
                 <!-- Header Bar -->
                 <ui:VisualElement class="login-header">

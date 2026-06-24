@@ -156,7 +156,7 @@
         <!-- ============================== -->
         <ui:VisualElement class="hud-bottom-left">
             <ui:VisualElement name="SprintHint" class="sprint-hint">
-                <ui:Label text="⚡" class="sprint-hint-icon" />
+                <ui:VisualElement class="sprint-hint-icon" />
             </ui:VisualElement>
 
             <ui:VisualElement name="Joystick" class="joystick-outer">
@@ -212,7 +212,7 @@
         <!-- ============================== -->
         <ui:VisualElement class="sprint-btn-shadow">
             <ui:Button name="BtnSprint" class="sprint-btn">
-                <ui:Label text="⚡" class="sprint-btn-icon" />
+                <ui:VisualElement class="sprint-btn-icon" />
             </ui:Button>
         </ui:VisualElement>
 

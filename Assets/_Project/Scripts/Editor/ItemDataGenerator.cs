@@ -92,10 +92,10 @@ namespace YWonderLand.EditorScripts
             AddItem(db, "milk_01", "S\u1EEFa b\u00F2", "S\u1EEFa b\u00F2 t\u01B0\u01A1i.", "\ud83e\udd5b", "products", 0, 50, true); // kh\u00E1ch ch\u1ED1t 22/06: l\u1EA5y s\u1ED1 l\u1EDBn h\u01A1n (233 vs 305)
             AddItem(db, "pigskin_01", "Da heo", "Da heo thu\u1ED9c.", "\uD83D\uDC16", "products", 0, 7042, true);
             AddItem(db, "ostrich_egg_01", "Tr\u1EE9ng \u0111\u00E0 \u0111i\u1EC3u", "Tr\u1EE9ng \u0111\u00E0 \u0111i\u1EC3u kh\u1ED5ng l\u1ED3.", "\ud83e\udd5a", "products", 0, 409, true);
-            AddItem(db, "deer_velvet_01", "Nhung h\u01B0\u01A1u", "Nhung h\u01B0\u01A1u qu\u00FD.", "\ud83e\uDD8C", "products", 0, 24735, true);
-            AddItem(db, "goat_milk_01", "S\u1EEFa d\u00EA", "S\u1EEFa d\u00EA t\u01B0\u01A1i.", "\ud83e\udd5b", "products", 0, 24, true);
-            AddItem(db, "rabbit_fur_01", "L\u00F4ng th\u1ECF", "L\u00F4ng th\u1ECF m\u1EC1m.", "\uD83D\uDC07", "products", 0, 172, true);
-            AddItem(db, "goose_egg_01", "Tr\u1EE9ng ng\u1ED7ng", "Tr\u1EE9ng ng\u1ED7ng.", "\ud83e\udd5a", "products", 0, 28, true);
+            AddItem(db, "deer_velvet_01", "Nhung h\u01B0\u01A1u", "Nhung h\u01B0\u01A1u qu\u00FD.", "\ud83e\uDD8C", "products", 0, 12368, true);
+            AddItem(db, "goat_milk_01", "S\u1EEFa d\u00EA", "S\u1EEFa d\u00EA t\u01B0\u01A1i.", "\ud83e\udd5b", "products", 0, 12, true);
+            AddItem(db, "rabbit_fur_01", "L\u00F4ng th\u1ECF", "L\u00F4ng th\u1ECF m\u1EC1m.", "\uD83D\uDC07", "products", 0, 21, true);
+            AddItem(db, "goose_egg_01", "Tr\u1EE9ng ng\u1ED7ng", "Tr\u1EE9ng ng\u1ED7ng.", "\ud83e\udd5a", "products", 0, 14, true);
             AddItem(db, "duck_egg_01", "Tr\u1EE9ng v\u1ECBt", "Tr\u1EE9ng v\u1ECBt.", "\ud83e\udd5a", "products", 0, 5, true);
             AddItem(db, "turtle_shell_01", "Mai r\u00F9a", "Mai r\u00F9a c\u1EE9ng.", "\uD83D\uDC22", "products", 0, 11893, true);
 
@@ -247,6 +247,45 @@ namespace YWonderLand.EditorScripts
                 ["sacha_01"] = "Assets/_Project/UI/Sprites/icon/boxes/sacha_inchi_box.png",
                 ["durian_01"] = "Assets/_Project/UI/Sprites/icon/boxes/durian_box.png",
                 ["passion_fruit_01"] = "Assets/_Project/UI/Sprites/icon/boxes/passion_box.png",
+
+                // New product icons from artist (Assets/Sprites/icon/SanPham)
+                ["banana_01"] = "Assets/Sprites/icon/SanPham/CayLauNam/Chuoi.png",
+                ["coconut_01"] = "Assets/Sprites/icon/SanPham/CayLauNam/Dua.png",
+                ["areca_01"] = "Assets/Sprites/icon/SanPham/CayLauNam/QuaCau.png",
+                ["date_01"] = "Assets/Sprites/icon/SanPham/CayLauNam/ChaLa.png",
+                ["tea_01"] = "Assets/Sprites/icon/SanPham/CayLauNam/Tra.png",
+                ["asparagus_01"] = "Assets/Sprites/icon/SanPham/CayLauNam/MangTay.png",
+                ["red_ginseng_01"] = "Assets/Sprites/icon/SanPham/CayLauNam/HongSam.png",
+                ["royal_ginseng_01"] = "Assets/Sprites/icon/SanPham/CayLauNam/SamTienVua.png",
+
+                ["apple_01"] = "Assets/Sprites/icon/SanPham/DoAn/Tao.png",
+                ["bread_01"] = "Assets/Sprites/icon/SanPham/DoAn/BanhMi.png",
+                ["fish_01"] = "Assets/Sprites/icon/SanPham/DoAn/CaChep.png",
+                ["fish_02"] = "Assets/Sprites/icon/SanPham/DoAn/CaHiem.png",
+
+                ["egg_01"] = "Assets/Sprites/icon/SanPham/SanPhamVatNuoi/TrungGa.png",
+                ["milk_01"] = "Assets/Sprites/icon/SanPham/SanPhamVatNuoi/SuaBo.png",
+                ["pigskin_01"] = "Assets/Sprites/icon/SanPham/SanPhamVatNuoi/DaHeo.png",
+                ["ostrich_egg_01"] = "Assets/Sprites/icon/SanPham/SanPhamVatNuoi/TrungDaDieu.png",
+                ["deer_velvet_01"] = "Assets/Sprites/icon/SanPham/SanPhamVatNuoi/NhungHuou.png",
+                ["goat_milk_01"] = "Assets/Sprites/icon/SanPham/SanPhamVatNuoi/SuaDe.png",
+                ["rabbit_fur_01"] = "Assets/Sprites/icon/SanPham/SanPhamVatNuoi/LongTho.png",
+                ["goose_egg_01"] = "Assets/Sprites/icon/SanPham/SanPhamVatNuoi/TrungNgong.png",
+                ["duck_egg_01"] = "Assets/Sprites/icon/SanPham/SanPhamVatNuoi/TrungVit.png",
+                ["turtle_shell_01"] = "Assets/Sprites/icon/SanPham/SanPhamVatNuoi/MaiRua.png",
+                ["pork_01"] = "Assets/Sprites/icon/SanPham/SanPhamVatNuoi/ThitHeo.png",
+                ["beef_01"] = "Assets/Sprites/icon/SanPham/SanPhamVatNuoi/ThitBo.png",
+                ["deer_meat_01"] = "Assets/Sprites/icon/SanPham/SanPhamVatNuoi/ThitHuou.png",
+                ["goat_meat_01"] = "Assets/Sprites/icon/SanPham/SanPhamVatNuoi/ThitDe.png",
+                ["rabbit_meat_01"] = "Assets/Sprites/icon/SanPham/SanPhamVatNuoi/ThitTho.png",
+                ["turtle_meat_01"] = "Assets/Sprites/icon/SanPham/SanPhamVatNuoi/ThitRua.png",
+
+                ["fertilizer_01"] = "Assets/Sprites/icon/SanPham/VatPham/fertilizer.png",
+                ["vaccine_01"] = "Assets/Sprites/icon/SanPham/VatPham/syringe.png",
+                ["medicine_01"] = "Assets/Sprites/icon/SanPham/VatPham/bottle.png",
+                ["bait_01"] = "Assets/Sprites/icon/SanPham/VatPham/worm.png",
+                ["gift_box_01"] = "Assets/Sprites/icon/SanPham/VatPham/giftbox.png",
+                ["mine_ticket_01"] = "Assets/Sprites/icon/SanPham/VatPham/tickets.png",
             };
 
             foreach (var item in db.items)

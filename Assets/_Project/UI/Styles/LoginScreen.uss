@@ -21,6 +21,35 @@
     background-color: var(--color-primary-navy); /* Base Navy */
     border-radius: var(--radius-panel);
     flex-grow: 1; overflow: hidden;
+    position: relative;
+}
+
+.login-close-btn {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    width: 132px;
+    height: 42px;
+    border-radius: 21px;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.22);
+    background-color: rgba(15, 23, 38, 0.72);
+    color: var(--color-text-white);
+    font-size: 14px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    padding: 0 14px;
+    transition-property: background-color, scale;
+    transition-duration: 0.1s;
+}
+
+.login-close-btn:hover {
+    background-color: var(--color-danger);
+    scale: 1.05;
+}
+
+.login-close-btn:active {
+    scale: 0.95;
 }
 
 /* -- Header -- */

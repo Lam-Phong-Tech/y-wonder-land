@@ -738,11 +738,29 @@ public class ShopPopupController : MonoBehaviour
 
         if (!isSellMode)
         {
-            // Special handling for Animals (spawn them directly into pens)
+            // Special handling for Animals
             if (item.category == "animals")
             {
+                // Current demo flow: buy animal tokens into inventory, then place them into
+                // build-mode enclosures. Pen capacity is validated when placing, not buying.
+                if (!YWonderLand.Managers.EconomyManager.Instance.SpendPOS(totalCost))
+                {
+                    Debug.Log($"[Shop] Không đủ POS để mua thú!");
+                    YWonderLand.Environment.ScreenToast.Show("Không đủ POS để mua thú!");
+                    return;
+                }
+
+                YWonderLand.Managers.InventoryManager.Instance.AddItem(item.id, selectedQty);
+                Debug.Log($"[Shop] Mua {selectedQty}x {item.name} vào túi đồ. Trừ {totalCost} POS.");
+                YWonderLand.Environment.ScreenToast.ShowInfo($"Đã mua: {selectedQty}x {item.name}  (-{totalCost} POS)");
+                YWonderLand.Managers.AudioManager.Instance?.PlaySFX("coin");
+                UpdateBalance();
+                ShowEmptyDetails();
+                return;
+
+                /*
                 // Pre-check POS for the FULL selected quantity. If they want 3, they must afford 3.
-                if (YWonderLand.Managers.EconomyManager.Instance.GetPOS() < totalCost)
+                if (!YWonderLand.Managers.EconomyManager.Instance.SpendPOS(totalCost))
                 {
                     Debug.Log($"[Shop] Không đủ POS để mua thú!");
                     YWonderLand.Environment.ScreenToast.Show("Không đủ POS để mua thú!");
@@ -776,6 +794,7 @@ public class ShopPopupController : MonoBehaviour
                 Debug.Log($"[Shop] Mua {spawnedCount}x {item.name} — Trừ {actualCost} POS.");
                 YWonderLand.Environment.ScreenToast.ShowInfo($"Đã mua: {spawnedCount}x {item.name}  (-{actualCost} POS)");
                 YWonderLand.Managers.AudioManager.Instance?.PlaySFX("coin");
+                */
             }
             else
             {
@@ -828,28 +847,69 @@ public class ShopPopupController : MonoBehaviour
 
     private ShopData CreateMockShopData()
     {
+        string[] defaultBuyIds =
+        {
+            "carrot_seed_01",
+            "cabbage_seed_01",
+            "watermelon_seed_01",
+            "corn_seed_01",
+            "pumpkin_seed_01",
+            "grass_seed_01",
+            "fertilizer_01",
+            "vaccine_01",
+            "medicine_01",
+            "bait_01",
+            "chicken_01",
+            "cow_01",
+            "pig_01"
+        };
+
+        var dbItems = new List<ShopItem>();
+        foreach (string id in defaultBuyIds)
+        {
+            dbItems.Add(BuildShopItemFromDatabase(id));
+        }
+
         return new ShopData
         {
             shopName = "HAI LÚA — VẬT TƯ NÔNG TRẠI",
             hasSellTab = true,
-            buyItems = new List<ShopItem>
+            buyItems = dbItems,
+            sellItems = new List<ShopItem>()
+        };
+    }
+
+    private ShopItem BuildShopItemFromDatabase(string id)
+    {
+        var def = itemDatabase != null ? itemDatabase.GetItem(id) : null;
+        if (def == null)
+        {
+            Debug.LogWarning($"[Shop] Mock catalog ID not found in ItemDatabase: '{id}'");
+            return new ShopItem
             {
-                new ShopItem { id = "carrot_seed_01", icon = "🥕", name = "Hạt cà rốt", price = 10, description = "Hạt giống cà rốt. Thu hoạch sau 24h. Tưới mỗi 10h.", category = "seeds", canSell = true, sellPrice = 5 },
-                new ShopItem { id = "cabbage_seed_01", icon = "🥬", name = "Hạt cải", price = 15, description = "Hạt giống rau cải xanh tươi. Sản lượng cao.", category = "seeds", canSell = true, sellPrice = 7 },
-                new ShopItem { id = "watermelon_seed_01", icon = "🍉", name = "Hạt dưa hấu", price = 30, description = "Hạt giống dưa hấu ngọt. Chu kỳ dài hơn nhưng lời nhiều.", category = "seeds", canSell = true, sellPrice = 15 },
-                new ShopItem { id = "corn_seed_01", icon = "🌽", name = "Hạt bắp", price = 20, description = "Hạt giống bắp ngô vàng. Trồng dễ, năng suất ổn.", category = "seeds", canSell = true, sellPrice = 10 },
-                new ShopItem { id = "pumpkin_seed_01", icon = "🎃", name = "Hạt bí ngô", price = 25, description = "Hạt giống bí ngô mùa event. Giá trị thu hoạch cao.", category = "seeds", canSell = true, sellPrice = 12 },
-                new ShopItem { id = "grass_seed_01", icon = "🌿", name = "Cỏ voi", price = 5, description = "Cỏ voi làm thức ăn cho vật nuôi. Gieo nhanh, thu hoạch lẹ.", category = "seeds", canSell = true, sellPrice = 2 },
-                new ShopItem { id = "fertilizer_01", icon = "🧪", name = "Phân bón", price = 50, description = "Phân bón tăng tốc sinh trưởng cây trồng. Giảm 50% thời gian.", category = "items", canSell = true, sellPrice = 25 },
-                new ShopItem { id = "vaccine_01", icon = "💉", name = "Vắc-xin", price = 80, description = "Vắc-xin kháng bệnh cho vật nuôi. Phòng bệnh 7 ngày.", category = "items", canSell = true, sellPrice = 40 },
-                new ShopItem { id = "medicine_01", icon = "💊", name = "Thuốc trị", price = 100, description = "Thuốc điều trị cho vật nuôi đã bị bệnh.", category = "items", canSell = true, sellPrice = 50 },
-                new ShopItem { id = "bait_01", icon = "🪱", name = "Mồi câu", price = 20, description = "Mồi câu cá. Tăng 20% tỉ lệ câu được cá hiếm.", category = "items", canSell = true, sellPrice = 10 },
-                // Thú nuôi
-                new ShopItem { id = "chicken_01", icon = "🐔", name = "Gà", price = 500, description = "Gà đẻ trứng mỗi 30s. Thức ăn: 1 Thức ăn/lần.", category = "animals", canSell = false, sellPrice = 0 },
-                new ShopItem { id = "cow_01", icon = "🐄", name = "Bò sữa", price = 1500, description = "Bò vắt sữa mỗi 45s. Giá trị dinh dưỡng cao.", category = "animals", canSell = false, sellPrice = 0 },
-                new ShopItem { id = "pig_01", icon = "🐷", name = "Heo", price = 1000, description = "Heo cho thịt. Béo mầm mạp mạp.", category = "animals", canSell = false, sellPrice = 0 },
-            },
-            sellItems = new List<ShopItem>() // Sell items are loaded dynamically now
+                id = id,
+                icon = "?",
+                name = id,
+                price = 0,
+                description = "",
+                category = "items",
+                canSell = false,
+                sellPrice = 0
+            };
+        }
+
+        return new ShopItem
+        {
+            id = def.id,
+            icon = !string.IsNullOrEmpty(def.iconEmoji) ? def.iconEmoji : "?",
+            iconSprite = def.iconSprite,
+            iconTexture = def.iconTexture,
+            name = def.itemName,
+            price = def.buyPrice,
+            description = def.description,
+            category = def.category,
+            canSell = def.canSell,
+            sellPrice = def.sellPrice
         };
     }
 }

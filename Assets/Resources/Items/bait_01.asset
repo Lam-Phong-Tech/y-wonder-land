@@ -17,7 +17,7 @@ MonoBehaviour:
   description: "T\u0103ng 20% c\xE1 hi\u1EBFm."
   iconEmoji: "\U0001FAB1"
   iconSprite: {fileID: 0}
-  iconTexture: {fileID: 0}
+  iconTexture: {fileID: 2800000, guid: 9bb77a8f85f12584c95555c19af47fd6, type: 3}
   category: items
   buyPrice: 20
   sellPrice: 10

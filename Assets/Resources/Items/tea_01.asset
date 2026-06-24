@@ -17,7 +17,7 @@ MonoBehaviour:
   description: "T\xFAi l\xE1 tr\xE0."
   iconEmoji: "\U0001F375"
   iconSprite: {fileID: 0}
-  iconTexture: {fileID: 0}
+  iconTexture: {fileID: 2800000, guid: 186b58ef4c31c054d8805a7c9419bfc4, type: 3}
   category: products
   buyPrice: 0
   sellPrice: 400

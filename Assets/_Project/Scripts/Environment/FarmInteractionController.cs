@@ -399,6 +399,11 @@ namespace YWonderLand.Environment
         void Update()
         {
             if (GameManager.Instance != null && GameManager.Instance.currentState != GameManager.GameState.Gameplay) return;
+            if (IsBuildModeOpen())
+            {
+                ClearWorldInteractionState();
+                return;
+            }
             if (UIPopupTracker.AnyOpen) return; // Đang mở popup -> ngừng tương tác thế giới (tránh click xuyên qua UI)
 
             // Pointer = lớp CHUNG cho Mouse (PC) lẫn Touchscreen (mobile) -> chạm tay cũng chạy.
@@ -468,6 +473,28 @@ namespace YWonderLand.Environment
                     if (action.keyName == "G" && Keyboard.current.gKey.wasPressedThisFrame) action.onClick?.Invoke();
                 }
             }
+        }
+
+        private bool IsBuildModeOpen()
+        {
+            return BuildModeOverlayController.Instance != null && BuildModeOverlayController.Instance.IsVisible();
+        }
+
+        private void ClearWorldInteractionState()
+        {
+            if (currentHarvestTarget != null)
+            {
+                currentHarvestTarget.CancelHarvest();
+                currentHarvestTarget = null;
+            }
+
+            currentHoverObject = null;
+            currentActions.Clear();
+
+            if (GameHUDController.Instance != null)
+                GameHUDController.Instance.HideInteractionPrompt();
+            if (YWonderLand.UI.ResourceInteractionUIController.Instance != null)
+                YWonderLand.UI.ResourceInteractionUIController.Instance.Hide();
         }
 
         private RaycastHit[] hoverHitResults = new RaycastHit[30];

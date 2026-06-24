@@ -10,6 +10,7 @@ using UnityEngine.UIElements;
 public class ConfirmDialogController : MonoBehaviour
 {
     [SerializeField] private UIDocument uiDocument;
+    [SerializeField] private float visibleSortingOrder = 5000f;
 
     private VisualElement overlay;
     private VisualElement iconContainer;
@@ -21,6 +22,7 @@ public class ConfirmDialogController : MonoBehaviour
     private Button btnClose;
 
     private Action onConfirmCallback;
+    private float baseSortingOrder;
 
     private void Awake()
     {
@@ -32,6 +34,8 @@ public class ConfirmDialogController : MonoBehaviour
                 return;
             }
         }
+
+        baseSortingOrder = uiDocument.sortingOrder;
     }
 
     private void OnEnable()
@@ -154,6 +158,8 @@ public class ConfirmDialogController : MonoBehaviour
 
         ApplyDialogType(dialogType);
 
+        BringDialogToFront();
+
         if (overlay != null)
         {
             overlay.style.display = DisplayStyle.Flex;
@@ -170,7 +176,25 @@ public class ConfirmDialogController : MonoBehaviour
             overlay.style.display = DisplayStyle.None;
         }
 
+        if (uiDocument != null)
+        {
+            uiDocument.sortingOrder = baseSortingOrder;
+        }
+
         onConfirmCallback = null;
+    }
+
+    private void BringDialogToFront()
+    {
+        transform.SetAsLastSibling();
+
+        if (uiDocument != null)
+        {
+            uiDocument.sortingOrder = Mathf.Max(uiDocument.sortingOrder, visibleSortingOrder);
+            uiDocument.rootVisualElement?.BringToFront();
+        }
+
+        overlay?.BringToFront();
     }
 
     private void ApplyDialogType(ConfirmDialogType dialogType)

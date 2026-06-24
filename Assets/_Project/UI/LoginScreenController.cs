@@ -28,6 +28,7 @@ public class LoginScreenController : MonoBehaviour
     private Toggle rememberToggle;
     private Label forgotPassword;
     private Button btnLogin;
+    private Button btnQuitApp;
     private Label loginStatus;
 
     // Register form elements
@@ -92,6 +93,7 @@ public class LoginScreenController : MonoBehaviour
         rememberToggle = root.Q<Toggle>("RememberToggle");
         forgotPassword = root.Q<Label>("ForgotPassword");
         btnLogin = root.Q<Button>("BtnLogin");
+        btnQuitApp = root.Q<Button>("BtnQuitApp");
         loginStatus = root.Q<Label>("LoginStatus");
 
         // Register elements
@@ -112,6 +114,7 @@ public class LoginScreenController : MonoBehaviour
 
         // Login actions
         btnLogin?.RegisterCallback<ClickEvent>(evt => OnLoginClicked());
+        btnQuitApp?.RegisterCallback<ClickEvent>(evt => OnQuitAppClicked());
         btnTogglePassword?.RegisterCallback<ClickEvent>(evt => TogglePasswordVisibility());
 
         // Register actions
@@ -523,7 +526,6 @@ public class LoginScreenController : MonoBehaviour
         rememberToggle?.SetEnabled(enabled);
         forgotPassword?.SetEnabled(enabled);
         btnLogin?.SetEnabled(enabled);
-
         regUsernameField?.SetEnabled(enabled);
         regEmailField?.SetEnabled(enabled);
         regPasswordField?.SetEnabled(enabled);
@@ -534,5 +536,15 @@ public class LoginScreenController : MonoBehaviour
         {
             btnRegister.SetEnabled(enabled && ValidateRegisterForm(out _));
         }
+    }
+
+    private void OnQuitAppClicked()
+    {
+        Debug.Log("[LoginScreen] Quit app clicked.");
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
     }
 }

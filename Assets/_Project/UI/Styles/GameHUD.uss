@@ -124,7 +124,12 @@
 .sprint-btn:active { scale: 0.95; }
 /* Đang BẬT chạy nhanh (toggle) -> nút sáng để biết trạng thái */
 .sprint-btn-active { background-color: var(--color-primary); border-color: var(--color-primary); }
-.sprint-btn-icon { font-size: 32px; color: white; -unity-font-style: bold; padding-bottom: 2px; }
+.sprint-btn-icon {
+    width: 44px;
+    height: 46px;
+    background-image: url('project://database/Assets/Sprites/icon/PNG/sprintIcon.png');
+    -unity-background-scale-mode: scale-to-fit;
+}
 
 .sprint-hint {
     position: absolute;
@@ -144,9 +149,10 @@
     transition-duration: 0.12s;
 }
 .sprint-hint-icon {
-    font-size: 24px;
-    color: rgba(255, 190, 100, 0.95);
-    -unity-font-style: bold;
+    width: 32px;
+    height: 34px;
+    background-image: url('project://database/Assets/Sprites/icon/PNG/sprintIcon.png');
+    -unity-background-scale-mode: scale-to-fit;
 }
 .sprint-hint-active {
     opacity: 1;

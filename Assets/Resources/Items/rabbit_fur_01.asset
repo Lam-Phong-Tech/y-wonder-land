@@ -17,10 +17,10 @@ MonoBehaviour:
   description: "L\xF4ng th\u1ECF m\u1EC1m."
   iconEmoji: "\U0001F407"
   iconSprite: {fileID: 0}
-  iconTexture: {fileID: 0}
+  iconTexture: {fileID: 2800000, guid: 2eabd728308b1d049969e3638880d593, type: 3}
   category: products
   buyPrice: 0
-  sellPrice: 172
+  sellPrice: 21
   canSell: 1
   isStackable: 1
   maxStack: 999

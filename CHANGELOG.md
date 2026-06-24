@@ -1,5 +1,62 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-06-24 (UI quit/build-mode interaction/loadout polish)
+
+### Added
+- Thêm nút đóng app trực tiếp trên màn Login (`BtnQuitApp`) để bản Windows không bắt người test phải bấm phím Windows rồi đóng cửa sổ.
+
+### Changed
+- Tài khoản rich demo dùng `GiveTestLoadout()` được tăng mạnh tài nguyên: POS 500.000, vật liệu xây dựng 1000 mỗi loại, thức ăn/sản phẩm 500, hạt 300, vật phẩm tiêu hao 300, nước tưới 500.
+- Nút thoát ở màn Login đổi từ dấu `X` nhỏ sang `✕ Thoát game` dạng pill để tester hiểu đây là nút đóng app thật.
+
+### Fixed
+- `ConfirmDialogController` tự nâng `UIDocument.sortingOrder` + sibling khi mở, tránh popup xác nhận bị Settings/popup khác đè lên.
+- `FarmInteractionController` chặn toàn bộ tương tác thế giới khi Build Mode đang mở, tránh click/raycast xuyên vào chuồng có động vật trong lúc xây dựng.
+- `ShopPopupController` sửa luồng mua vật nuôi: mua thú giờ thêm con giống vào túi đồ và trừ POS ngay, không còn gọi hệ chuồng cũ `AnimalPen` nên không bị chặn bởi lỗi "Chuồng đã đầy" khi chỉ muốn mua thêm thú.
+
+### Changed Files
+- `Assets/_Project/UI/ConfirmDialogController.cs`
+- `Assets/_Project/UI/LoginScreen.uxml`
+- `Assets/_Project/UI/Styles/LoginScreen.uss`
+- `Assets/_Project/UI/LoginScreenController.cs`
+- `Assets/_Project/UI/ShopPopupController.cs`
+- `Assets/_Project/Scripts/Environment/FarmInteractionController.cs`
+- `Assets/_Project/Scripts/Managers/InventoryManager.cs`
+
+## [Unreleased] - 2026-06-24 (Product/shop icon pass)
+
+### Added
+- Gắn icon mới từ `Assets/Sprites/icon/SanPham/` cho 34 item có tên ảnh khớp rõ: sản phẩm cây lâu năm, đồ ăn/cá, sản phẩm vật nuôi, phân bón/thuốc/mồi/vé/quà.
+- Cập nhật `ItemDataGenerator.AssignIconTextures()` để nếu chạy lại mock data thì các icon mới vẫn được gán lại đúng đường dẫn.
+- Thay icon Sprint trên HUD mobile bằng `Assets/Sprites/icon/PNG/sprintIcon.png` cho cả nút Sprint và hint auto-sprint.
+
+### Fixed
+- Shop mở bằng nút HUD/legacy mock giờ cũng tra `ItemDatabase` cho giá mua/bán/tên/icon, tránh lệch số liệu so với NPC shop data-driven.
+
+### Notes
+- Không gán thịt gia cầm (`chicken_meat_01`, `duck_meat_01`, `goose_meat_01`, `ostrich_meat_01`) vì gameplay hiện đang chốt gia cầm chỉ lấy trứng.
+
+### Changed Files
+- `Assets/_Project/Scripts/Editor/ItemDataGenerator.cs`
+- `Assets/Resources/Items/*.asset` (34 item có icon mới)
+- `Assets/Sprites/icon/SanPham/**`
+
+## [Unreleased] - 2026-06-24 (SuaLai4VatNuoi - 4 animal product price fix)
+
+### Changed
+- Áp file khách mới `Assets/_Project/Docs_KichBan/SuaLai4VatNuoi.xlsx/.md` cho 4 vật nuôi: Hươu, Dê, Ngỗng, Thỏ.
+- Sửa giá bán Product 1 theo công thức `Tổng Product 1 = Tổng chu kỳ thu hoạch * Số lượng Pro1`:
+  - `deer_velvet_01`: 24735 -> 12368
+  - `goat_milk_01`: 24 -> 12
+  - `goose_egg_01`: 28 -> 14
+  - `rabbit_fur_01`: 172 -> 21
+- Giữ nguyên quyết định cũ: gia cầm chỉ lấy trứng, không bật thịt ngỗng.
+
+### Changed Files
+- `Assets/_Project/Scripts/Editor/ItemDataGenerator.cs`
+- `Assets/Resources/Items/{deer_velvet_01,goat_milk_01,goose_egg_01,rabbit_fur_01}.asset`
+- `Assets/_Project/Docs_KichBan/SuaLai4VatNuoi.md`
+
 ## [Unreleased] - 2026-06-24 (Backend demo accounts + interaction hotfix)
 
 ### Added

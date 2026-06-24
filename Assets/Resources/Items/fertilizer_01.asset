@@ -17,7 +17,7 @@ MonoBehaviour:
   description: "Gi\u1EA3m 50% th\u1EDDi gian sinh tr\u01B0\u1EDFng."
   iconEmoji: "\U0001F9EA"
   iconSprite: {fileID: 0}
-  iconTexture: {fileID: 0}
+  iconTexture: {fileID: 2800000, guid: b6aaaaa85c33fe84f838842035dc5e4c, type: 3}
   category: items
   buyPrice: 50
   sellPrice: 25
