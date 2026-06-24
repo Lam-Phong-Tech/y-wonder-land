@@ -536,3 +536,13 @@
 - **Tình huống**: Báo "mua bò 300, bán cả đời 164k → lời 547 lần → kinh tế thủng" → làm hoang mang sai.
 - **Sai ở đâu**: Con số đó BỎ QUA (a) chi phí **thức ăn** cả đời (~40k/con bò, người chơi tự trồng tốn công), (b) **thời gian** (bò 38 vụ × 7 ngày = ~9 tháng game = 9 tháng thật ở 1day=1day), (c) số lần thu **GIỚI HẠN** (đã tính trong tổng-thu).
 - **Quy tắc**: Lời = (doanh thu − thức ăn − giá mua) và xét theo CHU KỲ/THỜI GIAN. Công thức của khách (CachTinh) tính cả thức ăn → lời thật **~250-400%**, hợp lý. Khi báo cáo kinh tế cho người ra quyết định, luôn trừ chi phí vận hành + nêu thời gian hoàn vốn.
+
+### 64. VPS/backend không phải "bật online" bằng một URL (24/06)
+- **Tình huống**: Cần giải thích việc "kết nối VPS" trước demo.
+- **Hiện trạng dự án**: Unity client đã có khung REST (`BackendConfig`, `ApiClient`, `AuthService`, `PlayerProfileService`) nhưng mới đủ auth/profile/tutorialCompleted. `server/` hiện là stub Node/Express phục vụ demo/dev, chưa phải backend production.
+- **Quy tắc**: VPS chỉ là nơi chạy API. Muốn build demo online tối thiểu thì deploy `server/` stub + tạo `Assets/Resources/BackendConfig.asset` trỏ `baseUrl` về URL public. Muốn online thật cho POS/inventory/farm/cây/thú/server-time/IAP thì phải làm phase backend server-authoritative riêng, không hứa là đã có sẵn.
+
+### 65. Sửa tài liệu tiếng Việt phải kiểm tra bằng `git diff`, không tin màn hình console (24/06)
+- **Tình huống**: Sửa `CHANGELOG.md`/context bằng tooling có thể làm người dùng thấy ký tự lỗi hoặc full-file diff.
+- **Quy tắc**: Sau khi sửa tài liệu có tiếng Việt, luôn chạy `git diff -- <file>` và kiểm tra diff chỉ gồm đoạn cần đổi, không phải toàn bộ file bị rewrite. Nếu thấy mojibake/full-file churn thì dừng, khôi phục từ `HEAD:<file>` rồi chèn lại phần cần giữ.
+- **Lưu ý**: PowerShell `Get-Content` có thể hiển thị sai do code page dù file UTF-8 vẫn đúng; dùng `git diff`, `rg`, hoặc đọc qua .NET UTF-8 khi cần xác minh nội dung.

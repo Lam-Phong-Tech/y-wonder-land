@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.CropDefinition
   seedItemId: passion_fruit_seed_01
   harvestItemId: passion_fruit_01
-  growthTimeSec: 120
-  waterIntervalSec: 25
-  noWaterDeathSec: 20
-  wateredLifeSec: 50
+  growthTimeSec: 5400
+  waterIntervalSec: 840
+  noWaterDeathSec: 840
+  wateredLifeSec: 840
   harvestYield: 10
-  expReward: 20
+  expReward: 3000
   posReward: 0
   growthStages: 5
   cropColor: {r: 0.5, g: 0.2, b: 0.6, a: 1}

@@ -126,6 +126,35 @@
 .sprint-btn-active { background-color: var(--color-primary); border-color: var(--color-primary); }
 .sprint-btn-icon { font-size: 32px; color: white; -unity-font-style: bold; padding-bottom: 2px; }
 
+.sprint-hint {
+    position: absolute;
+    left: 64px;
+    bottom: 214px;
+    width: 56px;
+    height: 56px;
+    border-radius: 28px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 170, 60, 0.22);
+    border-width: 1px;
+    border-color: rgba(255, 184, 90, 0.5);
+    opacity: 0.6;
+    transition-property: opacity, scale, background-color, border-color;
+    transition-duration: 0.12s;
+}
+.sprint-hint-icon {
+    font-size: 24px;
+    color: rgba(255, 190, 100, 0.95);
+    -unity-font-style: bold;
+}
+.sprint-hint-active {
+    opacity: 1;
+    scale: 1.08;
+    background-color: rgba(255, 177, 65, 0.95);
+    border-color: rgba(255, 236, 186, 0.95);
+}
+
 .joystick-outer { width: 200px; height: 200px; border-radius: 100px; background-color: rgba(30, 35, 45, 0.6); border-width: 1px; border-color: rgba(255, 255, 255, 0.15); align-items: center; justify-content: center; }
 .player-avatar {
     width: 48px; height: 48px; border-radius: 24px;

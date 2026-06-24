@@ -28,6 +28,7 @@ MonoBehaviour:
   produceAmount: 1
   produceCycleTimeSec: 120
   maxHarvests: 45
+  expReward: 3000
   meatItemId: 
   meatAmount: 0
   feedIntervalSec: 60

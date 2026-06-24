@@ -49,6 +49,9 @@ namespace YWonderLand.Data
         [Tooltip("Số vụ thu hoạch trước khi hết tuổi. 0 = vô hạn")]
         public int maxHarvests = 0;
 
+        [Tooltip("EXP nhan o lan thu hoach cuoi (theo VatNuoi2).")]
+        public int expReward = 0;
+
         [Header("Vụ cuối (làm thịt)")]
         [Tooltip("ID sản phẩm THỊT thu ở VỤ CUỐI (Pro2 trong VatNuoi). Thu xong con vật biến mất. Để trống nếu không có.")]
         public string meatItemId;

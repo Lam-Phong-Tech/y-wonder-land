@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.CropDefinition
   seedItemId: sacha_seed_01
   harvestItemId: sacha_01
-  growthTimeSec: 120
-  waterIntervalSec: 25
-  noWaterDeathSec: 20
-  wateredLifeSec: 50
+  growthTimeSec: 1680
+  waterIntervalSec: 840
+  noWaterDeathSec: 840
+  wateredLifeSec: 840
   harvestYield: 5
-  expReward: 200
+  expReward: 6800
   posReward: 0
   growthStages: 5
   cropColor: {r: 0.3, g: 0.6, b: 0.3, a: 1}

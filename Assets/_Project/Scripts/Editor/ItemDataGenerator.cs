@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 using UnityEditor;
 using YWonderLand.Data;
 using static YWonderLand.Core.GameTimeConfig; // Days()/Hours() — quy đổi thời gian thật
@@ -121,7 +122,7 @@ namespace YWonderLand.EditorScripts
             AddItem(db, "asparagus_01", "B\u00FAp M\u0103ng T\u00E2y", "B\u00FAp m\u0103ng t\u00E2y t\u01B0\u01A1i.", "\uD83C\uDF31", "products", 0, 300, true);
             AddItem(db, "red_ginseng_01", "H\u1ED9p h\u1ED3ng s\u00E2m", "H\u1ED9p h\u1ED3ng s\u00E2m qu\u00FD.", "\uD83C\uDF3F", "products", 0, 2000, true);
             AddItem(db, "royal_ginseng_01", "H\u1ED9p S\u00E2m Ti\u1EBFn Vua", "S\u1EA3n ph\u1EA9m s\u00E2m cao c\u1EA5p nh\u1EA5t.", "\uD83C\uDF3F", "products", 0, 5000, true);
-            AddItem(db, "passion_fruit_01", "H\u1ED9p m\u1EE9t chanh leo", "H\u1ED9p m\u1EE9t chanh leo (chanh d\u00E2y).", "\uD83C\uDF47", "products", 0, 57, true); // kh\u00E1ch ch\u1ED1t 22/06: b\u00E1n 325
+            AddItem(db, "passion_fruit_01", "H\u1ED9p m\u1EE9t chanh leo", "H\u1ED9p m\u1EE9t chanh leo (chanh d\u00E2y).", "\uD83C\uDF47", "products", 0, 57, true); // CayTrongLauNam2: ban 57
             
             // Vật liệu
             AddItem(db, "wood_01", "G\u1ED7", "G\u1ED7 ch\u1EB7t t\u1EEB c\u00E2y.", "\ud83e\udeb5", "materials", 0, 8, true);
@@ -159,6 +160,8 @@ namespace YWonderLand.EditorScripts
             AddItem(db, "fish_02", "Cá hiếm", "Loài cá quý hiếm.", "🐡", "food", 0, 200, true);
             AddItem(db, "gift_box_01", "Hộp quà", "Hộp quà sự kiện từ đại dương.", "🎁", "items", 0, 500, true);
 
+            AssignIconTextures(db);
+
             EditorUtility.SetDirty(db);
             AssetDatabase.SaveAssets();
             
@@ -189,6 +192,80 @@ namespace YWonderLand.EditorScripts
             db.items.Add(item);
         }
 
+        private static void AssignIconTextures(ItemDatabase db)
+        {
+            if (db == null) return;
+
+            var iconPaths = new Dictionary<string, string>
+            {
+                // Animals
+                ["chicken_01"] = "Assets/_Project/UI/Sprites/icon/animals/chicken.png",
+                ["cow_01"] = "Assets/_Project/UI/Sprites/icon/animals/cow.png",
+                ["deer_01"] = "Assets/_Project/UI/Sprites/icon/animals/deer.png",
+                ["duck_01"] = "Assets/_Project/UI/Sprites/icon/animals/duck.png",
+                ["goose_01"] = "Assets/_Project/UI/Sprites/icon/animals/food.png",
+                ["goat_01"] = "Assets/_Project/UI/Sprites/icon/animals/goat.png",
+                ["ostrich_01"] = "Assets/_Project/UI/Sprites/icon/animals/ostrich.png",
+                ["pig_01"] = "Assets/_Project/UI/Sprites/icon/animals/pig.png",
+                ["rabbit_01"] = "Assets/_Project/UI/Sprites/icon/animals/rabbit.png",
+                ["turtle_01"] = "Assets/_Project/UI/Sprites/icon/animals/turtle.png",
+
+                // Short crop seeds
+                ["cabbage_seed_01"] = "Assets/_Project/UI/Sprites/icon/seed/cabbage.png",
+                ["carrot_seed_01"] = "Assets/_Project/UI/Sprites/icon/seed/carrrot.png",
+                ["corn_seed_01"] = "Assets/_Project/UI/Sprites/icon/seed/corn.png",
+                ["morning_glory_seed_01"] = "Assets/_Project/UI/Sprites/icon/seed/glory.png",
+                ["grass_seed_01"] = "Assets/_Project/UI/Sprites/icon/seed/grass.png",
+                ["watermelon_seed_01"] = "Assets/_Project/UI/Sprites/icon/seed/melon.png",
+                ["pumpkin_seed_01"] = "Assets/_Project/UI/Sprites/icon/seed/pumpkin.png",
+                ["sweet_potato_seed_01"] = "Assets/_Project/UI/Sprites/icon/seed/sweet_potato.png",
+
+                // Short crop products / feed
+                ["cabbage_01"] = "Assets/_Project/UI/Sprites/icon/products/bap cai.png",
+                ["corn_01"] = "Assets/_Project/UI/Sprites/icon/products/bap ngo.png",
+                ["pumpkin_01"] = "Assets/_Project/UI/Sprites/icon/products/bi ngo.png",
+                ["carrot_01"] = "Assets/_Project/UI/Sprites/icon/products/ca rot.png",
+                ["grass_01"] = "Assets/_Project/UI/Sprites/icon/products/co voi.png",
+                ["watermelon_01"] = "Assets/_Project/UI/Sprites/icon/products/dua hau.png",
+                ["sweet_potato_01"] = "Assets/_Project/UI/Sprites/icon/products/giong khoai lang.png",
+                ["morning_glory_01"] = "Assets/_Project/UI/Sprites/icon/products/rau muong.png",
+
+                // Perennial crop seeds
+                ["banana_seed_01"] = "Assets/_Project/UI/Sprites/icon/trees/caychuoi.png",
+                ["coconut_seed_01"] = "Assets/_Project/UI/Sprites/icon/trees/coconut-tree.png",
+                ["areca_seed_01"] = "Assets/_Project/UI/Sprites/icon/trees/cay cau.png",
+                ["date_seed_01"] = "Assets/_Project/UI/Sprites/icon/trees/cay cha la.png",
+                ["sacha_seed_01"] = "Assets/_Project/UI/Sprites/icon/trees/cay sa chi.png",
+                ["tea_seed_01"] = "Assets/_Project/UI/Sprites/icon/trees/cay tra.png",
+                ["durian_seed_01"] = "Assets/_Project/UI/Sprites/icon/trees/cay sau rieng.png",
+                ["asparagus_seed_01"] = "Assets/_Project/UI/Sprites/icon/trees/cay mang tay.png",
+                ["red_ginseng_seed_01"] = "Assets/_Project/UI/Sprites/icon/trees/cay hong sam.png",
+                ["royal_ginseng_seed_01"] = "Assets/_Project/UI/Sprites/icon/trees/sam tien vua.png",
+                ["passion_fruit_seed_01"] = "Assets/_Project/UI/Sprites/icon/trees/cay chanh leo.png",
+
+                // Perennial boxed products
+                ["sacha_01"] = "Assets/_Project/UI/Sprites/icon/boxes/sacha_inchi_box.png",
+                ["durian_01"] = "Assets/_Project/UI/Sprites/icon/boxes/durian_box.png",
+                ["passion_fruit_01"] = "Assets/_Project/UI/Sprites/icon/boxes/passion_box.png",
+            };
+
+            foreach (var item in db.items)
+            {
+                if (item == null || string.IsNullOrEmpty(item.id)) continue;
+                if (!iconPaths.TryGetValue(item.id, out string path)) continue;
+
+                Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+                if (texture == null)
+                {
+                    Debug.LogWarning($"[Mock Data] Missing icon texture for '{item.id}': {path}");
+                    continue;
+                }
+
+                item.iconTexture = texture;
+                EditorUtility.SetDirty(item);
+            }
+        }
+
         [MenuItem("YWonderLand/Generate Animal Data")]
         public static void GenerateAnimalData()
         {
@@ -214,16 +291,16 @@ namespace YWonderLand.EditorScripts
             // produceCycle/feed để giây DEMO (số ngày thật chờ khách quy đổi).  (cycle 25s, feed 40s)
             // Chu kỳ thu / cho ăn = NGÀY THẬT theo VatNuoi (quy đổi qua Days()). Con chu kỳ dài (heo/hươu/rùa)
             // là vật nuôi "đầu tư dài hạn" — demo chỉnh nhanh bằng SecondsPerGameDay nếu cần.
-            SetAnimalGameplay("chicken_01", "egg_01", 1, 45, "", 0, Days(2f), Days(1f), Days(1f), Days(2f)); // gia cầm: chỉ lấy trứng, BỎ thịt (khách 22/06)
-            SetAnimalGameplay("cow_01", "milk_01", 10, 38, "beef_01", 50, Days(7f), Days(1f), Days(1f), Days(2f));
-            SetAnimalGameplay("pig_01", "pigskin_01", 1, 1, "pork_01", 50, Days(180f), Days(1f), Days(1f), Days(2f));
-            SetAnimalGameplay("ostrich_01", "ostrich_egg_01", 1, 30, "", 0, Days(6f), Days(1f), Days(1f), Days(2f)); // gia cầm: chỉ lấy trứng, BỎ thịt
-            SetAnimalGameplay("deer_01", "deer_velvet_01", 2, 2, "deer_meat_01", 40, Days(180f), Days(1f), Days(1f), Days(2f));
-            SetAnimalGameplay("goat_01", "goat_milk_01", 2, 60, "goat_meat_01", 20, Days(3f), Days(1f), Days(1f), Days(2f));
-            SetAnimalGameplay("rabbit_01", "rabbit_fur_01", 8, 2, "rabbit_meat_01", 5, Days(40f), Days(1f), Days(1f), Days(2f));
-            SetAnimalGameplay("goose_01", "goose_egg_01", 2, 30, "", 0, Days(3f), Days(1f), Days(1f), Days(2f)); // gia cầm: chỉ lấy trứng, BỎ thịt
-            SetAnimalGameplay("duck_01", "duck_egg_01", 1, 45, "", 0, Days(1f), Days(0.5f), Days(1f), Days(2f)); // gia cầm: chỉ lấy trứng, BỎ thịt (đói từ 12h = thanh 50%)
-            SetAnimalGameplay("turtle_01", "turtle_shell_01", 1, 1, "turtle_meat_01", 10, Days(300f), Days(7f), Days(5f), Days(10f)); // rùa: chưa ăn 5 ngày chết / cho ăn 10 ngày
+            SetAnimalGameplay("chicken_01", "egg_01", 1, 45, 3000, "", 0, Days(2f), Days(1f), Days(1f), Days(2f)); // gia cầm: chỉ lấy trứng, BỎ thịt (khách 22/06)
+            SetAnimalGameplay("cow_01", "milk_01", 10, 38, 10000, "beef_01", 50, Days(7f), Days(1f), Days(1f), Days(2f));
+            SetAnimalGameplay("pig_01", "pigskin_01", 1, 1, 8000, "pork_01", 50, Days(180f), Days(1f), Days(1f), Days(2f));
+            SetAnimalGameplay("ostrich_01", "ostrich_egg_01", 1, 30, 5000, "", 0, Days(6f), Days(1f), Days(1f), Days(2f)); // gia cầm: chỉ lấy trứng, BỎ thịt
+            SetAnimalGameplay("deer_01", "deer_velvet_01", 2, 2, 15000, "deer_meat_01", 40, Days(180f), Days(1f), Days(1f), Days(2f));
+            SetAnimalGameplay("goat_01", "goat_milk_01", 2, 60, 8000, "goat_meat_01", 20, Days(3f), Days(1f), Days(1f), Days(2f));
+            SetAnimalGameplay("rabbit_01", "rabbit_fur_01", 8, 2, 1500, "rabbit_meat_01", 5, Days(40f), Days(1f), Days(1f), Days(2f));
+            SetAnimalGameplay("goose_01", "goose_egg_01", 2, 30, 4500, "", 0, Days(3f), Days(1f), Days(1f), Days(2f)); // gia cầm: chỉ lấy trứng, BỎ thịt
+            SetAnimalGameplay("duck_01", "duck_egg_01", 1, 45, 1000, "", 0, Days(1f), Days(0.5f), Days(1f), Days(2f)); // gia cầm: chỉ lấy trứng, BỎ thịt (đói từ 12h = thanh 50%)
+            SetAnimalGameplay("turtle_01", "turtle_shell_01", 1, 1, 20000, "turtle_meat_01", 10, Days(300f), Days(7f), Days(5f), Days(10f)); // rùa: chưa ăn 5 ngày chết / cho ăn 10 ngày
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -231,7 +308,7 @@ namespace YWonderLand.EditorScripts
         }
 
         // Set logic gameplay theo VatNuoi (giữ nguyên phần hiển thị do SetHusbandry set trước đó).
-        private static void SetAnimalGameplay(string id, string produceId, int produceAmt, int maxHarv,
+        private static void SetAnimalGameplay(string id, string produceId, int produceAmt, int maxHarv, int expReward,
             string meatId, int meatAmt, float cycle, float feed, float noFeedDeath, float fedLife)
         {
             string path = "Assets/Resources/Items/Animal_" + id + ".asset";
@@ -244,6 +321,7 @@ namespace YWonderLand.EditorScripts
             a.produceItemId = produceId;
             a.produceAmount = produceAmt;
             a.maxHarvests = maxHarv;
+            a.expReward = expReward;
             a.meatItemId = meatId;
             a.meatAmount = meatAmt;
             a.produceCycleTimeSec = cycle;

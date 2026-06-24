@@ -28,6 +28,7 @@ MonoBehaviour:
   produceAmount: 2
   produceCycleTimeSec: 180
   maxHarvests: 60
+  expReward: 8000
   meatItemId: goat_meat_01
   meatAmount: 20
   feedIntervalSec: 60

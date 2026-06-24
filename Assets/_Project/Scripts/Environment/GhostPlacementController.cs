@@ -25,6 +25,14 @@ public class GhostPlacementController : MonoBehaviour
     [Header("Raycast")]
     [SerializeField] private LayerMask groundMask = ~0;
 
+    [Header("Placement Feel")]
+    [Tooltip("Tỉ lệ vùng rìa màn hình bị khóa đặt để tránh bấm nhầm khi kéo sát mép.")]
+    [SerializeField, Range(0f, 0.25f)] private float screenEdgeBlockPercent = 0.08f;
+    [Tooltip("Cỡ tối thiểu của vùng rìa bị khóa đặt, tính bằng pixel.")]
+    [SerializeField] private float minScreenEdgeBlockPixels = 64f;
+    [Tooltip("Tốc độ nhân vật xoay nhìn theo điểm ghost khi đang chọn chỗ xây.")]
+    [SerializeField] private float playerFaceGhostTurnSpeed = 540f;
+
     // Ghost object
     private GameObject ghostObject;
     private bool ghostIsPrefab = false;
@@ -88,32 +96,78 @@ public class GhostPlacementController : MonoBehaviour
         if (mouse == null) return;
 
         Vector2 mousePos = mouse.position.ReadValue();
-        Ray ray = mainCamera.ScreenPointToRay(new Vector3(mousePos.x, mousePos.y, 0));
-
-        var hits = Physics.RaycastAll(ray, 200f, groundMask);
-        if (hits.Length > 0)
+        bool edgeBlocked = IsInScreenEdgeBlockedArea(mousePos);
+        if (edgeBlocked)
         {
-            System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+            currentPlacementValid = false;
+            UpdateGhostColor(false);
+        }
+        else
+        {
+            Ray ray = mainCamera.ScreenPointToRay(new Vector3(mousePos.x, mousePos.y, 0));
 
-            // Tìm Ô ĐẤT (BuildSurfaceCell) GẦN NHẤT — bỏ qua collider nền/mesh đảo chắn phía trước.
-            currentCell = null;
-            Vector3 fallback = hits[0].point;
-            foreach (var h in hits)
+            var hits = Physics.RaycastAll(ray, 200f, groundMask);
+            if (hits.Length > 0)
             {
-                var bsc = h.collider.GetComponentInParent<YWonderLand.Environment.BuildSurfaceCell>();
-                if (bsc != null) { currentCell = bsc; break; }
+                System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+
+                // Tìm Ô ĐẤT (BuildSurfaceCell) GẦN NHẤT — bỏ qua collider nền/mesh đảo chắn phía trước.
+                currentCell = null;
+                Vector3 fallback = hits[0].point;
+                foreach (var h in hits)
+                {
+                    var bsc = h.collider.GetComponentInParent<YWonderLand.Environment.BuildSurfaceCell>();
+                    if (bsc != null) { currentCell = bsc; break; }
+                }
+
+                currentSnapPos = (currentCell != null) ? currentCell.SurfaceCenter : fallback;
+                currentGroundY = currentSnapPos.y;
+                ApplyGhostTransform();
+
+                // Chỉ đặt được khi đang trỏ vào ô đất hợp lệ và ô còn TRỐNG.
+                currentPlacementValid = (currentCell != null && !currentCell.IsOccupied);
+                UpdateGhostColor(currentPlacementValid);
+
+                if (currentCell != null)
+                    FacePlayerTowards(currentSnapPos);
             }
-
-            currentSnapPos = (currentCell != null) ? currentCell.SurfaceCenter : fallback;
-            currentGroundY = currentSnapPos.y;
-            ApplyGhostTransform();
-
-            // Chỉ đặt được khi đang trỏ vào ô đất hợp lệ và ô còn TRỐNG.
-            currentPlacementValid = (currentCell != null && !currentCell.IsOccupied);
-            UpdateGhostColor(currentPlacementValid);
+            else
+            {
+                currentPlacementValid = false;
+                UpdateGhostColor(false);
+            }
         }
 
         if (mouse.rightButton.wasPressedThisFrame) Deactivate();
+    }
+
+    private bool IsInScreenEdgeBlockedArea(Vector2 screenPos)
+    {
+        float shorterSide = Mathf.Min(Screen.width, Screen.height);
+        float edge = Mathf.Max(minScreenEdgeBlockPixels, shorterSide * screenEdgeBlockPercent);
+        return screenPos.x < edge
+            || screenPos.x > Screen.width - edge
+            || screenPos.y < edge
+            || screenPos.y > Screen.height - edge;
+    }
+
+    public bool IsScreenPositionBlockedForPlacement(Vector2 screenPos) => IsInScreenEdgeBlockedArea(screenPos);
+
+    private void FacePlayerTowards(Vector3 worldPoint)
+    {
+        var player = PlayerController.Instance;
+        if (player == null || player.IsBusy) return;
+
+        Transform playerTransform = player.transform;
+        Vector3 dir = worldPoint - playerTransform.position;
+        dir.y = 0f;
+        if (dir.sqrMagnitude < 0.0001f) return;
+
+        Quaternion targetRotation = Quaternion.LookRotation(dir.normalized);
+        playerTransform.rotation = Quaternion.RotateTowards(
+            playerTransform.rotation,
+            targetRotation,
+            playerFaceGhostTurnSpeed * Time.deltaTime);
     }
 
     // ── Activation ──
@@ -150,6 +204,10 @@ public class GhostPlacementController : MonoBehaviour
     public void Deactivate()
     {
         isActive = false;
+        IsPinned = false;
+        currentPlacementValid = false;
+        currentCell = null;
+
         if (ghostObject != null) ghostObject.SetActive(false);
     }
 
@@ -338,7 +396,7 @@ public class GhostPlacementController : MonoBehaviour
     {
         if (ghostObject == null) return;
         // Chỉ đặt khi đang trỏ vào ô đất hợp lệ còn TRỐNG (snap theo cube, không theo lưới ảo).
-        if (currentCell == null || currentCell.IsOccupied) return;
+        if (!currentPlacementValid || currentCell == null || currentCell.IsOccupied) return;
 
         // Chi phí VẬT LIỆU: đủ → trừ; thiếu → KHÔNG đặt + báo. (0/"" = miễn phí, vd ô ruộng.)
         if (currentItemPrice > 0 && !string.IsNullOrEmpty(currentMaterialId))

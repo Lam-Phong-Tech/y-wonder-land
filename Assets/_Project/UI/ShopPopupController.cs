@@ -38,6 +38,8 @@ public class ShopPopupController : MonoBehaviour
     // Detail panel
     private VisualElement detailEmpty;
     private VisualElement detailContent;
+    private VisualElement detailIconWrap;
+    private Image detailIconImage;
     private Label lblShopIcon;
     private Label lblShopName;
     private Label lblShopPrice;
@@ -72,6 +74,8 @@ public class ShopPopupController : MonoBehaviour
     {
         public string id;
         public string icon;
+        public Sprite iconSprite;
+        public Texture2D iconTexture;
         public string name;
         public int price;
         public string description;
@@ -154,6 +158,18 @@ public class ShopPopupController : MonoBehaviour
         detailEmpty = root.Q<Label>("ShopDetailEmpty");
         detailContent = root.Q<VisualElement>("ShopDetailContent");
         lblShopIcon = root.Q<Label>("LblShopIcon");
+        detailIconWrap = lblShopIcon?.parent;
+        detailIconImage = root.Q<Image>("ShopDetailIconImage");
+        if (detailIconWrap != null && detailIconImage == null)
+        {
+            detailIconImage = new Image
+            {
+                name = "ShopDetailIconImage",
+                scaleMode = ScaleMode.ScaleToFit
+            };
+            detailIconImage.AddToClassList("shop-detail-icon-image");
+            detailIconWrap.Add(detailIconImage);
+        }
         lblShopName = root.Q<Label>("LblShopName");
         lblShopPrice = root.Q<Label>("LblShopPrice");
         lblShopDesc = root.Q<Label>("LblShopDesc");
@@ -341,6 +357,8 @@ public class ShopPopupController : MonoBehaviour
                 {
                     id = idef.id,
                     icon = !string.IsNullOrEmpty(idef.iconEmoji) ? idef.iconEmoji : "📦",
+                    iconSprite = idef.iconSprite,
+                    iconTexture = idef.iconTexture,
                     name = idef.itemName,
                     price = idef.buyPrice,
                     description = idef.description,
@@ -457,6 +475,8 @@ public class ShopPopupController : MonoBehaviour
                         {
                             id = def.id,
                             icon = !string.IsNullOrEmpty(def.iconEmoji) ? def.iconEmoji : "📦",
+                            iconSprite = def.iconSprite,
+                            iconTexture = def.iconTexture,
                             name = def.itemName,
                             price = def.buyPrice,
                             description = def.description,
@@ -516,9 +536,18 @@ public class ShopPopupController : MonoBehaviour
         // Icon
         var iconWrap = new VisualElement();
         iconWrap.AddToClassList("shop-item-icon");
-        var iconLabel = new Label(item.icon);
-        iconLabel.AddToClassList("shop-item-icon-text");
-        iconWrap.Add(iconLabel);
+        var iconImage = new Image { scaleMode = ScaleMode.ScaleToFit };
+        iconImage.AddToClassList("shop-item-icon-image");
+        if (ApplyGraphicIcon(iconImage, item))
+        {
+            iconWrap.Add(iconImage);
+        }
+        else
+        {
+            var iconLabel = new Label(item.icon);
+            iconLabel.AddToClassList("shop-item-icon-text");
+            iconWrap.Add(iconLabel);
+        }
 
         // Name
         var nameLabel = new Label(item.name);
@@ -560,7 +589,13 @@ public class ShopPopupController : MonoBehaviour
         if (detailEmpty != null) detailEmpty.style.display = DisplayStyle.None;
         if (detailContent != null) detailContent.style.display = DisplayStyle.Flex;
 
-        if (lblShopIcon != null) lblShopIcon.text = item.icon;
+        bool hasGraphicIcon = ApplyGraphicIcon(detailIconImage, item);
+        if (detailIconImage != null) detailIconImage.style.display = hasGraphicIcon ? DisplayStyle.Flex : DisplayStyle.None;
+        if (lblShopIcon != null)
+        {
+            lblShopIcon.style.display = hasGraphicIcon ? DisplayStyle.None : DisplayStyle.Flex;
+            lblShopIcon.text = item.icon;
+        }
         if (lblShopName != null) lblShopName.text = item.name;
         if (lblShopDesc != null)
         {
@@ -612,6 +647,44 @@ public class ShopPopupController : MonoBehaviour
 
         if (detailEmpty != null) detailEmpty.style.display = DisplayStyle.Flex;
         if (detailContent != null) detailContent.style.display = DisplayStyle.None;
+    }
+
+    private bool ApplyGraphicIcon(Image iconImage, ShopItem item)
+    {
+        if (iconImage == null) return false;
+
+        iconImage.image = null;
+        iconImage.sprite = null;
+
+        Texture2D texture = ResolveIconTexture(item);
+        if (texture != null)
+        {
+            iconImage.image = texture;
+            return true;
+        }
+
+        Sprite sprite = ResolveIconSprite(item);
+        if (sprite != null)
+        {
+            iconImage.sprite = sprite;
+            return true;
+        }
+
+        return false;
+    }
+
+    private Texture2D ResolveIconTexture(ShopItem item)
+    {
+        if (item.iconTexture != null) return item.iconTexture;
+        var def = itemDatabase != null ? itemDatabase.GetItem(item.id) : null;
+        return def != null ? def.iconTexture : null;
+    }
+
+    private Sprite ResolveIconSprite(ShopItem item)
+    {
+        if (item.iconSprite != null) return item.iconSprite;
+        var def = itemDatabase != null ? itemDatabase.GetItem(item.id) : null;
+        return def != null ? def.iconSprite : null;
     }
 
     // ── Quantity ──

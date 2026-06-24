@@ -17,6 +17,7 @@ MonoBehaviour:
   description: "Bu\u1ED3ng chu\u1ED1i ch\xEDn."
   iconEmoji: "\U0001F34C"
   iconSprite: {fileID: 0}
+  iconTexture: {fileID: 0}
   category: products
   buyPrice: 0
   sellPrice: 80

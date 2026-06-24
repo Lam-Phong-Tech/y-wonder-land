@@ -17,6 +17,7 @@ MonoBehaviour:
   description: "Nhung h\u01B0\u01A1u qu\xFD."
   iconEmoji: "\U0001F98C"
   iconSprite: {fileID: 0}
+  iconTexture: {fileID: 0}
   category: products
   buyPrice: 0
   sellPrice: 24735

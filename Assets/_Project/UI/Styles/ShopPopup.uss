@@ -119,6 +119,7 @@
     margin-bottom: 8px;
 }
 .shop-item-icon-text { font-size: 32px; -unity-text-align: middle-center; }
+.shop-item-icon-image { width: 58px; height: 58px; }
 .shop-item-name {
     font-size: 13px; -unity-font-style: bold; color: var(--color-text-white);
     -unity-text-align: upper-center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100px; margin-bottom: 4px;
@@ -146,6 +147,7 @@
     margin-bottom: 12px;
 }
 .shop-detail-icon { font-size: 40px; -unity-text-align: middle-center; }
+.shop-detail-icon-image { width: 72px; height: 72px; }
 .shop-detail-name { font-size: 18px; -unity-font-style: bold; color: var(--color-text-white); margin-bottom: 8px; -unity-text-align: middle-center; white-space: normal; }
 
 /* === PRICE ROW === */

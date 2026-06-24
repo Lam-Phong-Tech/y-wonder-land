@@ -17,6 +17,7 @@ MonoBehaviour:
   description: "Tr\xE1i cau."
   iconEmoji: "\U0001F334"
   iconSprite: {fileID: 0}
+  iconTexture: {fileID: 0}
   category: products
   buyPrice: 0
   sellPrice: 100

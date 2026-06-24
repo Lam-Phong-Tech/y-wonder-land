@@ -61,6 +61,24 @@ Trạng thái: [đã xong gì, còn gì]
 
 ---
 
+## 📌 TRẠNG THÁI MỚI NHẤT (cập nhật 24/06/2026 — PHIÊN 6)
+
+### 🎯 Đang ở đâu
+- Bản APK/Windows demo vẫn dùng tốc độ demo: `GameTimeConfig.SecondsPerGameDay = 60f` (1 ngày game = 60 giây thật), không đổi về 24h thật trước test chéo.
+- Expected timing để test: cây ngắn ngày ~60s sau tưới; tutorial 24s; Sa Chi/Sầu Riêng ~28 phút; Chanh dây ~90 phút; vịt 60s, gà 120s, dê/ngỗng 180s, đà điểu 360s, bò 420s.
+- NPC tutorial đã dùng prefab `Assets/_Project/Prefabs/ExclamationMark.prefab` thay dấu chấm than primitive; khi spawn sẽ gỡ collider để không chắn ray/click.
+- Backend/VPS: client có khung REST (`BackendConfig`, `ApiClient`, `AuthService`, `PlayerProfileService`) nhưng mới đủ auth/profile/tutorialCompleted. Muốn demo với VPS thì deploy `server/` stub và tạo `Assets/Resources/BackendConfig.asset` trỏ `baseUrl` về URL public; backend online thật cho POS/inventory/farm/cây/thú/server-time/IAP là phase riêng sau demo.
+- Build/chăn nuôi đã bước vào ổn định: `BuildSurfaceCell`, chuồng ghép từ hàng rào, thả thú theo đúng size chuồng.
+- Hệ Sprint mobile đã chỉnh theo yêu cầu: `Sprint` bấm/tap hold đúng trạng thái; `auto-run` không nhảy vô tội vạ; đổi hướng joystick mới break sprint; có smoothing riêng cho touch và clamp pitch.
+- Tutorial NPC đã chốt logic cơ bản, đang tiếp tục tinh chỉnh tốc độ thoại/hướng dẫn để không spam.
+- Build mode dùng `ghost` prefab trực quan, hàng rào có auto-connect, animation búa khi đặt công trình đã gắn.
+
+### 🔧 Việc tiếp theo ưu tiên
+- Ưu tiên 19/06 theo đúng yêu cầu: effect vật bay vào túi đồ, hủy chuồng lấy lại tài nguyên, trồng theo ô từng loài.
+- Sau đó quay lại các task phụ và UI polish còn lại theo `task.md`.
+
+---
+
 ## 📌 TRẠNG THÁI MỚI NHẤT (cập nhật 23/06/2026 — PHIÊN 5)
 
 ### 🎯 Đang ở đâu

@@ -73,6 +73,19 @@
 
 ---
 
+## ✅ CẬP NHẬT 23/06 (Antigravity đã làm)
+- `[x]` **Persistence real-time (wall-clock) cho cây + thú**: đóng/mở app vẫn lớn-bù/đói-bù/chết-bù đúng mốc.
+- `[x]` **Vòng đời chết thật**:
+  - Cây: thiếu nước quá ngưỡng sẽ chết theo luật mới.
+  - Thú: đói quá ngưỡng sẽ chết, biến mất và trả ô chuồng.
+- `[x]` **Build persistence**: lưu/khôi phục công trình build mode (Ruộng/Chuồng/Đường) + cây + thú theo `BuildSurfaceCell`.
+- `[x]` **Áp giá Point ×26** + cập nhật economy theo bộ dữ liệu khách mới.
+- `[x]` **EXP/Level bản mới** + vòng quay + điểm danh 15 ngày.
+- `[x]` **Generator dữ liệu đã chạy lại** (crop/animal) cho mốc thời gian và thông số mới.
+- `[x]` **Tắt `ForceRunTutorialForTesting`** (không ép tua tutorial ở bản demo chính).
+
+---
+
 ## 🐄 NHÁNH HIỆN TẠI: Chăn nuôi trong lồng (animal husbandry) — ⭐ ƯU TIÊN CAO NHẤT
 > Sửa & bổ sung chức năng nuôi/trồng động vật trong chuồng.
 > **Đây là nhóm việc ưu tiên số 1.** Hoàn thành hết nhóm này rồi mới quay lại các task tồn đọng phía dưới.
@@ -108,7 +121,7 @@
   - Generator: thêm `SetAnimalGameplay` cho cả 10 con → `produceItemId`, `produceAmount` (=SL Pro1), `maxHarvests` (=Tổng lần thu VatNuoi), thịt vụ cuối. Tạo 17 item sản phẩm/thịt còn thiếu (giá bán theo cột "Giá Product 1/2" VatNuoi). Sửa giá egg/milk/pork theo VatNuoi; pig Pro1 đổi `pork_01`→`pigskin_01` (Da heo), thịt = pork_01.
   - `AnimalDefinition` thêm `meatItemId`/`meatAmount`. `FarmAnimal.HarvestProduct`: vụ CUỐI (hết số lần thu) → cộng thịt (Pro2) + **con vật biến mất** + **giải phóng ô chuồng** (`ClearAnimal`, rào vẫn còn) → thả con mới được ngay. `FarmInteractionController` gán `occupiedCells` cho con vật lúc thả.
 - `[x]` **Fix tên + loại thức ăn cho khớp VatNuoi**: đổi `grass_01` "Cỏ khô"→**"Cỏ Voi"**, `cabbage_01` "Rau cải"→**"Bắp cải"**; chuyển **7 nông sản sang category "food"** để hiện trong tab cho ăn (trước đó là "items" → không chọn được). ⚠️ Nông sản giờ nằm tab "Thực phẩm" thay vì "items" — nếu Mini Garden/shop lọc theo category cần rà lại.
-- `[ ]` **CẦN Editor**: chạy lại `Generate Mock Items` + `Generate Animal Data` (data mới). Test thu hoạch 10 con + vụ cuối làm thịt.
+- `[x]` **CẦN Editor**: chạy lại `Generate Mock Items` + `Generate Animal Data` (data mới). Test thu hoạch 10 con + vụ cuối làm thịt.
 - `[ ]` **CHỜ KHÁCH**: chu kỳ thu hoạch đang để giây DEMO (25s) thay vì ngày thật — chờ khách quy đổi ngày→giây.
 - `[x]` **Khung CƠ BẢN cho 10 cây LÂU NĂM** (để anh gắn model): thêm 10 hạt giống + 10 sản phẩm (ItemDataGenerator) + 10 CropDefinition (CropDataGenerator, để trống `cropPrefab` cho anh kéo model). Tạm **1-lần-thu** như cây ngắn ngày. Giá Sa Chi/Sầu Riêng theo CayTrong.md, còn lại số DEMO. **CẦN Editor**: chạy `Generate Mock Items` → `Generate Crop Data`, rồi kéo model vào `Crop_<seed>.asset`.
   - TODO Phase 2: **cơ chế thu NHIỀU LẦN** cho cây lâu năm (giống vật nuôi: ra quả nhiều vụ + vụ cuối) — FarmTile hiện chỉ 1 lần thu. Số liệu thật 7/10 cây chưa có (CayTrong.md mới có Sa Chi + Sầu Riêng + chanh dây).
@@ -131,7 +144,7 @@
 - `[x]` **#1 Ẩn tab filter shop không liên quan**: `ShopPopupController.UpdateFilterVisibility()` — chỉ hiện filter (Seeds/Animals/Tools/Items) có hàng trong shop đó; còn lại ẩn, giữ "Tất cả".
   - **CẦN Editor**: chạy lại `Generate Mock Items` (item nước + đổi category sản phẩm) + `Generate Shop Data`.
   - ⚠️ Lưu ý phụ: live-animal item `duck_01`/`goose_01`/`turtle_01` chưa có ItemDefinition (chỉ 7/10 con mua được ở shop) — bổ sung sau nếu cần bán 3 con này.
-- `[ ]` **CẦN Editor/test**: thả thú thử → chỉnh `statusBarHeight` nếu thanh lệch đầu; xác nhận prefab thú có Collider (nếu chưa, FarmAnimal tự thêm BoxCollider tạm). Đảm bảo đã chạy `Generate Animal Data` để có `produceCycleTimeSec`/`feedIntervalSec`/`maxHarvests` thật.
+- `[~]` **CẦN Editor/test**: thả thú thử → chỉnh `statusBarHeight` nếu thanh lệch đầu; xác nhận prefab thú có Collider (nếu chưa, FarmAnimal tự thêm BoxCollider tạm). Đảm bảo đã chạy `Generate Animal Data` để có `produceCycleTimeSec`/`feedIntervalSec`/`maxHarvests` thật.
 
 ## 🔍 RÀ SOÁT TRƯỚC DEMO (21/06 — anh review) — đối chiếu task/lộ trình
 > 13 điểm anh nêu khi chơi thử. Phần lớn TRÙNG; ➕ = GAP mới chưa có ở task/lộ trình.
@@ -139,7 +152,7 @@
 - `[ ]` ➕ **#1 Thành phố thiếu biển**: biển nằm `farmOnlyObjects` → ẩn ở city. CityScene cần **water plane RIÊNG + FishingSpot** (Editor).
 - `[~]` **#2 NPC thành phố chưa đủ popup**: chỉ NPC shop mua/bán chạy. VIP/Maid/Pet/Game/Gift/Heo Đất = Phase 2 (xem mục "HỆ NPC").
 - `[~]` **#3/#4 Lưu/load**: CÓ lưu local (POS/túi/ô đất/thú qua PlayerPrefs, lúc Quit/Pause). **(21/06) THÊM luồng RESUME người chơi cũ**: `GameManager` — có save → **bỏ Login+Cutscene, vào thẳng game**; lưu + thả lại **đúng vị trí** lúc thoát (chỉ lưu toạ độ khi ở Nông trại để resume an toàn). Cờ `alwaysStartFresh` (test mở đầu) + ContextMenu "Clear Save". *(GameManager là file protected — sửa theo yêu cầu anh, báo rõ.)* CÒN NỢ: (a) persistence DateTime cho offline lớn-bù (cây/thú lớn khi đóng app); (b) TẮT `giveTestLoadoutOnStart` khi build thật; (c) resume luôn về Nông trại (nếu thoát ở City thì về farm) — chấp nhận cho demo.
-- `[~]` **#5/#8 Loop + công thức**: vòng lặp lõi chạy đúng; data khớp VatNuoi/CayTrong. Còn mock (#6) + **chưa có EXP/level**.
+- `[~]` **#5/#8 Loop + công thức**: vòng lặp lõi chạy đúng; data khớp VatNuoi/CayTrong; **đã có EXP/Level**. Còn phần chốt kinh tế cuối (giá bán + anti-exploit + đồng bộ web).
 - `[x]` **#6 Xây chuồng tốn GỖ + #7 Ruộng FREE + Build mode dùng VẬT LIỆU (không POS)**: `BuildModeOverlayController` đổi item sang `materialId`+amount (Ruộng=miễn phí · Đường đá=1 Đá · Chuồng=1 Gỗ/ô rào); menu hiện chi phí vật liệu + số gỗ/đá đang có. `GhostPlacementController` KIỂM + TRỪ vật liệu lúc đặt (thiếu → toast, không đặt). `BuildSurfaceCell` lưu `BuildMaterialId`+amount. Phá chuồng (`DemolishEnclosure`) HOÀN đúng vật liệu (đầy đủ) thay vì POS. Loadout test có 30 gỗ + 30 đá.
 - `[x]` ➕ **#9 Tái sinh tài nguyên**: `HarvestableResource.respawnTimeSec` thành SerializeField gọn (Header "Tái sinh" + tooltip), default đổi 3600→**60s** (demo). Cây + đá dùng chung → cả hai mọc lại. **CẦN Editor**: set `respawnTimeSec` trên prefab/đối tượng cây+đá CŨ (chọn nhiều → sửa 1 lần), vì chúng đã lưu 3600.
 - `[x]` ➕ **Build cost ra SerializeField**: `BuildModeOverlayController` thêm `penWoodCost`/`pathStoneCost` (Inspector) — đổi số không cần sửa code. Ruộng free.

@@ -17,6 +17,7 @@ MonoBehaviour:
   description: "D\xEA cho s\u1EEFa."
   iconEmoji: "\U0001F410"
   iconSprite: {fileID: 0}
+  iconTexture: {fileID: 2800000, guid: 033334c0a913c5543b9f249f639af082, type: 3}
   category: animals
   buyPrice: 1300
   sellPrice: 0

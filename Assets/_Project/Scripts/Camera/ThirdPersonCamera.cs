@@ -18,7 +18,7 @@ public class ThirdPersonCamera : MonoBehaviour
 
     [Header("Shoulder Offset (GTA-style)")]
     [Tooltip("Horizontal offset: positive = camera shifts right, character appears left on screen.")]
-    public float shoulderOffsetX = 0.6f;
+    public float shoulderOffsetX = 0.45f;
     [Tooltip("Vertical offset from the target pivot (look at chest/head height).")]
     public float heightOffset = 1.6f;
 
@@ -34,10 +34,10 @@ public class ThirdPersonCamera : MonoBehaviour
     public float inputSmoothing = 0.1f;
 
     [Header("Vertical Angle Limits")]
-    [Tooltip("Minimum pitch angle (0 = look straight forward, negative = look up). Khóa ở 0 để không nhìn dưới háng.")]
-    public float minVerticalAngle = 0f;
+    [Tooltip("Minimum pitch angle. Đặt >= 0 để tránh góc nhìn không phù hợp kiểm duyệt.")]
+    public float minVerticalAngle = 6f;
     [Tooltip("Maximum pitch angle (positive = look upward).")]
-    public float maxVerticalAngle = 60f;
+    public float maxVerticalAngle = 30f;
 
     [Header("Camera Collision")]
     [Tooltip("Layer mask for obstacles (walls, ground) that should block the camera.")]
@@ -52,13 +52,17 @@ public class ThirdPersonCamera : MonoBehaviour
     public float touchHorizontalSensitivity = 0.15f;
     [Tooltip("Độ nhạy xoay DỌC khi kéo 1 ngón (mobile).")]
     public float touchVerticalSensitivity = 0.12f;
+    [Tooltip("Làm mượt riêng cho touch look. 0 = raw, cao hơn = êm hơn nhưng trễ hơn.")]
+    [Range(0f, 0.95f)]
+    public float touchInputSmoothing = 0.08f;
 
     // Internal state
     private float yaw = 0f;
     private float pitch = 15f;
     private Vector2 smoothedInput = Vector2.zero;
     private bool cursorLocked = true;
-    private Vector2 _touchLookDelta; // cộng dồn delta kéo ngón trong frame, áp 1 lần ở LateUpdate
+    private Vector2 _touchLookDelta; // cộng dồn delta kéo ngón trong frame
+    private Vector2 _smoothedTouchLook = Vector2.zero;
     // Base "1x" độ nhạy (chốt sau Start clamp) — để SetUserSensitivity scale cả PC + mobile theo 1 slider.
     private float baseH, baseV, baseTH, baseTV;
     private bool baseCaptured = false;
@@ -71,6 +75,8 @@ public class ThirdPersonCamera : MonoBehaviour
 
     // Input System
     private InputAction lookAction;
+    // Safety floor cho kiểm duyệt: không cho camera hạ xuống dưới ngưỡng này.
+    private const float ComplianceMinVerticalAngle = 6f;
 
     void Awake()
     {
@@ -106,8 +112,15 @@ public class ThirdPersonCamera : MonoBehaviour
         // Chống chóng mặt: ép input mượt KHÔNG quán tính + giảm độ nhạy về mức êm
         // (áp dụng kể cả khi component trong scene còn lưu giá trị cũ cao).
         inputSmoothing = Mathf.Clamp(inputSmoothing, 0f, 0.12f);
+        touchInputSmoothing = Mathf.Clamp(touchInputSmoothing, 0f, 0.16f);
         horizontalSensitivity = Mathf.Min(horizontalSensitivity, 0.8f);
         verticalSensitivity = Mathf.Min(verticalSensitivity, 0.6f);
+        minVerticalAngle = Mathf.Max(minVerticalAngle, ComplianceMinVerticalAngle);
+        maxVerticalAngle = Mathf.Clamp(maxVerticalAngle, minVerticalAngle + 5f, 30f);
+        if (Mathf.Abs(shoulderOffsetX) > 0.45f)
+        {
+            shoulderOffsetX = Mathf.Sign(shoulderOffsetX) * 0.45f;
+        }
 
         // Chốt mức "1x" (base) sau khi clamp, rồi áp độ nhạy người chơi đã lưu (Settings — 1 slider).
         baseH = horizontalSensitivity; baseV = verticalSensitivity;
@@ -188,17 +201,25 @@ public class ThirdPersonCamera : MonoBehaviour
         yaw += smoothedInput.x * horizontalSensitivity;
         pitch -= smoothedInput.y * verticalSensitivity;
 
-        // 3b. Kéo chạm mobile (cộng thẳng, không qua smoothing chuột). Trục Y panel hướng XUỐNG
-        //     -> kéo NGÓN lên (delta.y âm) thì pitch tăng = nhìn lên. Dừng tay là dừng ngay.
-        if (_touchLookDelta != Vector2.zero)
+        // 3b. Kéo chạm mobile: làm mượt RIÊNG cho touch để đỡ gắt trên điện thoại.
+        float touchFollow = 1f - Mathf.Pow(touchInputSmoothing, Time.deltaTime * 60f);
+        _smoothedTouchLook = Vector2.Lerp(_smoothedTouchLook, _touchLookDelta, touchFollow);
+        if (_smoothedTouchLook.sqrMagnitude < 0.0001f && _touchLookDelta.sqrMagnitude < 0.0001f)
         {
-            yaw += _touchLookDelta.x * touchHorizontalSensitivity;
-            pitch -= _touchLookDelta.y * touchVerticalSensitivity;
-            _touchLookDelta = Vector2.zero;
+            _smoothedTouchLook = Vector2.zero;
         }
 
+        // Trục Y panel hướng XUỐNG -> kéo NGÓN lên (delta.y âm) thì pitch tăng = nhìn lên.
+        if (_smoothedTouchLook != Vector2.zero)
+        {
+            yaw += _smoothedTouchLook.x * touchHorizontalSensitivity;
+            pitch -= _smoothedTouchLook.y * touchVerticalSensitivity;
+        }
+        _touchLookDelta = Vector2.zero;
+
         // 4. Clamp vertical angle
-        pitch = Mathf.Clamp(pitch, minVerticalAngle, maxVerticalAngle);
+        float effectiveMinVertical = Mathf.Max(minVerticalAngle, ComplianceMinVerticalAngle);
+        pitch = Mathf.Clamp(pitch, effectiveMinVertical, maxVerticalAngle);
 
         // 5. Calculate orbit position (rigid, no smoothing = no wobble)
         Vector3 pivotPoint = target.position + Vector3.up * heightOffset;

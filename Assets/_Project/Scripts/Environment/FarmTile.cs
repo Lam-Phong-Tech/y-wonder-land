@@ -69,6 +69,7 @@ public class FarmTile : MonoBehaviour
     /// <summary>Sản phẩm VỤ CUỐI thu ở lần harvest cuối (caller đọc sau InteractHarvest). Rỗng nếu không có.</summary>
     public string LastFinalProductId { get; private set; } = "";
     public int LastFinalProductAmount { get; private set; } = 0;
+    public bool LastHarvestWasFinal { get; private set; } = false;
 
     // ── Cây NHIỀU Ô (giàn, vd chanh dây 20 ô): master giữ list slave; slave trỏ về master (bị khoá) ──
     [HideInInspector] public FarmTile masterTile = null;          // != null → ô này bị 1 giàn chiếm
@@ -424,6 +425,7 @@ public class FarmTile : MonoBehaviour
     {
         harvestedItemId = "";
         amount = 0;
+        LastHarvestWasFinal = false;
 
         if (currentState != TileState.Ripe) return false;
 
@@ -468,6 +470,8 @@ public class FarmTile : MonoBehaviour
         }
 
         // LẦN CUỐI (hoặc cây ngắn ngày 1-lần): thu thêm sản phẩm VỤ CUỐI (nếu có) rồi cây biến mất.
+        LastHarvestWasFinal = true;
+
         if (currentCrop != null && !string.IsNullOrEmpty(currentCrop.finalProductItemId) && currentCrop.finalProductAmount > 0)
         {
             LastFinalProductId = currentCrop.finalProductItemId;

@@ -155,6 +155,9 @@
         <!-- 4. JOYSTICK & SPRINT — Bottom Left -->
         <!-- ============================== -->
         <ui:VisualElement class="hud-bottom-left">
+            <ui:VisualElement name="SprintHint" class="sprint-hint">
+                <ui:Label text="⚡" class="sprint-hint-icon" />
+            </ui:VisualElement>
 
             <ui:VisualElement name="Joystick" class="joystick-outer">
                 <!-- Direction arrows -->

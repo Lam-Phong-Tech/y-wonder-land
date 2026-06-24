@@ -1,11 +1,25 @@
 # 🌿 Y WONDER GREEN FARM - MEMENTO PROTOCOL (BẢN GHI NHỚ TIẾN ĐỘ)
 
 *Dự án: BaChuKhuRung3D (Game nông trại 3D YWONDERLAND)*
-*Ngày cập nhật: 20/06/2026*
+*Ngày cập nhật: 24/06/2026*
 
-## 0. Cập nhật 20/06 (mới nhất)
+## 0. Cập nhật 24/06 (mới nhất)
 
-> Nhánh `feat/animal-husbandry`. Chi tiết xem CHANGELOG mục 20/06 + task.md.
+> Nhánh đang dùng: `feat/animal-husbandry` (đã có thay đổi cục bộ touch-control/build-flow). Chi tiết xem `CHANGELOG.md` + `docs/CHANGELOG.md` + `task.md`.
+
+- **Điều khiển mobile đã ổn định cho sprint/tap-hold/auto-run:** `PlayerController` có state sprint chung, `GameHUD` giữ đúng trạng thái sprint khi bấm hoặc giữ.
+- **Camera touch chỉnh lại:** smoothing riêng cho touch, pitch clamp theo yêu cầu kiểm duyệt.
+- **Build/chuồng đang hoàn thiện:** ghost preview là prefab mờ, rào có auto-connect; cài đặt búa animation khi đặt công trình.
+- **Hệ chăn nuôi:** ô chuồng lấy theo cụm hàng rào (PenEnclosure), kiểm tra kích thước trước khi thả thú, popup thông tin con vật đã tích hợp.
+- **Hỗ trợ tutorial flow mới:** NPC khó tính, đi theo hành vi và nhắc khéo (đã tránh spam thoại quá nhanh).
+- **Còn dang dở ưu tiên:** hệ hiệu ứng thu thập bay vào túi đồ, hủy chuồng thu lại tài nguyên, trồng theo ô theo từng loại cây (sau khi hoàn tất phần chăn nuôi cơ bản).
+- **Tốc độ demo trước build APK/Windows:** giữ `GameTimeConfig.SecondsPerGameDay = 60f` (1 ngày game = 60 giây thật), không đổi về 24h thật trước test chéo. Expected test nhanh: cây ngắn ngày ~60s sau tưới; Sa Chi/Sầu Riêng ~28 phút; Chanh dây ~90 phút; vịt 60s, gà 120s, dê/ngỗng 180s, đà điểu 360s, bò 420s.
+- **NPC tutorial marker:** đã thay dấu chấm than primitive bằng prefab `Assets/_Project/Prefabs/ExclamationMark.prefab`; khi spawn gỡ collider con để không chắn ray/click.
+- **Backend/VPS:** client hiện có khung REST (`BackendConfig`, `ApiClient`, `AuthService`, `PlayerProfileService`) nhưng mới phủ auth/profile/tutorialCompleted. Muốn demo VPS tối thiểu thì deploy `server/` stub và tạo `Assets/Resources/BackendConfig.asset` trỏ `baseUrl` về URL public; online thật cho POS/inventory/farm/cây/thú/server-time/IAP là phase backend riêng sau demo.
+
+## 1. Cập nhật 20/06 (lịch sử)
+
+> Nhánh lúc đó: `feat/animal-husbandry`. Chi tiết xem CHANGELOG mục 20/06 + task.md.
 
 - **Điều khiển mobile (GameHUD):** joystick ảo di chuyển, nút Sprint giữ-để-chạy (fix Clickable nuốt event bằng **TrickleDown**), nút Jump, nút **X hủy hoạt ảnh**. Tương tác ngắm theo điểm chạm; nút gợi ý bấm/tap được (fix picking-mode cha Ignore).
 - **Bỏ tính năng Vuốt ve.**

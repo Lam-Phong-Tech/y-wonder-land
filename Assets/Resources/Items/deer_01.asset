@@ -17,6 +17,7 @@ MonoBehaviour:
   description: "H\u01B0\u01A1u cho nhung qu\xFD."
   iconEmoji: "\U0001F98C"
   iconSprite: {fileID: 0}
+  iconTexture: {fileID: 2800000, guid: ca1f65b78b3d2f046b0b98d219d8f6a4, type: 3}
   category: animals
   buyPrice: 10400
   sellPrice: 0

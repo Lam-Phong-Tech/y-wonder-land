@@ -39,7 +39,15 @@ public class PlayerController : MonoBehaviour
     // ướm hồ hình dạng lạ — chỉ tắt bơi khi rời HẾT (đếm về 0), không bị giật giữa các box.
     private int waterVolumeCount = 0;
     private bool isSprintUIHeld = false;
+    private bool isStickAutoSprintLatched = false;
+    private bool stickSprintDirectionLocked = false;
+    private Vector3 stickSprintLockDirection = Vector3.zero;
     private bool autoRunForward = false; // AUTO-RUN: nút chạy nhanh -> tự tiến thẳng, vuốt màn hình để lái
+    [Header("Mobile Sprint")]
+    [SerializeField] private bool enableStickAutoSprint = true;
+    [SerializeField, Range(0.6f, 1f)] private float stickAutoSprintThreshold = 0.88f;
+    // Runtime cap để đảm bảo ngưỡng sprint bằng joystick không quá gắt trên mobile
+    private const float MobileSprintThresholdCap = 0.62f;
     private float actionLockTimer = 0f;
     private float _actionSpeed = 1f;
 
@@ -163,7 +171,9 @@ public class PlayerController : MonoBehaviour
         }
         // ------------------------------
 
-        Vector3 inputDir = new Vector3(inputVec.x, 0, inputVec.y).normalized;
+        Vector3 inputDir = new Vector3(inputVec.x, 0, inputVec.y);
+        float inputMagnitude = Mathf.Clamp01(inputVec.magnitude);
+        bool hasMoveInput = inputMagnitude >= 0.05f;
         Vector3 moveDirection = Vector3.zero;
 
         // Ensure we always have the active main camera transform if the camera changed states
@@ -173,7 +183,7 @@ public class PlayerController : MonoBehaviour
         }
 
         // 3. Move Relative to Camera Direction
-        if (inputVec.magnitude >= 0.1f)
+        if (hasMoveInput)
         {
             Vector3 camForward = Vector3.forward;
             Vector3 camRight = Vector3.right;
@@ -190,34 +200,66 @@ public class PlayerController : MonoBehaviour
             camRight.Normalize();
 
             moveDirection = camForward * inputDir.z + camRight * inputDir.x;
+            Vector3 moveDirectionNormalized = moveDirection.normalized;
+            Vector3 preRotationForward = transform.forward;
 
-            // Khi GIỮ Free-Look: nhân vật KHÔNG quay theo camera; chỉ xoay theo hướng đang chạy.
-            // (Trường hợp mặc định — quay theo camera — xử lý mỗi frame ở dưới, kể cả khi đứng yên.)
-            if (IsFreeLook() && moveDirection != Vector3.zero)
+            // Sprint latch từ joystick: khóa hướng tại thời điểm kích hoạt.
+            // Khi người chơi đổi hướng rõ rệt thì tự hủy latch (trả về điều khiển thường).
+            if (isStickAutoSprintLatched)
             {
-                Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+                if (!stickSprintDirectionLocked && moveDirectionNormalized.sqrMagnitude > 0.0001f)
+                {
+                    stickSprintLockDirection = moveDirectionNormalized;
+                    stickSprintDirectionLocked = true;
+                }
+                else if (stickSprintDirectionLocked)
+                {
+                    float dirDot = Vector3.Dot(stickSprintLockDirection, moveDirectionNormalized);
+                    if (dirDot < 0.92f)
+                    {
+                        SetStickAutoSprint(false);
+                    }
+                }
             }
 
-            // Check Sprint
-            bool isSprinting = isSprintUIHeld || (Keyboard.current != null && Keyboard.current.leftShiftKey.isPressed);
+            // Có input di chuyển: luôn quay theo hướng chạy để tránh "chạy lùi" khi kéo joystick xuống.
+            // GIỮ free-look thì quay chậm hơn để vẫn giữ cảm giác nhìn quanh.
+            if (moveDirectionNormalized.sqrMagnitude > 0.0001f)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(moveDirectionNormalized);
+                float rotationMultiplier = IsFreeLook() ? 1.2f : 3.0f;
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * rotationMultiplier * Time.deltaTime);
+            }
+
+            bool sprintActive = IsSprintActive();
+            bool autoRunMode = autoRunForward || isStickAutoSprintLatched;
+            float preDot = Vector3.Dot(preRotationForward, moveDirectionNormalized);
+            bool isBackwardInput = !autoRunMode && preDot < -0.15f;
+            if (isBackwardInput)
+            {
+                sprintActive = false;
+            }
+
             // Tốc độ bơi bị giảm đi 30% so với đi bộ
-            float currentSpeed = moveSpeed * (isSprinting ? sprintMultiplier : 1f);
+            float currentSpeed = moveSpeed * (sprintActive ? sprintMultiplier : 1f);
+            if (isBackwardInput)
+            {
+                currentSpeed *= 0.7f;
+            }
             if (isSwimming) currentSpeed *= 0.7f;
 
             // Move the character controller
-            controller.Move(moveDirection * currentSpeed * Time.deltaTime);
+            controller.Move(moveDirectionNormalized * (currentSpeed * inputMagnitude) * Time.deltaTime);
         }
 
-        // MẶC ĐỊNH (không Free-Look): nhân vật LUÔN quay lưng về người chơi — mặt hướng theo camera.
-        // Chạy MỖI FRAME kể cả khi đứng yên -> xoay camera là nhân vật xoay theo (kiểu PUBG/Free Fire mobile).
-        if (!IsFreeLook() && mainCameraTransform != null)
+        // Không có input di chuyển: mới quay follow camera (tránh cảm giác bị "kéo lùi" khi đang lái joystick).
+        if (!IsFreeLook() && !hasMoveInput && mainCameraTransform != null)
         {
             ThirdPersonCamera tpc = mainCameraTransform.GetComponent<ThirdPersonCamera>();
             if (tpc != null)
             {
                 Quaternion targetRotation = Quaternion.Euler(0, tpc.Yaw, 0);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * 2.5f * Time.deltaTime);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * 1.4f * Time.deltaTime);
             }
         }
 
@@ -270,8 +312,7 @@ public class PlayerController : MonoBehaviour
         }
         else if (moveDirection.magnitude > 0.1f)
         {
-            bool isSprinting = isSprintUIHeld || (Keyboard.current != null && Keyboard.current.leftShiftKey.isPressed);
-            if (isSprinting)
+            if (IsSprintActive())
             {
                 CrossFadeAnim(animRun, 0.2f);
             }
@@ -291,6 +332,20 @@ public class PlayerController : MonoBehaviour
         isSprintUIHeld = isPressed;
     }
 
+    /// <summary>
+    /// HUD báo trạng thái "đã giữ joystick đủ lâu để vào sprint" (kiểu FF/PUBG mobile).
+    /// </summary>
+    public void SetStickAutoSprint(bool enabled)
+    {
+        isStickAutoSprintLatched = enableStickAutoSprint && enabled;
+        autoRunForward = isStickAutoSprintLatched;
+        if (!isStickAutoSprintLatched)
+        {
+            stickSprintDirectionLocked = false;
+            stickSprintLockDirection = Vector3.zero;
+        }
+    }
+
     /// <summary>Nút Sprint trên HUD bấm 1 lần = bật/tắt chạy nhanh. Trả về trạng thái mới (true = đang chạy nhanh).</summary>
     public bool ToggleSprintUI()
     {
@@ -300,22 +355,47 @@ public class PlayerController : MonoBehaviour
 
     /// <summary>Trạng thái chạy nhanh đang bật từ nút HUD (để HUD đồng bộ hiệu ứng nút).</summary>
     public bool IsSprintUIOn => isSprintUIHeld;
+    public bool IsStickAutoSprintOn => isStickAutoSprintLatched;
+    public float StickAutoSprintThreshold => Mathf.Min(stickAutoSprintThreshold, MobileSprintThresholdCap);
 
     /// <summary>Nút "chạy nhanh" trên HUD: bật/tắt AUTO-RUN — nhân vật tự tiến thẳng theo hướng camera,
     /// người chơi chỉ vuốt màn hình để đổi hướng (khỏi phải kéo joystick). Trả về trạng thái mới.</summary>
     public bool ToggleAutoRun()
     {
         autoRunForward = !autoRunForward;
-        isSprintUIHeld = autoRunForward; // auto-run = chạy ở tốc độ nhanh
+        if (autoRunForward)
+        {
+            isSprintUIHeld = false;
+        }
         return autoRunForward;
     }
     /// <summary>Auto-run đang bật (để HUD đồng bộ hiệu ứng nút).</summary>
     public bool IsAutoRunOn => autoRunForward;
 
+    public bool IsSprintActive()
+    {
+        return isSprintUIHeld ||
+               isStickAutoSprintLatched ||
+               autoRunForward ||
+               (Keyboard.current != null && Keyboard.current.leftShiftKey.isPressed);
+    }
+
     // ── Joystick ảo (mobile) ──
     private Vector2 virtualMoveInput = Vector2.zero;
     /// <summary>Joystick ảo trên HUD gọi mỗi frame khi kéo (x,y trong [-1,1]); thả tay gọi Vector2.zero.</summary>
-    public void SetMoveInput(Vector2 move) => virtualMoveInput = Vector2.ClampMagnitude(move, 1f);
+    public void SetMoveInput(Vector2 move)
+    {
+        virtualMoveInput = Vector2.ClampMagnitude(move, 1f);
+    }
+
+    /// <summary>
+    /// Bản mở rộng cho mobile: truyền thêm độ kéo thô của joystick (trước response curve)
+    /// để sprint theo lực kéo thật, không bị hụt ngưỡng do curve.
+    /// </summary>
+    public void SetMoveInput(Vector2 move, float rawMagnitude)
+    {
+        virtualMoveInput = Vector2.ClampMagnitude(move, 1f);
+    }
 
     // ── Nút Nhảy ảo (mobile) ──
     private bool jumpQueuedFromUI = false;

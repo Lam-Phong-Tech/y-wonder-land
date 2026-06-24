@@ -181,6 +181,12 @@ public class BuildModeOverlayController : MonoBehaviour
                 {
                     if (!ghost.IsPinned)
                     {
+                        if (!ghost.IsPlacementValid || ghost.IsScreenPositionBlockedForPlacement(mouse.position.ReadValue()))
+                        {
+                            ShowStatusMessage("V\u1ecb tr\u00ed kh\u00f4ng h\u1ee3p l\u1ec7 ho\u1eb7c qu\u00e1 s\u00e1t r\u00eca m\u00e0n h\u00ecnh.", false);
+                            return;
+                        }
+
                         ghost.SetPinned(true);
                         ShowPlacementControls();
                         ShowStatusMessage("\u0110\u00e3 ghim v\u1ecb tr\u00ed. B\u1ea5m \u2714 \u0111\u1ec3 x\u00e2y.", true); // "Đã ghim vị trí. Bấm ✔ để xây."

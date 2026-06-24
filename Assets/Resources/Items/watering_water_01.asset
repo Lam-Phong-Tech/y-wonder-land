@@ -18,6 +18,7 @@ MonoBehaviour:
     l\u1EA7n t\u01B0\u1EDBi c\xE2y t\u1ED1n 1 x\xF4."
   iconEmoji: "\U0001F4A7"
   iconSprite: {fileID: 0}
+  iconTexture: {fileID: 0}
   category: materials
   buyPrice: 0
   sellPrice: 0

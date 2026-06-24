@@ -46,20 +46,20 @@ namespace YWonderLand.EditorScripts
             AddCrop(db, "coconut_seed_01", "coconut_01", Days(2f), Hours(10f), 2, 150, 0, 5, new Color(0.6f, 0.45f, 0.25f), "\ud83e\udd65");
             AddCrop(db, "areca_seed_01", "areca_01", Days(2f), Hours(10f), 3, 150, 0, 5, new Color(0.55f, 0.7f, 0.3f), "\ud83c\udf34");
             AddCrop(db, "date_seed_01", "date_01", Days(2f), Hours(10f), 4, 200, 0, 5, new Color(0.6f, 0.35f, 0.15f), "\ud83c\udf34");
-            AddCrop(db, "sacha_seed_01", "sacha_01", Days(2f), Hours(10f), 5, 200, 0, 5, new Color(0.3f, 0.6f, 0.3f), "\ud83c\udf30");
+            AddCrop(db, "sacha_seed_01", "sacha_01", Days(28f), Days(14f), 5, 6800, 0, 5, new Color(0.3f, 0.6f, 0.3f), "\ud83c\udf30");
             AddCrop(db, "tea_seed_01", "tea_01", Days(2f), Hours(10f), 5, 180, 0, 5, new Color(0.2f, 0.55f, 0.25f), "\ud83c\udf75");
-            AddCrop(db, "durian_seed_01", "durian_01", Days(2f), Hours(10f), 5, 300, 0, 5, new Color(0.7f, 0.6f, 0.2f), "\ud83e\udd6d");
+            AddCrop(db, "durian_seed_01", "durian_01", Days(28f), Days(14f), 5, 16800, 0, 5, new Color(0.7f, 0.6f, 0.2f), "\ud83e\udd6d");
             AddCrop(db, "asparagus_seed_01", "asparagus_01", Days(2f), Hours(10f), 4, 150, 0, 4, new Color(0.4f, 0.7f, 0.3f), "\ud83c\udf31");
             AddCrop(db, "red_ginseng_seed_01", "red_ginseng_01", Days(2f), Hours(10f), 1, 250, 0, 5, new Color(0.7f, 0.2f, 0.2f), "\ud83c\udf3f");
             AddCrop(db, "royal_ginseng_seed_01", "royal_ginseng_01", Days(2f), Hours(10f), 1, 400, 0, 5, new Color(0.8f, 0.15f, 0.2f), "\ud83c\udf3f");
-            // Chanh leo (chanh d\u00e2y) \u2014 c\u00e2y l\u00e2u n\u0103m th\u1ee9 3 kh\u00e1ch ch\u1ed1t. yield=10 qu\u1ea3/v\u1ee5 (CayTrong Pro1), exp t\u1ea1m; b\u00e1n 325. K\u00e9o model cay_chanh_day_.prefab v\u00e0o Crop_passion_fruit_seed_01.asset.
-            AddCrop(db, "passion_fruit_seed_01", "passion_fruit_01", Days(2f), Hours(10f), 10, 20, 0, 5, new Color(0.5f, 0.2f, 0.6f), "\ud83c\udf47");
+            // Chanh leo/chanh day theo CayTrongLauNam2: 20 o, thu 2 lan, chu ky 90 ngay, gia ban 57.
+            AddCrop(db, "passion_fruit_seed_01", "passion_fruit_01", Days(90f), Days(14f), 10, 3000, 0, 5, new Color(0.5f, 0.2f, 0.6f), "\ud83c\udf47");
 
             // Cây LÂU NĂM: số ô + thu NHIỀU LẦN + sản phẩm vụ cuối (theo CayTrongLauNam2.xlsx).
             // (seedId, số ô, số lần thu, chu kỳ ra quả, idSP vụ cuối, SL vụ cuối)
-            SetPerennial("sacha_seed_01", 1, 9, Days(28f), "sacha_01", 46);
-            SetPerennial("durian_seed_01", 1, 12, Days(28f), "durian_01", 29);
-            SetPerennial("passion_fruit_seed_01", 20, 2, Days(90f), "passion_fruit_01", 35);
+            SetPerennial("sacha_seed_01", 1, 9, Days(28f), Days(14f), 6800, "sacha_01", 46);
+            SetPerennial("durian_seed_01", 1, 12, Days(28f), Days(14f), 16800, "durian_01", 29);
+            SetPerennial("passion_fruit_seed_01", 20, 2, Days(90f), Days(14f), 3000, "passion_fruit_01", 35);
 
             EditorUtility.SetDirty(db);
             AssetDatabase.SaveAssets();
@@ -102,13 +102,18 @@ namespace YWonderLand.EditorScripts
 
         // Set thông số CÂY LÂU NĂM lên Crop_<seedId>.asset (chạy SAU AddCrop). Cây ngắn ngày giữ default (1 ô, 1 lần thu).
         private static void SetPerennial(string seedId, int plotSlots, int maxHarvests, float reHarvestCycleSec,
-            string finalProductId, int finalProductAmount)
+            float waterCycleSec, int expReward, string finalProductId, int finalProductAmount)
         {
             string path = "Assets/Resources/Items/Crop_" + seedId + ".asset";
             var crop = AssetDatabase.LoadAssetAtPath<CropDefinition>(path);
             if (crop == null) { Debug.LogWarning($"[CropData] Chưa có Crop_{seedId} để set cây lâu năm (AddCrop phải chạy trước)."); return; }
             crop.plotSlots = plotSlots;
             crop.maxHarvests = maxHarvests;
+            crop.growthTimeSec = reHarvestCycleSec;
+            crop.waterIntervalSec = waterCycleSec;
+            crop.noWaterDeathSec = waterCycleSec;
+            crop.wateredLifeSec = waterCycleSec;
+            crop.expReward = expReward;
             crop.reHarvestCycleSec = reHarvestCycleSec;
             crop.finalProductItemId = finalProductId;
             crop.finalProductAmount = finalProductAmount;

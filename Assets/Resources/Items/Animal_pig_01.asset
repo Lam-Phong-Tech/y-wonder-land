@@ -28,6 +28,7 @@ MonoBehaviour:
   produceAmount: 1
   produceCycleTimeSec: 10800
   maxHarvests: 1
+  expReward: 8000
   meatItemId: pork_01
   meatAmount: 50
   feedIntervalSec: 60

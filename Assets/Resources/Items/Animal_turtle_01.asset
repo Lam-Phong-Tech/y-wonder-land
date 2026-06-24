@@ -28,6 +28,7 @@ MonoBehaviour:
   produceAmount: 1
   produceCycleTimeSec: 18000
   maxHarvests: 1
+  expReward: 20000
   meatItemId: turtle_meat_01
   meatAmount: 10
   feedIntervalSec: 420

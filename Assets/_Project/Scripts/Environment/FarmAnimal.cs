@@ -36,6 +36,7 @@ namespace YWonderLand.Environment
         public int harvestsRemaining;
         public bool hasProductReady = false;
         public bool isVaccinated = false;
+        public bool LastHarvestWasFinal { get; private set; }
 
         // ── MỐC THỜI GIAN (đồng hồ toàn cục) ──
         // No đầy lại từ lúc này; đói dần tới khi (now - feedRefTime) >= cửa sổ sống (noFeedDeathSec chưa ăn / fedLifeSec đã ăn).
@@ -237,6 +238,7 @@ namespace YWonderLand.Environment
         {
             itemId = "";
             amount = 0;
+            LastHarvestWasFinal = false;
 
             if (!hasProductReady || currentState == AnimalState.Dead) return false;
 
@@ -247,12 +249,13 @@ namespace YWonderLand.Environment
             produceRefTime = RealNow(); // bắt đầu chu kỳ kế từ bây giờ
             produceTimer = 0f;
             if (!IsInfiniteHarvest) harvestsRemaining--;
+            LastHarvestWasFinal = !IsInfiniteHarvest && harvestsRemaining <= 0;
 
             UpdateVisuals();
             OnAnimalStateChanged?.Invoke(this);
 
             // VỤ CUỐI: hết số lần thu → cho THỊT (Pro2) + làm thịt con vật (biến mất, trả ô chuồng).
-            if (!IsInfiniteHarvest && harvestsRemaining <= 0)
+            if (LastHarvestWasFinal)
             {
                 SlaughterForMeat();
             }

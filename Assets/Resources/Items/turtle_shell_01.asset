@@ -17,6 +17,7 @@ MonoBehaviour:
   description: "Mai r\xF9a c\u1EE9ng."
   iconEmoji: "\U0001F422"
   iconSprite: {fileID: 0}
+  iconTexture: {fileID: 0}
   category: products
   buyPrice: 0
   sellPrice: 11893

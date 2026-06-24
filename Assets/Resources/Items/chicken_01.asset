@@ -17,6 +17,7 @@ MonoBehaviour:
   description: "G\xE0 ta \u0111\u1EBB tr\u1EE9ng."
   iconEmoji: "\U0001F414"
   iconSprite: {fileID: 0}
+  iconTexture: {fileID: 2800000, guid: 01e1fe609679311419478c7d5b3088e5, type: 3}
   category: animals
   buyPrice: 156
   sellPrice: 0

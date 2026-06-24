@@ -17,6 +17,7 @@ MonoBehaviour:
   description: "T\xE1o ch\xEDn \u0111\u1ECF ng\u1ECDt l\u1ECBm."
   iconEmoji: "\U0001F34E"
   iconSprite: {fileID: 0}
+  iconTexture: {fileID: 0}
   category: food
   buyPrice: 10
   sellPrice: 2

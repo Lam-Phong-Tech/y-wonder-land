@@ -28,6 +28,7 @@ MonoBehaviour:
   produceAmount: 8
   produceCycleTimeSec: 2400
   maxHarvests: 2
+  expReward: 1500
   meatItemId: rabbit_meat_01
   meatAmount: 5
   feedIntervalSec: 60

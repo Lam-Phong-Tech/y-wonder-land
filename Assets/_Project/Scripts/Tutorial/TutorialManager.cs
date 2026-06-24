@@ -44,6 +44,8 @@ public class TutorialManager : MonoBehaviour
     public GuideNPC guideNPC;
     [Tooltip("Vị trí sinh ra NPC Tân Thủ. Để trống = sinh gần Player.")]
     public Transform guideNpcSpawnPoint;
+    [Tooltip("Prefab dau cham than hien tren dau NPC huong dan.")]
+    [SerializeField] private GameObject exclamationMarkPrefab;
 
     [Header("Điểm mốc NPC dẫn tới (kéo Empty vào)")]
     [Tooltip("Điểm gần CÂY để chặt")]
@@ -836,6 +838,21 @@ public class TutorialManager : MonoBehaviour
     private void CreateNPCExclamationMark()
     {
         if (guideNPC == null) return;
+
+        if (exclamationMarkPrefab != null)
+        {
+            exclamationMark = Instantiate(exclamationMarkPrefab, guideNPC.transform);
+            exclamationMark.name = "NPC_ExclamationMark";
+            exclamationMark.transform.localPosition = new Vector3(0, 3.2f, 0);
+            exclamationMark.transform.localRotation = Quaternion.identity;
+            exclamationMark.transform.localScale = Vector3.one;
+
+            foreach (Collider c in exclamationMark.GetComponentsInChildren<Collider>(true))
+                Destroy(c);
+
+            StartCoroutine(BobExclamationMark());
+            return;
+        }
 
         exclamationMark = GameObject.CreatePrimitive(PrimitiveType.Cube);
         exclamationMark.name = "NPC_ExclamationMark";

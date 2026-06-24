@@ -1,5 +1,31 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-06-24 (Điều khiển mobile cuối phiên: Sprint, auto-run, touch feel)
+
+### Changed
+
+- **Điều khiển mobile tổng thể:** chỉnh feel joystick/camera để gần trải nghiệm game góc nhìn thứ 3.
+  - `Sprint` giữ (`PointerDown`) giữ trạng thái chạy nhanh ổn định.
+  - `Sprint` bấm 1 lần toggle đúng trạng thái.
+  - Camera giật/nhấp khi điều khiển cảm ứng nhẹ hơn: touch smoothing riêng.
+  - Tập trung hướng di chuyển theo joystick (đứng yên vẫn có hướng để tránh “xoay lệch”), giới hạn góc nhìn để phù hợp kiểm duyệt.
+
+- **Điều khiển mobile (Sprint + auto-run nhất quán):**
+  - Sửa luồng auto-run sát mục tiêu PUBG/FreeFire theo phản hồi.
+  - Camera đổi hướng khi đang auto-run không tự hủy sprint; đổi hướng joystick mới break sprint theo đúng mong đợi.
+  - Tạo trạng thái sprint thống nhất trong `PlayerController` (`IsSprintActive()`), gộp nguồn: sprint button, joystick hold, auto-run, shift (PC).
+  - `Sprint` và `Jump` hoạt động ổn khi chờ animation/build mode.
+
+- **Hệ thống Build/chuồng/nhặt thú (đang chốt):**
+  - Cập nhật luồng đặt nhà/cối chuồng với preview ghost trực quan hơn, tự bù pivot prefab, và gắn logic chạy gõ búa khi đặt.
+  - Chuồng: kiểm tra kích thước chuồng theo lưới khi thả thú, có rào gắn kết 1x1.
+
+### Changed Files
+- `Assets/_Project/Scripts/Player/PlayerController.cs` (gộp sprint-state, chạy nhanh/đổi hướng, đi lùi, auto-run)
+- `Assets/_Project/Scripts/Camera/ThirdPersonCamera.cs` (touch smoothing + giới hạn pitch)
+- `Assets/_Project/UI/GameHUDController.cs` (điều phối sprint UI/mobile)
+- `Assets/_Project/UI/GameHUD.uxml` + `Assets/_Project/UI/Styles/GameHUD.uss` (nút sprint/touch feel, layout)
+
 ## [Unreleased] - 2026-06-23 (PHIÊN 5: Cây/Thú CHẾT thật + PERSISTENCE real-time (build mode + chuồng) + Rà soát kinh tế thú)
 
 ### Added

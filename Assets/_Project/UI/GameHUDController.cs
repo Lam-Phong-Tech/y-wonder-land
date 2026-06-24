@@ -83,10 +83,22 @@ public class GameHUDController : MonoBehaviour
     // Joystick ảo (mobile)
     private VisualElement joystickOuter;
     private VisualElement joystickKnob;
+    private VisualElement sprintHint;
     private int joystickPointerId = -1;
     // Tầm kéo núm + chuẩn hoá input. Đi theo size .joystick-outer trong GameHUD.uss
     // (outer 200 → bán kính ~70). Đổi size joystick thì chỉnh số này theo tỉ lệ.
     private const float JoystickRadius = 70f;
+    [Header("Mobile Feel")]
+    [SerializeField, Range(0f, 0.4f)] private float joystickDeadZone = 0.18f;
+    [SerializeField, Range(1f, 3f)] private float joystickResponseExponent = 1.6f;
+    [SerializeField, Range(0.1f, 1f)] private float joystickSprintHoldSeconds = 0.35f;
+    [SerializeField, Range(0f, 1f)] private float joystickSprintForwardMin = 0.55f;
+    private float joystickRawMagnitude = 0f;
+    private float joystickRawForward = 0f;
+    private float joystickSprintHoldTimer = 0f;
+    private float sprintPressStartTime = -1f;
+    private bool suppressNextSprintClick = false;
+    private const float SprintTapThresholdSeconds = 0.18f;
 
     // Vùng nhìn (mobile) — kéo 1 ngón nửa phải để xoay camera
     private VisualElement lookZone;
@@ -170,6 +182,7 @@ public class GameHUDController : MonoBehaviour
         }
 
         if (_expMgr != null) _expMgr.OnEXPChanged -= OnExpChanged;
+        if (PlayerController.Instance != null) PlayerController.Instance.SetStickAutoSprint(false);
     }
 
     // Cập nhật cấp + % EXP lên HUD khi ExperienceManager báo đổi.
@@ -217,6 +230,7 @@ public class GameHUDController : MonoBehaviour
         interactionContainer = root.Q<VisualElement>("InteractionContainer");
         joystickOuter = root.Q<VisualElement>("Joystick");
         joystickKnob = joystickOuter?.Q<VisualElement>(className: "joystick-inner");
+        sprintHint = root.Q<VisualElement>("SprintHint");
         lookZone = root.Q<VisualElement>("LookZone");
         rightActionsContainer = root.Q<VisualElement>(className: "hud-right-actions");
 
@@ -365,17 +379,48 @@ public class GameHUDController : MonoBehaviour
 
         if (btnSprint != null)
         {
-            // BẤM 1 LẦN = bật/tắt AUTO-RUN: nhân vật tự tiến thẳng, vuốt màn hình để lái (khách yêu cầu).
-            // Nút sáng (class "sprint-btn-active") khi đang bật để người chơi biết trạng thái.
+            // Mặc định mobile TPS: GIỮ nút để sprint. Auto-run giữ riêng, không là cơ chế chính.
+            btnSprint.RegisterCallback<PointerDownEvent>(evt =>
+            {
+                if (PlayerController.Instance == null) return;
+                sprintPressStartTime = Time.unscaledTime;
+                suppressNextSprintClick = false;
+                btnSprint.CapturePointer(evt.pointerId);
+                PlayerController.Instance.SetSprintUI(true);
+                RefreshSprintVisual();
+            }, TrickleDown.TrickleDown);
+
+            btnSprint.RegisterCallback<PointerUpEvent>(evt =>
+            {
+                if (PlayerController.Instance == null) return;
+                float heldTime = sprintPressStartTime >= 0f ? (Time.unscaledTime - sprintPressStartTime) : 0f;
+                suppressNextSprintClick = heldTime > SprintTapThresholdSeconds;
+                if (btnSprint.HasPointerCapture(evt.pointerId)) btnSprint.ReleasePointer(evt.pointerId);
+                PlayerController.Instance.SetSprintUI(false);
+                RefreshSprintVisual();
+            }, TrickleDown.TrickleDown);
+
+            btnSprint.RegisterCallback<PointerCaptureOutEvent>(evt =>
+            {
+                if (PlayerController.Instance == null) return;
+                sprintPressStartTime = -1f;
+                PlayerController.Instance.SetSprintUI(false);
+                RefreshSprintVisual();
+            });
+
+            // BẤM NHẢ (click/tap) = bật/tắt auto-run.
+            // Cho phép người chơi đứng yên rồi bấm sprint để nhân vật tự chạy tới.
             btnSprint.RegisterCallback<ClickEvent>(evt =>
             {
                 if (PlayerController.Instance == null) return;
-                bool on = PlayerController.Instance.ToggleAutoRun();
-                btnSprint.EnableInClassList("sprint-btn-active", on);
+                if (suppressNextSprintClick)
+                {
+                    suppressNextSprintClick = false;
+                    return;
+                }
+                PlayerController.Instance.ToggleAutoRun();
+                RefreshSprintVisual();
             });
-            // Đồng bộ hiệu ứng nút với trạng thái hiện tại (HUD có thể bật lại sau khi đã toggle).
-            if (PlayerController.Instance != null)
-                btnSprint.EnableInClassList("sprint-btn-active", PlayerController.Instance.IsAutoRunOn);
         }
 
         SetupJoystick();
@@ -523,6 +568,7 @@ public class GameHUDController : MonoBehaviour
 
         // Hiện/ẩn nút X (hủy hoạt ảnh) theo trạng thái bận — chạy cả khi không có bàn phím (mobile).
         UpdateCancelButton();
+        UpdateJoystickSprintState();
 
         // Chặn các phím tắt nếu người chơi đang gõ phím trong khung chat
         if (ChatPanelController.Instance != null && ChatPanelController.Instance.IsTyping())
@@ -645,16 +691,69 @@ public class GameHUDController : MonoBehaviour
 
         if (joystickKnob != null) joystickKnob.style.translate = new Translate(offset.x, offset.y, 0);
 
+        float rawMagnitude = Mathf.Clamp01(offset.magnitude / JoystickRadius);
+        float curvedMagnitude = 0f;
+        if (rawMagnitude > joystickDeadZone)
+        {
+            float normalizedMagnitude = Mathf.InverseLerp(joystickDeadZone, 1f, rawMagnitude);
+            curvedMagnitude = Mathf.Pow(normalizedMagnitude, joystickResponseExponent);
+        }
+
+        Vector2 direction = offset.sqrMagnitude > 0.0001f ? offset.normalized : Vector2.zero;
         // Trục Y của UI hướng XUỐNG -> đảo dấu để kéo lên = đi tới (forward).
-        Vector2 move = new Vector2(offset.x / JoystickRadius, -offset.y / JoystickRadius);
-        if (PlayerController.Instance != null) PlayerController.Instance.SetMoveInput(move);
+        Vector2 move = new Vector2(direction.x * curvedMagnitude, -direction.y * curvedMagnitude);
+        joystickRawMagnitude = rawMagnitude;
+        joystickRawForward = Mathf.Max(0f, -direction.y) * rawMagnitude;
+        if (PlayerController.Instance != null) PlayerController.Instance.SetMoveInput(move, rawMagnitude);
     }
 
     private void ResetJoystick()
     {
         joystickPointerId = -1;
         if (joystickKnob != null) joystickKnob.style.translate = new Translate(0, 0, 0);
-        if (PlayerController.Instance != null) PlayerController.Instance.SetMoveInput(Vector2.zero);
+        joystickRawMagnitude = 0f;
+        joystickRawForward = 0f;
+        joystickSprintHoldTimer = 0f;
+        if (sprintHint != null)
+        {
+            sprintHint.style.display = DisplayStyle.None;
+            sprintHint.EnableInClassList("sprint-hint-active", false);
+        }
+        if (PlayerController.Instance != null) PlayerController.Instance.SetMoveInput(Vector2.zero, 0f);
+        RefreshSprintVisual();
+    }
+
+    private void UpdateJoystickSprintState()
+    {
+        if (PlayerController.Instance == null) return;
+
+        float sprintThreshold = PlayerController.Instance.StickAutoSprintThreshold;
+        bool alreadyLatched = PlayerController.Instance.IsStickAutoSprintOn;
+        if (alreadyLatched) joystickSprintHoldTimer = 0f;
+        bool eligible = joystickRawMagnitude >= sprintThreshold && joystickRawForward >= joystickSprintForwardMin;
+        if (!alreadyLatched && eligible)
+        {
+            joystickSprintHoldTimer += Time.deltaTime;
+        }
+        else if (!alreadyLatched)
+        {
+            joystickSprintHoldTimer = 0f;
+        }
+
+        if (!alreadyLatched && eligible && joystickSprintHoldTimer >= joystickSprintHoldSeconds)
+        {
+            PlayerController.Instance.SetStickAutoSprint(true);
+            alreadyLatched = true;
+        }
+
+        if (sprintHint != null)
+        {
+            bool showHint = eligible;
+            sprintHint.style.display = showHint ? DisplayStyle.Flex : DisplayStyle.None;
+            sprintHint.EnableInClassList("sprint-hint-active", alreadyLatched || (eligible && joystickSprintHoldTimer >= joystickSprintHoldSeconds));
+        }
+
+        RefreshSprintVisual();
     }
 
     // ───────────────────────────────────────────────
@@ -763,5 +862,12 @@ public class GameHUDController : MonoBehaviour
         if (rightActionsContainer == null) return;
         bool busy = PlayerController.Instance != null && PlayerController.Instance.IsBusy;
         rightActionsContainer.style.display = busy ? DisplayStyle.Flex : DisplayStyle.None;
+    }
+
+    private void RefreshSprintVisual()
+    {
+        if (btnSprint == null || PlayerController.Instance == null) return;
+        bool sprintLit = PlayerController.Instance.IsSprintActive();
+        btnSprint.EnableInClassList("sprint-btn-active", sprintLit);
     }
 }

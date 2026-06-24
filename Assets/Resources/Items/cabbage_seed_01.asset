@@ -17,6 +17,7 @@ MonoBehaviour:
   description: "H\u1EA1t gi\u1ED1ng rau c\u1EA3i xanh t\u01B0\u01A1i."
   iconEmoji: "\U0001F96C"
   iconSprite: {fileID: 0}
+  iconTexture: {fileID: 2800000, guid: aec16870f05c23840821d3cde9d98f5a, type: 3}
   category: seeds
   buyPrice: 3
   sellPrice: 7

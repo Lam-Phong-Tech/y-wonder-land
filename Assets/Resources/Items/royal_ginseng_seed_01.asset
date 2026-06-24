@@ -17,6 +17,7 @@ MonoBehaviour:
   description: "Gi\u1ED1ng s\xE2m ti\u1EBFn vua qu\xFD hi\u1EBFm."
   iconEmoji: "\U0001F33F"
   iconSprite: {fileID: 0}
+  iconTexture: {fileID: 2800000, guid: a53f0012686c64146a85d93f7d95469c, type: 3}
   category: seeds
   buyPrice: 800
   sellPrice: 80

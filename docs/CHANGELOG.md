@@ -5,6 +5,28 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-06-24] — Tối ưu cảm ứng Mobile + Sprint theo hướng PUBG/FreeFire
+
+### Changed
+- **Chốt trạng thái demo build:** giữ `GameTimeConfig.SecondsPerGameDay = 60f` để cây/thú chạy nhanh cho APK/Windows test chéo; không đổi về 24h thật trước demo.
+- **Ghi expected timing cho tester:** cây ngắn ngày ~60s sau tưới; tutorial 24s; Sa Chi/Sầu Riêng ~28 phút; Chanh dây ~90 phút; thú nhanh gồm vịt 60s, gà 120s, dê/ngỗng 180s, đà điểu 360s, bò 420s.
+- **NPC tutorial marker:** thay dấu chấm than primitive bằng prefab `Assets/_Project/Prefabs/ExclamationMark.prefab`, vẫn giữ fallback primitive nếu scene chưa gán prefab.
+- **VPS/backend:** xác nhận client có khung REST nhưng mới phủ `auth/profile/tutorialCompleted`; deploy VPS chỉ đủ cho online tối thiểu nếu chạy `server/` stub + cấu hình `BackendConfig.baseUrl`. Backend thật cho POS/inventory/farm/cây/thú/server-time/IAP là phase riêng sau demo.
+- **Điều khiển mobile:** hoàn thiện luồng `Sprint` hold + tap, auto-run không bị auto-dừng khi xoay camera; đổi hướng bằng joystick mới break sprint.
+- **Camera cảm ứng:** smoothing riêng cho touch, khóa góc nhìn phù hợp kiểm duyệt; giảm tối thiểu bắn ngang.
+- **Đi lùi / đổi hướng:** sửa lại hành vi khi kéo joystick lùi để nhân vật quay đầu trước rồi chạy theo hướng mới.
+- **Build/chuồng:** trạng thái gõ búa + preview ghost build tiếp tục cập nhật theo hướng trực quan.
+- **Popup/flow học chơi:** NPC tutorial giữ nhịp chậm hơn, không spam thoại liên tiếp.
+
+### Changed Files
+- `Assets/_Project/Scripts/Player/PlayerController.cs`
+- `Assets/_Project/Scripts/Camera/ThirdPersonCamera.cs`
+- `Assets/_Project/UI/GameHUD.uxml`
+- `Assets/_Project/UI/GameHUDController.cs`
+- `Assets/_Project/UI/Styles/GameHUD.uss`
+- `Assets/_Project/Scripts/Environment/GhostPlacementController.cs`
+- `Assets/_Project/Scripts/Environment/FenceAutoConnect.cs`
+
 ## [2026-06-20] — Điều khiển mobile + Build snap theo ô đất thật + Hệ chuồng từ hàng rào + Thông tin con vật
 
 ### Added

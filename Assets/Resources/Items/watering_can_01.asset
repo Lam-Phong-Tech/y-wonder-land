@@ -17,6 +17,7 @@ MonoBehaviour:
   description: "X\xF4 \u0111\u1EF1ng n\u01B0\u1EDBc l\xE0m v\u01B0\u1EDDn."
   iconEmoji: "\U0001FAA3"
   iconSprite: {fileID: 0}
+  iconTexture: {fileID: 0}
   category: tools
   buyPrice: 100
   sellPrice: 50

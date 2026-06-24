@@ -28,6 +28,7 @@ MonoBehaviour:
   produceAmount: 2
   produceCycleTimeSec: 10800
   maxHarvests: 2
+  expReward: 15000
   meatItemId: deer_meat_01
   meatAmount: 40
   feedIntervalSec: 60
