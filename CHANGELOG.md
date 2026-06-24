@@ -1,5 +1,30 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-06-24 (Backend demo accounts + interaction hotfix)
+
+### Added
+- **Backend demo tối thiểu đã nối vào client:** thêm `Assets/Resources/BackendConfig.asset` trỏ `https://ywonder.net/game-api`; màn Login/Register gọi thật `auth/login` và `auth/register`.
+- **5 tài khoản test giàu cho khách:** `DemoRich01` -> `DemoRich05` (mật khẩu trùng username) có `tutorialCompleted=true`, level 25, skip tutorial và seed loadout test khi vào gameplay.
+- **Tài khoản mới sạch:** giữ `DemoNew01` để test tutorial/profile mới.
+
+### Changed
+- `AuthService` lưu và expose `Username` backend cùng token/userId để `GameManager` biết account thật đang đăng nhập.
+- `LoginScreenController` preload `PlayerProfileService.LoadProfileAsync()` ngay sau login thành công để tránh bấm skip cutscene quá nhanh làm tutorial bật nhầm.
+- `GameManager` ưu tiên signed-in backend account thay vì lấy tên nhân vật làm username; demo rich accounts được cấp lại `GiveTestLoadout()` sau khi clear app data.
+
+### Fixed
+- **Tương tác tâm ngắm gần vật thể:** `FarmInteractionController` dùng trigger raycast, ưu tiên animal/water, guard khoảng cách theo điểm hit/closest point và mặt phẳng XZ để giảm lỗi đứng gần nhưng không hiện/click được UI.
+- **Chuồng đã có thú:** khi ngắm vào rào/chuồng có `AnimalObject`, popup ưu tiên action của thú thay vì chỉ hiện "Thả thú/Hủy chuồng".
+- **Cho ăn:** popup animal cho phép bấm cho ăn khi thú đang Healthy hoặc Hungry, không chỉ lúc đã Hungry.
+
+### Changed Files
+- `Assets/_Project/UI/LoginScreenController.cs`
+- `Assets/_Project/Scripts/Backend/AuthService.cs`
+- `Assets/_Project/Scripts/Managers/GameManager.cs`
+- `Assets/_Project/Scripts/Environment/FarmInteractionController.cs`
+- `Assets/_Project/UI/AnimalInteractionPopupController.cs`
+- `Assets/Resources/BackendConfig.asset`
+
 ## [Unreleased] - 2026-06-24 (Điều khiển mobile cuối phiên: Sprint, auto-run, touch feel)
 
 ### Changed

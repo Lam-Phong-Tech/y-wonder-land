@@ -199,8 +199,8 @@ public class AnimalInteractionPopupController : MonoBehaviour
         btnHarvest.style.display = animal.hasProductReady && !isDead ? DisplayStyle.Flex : DisplayStyle.None;
         btnHeal.style.display = animal.currentState == FarmAnimal.AnimalState.Sick && !isDead ? DisplayStyle.Flex : DisplayStyle.None;
 
-        // Dim buttons if they don't apply right now
-        btnFeed.SetEnabled(animal.currentState == FarmAnimal.AnimalState.Hungry);
+        // Demo tutorial cho phep cho an ngay sau khi tha thu, ke ca khi thanh no con day.
+        btnFeed.SetEnabled((animal.currentState == FarmAnimal.AnimalState.Hungry || animal.currentState == FarmAnimal.AnimalState.Healthy) && !isDead);
     }
 
     private void OnFeedClicked()

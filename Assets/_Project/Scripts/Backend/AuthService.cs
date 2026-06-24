@@ -17,6 +17,7 @@ namespace YWonderLand.Backend
 
         public string Token { get; private set; }
         public string UserId { get; private set; }
+        public string Username { get; private set; }
         public bool IsSignedIn => !string.IsNullOrEmpty(Token);
 
         // DTOs khớp với server stub
@@ -29,6 +30,7 @@ namespace YWonderLand.Backend
             Instance = this;
             Token = PlayerPrefs.GetString(KEY_TOKEN, "");
             UserId = PlayerPrefs.GetString(KEY_USERID, "");
+            Username = PlayerPrefs.GetString(KEY_USERNAME, "");
         }
 
         /// <summary>Thử đăng nhập; nếu tài khoản chưa tồn tại thì tự đăng ký. Trả về true nếu có token.</summary>
@@ -59,6 +61,7 @@ namespace YWonderLand.Backend
 
             Token = res.data.token;
             UserId = res.data.userId;
+            Username = username;
             PlayerPrefs.SetString(KEY_TOKEN, Token);
             PlayerPrefs.SetString(KEY_USERID, UserId);
             PlayerPrefs.SetString(KEY_USERNAME, username);
@@ -71,8 +74,10 @@ namespace YWonderLand.Backend
         {
             Token = "";
             UserId = "";
+            Username = "";
             PlayerPrefs.DeleteKey(KEY_TOKEN);
             PlayerPrefs.DeleteKey(KEY_USERID);
+            PlayerPrefs.DeleteKey(KEY_USERNAME);
             PlayerPrefs.Save();
         }
     }

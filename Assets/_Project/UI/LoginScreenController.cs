@@ -1,10 +1,10 @@
 using UnityEngine;
 using UnityEngine.UIElements;
+using YWonderLand.Backend;
 
 /// <summary>
 /// Controller for the Login/Register UI screen.
-/// Handles tab switching, password toggle, and navigation to Character Selection.
-/// Mockup only — no backend authentication logic.
+/// Handles tab switching, password toggle, backend auth, and navigation to Character Selection.
 /// </summary>
 public class LoginScreenController : MonoBehaviour
 {
@@ -42,6 +42,7 @@ public class LoginScreenController : MonoBehaviour
     // State
     private bool isPasswordVisible = false;
     private bool isRegPasswordVisible = false;
+    private bool isAuthRequestInProgress = false;
 
     // USS class names
     private const string TAB_ACTIVE_CLASS = "login-tab-active";
@@ -224,9 +225,11 @@ public class LoginScreenController : MonoBehaviour
 
     // ── Login ──
 
-    private void OnLoginClicked()
+    private async void OnLoginClicked()
     {
-        string username = usernameField?.value ?? "";
+        if (isAuthRequestInProgress) return;
+
+        string username = (usernameField?.value ?? "").Trim();
         string password = passwordField?.value ?? "";
 
         Debug.Log($"[LoginScreen] Login clicked — Username: '{username}'");
@@ -254,9 +257,34 @@ public class LoginScreenController : MonoBehaviour
             return;
         }
 
-        // Mockup: always succeed
+        var auth = AuthService.Instance;
+        if (auth == null)
+        {
+            ShowStatus(loginStatus, "Hệ thống đăng nhập chưa sẵn sàng. Thử lại sau.", false);
+            Debug.LogWarning("[LoginScreen] AuthService.Instance is null. Cannot login.");
+            return;
+        }
+
+        SetAuthControlsEnabled(false);
+        ShowStatus(loginStatus, "Đang đăng nhập...", true);
+        bool success = await auth.LoginAsync(username, password);
+        SetAuthControlsEnabled(true);
+
+        if (!success)
+        {
+            ShowStatus(loginStatus, "Đăng nhập thất bại. Kiểm tra tài khoản/mật khẩu.", false);
+            return;
+        }
+
+        var profile = PlayerProfileService.Instance;
+        if (profile != null)
+        {
+            ShowStatus(loginStatus, "Đang nạp hồ sơ...", true);
+            await profile.LoadProfileAsync();
+        }
+
         ShowStatus(loginStatus, "Đăng nhập thành công!", true);
-        Debug.Log("[LoginScreen] Login successful (mockup). Transitioning to Character Selection...");
+        Debug.Log("[LoginScreen] Login successful. Transitioning to Character Selection...");
 
         // Transition to Character Selection after a short delay
         Invoke(nameof(TransitionToCharacterSelect), 0.8f);
@@ -391,8 +419,10 @@ public class LoginScreenController : MonoBehaviour
         return true;
     }
 
-    private void OnRegisterClicked()
+    private async void OnRegisterClicked()
     {
+        if (isAuthRequestInProgress) return;
+
         string errMsg;
         if (!ValidateRegisterForm(out errMsg))
         {
@@ -400,9 +430,32 @@ public class LoginScreenController : MonoBehaviour
             return;
         }
 
-        // Mockup: always succeed
+        var auth = AuthService.Instance;
+        if (auth == null)
+        {
+            ShowStatus(registerStatus, "Hệ thống đăng ký chưa sẵn sàng. Thử lại sau.", false);
+            Debug.LogWarning("[LoginScreen] AuthService.Instance is null. Cannot register.");
+            return;
+        }
+
+        string username = (regUsernameField?.value ?? "").Trim();
+        string password = regPasswordField?.value ?? "";
+
+        SetAuthControlsEnabled(false);
+        ShowStatus(registerStatus, "Đang tạo tài khoản...", true);
+        bool success = await auth.RegisterAsync(username, password);
+        SetAuthControlsEnabled(true);
+
+        if (!success)
+        {
+            ShowStatus(registerStatus, "Đăng ký thất bại. Tài khoản có thể đã tồn tại hoặc mất kết nối.", false);
+            return;
+        }
+
+        auth.SignOut();
+
         ShowStatus(registerStatus, "Đăng ký thành công! Chuyển sang Đăng Nhập...", true);
-        Debug.Log("[LoginScreen] Registration successful (mockup). Switching to Login tab...");
+        Debug.Log("[LoginScreen] Registration successful. Switching to Login tab...");
 
         Invoke(nameof(SwitchToLoginAfterRegister), 1.2f);
     }
@@ -455,5 +508,31 @@ public class LoginScreenController : MonoBehaviour
         label.RemoveFromClassList(STATUS_SUCCESS);
         label.RemoveFromClassList(STATUS_ERROR);
         label.style.display = DisplayStyle.None;
+    }
+
+    private void SetAuthControlsEnabled(bool enabled)
+    {
+        isAuthRequestInProgress = !enabled;
+
+        tabLogin?.SetEnabled(enabled);
+        tabRegister?.SetEnabled(enabled);
+
+        usernameField?.SetEnabled(enabled);
+        passwordField?.SetEnabled(enabled);
+        btnTogglePassword?.SetEnabled(enabled);
+        rememberToggle?.SetEnabled(enabled);
+        forgotPassword?.SetEnabled(enabled);
+        btnLogin?.SetEnabled(enabled);
+
+        regUsernameField?.SetEnabled(enabled);
+        regEmailField?.SetEnabled(enabled);
+        regPasswordField?.SetEnabled(enabled);
+        regConfirmField?.SetEnabled(enabled);
+        btnToggleRegPassword?.SetEnabled(enabled);
+
+        if (btnRegister != null)
+        {
+            btnRegister.SetEnabled(enabled && ValidateRegisterForm(out _));
+        }
     }
 }

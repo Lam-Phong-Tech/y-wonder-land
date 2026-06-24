@@ -50,6 +50,8 @@ public class GameManager : MonoBehaviour
     private const string K_PosY = "YW_PosY";
     private const string K_PosZ = "YW_PosZ";
     private const string K_Yaw = "YW_PosYaw";
+    private static readonly string[] DemoRichAccounts = { "DemoRich01", "DemoRich02", "DemoRich03", "DemoRich04", "DemoRich05" };
+    private const string DemoFreshAccount = "DemoNew01";
 
     void Awake()
     {
@@ -348,17 +350,38 @@ public class GameManager : MonoBehaviour
         var profile = YWonderLand.Backend.PlayerProfileService.Instance;
         if (auth == null || profile == null) return;
 
-        // Đợt 1 CHƯA nối UI Login: dùng tên nhân vật làm username, mật khẩu sinh & lưu local.
-        string username = string.IsNullOrEmpty(playerName) ? "Player" : playerName;
-        string password = GetOrCreateLocalPassword(username);
+        string backendUsername = auth.IsSignedIn && !string.IsNullOrEmpty(auth.Username)
+            ? auth.Username
+            : null;
 
-        await auth.EnsureSignedInAsync(username, password);
+        if (string.IsNullOrEmpty(backendUsername))
+        {
+            // Fallback cho flow cũ/offline: chưa qua Login backend thì dùng tên nhân vật làm account local.
+            backendUsername = string.IsNullOrEmpty(playerName) ? "Player" : playerName;
+            string password = GetOrCreateLocalPassword(backendUsername);
+            await auth.EnsureSignedInAsync(backendUsername, password);
+            backendUsername = !string.IsNullOrEmpty(auth.Username) ? auth.Username : backendUsername;
+        }
+        else
+        {
+            Debug.Log($"[GameManager] Using signed-in backend account: {backendUsername}");
+        }
+
         await profile.LoadProfileAsync();
         profile.ApplyCharacterInfo(playerName, selectedCharacterIndex == 0 ? "male" : "female");
+        ApplyDemoAccountOverrides(backendUsername, profile);
     }
 
     private string GetOrCreateLocalPassword(string username)
     {
+        if (IsFixedDemoAccount(username))
+        {
+            string demoKey = "YW_LocalPwd_" + username;
+            PlayerPrefs.SetString(demoKey, username);
+            PlayerPrefs.Save();
+            return username;
+        }
+
         string key = "YW_LocalPwd_" + username;
         string pwd = PlayerPrefs.GetString(key, "");
         if (string.IsNullOrEmpty(pwd))
@@ -368,6 +391,40 @@ public class GameManager : MonoBehaviour
             PlayerPrefs.Save();
         }
         return pwd;
+    }
+
+    private static bool IsFixedDemoAccount(string username)
+    {
+        return IsRichDemoAccount(username)
+            || string.Equals(username, DemoFreshAccount, System.StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsRichDemoAccount(string username)
+    {
+        if (string.IsNullOrEmpty(username)) return false;
+        foreach (string account in DemoRichAccounts)
+        {
+            if (string.Equals(username, account, System.StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+        return false;
+    }
+
+    private void ApplyDemoAccountOverrides(string username, YWonderLand.Backend.PlayerProfileService profile)
+    {
+        if (!IsRichDemoAccount(username))
+            return;
+
+        if (profile != null && profile.Profile != null && !profile.Profile.tutorialCompleted)
+            profile.SetTutorialCompleted(true);
+
+        string seedKey = "YW_DemoLoadoutSeeded_" + username;
+        if (PlayerPrefs.GetInt(seedKey, 0) == 1) return;
+
+        YWonderLand.Managers.InventoryManager.Instance?.GiveTestLoadout();
+        PlayerPrefs.SetInt(seedKey, 1);
+        PlayerPrefs.Save();
+        Debug.Log($"[GameManager] {username}: seeded rich demo loadout and skipped tutorial.");
     }
 
     private void SpawnCharacterOnBoat()
