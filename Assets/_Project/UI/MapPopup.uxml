@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:Style src="Styles/DesignSystem.uss" />
+    <ui:Style src="Styles/MapPopup.uss" />
+
+    <!-- Overlay -->
+    <ui:VisualElement name="MapOverlay" class="map-overlay">
+
+        <!-- Wrapper (no overflow hidden — close button lives here) -->
+        <ui:VisualElement class="map-wrapper">
+
+            <!-- Map Container (has overflow hidden for content clipping) -->
+            <ui:VisualElement class="map-container">
+
+                <!-- Header Bar (floating top) -->
+                <ui:VisualElement class="map-top-bar">
+                    <!-- Level pill -->
+                    <ui:VisualElement class="map-level-pill">
+                        <ui:Label text="⭐" class="map-pill-icon" />
+                        <ui:Label name="LblMapLevel" text="Lv. 1" class="map-pill-value" />
+                    </ui:VisualElement>
+
+                    <!-- Title -->
+                    <ui:Label text="BẢN ĐỒ THẾ GIỚI" class="map-top-title" />
+                </ui:VisualElement>
+
+                <!-- Ocean Background + Islands -->
+                <ui:VisualElement name="MapWorld" class="map-world">
+
+                    <!-- Decorative waves / ocean texture labels -->
+                    <ui:Label text="〰〰〰" class="map-wave map-wave-1" />
+                    <ui:Label text="〰〰" class="map-wave map-wave-2" />
+                    <ui:Label text="〰〰〰〰" class="map-wave map-wave-3" />
+                    <ui:Label text="〰" class="map-wave map-wave-4" />
+
+                    <!-- ═══ ISLAND: Nông trại (center-left) ═══ -->
+                    <ui:VisualElement name="IslandFarm" class="map-island map-island--farm">
+                        <ui:VisualElement class="map-island-land map-island-land--farm" />
+                        <ui:VisualElement class="map-island-pin">
+                            <ui:Label text="🏡" class="map-island-icon" />
+                        </ui:VisualElement>
+                        <ui:Label text="Nông trại" class="map-island-name" />
+                    </ui:VisualElement>
+
+                    <!-- ═══ ISLAND: Thành phố (center-right) ═══ -->
+                    <ui:VisualElement name="IslandCity" class="map-island map-island--city">
+                        <ui:VisualElement class="map-island-land map-island-land--city" />
+                        <ui:VisualElement class="map-island-pin">
+                            <ui:Label text="🏙️" class="map-island-icon" />
+                        </ui:VisualElement>
+                        <ui:Label text="Thành phố" class="map-island-name" />
+                    </ui:VisualElement>
+
+                    <!-- ═══ ISLAND: Khai thác mỏ (top-center) ═══ -->
+                    <ui:VisualElement name="IslandMine" class="map-island map-island--mine">
+                        <ui:VisualElement class="map-island-land map-island-land--mine" />
+                        <ui:VisualElement class="map-island-pin">
+                            <ui:Label text="⛏️" class="map-island-icon" />
+                        </ui:VisualElement>
+                        <ui:Label text="Mỏ đá" class="map-island-name" />
+                        <ui:VisualElement name="LockMine" class="map-island-lock">
+                            <ui:Label text="🔒" class="map-island-lock-icon" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <!-- ═══ ISLAND: Đảo Hải Phú (bottom-left) ═══ -->
+                    <ui:VisualElement name="IslandHaiphu" class="map-island map-island--haiphu">
+                        <ui:VisualElement class="map-island-land map-island-land--haiphu" />
+                        <ui:VisualElement class="map-island-pin">
+                            <ui:Label text="🏝️" class="map-island-icon" />
+                        </ui:VisualElement>
+                        <ui:Label text="Đảo Hải Phú" class="map-island-name" />
+                        <ui:VisualElement name="LockHaiphu" class="map-island-lock">
+                            <ui:Label text="🔒" class="map-island-lock-icon" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <!-- ═══ ISLAND: Đảo Mộc Nhi (bottom-right) ═══ -->
+                    <ui:VisualElement name="IslandMocnhi" class="map-island map-island--mocnhi">
+                        <ui:VisualElement class="map-island-land map-island-land--mocnhi" />
+                        <ui:VisualElement class="map-island-pin">
+                            <ui:Label text="🌲" class="map-island-icon" />
+                        </ui:VisualElement>
+                        <ui:Label text="Đảo Mộc Nhi" class="map-island-name" />
+                        <ui:VisualElement name="LockMocnhi" class="map-island-lock">
+                            <ui:Label text="🔒" class="map-island-lock-icon" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <!-- Compass rose button -->
+                    <ui:Button name="BtnCompass" class="map-compass">
+                        <ui:Label text="🧭" class="map-compass-icon" />
+                    </ui:Button>
+
+                    <!-- Player Location Indicator -->
+                    <ui:VisualElement name="PlayerIndicator" class="map-player-indicator">
+                        <ui:Label text="✨" class="map-indicator-star" />
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+
+                <!-- Removed InfoCard per new design -->
+
+                <!-- Cheat Bar (bottom floating) -->
+                <ui:VisualElement class="map-cheat-bar">
+                    <ui:Button name="BtnCheatLevel" text="🔧 Tăng Level" class="map-cheat-btn" />
+                    <ui:Button name="BtnCheatVip" text="👑 VIP / Vé" class="map-cheat-btn" />
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+
+            <!-- Close Button (OUTSIDE container, won't be clipped) -->
+            <ui:VisualElement class="map-close-shadow">
+                <ui:Button name="BtnCloseMap" text="✕" class="map-close-btn" />
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+
+</ui:UXML>

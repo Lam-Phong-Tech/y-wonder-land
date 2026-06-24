@@ -1,0 +1,154 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &3159927810167397986
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: -8253093920295675039, guid: 18d483fdc7ad4924dada20ca1339f55d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 90f0e5d1b35432441bc5381ffbe2b8cd, type: 2}
+    - target: {fileID: -1342634580138740236, guid: 18d483fdc7ad4924dada20ca1339f55d, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -1342634580138740236, guid: 18d483fdc7ad4924dada20ca1339f55d, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -1342634580138740236, guid: 18d483fdc7ad4924dada20ca1339f55d, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -1342634580138740236, guid: 18d483fdc7ad4924dada20ca1339f55d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 998.13
+      objectReference: {fileID: 0}
+    - target: {fileID: -1342634580138740236, guid: 18d483fdc7ad4924dada20ca1339f55d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 2.441
+      objectReference: {fileID: 0}
+    - target: {fileID: -1342634580138740236, guid: 18d483fdc7ad4924dada20ca1339f55d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -6.90506
+      objectReference: {fileID: 0}
+    - target: {fileID: -1342634580138740236, guid: 18d483fdc7ad4924dada20ca1339f55d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1342634580138740236, guid: 18d483fdc7ad4924dada20ca1339f55d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -1342634580138740236, guid: 18d483fdc7ad4924dada20ca1339f55d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -1342634580138740236, guid: 18d483fdc7ad4924dada20ca1339f55d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -1342634580138740236, guid: 18d483fdc7ad4924dada20ca1339f55d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -1342634580138740236, guid: 18d483fdc7ad4924dada20ca1339f55d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -1342634580138740236, guid: 18d483fdc7ad4924dada20ca1339f55d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -1342634580138740236, guid: 18d483fdc7ad4924dada20ca1339f55d, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2015994280071111348, guid: 18d483fdc7ad4924dada20ca1339f55d, type: 3}
+      propertyPath: m_Name
+      value: ThuYNPC
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2015994280071111348, guid: 18d483fdc7ad4924dada20ca1339f55d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7666855138619715808}
+    - targetCorrespondingSourceObject: {fileID: 2015994280071111348, guid: 18d483fdc7ad4924dada20ca1339f55d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6838409720642997484}
+    - targetCorrespondingSourceObject: {fileID: 2015994280071111348, guid: 18d483fdc7ad4924dada20ca1339f55d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 620781620451761435}
+  m_SourcePrefab: {fileID: 3150474306388093854, guid: 18d483fdc7ad4924dada20ca1339f55d, type: 3}
+--- !u!1 &3467790972316581078 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2015994280071111348, guid: 18d483fdc7ad4924dada20ca1339f55d, type: 3}
+  m_PrefabInstance: {fileID: 3159927810167397986}
+  m_PrefabAsset: {fileID: 0}
+--- !u!136 &7666855138619715808
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3467790972316581078}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.21389067
+  m_Height: 0.97839797
+  m_Direction: 1
+  m_Center: {x: -0.0002591759, y: 0.000047266483, z: 0.00008161366}
+--- !u!114 &6838409720642997484
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3467790972316581078}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3339945932e7b094fae9ffc5a48bac9e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Environment.MerchantNPC
+  serviceType: 0
+  shopData: {fileID: 0}
+  interactionLabel: 
+  npcName: 
+--- !u!95 &620781620451761435
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3467790972316581078}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 156d6c06b354c9c478c782d3859136c2, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

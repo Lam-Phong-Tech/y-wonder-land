@@ -1,0 +1,28 @@
+{
+    "asset": "7cea767f8284c5b49a48ecab0aaee8c1",
+    "fileName": "019eaf88-e43b-7fd4-b255-499bf7aafbcd.png",
+    "prompt": "Strictly front-facing orthographic view of a 3D folded map icon with a location pin. The map is tri-folded into 3 vertical sections. A large 3D tear-drop shaped location pin with a hole is centered on the map, pointing to a glowing route. Isolated object only, no pedestal, no display stand, no floor shadow. Minimalist 3D Onyx style: dark matte plastic base, frosted glass elements, soft glowing neon green and cyan route lines and pin. Centered composition, high contrast, solid white background.",
+    "negativePrompt": "",
+    "model": "gemini-3.1-flash",
+    "modelName": "Gemini 3.1 Nano Banana 2",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelatePixelGridSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0,
+    "dimensions": {
+        "width": 1024,
+        "height": 1024
+    },
+    "spriteSheet": false,
+    "duration": 0.0
+}

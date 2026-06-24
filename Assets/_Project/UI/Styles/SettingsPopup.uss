@@ -1,0 +1,151 @@
+/* ============================================
+   Settings Popup - Cozy Dark Palia
+   Extends DesignSystem.uss
+   ============================================ */
+
+.settings-overlay {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(21, 26, 39, 0.7); /* Mystic Black 70% */
+    align-items: center; justify-content: center; display: none; z-index: 100;
+}
+
+.settings-panel-shadow { position: relative; }
+
+.settings-panel {
+    width: 680px;
+    background-color: var(--color-primary-navy);
+    border-radius: 24px; /* Soft Pill shape for panel */
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.1); /* Subtle inner glow */
+    overflow: hidden;
+}
+
+/* ── HEADER ── */
+.settings-header {
+    flex-direction: row; align-items: center; justify-content: center;
+    background-color: var(--color-deep-blue); 
+    padding: 24px 20px;
+    border-bottom-width: 1px; border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+.settings-header-title {
+    font-size: 32px; -unity-font-style: bold;
+    color: var(--color-accent-yellow); -unity-text-align: middle-center;
+    letter-spacing: 2px;
+}
+
+/* ── CLOSE BUTTON (Inside Header) ── */
+.settings-close-btn-container {
+    position: absolute; right: 16px; top: 16px;
+}
+
+.settings-close-btn {
+    width: 40px; height: 40px; border-radius: 20px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-width: 0;
+    font-size: 18px; color: var(--color-text-white);
+    -unity-font-style: bold; padding: 0; align-items: center; justify-content: center;
+    transition-property: background-color, scale; transition-duration: 0.15s;
+}
+
+.settings-close-btn:hover { background-color: var(--color-danger); color: white; }
+.settings-close-btn:active { scale: 0.9; }
+
+/* ── BODY ── */
+.settings-columns { flex-direction: row; padding: 24px 24px 12px 24px; }
+.settings-col { flex: 1; padding: 0 16px; }
+.settings-col-divider { width: 1px; background-color: rgba(255, 255, 255, 0.1); margin: 0 8px; }
+
+.settings-section-header {
+    font-size: 14px; -unity-font-style: bold;
+    color: var(--color-accent-blue); letter-spacing: 1px;
+    margin-bottom: 16px; margin-top: 8px; padding-bottom: 8px;
+    border-bottom-width: 1px; border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+.settings-row { flex-direction: row; align-items: center; margin-bottom: 20px; }
+
+/* ── SLIDERS ── */
+.settings-slider-row {
+    flex-direction: row; flex-wrap: wrap;
+    align-items: center; justify-content: space-between;
+    margin-bottom: 24px;
+}
+.settings-slider-row > .settings-label { width: auto; font-size: 15px; -unity-font-style: bold; color: var(--color-text-white); margin-bottom: 8px; }
+.settings-label { font-size: 15px; -unity-font-style: bold; color: var(--color-text-white); width: 100px; flex-shrink: 0; }
+
+.settings-slider { width: 100%; height: 24px; margin-top: 4px; }
+.settings-slider .unity-base-slider__tracker {
+    height: 12px; border-radius: 6px; background-color: var(--color-mystic-black);
+    border-width: 0; margin-top: -6px;
+}
+.settings-slider .unity-base-slider__dragger {
+    width: 24px; height: 24px; border-radius: 12px; background-color: var(--color-accent-blue);
+    border-width: 3px; border-color: var(--color-text-white); margin-top: -12px;
+    transition-property: scale, background-color; transition-duration: 0.1s;
+}
+.settings-slider .unity-base-slider__dragger:hover { scale: 1.2; background-color: #6BC0F6; }
+.settings-slider .unity-base-slider__fill { background-color: var(--color-accent-blue); border-radius: 6px; }
+
+.settings-slider-value {
+    font-size: 14px; -unity-font-style: bold; color: var(--color-text-white);
+    width: 52px; -unity-text-align: middle-center;
+    background-color: var(--color-mystic-black); border-radius: 12px; padding: 6px 4px;
+    margin-bottom: 8px;
+}
+
+/* ── TOGGLES / CHECKBOXES ── */
+.settings-toggle-row { flex-direction: row; align-items: center; margin-bottom: 20px; }
+.settings-toggle .unity-toggle__input { flex-direction: row-reverse; }
+.settings-toggle .unity-toggle__checkmark {
+    width: 28px; height: 28px; border-radius: 8px;
+    border-width: 2px; border-color: rgba(255,255,255,0.2); background-color: var(--color-mystic-black);
+    -unity-background-image-tint-color: transparent; transition-property: background-color, border-color; transition-duration: 0.1s;
+}
+.settings-toggle:checked .unity-toggle__checkmark {
+    background-color: var(--color-mystic-black); border-color: var(--color-accent-yellow);
+    -unity-background-image-tint-color: var(--color-accent-yellow);
+}
+.settings-toggle .unity-toggle__text { display: none; }
+.settings-toggle-label { font-size: 15px; -unity-font-style: bold; color: var(--color-text-white); width: 150px; flex-shrink: 0; }
+.settings-toggle-status { font-size: 14px; -unity-font-style: bold; margin-left: 12px; color: var(--color-bright-grey); }
+
+/* ── DROPDOWN ── */
+.settings-dropdown-shadow { flex-grow: 1; min-width: 140px; }
+.settings-dropdown {
+    border-radius: 16px; background-color: var(--color-mystic-black);
+    border-width: 0; padding: 0; margin: 0; flex-grow: 1;
+    transition-property: background-color; transition-duration: 0.1s;
+}
+.settings-dropdown:hover { background-color: var(--color-deep-blue); }
+
+.settings-dropdown > .unity-base-popup-field__input {
+    background-color: transparent; border-width: 0; margin: 0;
+    padding: 10px 16px; color: var(--color-text-white);
+    font-size: 14px; -unity-font-style: bold;
+}
+.settings-dropdown .unity-text-element { color: var(--color-text-white); }
+.settings-dropdown .unity-base-popup-field__arrow { -unity-background-image-tint-color: var(--color-text-white); }
+
+.settings-divider { height: 1px; background-color: rgba(255, 255, 255, 0.05); margin: 8px 32px 24px 32px; }
+
+/* ── FOOTER BUTTONS ── */
+.settings-buttons-row { flex-direction: row; justify-content: space-between; padding: 0 32px 32px 32px; }
+
+.settings-delete-btn {
+    padding: 14px 24px; border-radius: 24px; /* Flat pill shape */
+    background-color: transparent; border-width: 2px; border-color: var(--color-danger);
+    font-size: 16px; -unity-font-style: bold; color: var(--color-danger); -unity-text-align: middle-center; width: 48%;
+    transition-property: background-color, color, scale; transition-duration: 0.1s;
+}
+.settings-delete-btn:hover { background-color: rgba(230, 74, 25, 0.15); }
+.settings-delete-btn:active { scale: 0.98; background-color: var(--color-danger); color: white; }
+
+.settings-exit-btn {
+    padding: 14px 32px; border-radius: 24px; /* Flat pill shape */
+    background-color: var(--color-accent-yellow); border-width: 0;
+    font-size: 16px; -unity-font-style: bold; color: var(--color-mystic-black); -unity-text-align: middle-center; width: 48%;
+    transition-property: background-color, scale; transition-duration: 0.1s;
+}
+.settings-exit-btn:hover { background-color: #FFF890; }
+.settings-exit-btn:active { scale: 0.98; background-color: #D0C350; }

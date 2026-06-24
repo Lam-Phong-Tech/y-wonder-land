@@ -1,0 +1,23 @@
+{
+    "asset": "a2c95d3b698850c418a99b2b7a099e09",
+    "fileName": "019eabd8-92d9-7647-a1d2-bb97047012a0.glb",
+    "prompt": "A single stylized low-poly rock (flatter shape). Grey color, faceted surfaces, sharp edges. Matching the art style of the provided reference image. Optimized for mobile.",
+    "negativePrompt": "",
+    "model": "model3d-tripo3-1",
+    "modelName": "Tripo 3.1",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "promptImageReferenceGuid": "c3425668aefe22e4687c0b36cccd125c",
+    "modelReferenceGuid": "",
+    "multiviewFrontGuid": "",
+    "multiviewBackGuid": "",
+    "multiviewLeftGuid": "",
+    "multiviewRightGuid": "",
+    "multiviewTopGuid": "",
+    "multiviewBottomGuid": "",
+    "multiviewLeftFrontGuid": "",
+    "multiviewRightFrontGuid": "",
+    "faceLimit": -1
+}

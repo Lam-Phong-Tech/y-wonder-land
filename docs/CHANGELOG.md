@@ -1,8 +1,315 @@
-# Changelog — Y WONDER LAND
+﻿# Changelog — Y WONDER GREEN FARM
 # Format: Theo module, có ngày và danh sách files thay đổi
 
 > **⚠️ TRẠNG THÁI QC:** Tất cả các module UI hiện tại đều **CHƯA được QC review** bởi khách hàng.
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
+
+---
+## [2026-06-24] — Tối ưu cảm ứng Mobile + Sprint theo hướng PUBG/FreeFire
+
+### Changed
+- **Chốt trạng thái demo build:** giữ `GameTimeConfig.SecondsPerGameDay = 60f` để cây/thú chạy nhanh cho APK/Windows test chéo; không đổi về 24h thật trước demo.
+- **Ghi expected timing cho tester:** cây ngắn ngày ~60s sau tưới; tutorial 24s; Sa Chi/Sầu Riêng ~28 phút; Chanh dây ~90 phút; thú nhanh gồm vịt 60s, gà 120s, dê/ngỗng 180s, đà điểu 360s, bò 420s.
+- **NPC tutorial marker:** thay dấu chấm than primitive bằng prefab `Assets/_Project/Prefabs/ExclamationMark.prefab`, vẫn giữ fallback primitive nếu scene chưa gán prefab.
+- **VPS/backend:** xác nhận client có khung REST nhưng mới phủ `auth/profile/tutorialCompleted`; deploy VPS chỉ đủ cho online tối thiểu nếu chạy `server/` stub + cấu hình `BackendConfig.baseUrl`. Backend thật cho POS/inventory/farm/cây/thú/server-time/IAP là phase riêng sau demo.
+- **Điều khiển mobile:** hoàn thiện luồng `Sprint` hold + tap, auto-run không bị auto-dừng khi xoay camera; đổi hướng bằng joystick mới break sprint.
+- **Camera cảm ứng:** smoothing riêng cho touch, khóa góc nhìn phù hợp kiểm duyệt; giảm tối thiểu bắn ngang.
+- **Đi lùi / đổi hướng:** sửa lại hành vi khi kéo joystick lùi để nhân vật quay đầu trước rồi chạy theo hướng mới.
+- **Build/chuồng:** trạng thái gõ búa + preview ghost build tiếp tục cập nhật theo hướng trực quan.
+- **Popup/flow học chơi:** NPC tutorial giữ nhịp chậm hơn, không spam thoại liên tiếp.
+
+### Changed Files
+- `Assets/_Project/Scripts/Player/PlayerController.cs`
+- `Assets/_Project/Scripts/Camera/ThirdPersonCamera.cs`
+- `Assets/_Project/UI/GameHUD.uxml`
+- `Assets/_Project/UI/GameHUDController.cs`
+- `Assets/_Project/UI/Styles/GameHUD.uss`
+- `Assets/_Project/Scripts/Environment/GhostPlacementController.cs`
+- `Assets/_Project/Scripts/Environment/FenceAutoConnect.cs`
+
+## [2026-06-20] — Điều khiển mobile + Build snap theo ô đất thật + Hệ chuồng từ hàng rào + Thông tin con vật
+
+### Added
+- **Điều khiển cảm ứng (GameHUD):** joystick ảo điều khiển di chuyển (`PlayerController.SetMoveInput`); nút **Sprint giữ-để-chạy** (fix `Clickable` nuốt event bằng `TrickleDown`); nút **Jump** (`TriggerJump`); nút **X hủy hoạt ảnh** (`CancelAction`, tự hiện khi `IsBusy`).
+- **Build snap theo Ô ĐẤT THẬT:** `BuildSurfaceCell` (gắn lên khối cube map, cube=0.8) thay lưới ảo lệch; ghost ướm vào tâm mặt trên khối. Tool Editor **"sơn vùng"** (`BuildSurfaceCellSetup`): kéo BoxCollider trùm vùng → gắn hàng loạt khối `cube*` trong vùng (+ collider). Gizmo hiện trạng ô.
+- **Hệ chuồng từ hàng rào (task #6):** rào = hộp vuông trên 1 ô → **ô có rào = ô chuồng**. `PenEnclosure.FindPen` BFS cụm ô-rào liền nhau (nhiều rào kề = chuồng to). Ngắm/click ô rào → "Thả thú" → chọn loài → validate `penSlots` vs số ô còn trống → thả (`SetAnimal`) hoặc `ScreenToast` báo lỗi. `AnimalPrefabLibrary` (itemId→prefab thú + spawnHeightOffset). Click thẳng (PC) + bấm chữ (mobile) đều chạy.
+- **Popup Thông tin con vật:** hiện giá mua / số ô chuồng / thức ăn chính-phụ / sản phẩm. Thêm trường vào `AnimalDefinition`; điền data 10 con qua generator (nguồn: bảng VatNuoi khách). Restyle popup theo Cozy Dark Palia.
+- **Thông tin con vật ở Shop + Túi đồ:** chèn "Thông tin nuôi" (giá/ô/thức ăn) vào mô tả khi chọn con vật. `AnimalManager.LookupDefinition` (tra Instance, fallback Resources → chạy kể cả khi scene chưa gắn AnimalManager).
+- **Mặt đường đá (paving):** item "Đường đá" trong Build Mode → map `BuildPrefabLibrary` (StoneSlab).
+- **Loadout test:** `InventoryManager.GiveTestLoadout()` + cờ `giveTestLoadoutOnStart` — nạp nông sản/sản phẩm/vật liệu/hạt + tiền để test NPC mua/bán.
+
+### Changed
+- **Tương tác ngắm theo điểm chạm/tâm** cho ổn định; **nút gợi ý "Chặt cây"... bấm/tap được** (fix picking-mode cha Ignore); tia ngắm **xuyên qua hàng rào + ô bị chiếm** để tới ô chuồng.
+- **Bỏ tính năng Vuốt ve** (Pet) khỏi tương tác con vật.
+- **Dọn menu Build còn 3 mục** (Ruộng / Đường đá / Chuồng); ẩn 4 tab cũ.
+- **Fix ghost Build luôn báo đỏ:** `GhostPlacementController` đổi `Physics.Raycast` → `RaycastAll` + tìm `BuildSurfaceCell` gần nhất (bỏ qua collider nền/mesh đảo chắn trước).
+- **Lập task Hệ NPC** (theo kịch bản "10+ NPC"): shop keeper đa-NPC, Maid, Pet, NPC mỏ, NPC câu cá, AI chat (xem task.md).
+
+### Changed Files
+- `Scripts/Player/PlayerController.cs`, `UI/GameHUD.uxml`, `UI/GameHUDController.cs`, `UI/Styles/GameHUD.uss`
+- `Scripts/Environment/{BuildSurfaceCell,PenEnclosure,AnimalPrefabLibrary,ScreenToast}.cs` [NEW], `GhostPlacementController.cs`, `FarmInteractionController.cs`, `PetInteraction.cs`
+- `Scripts/Editor/BuildSurfaceCellSetup.cs` [NEW], `Scripts/Editor/ItemDataGenerator.cs`, `Scripts/Data/AnimalDefinition.cs`
+- `UI/AnimalInteractionPopup.uxml`, `UI/AnimalInteractionPopupController.cs`, `UI/Styles/AnimalInteractionPopup.uss` [NEW]
+- `UI/ShopPopupController.cs`, `UI/InventoryPopupController.cs`, `UI/BuildModeOverlayController.cs`, `UI/BuildModeOverlay.uxml`
+- `Scripts/Managers/{AnimalManager,InventoryManager}.cs`, `task.md`
+
+---
+## [2026-06-19] — Build Mode trực quan: ghost mờ kiểu ROK + bù pivot + hàng rào tự nối
+
+### Changed
+- **Bỏ lưới hiển thị** trong Build Mode theo yêu cầu khách (giữ logic snap ô, chỉ tắt phần vẽ lưới).
+- **Ghost preview = bản MỜ của chính prefab** (kiểu ROK/Hay Day): chọn item thấy luôn hình công trình mờ **xanh lá** (đặt được) / **đỏ** (không), theo chuột + snap lưới + xoay. Đặt = clone y hệt ghost (WYSIWYG). Item chưa khai báo prefab vẫn fallback khối Cube.
+- Stretch prefab (đất/hàng rào) lên **đúng 1 ô (100%)** để đặt liền kề khít sát.
+
+### Added
+- **Tự bù pivot lệch** (`MakeCenteredClone`): bọc prefab vào wrapper căn tâm cụm mesh → model artist export pivot lệch (vd Fence lệch 88m) vẫn hiện/đặt đúng ngay vị trí nhắm, xoay quanh tâm. Không cần sửa prefab.
+- **`FenceAutoConnect`**: hàng rào kề nhau (trực giao) tự **tắt cạnh tiếp giáp** ở cả hai → nối liền thành vùng quây (Minecraft-style), không cần nhiều prefab biến thể. Chọn cạnh tắt theo **vị trí thực** (không phụ thuộc tên), refresh sau 1 frame để vị trí ổn định.
+
+### Fixed
+- Ghost prefab "tàng hình"/đặt văng xa do pivot model lệch tâm → đã bù tự động.
+- Hàng rào tắt cạnh lung tung khi đặt nhiều ô → do tính tâm khi vị trí chưa ổn định + đo bounds khi cạnh đã tắt; đã chụp tâm 1 lần lúc đủ cạnh + delay 1 frame.
+
+### Changed Files
+- `Scripts/Environment/GhostPlacementController.cs` *(refactor ghost = prefab mờ + bù pivot)*, `FenceAutoConnect.cs` [NEW]
+- `UI/BuildModeOverlayController.cs` (tắt lưới)
+
+---
+## [2026-06-18] — Tutorial mới (NPC ông lão khó tính) + Cho ăn qua túi + sửa thuyền cutscene
+
+### Added
+- **Viết lại TutorialManager theo flow mới** (Giai đoạn 1 — đảo nông trại): Lên đảo (chào) → tới Cây → **chặt cây** → tới Mỏ → **đào khoáng** → tới Bãi ruộng → **xây ruộng** (Build) → cuốc → trồng → tưới → thu hoạch → tới Bãi chuồng → **xây chuồng** → **thả thú** → **cho ăn** → hoàn thành. (Bỏ bán chợ/workshop khỏi flow tân thủ; câu cá + sang đảo = Giai đoạn 2.)
+- **NPC dẫn 4 trạm** (Cây/Mỏ/Bãi ruộng/Bãi chuồng) — kéo Empty waypoint vào Inspector. Tự bắt ô đất người chơi vừa xây để theo dõi cuốc/trồng/tưới/thu hoạch.
+- **Giọng NPC ông lão ~70 tuổi khó tính** (xưng tôi–cậu): câu chào, giao việc, giục khi afk, càu nhàu. Thoại NPC cập nhật theo từng bước (hết lặp câu cũ).
+- **2 hook mới cho tutorial**: `AnimalPenSpawner.OnAnimalPlaced` (thả thú), `FarmAnimal.OnAnimalFed` (cho ăn).
+- **Công tắc `Force Run Tutorial For Testing`**: ép chạy lại tutorial dù hồ sơ đã hoàn thành (tiện dev; nhớ tắt khi release).
+- **Cho ăn động vật qua túi đồ**: click thú đói → mở túi (tab Thực phẩm) → chọn **Bắp ngô** → animation Feed (cầm `oat` tượng trưng) → trừ đồ. Cả nút "Cho Ăn" trong popup Thú nuôi cũng đi cùng luồng này.
+- Thêm vật phẩm **Đà điểu, Dê, Hươu, Thỏ** vào database; **Bắp ngô** chuyển category `items` → `food` (hiện ở túi để cho ăn).
+
+### Fixed
+- **Thuyền cutscene lật ngang khi cập bến**: tự suy "góc bù model" từ rotation đã căn sẵn → giữ tư thế đúng khi xoay, nhân vật không rơi nước.
+- **Animation gõ búa khi xây**: gọi đúng state `Hammering2` (trước gọi sai tên "Hammering" → nhân vật cầm búa nhưng không gõ).
+- **NPC lặp lại thoại cũ / câu thoại dồn dập / câu chào mất nhanh**: thoại chuyển bước hiện trễ 2.5s, câu chào kéo 9s.
+
+### Changed Files
+- `Scripts/Tutorial/TutorialManager.cs` *(viết lại)*, `Scripts/Environment/AnimalPenSpawner.cs`, `FarmAnimal.cs` [MODIFIED]
+- `Scripts/Environment/FarmInteractionController.cs`, `UI/AnimalInteractionPopupController.cs`, `UI/BuildModeOverlayController.cs` [MODIFIED]
+- `Scripts/Cutscenes/BoatCutscene.cs`, `Scripts/Editor/ItemDataGenerator.cs`, `Scripts/Managers/InventoryManager.cs` [MODIFIED]
+
+---
+## [2026-06-18] — Build Mode sinh prefab thật + Chuồng & thả thú từ túi đồ
+
+### Added
+- **`BuildPrefabLibrary`**: bảng ánh xạ "tên item Build → prefab THẬT" (kéo thả Inspector). Build Mode đặt ô đất/chuồng giờ sinh **prefab thật** (có FarmTile/collider…) thay khối Cube placeholder. Hỗ trợ `stretchToFootprint` (đất co vừa ô) + `yOffset` (chỉnh chìm/nổi) + khớp từ khóa **cụ thể nhất** (tránh nhầm chuồng).
+- **Hệ chuồng trại**: thanh Build có **Chuồng nhỏ (1x1) / vừa (2x2) / lớn (3x2)**. Đặt chuồng chạy animation Hammering. Mỗi loại chỉ nuôi loài đúng cỡ.
+- **`AnimalPenSpawner`**: click chuồng → mở **túi đồ (tab Thú nuôi)** chọn con vật → thả vào chuồng. Giới hạn loài theo `allowedAnimals` (map itemId→prefab) — không cho bò vào chuồng gà. `maxCapacity` (demo=1), `spawnHeightOffset` chỉnh độ cao con vật.
+- **Tab "Thú nuôi"** trong túi đồ (UXML + controller, lọc category `animals`).
+- **Vật phẩm con vật mới**: Đà điểu, Dê, Hươu, Thỏ (`ostrich_01/goat_01/deer_01/rabbit_01`) trong ItemDataGenerator; cấp sẵn để test (`EnsureStarterAnimals`).
+- **Ruộng 1x1** trên thanh Build (đặt từng ô đất nhỏ).
+
+### Changed
+- **Nhân vật xoay thẳng về ô đất** khi cuốc/gieo/tưới/thu hoạch (`PlayerController.FaceTowards`) — hết lệch do camera lệch vai GTA.
+- **Camera Build Mode** dốc hơn (góc ≥84°) để nhân vật ở giữa màn hình, không bị thanh chat che.
+
+### Fixed
+- **Prefab Build bị dựng đứng/lật**: giữ rotation gốc prefab (Blender xoay) + chỉ thêm yaw, không ghi đè.
+- **Thuyền cutscene lật ngang khi cập bến** (`BoatCutscene`): tự suy "góc bù model" từ rotation đã căn sẵn (`autoOffsetFromInitialRotation`) → thuyền giữ tư thế đúng khi xoay, nhân vật không rơi nước.
+
+### Changed Files
+- `Scripts/Environment/BuildPrefabLibrary.cs`, `AnimalPenSpawner.cs` [NEW]
+- `Scripts/Environment/GhostPlacementController.cs`, `FarmInteractionController.cs` [MODIFIED]
+- `Scripts/Player/PlayerController.cs`, `Scripts/Camera/BuildCameraController.cs`, `Scripts/Cutscenes/BoatCutscene.cs` [MODIFIED]
+- `UI/BuildModeOverlayController.cs`, `UI/InventoryPopup.uxml`, `UI/InventoryPopupController.cs` [MODIFIED]
+- `Scripts/Editor/ItemDataGenerator.cs`, `Scripts/Managers/InventoryManager.cs` [MODIFIED]
+
+---
+## [2026-06-17] — Thiết kế lại UI Onboarding + Gameplay tile/búa/camera
+
+> ⚠️ Phần **UI Onboarding** bên dưới có **sự hỗ trợ của Gemini Pro 3.1** (làm khi phiên Claude đạt giới hạn). Toàn bộ thay đổi phiên này **CHƯA commit** tại thời điểm ghi.
+
+### Changed — UI Onboarding (Gemini Pro hỗ trợ)
+- **Màn Login redesign**: bỏ chữ "Y WONDER GREEN FARM" + "CUỘC PHIÊU LƯU BẮT ĐẦU", thay bằng **logo Ywonder Hub** (`Y_Wonder_Hub_Logo2.png`, đã tách nền). Thêm **validate ≤ 20 ký tự** cho username/password ở cả form Đăng nhập lẫn Đăng ký (`max-length="20"` + check code).
+- **Character Select redesign**: thay ký tự ♂/♀ bằng **avatar ảnh** (`Male_Avatar.jpg`, `Female_avatar2.jpg`); lưu `PlayerGender` (static) để đặt avatar mặc định; validate tên nhân vật **2–20 ký tự** (trước 2–16).
+- **Đồng bộ 3 tông màu chủ đạo** (Cam `#eb6b2a` · Xanh lá `#7cb641` · Xanh biển `#2596be`) vào toàn bộ onboarding:
+  - Login: nút Cam viền hover Xanh lá; ô input focus viền Xanh lá; tab active Xanh biển viền Xanh lá.
+  - Character Select: nút/tiêu đề/thẻ giới tính/popup cảnh báo theo 3 tông; sửa USS (z-index, line-height).
+- **`FloatingNameTag` nâng cấp**: xóa thẻ `<mark>` bị lỗi khoảng cách ký tự dài; thêm **3D Quad làm nền** căn giữa tự động; sửa công thức tính chiều rộng nền (dùng padding tĩnh thay vì ×0.8) → tên dài không tràn.
+- **`GameManager`**: sửa lỗi đè màu tên nhân vật → khôi phục **màu trắng chuẩn** (thay vì vàng).
+- **Splash & Loading**: gỡ trang trí dư (ngôi sao, version tag); nền Splash đổi **mystic-black**; thanh tiến trình **Xanh lá**, logo text **Cam**.
+- **`LoadingScreenController`**: thêm tham số `destinationName` cho `ShowLoadingAsync` (hiện tên địa điểm đích khi chuyển scene).
+- Tinh chỉnh kèm theo: `GameHUD`, `ProfilePopup`, `BuildModeOverlay`, `BuildCameraController`, `GhostPlacementController`, `MapPopupController`.
+
+> ✅ **Chốt tên game chính thức = "Y WONDER GREEN FARM"** (18/06): tên loading mặc định Gemini đặt là đúng. Splash vẫn dùng **logo Ywonder Hub** (logo hình, không hiện chữ tên). Tài liệu kỹ thuật đã đồng bộ lại tên này (trước đó vài file ghi tạm "YWONDERLAND").
+
+### Added — Gameplay (phiên Claude 16/06, gộp ghi ở đây)
+- **`FarmTileMarker`**: ô vuông viền màu theo trạng thái đất (vàng=sẵn gieo, xanh=đang lớn, cam=chín), tự gắn vào mọi FarmTile.
+- **Hammer Build (kiểu Minecraft)**: `TilePlacementSystem` + `HammerBuildController` — cầm búa gõ ô trước mặt để lát (tốn 4 đá + 4 gỗ), ô preview sáng/đỏ. *(Phím G tạm — Bước 2 sẽ thay nút HUD.)*
+- **`NpcProximityInteract`**: bước vào vùng quanh NPC dịch vụ tự mở Shop/Workshop/Heo đất (không cần bấm).
+- **Camera PUBG/Free Fire**: nhân vật luôn quay lưng về người chơi theo yaw camera; bỏ camera trôi; giảm độ nhạy (0.8/0.6); Free-Look giữ Alt.
+
+### Changed Files (chính)
+- UI: `LoginScreen.uxml/.uss`, `LoginScreenController.cs`, `CharacterSelect.uxml/.uss`, `CharacterSelectController.cs` [MODIFIED]
+- Gameplay: `FarmTileMarker.cs`, `TilePlacementSystem.cs`, `HammerBuildController.cs`, `NpcProximityInteract.cs` [NEW]
+- `ThirdPersonCamera.cs`, `PlayerController.cs`, `EquipmentManager.cs` [MODIFIED]
+
+---
+## [2026-06-16] — Rà soát điểm mù tài liệu + Bộ tài liệu kỹ thuật
+
+### Added (tài liệu cho khách/BA)
+- **`Docs_KichBan/DiemMu_CanXinKhach.md`** [NEW]: audit 3 lớp (kịch bản khách + docs nội bộ + code thật) → liệt kê toàn bộ điểm mù cần khách làm rõ, nhóm theo hệ thống, đánh dấu mức 🔴 chặn code / 🟡 chặn cân bằng / ⚪ chặn bàn giao. Kèm 4 mục GATING (backend, API web, định danh đăng nhập, publish Android) + bảng mâu thuẫn nội bộ.
+- **`Docs_KichBan/TongKet_TaiLieu_CanCo.md`** [NEW]: tổng kết toàn bộ tài liệu dự án cần có, chia **Nhóm A (khách/BA cung cấp)** vs **Nhóm B (team tự viết)** vs **Nhóm C (viết lại)**; có câu nhắn mẫu gửi BA.
+
+### Added (tài liệu kỹ thuật — team tự viết)
+- **`docs/TECHNICAL_DESIGN.md`** [NEW] (TDD): kiến trúc backend REST offline-first, stack hiện tại vs cần chốt, luồng đăng nhập/tutorial đợt 1, lộ trình đợt 2–4, 8 rủi ro kỹ thuật đã biết.
+- **`docs/DB_SCHEMA.md`** [NEW] (ERD): lược đồ DB thật theo REST — bảng `users`/`profiles` (đã có) + đề xuất economy/inventory/transactions/farm/animal/piggy_bank/quests + danh mục tĩnh (item/crop/animal/shop catalog).
+- **`docs/SECURITY.md`** [NEW]: threat model, nguyên tắc **server-authoritative**, chống chỉnh giờ/double-spend/IAP giả, checklist anti-cheat đợt 2–3.
+- **`docs/BUILD_RELEASE.md`** [NEW]: runbook build Android (keystore → AAB → Play Console), checklist phát hành, versioning.
+
+### Changed (dọn mâu thuẫn UGS/Unity 2022 — Nhóm C)
+- `docs/ARCHITECTURE.md`: **viết lại theo REST** — bỏ bảng "UGS Services" + sơ đồ "UGS Cloud", thay bằng Backend Services thật, cấu trúc thư mục `_Project/` đúng thực tế, trỏ sang TDD/DB_SCHEMA/SECURITY/BUILD.
+- `docs/CONTEXT_RECOVERY.md`: prompt khởi động sửa **Unity 2022 + UGS + UniTask → Unity 6 + REST + Awaitable**; cập nhật danh sách file đọc.
+- `docs/DATA_SCHEMA.md`: gắn banner **LỖI THỜI**, trỏ sang `DB_SCHEMA.md` (tránh implement nhầm theo UGS).
+
+### Notes
+- Phát hiện cần xử lý ở đợt 2–3 (ghi trong TDD/SECURITY): POS đang `int` sẽ tràn → đổi `long`; PiggyBank tách rời EconomyManager (gửi/rút chưa trừ tiền thật); lãi Heo Đất phải tính giờ server (chống chỉnh giờ máy).
+
+### Changed Files
+- `Assets/_Project/Docs_KichBan/DiemMu_CanXinKhach.md`, `TongKet_TaiLieu_CanCo.md` [NEW]
+- `docs/TECHNICAL_DESIGN.md`, `docs/DB_SCHEMA.md`, `docs/SECURITY.md`, `docs/BUILD_RELEASE.md` [NEW]
+- `docs/ARCHITECTURE.md`, `docs/CONTEXT_RECOVERY.md`, `docs/DATA_SCHEMA.md` [MODIFIED]
+
+---
+## [2026-06-16] — Lưu trữ THẬT (REST API) — Đợt 1: Profile + Tutorial
+
+### Added
+- **Backend REST đợt 1** (theo kịch bản khách, KHÔNG dùng UGS): chuyển từ mock/PlayerPrefs sang lưu thật cho `player_profile` + cờ `tutorialCompleted`.
+- **Server stub** `server/` (Node/Express, lưu `data.json`): `/auth/register`, `/auth/login`, `GET|PUT /player/profile`. Token JWT đơn giản (chỉ dev/test, không production). Đã smoke-test end-to-end OK.
+- **Client Unity** `Assets/_Project/Scripts/Backend/`: `BackendConfig` (ScriptableObject URL/timeout), `ApiClient` (UnityWebRequest + Newtonsoft, try/catch + timeout), `AuthService` (login/register, cache token), `PlayerProfileService` (load/save profile, **offline-first** fallback cache PlayerPrefs).
+
+### Changed
+- `SystemsBootstrapper`: khởi tạo thêm `AuthService` + `PlayerProfileService`.
+- `GameManager.StartGame()` *(PROTECTED)*: đăng nhập + nạp profile chạy nền song song cutscene (không chặn UX, offline tự fallback).
+- `TutorialManager` *(PROTECTED)*: bỏ qua tutorial nếu hồ sơ đã `tutorialCompleted`; khi hoàn thành thì ghi cờ lên hồ sơ thật.
+- `docs/ARCHITECTURE.md` + `docs/API_CONTRACTS.md`: đính chính backend UGS → **REST API riêng**.
+
+### Notes
+- Auth đợt 1 dùng username = tên nhân vật + mật khẩu sinh/lưu local (CHƯA nối UI Login — để đợt 2).
+- KHÔNG cài package Unity mới (dùng UnityWebRequest + Newtonsoft sẵn có).
+
+### Changed Files
+- `server/*` [NEW] · `Assets/_Project/Scripts/Backend/*.cs` [NEW]
+- `Assets/_Project/Scripts/Core/SystemsBootstrapper.cs` [MODIFIED]
+- `Assets/_Project/Scripts/Managers/GameManager.cs` [MODIFIED]
+- `Assets/_Project/Scripts/Tutorial/TutorialManager.cs` [MODIFIED]
+- `docs/ARCHITECTURE.md`, `docs/API_CONTRACTS.md` [MODIFIED]
+
+---
+## [2026-06-15] — Tưới cây (cầm xô), tự gom lá vào cây, tắt rung, dọn Splash
+
+### Added
+- **Hoạt ảnh tưới cây riêng**: động tác tưới gọi clip `Watering` riêng (tự đo độ dài clip), nhân vật cầm **bình tưới/xô** qua `EquipmentManager` (đúng pattern các nông cụ khác). Placeholder bình tưới được dựng lại có thân + quai xách + vòi + bông sen cho ra dáng.
+- **Tự gắn lá rời vào cây lúc runtime** (`HarvestableResource`): cây tự tìm các object lá ở gần theo tên (`leafNameContains`) + bán kính (`leafAttachRadius`) rồi `SetParent` vào thân — khỏi phải parent tay từng cây. Lá tự ẩn + tự đổ theo cây khi bị chặt. Dùng cache tĩnh để chỉ quét scene 1 lần.
+
+### Changed
+- **Tắt hẳn rung lắc cây/đá** khi chặt/đập (trước giảm còn 10%, nay bỏ luôn) — cây/đá đứng yên, chỉ chạy thanh tiến trình.
+- **Ẩn toàn bộ phần con (thân + lá)** khi cây bị chặt qua `SetVisualsActive`, thay cho việc chỉ ẩn con đầu tiên (tránh lá lơ lửng còn sót).
+- **Màn Splash**: nền đổi sang **đen thuần** (hòa với nền logo JPG), **xóa tiêu đề "YWONDER GREEN FARM"** và **dòng kẻ vàng** trang trí; giữ logo YWonderHub + dòng "CUỘC PHIÊU LƯU BẮT ĐẦU" + thanh tải.
+
+### Changed Files
+- `Assets/_Project/Scripts/Environment/FarmInteractionController.cs` [MODIFIED]
+- `Assets/_Project/Scripts/Environment/HarvestableResource.cs` [MODIFIED]
+- `Assets/_Project/Scripts/Player/EquipmentManager.cs` [MODIFIED]
+- `Assets/_Project/UI/SplashLoadingScreen.uxml` [MODIFIED]
+- `Assets/_Project/UI/Styles/SplashLoadingScreen.uss` [MODIFIED]
+
+---
+## [2026-06-07] — Phase 5 & 6: Khai Thác Tài Nguyên và Câu Cá
+
+### Added
+- **Phase 5 (Khai Thác Tài Nguyên)**:
+  - Hệ thống `HarvestableResource.cs` xử lý tương tác nhấn giữ (hold 3s) để chặt cây, đập đá. Rơi ra `wood_01` và `stone_01`.
+  - `ResourceSpawner.cs` sinh ngẫu nhiên tài nguyên trên bản đồ, theo dõi đếm ngược thời gian hồi sinh (Respawn Timer) và lưu qua `PlayerPrefs`.
+  - Giao diện thanh tiến trình lơ lửng (`ResourceInteractionUI.uxml` và Controller) theo dõi tiến độ nhấn giữ.
+- **Phase 6 (Câu Cá - Đấu nối lõi)**:
+  - Tích hợp `FishingOverlayController.cs` với `InventoryManager`. Đọc số lượng `bait_01` thật từ túi đồ.
+  - Vượt qua QTE thành công, cá (`fish_01`, `fish_02`, `gift_box_01`) tự động thêm vào túi đồ.
+  - Hệ thống 10 lượt câu miễn phí mỗi ngày, lưu và reset bằng `PlayerPrefs` theo ngày thực.
+- **Item Database**: Thêm `pickaxe_01`, `fish_01`, `fish_02`, `gift_box_01` vào `ItemDataGenerator.cs`.
+
+### Fixed
+- **Obsolete API Cleanup (bởi Unity Assistant)**: Thay `enableWordWrapping` bằng `textWrappingMode = TextWrappingModes.NoWrap` trong `FloatingNameTag.cs` và `FishingSpot.cs`.
+- **Code Cleanup**: Dọn dẹp biến thừa `premiumBait` trong `FishingOverlayController.cs`.
+
+### Changed Files
+- `Assets/Scripts/Environment/HarvestableResource.cs` [NEW]
+- `Assets/Scripts/Managers/ResourceSpawner.cs` [NEW]
+- `Assets/UI/ResourceInteractionUI.uxml` [NEW]
+- `Assets/UI/ResourceInteractionUIController.cs` [NEW]
+- `Assets/Scripts/Environment/FarmInteractionController.cs` [MODIFIED]
+- `Assets/Scripts/Editor/ItemDataGenerator.cs` [MODIFIED]
+- `Assets/UI/FishingOverlayController.cs` [MODIFIED]
+- `Assets/Scripts/UI/FloatingNameTag.cs` [MODIFIED]
+- `Assets/Scripts/Environment/FishingSpot.cs` [MODIFIED]
+
+---
+## [2026-06-06] — Part B (Fix Phase): Fishing 3D & Build Mode Redesign
+
+### Added
+- **Fishing Spot 3D Interaction** (`FishingSpot.cs`): Chuyển từ bấm nút UI sang trigger 3D. Lại gần hiện TextMeshPro nổi "Nhấp F để Câu", bấm F mới mở UI câu cá. Tránh đụng phím E của sự kiện.
+- **Contextual Build Mode UX** (`BuildModeOverlayController.cs`):
+  - Ghim (Pin) vị trí nhà trên map khi click trái thay vì xây ngay, giải phóng chuột.
+  - Các nút Xây/Xoay/Hủy nổi cạnh ngôi nhà 3D.
+  - Context menu Xoay/Nhấc/Xóa nổi cạnh nhà khi click vào nhà đã xây.
+- **URP Grid Renderer** (`BuildGridRenderer.cs`): Dùng `RenderPipelineManager.endCameraRendering` để vẽ lưới bằng lệnh `Graphics.DrawMeshNow` thay cho `GL.Lines` (không chạy trên URP).
+
+### Fixed
+- **Build Mode Bugs**:
+  - Khối Ghost không trong suốt: Sửa shader URP.
+  - Lỗi click UI xuyên xuống game: Tự động ẩn `GameHUD` khi bật chế độ xây dựng.
+  - Ghost bị dính chuột: Đổi logic sang Pin position.
+
+### Changed Files
+- `Assets/UI/BuildModeOverlayController.cs`
+- `Assets/UI/BuildModeOverlay.uxml`
+- `Assets/UI/Styles/BuildModeOverlay.uss`
+- `Assets/Scripts/Environment/GhostPlacementController.cs`
+- `Assets/Scripts/Environment/BuildGridRenderer.cs` [NEW]
+- `Assets/Scripts/Environment/BuildGridManager.cs`
+- `Assets/Scripts/Environment/FishingSpot.cs` [NEW]
+
+---
+## [2026-06-06] — Part A Hoàn thành: Onboarding Flow + Tutorial UX + Name Tags
+
+### Added
+- **Character Select UI Toolkit** (`CharacterSelect.uxml`, `CharacterSelectController.cs`):
+  - Chọn giới tính (♂/♀ cards), đặt tên (2-16 ký tự, validate), popup cảnh báo xác nhận.
+  - Vietnamese text set từ C# code (không gõ trực tiếp UXML).
+  - GameManager tự Show/Hide theo state.
+- **Tutorial UX cải thiện cho đối tượng nhỏ tuổi** (`TutorialManager.cs`):
+  - Instruction Banner lớn (nền xanh) hiện mỗi bước quan trọng.
+  - Countdown Timer to (48px) giữa màn hình khi chờ cây lớn, đổi màu xanh→vàng→đỏ.
+  - Dấu chấm than (!) vàng nhấp nhô+xoay trên đầu NPC.
+  - NPC chào ngay khi tutorial bắt đầu.
+- **Floating Name Tags** (`FloatingNameTag.cs`):
+  - TextMeshPro 3D + billboard rotation — chữ phẳng sắc nét kiểu Minecraft.
+  - Outline đen dày, màu theo Design System (Player=Gold #FFC107, NPC=Hero #5B42F3).
+  - Anti-frustum culling: overflow mode, disable occlusion, force mesh update.
+  - Fade opacity khi xa, ẩn khi >30m.
+  - Auto-attach cho Player (GameManager) và NPC (GuideNPC).
+
+### Fixed
+- **Legacy Input bug** (`TutorialManager.cs`): `Input.GetMouseButtonDown(0)` → `Mouse.current.leftButton.wasPressedThisFrame`.
+- **URP Shader tím** (8 files): `Shader.Find("Standard")` → `Shader.Find("Universal Render Pipeline/Lit")` trong FarmTile, GhostPlacement, GuideNPC, TutorialManager.
+- **CharacterSelect không ẩn sau xác nhận**: Thêm Hide() + GameManager quản lý visibility.
+
+### Changed Files
+- `Assets/UI/CharacterSelect.uxml` [NEW]
+- `Assets/UI/CharacterSelectController.cs` [NEW]
+- `Assets/Scripts/UI/FloatingNameTag.cs` [NEW]
+- `Assets/Scripts/Tutorial/TutorialManager.cs`
+- `Assets/Scripts/Tutorial/GuideNPC.cs`
+- `Assets/Scripts/Managers/GameManager.cs`
+- `Assets/Scripts/Environment/FarmTile.cs`
+- `Assets/Scripts/Environment/GhostPlacementController.cs`
 
 ---
 ## [2026-06-05] — Module Build Mode / Chế độ Xây dựng (WIP)
@@ -50,7 +357,7 @@
 
 ### Added
 - **Splash Loading Screen** — Màn hình khởi động game hiển thị đầu tiên khi Play Mode:
-  - **Logo thương hiệu**: Chữ "Y WONDER LAND" cỡ 48px nét đậm trắng trên nền tối `#1E1E23`, có bóng đổ retro cứng `#3D3535` lệch 4px tạo hiệu ứng khắc chữ nổi.
+  - **Logo thương hiệu**: Chữ "Y WONDER GREEN FARM" cỡ 48px nét đậm trắng trên nền tối `#1E1E23`, có bóng đổ retro cứng `#3D3535` lệch 4px tạo hiệu ứng khắc chữ nổi.
   - **Phụ đề**: "CUỘC PHIÊU LƯU BẮT ĐẦU" màu vàng `#FFC107`, letter-spacing 6px tạo cảm giác trang trọng.
   - **Thanh tiến trình retro**: Chiều rộng 400px, chiều cao 24px, viền dày 3px `#3D3535`, nền xám `#3A3A42`. Vệt nạp màu vàng `#FFC107` bo góc 8px, chiều rộng thay đổi mượt mà từ 0% → 100% theo eased curve (smoothstep).
   - **Nhãn trạng thái động**: Thay đổi theo 5 mốc phần trăm — "Đang tải cấu hình nông trại..." → "Đang kết nối đến máy chủ Cloud..." → "Đang đồng bộ dữ liệu thế giới 3D..." → "Đang chuẩn bị giao diện..." → "Tải hoàn tất!".
@@ -431,7 +738,7 @@
 - Tích hợp chi tiết phân tích biểu hiện, tác hại và cách phòng tránh cụ thể cho **8 bệnh lý giao diện kinh điển của AI Agent** (lạm dụng glassmorphism/icon, loạn đơn vị, chột trạng thái, mù tương phản, cụt chữ...) trên từng nền tảng bằng cả hai ngôn ngữ.
 - Cung cấp **AI Agent Self-Check Protocol** với 15 câu hỏi kiểm tra chất lượng tự động giúp AI tự kiểm duyệt UI trước khi bàn giao.
 ### Changed
-- Cập nhật tài liệu thiết kế của dự án [DESIGN.md](file:///d:/LamGameUnity/BaChuKhuRung3D/docs/DESIGN.md) áp dụng các thông số thực tế của game **Y WONDER LAND** theo đúng khung chuẩn Universal và tích hợp các nguyên tắc ngăn ngừa bệnh UI để dự án trực tiếp áp dụng.
+- Cập nhật tài liệu thiết kế của dự án [DESIGN.md](file:///d:/LamGameUnity/BaChuKhuRung3D/docs/DESIGN.md) áp dụng các thông số thực tế của game **Y WONDER GREEN FARM** theo đúng khung chuẩn Universal và tích hợp các nguyên tắc ngăn ngừa bệnh UI để dự án trực tiếp áp dụng.
 ### Files changed
 - docs/DESIGN_SYSTEM_TEMPLATE.md (NEW)
 - docs/DESIGN.md (MODIFIED)
@@ -659,7 +966,7 @@
 
 ## [2026-05-27] — Khởi tạo dự án
 ### Added
-- Unity project setup (URP, Unity 2022 LTS)
+- Unity project setup (URP, Unity 6.3 LTS)
 - 3D environment cơ bản (terrain, trees, house)
 - Character model + animations
 - Camera controller

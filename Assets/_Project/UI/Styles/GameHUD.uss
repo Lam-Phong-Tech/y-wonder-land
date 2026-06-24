@@ -1,0 +1,291 @@
+/* ============================================
+   In-Game HUD Styles - Structured Palia
+   Extends DesignSystem.uss
+   ============================================ */
+
+/* inset:0 (thay width/height 100%) để khi Safe Area đệm padding root thì HUD co lại đúng
+   vùng an toàn, không bị tai thỏ/đục lỗ che nút mép phải. */
+.hud-root { position: absolute; top: 0; left: 0; right: 0; bottom: 0; padding: 16px; }
+
+/* ── 1. PLAYER INFO ── */
+.hud-top-left { position: absolute; top: 16px; left: 16px; }
+
+.player-info {
+    flex-direction: row; align-items: center;
+    background-color: var(--color-neutral-surface);
+    border-radius: var(--radius-panel);
+    border-width: var(--border-medium); border-color: var(--color-border);
+    padding: 8px 16px 8px 8px;
+    transition-property: background-color, border-color, scale; transition-duration: 0.15s;
+}
+.player-info:hover { border-color: var(--color-border-focus); background-color: rgba(45, 50, 65, 0.95); scale: 1.02; }
+
+.player-avatar {
+    width: 44px; height: 44px; border-radius: var(--radius-button);
+    border-width: 1px; border-color: var(--color-border);
+    background-color: rgba(0, 0, 0, 0.3); align-items: center; justify-content: center; margin-right: 12px;
+}
+.player-avatar-icon { font-size: 22px; color: var(--color-text-white); -unity-text-align: middle-center; }
+.player-details { justify-content: center; }
+.player-name { font-size: 14px; -unity-font-style: bold; color: var(--color-text-white); margin-bottom: 4px; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
+
+.player-level-row { flex-direction: row; align-items: center; }
+.player-level-badge {
+    background-color: rgba(255, 179, 71, 0.2);
+    border-width: 1px; border-color: var(--color-primary); border-radius: 4px;
+    padding: 2px 8px; align-items: center; justify-content: center;
+}
+.player-level-text { font-size: 11px; -unity-font-style: bold; color: var(--color-primary); margin: 0; padding: 0; -unity-text-align: middle-center; }
+.player-exp-text { font-size: 12px; -unity-font-style: bold; color: var(--color-text-secondary); margin: 0 0 0 8px; padding: 0; -unity-text-align: middle-left; }
+
+/* ── 2. QUEST BUBBLE ── */
+.quest-bubble {
+    flex-direction: row; align-items: center;
+    background-color: var(--color-neutral-surface);
+    border-radius: var(--radius-panel); border-width: var(--border-medium); border-color: var(--color-border);
+    padding: 8px 12px; margin-top: 10px; max-width: 220px;
+    transition-property: scale, border-color; transition-duration: 0.15s;
+}
+.quest-bubble:hover { border-color: var(--color-border-focus); scale: 1.02; }
+.quest-text { font-size: 12px; color: var(--color-text-white); flex-grow: 1; flex-shrink: 1; white-space: normal; margin-right: 8px; }
+.quest-info-icon { width: 24px; height: 24px; flex-shrink: 0; }
+.quest-info-text { font-size: 12px; -unity-font-style: bold; color: var(--color-primary); margin: 0; padding: 0; -unity-text-align: middle-center; }
+
+/* ── 3. TOP RIGHT ── */
+.hud-top-right { position: absolute; top: 16px; right: 16px; align-items: flex-end; }
+.hud-top-right-row { flex-direction: row; align-items: center; }
+
+.currency-item {
+    flex-direction: row; align-items: center;
+    background-color: rgba(58, 71, 102, 0.5);
+    border-radius: var(--radius-panel); border-width: var(--border-medium); border-color: rgba(255, 255, 255, 0.2);
+    padding: 8px 14px; margin-right: 10px;
+}
+.currency-icon { width: 22px; height: 22px; margin-right: 8px; align-items: center; justify-content: center; }
+.currency-icon-label { font-size: 10px; -unity-font-style: bold; color: var(--color-primary); margin: 0; padding: 0; -unity-text-align: middle-center; }
+.currency-value { font-size: 15px; -unity-font-style: bold; color: var(--color-text-white); }
+
+.settings-btn {
+    width: 58px; height: 58px; border-radius: var(--radius-button);
+    background-color: rgba(58, 71, 102, 0.5); border-width: var(--border-medium); border-color: rgba(255, 255, 255, 0.2);
+    align-items: center; justify-content: center; padding: 0;
+    transition-property: background-color, border-color, scale; transition-duration: 0.15s;
+}
+.settings-btn:hover { border-color: var(--color-primary); scale: 1.05; }
+.settings-btn:active { scale: 0.95; }
+.settings-btn-icon { font-size: 30px; color: var(--color-text-white); width: 33px; height: 33px; }
+
+/* Row 2 góc phải-trên: Build (trái) + Bag — xếp ngang */
+.hud-bag-row { flex-direction: row; align-items: center; margin-top: 10px; }
+.bag-btn-shadow { align-self: center; }
+.bag-btn {
+    width: 70px; height: 70px; border-radius: var(--radius-button);
+    background-color: rgba(58, 71, 102, 0.5); border-width: var(--border-medium); border-color: rgba(255, 255, 255, 0.2);
+    align-items: center; justify-content: center; padding: 0;
+    transition-property: background-color, border-color, scale; transition-duration: 0.15s;
+}
+.bag-btn:hover { border-color: var(--color-primary); scale: 1.05; }
+.bag-btn:active { scale: 0.95; }
+.bag-btn-icon { width: 44px; height: 44px; }
+
+/* ── 4. LEFT SIDEBAR ── */
+.hud-left-sidebar { margin-top: 10px; }
+.sidebar-btn-shadow { margin-bottom: 12px; align-self: flex-start; }
+.sidebar-btn {
+    width: 58px; height: 58px; border-radius: var(--radius-button);
+    border-width: var(--border-medium); border-color: rgba(255, 255, 255, 0.2);
+    background-color: rgba(58, 71, 102, 0.5);
+    align-items: center; justify-content: center; padding: 0;
+    transition-property: background-color, border-color, scale; transition-duration: 0.15s;
+}
+.sidebar-btn:hover { border-color: var(--color-primary); scale: 1.05; }
+.sidebar-btn:active { scale: 0.95; }
+
+.sidebar-btn-shop, .sidebar-btn-map { flex-direction: row; width: 124px; height: 58px; padding: 0 10px; }
+.sidebar-btn-icon { width: 33px; height: 33px; }
+.sidebar-btn-shop-icon, .sidebar-btn-map-icon { width: 33px; height: 33px; }
+.sidebar-btn-shop-text, .sidebar-btn-map-text { font-size: 14px; -unity-font-style: bold; color: var(--color-text-white); margin-left: 6px; }
+.sidebar-btn-piggy, .sidebar-btn-fishing, .sidebar-btn-build { width: 58px; height: 58px; }
+
+/* ── 5. JOYSTICK & SPRINT ── */
+/* Joystick: dịch VÀO TRONG (left 84 để KHỎI đè nút sidebar 58px mép trái) + LÊN, vẫn bên trái */
+.hud-bottom-left { position: absolute; bottom: 60px; left: 84px; }
+
+/* Vùng nhìn (mobile): nửa PHẢI màn hình, trong suốt, chỉ để bắt kéo 1 ngón xoay camera. */
+.hud-look-zone { position: absolute; top: 0; bottom: 0; right: 0; width: 50%; }
+
+.sprint-btn-shadow { position: absolute; left: 140px; top: 200px; }
+.sprint-btn {
+    width: 72px; height: 72px; border-radius: 50%;
+    background-color: rgba(58, 71, 102, 0.5); border-width: var(--border-medium); border-color: rgba(255, 255, 255, 0.2);
+    align-items: center; justify-content: center; transition-property: border-color, scale; transition-duration: 0.15s;
+}
+.sprint-btn:hover { border-color: var(--color-primary); scale: 1.05; }
+.sprint-btn:active { scale: 0.95; }
+/* Đang BẬT chạy nhanh (toggle) -> nút sáng để biết trạng thái */
+.sprint-btn-active { background-color: var(--color-primary); border-color: var(--color-primary); }
+.sprint-btn-icon { font-size: 32px; color: white; -unity-font-style: bold; padding-bottom: 2px; }
+
+.sprint-hint {
+    position: absolute;
+    left: 64px;
+    bottom: 214px;
+    width: 56px;
+    height: 56px;
+    border-radius: 28px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 170, 60, 0.22);
+    border-width: 1px;
+    border-color: rgba(255, 184, 90, 0.5);
+    opacity: 0.6;
+    transition-property: opacity, scale, background-color, border-color;
+    transition-duration: 0.12s;
+}
+.sprint-hint-icon {
+    font-size: 24px;
+    color: rgba(255, 190, 100, 0.95);
+    -unity-font-style: bold;
+}
+.sprint-hint-active {
+    opacity: 1;
+    scale: 1.08;
+    background-color: rgba(255, 177, 65, 0.95);
+    border-color: rgba(255, 236, 186, 0.95);
+}
+
+.joystick-outer { width: 200px; height: 200px; border-radius: 100px; background-color: rgba(30, 35, 45, 0.6); border-width: 1px; border-color: rgba(255, 255, 255, 0.15); align-items: center; justify-content: center; }
+.player-avatar {
+    width: 48px; height: 48px; border-radius: 24px;
+    background-color: var(--color-deep-blue);
+    align-items: center; justify-content: center;
+    border-width: 2px; border-color: rgba(255, 255, 255, 0.1);
+}
+
+.avatar-male {
+    background-image: url('project://database/Assets/_Project/UI/Sprites/Male_Avatar.jpg');
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+.avatar-female {
+    background-image: url('project://database/Assets/_Project/UI/Sprites/Female_avatar2.jpg');
+    -unity-background-scale-mode: scale-and-crop;
+}
+.joystick-arrow-container { position: absolute; width: 200px; height: 200px; align-items: center; justify-content: center; }
+.joystick-arrow { position: absolute; font-size: 17px; color: rgba(255, 255, 255, 0.4); }
+.joystick-arrow-up { top: 10px; } .joystick-arrow-down { bottom: 10px; } .joystick-arrow-left { left: 12px; } .joystick-arrow-right { right: 12px; }
+.joystick-inner { width: 88px; height: 88px; border-radius: 44px; background-color: rgba(255, 255, 255, 0.55); border-width: 1px; border-color: rgba(255, 255, 255, 0.45); }
+
+/* ── 6. ACTION BUTTONS ── */
+.hud-right-actions { position: absolute; right: 24px; bottom: 130px; align-items: center; }
+.action-btn-shadow { margin-bottom: 12px; }
+.action-btn { border-radius: 50%; align-items: center; justify-content: center; padding: 0; transition-property: background-color, scale; transition-duration: 0.15s; }
+
+.action-btn-interact { width: 80px; height: 80px; background-color: rgba(58, 71, 102, 0.5); border-width: var(--border-medium); border-color: rgba(255, 255, 255, 0.2); }
+.action-btn-interact:hover { border-color: var(--color-primary); scale: 1.05; }
+.action-btn-interact:active { scale: 0.95; }
+
+.action-btn-cancel { width: 66px; height: 66px; background-color: var(--color-danger); border-width: 0; }
+.action-btn-cancel:hover { background-color: var(--color-danger-hover); scale: 1.05; }
+.action-btn-cancel:active { background-color: var(--color-danger-active); scale: 0.95; }
+
+.action-btn-icon-dark { width: 50px; height: 50px; }
+.action-btn-icon-white { width: 38px; height: 38px; }
+
+/* ── 7. MESSAGES BAR ── */
+.hud-bottom-center { position: absolute; bottom: 16px; left: 50%; translate: -50% 0; }
+.messages-bar {
+    flex-direction: row; align-items: center;
+    background-color: rgba(58, 71, 102, 0.5);
+    border-radius: var(--radius-panel); border-width: var(--border-medium); border-color: rgba(255, 255, 255, 0.2);
+    padding: 10px 20px; min-width: 260px;
+}
+.messages-text { font-size: 14px; color: var(--color-text-secondary); flex-grow: 1; margin-left: 6px; margin-right: 12px; }
+.messages-icons { flex-direction: row; align-items: center; }
+.messages-icon-btn {
+    width: 44px; height: 44px; border-radius: var(--radius-button);
+    background-color: transparent; border-width: 0; align-items: center; justify-content: center; margin: 0 0 0 8px;
+    font-size: 26px; color: var(--color-text-secondary); padding: 0; transition-property: background-color, color; transition-duration: 0.15s;
+}
+.messages-icon-btn:hover { background-color: rgba(255, 255, 255, 0.1); color: var(--color-text-white); }
+#BtnEmoji { font-size: 30px; padding-bottom: 4px; }
+
+/* ── 8. JUMP BUTTON ── */
+/* Jump nâng cao hơn (khách yêu cầu ~2cm) — số px dễ chỉnh nếu cần */
+.hud-bottom-right { position: absolute; bottom: 90px; right: 24px; align-items: flex-end; }
+
+/* Nút búa (Build) bên phải, nằm trên nút Jump — tròn cho khớp Jump */
+.build-btn-shadow { margin-right: 10px; align-self: center; }
+.build-btn {
+    width: 72px; height: 72px; border-radius: 50%;
+    background-color: rgba(58, 71, 102, 0.5); border-width: var(--border-medium); border-color: rgba(255, 255, 255, 0.2);
+    align-items: center; justify-content: center; padding: 0;
+    transition-property: background-color, border-color, scale; transition-duration: 0.15s;
+}
+.build-btn:hover { border-color: var(--color-primary); scale: 1.05; }
+.build-btn:active { scale: 0.95; }
+.build-btn-icon { width: 38px; height: 38px; -unity-background-image-tint-color: white; }
+
+.jump-btn {
+    width: 96px; height: 96px; border-radius: 50%;
+    background-color: rgba(58, 71, 102, 0.5); border-width: var(--border-medium); border-color: rgba(255, 255, 255, 0.2);
+    align-items: center; justify-content: center; transition-property: border-color, scale; transition-duration: 0.15s;
+}
+.jump-btn:hover { border-color: var(--color-primary); scale: 1.05; }
+.jump-btn:active { scale: 0.95; }
+.jump-btn-icon { width: 58px; height: 58px; }
+
+.crosshair { position: absolute; left: 0; top: 0; right: 0; bottom: 0; align-items: center; justify-content: center; }
+.crosshair-dot { width: 8px; height: 8px; border-radius: 4px; background-color: rgba(255, 255, 255, 0.9); border-width: 1px; border-color: rgba(0, 0, 0, 0.5); }
+
+/* ── 9. INTERACTION MENU (Nút nổi Mobile & PC) ── */
+.interaction-container {
+    position: absolute;
+    top: 55%; /* Nằm dưới crosshair */
+    left: 50%;
+    translate: -50% 0; /* Co theo nội dung + căn GIỮA dưới tâm ngắm (KHÔNG full-width để khỏi chặn cả dải ngang) */
+    align-items: center;
+    flex-direction: row; /* Xếp ngang các nút */
+}
+
+.interaction-action-btn {
+    background-color: rgba(18, 22, 32, 0.86); /* tối + ĐẶC hơn -> chữ luôn nổi rõ trên mọi nền (sáng/tối) */
+    border-radius: var(--radius-lg);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.32);
+    padding: 9px 16px;
+    margin: 0 4px;
+    flex-direction: row;
+    align-items: center;
+    transition-duration: var(--transition-fast);
+    -unity-background-image-tint-color: white;
+}
+
+.interaction-action-btn:hover {
+    background-color: var(--color-surface-hover);
+    scale: 1.05;
+}
+
+.interaction-action-btn:active {
+    background-color: var(--color-primary);
+    scale: 0.95;
+}
+
+.interaction-key-label {
+    background-color: rgba(253, 239, 112, 0.18);
+    color: var(--color-accent-yellow);
+    -unity-font-style: bold;
+    font-size: 17px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    margin-right: 6px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.interaction-action-label {
+    color: rgb(255, 252, 247); /* trắng kem — sáng rõ */
+    -unity-font-style: bold;
+    font-size: 15px;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9); /* viền đổ bóng -> đọc được cả trên nền sáng */
+}

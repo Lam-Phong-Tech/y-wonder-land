@@ -1,0 +1,46 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements"
+         xsi="http://www.w3.org/2001/XMLSchema-instance"
+         editor="UnityEditor.UIElements"
+         noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="False">
+
+    <ui:Style src="Styles/DesignSystem.uss" />
+    <ui:Style src="Styles/ConfirmDialog.uss" />
+
+    <!-- Layer 1: Overlay -->
+    <ui:VisualElement name="confirm-overlay" class="confirm-overlay" style="display: none;">
+
+        <!-- Layer 2: Panel -->
+        <ui:VisualElement name="confirm-panel" class="confirm-panel">
+
+            <!-- Header -->
+            <ui:VisualElement class="confirm-header">
+                <ui:Label name="confirm-title" class="confirm-header-title" text="XÁC NHẬN" />
+                <ui:VisualElement class="confirm-close-btn-container">
+                    <ui:Button name="btn-close" class="confirm-close-btn" text="✕" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Body -->
+            <ui:VisualElement class="confirm-body">
+                <!-- Icon theo dialogType -->
+                <ui:VisualElement name="confirm-icon-container" class="confirm-icon-container icon-container-warning">
+                    <ui:Label name="confirm-icon" class="confirm-icon icon-warning" text="⚠" />
+                </ui:VisualElement>
+
+                <!-- Message -->
+                <ui:Label name="confirm-message" class="confirm-message" text="Bạn có chắc chắn muốn thực hiện hành động này không?" />
+
+                <!-- 2 nút hành động -->
+                <ui:VisualElement name="confirm-buttons" class="confirm-buttons">
+                    <!-- Nút Hủy bỏ (xám viền đỏ) -->
+                    <ui:Button name="btn-cancel" class="confirm-btn-cancel" text="Hủy bỏ" />
+
+                    <!-- Nút Xác nhận (màu theo dialogType) -->
+                    <ui:Button name="btn-confirm" class="confirm-btn-confirm btn-confirm-warning" text="Xác nhận" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,204 @@
+/* ============================================
+   Inventory Popup — The Tangible Playground
+   ============================================ */
+
+.inventory-overlay {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(21, 26, 39, 0.8); /* Mystic Black 80% */
+    align-items: center; justify-content: center; display: none; z-index: 100;
+}
+
+.inventory-panel-shadow { background-color: transparent; }
+
+.inventory-panel {
+    width: 900px; height: 600px;
+    max-width: 96%; max-height: 92%; /* không tràn trên màn nhỏ (phone landscape ngắn) */
+    background-color: var(--color-primary-navy);
+    border-radius: var(--radius-panel);
+    border-width: 1px; border-color: rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+}
+
+/* ── Header Bar ── */
+.inventory-header {
+    flex-direction: row; align-items: center; justify-content: center;
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 20px 24px;
+    border-bottom-width: 1px; border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+.inventory-header-title {
+    font-size: 20px; -unity-font-style: bold; color: var(--color-accent-yellow);
+    letter-spacing: 2px;
+}
+
+/* ── Close Button ── */
+.inventory-close-shadow {
+    position: absolute; right: 12px; top: 12px; z-index: 10;
+}
+
+.inventory-close-btn {
+    width: 40px; height: 40px; border-radius: var(--radius-button);
+    background-color: rgba(255, 255, 255, 0.1);
+    border-width: 0; align-items: center; justify-content: center; padding: 0;
+    font-size: 16px; -unity-font-style: bold; color: var(--color-bright-grey);
+    transition-property: scale, background-color, color; transition-duration: 0.1s;
+}
+
+.inventory-close-btn:hover {
+    background-color: rgba(255, 75, 75, 0.8); color: #FFF;
+}
+
+.inventory-close-btn:active { scale: 0.95; }
+
+/* ── Body ── */
+.inventory-body { flex-direction: row; flex-grow: 1; }
+
+/* ── Tabs ── */
+.inventory-tabs {
+    width: 180px; padding: 16px 12px;
+    background-color: var(--color-mystic-black);
+    border-right-width: 1px; border-right-color: rgba(255, 255, 255, 0.05);
+    flex-shrink: 0;
+}
+
+.inventory-tab {
+    padding: 12px 16px; margin-bottom: 6px;
+    border-radius: var(--radius-tab); border-width: 1px; border-color: transparent;
+    background-color: transparent;
+    font-size: 14px; -unity-font-style: bold; color: var(--color-bright-grey);
+    -unity-text-align: middle-center;
+    transition-property: background-color, color, border-color; transition-duration: 0.1s;
+}
+
+.inventory-tab:hover {
+    background-color: rgba(255, 255, 255, 0.05); color: var(--color-text-white);
+}
+
+.inventory-tab--active {
+    background-color: var(--color-primary-navy);
+    border-color: var(--color-accent-yellow);
+    color: var(--color-accent-yellow);
+}
+
+/* ── Grid Area ── */
+.inventory-grid-area { flex-grow: 1; padding: 16px; }
+.inventory-grid-scroll { flex-grow: 1; }
+.inventory-grid { flex-direction: row; flex-wrap: wrap; align-content: flex-start; }
+
+/* ── Item Card ── */
+.inventory-item-shadow { margin: 6px; }
+
+.inventory-item {
+    width: 104px; height: 114px;
+    border-radius: 12px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-width: 1px; border-color: rgba(255, 255, 255, 0.05);
+    align-items: center; justify-content: center; padding: 8px;
+    transition-property: border-color, background-color, scale; transition-duration: 0.1s;
+}
+
+.inventory-item:hover {
+    border-color: rgba(255, 255, 255, 0.3); background-color: rgba(255, 255, 255, 0.05);
+}
+
+.inventory-item--selected {
+    border-color: var(--color-accent-yellow);
+    background-color: rgba(253, 239, 112, 0.1);
+}
+
+.inventory-item-icon {
+    width: 52px; height: 52px; border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0.4);
+    align-items: center; justify-content: center; margin-bottom: 6px;
+}
+
+.inventory-item-icon-text { font-size: 28px; margin: 0; padding: 0; }
+
+.inventory-item-name {
+    font-size: 11px; -unity-font-style: bold; color: var(--color-text-white);
+    margin-bottom: 2px; -unity-text-align: upper-center;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 90px;
+}
+
+.inventory-item-qty {
+    font-size: 11px; -unity-font-style: bold; color: var(--color-accent-yellow);
+}
+
+/* ── Item Detail Panel ── */
+.inventory-detail-panel {
+    width: 260px; background-color: var(--color-mystic-black);
+    border-radius: var(--radius-panel); border-width: 1px; border-color: rgba(255, 255, 255, 0.05);
+    margin: 16px 16px 16px 0; padding: 20px;
+    align-items: center; justify-content: flex-start; flex-shrink: 0;
+}
+
+.inventory-detail-content {
+    width: 100%; height: 100%; align-items: center;
+}
+
+.inventory-detail-icon-container {
+    width: 80px; height: 80px; border-radius: 12px;
+    background-color: rgba(0, 0, 0, 0.4);
+    align-items: center; justify-content: center; margin-bottom: 12px;
+    border-width: 1px; border-color: rgba(255, 255, 255, 0.05);
+}
+
+.inventory-detail-icon { font-size: 40px; }
+
+.inventory-detail-name {
+    font-size: 16px; -unity-font-style: bold; color: var(--color-accent-yellow); margin-bottom: 4px;
+}
+
+.inventory-detail-qty {
+    font-size: 13px; -unity-font-style: bold; color: var(--color-bright-grey); margin-bottom: 16px;
+}
+
+.inventory-detail-divider {
+    height: 1px; background-color: rgba(255, 255, 255, 0.1); width: 100%; margin-bottom: 16px;
+}
+
+.inventory-detail-desc {
+    font-size: 13px; color: var(--color-text-white); margin-bottom: 16px;
+    white-space: normal; -unity-text-align: upper-center; flex-grow: 1; width: 100%;
+}
+
+.inventory-detail-actions { width: 100%; flex-direction: column; margin-top: auto; }
+
+.inventory-detail-btn {
+    width: 100%; margin-bottom: 8px; padding: 12px;
+    border-radius: var(--radius-button); border-width: 0;
+    -unity-font-style: bold; font-size: 14px;
+    transition-property: scale, background-color; transition-duration: 0.1s;
+}
+
+.inventory-detail-btn--primary {
+    background-color: var(--color-accent-yellow); color: var(--color-mystic-black);
+}
+
+.inventory-detail-btn--primary:hover { background-color: #FFD54F; }
+.inventory-detail-btn--primary:active { scale: 0.95; }
+
+.inventory-detail-btn--secondary {
+    background-color: rgba(255, 75, 75, 0.2); border-width: 1px; border-color: rgba(255, 75, 75, 0.5);
+    color: #FF4B4B; margin-bottom: 0;
+}
+
+.inventory-detail-btn--secondary:hover { background-color: rgba(255, 75, 75, 0.4); }
+.inventory-detail-btn--secondary:active { scale: 0.95; }
+
+.inventory-detail-empty-text {
+    font-size: 13px; color: var(--color-bright-grey); -unity-font-style: italic;
+    -unity-text-align: middle-center; margin-top: auto; margin-bottom: auto; white-space: normal;
+}
+
+/* ── Bottom Info Bar ── */
+.inventory-info-bar {
+    flex-direction: row; justify-content: space-between; padding: 12px 24px;
+    background-color: var(--color-mystic-black);
+    border-top-width: 1px; border-top-color: rgba(255, 255, 255, 0.05);
+}
+
+.inventory-info-text {
+    font-size: 13px; color: var(--color-bright-grey); -unity-font-style: bold;
+}

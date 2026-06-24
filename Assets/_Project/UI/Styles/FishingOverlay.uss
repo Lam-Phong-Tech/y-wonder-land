@@ -1,0 +1,109 @@
+/* ============================================
+   Fishing Overlay — Cozy Dark Palia
+   Bản GỌN: chỉ 1 popup căn-thời-gian ở góc phải.
+   ============================================ */
+
+.fish-root {
+    width: 100%; height: 100%; position: absolute;
+}
+
+/* ── Popup chính (góc phải, canh giữa dọc) ── */
+.fish-panel {
+    position: absolute; right: 32px; top: 50%; translate: 0 -50%;
+    width: 440px;
+    background-color: var(--color-primary-navy);
+    border-width: 1px; border-color: rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-panel);
+    padding: 24px;
+}
+
+/* ── Header: tiêu đề + nút đóng ── */
+.fish-panel-header {
+    flex-direction: row; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.fish-panel-title {
+    font-size: 26px; -unity-font-style: bold; color: var(--color-text-white);
+    letter-spacing: 1px;
+}
+
+.fish-close-x {
+    width: 38px; height: 38px; padding: 0;
+    background-color: rgba(255, 255, 255, 0.08);
+    border-width: 0; border-radius: 19px;
+    color: var(--color-bright-grey); font-size: 18px; -unity-font-style: bold;
+    transition-property: scale, background-color, color; transition-duration: 0.1s;
+}
+
+.fish-close-x:hover { background-color: rgba(255, 75, 75, 0.35); color: var(--color-text-white); }
+.fish-close-x:active { scale: 0.92; }
+
+/* ── Số lượt câu trong ngày ── */
+.fish-turns-pill {
+    align-self: flex-start;
+    background-color: var(--color-mystic-black);
+    border-radius: 14px; padding: 8px 18px; margin-bottom: 18px;
+}
+
+.fish-turns-text {
+    font-size: 18px; -unity-font-style: bold; color: var(--color-accent-yellow);
+}
+
+/* ── Hướng dẫn ngắn ── */
+.fish-hint {
+    font-size: 18px; -unity-font-style: bold; color: var(--color-bright-grey);
+    white-space: normal; -unity-text-align: middle-center;
+    margin-bottom: 20px;
+}
+
+/* ── Thanh căn cá (to, rõ) ── */
+.qte-gauge-wrapper { width: 100%; margin-bottom: 14px; }
+
+.qte-gauge-track {
+    height: 34px; width: 100%;
+    background-color: var(--color-mystic-black);
+    border-width: 1px; border-color: rgba(255, 255, 255, 0.1); border-radius: 17px;
+    position: relative; overflow: hidden;
+}
+
+.qte-safe-zone {
+    height: 100%; background-color: var(--color-green-leaf); position: absolute;
+}
+
+.qte-pointer {
+    width: 6px; height: 130%; top: -15%;
+    background-color: var(--color-text-white); border-radius: 3px; position: absolute;
+}
+
+/* ── Thanh thời gian còn lại ── */
+.qte-timer-wrapper {
+    width: 100%; height: 10px; background-color: var(--color-mystic-black);
+    border-radius: 5px; margin-bottom: 22px; overflow: hidden;
+}
+
+.qte-timer-bar {
+    height: 100%; background-color: var(--color-accent-blue); width: 100%;
+}
+
+/* ── Nút hành động (pill vàng) ── */
+.fish-action-btn {
+    width: 100%; padding: 15px;
+    background-color: var(--color-accent-yellow);
+    border-width: 0; border-radius: var(--radius-button);
+    color: var(--color-mystic-black); font-size: 20px; -unity-font-style: bold;
+    transition-property: scale, background-color; transition-duration: 0.1s;
+}
+
+.fish-action-btn:hover { background-color: #FFD54F; }
+.fish-action-btn:active { scale: 0.97; }
+.fish-action-btn:disabled { background-color: var(--color-overcast-grey); opacity: 0.6; }
+
+/* Khi đang căn cá -> nút chuyển xanh đại dương cho rõ "GIẬT" */
+.fish-action-btn--pull {
+    background-color: var(--color-blue-ocean); color: var(--color-text-white);
+}
+.fish-action-btn--pull:hover { background-color: #4B90FF; }
+
+/* Utility */
+.hidden { display: none; }

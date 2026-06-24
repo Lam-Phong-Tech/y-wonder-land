@@ -1,0 +1,28 @@
+{
+    "asset": "bcf2c4bafeb28fc40b28cb67cef1d472",
+    "fileName": "019eaf92-4ba1-7285-a1eb-fb891acb3c70.png",
+    "prompt": "Strictly front-facing orthographic view of a 3D hand wearing a matte white cartoon-style glove, pointing upward. Premium aesthetic with a subtle glowing neon cyan outline and a frosted glass circular base behind the hand. Isolated object, no pedestal, no display stand, no floor shadow. Solid white background. Minimalist 3D Onyx style context.",
+    "negativePrompt": "",
+    "model": "gemini-3.1-flash",
+    "modelName": "Gemini 3.1 Nano Banana 2",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelatePixelGridSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0,
+    "dimensions": {
+        "width": 1024,
+        "height": 1024
+    },
+    "spriteSheet": false,
+    "duration": 0.0
+}

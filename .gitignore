@@ -1,5 +1,5 @@
 # ============================================
-# Unity .gitignore — Y WONDER LAND
+# Unity .gitignore — Y WONDER GREEN FARM
 # ============================================
 
 # Unity generated
@@ -76,3 +76,15 @@ Thumbs.db
 # Antigravity / AI
 # ============================================
 .gemini/
+
+Assets/Building/Map1*
+
+# ============================================
+# Build temp + texture NPC gốc nặng (391MB) — extract lại được từ .glb (22/06)
+# ============================================
+/.utmp/
+/Assets/OptimizedNPCAssets/
+/Assets/OptimizedNPCAssets.meta
+
+# File khóa tạm của Word/Office (~$...) khi đang mở .docx
+~$*

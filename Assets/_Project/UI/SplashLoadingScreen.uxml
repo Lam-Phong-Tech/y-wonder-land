@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:Style src="Styles/DesignSystem.uss" />
+    <ui:Style src="Styles/SplashLoadingScreen.uss" />
+
+    <!-- Full Screen Splash Container -->
+    <ui:VisualElement name="SplashRoot" class="splash-screen">
+
+
+
+        <!-- Brand Logo Group (Centered) -->
+        <ui:VisualElement class="splash-logo-container">
+
+            <!-- Brand Logo Image — lưu PNG vào Assets/_Project/UI/Sprites/Logo_YWonderHub.png -->
+            <ui:VisualElement name="SplashLogo" class="splash-brand-logo" />
+
+            <!-- Subtitle -->
+            <ui:Label text="CUỘC PHIÊU LƯU BẮT ĐẦU" class="splash-subtitle" />
+        </ui:VisualElement>
+
+        <!-- Loading Group (Bottom Center) -->
+        <ui:VisualElement class="splash-loading-group">
+
+            <!-- Status Label -->
+            <ui:Label name="lblStatus" text="Đang tải tài nguyên..." class="splash-status-text" />
+
+            <!-- Progress Bar Container -->
+            <ui:VisualElement class="splash-progress-wrapper">
+
+                <!-- Progress Track (Background) -->
+                <ui:VisualElement class="splash-progress-track">
+
+                    <!-- Progress Fill (Dynamic Width) -->
+                    <ui:VisualElement name="ProgressFill" class="splash-progress-fill" />
+
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Percentage Label -->
+            <ui:Label name="lblPercentage" text="0%" class="splash-percentage-text" />
+
+            <!-- Skip Hint -->
+            <ui:Label text="Click để bỏ qua" class="splash-skip-hint" />
+        </ui:VisualElement>
+
+
+    </ui:VisualElement>
+</ui:UXML>

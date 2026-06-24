@@ -1,0 +1,28 @@
+{
+    "asset": "519eca0c718e94242a622571655c7b38",
+    "fileName": "019eaf93-5534-7077-9d17-d8823ffe06da.png",
+    "prompt": "Strictly front-facing orthographic view of a modern minimalist 3D shopping cart icon. Isolated object, no pedestal, no display stand, no floor shadow. Minimalist 3D Onyx style: matte dark plastic frame, glowing neon gold handles. Solid white background.",
+    "negativePrompt": "",
+    "model": "gemini-3.1-flash",
+    "modelName": "Gemini 3.1 Nano Banana 2",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelatePixelGridSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0,
+    "dimensions": {
+        "width": 1024,
+        "height": 1024
+    },
+    "spriteSheet": false,
+    "duration": 0.0
+}

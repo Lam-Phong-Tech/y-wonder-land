@@ -1,0 +1,245 @@
+/* ============================================
+   Design System - Structured Palia (Cozy Dark)
+   ============================================ */
+
+:root {
+    /* Palia Standard Palette */
+    --color-primary-navy: #3A4766;
+    --color-deep-blue: #305080;
+    --color-light-blue: #508FB3;
+    
+    --color-accent-yellow: #FDEF70;
+    --color-accent-blue: #4EB0E6;
+    
+    --color-brown: #594F42;
+    --color-tan: #D5B892;
+    --color-cream: #FEF4E6;
+    
+    --color-mystic-black: #151A27;
+    --color-overcast-grey: #A6A4A9;
+    --color-bright-grey: #DFDCE4;
+    --color-palia-white: #FFFCF7;
+
+    /* Semantic Mappings */
+    --color-neutral-surface: var(--color-primary-navy); /* Main Panel */
+    --color-hero-surface: var(--color-mystic-black); /* Overlays */
+    --color-surface-mid: var(--color-deep-blue); /* Inner Cards */
+    
+    /* Accents & Functional */
+    --color-primary: var(--color-accent-yellow); /* Main Buttons */
+    --color-primary-hover: #FFF890;
+    --color-primary-active: #D0C350;
+    
+    --color-success: #70C050;
+    --color-danger: #E65A4E;
+    --color-danger-hover: #FF7A6E;
+    --color-danger-active: #C63A2E;
+    
+    /* Typography */
+    --color-text-white: var(--color-palia-white);
+    --color-text-dark: var(--color-mystic-black);
+    --color-text-secondary: var(--color-bright-grey);
+    --color-text-placeholder: var(--color-overcast-grey);
+    --color-text-link: var(--color-accent-blue);
+
+    
+    /* Borders & Structure (Soft Tactile) */
+    --color-border: rgba(255, 255, 255, 0.1);
+    --color-border-focus: rgb(255, 179, 71);
+    --radius-panel: 24px; /* Mềm mại hơn */
+    --radius-button: 24px; /* Pill-shape chuẩn Palia */
+    --radius-input: 16px;
+    --radius-tab: 16px;
+    --border-thick: 2px;
+    --border-medium: 1px;
+}
+
+/* ============================================
+   Typography
+   ============================================ */
+.text-heading { font-size: 26px; -unity-font-style: bold; color: var(--color-text-white); text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+.text-heading-white { font-size: 26px; -unity-font-style: bold; color: var(--color-text-white); letter-spacing: 2px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+.text-subheading { font-size: 18px; -unity-font-style: bold; color: var(--color-text-white); }
+.text-body { font-size: 15px; color: var(--color-text-white); }
+.text-caption { font-size: 12px; color: var(--color-text-secondary); }
+.text-link { font-size: 13px; color: var(--color-text-link); cursor: link; }
+.text-link:hover { color: var(--color-primary-hover); }
+
+/* ============================================
+   Layout & Surfaces
+   ============================================ */
+.overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(15, 15, 20, 0.7); }
+
+.panel {
+    background-color: var(--color-neutral-surface);
+    border-radius: var(--radius-panel);
+    border-width: var(--border-medium);
+    border-color: var(--color-border);
+    flex-grow: 1;
+    /* Soft shadow to pop out from dark background */
+    /* Note: Unity CSS doesn't support complex box-shadow well, simulated via structure */
+}
+
+.panel-header {
+    background-color: rgba(0, 0, 0, 0.25);
+    border-top-left-radius: var(--radius-panel);
+    border-top-right-radius: var(--radius-panel);
+    padding: 16px 24px;
+    align-items: center; justify-content: center;
+    min-height: 56px;
+    border-bottom-width: var(--border-medium);
+    border-bottom-color: var(--color-border);
+}
+
+/* ============================================
+   Buttons (Structured Palia)
+   ============================================ */
+.btn-close {
+    position: absolute; top: 12px; right: 12px;
+    width: 32px; height: 32px;
+    background-color: rgba(230, 74, 25, 0.1);
+    border-radius: var(--radius-button);
+    border-width: 1px; border-color: rgba(230, 74, 25, 0.5);
+    align-items: center; justify-content: center;
+    color: var(--color-danger); font-size: 16px; -unity-font-style: bold;
+    transition-property: background-color, border-color, color, scale;
+    transition-duration: 0.15s;
+}
+.btn-close:hover { background-color: rgba(230, 74, 25, 0.8); border-color: rgb(230, 74, 25); color: white; }
+.btn-close:active { background-color: rgb(190, 50, 10); scale: 0.95; }
+
+.btn-primary {
+    background-color: var(--color-primary);
+    color: var(--color-text-dark);
+    font-size: 16px; -unity-font-style: bold;
+    border-width: 0;
+    border-radius: var(--radius-button);
+    padding: 12px 24px;
+    -unity-text-align: middle-center; flex-grow: 1;
+    transition-property: background-color, scale;
+    transition-duration: 0.1s;
+}
+.btn-primary:hover { background-color: var(--color-primary-hover); }
+.btn-primary:active { 
+    background-color: var(--color-primary-active); 
+    scale: 0.98;
+}
+
+.btn-danger {
+    background-color: rgba(230, 74, 25, 0.15);
+    color: var(--color-danger);
+    font-size: 16px; -unity-font-style: bold;
+    border-width: 1px; border-color: var(--color-danger);
+    border-radius: var(--radius-button);
+    padding: 12px 24px; -unity-text-align: middle-center; flex-grow: 1;
+    transition-property: background-color, color, scale;
+    transition-duration: 0.1s;
+}
+.btn-danger:hover { background-color: rgba(230, 74, 25, 0.8); color: white; }
+.btn-danger:active { 
+    background-color: var(--color-danger-active); 
+    scale: 0.98;
+}
+
+/* ============================================
+   Inputs & Forms
+   ============================================ */
+.input-group {
+    flex-direction: row; align-items: center;
+    background-color: rgba(0, 0, 0, 0.25);
+    border-radius: var(--radius-input);
+    border-width: 1px; border-color: rgba(255, 255, 255, 0.05);
+    border-top-width: 3px; border-top-color: rgba(0, 0, 0, 0.4); /* Inner shadow effect */
+    height: 52px; padding: 0 16px; margin-bottom: 14px;
+    transition-property: border-color, background-color; transition-duration: 0.2s;
+}
+.input-group:hover { border-color: rgba(255, 255, 255, 0.2); }
+.input-group-focus { border-color: var(--color-border-focus); background-color: rgba(0, 0, 0, 0.4); }
+
+.input-icon { width: 22px; height: 22px; margin-right: 10px; flex-shrink: 0; -unity-background-image-tint-color: var(--color-text-secondary); }
+
+.input-textfield { flex-grow: 1; border-width: 0; background-color: transparent; font-size: 15px; color: var(--color-text-white); margin: 0; padding: 0; }
+.input-textfield > .unity-text-field__input { border-width: 0; background-color: transparent; padding: 0; margin: 0; color: var(--color-text-white); font-size: 15px; }
+.input-textfield:focus > .unity-text-field__input { border-width: 0; background-color: transparent; }
+.input-textfield > .unity-text-field__input > .unity-text-element--placeholder { color: var(--color-text-placeholder); }
+
+/* ============================================
+   Tabs
+   ============================================ */
+.tab-bar {
+    flex-direction: row; background-color: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-tab); border-width: 1px; border-color: var(--color-border);
+    padding: 4px; margin: 20px 24px 0 24px;
+}
+.tab-item {
+    flex-grow: 1; padding: 10px 0; -unity-text-align: middle-center;
+    font-size: 15px; color: var(--color-text-secondary);
+    border-width: 0; border-radius: 4px; background-color: transparent;
+    transition-property: background-color, color; transition-duration: 0.15s;
+}
+.tab-item:hover { color: var(--color-text-white); background-color: rgba(255, 255, 255, 0.05); }
+.tab-active { background-color: var(--color-surface-mid); color: var(--color-primary); -unity-font-style: bold; border-width: 1px; border-color: var(--color-border); }
+
+/* ============================================
+   Utilities
+   ============================================ */
+.list-item-even { background-color: rgba(0, 0, 0, 0.15); padding: 12px 16px; border-bottom-width: 1px; border-bottom-color: rgba(255, 255, 255, 0.03); }
+.list-item-odd { background-color: transparent; padding: 12px 16px; border-bottom-width: 1px; border-bottom-color: rgba(255, 255, 255, 0.03); }
+.full-screen { width: 100%; height: 100%; position: absolute; }
+.center-content { align-items: center; justify-content: center; }
+.row { flex-direction: row; align-items: center; }
+.space-between { justify-content: space-between; }
+.hidden { display: none; }
+
+/* ============================================
+   GLOBAL SCROLLBAR STYLING (Modern & Slim)
+   ============================================ */
+
+/* Vertical Scroller Container */
+.unity-scroller--vertical {
+    width: 6px; /* Slim scrollbar */
+    background-color: transparent;
+    border-width: 0;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    margin-right: 2px;
+}
+
+/* Hide the Up/Down Arrow Buttons */
+.unity-scroller__low-button, 
+.unity-scroller__high-button {
+    display: none;
+}
+
+/* Slider Track */
+.unity-base-slider__tracker {
+    background-color: transparent;
+    border-width: 0;
+}
+
+/* Slider Thumb (Dragger) */
+.unity-base-slider__dragger {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+    border-width: 0;
+    width: 6px;
+    left: 0;
+    margin: 0;
+    transition-property: background-color;
+    transition-duration: 0.15s;
+}
+
+.unity-base-slider__dragger:hover {
+    background-color: rgba(255, 255, 255, 0.6);
+}
+
+.unity-base-slider__dragger:active {
+    background-color: rgba(255, 255, 255, 0.8);
+}
+
+/* Ẩn thanh cuộn NGANG ở mọi ScrollView (game dùng list/grid DỌC; grid thì wrap
+   xuống dòng nên không cần cuộn ngang). Tránh "slider" thừa hiện ra khi nội dung
+   lố vài px. Trường hợp cố ý cuộn ngang (BuildMode) tự bật lại trong file riêng. */
+.unity-scroller--horizontal {
+    display: none;
+}

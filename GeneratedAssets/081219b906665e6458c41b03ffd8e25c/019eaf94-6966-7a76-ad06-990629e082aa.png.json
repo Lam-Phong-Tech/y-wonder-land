@@ -1,0 +1,28 @@
+{
+    "asset": "081219b906665e6458c41b03ffd8e25c",
+    "fileName": "019eaf94-6966-7a76-ad06-990629e082aa.png",
+    "prompt": "Strictly front-facing orthographic view of a minimalist 3D person bust icon. Isolated object, no pedestal, no display stand, no floor shadow. Minimalist 3D Onyx style: matte dark plastic, frosted glass elements, glowing neon blue accents. Solid white background.",
+    "negativePrompt": "",
+    "model": "gemini-3.1-flash",
+    "modelName": "Gemini 3.1 Nano Banana 2",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelatePixelGridSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0,
+    "dimensions": {
+        "width": 1024,
+        "height": 1024
+    },
+    "spriteSheet": false,
+    "duration": 0.0
+}

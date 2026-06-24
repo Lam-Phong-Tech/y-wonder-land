@@ -1,0 +1,28 @@
+{
+    "asset": "0234cf2c3df93c84096c9bf6912f36df",
+    "fileName": "019eaf7a-7b6f-7eed-b802-ea1a248456a2.png",
+    "prompt": "Minimalist 3D Shining Star Shield Level Badge UI icon, onyx black/dark grey matte plastic base with frosted glass (glassmorphism) elements, soft glowing neon gold accents, premium modern futuristic friendly style, rounded thick minimalist shape, soft studio lighting, 3D isometric view, subtle drop shadows, solid white background.",
+    "negativePrompt": "",
+    "model": "gemini-3.1-flash",
+    "modelName": "Gemini 3.1 Nano Banana 2",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelatePixelGridSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0,
+    "dimensions": {
+        "width": 1024,
+        "height": 1024
+    },
+    "spriteSheet": false,
+    "duration": 0.0
+}

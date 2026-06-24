@@ -1,0 +1,278 @@
+/* ============================================================
+   PiggyBankPopup.uss — Heo Đất / Piggy Bank Savings
+   Design System: Cozy Dark Palia
+   ============================================================ */
+
+/* === OVERLAY === */
+.piggy-overlay {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(21, 26, 39, 0.7); /* Mystic Black 70% */
+    align-items: center; justify-content: center; display: none; z-index: 100;
+}
+
+/* === PANEL === */
+.piggy-panel {
+    width: 740px; height: 640px;
+    background-color: var(--color-primary-navy);
+    border-radius: var(--radius-panel);
+    border-width: 1px; border-color: rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    flex-direction: column;
+}
+
+/* === HEADER === */
+.piggy-header {
+    flex-direction: row; align-items: center; justify-content: center;
+    background-color: var(--color-deep-blue);
+    padding: 24px 20px;
+    border-bottom-width: 1px; border-bottom-color: rgba(255, 255, 255, 0.05);
+    min-height: 80px; position: relative;
+}
+
+.piggy-header-title {
+    font-size: 32px; -unity-font-style: bold;
+    color: var(--color-accent-yellow); -unity-text-align: middle-center;
+    letter-spacing: 2px; position: absolute; left: 0; right: 0;
+}
+
+/* === BALANCE PILL === */
+.piggy-balance-pill {
+    position: absolute; left: 24px;
+    flex-direction: row; align-items: center;
+    background-color: var(--color-mystic-black);
+    border-radius: var(--radius-button); padding: 8px 16px;
+    border-width: 0; z-index: 2;
+}
+
+.piggy-pill-icon {
+    font-size: 18px; margin-right: 6px; padding: 0; -unity-text-align: middle-center;
+}
+
+.piggy-pill-value {
+    font-size: 16px; -unity-font-style: bold; color: var(--color-text-white); padding: 0; -unity-text-align: middle-center;
+}
+
+/* === CLOSE BUTTON === */
+.piggy-close-btn-container { position: absolute; right: 16px; top: 16px; }
+.piggy-close-btn {
+    width: 40px; height: 40px; border-radius: 20px;
+    background-color: rgba(255, 255, 255, 0.05); border-width: 0;
+    font-size: 18px; color: var(--color-text-white); -unity-font-style: bold;
+    padding: 0; align-items: center; justify-content: center;
+    transition-property: background-color, scale; transition-duration: 0.15s;
+}
+.piggy-close-btn:hover { background-color: var(--color-danger); color: white; }
+.piggy-close-btn:active { scale: 0.9; }
+
+/* === TAB BAR === */
+.piggy-tab-bar {
+    flex-direction: row; justify-content: center;
+    background-color: transparent;
+    padding: 16px 24px 0 24px;
+    border-bottom-width: 1px; border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+.piggy-tab {
+    padding: 10px 0; margin: 0 4px;
+    width: 220px; min-width: 220px; max-width: 220px; flex-shrink: 0;
+    border-top-left-radius: var(--radius-tab);
+    border-top-right-radius: var(--radius-tab);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-width: 0;
+    background-color: rgba(0, 0, 0, 0.2); background-image: none;
+    font-size: 15px; -unity-font-style: bold;
+    color: var(--color-bright-grey);
+    -unity-text-align: middle-center;
+    transition-property: background-color, color; transition-duration: 0.1s;
+}
+
+.piggy-tab:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--color-text-white);
+}
+
+.piggy-tab--active {
+    background-color: var(--color-mystic-black);
+    color: var(--color-accent-yellow);
+}
+
+/* === BODY === */
+.piggy-body {
+    flex-direction: row; flex-grow: 1; padding: 24px;
+}
+
+/* === LEFT: PACKAGE CARDS === */
+.piggy-packages {
+    width: 240px; flex-shrink: 0; flex-direction: column;
+}
+
+.piggy-pkg-shadow { margin-bottom: 12px; }
+
+.piggy-pkg {
+    flex-direction: row; align-items: center; padding: 14px;
+    background-color: var(--color-mystic-black);
+    border-radius: 16px; border-width: 2px; border-color: transparent;
+    transition-property: scale, border-color; transition-duration: 0.1s;
+}
+
+.piggy-pkg:hover {
+    border-color: var(--color-accent-blue); scale: 1.02;
+}
+.piggy-pkg:active { scale: 0.98; }
+
+.piggy-pkg--selected {
+    border-color: var(--color-accent-yellow);
+    background-color: var(--color-deep-blue);
+}
+
+.piggy-pkg-icon {
+    font-size: 20px; margin-right: 8px; flex-shrink: 0; -unity-text-align: middle-center; padding: 0; margin-top: 0; margin-bottom: 0;
+}
+
+.piggy-pkg-duration {
+    font-size: 14px; -unity-font-style: bold; color: var(--color-text-white);
+    flex-grow: 1; flex-shrink: 0; white-space: nowrap; /* KHÔNG co, KHÔNG cắt chữ "ngày" */
+}
+
+.piggy-pkg-rate {
+    font-size: 16px; -unity-font-style: bold; color: var(--color-accent-yellow);
+    flex-shrink: 0; margin-left: 8px; white-space: nowrap;
+}
+
+.piggy-pkg-label { display: none; }
+
+/* === RIGHT: FORM / ACTIVE === */
+.piggy-right {
+    flex-grow: 1; margin-left: 24px;
+}
+
+/* ── DEPOSIT FORM ── */
+.piggy-form {
+    background-color: var(--color-mystic-black);
+    border-radius: 16px; padding: 24px; flex-grow: 1; border-width: 0;
+}
+
+.piggy-form-title {
+    font-size: 16px; -unity-font-style: bold; color: var(--color-accent-blue);
+    letter-spacing: 1px; margin-bottom: 16px; -unity-text-align: upper-center; flex-shrink: 0;
+}
+
+.piggy-form-summary {
+    background-color: rgba(255, 255, 255, 0.05); border-radius: 8px;
+    padding: 10px 16px; margin-bottom: 16px; align-items: center; flex-shrink: 0;
+}
+
+.piggy-form-pkg {
+    font-size: 14px; -unity-font-style: bold; color: var(--color-accent-yellow); -unity-text-align: middle-center;
+}
+
+/* Input */
+.piggy-input-label {
+    font-size: 13px; color: var(--color-bright-grey); margin-bottom: 6px; flex-shrink: 0;
+}
+
+.piggy-input {
+    border-radius: 12px; border-width: 0; flex-shrink: 0;
+    padding: 0; margin-bottom: 16px; height: 48px;
+}
+.piggy-input .unity-text-field__input {
+    background-color: rgba(255, 255, 255, 0.05); border-width: 1px; border-color: rgba(255, 255, 255, 0.1);
+    border-radius: 12px; padding: 0 16px; color: var(--color-text-white);
+    height: 48px; font-size: 16px; -unity-font-style: bold; -unity-text-align: middle-left; margin: 0;
+}
+.piggy-input .unity-text-field__input:focus { border-color: var(--color-accent-yellow); background-color: rgba(0, 0, 0, 0.4); }
+
+/* Preview */
+.piggy-preview {
+    background-color: var(--color-deep-blue); border-radius: 12px; flex-shrink: 0;
+    padding: 12px 16px; margin-bottom: 16px;
+}
+
+.piggy-preview-row {
+    flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 6px;
+    flex-shrink: 0; min-height: 20px;
+}
+
+.piggy-preview-label { font-size: 13px; color: var(--color-bright-grey); flex-shrink: 0; }
+.piggy-preview-label--bold { -unity-font-style: bold; color: var(--color-text-white); }
+.piggy-preview-value { font-size: 13px; color: var(--color-text-white); flex-shrink: 0; -unity-text-align: middle-right; }
+.piggy-preview-value--green { color: var(--color-success); -unity-font-style: bold; }
+.piggy-preview-value--bold { font-size: 16px; -unity-font-style: bold; color: var(--color-accent-yellow); }
+
+.piggy-preview-divider { height: 1px; background-color: rgba(255, 255, 255, 0.1); margin: 8px 0; }
+
+/* Error */
+.piggy-form-error {
+    font-size: 12px; color: var(--color-danger); -unity-font-style: bold; margin-bottom: 12px;
+    min-height: 16px; -unity-text-align: upper-center;
+}
+
+/* Submit button */
+.piggy-btn-deposit {
+    padding: 14px 24px; border-radius: var(--radius-button); border-width: 0;
+    background-color: var(--color-accent-yellow); color: var(--color-mystic-black);
+    font-size: 16px; -unity-font-style: bold; -unity-text-align: middle-center; letter-spacing: 1px;
+    transition-property: scale, background-color; transition-duration: 0.1s; margin-top: auto; flex-shrink: 0;
+}
+.piggy-btn-deposit:hover { background-color: #FFF890; }
+.piggy-btn-deposit:active { scale: 0.98; background-color: #D0C350; }
+.piggy-btn-deposit:disabled { background-color: var(--color-overcast-grey); color: rgba(21, 26, 39, 0.5); }
+
+/* ── ACTIVE DEPOSIT (countdown view) ── */
+.piggy-active {
+    background-color: var(--color-mystic-black); border-radius: 16px;
+    border-width: 0; padding: 24px; height: 100%;
+    align-items: center; justify-content: center; display: none;
+}
+
+.piggy-active-emoji { font-size: 48px; margin-bottom: 12px; }
+.piggy-active-title {
+    font-size: 16px; -unity-font-style: bold; color: var(--color-accent-yellow);
+    letter-spacing: 1px; margin-bottom: 16px;
+}
+
+.piggy-active-info {
+    width: 100%; background-color: var(--color-deep-blue);
+    border-radius: 12px; padding: 12px 16px; margin-bottom: 16px;
+}
+.piggy-active-row { flex-direction: row; justify-content: space-between; margin-bottom: 6px; }
+.piggy-active-label { font-size: 13px; color: var(--color-bright-grey); }
+.piggy-active-value { font-size: 13px; -unity-font-style: bold; color: var(--color-text-white); }
+
+/* Countdown */
+.piggy-countdown-wrap {
+    width: 100%; background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 12px; border-width: 1px; border-color: rgba(255, 255, 255, 0.1);
+    padding: 16px; align-items: center; margin-bottom: 16px;
+}
+.piggy-countdown-title { font-size: 12px; color: var(--color-bright-grey); margin-bottom: 6px; }
+.piggy-countdown-value { font-size: 28px; -unity-font-style: bold; color: var(--color-accent-yellow); letter-spacing: 2px; }
+.piggy-active-note {
+    font-size: 11px; color: var(--color-overcast-grey); -unity-font-style: italic; -unity-text-align: upper-center; white-space: normal;
+}
+
+/* === HISTORY TAB === */
+.piggy-history-panel { display: none; flex-direction: column; }
+.piggy-history-scroll { flex-grow: 1; }
+.piggy-history-list { flex-direction: column; }
+
+/* History row */
+.piggy-history-row {
+    flex-direction: row; align-items: center;
+    background-color: var(--color-mystic-black); border-radius: 12px;
+    border-width: 0; padding: 12px 16px; margin-bottom: 8px;
+}
+.piggy-history-icon { font-size: 24px; margin-right: 16px; }
+.piggy-history-info { flex-grow: 1; }
+.piggy-history-pkg-name { font-size: 14px; -unity-font-style: bold; color: var(--color-text-white); margin-bottom: 4px; }
+.piggy-history-detail { font-size: 11px; color: var(--color-bright-grey); }
+.piggy-history-result { align-items: flex-end; }
+.piggy-history-amount { font-size: 14px; -unity-font-style: bold; color: var(--color-success); }
+.piggy-history-status { font-size: 11px; color: var(--color-bright-grey); -unity-font-style: italic; margin-top: 2px; }
+
+/* History empty */
+.piggy-history-empty {
+    font-size: 14px; color: var(--color-overcast-grey); -unity-font-style: italic;
+    -unity-text-align: middle-center; margin-top: auto; margin-bottom: auto;
+}

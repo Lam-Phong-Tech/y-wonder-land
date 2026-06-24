@@ -1,0 +1,315 @@
+/* ============================================================
+   MapPopup.uss — Visual World Map
+   Design System: The Tangible Playground
+   ============================================================ */
+
+/* === OVERLAY === */
+.map-overlay {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(21, 26, 39, 0.8);
+    align-items: center; justify-content: center; display: none; z-index: 100;
+}
+
+/* === MAP WRAPPER === */
+.map-wrapper { position: relative; }
+
+/* === MAP CONTAINER === */
+.map-container {
+    width: 400px; height: 400px;
+    background-color: var(--color-primary-navy);
+    border-radius: var(--radius-panel);
+    border-width: 1px; border-color: rgba(255, 255, 255, 0.1);
+    overflow: hidden; position: relative;
+}
+
+/* === MAP WORLD === */
+.map-world {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #0B1120; /* Deep dark navy ocean */
+    background-image: url('../Icons/MapBackground.png');
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* === DECORATIVE WAVES === */
+.map-wave {
+    display: none;
+}
+
+.map-wave-1 { top: 100px; left: 50px; }
+.map-wave-2 { top: 250px; right: 80px; }
+.map-wave-3 { bottom: 80px; left: 200px; }
+.map-wave-4 { top: 180px; left: 450px; }
+
+/* === COMPASS === */
+.map-compass {
+    position: absolute; bottom: 20px; right: 24px;
+    background-color: transparent; border-width: 0; padding: 0;
+    transition-property: scale; transition-duration: 0.1s;
+}
+
+.map-compass:hover { scale: 1.1; }
+.map-compass:active { scale: 0.9; }
+
+.map-compass-icon {
+    font-size: 40px; color: rgba(255, 255, 255, 0.7);
+}
+
+/* === TOP BAR === */
+.map-top-bar {
+    position: absolute; top: 0; left: 0; right: 0;
+    flex-direction: row; align-items: center; justify-content: center;
+    padding: 20px 24px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-bottom-width: 1px; border-bottom-color: rgba(255, 255, 255, 0.05);
+    z-index: 20;
+}
+
+.map-top-title {
+    font-size: 20px; -unity-font-style: bold;
+    color: var(--color-accent-yellow); letter-spacing: 2px;
+}
+
+/* Level pill */
+.map-level-pill {
+    position: absolute; left: 24px; flex-direction: row; align-items: center;
+    background-color: rgba(0, 0, 0, 0.4);
+    border-radius: 16px; padding: 6px 16px;
+    border-width: 1px; border-color: rgba(255, 255, 255, 0.1);
+}
+
+.map-pill-icon { font-size: 14px; margin-right: 6px; }
+
+.map-pill-value {
+    font-size: 12px; -unity-font-style: bold; color: var(--color-accent-yellow);
+}
+
+/* === CLOSE BUTTON === */
+.map-close-shadow {
+    position: absolute; right: 12px; top: 12px; z-index: 50;
+}
+
+.map-close-btn {
+    width: 40px; height: 40px; border-radius: var(--radius-button);
+    background-color: rgba(128, 128, 128, 0.4);
+    border-width: 0; padding: 0; align-items: center; justify-content: center;
+    font-size: 16px; -unity-font-style: bold; color: #FFFFFF;
+    transition-property: scale, background-color, color; transition-duration: 0.1s;
+}
+
+.map-close-btn:hover { background-color: rgba(255, 75, 75, 0.8); color: #FFF; }
+.map-close-btn:active { scale: 0.95; }
+
+/* === ISLANDS === */
+.map-island {
+    position: absolute; 
+    width: 0; height: 0; /* Act as a precise anchor point */
+    align-items: center; justify-content: center;
+    cursor: link;
+}
+
+/* We don't scale the anchor itself to avoid shifting, we scale the land instead */
+
+/* Land mass (Invisible interactive hitboxes) */
+.map-island-land {
+    position: absolute;
+    left: 0; top: 0; translate: -50% -50%;
+    display: flex;
+    align-items: center; justify-content: center;
+    background-color: transparent;
+    border-width: 3px; border-color: transparent;
+    transition-property: background-color, border-color, scale, translate;
+    transition-duration: 0.2s;
+    cursor: link;
+}
+
+.map-island:hover .map-island-land {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.6);
+    scale: 1.05;
+    translate: -50% -55%;
+}
+
+/* Approximate shapes for the islands */
+.map-island-land--farm {
+    width: 40%; height: 27.5%; border-radius: 45% 55% 50% 48%;
+}
+
+.map-island-land--city {
+    width: 35%; height: 25%; border-radius: 48% 52% 55% 42%;
+}
+
+.map-island-land--mine {
+    width: 50%; height: 35%; border-radius: 42% 58% 45% 52%;
+}
+
+.map-island-land--haiphu {
+    width: 37.5%; height: 25%; border-radius: 55% 45% 48% 52%;
+}
+
+.map-island-land--mocnhi {
+    width: 40%; height: 22.5%; border-radius: 50% 48% 52% 45%;
+}
+
+/* Island Pin (Hidden to focus on image interaction) */
+.map-island-pin {
+    display: none;
+}
+
+/* Island Name */
+.map-island-name {
+    font-size: 14px; -unity-font-style: bold; color: var(--color-bright-grey);
+    -unity-text-align: upper-center; padding: 6px 14px;
+    background-color: rgba(0, 0, 0, 0.75); border-radius: 20px;
+    border-width: 1px; border-color: rgba(255, 255, 255, 0.1); z-index: 2;
+    position: absolute;
+    left: 0; top: 30px; translate: -50% 0;
+    transition-property: border-color, background-color; transition-duration: 0.15s;
+    pointer-events: none; /* Let clicks pass through to land */
+}
+
+.map-island:hover .map-island-name {
+    border-color: var(--color-accent-yellow); color: #FFF;
+}
+
+/* Lock overlay */
+.map-island-lock {
+    position: absolute; 
+    left: 0; top: 0; translate: -50% -50%;
+    align-items: center; justify-content: center;
+    background-color: rgba(0, 0, 0, 0.8); border-radius: 50%; z-index: 3;
+    width: 48px; height: 48px;
+    pointer-events: none;
+}
+
+.map-island-lock-icon { font-size: 28px; -unity-text-align: middle-center; }
+
+/* Selected State (No pins now, just change name color) */
+.map-island--selected .map-island-name {
+    background-color: var(--color-accent-yellow); color: var(--color-mystic-black);
+}
+
+/* Positions (Using percentages so it scales perfectly with any container size) */
+.map-island--farm { left: 27.5%; top: 15%; }
+.map-island--city { left: 72.5%; top: 20%; }
+.map-island--mine { left: 30%; top: 50%; }
+.map-island--haiphu { left: 77.5%; top: 65%; }
+.map-island--mocnhi { left: 50%; top: 82.5%; }
+
+/* === PLAYER INDICATOR === */
+.map-player-indicator {
+    position: absolute;
+    width: 0; height: 0;
+    align-items: center; justify-content: center;
+    transition-property: opacity, translate;
+    transition-duration: 0.8s, 0.3s;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.map-indicator-star {
+    position: absolute;
+    font-size: 24px;
+    color: #FFD700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+    left: 0; top: -10px; translate: -50% -50%;
+}
+
+.map-player-indicator.map-indicator-blink {
+    opacity: 0.2;
+}
+
+/* === FLOATING INFO CARD === */
+.map-info-card {
+    position: absolute; bottom: 40px; left: 50%; translate: -50% 0;
+    z-index: 30; display: none;
+}
+
+.map-info-card-inner {
+    width: 380px; background-color: var(--color-mystic-black);
+    border-radius: var(--radius-panel); border-width: 1px; border-color: rgba(255, 255, 255, 0.1);
+    padding: 24px;
+}
+
+.map-info-header { flex-direction: row; align-items: center; margin-bottom: 16px; }
+
+.map-info-icon {
+    font-size: 32px; margin-right: 12px; -unity-text-align: middle-center;
+}
+
+.map-info-header-text { flex-grow: 1; }
+
+.map-info-name {
+    font-size: 18px; -unity-font-style: bold; color: var(--color-text-white); margin-bottom: 6px;
+}
+
+/* Status Badge */
+.map-info-status {
+    border-radius: 6px; padding: 4px 10px; align-self: flex-start;
+}
+
+.map-info-status--unlocked {
+    background-color: rgba(46, 204, 113, 0.15); border-width: 1px; border-color: rgba(46, 204, 113, 0.3);
+}
+
+.map-info-status--locked {
+    background-color: rgba(255, 75, 75, 0.15); border-width: 1px; border-color: rgba(255, 75, 75, 0.3);
+}
+
+.map-info-status-text {
+    font-size: 10px; -unity-font-style: bold; letter-spacing: 1px; margin: 0; padding: 0;
+}
+
+.map-info-status--unlocked .map-info-status-text { color: #2ECC71; }
+.map-info-status--locked .map-info-status-text { color: #FF4B4B; }
+
+/* Divider */
+.map-info-divider {
+    height: 1px; background-color: rgba(255, 255, 255, 0.05); margin-bottom: 16px;
+}
+
+/* Description */
+.map-info-desc {
+    font-size: 13px; color: var(--color-bright-grey); white-space: normal; margin-bottom: 20px;
+}
+
+/* Requirements */
+.map-info-requirements {
+    background-color: rgba(255, 75, 75, 0.05); border-radius: var(--radius-button);
+    padding: 12px; margin-bottom: 20px; border-width: 1px; border-color: rgba(255, 75, 75, 0.2);
+    display: none;
+}
+
+.map-info-req {
+    font-size: 13px; color: #FF4B4B; margin-bottom: 4px;
+}
+
+/* Travel Button */
+.map-btn-travel {
+    padding: 14px 24px; border-radius: var(--radius-button); border-width: 0;
+    background-color: var(--color-accent-yellow); color: var(--color-mystic-black);
+    font-size: 15px; -unity-font-style: bold; -unity-text-align: middle-center;
+    letter-spacing: 1px; transition-property: scale, background-color; transition-duration: 0.1s;
+}
+
+.map-btn-travel:hover { background-color: #FFD54F; }
+.map-btn-travel:active { scale: 0.95; }
+.map-btn-travel:disabled {
+    background-color: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.3);
+}
+
+/* === CHEAT BAR === */
+.map-cheat-bar {
+    position: absolute; bottom: 16px; right: 24px; flex-direction: row; z-index: 25;
+    display: none;
+}
+
+.map-cheat-btn {
+    padding: 8px 12px; margin-left: 8px; border-radius: var(--radius-button);
+    border-width: 1px; border-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(0, 0, 0, 0.4);
+    font-size: 11px; -unity-font-style: bold; color: var(--color-bright-grey);
+    -unity-text-align: middle-center; transition-property: scale, background-color; transition-duration: 0.1s;
+}
+
+.map-cheat-btn:hover { background-color: rgba(255, 255, 255, 0.1); color: #FFF; }
+.map-cheat-btn:active { scale: 0.95; }

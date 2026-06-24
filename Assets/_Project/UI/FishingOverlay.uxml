@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:Style src="Styles/DesignSystem.uss" />
+    <ui:Style src="Styles/FishingOverlay.uss" />
+
+    <!-- Overlay gốc KHÔNG chặn click (picking Ignore) — chỉ panel góc phải nhận tương tác -->
+    <ui:VisualElement name="FishingOverlayRoot" class="fish-root" picking-mode="Ignore">
+
+        <!-- ============================================== -->
+        <!-- POPUP CĂN THỜI GIAN CÂU CÁ (góc phải, gọn)     -->
+        <!-- ============================================== -->
+        <ui:VisualElement name="PanelFishing" class="fish-panel">
+
+            <!-- Header: tiêu đề + nút đóng X -->
+            <ui:VisualElement class="fish-panel-header">
+                <ui:Label text="CÂU CÁ" class="fish-panel-title" />
+                <ui:Button name="BtnExitFishing" text="✕" class="fish-close-x" />
+            </ui:VisualElement>
+
+            <!-- Số lượt câu trong ngày (tích hợp luôn) -->
+            <ui:VisualElement class="fish-turns-pill">
+                <ui:Label name="LblFreeTurns" text="Lượt câu hôm nay: 10/10" class="fish-turns-text" />
+            </ui:VisualElement>
+
+            <!-- Hướng dẫn ngắn theo trạng thái -->
+            <ui:Label name="LblHint" text="Bấm Quăng cần (F) để bắt đầu" class="fish-hint" />
+
+            <!-- Thanh căn cá: vùng xanh + kim chạy -->
+            <ui:VisualElement class="qte-gauge-wrapper">
+                <ui:VisualElement name="QTETrack" class="qte-gauge-track">
+                    <ui:VisualElement name="QTESafeZone" class="qte-safe-zone" />
+                    <ui:VisualElement name="QTEPointer" class="qte-pointer" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Thanh thời gian còn lại -->
+            <ui:VisualElement class="qte-timer-wrapper">
+                <ui:VisualElement name="QTETimerBar" class="qte-timer-bar" />
+            </ui:VisualElement>
+
+            <!-- Nút hành động: Quăng cần (Idle) / Giật cần (đang căn) -->
+            <ui:Button name="BtnAction" text="QUĂNG CẦN" class="fish-action-btn" />
+
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

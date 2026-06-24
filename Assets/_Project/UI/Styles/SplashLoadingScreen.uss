@@ -1,0 +1,218 @@
+/* ============================================
+   Splash Loading Screen Styles - Palia Style
+   Extends DesignSystem.uss
+   ============================================ */
+
+/* -- Screen Container -- */
+
+.splash-screen {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-mystic-black); /* Chuyển sang Xanh đen thẫm để hài hoà với màu Blue chủ đạo */
+    transition-property: opacity;
+    transition-duration: 0.5s;
+    transition-timing-function: ease-in-out;
+}
+
+/* -- Decorative Stars -- */
+
+.splash-star {
+    position: absolute;
+    font-size: 32px;
+    color: rgba(253, 239, 112, 0.15); /* Soft Accent Yellow */
+}
+
+.splash-star-tl {
+    top: 40px;
+    left: 48px;
+}
+
+.splash-star-tr {
+    top: 48px;
+    right: 56px;
+    font-size: 24px;
+}
+
+.splash-star-bl {
+    bottom: 140px;
+    left: 64px;
+    font-size: 20px;
+}
+
+.splash-star-br {
+    bottom: 48px;
+    right: 40px;
+}
+
+/* -- Logo Container -- */
+
+.splash-logo-container {
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 80px;
+}
+
+/* -- Brand Logo Image -- */
+.splash-brand-logo {
+    width: 240px;
+    height: 240px;
+    background-image: url("project:/Assets/_Project/UI/Sprites/Y_Wonder_Hub_Logo2.png");
+    -unity-background-scale-mode: scale-to-fit;
+    margin-bottom: 8px;
+}
+
+/* -- Title (per-word colors) -- */
+.splash-title-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+.splash-title-word {
+    font-size: 56px;
+    letter-spacing: 4px;
+    white-space: nowrap;
+    -unity-font-style: bold;
+    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
+}
+.splash-word-light { color: rgb(236, 240, 245); }
+.splash-word-green { color: var(--color-success); }
+.splash-word-blue { color: var(--color-accent-blue); }
+
+/* -- Title Shadow (Removed retro block, now just subtle soft shadow) -- */
+
+.splash-title-shadow-wrapper {
+    position: absolute;
+    top: 4px;
+    left: 0px;
+    opacity: 0.5;
+}
+
+.splash-title-shadow {
+    font-size: 56px;
+    color: var(--color-mystic-black);
+    letter-spacing: 4px;
+    -unity-text-align: middle-center;
+    white-space: nowrap;
+}
+
+/* -- Title Main -- */
+
+.splash-title {
+    font-size: 56px;
+    color: var(--color-text-white);
+    letter-spacing: 4px;
+    -unity-text-align: middle-center;
+    white-space: nowrap;
+}
+
+/* -- Subtitle -- */
+
+.splash-subtitle {
+    font-size: 18px;
+    color: var(--color-accent-yellow);
+    letter-spacing: 6px;
+    -unity-text-align: middle-center;
+    margin-top: 8px;
+}
+
+/* -- Decorative Divider -- */
+
+.splash-divider {
+    width: 120px;
+    height: 4px;
+    background-color: var(--color-accent-yellow);
+    border-radius: 2px;
+    margin-top: 24px;
+    opacity: 0.8;
+}
+
+/* -- Loading Group -- */
+
+.splash-loading-group {
+    position: absolute;
+    bottom: 80px;
+    left: 0;
+    right: 0;
+    align-items: center;
+}
+
+/* -- Status Text -- */
+
+.splash-status-text {
+    font-size: 16px;
+    color: var(--color-bright-grey);
+    -unity-text-align: middle-center;
+    margin-bottom: 16px;
+    letter-spacing: 1px;
+}
+
+/* -- Progress Bar Wrapper -- */
+
+.splash-progress-wrapper {
+    width: 400px;
+    /* Soft shadow instead of block offset */
+}
+
+/* -- Progress Track -- */
+
+.splash-progress-track {
+    width: 100%;
+    height: 16px;
+    background-color: var(--color-mystic-black); /* Dark Navy Track */
+    border-radius: 8px; /* Pill shape */
+    overflow: hidden;
+    flex-direction: row;
+    align-items: stretch;
+    border-width: 2px;
+    border-color: rgba(255,255,255,0.05); /* Very subtle highlight */
+}
+
+/* -- Progress Fill -- */
+
+.splash-progress-fill {
+    width: 0%;
+    height: 100%;
+    background-color: var(--color-success); /* xanh lá glow — khớp thiết kế mới */
+    border-radius: 8px; /* Pill shape */
+    transition-property: width;
+    transition-duration: 0.15s;
+    transition-timing-function: ease-out;
+}
+
+/* -- Percentage Text -- */
+
+.splash-percentage-text {
+    font-size: 16px;
+    color: var(--color-text-white);
+    -unity-text-align: middle-center;
+    margin-top: 12px;
+    letter-spacing: 1px;
+}
+
+/* -- Skip Hint -- */
+
+.splash-skip-hint {
+    font-size: 14px;
+    color: var(--color-overcast-grey);
+    -unity-text-align: middle-center;
+    margin-top: 24px;
+}
+
+/* -- Version Label -- */
+
+.splash-version {
+    position: absolute;
+    bottom: 16px;
+    right: 24px;
+    font-size: 12px;
+    color: var(--color-overcast-grey);
+}
+
+/* -- Fade Out Class (applied via C#) -- */
+
+.splash-fade-out {
+    opacity: 0;
+}

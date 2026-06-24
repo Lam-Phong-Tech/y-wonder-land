@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f3ad8fecab395944e9aff10213de8036, type: 3}
+  m_Name: CropDatabase
+  m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.CropDatabase
+  crops:
+  - {fileID: 11400000, guid: 26eb59a22519f714eb280fe80ef434b4, type: 2}
+  - {fileID: 11400000, guid: 2314a1ef03cbd2048804f252d97dc093, type: 2}
+  - {fileID: 11400000, guid: 2c6fbf2cab44e3e4787beb65e5ca4815, type: 2}
+  - {fileID: 11400000, guid: 54096f15e4972dc48bcf1a83ec2dc9a9, type: 2}
+  - {fileID: 11400000, guid: 1c3bd630288be9d4b895a0e1d8dfa005, type: 2}
+  - {fileID: 11400000, guid: b593824aa7c7528409b03cfc16d1fae4, type: 2}
+  - {fileID: 11400000, guid: ace31aaa201e06a4fa09d157338a50e3, type: 2}
+  - {fileID: 11400000, guid: f103da93315f6a7498dfd45f2476ecaf, type: 2}
+  - {fileID: 11400000, guid: 7610358ff4f212f4c8861cf3d7b73af7, type: 2}
+  - {fileID: 11400000, guid: dafca78f8d32afc4b94c5e340f9801ab, type: 2}
+  - {fileID: 11400000, guid: 503b47945d86ca741a180aaeab4dc024, type: 2}
+  - {fileID: 11400000, guid: 6838ec7528ff6aa478729f6763025f86, type: 2}
+  - {fileID: 11400000, guid: 68944e414f0f47742be87d6ce36438fe, type: 2}
+  - {fileID: 11400000, guid: 4921e1370bf06a3459490b8ca244658a, type: 2}
+  - {fileID: 11400000, guid: 522fb4eeac3428c4b8fe4b2663628e5e, type: 2}
+  - {fileID: 11400000, guid: 5f70bff7519040d44a6a9b4a11c9086e, type: 2}
+  - {fileID: 11400000, guid: e0a16d7e2c45a0440b93084b63570aba, type: 2}
+  - {fileID: 11400000, guid: 741f08a2d521cfb43af63f83d068e7e5, type: 2}
+  - {fileID: 11400000, guid: b7f6d2276d872e24da215ec1b8d95be2, type: 2}

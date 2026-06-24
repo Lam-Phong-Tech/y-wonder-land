@@ -1,0 +1,28 @@
+{
+    "asset": "3d36f5e6548358a4da25316c2feaeb33",
+    "fileName": "019eb537-1a9b-7281-b76c-33f7ddfa4f2a.png",
+    "prompt": "A single ripe yellow corn cob with green husks, 3D game icon asset, casual farming game style, top-down isometric view, chunky clay texture, soft smooth shading, vibrant and cozy colors, clean solid white background, high quality, highly detailed, no text, no shadows on background --v 6.0",
+    "negativePrompt": "",
+    "model": "gemini-3.1-flash",
+    "modelName": "Gemini 3.1 Nano Banana 2",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelatePixelGridSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0,
+    "dimensions": {
+        "width": 1024,
+        "height": 1024
+    },
+    "spriteSheet": false,
+    "duration": 0.0
+}

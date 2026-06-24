@@ -1,0 +1,313 @@
+/* ============================================
+   Chat Panel — Cozy Dark Palia
+   Extends DesignSystem.uss
+   ============================================ */
+
+/* Root element: absolute positioned bottom center */
+.chat-root {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    translate: -50% 0;
+    width: 460px;
+    align-items: center;
+    justify-content: flex-end;
+    transition-property: bottom;
+    transition-duration: 0.3s;
+    transition-timing-function: ease-out-back;
+}
+
+/* ── 1. Collapsed State ── */
+.chat-collapsed-bar {
+    flex-direction: row;
+    align-items: center;
+    background-color: var(--color-mystic-black);
+    border-radius: 24px; /* Pill shape */
+    padding: 6px 16px;
+    width: 360px;
+    height: 48px;
+    justify-content: space-between;
+    transition-property: opacity, scale;
+    transition-duration: 0.15s;
+    border-width: 2px;
+    border-color: transparent;
+}
+
+.chat-collapsed-bar:hover {
+    border-color: rgba(255,255,255,0.1);
+}
+
+.chat-last-message {
+    font-size: 14px;
+    color: var(--color-bright-grey);
+    flex-grow: 1;
+    flex-shrink: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    margin-right: 8px;
+    -unity-text-align: middle-left;
+}
+
+.chat-collapsed-controls {
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.chat-mini-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 16px; /* Circle */
+    background-color: var(--color-deep-blue);
+    border-width: 0;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: var(--color-text-white);
+    padding: 0;
+    margin-left: 8px;
+    transition-property: background-color, scale;
+    transition-duration: 0.1s;
+}
+
+.chat-mini-btn:hover {
+    background-color: var(--color-accent-blue);
+}
+
+.chat-mini-btn:active {
+    scale: 0.9;
+}
+
+#BtnQuickEmoji {
+    font-size: 16px;
+    padding-bottom: 2px;
+}
+
+/* ── 2. Expanded State ── */
+.chat-expanded-shadow {
+    background-color: transparent;
+    border-radius: 24px;
+    width: 460px;
+    height: 320px;
+    display: none; /* hidden by default */
+}
+
+.chat-expanded-panel {
+    background-color: var(--color-primary-navy);
+    border-radius: 24px;
+    border-width: 0;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+/* Header */
+.chat-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--color-deep-blue);
+    padding: 12px 16px;
+    height: 48px;
+    flex-shrink: 0;
+}
+
+.chat-header-title {
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: var(--color-text-white);
+    letter-spacing: 2px;
+}
+
+.chat-collapse-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 14px;
+    background-color: rgba(255,255,255,0.1);
+    border-width: 0;
+    color: var(--color-text-white);
+    font-size: 10px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition-property: background-color, scale;
+    transition-duration: 0.1s;
+}
+
+.chat-collapse-btn:hover {
+    background-color: rgba(255,255,255,0.2);
+}
+
+.chat-collapse-btn:active {
+    scale: 0.9;
+}
+
+/* History Scroll */
+.chat-history-scroll {
+    flex-grow: 1;
+    padding: 12px 16px;
+    background-color: transparent;
+}
+
+/* Message Item Layout */
+.chat-msg-row {
+    flex-direction: row;
+    align-items: flex-start;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.chat-msg-sender {
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: var(--color-accent-yellow);
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+.chat-msg-text {
+    font-size: 14px;
+    color: var(--color-text-white);
+    white-space: normal;
+    flex-grow: 1;
+    flex-shrink: 1;
+    line-height: 20px;
+}
+
+/* Footer Controls */
+.chat-footer {
+    flex-direction: row;
+    align-items: center;
+    background-color: var(--color-mystic-black);
+    padding: 8px 12px;
+    height: 56px;
+    flex-shrink: 0;
+}
+
+.chat-footer-emoji-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 18px;
+    background-color: transparent;
+    border-width: 0;
+    font-size: 20px;
+    color: var(--color-bright-grey);
+    padding: 0;
+    margin-right: 8px;
+    -unity-text-align: middle-center;
+    transition-property: background-color, scale;
+    transition-duration: 0.1s;
+}
+
+.chat-footer-emoji-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--color-text-white);
+}
+
+.chat-input-wrapper {
+    flex-grow: 1;
+    height: 40px;
+    background-color: var(--color-deep-blue);
+    border-radius: 20px; /* Pill */
+    border-width: 2px;
+    border-color: transparent;
+    justify-content: center;
+    padding: 0 12px;
+    margin-right: 12px;
+    transition-property: border-color;
+    transition-duration: 0.15s;
+}
+
+.chat-input-wrapper:hover {
+    border-color: rgba(255,255,255,0.1);
+}
+
+.chat-text-input {
+    background-color: transparent;
+    border-width: 0;
+    font-size: 14px;
+    color: var(--color-text-white);
+    margin: 0;
+    padding: 0;
+}
+
+.chat-text-input > .unity-text-field__input {
+    background-color: transparent;
+    border-width: 0;
+    color: var(--color-text-white);
+    padding: 0;
+    margin: 0;
+}
+
+.chat-text-input > .unity-text-field__input > .unity-text-element--placeholder {
+    color: var(--color-overcast-grey);
+}
+
+/* Send Button */
+.chat-send-shadow {
+    background-color: transparent;
+}
+
+.chat-send-btn {
+    padding: 10px 20px;
+    background-color: var(--color-accent-blue);
+    border-width: 0;
+    border-radius: 20px; /* Pill */
+    color: var(--color-mystic-black);
+    font-size: 14px;
+    -unity-font-style: bold;
+    transition-property: background-color, scale;
+    transition-duration: 0.1s;
+}
+
+.chat-send-btn:hover {
+    background-color: #6BC0F6;
+}
+
+.chat-send-btn:active {
+    background-color: #3886B8;
+    scale: 0.95;
+}
+
+/* ── 3. Emote Popup Grid (Phương án 2) ── */
+.emote-popup {
+    position: absolute;
+    bottom: 60px; /* Hiển thị ngay trên thanh footer của chat (footer height 56px) */
+    left: 12px;   /* Thẳng hàng với nút Emoji */
+    background-color: var(--color-mystic-black);
+    border-radius: 16px;
+    padding: 12px;
+    border-width: 2px;
+    border-color: rgba(255,255,255,0.1);
+}
+
+.emote-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 140px; /* Vừa đủ cho 2 cột nút (60px x 2 + margin) */
+    justify-content: space-between;
+}
+
+.emote-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    background-color: var(--color-deep-blue);
+    border-width: 0;
+    font-size: 24px;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+    padding: 0;
+    -unity-text-align: middle-center;
+    transition-property: background-color, scale;
+    transition-duration: 0.1s;
+}
+
+.emote-btn:hover {
+    background-color: var(--color-accent-blue);
+}
+
+.emote-btn:active {
+    scale: 0.9;
+}

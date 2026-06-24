@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:Style src="Styles/DesignSystem.uss" />
+    <ui:Style src="Styles/LoginScreen.uss" />
+
+    <!-- Full Screen Container -->
+    <ui:VisualElement class="login-screen">
+
+        <!-- Layer 1: Overlay (black 40%) -->
+        <ui:VisualElement class="overlay" />
+
+        <!-- Layer 2: Login Panel with Retro Shadow -->
+        <ui:VisualElement class="login-shadow">
+            <ui:VisualElement class="login-panel">
+
+                <!-- Header Bar -->
+                <ui:VisualElement class="login-header">
+                    <ui:VisualElement class="game-logo" />
+                </ui:VisualElement>
+
+                <!-- Tab Bar -->
+                <ui:VisualElement class="login-tab-bar">
+                    <ui:Button name="TabLogin" text="Đăng Nhập" class="login-tab login-tab-active" />
+                    <ui:Button name="TabRegister" text="Đăng Ký" class="login-tab" />
+                </ui:VisualElement>
+
+                <!-- ==================== -->
+                <!-- LOGIN FORM           -->
+                <!-- ==================== -->
+                <ui:VisualElement name="LoginForm" class="form-container">
+
+                    <!-- Username -->
+                    <ui:VisualElement name="UsernameGroup" class="login-input-group">
+                        <ui:VisualElement class="login-icon">
+                            <ui:VisualElement class="user-icon-head" />
+                            <ui:VisualElement class="user-icon-body" />
+                        </ui:VisualElement>
+                        <ui:TextField name="UsernameField" class="login-textfield" text="" max-length="20" />
+                    </ui:VisualElement>
+
+                    <!-- Password -->
+                    <ui:VisualElement name="PasswordGroup" class="login-input-group">
+                        <ui:VisualElement class="login-icon">
+                            <ui:VisualElement class="lock-icon-top" />
+                            <ui:VisualElement class="lock-icon-body" />
+                        </ui:VisualElement>
+                        <ui:TextField name="PasswordField" password="true" class="login-textfield" text="" max-length="20" />
+                        <ui:Button name="BtnTogglePassword" text="◉" class="btn-toggle-eye" />
+                    </ui:VisualElement>
+
+                    <!-- Options Row -->
+                    <ui:VisualElement class="options-row">
+                        <ui:VisualElement class="remember-row">
+                            <ui:Toggle name="RememberToggle" class="remember-toggle" />
+                            <ui:Label text="Ghi nhớ" class="remember-label" />
+                        </ui:VisualElement>
+                        <ui:Label name="ForgotPassword" text="Quên mật khẩu?" class="forgot-password" />
+                    </ui:VisualElement>
+
+                    <!-- Login Button with Retro Shadow -->
+                    <ui:VisualElement class="login-btn-shadow">
+                        <ui:Button name="BtnLogin" text="ĐĂNG NHẬP" class="btn-login" />
+                    </ui:VisualElement>
+
+                    <!-- Status Message -->
+                    <ui:Label name="LoginStatus" class="status-message" text="" />
+
+                </ui:VisualElement>
+
+                <!-- ==================== -->
+                <!-- REGISTER FORM        -->
+                <!-- ==================== -->
+                <ui:VisualElement name="RegisterForm" class="form-container hidden">
+
+                    <!-- Username -->
+                    <ui:VisualElement name="RegUsernameGroup" class="login-input-group">
+                        <ui:VisualElement class="login-icon">
+                            <ui:VisualElement class="user-icon-head" />
+                            <ui:VisualElement class="user-icon-body" />
+                        </ui:VisualElement>
+                        <ui:TextField name="RegUsernameField" class="login-textfield" text="" max-length="20" />
+                    </ui:VisualElement>
+
+                    <!-- Email -->
+                    <ui:VisualElement name="RegEmailGroup" class="login-input-group">
+                        <ui:VisualElement class="login-icon">
+                            <ui:VisualElement class="email-icon-box" />
+                        </ui:VisualElement>
+                        <ui:TextField name="RegEmailField" class="login-textfield" text="" />
+                    </ui:VisualElement>
+
+                    <!-- Password -->
+                    <ui:VisualElement name="RegPasswordGroup" class="login-input-group">
+                        <ui:VisualElement class="login-icon">
+                            <ui:VisualElement class="lock-icon-top" />
+                            <ui:VisualElement class="lock-icon-body" />
+                        </ui:VisualElement>
+                        <ui:TextField name="RegPasswordField" password="true" class="login-textfield" text="" max-length="20" />
+                        <ui:Button name="BtnToggleRegPassword" text="◉" class="btn-toggle-eye" />
+                    </ui:VisualElement>
+
+                    <!-- Confirm Password -->
+                    <ui:VisualElement name="RegConfirmGroup" class="login-input-group">
+                        <ui:VisualElement class="login-icon">
+                            <ui:VisualElement class="lock-icon-top" />
+                            <ui:VisualElement class="lock-icon-body" />
+                        </ui:VisualElement>
+                        <ui:TextField name="RegConfirmField" password="true" class="login-textfield" text="" max-length="20" />
+                    </ui:VisualElement>
+
+                    <!-- Register Button with Retro Shadow -->
+                    <ui:VisualElement class="login-btn-shadow">
+                        <ui:Button name="BtnRegister" text="ĐĂNG KÝ" class="btn-login" />
+                    </ui:VisualElement>
+
+                    <!-- Status Message -->
+                    <ui:Label name="RegisterStatus" class="status-message" text="" />
+
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

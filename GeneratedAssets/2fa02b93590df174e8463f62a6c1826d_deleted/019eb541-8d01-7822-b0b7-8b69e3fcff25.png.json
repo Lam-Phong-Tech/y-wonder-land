@@ -1,0 +1,28 @@
+{
+    "asset": "2fa02b93590df174e8463f62a6c1826d",
+    "fileName": "019eb541-8d01-7822-b0b7-8b69e3fcff25.png",
+    "prompt": "A small paper seed bag with a carrot picture on it, 3D game icon asset, casual farming game style, top-down isometric view, chunky clay texture, soft smooth shading, vibrant and cozy colors, clean solid white background, high quality, highly detailed, no text, no shadows on background",
+    "negativePrompt": "",
+    "model": "stylized-3d",
+    "modelName": "Stylized 3D",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelatePixelGridSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0,
+    "dimensions": {
+        "width": 1024,
+        "height": 1024
+    },
+    "spriteSheet": false,
+    "duration": 0.0
+}

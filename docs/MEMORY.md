@@ -18,13 +18,12 @@
 **Tình huống:** Unity dùng file .meta để track assets, references, GUIDs.
 **Quy tắc:** Nếu sửa/xóa file .meta → Unity mất track → reference bị null → lỗi cả project.
 
-### 3. Unity version mismatch — Awaitable API
-**Tình huống:** Toolkit unity-ai-workflow dùng `Awaitable` (Unity 6.2+) nhưng dự án chạy Unity 2022 LTS.
-**Hậu quả:** Compile error, code không chạy được.
+### 3. Sức mạnh của Unity 6.3 LTS — Awaitable API
+**Tình huống:** Ban đầu dự án ghi nhầm là dùng Unity 2022 LTS, khiến AI không dám dùng các API async hiện đại.
+**Đính chính:** Dự án đang chạy trên **Unity 6.3 LTS**!
 **Quy tắc:**
-- Dự án này dùng **Unity 2022 LTS** — KHÔNG có `Awaitable`, `Application.exitCancellationToken`
-- Async pattern: dùng **UniTask** hoặc **async Task**
-- Luôn kiểm tra Unity version trước khi copy code từ nguồn ngoài
+- CÓ THỂ sử dụng thoải mái `Awaitable`, `Awaitable.WaitForSecondsAsync()`, `Application.exitCancellationToken`.
+- Đây là một lợi thế cực lớn giúp code async/await trong Unity sạch đẹp hơn rất nhiều so với UniTask hay Coroutine truyền thống.
 
 ---
 
@@ -248,6 +247,30 @@
   - Giảm `font-size: 20px → 18px` khi tiêu đề có thể dài.
   - Thêm `text-overflow: ellipsis; overflow: hidden; white-space: nowrap;` để cắt an toàn nếu tràn.
   - Thêm `padding: 0 120px` cho title absolute để chừa khoảng trống cho các element ở hai góc (pill trái, close button phải).
+
+---
+
+## 🟢 BÀI HỌC VỀ CHẾ ĐỘ XÂY DỰNG & TRẢI NGHIỆM NGƯỜI DÙNG (Cập nhật 06/06/2026)
+
+### 33. KHÔNG bắt sự kiện Left Click đặt công trình khi chưa Pin (Ghim)
+- **Tình huống**: Trong chế độ Xây dựng, khi Ghost preview đi theo chuột, nếu user bấm Left Click thì công trình tự động xây luôn.
+- **Hậu quả**: Khi user click vào UI (chọn nhà khác, chuyển tab) thì vô tình đặt luôn nhà xuống map vì tia raycast vẫn xuyên qua UI.
+- **Giải pháp (Chuẩn UX Mobile/PC)**: Click trái lần 1 để "Ghim" vị trí ngôi nhà (pin). Khi ghim xong, hiện 3 nút nổi cạnh nhà: [Dấu tích/Xây], [Xoay], [Hủy]. Click trái vào nút Tích mới thực sự trừ tiền và đặt công trình.
+
+### 34. KHÔNG vẽ GL.Lines trong URP
+- **Tình huống**: Dùng hàm `OnRenderObject()` và `GL.Lines` để vẽ lưới (Grid) 3D cho chế độ xây dựng.
+- **Hậu quả**: Lưới hoàn toàn tàng hình trong Universal Render Pipeline (URP).
+- **Giải pháp**: Trong URP, phải dùng `RenderPipelineManager.endCameraRendering`. Sử dụng `MeshTopology.Lines` để tạo Mesh, và vẽ nó bằng `Graphics.DrawMeshNow` với một Unlit Shader màu cơ bản.
+
+### 35. KHÔNG gán trùng phím tắt cho 2 tính năng lớn
+- **Tình huống**: Tính năng Câu cá gán phím `E`. Tính năng Popup Sự kiện cũng gán phím `E` ở ngoài HUD.
+- **Hậu quả**: Khi user đứng gần hồ, bấm `E` thì bật cả popup câu cá lẫn popup sự kiện lên cùng lúc.
+- **Giải pháp**: Map phím khác (`F` cho câu cá) hoặc dùng hệ thống Contextual Input chặn luồng sự kiện lẫn nhau.
+
+### 36. Xóa bớt UI rối mắt — Thay bằng Contextual Menu
+- **Tình huống**: Header của chế độ Xây dựng chứa 6-7 nút (Lưu, Hủy, Xoay, Nhấc, Xóa, Cất kho).
+- **Hậu quả**: Chiếm diện tích, rối mắt, trải nghiệm kém so với các game Township, Hay Day.
+- **Giải pháp**: Xóa hết các nút trên Header (chỉ chừa lại Tiền, Tiêu đề, Thoát). Các thao tác Xoay, Xóa, Nhấc được đặt vào Contextual Menu (menu ngữ cảnh) sẽ nổi lên NGAY CẠNH công trình khi user click vào một công trình ĐÃ XÂY.
 - **Quy tắc**: Mọi title trong header PHẢI có `text-overflow: ellipsis` + `overflow: hidden`. Luôn test với tiêu đề dài nhất có thể xuất hiện (ví dụ: "KỶ NGUYÊN XANH — THẺ THÀNH VIÊN VIP").
 
 ---
@@ -429,3 +452,97 @@
   - `✕` (U+2715) thay cho ✕
 - **Quy tắc**: Trong file `.uxml`, KHÔNG BAO GIỜ dùng `&#xNNNNN;` với N > 4 chữ số hex. Nếu cần icon, dùng ký tự BMP-safe hoặc chữ text thường. Trong file `.cs` thì dùng `\U0001Fxxx` bình thường vì C# string hỗ trợ đầy đủ UTF-32.
 
+### 48. Project dùng URP — KHÔNG BAO GIỜ dùng Shader.Find("Standard")
+- **Tình huống**: Tạo material bằng `new Material(Shader.Find("Standard"))` cho NPC fallback, FarmTile, GhostPlacement.
+- **Hậu quả**: Mọi object hiện màu TÍM/HỒNG (shader lỗi) vì URP không hỗ trợ Built-in Standard shader.
+- **Giải pháp**: Luôn dùng `Shader.Find("Universal Render Pipeline/Lit")` cho opaque objects, hoặc `Shader.Find("Universal Render Pipeline/Unlit")` cho UI/overlay objects.
+- **Quy tắc**: Grep toàn bộ project tìm `Shader.Find("Standard")` → đổi hết sang URP trước khi commit.
+
+### 49. Floating Name Tag — Dùng TextMeshPro 3D, KHÔNG dùng TextMesh hay UI Toolkit WorldToScreenPoint
+- **Tình huống**: Cần hiển thị tên nhân vật nổi trên đầu trong 3D.
+- **Cách SAI 1**: UI Toolkit + WorldToScreenPoint mỗi frame → text biến mất khi di chuyển.
+- **Cách SAI 2**: TextMesh cơ bản → chữ 3D thô, không sắc nét, khó đọc.
+- **Cách ĐÚNG**: TextMeshPro 3D (TMPro.TextMeshPro, KHÔNG phải TextMeshProUGUI) + billboard rotation.
+- **Chống frustum culling**: `enableWordWrapping=false`, `overflowMode=Overflow`, `allowOcclusionWhenDynamic=false`, `sizeDelta=(20,5)`, `ForceMeshUpdate()`.
+- **Camera**: Luôn refresh `Camera.main` mỗi frame (GameManager swap cameras giữa states).
+- **Scale**: KHÔNG scale theo khoảng cách (để nhỏ tự nhiên khi xa). Thêm fade opacity khi xa.
+
+### 50. Tiếng Việt có dấu trong UXML — Set từ C# code, KHÔNG gõ trực tiếp trong UXML
+- **Tình huống**: Gõ text tiếng Việt có dấu trực tiếp trong file `.uxml`.
+- **Hậu quả**: Chữ hiển thị không dấu hoặc ký tự lạ do encoding.
+- **Giải pháp**: Trong UXML dùng placeholder (text="."), rồi set text tiếng Việt từ C# controller bằng Unicode escapes (`\u1EA0`, `\u00c2`...) hoặc string literals.
+- **Lưu ý**: Rule #45 (UXML comment ASCII-only) áp dụng cho COMMENTS, không áp dụng cho text content. Nhưng vì UXML encoding không đáng tin cậy, set từ code cho an toàn.
+
+---
+
+## 🟢 BÀI HỌC VỀ BẢO TRÌ CODE & ĐẤU NỐI (Cập nhật 07/06/2026)
+
+### 51. TextMeshPro Obsolete API: `enableWordWrapping`
+- **Tình huống**: Sử dụng `enableWordWrapping = false` cho `TextMeshPro` dẫn đến cảnh báo Obsolete Warning trong console của các bản Unity/TMP mới.
+- **Giải pháp**: Thay thế bằng API mới `textWrappingMode = TMPro.TextWrappingModes.NoWrap;` (hoặc `Normal` nếu muốn bật). Điều này giúp code tương thích tốt với tương lai và giữ console sạch sẽ.
+
+### 52. Tận dụng Mockup UI cũ khi đấu nối hệ thống (Integration)
+- **Tình huống**: Yêu cầu triển khai hệ thống Câu Cá (Phase 6). AI định lên plan code từ đầu.
+- **Phát hiện**: Trước đó, file `FishingOverlay.uxml` và `FishingOverlayController.cs` đã được xây dựng sẵn dưới dạng Mockup (dùng biến ảo `premiumBait = 2`).
+- **Bài học**: TRƯỚC KHI tạo UI mới hoặc viết controller mới cho một tính năng, luôn dùng `grep_search` quét thư mục `Assets/UI/` để xem tính năng đó đã từng được làm mockup hay chưa. Việc tận dụng mockup cũ và chỉ việc thay đổi logic đọc data thực tế (như gọi `InventoryManager.Instance.GetItemQuantity`) tiết kiệm đến 80% thời lượng. Khai báo biến thừa trong Mockup (như `premiumBait`) cần được xóa sạch để tránh rác.
+
+---
+
+## 🟢 BÀI HỌC PHIÊN DEMO GAMEPLAY (Cập nhật 14/06/2026)
+
+### 53. Scale NHÂN CHỒNG — coi chừng "bom phóng đại"
+- **Tình huống**: Model Nữ (artist A) mesh nhỏ; vừa chỉnh FBX `Scale Factor`, vừa để transform prefab scale lớn → kích thước phình theo cấp số nhân (có lúc to gấp 100 lần).
+- **Quy tắc**: `Size = mesh × Scale Factor × MỌI transform scale (root + con)` — tất cả NHÂN với nhau. **Chỉ để 1 chỗ lo size, các chỗ còn lại = 1.** Chuẩn nhất: dùng FBX Scale Factor để chỉnh, mọi transform scale giữ `1,1,1` → đồng bộ giữa các model, tránh lỗi ngầm (CharacterController, điểm gắn dụng cụ, name tag).
+
+### 54. Object "ăn theo" nhân vật phải độc lập với scale model
+- **Tình huống**: `FloatingNameTag` là con của nhân vật → Nữ scale 2 đẩy name tag lên cao gấp đôi (Nam scale 1 thì đúng).
+- **Quy tắc**: Object bám theo nhân vật mà không nên phụ thuộc scale (name tag, thanh máu nổi...) → **đừng parent vào nhân vật**, set toạ độ THẾ GIỚI mỗi frame: `pos = player.position + Vector3.up * offset`. Vừa độc lập scale, vừa đúng cho mọi nhân vật.
+
+### 55. Model Blender import có sẵn rotation -90° trục X — ĐỪNG reset về identity
+- **Tình huống**: Spawn model cây bằng `Instantiate(prefab, parent)` rồi gán `localRotation = Quaternion.identity` → cây nằm ngang.
+- **Nguyên nhân**: FBX Blender (Z-up) → Unity (Y-up) thường có sẵn rotation `~-90° X` ở prefab để đứng thẳng. Reset về identity là phá mất.
+- **Quy tắc**: Spawn prefab mà chỉ muốn dời vị trí → `Instantiate(prefab)` rồi `SetParent(parent, false)` (giữ transform local), CHỈ set `localPosition`, **KHÔNG đụng** `localRotation`/`localScale`.
+
+### 56. GetComponent vs FindObjectByType vs Instance — biết script gắn ở đâu
+- **Tình huống**: `FarmInteractionController` KHÔNG nằm trên nhân vật. Dùng `GetComponent<PlayerController>()` → `null` → lệnh múa animation bị bỏ qua (trong khi Pet/Feed dùng `FindFirstObjectByType` thì chạy).
+- **Quy tắc**: Trước khi `GetComponent<X>()`, chắc chắn script ĐANG nằm cùng GameObject với X. Không chắc → dùng singleton `X.Instance` hoặc `FindFirstObjectByType<X>()`. Trong dự án này: lấy nhân vật LUÔN dùng `PlayerController.Instance`.
+
+### 57. Tự đo độ dài clip animation thay vì gõ số cứng
+- **Tình huống**: Khóa hành động (trồng/cho ăn) cần đúng bằng độ dài clip; gõ số tay dễ lệch khi artist sửa clip.
+- **Giải pháp**: Truyền `duration = 0` → tự lấy `clip.length`: thử khớp theo TÊN qua `animator.runtimeAnimatorController.animationClips`; nếu tên clip ≠ tên state thì đọc clip THỰC TẾ đang phát sau 1 frame qua `GetCurrentAnimatorClipInfo`/`GetNextAnimatorClipInfo` (kiểm `IsInTransition`). Thêm tham số `speed` để tăng/giảm tốc (`animator.speed`, khóa = `clip.length / speed`, nhớ trả `animator.speed = 1` khi xong).
+
+### 58. Field "(Auto-assigned)" là dữ liệu RUNTIME — đừng set tay
+- **Tình huống**: User set `Current Crop` (FarmTile) khác nhau cho từng ô, tưởng mỗi ô trồng 1 loại. Thực ra field này bị code ghi đè lúc gieo (`InteractPlant`) — set tay vô tác dụng.
+- **Quy tắc**: Field ghi chú "(Auto-assigned)" / được gán lúc runtime → KHÔNG cấu hình tay. (Loại cây do HẠT người chơi chọn quyết định, không phải ô đất.)
+
+### 59. Chuyển đảo: Scene NỀN giữ UI, đảo phụ load Additive — khỏi prefab hoá UI
+- **Tình huống**: Lo mất UI khi đổi map.
+- **Giải pháp**: Để UI/Manager/Player ở **Scene nền (Scene 0) luôn giữ tải**; mỗi đảo là 1 scene riêng `LoadSceneAsync(Additive)` / `UnloadSceneAsync`, KHÔNG bao giờ unload scene nền → UI tự sống, không cần đóng gói prefab. Teleport thì tắt `CharacterController` + `PlayerController` 1 frame rồi bật lại (xem `IslandTravelManager`/`ScenePortal`).
+
+### 60. Công tắc UI trung tâm trả chuột + chặn click-xuyên
+- **Tình huống**: Camera khóa chuột khi gameplay; mở popup khó bấm; bấm xuyên popup trúng thế giới.
+- **Giải pháp**: 1 static `UIPopupTracker` (HashSet popup đang mở). Mỗi popup gọi `SetOpen(this, true/false)` trong Show/Hide. `ThirdPersonCamera` mỗi frame: có popup mở → mở chuột + ngừng xoay; `FarmInteractionController` early-return khi `UIPopupTracker.AnyOpen` để chặn tương tác thế giới.
+
+### 61. Tầm tương tác đo tới ĐIỂM CHẠM (hit.point), không phải pivot
+- **Tình huống**: Gate khoảng cách chặt cây đo từ nhân vật tới pivot cây → cây to thì không bao giờ "đủ gần".
+- **Quy tắc**: Đo khoảng cách tới `hit.point` (điểm tâm ngắm chạm bề mặt) cho trực quan, đúng với mọi kích cỡ vật thể. Đặt range trên TỪNG vật (`HarvestableResource.interactionRange`) như `FishingSpot` để chỉnh linh hoạt + vẽ gizmo cho dễ canh.
+
+### 62. APK NẶNG = gần như luôn do TEXTURE — đọc Build Report đừng đoán (22/06)
+- **Tình huống**: Build APK ra **1.2GB**. Tưởng do model/code.
+- **Chẩn đoán**: Đọc **Build Report** trong `Editor.log` (sau build): "Uncompressed usage by category" + danh sách asset nặng nhất. Kết quả: **Textures 96.3%**; 4 con NPC `.glb` **256MB/con** do texture nhúng cực to. Mesh chỉ 58MB. → Instancing/Static KHÔNG liên quan dung lượng file (chỉ giảm draw call).
+- **Quy tắc**: Texture nhân vật/đồ trên mobile để **Max Size 512 + ASTC** là đủ (màn hình nhỏ). NPC dùng **glTF importer** → KHÔNG có nút "Extract Textures" như FBX; nếu texture là file rời thì chỉnh Max Size thẳng (multi-select hoặc menu `Tools/Tối ưu Mobile/Nén Texture`). 2048→512 = giảm ~16 lần.
+
+### 63. ĐỪNG tính "lời X lần" kiểu tổng-thu ÷ giá-mua (22/06)
+- **Tình huống**: Báo "mua bò 300, bán cả đời 164k → lời 547 lần → kinh tế thủng" → làm hoang mang sai.
+- **Sai ở đâu**: Con số đó BỎ QUA (a) chi phí **thức ăn** cả đời (~40k/con bò, người chơi tự trồng tốn công), (b) **thời gian** (bò 38 vụ × 7 ngày = ~9 tháng game = 9 tháng thật ở 1day=1day), (c) số lần thu **GIỚI HẠN** (đã tính trong tổng-thu).
+- **Quy tắc**: Lời = (doanh thu − thức ăn − giá mua) và xét theo CHU KỲ/THỜI GIAN. Công thức của khách (CachTinh) tính cả thức ăn → lời thật **~250-400%**, hợp lý. Khi báo cáo kinh tế cho người ra quyết định, luôn trừ chi phí vận hành + nêu thời gian hoàn vốn.
+
+### 64. VPS/backend không phải "bật online" bằng một URL (24/06)
+- **Tình huống**: Cần giải thích việc "kết nối VPS" trước demo.
+- **Hiện trạng dự án**: Unity client đã có khung REST (`BackendConfig`, `ApiClient`, `AuthService`, `PlayerProfileService`) nhưng mới đủ auth/profile/tutorialCompleted. `server/` hiện là stub Node/Express phục vụ demo/dev, chưa phải backend production.
+- **Quy tắc**: VPS chỉ là nơi chạy API. Muốn build demo online tối thiểu thì deploy `server/` stub + tạo `Assets/Resources/BackendConfig.asset` trỏ `baseUrl` về URL public. Muốn online thật cho POS/inventory/farm/cây/thú/server-time/IAP thì phải làm phase backend server-authoritative riêng, không hứa là đã có sẵn.
+
+### 65. Sửa tài liệu tiếng Việt phải kiểm tra bằng `git diff`, không tin màn hình console (24/06)
+- **Tình huống**: Sửa `CHANGELOG.md`/context bằng tooling có thể làm người dùng thấy ký tự lỗi hoặc full-file diff.
+- **Quy tắc**: Sau khi sửa tài liệu có tiếng Việt, luôn chạy `git diff -- <file>` và kiểm tra diff chỉ gồm đoạn cần đổi, không phải toàn bộ file bị rewrite. Nếu thấy mojibake/full-file churn thì dừng, khôi phục từ `HEAD:<file>` rồi chèn lại phần cần giữ.
+- **Lưu ý**: PowerShell `Get-Content` có thể hiển thị sai do code page dù file UTF-8 vẫn đúng; dùng `git diff`, `rg`, hoặc đọc qua .NET UTF-8 khi cần xác minh nội dung.

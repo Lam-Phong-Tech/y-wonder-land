@@ -1,6 +1,6 @@
-# Game UI/UX Design Principles
+﻿# Game UI/UX Design Principles
 
-> **Note:** For the Y WONDER LAND project-specific design system, see [docs/DESIGN.md](../../docs/DESIGN.md) — "The Tangible Playground" framework. Rules in DESIGN.md take priority over this generic guide.
+> **Note:** For the Y WONDER GREEN FARM project-specific design system, see [docs/DESIGN.md](../../docs/DESIGN.md) — "The Tangible Playground" framework. Rules in DESIGN.md take priority over this generic guide.
 
 Reference for the **Art Director** agent when designing game interfaces.
 

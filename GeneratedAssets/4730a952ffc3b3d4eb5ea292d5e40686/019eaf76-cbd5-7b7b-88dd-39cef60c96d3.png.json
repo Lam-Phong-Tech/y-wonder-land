@@ -1,0 +1,28 @@
+{
+    "asset": "4730a952ffc3b3d4eb5ea292d5e40686",
+    "fileName": "019eaf76-cbd5-7b7b-88dd-39cef60c96d3.png",
+    "prompt": "Minimalist 3D Friends Silhouette UI icon, onyx black/dark grey matte plastic base with frosted glass (glassmorphism) elements, soft glowing neon cyan accents, premium modern futuristic friendly style, rounded thick minimalist shape, soft studio lighting, 3D isometric view, subtle drop shadows, solid white background.",
+    "negativePrompt": "",
+    "model": "gemini-3.1-flash",
+    "modelName": "Gemini 3.1 Nano Banana 2",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelatePixelGridSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0,
+    "dimensions": {
+        "width": 1024,
+        "height": 1024
+    },
+    "spriteSheet": false,
+    "duration": 0.0
+}
