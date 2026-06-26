@@ -70,13 +70,29 @@ orientation, package name, and demo/test flags before producing an APK/AAB.
 The repository includes `codemagic.yaml` and
 `Assets/_Project/Editor/BuildScript.cs` for CodeMagic iOS export/build.
 
-The CodeMagic workflow expects Unity `6000.3.15f1` and Unity license variables
-configured in CodeMagic, for example:
+There are two iOS workflows:
+
+- `unity-ios-release`: CodeMagic runs Unity, exports Xcode, then builds IPA.
+- `ios-testflight-from-exported-xcode`: CodeMagic does not run Unity. It expects
+  a pre-exported Unity Xcode project at `ios/Unity-iPhone.xcodeproj`, then builds
+  the IPA and uploads it to TestFlight.
+
+The Unity-export workflow expects Unity `6000.3.15f1` and Unity license
+variables configured in CodeMagic, for example:
 
 ```text
 UNITY_SERIAL
 UNITY_EMAIL
 UNITY_PASSWORD
+```
+
+The Xcode-only TestFlight workflow expects App Store Connect variables in the
+CodeMagic environment group `appstore_credentials`:
+
+```text
+APP_STORE_CONNECT_PRIVATE_KEY
+APP_STORE_CONNECT_KEY_IDENTIFIER
+APP_STORE_CONNECT_ISSUER_ID
 ```
 
 iOS signing is not stored in this repository. The build owner must configure
