@@ -1,5 +1,27 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-06-26 (iOS CI and app icon setup)
+
+### Added
+- Added `codemagic.yaml` at the repository root with a Unity iOS release workflow for CodeMagic.
+- Added `Assets/_Project/Editor/BuildScript.cs` so CI can export an iOS Xcode project from Unity in batch mode.
+- Added game thumbnail/icon assets under `Assets/_Project/UI/Sprites/`.
+- Wired `ThumbnailGame.jpg` into Standalone app icon slots and Android adaptive icon slots in `ProjectSettings/ProjectSettings.asset`.
+
+### Fixed
+- Fixed Unity compile error in the CI build script caused by the project namespace `YWonderLand.Environment` shadowing `System.Environment`.
+- Updated the CI build script to use `NamedBuildTarget.iOS` for the iOS bundle identifier API, removing the Unity 6 obsolete API warning.
+
+### Changed Files
+- `codemagic.yaml`
+- `Assets/_Project/Editor/BuildScript.cs`
+- `Assets/_Project/Editor/BuildScript.cs.meta`
+- `Assets/_Project/UI/Sprites/ThumbnailGame.jpg`
+- `Assets/_Project/UI/Sprites/ThumbnailGame.jpg.meta`
+- `Assets/_Project/UI/Sprites/Black.jpg`
+- `Assets/_Project/UI/Sprites/Black.jpg.meta`
+- `ProjectSettings/ProjectSettings.asset`
+
 ## [Unreleased] - 2026-06-26 (Interaction, enclosure, fishing, and icon polish)
 
 ### Added
