@@ -67,7 +67,7 @@ namespace YWonderLand.CI
 
         private static string GetEnv(string key, string fallback)
         {
-            var value = Environment.GetEnvironmentVariable(key);
+            var value = System.Environment.GetEnvironmentVariable(key);
             return string.IsNullOrWhiteSpace(value) ? fallback : value;
         }
     }
