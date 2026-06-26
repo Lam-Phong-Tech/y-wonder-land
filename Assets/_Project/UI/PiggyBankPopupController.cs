@@ -72,15 +72,14 @@ public class PiggyBankPopupController : MonoBehaviour
     {
         public int days;
         public float rate; // e.g. 0.02 = 2%
-        public string icon;
         public string label;
     }
 
     private PackageInfo[] packages = new PackageInfo[]
     {
-        new PackageInfo { days = 12, rate = 0.02f, icon = "⏱️", label = "12 ngày" },
-        new PackageInfo { days = 30, rate = 0.06f, icon = "📅", label = "30 ngày" },
-        new PackageInfo { days = 180, rate = 0.45f, icon = "🏆", label = "180 ngày" },
+        new PackageInfo { days = 12, rate = 0.02f, label = "12 ngày" },
+        new PackageInfo { days = 30, rate = 0.06f, label = "30 ngày" },
+        new PackageInfo { days = 180, rate = 0.45f, label = "180 ngày" },
     };
 
     private struct HistoryEntry
@@ -456,8 +455,9 @@ public class PiggyBankPopupController : MonoBehaviour
             var row = new VisualElement();
             row.AddToClassList("piggy-history-row");
 
-            var icon = new Label("🐷");
+            var icon = new VisualElement();
             icon.AddToClassList("piggy-history-icon");
+            icon.AddToClassList("piggy-piggy-icon");
 
             var info = new VisualElement();
             info.AddToClassList("piggy-history-info");

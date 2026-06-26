@@ -11,12 +11,16 @@ public class QuestPopupController : MonoBehaviour
         public string rewardName;
         public string rewardEmoji;
         public int amount;
+        public string itemId;
+        public string iconClass;
 
-        public RewardItem(string name, string emoji, int amt)
+        public RewardItem(string name, string emoji, int amt, string itemId = null, string iconClass = null)
         {
             rewardName = name;
             rewardEmoji = emoji;
             amount = amt;
+            this.itemId = itemId;
+            this.iconClass = iconClass;
         }
     }
 
@@ -55,6 +59,7 @@ public class QuestPopupController : MonoBehaviour
 
     [Header("References")]
     [SerializeField] private UIDocument questDocument;
+    private YWonderLand.Data.ItemDatabase itemDatabase;
 
     private VisualElement root;
     private VisualElement questOverlay;
@@ -97,6 +102,7 @@ public class QuestPopupController : MonoBehaviour
         }
 
         root = questDocument.rootVisualElement;
+        itemDatabase = Resources.Load<YWonderLand.Data.ItemDatabase>("ItemDatabase");
         QueryElements();
         RegisterCallbacks();
 
@@ -262,16 +268,24 @@ public class QuestPopupController : MonoBehaviour
             // 1. Icon Container
             VisualElement iconContainer = new VisualElement();
             iconContainer.AddToClassList("quest-icon-container");
-            string iconStr = "⚔️";
-            if (quest.isRewardClaimed) iconStr = "🎁";
-            else if (quest.isCompleted) iconStr = "✔️";
-            Label iconLabel = new Label(iconStr);
-            iconLabel.AddToClassList("quest-icon-label");
-            if (quest.isCompleted && !quest.isRewardClaimed)
+            if (quest.isRewardClaimed)
             {
-                iconLabel.AddToClassList("completed");
+                iconContainer.AddToClassList("claimed");
+                iconContainer.Add(CreateQuestCheckMark("quest-claimed-check"));
             }
-            iconContainer.Add(iconLabel);
+            else
+            {
+                VisualElement icon = new VisualElement();
+                icon.AddToClassList("quest-list-icon");
+                icon.AddToClassList(quest.isCompleted ? "quest-icon-reward" : "quest-icon-mission");
+
+                if (quest.isCompleted)
+                {
+                    iconContainer.AddToClassList("ready");
+                }
+
+                iconContainer.Add(icon);
+            }
             card.Add(iconContainer);
 
             // 2. Info Content
@@ -351,13 +365,12 @@ public class QuestPopupController : MonoBehaviour
                 VisualElement slot = new VisualElement();
                 slot.AddToClassList("reward-slot");
 
-                Label emoji = new Label(reward.rewardEmoji);
-                emoji.AddToClassList("reward-emoji");
+                VisualElement icon = CreateRewardIcon(reward);
 
                 Label amount = new Label($"x{reward.amount}");
                 amount.AddToClassList("reward-amount");
 
-                slot.Add(emoji);
+                slot.Add(icon);
                 slot.Add(amount);
                 rewardGrid.Add(slot);
             }
@@ -404,5 +417,66 @@ public class QuestPopupController : MonoBehaviour
         Debug.Log($"[Quest] Nhận phần thưởng nhiệm vụ '{selectedQuest.title}' thành công: {summary}");
 
         SelectQuest(selectedQuest);
+    }
+
+    private VisualElement CreateRewardIcon(RewardItem reward)
+    {
+        if (!string.IsNullOrEmpty(reward.iconClass))
+        {
+            var classIcon = new VisualElement();
+            classIcon.AddToClassList("reward-icon");
+            classIcon.AddToClassList(reward.iconClass);
+            return classIcon;
+        }
+
+        var itemDef = !string.IsNullOrEmpty(reward.itemId) && itemDatabase != null
+            ? itemDatabase.GetItem(reward.itemId)
+            : null;
+
+        if (itemDef != null && (itemDef.iconTexture != null || itemDef.iconSprite != null))
+        {
+            var imageIcon = new Image { scaleMode = ScaleMode.ScaleToFit };
+            imageIcon.AddToClassList("reward-icon");
+            imageIcon.AddToClassList("reward-icon-image");
+
+            if (itemDef.iconTexture != null)
+                imageIcon.image = itemDef.iconTexture;
+            else
+                imageIcon.sprite = itemDef.iconSprite;
+
+            return imageIcon;
+        }
+
+        var fallback = new VisualElement();
+        fallback.AddToClassList("reward-icon");
+        fallback.AddToClassList(GetFallbackRewardIconClass(reward));
+        return fallback;
+    }
+
+    private string GetFallbackRewardIconClass(RewardItem reward)
+    {
+        switch (reward.rewardEmoji)
+        {
+            case "\U0001FA99":
+                return "quest-reward-pos";
+            case "\u2605":
+                return "quest-reward-exp";
+            case "\u2B50":
+                return "quest-reward-exp";
+            case "\U0001F48E":
+                return "quest-reward-diamond";
+            case "\U0001F4E6":
+                return "quest-reward-gift";
+            default:
+                return "quest-reward-gift";
+        }
+    }
+
+    private VisualElement CreateQuestCheckMark(string className)
+    {
+        var check = new VisualElement();
+        check.AddToClassList("quest-check-mark");
+        check.AddToClassList(className);
+        return check;
     }
 }

@@ -114,7 +114,7 @@
 
             <!-- Close Button (AFTER panel → renders on top) -->
             <ui:VisualElement class="inventory-close-shadow">
-                <ui:Button name="BtnCloseInventory" text="✕" class="inventory-close-btn" />
+                <ui:Button name="BtnCloseInventory" text="X" class="inventory-close-btn" />
             </ui:VisualElement>
 
         </ui:VisualElement>

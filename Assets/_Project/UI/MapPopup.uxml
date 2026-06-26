@@ -111,7 +111,7 @@
 
             <!-- Close Button (OUTSIDE container, won't be clipped) -->
             <ui:VisualElement class="map-close-shadow">
-                <ui:Button name="BtnCloseMap" text="✕" class="map-close-btn" />
+                <ui:Button name="BtnCloseMap" text="X" class="map-close-btn" />
             </ui:VisualElement>
 
         </ui:VisualElement>

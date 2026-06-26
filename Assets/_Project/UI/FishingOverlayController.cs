@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEngine.InputSystem;
@@ -36,9 +35,14 @@ public class FishingOverlayController : MonoBehaviour
     private VisualElement qteSafeZone;
     private VisualElement qtePointer;
     private VisualElement qteTimerBar;
+    private CursorLockMode previousCursorLockState;
+    private bool previousCursorVisible;
+    private bool hasSavedCursorState;
+    private int autoFishingStartFrame = -1;
 
     private enum FishingState { Idle, Timing, AutoFishing }
     private FishingState state = FishingState.Idle;
+    public bool IsAutoFishing => state == FishingState.AutoFishing;
 
     private int freeTurns = 10;
 
@@ -63,22 +67,8 @@ public class FishingOverlayController : MonoBehaviour
         }
     }
 
-    private readonly List<FishItem> commonFish = new List<FishItem>
-    {
-        new FishItem("fish_01", "Cá Rô Phi", "Thường"),
-        new FishItem("fish_01", "Cá Chép", "Thường")
-    };
-
-    private readonly List<FishItem> rareFish = new List<FishItem>
-    {
-        new FishItem("fish_02", "Cá Trắm Đen", "Hiếm"),
-        new FishItem("fish_02", "Cá Hồi Vây Đỏ", "Hiếm")
-    };
-
-    private readonly List<FishItem> epicFish = new List<FishItem>
-    {
-        new FishItem("fish_02", "Cá Kiếm Vàng", "Sử Thi")
-    };
+    private readonly FishItem commonFish = new FishItem("fish_01", "Cá chép", "Thường");
+    private readonly FishItem rareFish = new FishItem("fish_02", "Cá hiếm", "Hiếm");
 
     private void Awake()
     {
@@ -130,6 +120,8 @@ public class FishingOverlayController : MonoBehaviour
 
         // An toàn: gỡ khỏi tracker để chuột không kẹt nếu overlay tắt giữa chừng (đổi đảo...).
         UIPopupTracker.SetOpen(this, false);
+        EndFishingCursorMode();
+        GameHUDController.Instance?.HideFishingCancelProgress();
     }
 
     private void OnExitClicked(ClickEvent evt) => Hide();
@@ -145,7 +137,15 @@ public class FishingOverlayController : MonoBehaviour
         // BẢN TẠM: câu tự động — đợi hết thời gian rồi trao cá (không cần thao tác).
         if (state == FishingState.AutoFishing)
         {
+            var autoKeyboard = Keyboard.current;
+            if (autoKeyboard != null && Time.frameCount > autoFishingStartFrame && autoKeyboard.fKey.wasPressedThisFrame)
+            {
+                CancelFishingFromHUD();
+                return;
+            }
+
             timerElapsed += Time.deltaTime;
+            GameHUDController.Instance?.SetFishingCancelProgress(Mathf.Clamp01(timerElapsed / Mathf.Max(0.1f, castDuration)));
             if (timerElapsed >= castDuration)
                 HandleCatch();
             return;
@@ -192,23 +192,90 @@ public class FishingOverlayController : MonoBehaviour
     /// </summary>
     public void Show()
     {
-        if (state != FishingState.Idle) return; // đang câu rồi thì bỏ qua
+        BeginAutoFishing(castDuration);
+    }
 
-        if (freeTurns <= 0)
-        {
+    public bool CanStartFishing(bool showToast = true)
+    {
+        if (state != FishingState.Idle) return false;
+
+        if (freeTurns > 0) return true;
+
+        if (showToast)
             YWonderLand.Environment.ScreenToast.Show("Hết lượt câu hôm nay rồi! Mai quay lại nhé.");
-            return;
-        }
+        return false;
+    }
 
+    public bool BeginAutoFishing(float durationSec)
+    {
+        if (!CanStartFishing()) return false;
+
+        castDuration = Mathf.Max(0.1f, durationSec);
         freeTurns--;
         PlayerPrefs.SetInt("FishingFreeTurns", freeTurns);
         PlayerPrefs.Save();
 
-        // KHÔNG hiện popup; chỉ chờ animation + thời gian rồi trao cá.
+        if (fishingDocument != null && fishingDocument.rootVisualElement != null)
+            fishingDocument.rootVisualElement.style.display = DisplayStyle.None;
+
         state = FishingState.AutoFishing;
         timerElapsed = 0f;
+        autoFishingStartFrame = Time.frameCount;
+        BeginFishingCursorMode();
+        GameHUDController.Instance?.HideInteractionPrompt();
+        GameHUDController.Instance?.ShowFishingCancelProgress(0f);
         YWonderLand.Environment.ScreenToast.ShowInfo("Đang câu cá... chờ chút nhé!");
-        Debug.Log("[Fishing] Auto-fishing started (popup hidden).");
+        Debug.Log($"[Fishing] Auto-fishing started for {castDuration:F2}s.");
+        return true;
+    }
+
+    public void CancelFishingFromHUD()
+    {
+        if (state != FishingState.AutoFishing) return;
+
+        state = FishingState.Idle;
+        timerElapsed = 0f;
+        GameHUDController.Instance?.HideFishingCancelProgress();
+        EndFishingCursorMode();
+
+        if (YWonderLand.Environment.FishingLineController.Instance != null)
+            YWonderLand.Environment.FishingLineController.Instance.Reel();
+
+        if (PlayerController.Instance != null)
+            PlayerController.Instance.CancelAction();
+
+        YWonderLand.Environment.ScreenToast.Show("Đã hủy câu cá.");
+        Debug.Log("[Fishing] Auto-fishing cancelled.");
+    }
+
+    private void BeginFishingCursorMode()
+    {
+        if (!hasSavedCursorState)
+        {
+            previousCursorLockState = UnityEngine.Cursor.lockState;
+            previousCursorVisible = UnityEngine.Cursor.visible;
+            hasSavedCursorState = true;
+        }
+
+        UIPopupTracker.SetOpen(this, true);
+        UnityEngine.Cursor.lockState = CursorLockMode.None;
+        UnityEngine.Cursor.visible = true;
+    }
+
+    private void EndFishingCursorMode()
+    {
+        autoFishingStartFrame = -1;
+        UIPopupTracker.SetOpen(this, false);
+
+        if (!hasSavedCursorState) return;
+
+        if (!UIPopupTracker.AnyOpen)
+        {
+            UnityEngine.Cursor.lockState = previousCursorLockState;
+            UnityEngine.Cursor.visible = previousCursorVisible;
+        }
+
+        hasSavedCursorState = false;
     }
 
     /// <summary>Đóng overlay câu cá.</summary>
@@ -218,6 +285,8 @@ public class FishingOverlayController : MonoBehaviour
 
         state = FishingState.Idle;
         fishingDocument.rootVisualElement.style.display = DisplayStyle.None;
+        GameHUDController.Instance?.HideFishingCancelProgress();
+        EndFishingCursorMode();
 
         // Thu dây câu + phao về.
         if (YWonderLand.Environment.FishingLineController.Instance != null)
@@ -284,12 +353,8 @@ public class FishingOverlayController : MonoBehaviour
     {
         state = FishingState.Idle;
 
-        // Bốc loại cá theo tỉ lệ (không còn mồi -> tỉ lệ cơ bản).
-        FishItem caught;
-        float roll = Random.Range(0f, 1f);
-        if (roll < 0.08f) caught = epicFish[Random.Range(0, epicFish.Count)];
-        else if (roll < 0.33f) caught = rareFish[Random.Range(0, rareFish.Count)];
-        else caught = commonFish[Random.Range(0, commonFish.Count)];
+        // 80% cá chép, 20% cá hiếm.
+        FishItem caught = Random.value < 0.2f ? rareFish : commonFish;
 
         var inv = YWonderLand.Managers.InventoryManager.Instance;
         if (inv != null && !string.IsNullOrEmpty(caught.itemId))
@@ -302,6 +367,8 @@ public class FishingOverlayController : MonoBehaviour
         if (YWonderLand.Environment.FishingLineController.Instance != null)
             YWonderLand.Environment.FishingLineController.Instance.Reel();
 
+        GameHUDController.Instance?.HideFishingCancelProgress();
+        EndFishingCursorMode();
         UpdateUI();
     }
 
@@ -310,6 +377,8 @@ public class FishingOverlayController : MonoBehaviour
         state = FishingState.Idle;
         YWonderLand.Environment.ScreenToast.Show(reason);
         Debug.Log($"[Fishing] Miss: {reason}");
+        GameHUDController.Instance?.HideFishingCancelProgress();
+        EndFishingCursorMode();
         UpdateUI();
     }
 

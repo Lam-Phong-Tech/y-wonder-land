@@ -18,10 +18,10 @@
 
 /* -- Main Panel -- */
 .login-panel {
+    position: relative;
     background-color: var(--color-primary-navy); /* Base Navy */
     border-radius: var(--radius-panel);
     flex-grow: 1; overflow: hidden;
-    position: relative;
 }
 
 .login-close-btn {

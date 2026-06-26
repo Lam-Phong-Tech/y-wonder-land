@@ -44,6 +44,9 @@ public class LoginScreenController : MonoBehaviour
     private bool isPasswordVisible = false;
     private bool isRegPasswordVisible = false;
     private bool isAuthRequestInProgress = false;
+    private bool isQuitRequestSent = false;
+    private bool shouldSkipCharacterSelectAfterLogin = false;
+    private VisualElement callbacksRoot;
 
     // USS class names
     private const string TAB_ACTIVE_CLASS = "login-tab-active";
@@ -108,13 +111,22 @@ public class LoginScreenController : MonoBehaviour
 
     private void RegisterCallbacks()
     {
+        if (callbacksRoot == uiDocument.rootVisualElement) return;
+        callbacksRoot = uiDocument.rootVisualElement;
+
         // Tab switching
         tabLogin?.RegisterCallback<ClickEvent>(evt => ShowLoginTab());
         tabRegister?.RegisterCallback<ClickEvent>(evt => ShowRegisterTab());
 
         // Login actions
         btnLogin?.RegisterCallback<ClickEvent>(evt => OnLoginClicked());
-        btnQuitApp?.RegisterCallback<ClickEvent>(evt => OnQuitAppClicked());
+        if (btnQuitApp != null)
+        {
+            btnQuitApp.pickingMode = PickingMode.Position;
+            btnQuitApp.BringToFront();
+            btnQuitApp.clicked += OnQuitAppClicked;
+            btnQuitApp.RegisterCallback<PointerDownEvent>(OnQuitAppPointerDown, TrickleDown.TrickleDown);
+        }
         btnTogglePassword?.RegisterCallback<ClickEvent>(evt => TogglePasswordVisibility());
 
         // Register actions
@@ -279,18 +291,51 @@ public class LoginScreenController : MonoBehaviour
             return;
         }
 
+        shouldSkipCharacterSelectAfterLogin = false;
         var profile = PlayerProfileService.Instance;
         if (profile != null)
         {
             ShowStatus(loginStatus, "Đang nạp hồ sơ...", true);
             await profile.LoadProfileAsync();
+
+            if (GameManager.IsRichDemoAccountName(username) && !profile.HasCharacterCreated)
+                profile.ApplyCharacterInfo(username, profile.Profile != null ? profile.Profile.gender : "male");
+
+            shouldSkipCharacterSelectAfterLogin = profile.HasCharacterCreated;
         }
 
-        ShowStatus(loginStatus, "Đăng nhập thành công!", true);
-        Debug.Log("[LoginScreen] Login successful. Transitioning to Character Selection...");
+        if (GameManager.IsRichDemoAccountName(username))
+            shouldSkipCharacterSelectAfterLogin = true;
 
-        // Transition to Character Selection after a short delay
-        Invoke(nameof(TransitionToCharacterSelect), 0.8f);
+        ShowStatus(loginStatus,
+            shouldSkipCharacterSelectAfterLogin
+                ? "\u0110\u0103ng nh\u1eadp th\u00e0nh c\u00f4ng! \u0110ang v\u00e0o game..."
+                : "\u0110\u0103ng nh\u1eadp th\u00e0nh c\u00f4ng! H\u00e3y t\u1ea1o nh\u00e2n v\u1eadt.",
+            true);
+        Debug.Log($"[LoginScreen] Login successful. Skip character select: {shouldSkipCharacterSelectAfterLogin}");
+
+        Invoke(nameof(TransitionAfterLogin), 0.8f);
+    }
+
+    private void TransitionAfterLogin()
+    {
+        if (shouldSkipCharacterSelectAfterLogin)
+            TransitionToExistingCharacter();
+        else
+            TransitionToCharacterSelect();
+    }
+
+    private void TransitionToExistingCharacter()
+    {
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.StartGameFromProfile();
+            Debug.Log("[LoginScreen] Existing character profile found. Starting game directly.");
+        }
+        else
+        {
+            Debug.LogWarning("[LoginScreen] GameManager.Instance is null! Cannot start existing character.");
+        }
     }
 
     private void TransitionToCharacterSelect()
@@ -540,11 +585,20 @@ public class LoginScreenController : MonoBehaviour
 
     private void OnQuitAppClicked()
     {
+        if (isQuitRequestSent) return;
+        isQuitRequestSent = true;
+
         Debug.Log("[LoginScreen] Quit app clicked.");
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else
         Application.Quit();
 #endif
+    }
+
+    private void OnQuitAppPointerDown(PointerDownEvent evt)
+    {
+        evt.StopImmediatePropagation();
+        OnQuitAppClicked();
     }
 }

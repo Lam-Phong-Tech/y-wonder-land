@@ -14,8 +14,8 @@
     border-radius: var(--radius-panel);
     border-width: 1px;
     border-color: var(--color-border);
-    padding: 24px;
-    width: 360px;
+    padding: 20px;
+    width: 680px;
 }
 
 /* Header */
@@ -42,6 +42,107 @@
 
 .ap-status { font-size: 15px; color: var(--color-text-secondary); margin-bottom: 16px; }
 
+/* Cụm chuồng */
+.ap-enclosure {
+    display: none;
+    background-color: var(--color-surface-mid);
+    border-radius: 14px;
+    padding: 12px;
+    margin-bottom: 14px;
+}
+
+.ap-enclosure-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.ap-enclosure-summary {
+    font-size: 15px;
+    -unity-font-style: bold;
+    color: var(--color-text-white);
+}
+
+.ap-btn-small {
+    height: 34px;
+    padding-left: 16px;
+    padding-right: 16px;
+    border-radius: 17px;
+    font-size: 14px;
+    -unity-font-style: bold;
+    border-width: 0;
+}
+
+.ap-card-scroll {
+    height: 160px;
+}
+
+.ap-card-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.ap-animal-card {
+    width: 140px;
+    height: 132px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    border-width: 1px;
+    border-color: var(--color-border);
+    background-color: var(--color-background-dark);
+}
+
+.ap-animal-card:hover {
+    background-color: rgba(78, 176, 230, 0.12);
+}
+
+.ap-animal-card-selected {
+    border-width: 2px;
+    border-color: var(--color-primary);
+    background-color: rgba(255, 238, 94, 0.14);
+}
+
+.ap-card-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.12);
+    -unity-background-scale-mode: scale-to-fit;
+    color: var(--color-primary);
+    -unity-font-style: bold;
+    font-size: 22px;
+    -unity-text-align: middle-center;
+    margin-bottom: 8px;
+}
+
+.ap-card-icon-fallback {
+    -unity-text-align: middle-center;
+}
+
+.ap-card-name {
+    color: var(--color-text-white);
+    -unity-font-style: bold;
+    font-size: 14px;
+    white-space: normal;
+}
+
+.ap-card-meta {
+    color: var(--color-text-secondary);
+    font-size: 12px;
+    margin-top: 4px;
+    white-space: normal;
+}
+
+.ap-empty {
+    color: var(--color-text-secondary);
+    font-size: 14px;
+    white-space: normal;
+    padding: 10px;
+}
+
 /* Bảng thông tin (Deep Blue card) */
 .ap-info {
     background-color: var(--color-surface-mid);
@@ -63,20 +164,25 @@
 .ap-val { font-size: 15px; -unity-font-style: bold; color: var(--color-text-white); flex-shrink: 1; }
 
 /* Hành động */
-.ap-actions { flex-direction: column; }
+.ap-actions {
+    flex-direction: row;
+    margin-top: 2px;
+}
 .ap-btn {
     height: 44px;
-    margin-top: 8px;
+    flex-grow: 1;
+    margin-right: 8px;
     border-radius: var(--radius-button);
-    font-size: 16px; -unity-font-style: bold;
+    font-size: 14px; -unity-font-style: bold;
     border-width: 0;
     transition-property: scale, background-color;
     transition-duration: 0.12s;
 }
+.ap-btn-last { margin-right: 0; }
 .ap-btn-primary { background-color: var(--color-primary); color: var(--color-text-dark); }
 .ap-btn-primary:hover { background-color: var(--color-primary-hover); }
 .ap-btn-primary:active { background-color: var(--color-primary-active); scale: 0.98; }
-.ap-btn-primary:disabled { background-color: var(--color-overcast-grey); color: var(--color-text-dark); opacity: 0.6; }
+.ap-btn-primary:disabled { background-color: var(--color-overcast-grey); color: var(--color-text-dark); opacity: 0.45; }
 
 .ap-btn-secondary {
     background-color: rgba(0, 0, 0, 0);
@@ -85,4 +191,9 @@
 }
 .ap-btn-secondary:hover { background-color: rgba(78, 176, 230, 0.15); }
 .ap-btn-secondary:active { scale: 0.98; }
-.ap-btn-secondary:disabled { opacity: 0.5; }
+.ap-btn-secondary:disabled {
+    background-color: rgba(255, 255, 255, 0.06);
+    border-color: var(--color-overcast-grey);
+    color: var(--color-text-secondary);
+    opacity: 0.45;
+}

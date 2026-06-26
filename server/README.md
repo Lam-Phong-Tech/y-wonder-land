@@ -30,7 +30,7 @@ Mặc định chạy tại `http://localhost:3000` (đổi bằng biến môi tr
 | GET  | `/player/profile` | — (header `Authorization: Bearer <token>`) | `{ player_profile { ... } }` |
 | PUT  | `/player/profile` | `{ "player_profile": { ... } }` (Bearer token) | `{ ok: true, updatedAt }` |
 
-`player_profile` theo `docs/DATA_SCHEMA.md` + field `tutorialCompleted` (bool).
+`player_profile` theo `docs/DB_SCHEMA.md` + field `characterCreated` (bool, đã tạo nhân vật) và `tutorialCompleted` (bool).
 
 ## Smoke test nhanh (PowerShell)
 ```powershell
@@ -40,5 +40,5 @@ $tok = $r.token
 # Lấy profile
 irm http://localhost:3000/player/profile -Headers @{ Authorization = "Bearer $tok" }
 # Cập nhật cờ tutorial
-irm http://localhost:3000/player/profile -Method Put -ContentType application/json -Headers @{ Authorization = "Bearer $tok" } -Body '{"player_profile":{"tutorialCompleted":true}}'
+irm http://localhost:3000/player/profile -Method Put -ContentType application/json -Headers @{ Authorization = "Bearer $tok" } -Body '{"player_profile":{"characterCreated":true,"tutorialCompleted":true}}'
 ```

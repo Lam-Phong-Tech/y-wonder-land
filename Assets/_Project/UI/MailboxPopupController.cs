@@ -10,12 +10,16 @@ public class MailboxPopupController : MonoBehaviour
     {
         public string itemName;
         public string itemEmoji;
+        public string itemId;
+        public string iconClass;
         public int amount;
 
-        public AttachmentItem(string name, string emoji, int amt)
+        public AttachmentItem(string name, string emoji, int amt, string itemId = null, string iconClass = null)
         {
             itemName = name;
             itemEmoji = emoji;
+            this.itemId = itemId;
+            this.iconClass = iconClass;
             amount = amt;
         }
     }
@@ -49,6 +53,7 @@ public class MailboxPopupController : MonoBehaviour
 
     [Header("References")]
     [SerializeField] private UIDocument mailboxDocument;
+    private YWonderLand.Data.ItemDatabase itemDatabase;
     private VisualElement root;
     private VisualElement mailboxOverlay;
     private VisualElement mailboxPanel;
@@ -89,6 +94,7 @@ public class MailboxPopupController : MonoBehaviour
         }
 
         root = mailboxDocument.rootVisualElement;
+        itemDatabase = Resources.Load<YWonderLand.Data.ItemDatabase>("ItemDatabase");
         QueryElements();
         RegisterCallbacks();
         
@@ -153,9 +159,9 @@ public class MailboxPopupController : MonoBehaviour
         // 1. Welcome Mail (With reward, unread)
         var welcomeGift = new List<AttachmentItem>
         {
-            new AttachmentItem("Cá vàng", "🪙", 1500),
-            new AttachmentItem("Hạt giống Cà rốt", "🥕", 10),
-            new AttachmentItem("Rùa con", "🐢", 1)
+            new AttachmentItem("Cá vàng", "🪙", 1500, iconClass: "mail-reward-pos"),
+            new AttachmentItem("Hạt giống Cà rốt", "🥕", 10, itemId: "carrot_seed_01"),
+            new AttachmentItem("Rùa con", "🐢", 1, itemId: "turtle_01")
         };
         mailList.Add(new MailData(
             "mail_welcome",
@@ -182,8 +188,8 @@ public class MailboxPopupController : MonoBehaviour
         // 3. Compensation Mail (With reward, read & claimed)
         var compGift = new List<AttachmentItem>
         {
-            new AttachmentItem("Cá vàng", "🪙", 500),
-            new AttachmentItem("Phân bón siêu tốc", "🧪", 3)
+            new AttachmentItem("Cá vàng", "🪙", 500, iconClass: "mail-reward-pos"),
+            new AttachmentItem("Phân bón siêu tốc", "🧪", 3, itemId: "fertilizer_01")
         };
         var compMail = new MailData(
             "mail_compensation",
@@ -201,7 +207,7 @@ public class MailboxPopupController : MonoBehaviour
         // 4. Weekly Ranking Event (With reward, unread)
         var rankGift = new List<AttachmentItem>
         {
-            new AttachmentItem("Kim cương", "💎", 5)
+            new AttachmentItem("Kim cương", "💎", 5, iconClass: "mail-reward-diamond")
         };
         mailList.Add(new MailData(
             "mail_weekly_rank",
@@ -284,9 +290,11 @@ public class MailboxPopupController : MonoBehaviour
             // 1. Icon Container
             VisualElement iconContainer = new VisualElement();
             iconContainer.AddToClassList("mail-icon-container");
-            Label iconLabel = new Label(mail.isRead ? "📂" : "✉️");
-            iconLabel.style.fontSize = 18;
-            iconContainer.Add(iconLabel);
+            iconContainer.AddToClassList(mail.isRead ? "read" : "unread");
+            if (mail.isRead)
+            {
+                iconContainer.Add(CreateCheckMark("mail-read-check"));
+            }
             card.Add(iconContainer);
 
             // 2. Content info text
@@ -323,11 +331,17 @@ public class MailboxPopupController : MonoBehaviour
                 {
                     giftBadge.AddToClassList("claimed");
                 }
-                Label giftIcon = new Label(mail.isRewardClaimed ? "✔️" : "🎁");
+                VisualElement giftIcon = mail.isRewardClaimed
+                    ? CreateCheckMark("mail-gift-claimed-check")
+                    : new VisualElement();
                 giftIcon.AddToClassList("mail-gift-badge-icon");
                 if (mail.isRewardClaimed)
                 {
                     giftIcon.AddToClassList("claimed");
+                }
+                else
+                {
+                    giftIcon.AddToClassList("mail-reward-gift-icon");
                 }
                 giftBadge.Add(giftIcon);
                 rightContainer.Add(giftBadge);
@@ -383,13 +397,12 @@ public class MailboxPopupController : MonoBehaviour
                 VisualElement slot = new VisualElement();
                 slot.AddToClassList("attachment-slot");
 
-                Label emoji = new Label(item.itemEmoji);
-                emoji.AddToClassList("attachment-emoji");
+                VisualElement icon = CreateAttachmentIcon(item);
                 
                 Label amount = new Label($"x{item.amount}");
                 amount.AddToClassList("attachment-amount");
 
-                slot.Add(emoji);
+                slot.Add(icon);
                 slot.Add(amount);
                 attachmentGrid.Add(slot);
             }
@@ -434,6 +447,48 @@ public class MailboxPopupController : MonoBehaviour
         // Refresh UI state
         SelectMail(selectedMail);
         UpdateFooterButtons();
+    }
+
+    private VisualElement CreateAttachmentIcon(AttachmentItem item)
+    {
+        if (!string.IsNullOrEmpty(item.iconClass))
+        {
+            var icon = new VisualElement();
+            icon.AddToClassList("attachment-icon");
+            icon.AddToClassList(item.iconClass);
+            return icon;
+        }
+
+        var itemDef = !string.IsNullOrEmpty(item.itemId) && itemDatabase != null
+            ? itemDatabase.GetItem(item.itemId)
+            : null;
+
+        if (itemDef != null && (itemDef.iconTexture != null || itemDef.iconSprite != null))
+        {
+            var icon = new Image { scaleMode = ScaleMode.ScaleToFit };
+            icon.AddToClassList("attachment-icon");
+            icon.AddToClassList("attachment-icon-image");
+
+            if (itemDef.iconTexture != null)
+                icon.image = itemDef.iconTexture;
+            else
+                icon.sprite = itemDef.iconSprite;
+
+            return icon;
+        }
+
+        var fallback = new VisualElement();
+        fallback.AddToClassList("attachment-icon");
+        fallback.AddToClassList("mail-reward-gift-icon");
+        return fallback;
+    }
+
+    private VisualElement CreateCheckMark(string className)
+    {
+        var check = new VisualElement();
+        check.AddToClassList("mail-check-mark");
+        check.AddToClassList(className);
+        return check;
     }
 
     private void ClaimAllRewards()

@@ -27,6 +27,7 @@ function makeDefaultProfile() {
     avatarId: "",
     level: 1,
     exp: 0.0,
+    characterCreated: false,
     tutorialCompleted: false,
     createdAt: nowISO(),
     updatedAt: nowISO(),
@@ -112,7 +113,7 @@ app.put("/player/profile", auth, (req, res) => {
   store.setProfile(req.userId, merged);
 
   console.log(
-    `[profile] Cập nhật ${req.userId}: tutorialCompleted=${merged.tutorialCompleted}`
+    `[profile] Cập nhật ${req.userId}: characterCreated=${merged.characterCreated}, tutorialCompleted=${merged.tutorialCompleted}`
   );
   res.json({ ok: true, updatedAt: merged.updatedAt });
 });

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// Ghost preview khi Build Mode. Ưu tiên hiển thị BẢN MỜ của chính prefab thật
@@ -92,10 +93,8 @@ public class GhostPlacementController : MonoBehaviour
         if (mainCamera == null) mainCamera = Camera.main;
         if (mainCamera == null) return;
 
-        var mouse = UnityEngine.InputSystem.Mouse.current;
-        if (mouse == null) return;
-
-        Vector2 mousePos = mouse.position.ReadValue();
+        if (!TryGetPlacementPointerPosition(out Vector2 mousePos)) return;
+        var mouse = Mouse.current;
         bool edgeBlocked = IsInScreenEdgeBlockedArea(mousePos);
         if (edgeBlocked)
         {
@@ -138,7 +137,98 @@ public class GhostPlacementController : MonoBehaviour
             }
         }
 
-        if (mouse.rightButton.wasPressedThisFrame) Deactivate();
+        if (mouse != null && mouse.rightButton.wasPressedThisFrame) Deactivate();
+    }
+
+    private bool TryGetPlacementPointerPosition(out Vector2 screenPos)
+    {
+        var touch = Touchscreen.current;
+        if (touch != null)
+        {
+            var primary = touch.primaryTouch;
+            if (primary.press.isPressed)
+            {
+                screenPos = primary.position.ReadValue();
+                return true;
+            }
+
+            for (int i = 0; i < touch.touches.Count; i++)
+            {
+                var finger = touch.touches[i];
+                if (finger.press.isPressed)
+                {
+                    screenPos = finger.position.ReadValue();
+                    return true;
+                }
+            }
+        }
+
+        var mouse = Mouse.current;
+        if (mouse != null)
+        {
+            screenPos = mouse.position.ReadValue();
+            return true;
+        }
+
+        screenPos = default;
+        return false;
+    }
+
+    public void RefreshPlacementAtScreenPosition(Vector2 screenPos)
+    {
+        if (!isActive || ghostObject == null) return;
+
+        if (mainCamera == null) mainCamera = Camera.main;
+        if (mainCamera == null)
+        {
+            InvalidatePlacement();
+            return;
+        }
+
+        if (IsInScreenEdgeBlockedArea(screenPos))
+        {
+            InvalidatePlacement();
+            return;
+        }
+
+        Ray ray = mainCamera.ScreenPointToRay(new Vector3(screenPos.x, screenPos.y, 0));
+        var hits = Physics.RaycastAll(ray, 200f, groundMask);
+        if (hits.Length == 0)
+        {
+            InvalidatePlacement();
+            return;
+        }
+
+        System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+
+        currentCell = null;
+        Vector3 fallback = hits[0].point;
+        foreach (var h in hits)
+        {
+            var bsc = h.collider.GetComponentInParent<YWonderLand.Environment.BuildSurfaceCell>();
+            if (bsc != null)
+            {
+                currentCell = bsc;
+                break;
+            }
+        }
+
+        currentSnapPos = currentCell != null ? currentCell.SurfaceCenter : fallback;
+        currentGroundY = currentSnapPos.y;
+        ApplyGhostTransform();
+
+        currentPlacementValid = currentCell != null && !currentCell.IsOccupied;
+        UpdateGhostColor(currentPlacementValid);
+
+        if (currentCell != null)
+            FacePlayerTowards(currentSnapPos);
+    }
+
+    private void InvalidatePlacement()
+    {
+        currentPlacementValid = false;
+        currentCell = null;
+        UpdateGhostColor(false);
     }
 
     private bool IsInScreenEdgeBlockedArea(Vector2 screenPos)

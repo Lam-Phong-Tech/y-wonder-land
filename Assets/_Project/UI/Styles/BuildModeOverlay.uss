@@ -97,6 +97,12 @@
 }
 .build-cat-active .build-cat-icon { color: var(--color-mystic-black); }
 
+.build-cat-icon-image {
+    width: 28px;
+    height: 28px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
 .build-cat-label {
     font-size: 10px; -unity-font-style: bold;
     color: var(--color-bright-grey); -unity-text-align: middle-center; white-space: nowrap;
@@ -141,7 +147,28 @@
     background-color: rgba(253, 239, 112, 0.1);
 }
 
-.build-item-emoji { font-size: 28px; -unity-text-align: middle-center; margin-bottom: 2px; }
+.build-item-icon {
+    width: 34px;
+    height: 34px;
+    margin-bottom: 2px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.build-icon-buildings {
+    background-image: url('project://database/Assets/Sprites/icon/BoSungIcon/Chuong.png');
+}
+
+.build-icon-farm-plot {
+    background-image: url('project://database/Assets/Sprites/icon/BoSungIcon/DatCanhTac.png');
+}
+
+.build-icon-stone-path {
+    background-image: url('project://database/Assets/Sprites/icon/BoSungIcon/DuongLatDa.png');
+}
+
+.build-icon-pen {
+    background-image: url('project://database/Assets/Sprites/icon/BoSungIcon/Chuong.png');
+}
 
 .build-item-name {
     font-size: 10px; color: var(--color-text-white); -unity-text-align: middle-center;

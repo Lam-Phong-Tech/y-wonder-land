@@ -17,7 +17,7 @@
             <ui:VisualElement name="reward-panel" class="reward-panel">
 
                 <!-- Close button (X) — SAU panel để z-order đúng -->
-                <ui:Button name="btn-close" class="reward-btn-close" text="✕" />
+                <ui:Button name="btn-close" class="reward-btn-close" text="X" />
 
                 <!-- Header -->
                 <ui:VisualElement name="reward-header" class="reward-header">

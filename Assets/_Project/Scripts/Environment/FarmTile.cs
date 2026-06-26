@@ -10,6 +10,10 @@ using YWonderLand.Environment; // ScreenToast (toast báo cây chết)
 /// </summary>
 public class FarmTile : MonoBehaviour
 {
+    private const string WorldBarMaterialResourcePath = "Materials/WorldBar_Unlit";
+    private static Material worldBarMaterialTemplate;
+    private static bool worldBarMaterialLogged;
+
     public enum TileState
     {
         Soil,        // Đất thường chưa cuốc
@@ -204,8 +208,7 @@ public class FarmTile : MonoBehaviour
         if (waterFillRenderer != null)
         {
             Color c = Color.Lerp(new Color(0.9f, 0.3f, 0.2f), new Color(0.25f, 0.6f, 1f), frac);
-            waterFillRenderer.material.SetColor("_BaseColor", c);
-            waterFillRenderer.material.color = c;
+            ApplyWorldBarColor(waterFillRenderer.material, c);
         }
     }
 
@@ -244,15 +247,65 @@ public class FarmTile : MonoBehaviour
         var r = quad.GetComponent<Renderer>();
         if (r != null)
         {
-            var mat = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
-            mat.SetColor("_BaseColor", color);
-            mat.color = color;
-            mat.SetFloat("_Cull", 0f); // 2 mặt
-            r.material = mat;
+            var mat = CreateWorldBarMaterial(color);
+            if (mat != null)
+            {
+                mat.SetFloat("_Cull", 0f); // 2 mặt
+                r.material = mat;
+            }
             r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             r.receiveShadows = false;
         }
         return quad;
+    }
+
+    private static Material CreateWorldBarMaterial(Color color)
+    {
+        if (worldBarMaterialTemplate == null)
+            worldBarMaterialTemplate = Resources.Load<Material>(WorldBarMaterialResourcePath);
+
+        Material mat = null;
+        if (worldBarMaterialTemplate != null)
+        {
+            mat = new Material(worldBarMaterialTemplate);
+        }
+        else
+        {
+            Shader shader = Shader.Find("Universal Render Pipeline/Unlit");
+            if (shader == null) shader = Shader.Find("Unlit/Color");
+            if (shader != null) mat = new Material(shader);
+        }
+
+        if (mat == null)
+        {
+            Shader fallbackShader = Shader.Find("Sprites/Default");
+            if (fallbackShader == null) fallbackShader = Shader.Find("Hidden/Internal-Colored");
+            if (fallbackShader != null) mat = new Material(fallbackShader);
+        }
+
+        LogWorldBarMaterial("FarmTile", mat);
+        ApplyWorldBarColor(mat, color);
+        return mat;
+    }
+
+    private static void LogWorldBarMaterial(string owner, Material mat)
+    {
+        if (worldBarMaterialLogged) return;
+        worldBarMaterialLogged = true;
+
+        string shaderName = mat != null && mat.shader != null ? mat.shader.name : "null";
+        bool loadedTemplate = worldBarMaterialTemplate != null;
+        Debug.Log($"[WorldBar] {owner}: templateLoaded={loadedTemplate}, resource='{WorldBarMaterialResourcePath}', shader='{shaderName}'");
+
+        if (!loadedTemplate || string.IsNullOrEmpty(shaderName) || !shaderName.Contains("Unlit"))
+            Debug.LogWarning($"[WorldBar] {owner}: material template/shader may be wrong. Expected Resources/{WorldBarMaterialResourcePath} using an Unlit shader.");
+    }
+
+    private static void ApplyWorldBarColor(Material mat, Color color)
+    {
+        if (mat == null) return;
+        if (mat.HasProperty("_BaseColor")) mat.SetColor("_BaseColor", color);
+        if (mat.HasProperty("_Color")) mat.SetColor("_Color", color);
     }
 
     private void DestroyWaterBar()

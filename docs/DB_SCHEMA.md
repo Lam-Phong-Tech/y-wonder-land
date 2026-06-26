@@ -1,4 +1,4 @@
-# 🗄️ DATABASE SCHEMA / ERD — Y WONDER GREEN FARM (REST)
+﻿# 🗄️ DATABASE SCHEMA / ERD — Y WONDER GREEN FARM (REST)
 
 > Lược đồ DB thật theo **REST API riêng** (thay blueprint UGS cũ trong `docs/DATA_SCHEMA.md`).
 > Phiên bản: 0.1 — 16/06/2026. **Đợt 1** (users, profiles) đã hiện thực ở server stub bằng file JSON; phần còn lại là **đề xuất** cho PostgreSQL production.
@@ -54,6 +54,7 @@
 | `avatar_id` | TEXT | "" | |
 | `level` | INT | 1 | |
 | `exp` | REAL | 0 | curve EXP **chờ khách (A2)** |
+| `character_created` | BOOL | false | account đã hoàn tất tạo nhân vật; login cũ bỏ qua màn tạo nhân vật |
 | `tutorial_completed` | BOOL | false | ✅ đang dùng thật |
 | `created_at` / `updated_at` | TIMESTAMP | now | |
 

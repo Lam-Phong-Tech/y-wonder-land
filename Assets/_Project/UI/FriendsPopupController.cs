@@ -248,9 +248,10 @@ public class FriendsPopupController : MonoBehaviour
         var avatarWrap = new VisualElement();
         avatarWrap.AddToClassList("friend-avatar-wrap");
 
-        var avatarText = new Label(string.IsNullOrEmpty(data.avatarEmoji) ? "👤" : data.avatarEmoji);
-        avatarText.AddToClassList("friend-avatar-text");
-        avatarWrap.Add(avatarText);
+        var avatarImage = new VisualElement();
+        avatarImage.AddToClassList("friend-avatar-image");
+        avatarImage.AddToClassList(data.isMale ? "friend-avatar-male" : "friend-avatar-female");
+        avatarWrap.Add(avatarImage);
 
         // Status Dot (Only relevant for Friends list, but can show for all)
         if (activeTabType == TabType.Friends)

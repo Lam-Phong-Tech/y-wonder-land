@@ -56,20 +56,25 @@
 | `BackendConfig` | `Scripts/Backend/BackendConfig.cs` | ScriptableObject: `baseUrl`, `requestTimeoutSec=5`, `useOfflineFallback`. **Không hardcode URL.** |
 | `ApiClient` | `Scripts/Backend/ApiClient.cs` | `GetAsync/PostAsync/PutAsync<T>` → trả `ApiResult<T>{ok,data,status,error}`. Không bao giờ ném exception. |
 | `AuthService` | `Scripts/Backend/AuthService.cs` | Đăng nhập/đăng ký ngầm; lưu `YW_Auth_Token`/`YW_Auth_UserId`. |
-| `PlayerProfileService` | `Scripts/Backend/PlayerProfileService.cs` | Load (server→cache→default), Save (cache ngay→push server), `SetTutorialCompleted`. |
+| `PlayerProfileService` | `Scripts/Backend/PlayerProfileService.cs` | Load (server→cache→default), Save (cache ngay→push server), `characterCreated`, `SetTutorialCompleted`. |
 
 ## 5. Luồng chính (đợt 1 — đã chạy)
 
-**Đăng nhập + nạp hồ sơ** (tại `GameManager.StartGame()`):
+**Đăng nhập + nạp hồ sơ**:
 ```
-Chọn nhân vật → SignInAndLoadProfileAsync():
-  AuthService.EnsureSignedInAsync(username = tên NV, password = sinh & lưu local)
-    → POST /auth/login (nếu fail vì chưa có) → POST /auth/register
-    → lưu token
+LoginScreenController.OnLoginClicked():
+  AuthService.LoginAsync(username, password)
+    → POST /auth/login
   PlayerProfileService.LoadProfileAsync()
     → GET /player/profile (Bearer)  ── lỗi ──▶ dùng YW_Profile_Cache
-  ApplyCharacterInfo(name, gender)
-→ SetGameState(Cutscene)
+  nếu characterCreated=true → GameManager.StartGameFromProfile() → SetGameState(Cutscene)
+  nếu characterCreated=false → SetGameState(Menu/CharacterSelect)
+
+CharacterSelectController.OnConfirmYes():
+  GameManager.StartGame()
+    → ApplyCharacterInfo(name, gender, markCreated=true)
+    → PUT /player/profile
+    → SetGameState(Cutscene)
 ```
 
 **Ghi nhớ tutorial** (tại `TutorialManager`):

@@ -7,7 +7,7 @@
 .workshop-overlay {
     position: absolute; top: 0; left: 0; right: 0; bottom: 0;
     background-color: rgba(21, 26, 39, 0.7); /* Mystic Black 70% */
-    align-items: center; justify-content: center; display: none; z-index: 100;
+    align-items: center; justify-content: center; display: none;
 }
 
 /* === PANEL SHADOW === */
@@ -89,6 +89,10 @@
 }
 
 .workshop-tool-item-icon { font-size: 20px; margin-right: 12px; flex-shrink: 0; -unity-text-align: middle-center; }
+.workshop-tool-item-icon-image {
+    width: 24px; height: 24px; margin-right: 12px; flex-shrink: 0;
+    -unity-background-scale-mode: scale-to-fit;
+}
 .workshop-tool-item-name { font-size: 14px; -unity-font-style: bold; color: var(--color-text-white); flex-grow: 1; }
 
 /* === DETAIL PANEL (Right side) === */
@@ -113,6 +117,10 @@
     border-radius: 16px; align-items: center; justify-content: center; margin-bottom: 16px;
 }
 .workshop-detail-icon { font-size: 48px; -unity-text-align: middle-center; }
+.workshop-detail-icon-image {
+    width: 72px; height: 72px;
+    -unity-background-scale-mode: scale-to-fit;
+}
 .workshop-detail-name { font-size: 18px; -unity-font-style: bold; color: var(--color-text-white); -unity-text-align: middle-center; margin-bottom: 8px; }
 .workshop-detail-effect { font-size: 14px; color: var(--color-success); -unity-font-style: bold; -unity-text-align: upper-center; white-space: normal; }
 
@@ -137,6 +145,13 @@
 
 .workshop-req-row { flex-direction: row; align-items: center; min-height: 30px; padding: 4px 0; }
 .workshop-req-icon { font-size: 18px; width: 28px; flex-shrink: 0; -unity-text-align: middle-center; margin-right: 8px; }
+.workshop-req-icon-image {
+    width: 24px; height: 24px; flex-shrink: 0; margin-right: 8px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+.workshop-icon-pos {
+    background-image: url('project://database/Assets/Sprites/icon/BoSungIcon/Giau.png');
+}
 .workshop-req-name { font-size: 14px; color: var(--color-bright-grey); flex-grow: 1; flex-shrink: 0; }
 .workshop-req-value { font-size: 15px; -unity-font-style: bold; color: var(--color-text-white); flex-shrink: 0; -unity-text-align: middle-right; }
 

@@ -55,7 +55,7 @@
 
             <!-- Close Button (AFTER panel -> renders on top) -->
             <ui:VisualElement class="leaderboard-close-shadow">
-                <ui:Button name="BtnCloseLeaderboard" text="✕" class="leaderboard-close-btn" />
+                <ui:Button name="BtnCloseLeaderboard" text="X" class="leaderboard-close-btn" />
             </ui:VisualElement>
 
             <!-- My Rank Card -->

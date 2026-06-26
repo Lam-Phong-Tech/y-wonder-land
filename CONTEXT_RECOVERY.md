@@ -7,6 +7,18 @@
 
 > Nhánh đang dùng: `feat/animal-husbandry` (đã có thay đổi cục bộ touch-control/build-flow). Chi tiết xem `CHANGELOG.md` + `docs/CHANGELOG.md` + `task.md`.
 
+- **Login/profile existing character:** `player_profile` thêm `characterCreated`; login nạp profile trước, account đã có nhân vật vào game luôn. `DemoRich01`-`DemoRich05` được coi là đã có nhân vật để tester không phải đặt tên/chọn giới tính.
+- **Shop tab/header polish:** các tab chế độ/danh mục trong popup shop đã bỏ emoji icon, chỉ giữ chữ; card/panel chi tiết hàng hóa vẫn dùng icon ảnh từ `ItemDefinition.iconTexture/iconSprite`; title shop dài được giới hạn/căn giữa trong header để không tràn dưới pill POS.
+- **Workshop icons:** popup Tiệm rèn render dụng cụ/nguyên liệu nâng cấp bằng icon ảnh; đã gắn `iconTexture` cho rìu/cuốc/cần câu/xô tưới/cuốc chim/gỗ/đá/sắt/quặng; bỏ `z-index` trong USS.
+- **Quest popup icons:** danh sách nhiệm vụ bỏ emoji kiếm/quà/check; nhiệm vụ đã nhận thưởng dùng ô vuông có dấu tích visual như Hộp thư; reward slots dùng icon ảnh từ `ItemDatabase`/`BoSungIcon`.
+- **Mailbox icons:** hộp thư đã đọc hiển thị dấu tích visual; badge quà dùng `Assets/Sprites/icon/SanPham/VatPham/giftbox.png`; attachment rewards dùng icon ảnh từ `ItemDatabase`/`BoSungIcon`.
+- **Piggy bank icon cleanup:** popup Heo đất bỏ emoji icon ở balance/tab/gói/nút gửi/countdown; icon heo ở active/history dùng ảnh `Assets/Sprites/icon/BoSungIcon/Piggy.png`.
+- **Event popup icon cleanup:** popup Sự kiện & Quà tặng bỏ icon trang trí ở tiêu đề, icon đồng hồ ở timer pill, icon emoji trên tab, và icon emoji trong card gói ưu đãi.
+- **Attendance icons:** bảng điểm danh trong popup Sự kiện render icon ảnh cho Point/gỗ/ngày trống/thỏ từ `Assets/Sprites/icon`, và dùng icon `ItemDatabase` cho bắp ngô/bí ngô.
+- **Lucky wheel icons:** vòng quay may mắn render icon ảnh cho phần thưởng từ `Assets/Sprites/icon`/`ItemDatabase`; tiêu đề, hub giữa vòng và nút QUAY bỏ emoji text.
+- **Leaderboard icons/UI:** 5 tab `EXP/Level/Fashion/Pet/Rich` dùng icon ảnh từ `Assets/Sprites/icon/BoSungIcon/`; Level dùng `lv.png`; hạng 1/2/3 dùng huy chương vàng/bạc/đồng thật; Fashion/Pet/Rich hiện số thuần thay vì sao/Lv/kim cương.
+- **Inventory icons:** `InventoryPopupController` hiển thị `ItemDefinition.iconTexture/iconSprite` trong card kho đồ và panel chi tiết; item chưa có ảnh vẫn fallback emoji/text.
+- **HUD tiền tệ:** top-right giờ có pill `UPOS` đi cùng `POS`; `EconomyManager` đã có `OnUPOSChanged` + helper `AddUPOS`/`SpendUPOS`.
 - **Điều khiển mobile đã ổn định cho sprint/tap-hold/auto-run:** `PlayerController` có state sprint chung, `GameHUD` giữ đúng trạng thái sprint khi bấm hoặc giữ.
 - **Camera touch chỉnh lại:** smoothing riêng cho touch, pitch clamp theo yêu cầu kiểm duyệt.
 - **Build/chuồng đang hoàn thiện:** ghost preview là prefab mờ, rào có auto-connect; cài đặt búa animation khi đặt công trình.

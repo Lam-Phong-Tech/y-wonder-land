@@ -20,7 +20,7 @@ Client: `Assets/_Project/Scripts/Backend/` (`ApiClient`, `AuthService`, `PlayerP
 | GET  | `/player/profile` | header `Authorization: Bearer <token>` | `{ player_profile {...} }` |
 | PUT  | `/player/profile` | `{ player_profile {...} }` + Bearer | `{ ok, updatedAt }` |
 
-`player_profile`: theo `docs/DATA_SCHEMA.md` + field `tutorialCompleted` (bool).
+`player_profile`: theo `docs/DB_SCHEMA.md` + field `characterCreated` (bool, đã tạo nhân vật) và `tutorialCompleted` (bool).
 **Token đợt 1:** JWT đơn giản (stub, KHÔNG production). Auth đợt 1 dùng username = tên nhân vật, mật khẩu sinh & lưu local (chưa nối UI Login — để đợt 2).
 
 > **Lộ trình:** Đợt 2 nối UI Login/Register + Economy + Inventory; Đợt 3 Farm/Animal/Resource; Đợt 4 realtime (Photon) + Firebase push.

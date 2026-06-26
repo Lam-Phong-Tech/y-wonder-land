@@ -17,7 +17,7 @@ MonoBehaviour:
   description: "C\u1EA7n c\xE2u b\u1EB1ng tre."
   iconEmoji: "\U0001F3A3"
   iconSprite: {fileID: 0}
-  iconTexture: {fileID: 0}
+  iconTexture: {fileID: 2800000, guid: 87aa706656f0ca54eb409b2fb3c39843, type: 3}
   category: tools
   buyPrice: 100
   sellPrice: 50

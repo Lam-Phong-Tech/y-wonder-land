@@ -8,7 +8,7 @@
             <ui:VisualElement class="mailbox-header">
                 <ui:Label name="TitleLabel" class="mailbox-header-title" text="HỘP THƯ" />
                 <ui:VisualElement class="mailbox-close-btn-container">
-                    <ui:Button name="BtnClose" class="mailbox-close-btn" text="✕" />
+                    <ui:Button name="BtnClose" class="mailbox-close-btn" text="X" />
                 </ui:VisualElement>
             </ui:VisualElement>
 

@@ -17,7 +17,7 @@ MonoBehaviour:
   description: "Qu\u1EB7ng th\xF4 t\u1EEB m\u1ECF."
   iconEmoji: "\u2699"
   iconSprite: {fileID: 0}
-  iconTexture: {fileID: 0}
+  iconTexture: {fileID: 2800000, guid: 0dfc5078a1c9212448dc67874ae5d150, type: 3}
   category: materials
   buyPrice: 0
   sellPrice: 30

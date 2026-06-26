@@ -7,7 +7,7 @@
 .event-overlay {
     position: absolute; top: 0; left: 0; right: 0; bottom: 0;
     background-color: rgba(21, 26, 39, 0.8);
-    align-items: center; justify-content: center; display: none; z-index: 100;
+    align-items: center; justify-content: center; display: none;
 }
 
 /* === WRAPPER === */
@@ -43,10 +43,8 @@
     position: absolute; left: 16px; flex-direction: row; align-items: center;
     background-color: rgba(0, 0, 0, 0.4);
     border-radius: 16px; padding: 6px 16px;
-    border-width: 1px; border-color: rgba(255, 255, 255, 0.1); z-index: 2;
+    border-width: 1px; border-color: rgba(255, 255, 255, 0.1);
 }
-
-.event-pill-icon { font-size: 14px; margin-right: 6px; }
 
 .event-pill-value {
     font-size: 12px; -unity-font-style: bold; color: var(--color-accent-yellow);
@@ -54,7 +52,7 @@
 
 /* === CLOSE BUTTON === */
 .event-close-shadow {
-    position: absolute; right: 12px; top: 12px; z-index: 10;
+    position: absolute; right: 12px; top: 12px;
 }
 
 .event-close-btn {
@@ -192,8 +190,6 @@
     border-color: var(--color-accent-yellow); scale: 1.02;
 }
 
-.event-bundle-icon { font-size: 40px; margin-bottom: 12px; }
-
 .event-bundle-name {
     font-size: 15px; -unity-font-style: bold; color: var(--color-text-white);
     -unity-text-align: upper-center; margin-bottom: 6px;
@@ -293,6 +289,31 @@
     -unity-text-align: upper-center; margin: 4px 0 0 0; padding: 0;
 }
 
+.day-slot-icon {
+    width: 30px; height: 30px; margin: 0; padding: 0; flex-shrink: 0;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.day-slot-icon-special {
+    width: 38px; height: 38px;
+}
+
+.attendance-icon-point {
+    background-image: url('project://database/Assets/Sprites/icon/BoSungIcon/Giau.png');
+}
+
+.attendance-icon-wood {
+    background-image: url('project://database/Assets/Sprites/icon/BoSungIcon/Go.png');
+}
+
+.attendance-icon-calendar {
+    background-image: url('project://database/Assets/Sprites/icon/BoSungIcon/Lich.png');
+}
+
+.attendance-icon-rabbit {
+    background-image: url('project://database/Assets/Sprites/icon/animals/rabbit.png');
+}
+
 .day-slot-emoji { font-size: 24px; -unity-text-align: middle-center; margin: 0; padding: 0; }
 
 .day-slot-amount {
@@ -350,6 +371,44 @@
     align-items: center; justify-content: center; position: relative;
     transition-property: rotate; transition-duration: 3s; transition-timing-function: ease-out;
 }
+
+.wheel-icon {
+    width: 26px; height: 26px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.wheel-icon-spin {
+    background-image: url('project://database/Assets/Sprites/icon/BoSungIcon/VongQuayMayMan.png');
+}
+
+.wheel-icon-goat {
+    background-image: url('project://database/Assets/Sprites/icon/animals/goat.png');
+}
+
+.wheel-icon-duck {
+    background-image: url('project://database/Assets/Sprites/icon/animals/duck.png');
+}
+
+.wheel-icon-rabbit {
+    background-image: url('project://database/Assets/Sprites/icon/animals/rabbit.png');
+}
+
+.wheel-icon-wood {
+    background-image: url('project://database/Assets/Sprites/icon/BoSungIcon/Go.png');
+}
+
+.wheel-icon-stone {
+    background-image: url('project://database/Assets/Sprites/icon/BoSungIcon/Da.png');
+}
+
+.wheel-icon-chicken {
+    background-image: url('project://database/Assets/Sprites/icon/animals/chicken.png');
+}
+
+.wheel-icon-luck {
+    background-image: url('project://database/Assets/Sprites/icon/BoSungIcon/VongQuayMayMan.png');
+}
+
 .wheel-emoji { font-size: 22px; position: absolute; -unity-text-align: middle-center; }
 
 /* Ô giữa hiện quà trúng (KHÔNG quay) */
@@ -357,7 +416,12 @@
     position: absolute; width: 70px; height: 70px; border-radius: 35px;
     background-color: var(--color-primary-navy);
     border-width: 3px; border-color: var(--color-accent-yellow);
-    -unity-text-align: middle-center; font-size: 32px;
+    align-items: center; justify-content: center;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.wheel-hub-icon-image {
+    width: 42px; height: 42px;
 }
 
 .wheel-result { font-size: 16px; -unity-font-style: bold; color: var(--color-accent-yellow); -unity-text-align: middle-center; height: 22px; margin: 4px 0; flex-shrink: 0; }
