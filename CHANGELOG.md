@@ -3,6 +3,7 @@
 ## [Unreleased] - 2026-06-26 (iOS CI and app icon setup)
 
 ### Added
+- Added a root `README.md` for clone/build handoff, backend scope, branch usage, and CodeMagic/iOS notes.
 - Added `codemagic.yaml` at the repository root with a Unity iOS release workflow for CodeMagic.
 - Added `Assets/_Project/Editor/BuildScript.cs` so CI can export an iOS Xcode project from Unity in batch mode.
 - Added game thumbnail/icon assets under `Assets/_Project/UI/Sprites/`.
@@ -13,6 +14,7 @@
 - Updated the CI build script to use `NamedBuildTarget.iOS` for the iOS bundle identifier API, removing the Unity 6 obsolete API warning.
 
 ### Changed Files
+- `README.md`
 - `codemagic.yaml`
 - `Assets/_Project/Editor/BuildScript.cs`
 - `Assets/_Project/Editor/BuildScript.cs.meta`

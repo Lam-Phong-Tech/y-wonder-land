@@ -8,6 +8,7 @@
 ## [2026-06-26] — iOS CI, CodeMagic và icon game
 
 ### Added
+- Thêm `README.md` ở root repo để người clone `main` nắm cách mở project, build, trạng thái backend và nhánh làm việc.
 - Thêm `codemagic.yaml` ở root repo để CodeMagic nhận workflow build Unity iOS.
 - Thêm `Assets/_Project/Editor/BuildScript.cs` để CI có thể export Xcode project iOS từ Unity bằng batch mode.
 - Thêm asset thumbnail/icon game trong `Assets/_Project/UI/Sprites/`.
@@ -18,6 +19,7 @@
 - Đổi API set bundle id iOS sang `NamedBuildTarget.iOS`, bỏ warning obsolete của Unity 6.
 
 ### Changed Files
+- `README.md`
 - `codemagic.yaml`
 - `Assets/_Project/Editor/BuildScript.cs`
 - `Assets/_Project/Editor/BuildScript.cs.meta`
