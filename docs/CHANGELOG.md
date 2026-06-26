@@ -5,6 +5,29 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-06-26] — iOS CI, CodeMagic và icon game
+
+### Added
+- Thêm `codemagic.yaml` ở root repo để CodeMagic nhận workflow build Unity iOS.
+- Thêm `Assets/_Project/Editor/BuildScript.cs` để CI có thể export Xcode project iOS từ Unity bằng batch mode.
+- Thêm asset thumbnail/icon game trong `Assets/_Project/UI/Sprites/`.
+- Gắn `ThumbnailGame.jpg` vào icon Standalone và Android adaptive icon trong `ProjectSettings/ProjectSettings.asset`.
+
+### Fixed
+- Sửa lỗi compile trong build script do namespace `YWonderLand.Environment` che mất `System.Environment`.
+- Đổi API set bundle id iOS sang `NamedBuildTarget.iOS`, bỏ warning obsolete của Unity 6.
+
+### Changed Files
+- `codemagic.yaml`
+- `Assets/_Project/Editor/BuildScript.cs`
+- `Assets/_Project/Editor/BuildScript.cs.meta`
+- `Assets/_Project/UI/Sprites/ThumbnailGame.jpg`
+- `Assets/_Project/UI/Sprites/ThumbnailGame.jpg.meta`
+- `Assets/_Project/UI/Sprites/Black.jpg`
+- `Assets/_Project/UI/Sprites/Black.jpg.meta`
+- `ProjectSettings/ProjectSettings.asset`
+
+---
 ## [2026-06-26] — Interaction, chuồng, câu cá và icon build/popup
 
 ### Added
