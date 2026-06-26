@@ -39,6 +39,7 @@
                             <!-- Left: Icon + Name + Effect -->
                             <ui:VisualElement class="workshop-detail-left">
                                 <ui:VisualElement class="workshop-detail-icon-wrap">
+                                    <ui:Image name="ImgToolIcon" class="workshop-detail-icon-image" />
                                     <ui:Label name="LblToolIcon" text="." class="workshop-detail-icon" />
                                 </ui:VisualElement>
                                 <ui:Label name="LblToolName" text="." class="workshop-detail-name" />
@@ -51,7 +52,7 @@
 
                                 <ui:VisualElement name="ReqContainer" class="workshop-req-container">
                                     <!-- POS -->
-                                    <ui:VisualElement class="workshop-req-row">
+                                    <ui:VisualElement class="workshop-req-row" name="RowReqPOS">
                                         <ui:Label text="." class="workshop-req-icon" />
                                         <ui:Label text="POS" class="workshop-req-name" />
                                         <ui:Label name="LblReqPOS" text="." class="workshop-req-value" />

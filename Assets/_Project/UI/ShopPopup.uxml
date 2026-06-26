@@ -25,7 +25,7 @@
                     
                     <!-- Close Button -->
                     <ui:VisualElement class="shop-close-btn-container">
-                        <ui:Button name="BtnCloseShop" text="✕" class="shop-close-btn" />
+                        <ui:Button name="BtnCloseShop" text="X" class="shop-close-btn" />
                     </ui:VisualElement>
                 </ui:VisualElement>
 
@@ -37,18 +37,18 @@
                         <!-- Mode tabs (Mua / Bán) — controller ẩn khối này khi mở bằng NPC Mua/Bán riêng -->
                         <ui:VisualElement name="ModeSection">
                             <ui:Label text="CHẾ ĐỘ" class="shop-sidebar-section" />
-                            <ui:Button name="TabBuy" text="🛒 Mua" class="shop-mode-tab shop-mode-tab--active" />
-                            <ui:Button name="TabSell" text="💰 Bán" class="shop-mode-tab" />
+                            <ui:Button name="TabBuy" text="Mua" class="shop-mode-tab shop-mode-tab--active" />
+                            <ui:Button name="TabSell" text="Bán" class="shop-mode-tab" />
                             <ui:VisualElement class="shop-sidebar-divider" />
                         </ui:VisualElement>
 
                         <!-- Category filters -->
                         <ui:Label text="DANH MỤC" class="shop-sidebar-section" />
                         <ui:Button name="FilterAll" text="Tất cả" class="shop-filter shop-filter--active" />
-                        <ui:Button name="FilterSeeds" text="🌱 Hạt giống" class="shop-filter" />
-                        <ui:Button name="FilterAnimals" text="🐔 Vật nuôi" class="shop-filter" />
-                        <ui:Button name="FilterTools" text="🔧 Dụng cụ" class="shop-filter" />
-                        <ui:Button name="FilterItems" text="📦 Vật phẩm" class="shop-filter" />
+                        <ui:Button name="FilterSeeds" text="Hạt giống" class="shop-filter" />
+                        <ui:Button name="FilterAnimals" text="Vật nuôi" class="shop-filter" />
+                        <ui:Button name="FilterTools" text="Dụng cụ" class="shop-filter" />
+                        <ui:Button name="FilterItems" text="Vật phẩm" class="shop-filter" />
                     </ui:VisualElement>
 
                     <!-- Middle: Items Grid -->

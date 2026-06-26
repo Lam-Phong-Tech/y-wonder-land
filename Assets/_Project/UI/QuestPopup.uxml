@@ -26,7 +26,7 @@
                             
                             <!-- Empty State -->
                             <ui:VisualElement name="DetailEmptyState" class="detail-empty-state">
-                                <ui:Label name="EmptyIcon" class="empty-quest-icon" text="📜" />
+                                <ui:VisualElement name="EmptyIcon" class="empty-quest-icon quest-icon-mission" />
                                 <ui:Label name="EmptyLabel" class="empty-label" text="Chọn nhiệm vụ để xem chi tiết" />
                             </ui:VisualElement>
 
@@ -69,7 +69,7 @@
             
             <!-- Close Button (Absolute on Shadow/Wrapper to overlap properly) -->
             <ui:VisualElement class="quest-close-shadow">
-                <ui:Button name="BtnClose" class="close-button" text="✕" />
+                <ui:Button name="BtnClose" class="close-button" text="X" />
             </ui:VisualElement>
             
         </ui:VisualElement>

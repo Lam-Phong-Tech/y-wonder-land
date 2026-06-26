@@ -119,12 +119,19 @@
                     </ui:Button>
                 </ui:VisualElement>
 
-                <!-- Currency (single) -->
+                <!-- Currency (POS + UPOS) -->
                 <ui:VisualElement name="CurrencyDisplay" class="currency-item">
                     <ui:VisualElement class="currency-icon">
                         <ui:VisualElement style="width: 22px; height: 22px; background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_16.png'); -unity-background-scale-mode: scale-to-fit;" />
                     </ui:VisualElement>
                     <ui:Label name="CurrencyValue" text="84.00" class="currency-value" />
+                </ui:VisualElement>
+
+                <ui:VisualElement name="UposDisplay" class="currency-item currency-item--upos">
+                    <ui:VisualElement class="currency-icon currency-icon--upos">
+                        <ui:Label text="U" class="currency-icon-label currency-icon-label--upos" />
+                    </ui:VisualElement>
+                    <ui:Label name="UposValue" text="0 UPOS" class="currency-value currency-value--upos" />
                 </ui:VisualElement>
 
                 <!-- Settings -->
@@ -180,9 +187,9 @@
         <!-- Chỉ còn nút X (Hủy hoạt ảnh). Nút bàn tay Interact đã bỏ; tương tác qua các nút gợi ý nổi quanh tâm ngắm. -->
         <ui:VisualElement class="hud-right-actions" style="display: none;">
             <!-- Cancel — hủy hoạt ảnh đang chạy -->
-            <ui:VisualElement class="action-btn-shadow">
+            <ui:VisualElement name="CancelActionFrame" class="action-btn-shadow">
                 <ui:Button name="BtnCancel" class="action-btn action-btn-cancel">
-                    <ui:Label text="✕" class="action-btn-icon action-btn-icon-white" />
+                    <ui:Label text="X" class="action-btn-icon action-btn-icon-white" />
                 </ui:Button>
             </ui:VisualElement>
         </ui:VisualElement>

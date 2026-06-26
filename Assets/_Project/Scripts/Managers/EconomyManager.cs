@@ -12,7 +12,7 @@ namespace YWonderLand.Managers
         public static EconomyManager Instance { get; private set; }
 
         public event Action<long> OnPOSChanged;
-        // public event Action<long> OnUPOSChanged;
+        public event Action<long> OnUPOSChanged;
 
         private long currentPOS;
         private long currentUPOS;
@@ -74,10 +74,40 @@ namespace YWonderLand.Managers
             Debug.LogWarning($"[Economy] Not enough POS! Needed: {amount}, Have: {currentPOS}");
             return false;
         }
+
+        public void AddUPOS(long amount)
+        {
+            if (amount <= 0) return;
+            currentUPOS += amount;
+            SaveBalances();
+            OnUPOSChanged?.Invoke(currentUPOS);
+            Debug.Log($"[Economy] Add {amount} UPOS. Balance: {currentUPOS}");
+        }
+
+        public bool SpendUPOS(long amount)
+        {
+            if (amount <= 0) return true;
+            if (currentUPOS >= amount)
+            {
+                currentUPOS -= amount;
+                SaveBalances();
+                OnUPOSChanged?.Invoke(currentUPOS);
+                Debug.Log($"[Economy] Spend {amount} UPOS. Balance: {currentUPOS}");
+                return true;
+            }
+
+            Debug.LogWarning($"[Economy] Not enough UPOS! Needed: {amount}, Have: {currentUPOS}");
+            return false;
+        }
         
         public bool CanAffordPOS(long amount)
         {
             return currentPOS >= amount;
+        }
+
+        public bool CanAffordUPOS(long amount)
+        {
+            return currentUPOS >= amount;
         }
     }
 }

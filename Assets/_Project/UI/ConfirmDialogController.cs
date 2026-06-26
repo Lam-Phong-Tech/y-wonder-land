@@ -244,7 +244,7 @@ public class ConfirmDialogController : MonoBehaviour
             case ConfirmDialogType.Danger:
                 if (iconLabel != null)
                 {
-                    iconLabel.text = "✕";
+                    iconLabel.text = "X";
                     iconLabel.AddToClassList("icon-danger");
                 }
                 if (iconContainer != null)

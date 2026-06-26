@@ -70,5 +70,43 @@ namespace YWonderLand.Environment
             foreach (var c in pen) if (c != null && !c.HasAnimal) n++;
             return n;
         }
+
+        /// <summary>
+        /// Lấy toàn bộ vật nuôi thuộc cụm chuồng. Một con nhiều ô chỉ có ô neo giữ AnimalObject,
+        /// nên phải quét cả occupiedCells để không bỏ sót.
+        /// </summary>
+        public static List<FarmAnimal> FindAnimals(List<BuildSurfaceCell> pen)
+        {
+            var result = new List<FarmAnimal>();
+            if (pen == null || pen.Count == 0) return result;
+
+            var seen = new HashSet<FarmAnimal>();
+            foreach (var cell in pen)
+            {
+                if (cell == null || cell.AnimalObject == null) continue;
+
+                var animal = cell.AnimalObject.GetComponent<FarmAnimal>();
+                if (animal == null) animal = cell.AnimalObject.GetComponentInChildren<FarmAnimal>();
+                if (animal != null && seen.Add(animal))
+                    result.Add(animal);
+            }
+
+            var animals = Object.FindObjectsByType<FarmAnimal>(FindObjectsSortMode.None);
+            foreach (var animal in animals)
+            {
+                if (animal == null || animal.occupiedCells == null || seen.Contains(animal)) continue;
+
+                foreach (var cell in animal.occupiedCells)
+                {
+                    if (cell == null || !pen.Contains(cell)) continue;
+
+                    if (seen.Add(animal))
+                        result.Add(animal);
+                    break;
+                }
+            }
+
+            return result;
+        }
     }
 }

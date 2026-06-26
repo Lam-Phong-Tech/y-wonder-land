@@ -54,6 +54,7 @@ public class GameHUDController : MonoBehaviour
 
     // Currency
     private Label currencyValue;
+    private Label uposValue;
 
     // Quest
     private VisualElement questBubble;
@@ -109,6 +110,9 @@ public class GameHUDController : MonoBehaviour
 
     // Cụm nút phải: chỉ còn nút X (hủy hoạt ảnh), hiện khi nhân vật đang bận.
     private VisualElement rightActionsContainer;
+    private VisualElement cancelButtonFrame;
+    private bool fishingCancelMode;
+    private float fishingCancelProgress01;
 
 
 
@@ -157,8 +161,11 @@ public class GameHUDController : MonoBehaviour
 
         if (YWonderLand.Managers.EconomyManager.Instance != null)
         {
-            SetCurrency(YWonderLand.Managers.EconomyManager.Instance.GetPOS());
-            YWonderLand.Managers.EconomyManager.Instance.OnPOSChanged += SetCurrency;
+            var economy = YWonderLand.Managers.EconomyManager.Instance;
+            SetCurrency(economy.GetPOS());
+            SetUPOS(economy.GetUPOS());
+            economy.OnPOSChanged += SetCurrency;
+            economy.OnUPOSChanged += SetUPOS;
         }
 
         // EXP/Level (tối giản) — hiện cấp + % EXP thật, cập nhật khi cộng EXP.
@@ -176,9 +183,14 @@ public class GameHUDController : MonoBehaviour
 
     void OnDisable()
     {
+        if (cancelButtonFrame != null)
+            cancelButtonFrame.generateVisualContent -= DrawFishingCancelProgress;
+
         if (YWonderLand.Managers.EconomyManager.Instance != null)
         {
-            YWonderLand.Managers.EconomyManager.Instance.OnPOSChanged -= SetCurrency;
+            var economy = YWonderLand.Managers.EconomyManager.Instance;
+            economy.OnPOSChanged -= SetCurrency;
+            economy.OnUPOSChanged -= SetUPOS;
         }
 
         if (_expMgr != null) _expMgr.OnEXPChanged -= OnExpChanged;
@@ -203,6 +215,7 @@ public class GameHUDController : MonoBehaviour
 
         // Currency
         currencyValue = root.Q<Label>("CurrencyValue");
+        uposValue = root.Q<Label>("UposValue");
 
         // Quest
         questBubble = root.Q<VisualElement>("QuestBubble");
@@ -233,6 +246,12 @@ public class GameHUDController : MonoBehaviour
         sprintHint = root.Q<VisualElement>("SprintHint");
         lookZone = root.Q<VisualElement>("LookZone");
         rightActionsContainer = root.Q<VisualElement>(className: "hud-right-actions");
+        cancelButtonFrame = root.Q<VisualElement>("CancelActionFrame");
+        if (cancelButtonFrame != null)
+        {
+            cancelButtonFrame.generateVisualContent -= DrawFishingCancelProgress;
+            cancelButtonFrame.generateVisualContent += DrawFishingCancelProgress;
+        }
 
 
     }
@@ -369,6 +388,18 @@ public class GameHUDController : MonoBehaviour
         // Nút X (Cancel) = HỦY HOẠT ẢNH đang chạy (chặt/đào/cuốc/tưới/câu...).
         btnCancel?.RegisterCallback<ClickEvent>(evt =>
         {
+            if (FishingOverlayController.Instance != null && FishingOverlayController.Instance.IsAutoFishing)
+            {
+                FishingOverlayController.Instance.CancelFishingFromHUD();
+                return;
+            }
+
+            if (YWonderLand.Environment.FarmInteractionController.Instance != null &&
+                YWonderLand.Environment.FarmInteractionController.Instance.CancelTimedActionFromHUD())
+            {
+                return;
+            }
+
             if (PlayerController.Instance != null) PlayerController.Instance.CancelAction();
         });
 
@@ -507,6 +538,14 @@ public class GameHUDController : MonoBehaviour
     public void SetCurrency(long amount)
     {
         if (currencyValue != null) currencyValue.text = amount.ToString("N0");
+    }
+
+    /// <summary>
+    /// Update currency display (UPOS).
+    /// </summary>
+    public void SetUPOS(long amount)
+    {
+        if (uposValue != null) uposValue.text = $"{amount:N0} UPOS";
     }
 
     /// <summary>
@@ -806,22 +845,26 @@ public class GameHUDController : MonoBehaviour
             return;
         }
 
+        interactionContainer.pickingMode = PickingMode.Position;
         interactionContainer.style.display = DisplayStyle.Flex;
 
         foreach (var action in actions)
         {
-            Button btn = new Button();
+            VisualElement btn = new VisualElement();
+            btn.pickingMode = PickingMode.Position;
             btn.AddToClassList("interaction-action-btn");
             
             // Add key hint if PC
             if (!string.IsNullOrEmpty(action.keyName))
             {
                 Label keyLabel = new Label(action.keyName);
+                keyLabel.pickingMode = PickingMode.Ignore;
                 keyLabel.AddToClassList("interaction-key-label");
                 btn.Add(keyLabel);
             }
             
             Label actionLabel = new Label(action.actionName);
+            actionLabel.pickingMode = PickingMode.Ignore;
             actionLabel.AddToClassList("interaction-action-label");
             btn.Add(actionLabel);
 
@@ -830,7 +873,7 @@ public class GameHUDController : MonoBehaviour
             {
                 var holdStart = action.onHoldStart;
                 var holdEnd = action.onHoldEnd;
-                Button heldBtn = btn;
+                VisualElement heldBtn = btn;
                 btn.RegisterCallback<PointerDownEvent>(evt =>
                 {
                     holdStart?.Invoke();
@@ -841,7 +884,43 @@ public class GameHUDController : MonoBehaviour
             }
             else if (action.onClick != null)
             {
-                btn.clicked += action.onClick;
+                var click = action.onClick;
+                string clickKeyName = action.keyName;
+                string clickActionName = action.actionName;
+                VisualElement clickBtn = btn;
+                bool pressedOnButton = false;
+                int pressedPointerId = -1;
+
+                btn.RegisterCallback<PointerDownEvent>(evt =>
+                {
+                    pressedOnButton = true;
+                    pressedPointerId = evt.pointerId;
+                    clickBtn.CapturePointer(evt.pointerId);
+                    evt.StopImmediatePropagation();
+                }, TrickleDown.TrickleDown);
+
+                btn.RegisterCallback<PointerUpEvent>(evt =>
+                {
+                    bool shouldClick = pressedOnButton && pressedPointerId == evt.pointerId;
+                    pressedOnButton = false;
+                    pressedPointerId = -1;
+                    if (clickBtn.HasPointerCapture(evt.pointerId))
+                        clickBtn.ReleasePointer(evt.pointerId);
+                    evt.StopImmediatePropagation();
+                    if (shouldClick)
+                    {
+                        Debug.Log($"[InteractionPrompt] UI click: {clickKeyName} {clickActionName}");
+                        click?.Invoke();
+                    }
+                }, TrickleDown.TrickleDown);
+
+                btn.RegisterCallback<PointerCaptureOutEvent>(evt =>
+                {
+                    pressedOnButton = false;
+                    pressedPointerId = -1;
+                });
+
+                btn.RegisterCallback<ClickEvent>(evt => evt.StopImmediatePropagation(), TrickleDown.TrickleDown);
             }
 
             interactionContainer.Add(btn);
@@ -861,7 +940,58 @@ public class GameHUDController : MonoBehaviour
     {
         if (rightActionsContainer == null) return;
         bool busy = PlayerController.Instance != null && PlayerController.Instance.IsBusy;
-        rightActionsContainer.style.display = busy ? DisplayStyle.Flex : DisplayStyle.None;
+        bool show = fishingCancelMode || busy;
+        rightActionsContainer.EnableInClassList("hud-right-actions--fishing", fishingCancelMode);
+        rightActionsContainer.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
+    }
+
+    public void ShowFishingCancelProgress(float progress01)
+    {
+        fishingCancelMode = true;
+        SetFishingCancelProgress(progress01);
+        UpdateCancelButton();
+    }
+
+    public void SetFishingCancelProgress(float progress01)
+    {
+        fishingCancelProgress01 = Mathf.Clamp01(progress01);
+        cancelButtonFrame?.MarkDirtyRepaint();
+    }
+
+    public void HideFishingCancelProgress()
+    {
+        fishingCancelMode = false;
+        fishingCancelProgress01 = 0f;
+        cancelButtonFrame?.MarkDirtyRepaint();
+        UpdateCancelButton();
+    }
+
+    public void ShowActionCancelProgress(float progress01) => ShowFishingCancelProgress(progress01);
+
+    public void SetActionCancelProgress(float progress01) => SetFishingCancelProgress(progress01);
+
+    public void HideActionCancelProgress() => HideFishingCancelProgress();
+
+    private void DrawFishingCancelProgress(MeshGenerationContext context)
+    {
+        if (!fishingCancelMode || cancelButtonFrame == null) return;
+
+        Rect rect = cancelButtonFrame.contentRect;
+        float radius = Mathf.Max(8f, Mathf.Min(rect.width, rect.height) * 0.5f - 6f);
+        Vector2 center = new Vector2(rect.width * 0.5f, rect.height * 0.5f);
+        var painter = context.painter2D;
+
+        painter.lineWidth = 6f;
+        painter.strokeColor = new Color(1f, 1f, 1f, 0.24f);
+        painter.BeginPath();
+        painter.Arc(center, radius, 0f, 360f);
+        painter.Stroke();
+
+        float endAngle = -90f + 360f * fishingCancelProgress01;
+        painter.strokeColor = new Color(0.992f, 0.937f, 0.439f, 1f);
+        painter.BeginPath();
+        painter.Arc(center, radius, -90f, endAngle);
+        painter.Stroke();
     }
 
     private void RefreshSprintVisual()

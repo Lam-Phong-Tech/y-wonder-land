@@ -65,6 +65,8 @@ public class LeaderboardPopupController : MonoBehaviour
         tabPet = root.Q<Button>("TabPet");
         tabRich = root.Q<Button>("TabRich");
 
+        SetupTabVisuals();
+
         // Register callbacks
         RegisterCallbacks();
 
@@ -91,6 +93,34 @@ public class LeaderboardPopupController : MonoBehaviour
         tabFashion?.RegisterCallback<ClickEvent>(evt => SetActiveTab(tabFashion, "fashion", "STYLE"));
         tabPet?.RegisterCallback<ClickEvent>(evt => SetActiveTab(tabPet, "pet", "PET"));
         tabRich?.RegisterCallback<ClickEvent>(evt => SetActiveTab(tabRich, "rich", "GOLD"));
+    }
+
+    private void SetupTabVisuals()
+    {
+        SetupTabVisual(tabDiligence, "Diligence\nEXP", "leaderboard-tab-icon-exp");
+        SetupTabVisual(tabLevel, "Level", "leaderboard-tab-icon-level");
+        SetupTabVisual(tabFashion, "Fashion", "leaderboard-tab-icon-fashion");
+        SetupTabVisual(tabPet, "Pet", "leaderboard-tab-icon-pet");
+        SetupTabVisual(tabRich, "Rich", "leaderboard-tab-icon-rich");
+    }
+
+    private static void SetupTabVisual(Button tab, string labelText, string iconClass)
+    {
+        if (tab == null) return;
+
+        tab.text = string.Empty;
+        tab.Clear();
+        tab.AddToClassList("leaderboard-tab-with-icon");
+
+        var label = new Label(labelText);
+        label.AddToClassList("leaderboard-tab-label");
+
+        var icon = new VisualElement();
+        icon.AddToClassList("leaderboard-tab-icon");
+        icon.AddToClassList(iconClass);
+
+        tab.Add(label);
+        tab.Add(icon);
     }
 
     private void SetActiveTab(Button tab, string category, string valueHeaderName)
@@ -201,7 +231,7 @@ public class LeaderboardPopupController : MonoBehaviour
         playerCol.AddToClassList("row-player-text");
 
         // Column 3: Stats Value
-        var valueCol = new Label(entry.value);
+        var valueCol = new Label(GetDisplayValue(entry));
         valueCol.AddToClassList("col-value");
         valueCol.AddToClassList("row-value-text");
 
@@ -220,6 +250,25 @@ public class LeaderboardPopupController : MonoBehaviour
     }
 
     // ── Public API ──
+
+    private string GetDisplayValue(LeaderboardEntry entry)
+    {
+        return activeCategory switch
+        {
+            "fashion" => Mathf.Max(0, 142 - (entry.rank - 1) * 9).ToString(),
+            "pet" => Mathf.Max(0, 38 - (entry.rank - 1) * 3).ToString(),
+            "rich" => StripTrailingSymbol(entry.value),
+            _ => entry.value
+        };
+    }
+
+    private static string StripTrailingSymbol(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return string.Empty;
+
+        int spaceIndex = value.IndexOf(' ');
+        return spaceIndex >= 0 ? value.Substring(0, spaceIndex) : value;
+    }
 
     public void Show()
     {

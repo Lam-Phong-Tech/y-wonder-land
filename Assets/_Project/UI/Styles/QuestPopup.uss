@@ -7,7 +7,7 @@
 .quest-overlay {
     position: absolute; top: 0; left: 0; right: 0; bottom: 0;
     background-color: rgba(21, 26, 39, 0.8);
-    justify-content: center; align-items: center; display: none; z-index: 100;
+    justify-content: center; align-items: center; display: none;
 }
 
 .quest-panel-shadow {
@@ -38,7 +38,7 @@
 
 /* Close Button (X) */
 .quest-close-shadow {
-    position: absolute; right: 12px; top: 12px; z-index: 50;
+    position: absolute; right: 12px; top: 12px;
 }
 
 .close-button {
@@ -92,8 +92,36 @@
     align-items: center; justify-content: center; margin-right: 14px;
 }
 
-.quest-icon-label { margin: 0; padding: 0; -unity-text-align: middle-center; font-size: 20px; }
-.quest-icon-label.completed { font-size: 24px; }
+.quest-icon-container.ready {
+    border-color: #2ECC71;
+    background-color: rgba(46, 204, 113, 0.12);
+}
+
+.quest-icon-container.claimed {
+    border-color: rgba(255, 255, 255, 0.18);
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.quest-list-icon {
+    width: 28px; height: 28px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.quest-icon-mission {
+    background-image: url('project://database/Assets/Sprites/icon/BoSungIcon/NhiemVu.png');
+}
+
+.quest-icon-reward {
+    background-image: url('project://database/Assets/Sprites/icon/SanPham/VatPham/giftbox.png');
+}
+
+.quest-check-mark {
+    width: 17px; height: 10px;
+    border-left-width: 3px; border-left-color: var(--color-accent-yellow);
+    border-bottom-width: 3px; border-bottom-color: var(--color-accent-yellow);
+    rotate: -45deg;
+    margin-top: -4px;
+}
 
 .quest-card-content { flex-grow: 1; justify-content: center; }
 
@@ -130,8 +158,11 @@
 
 /* Empty State Detail */
 .detail-empty-state { flex-grow: 1; align-items: center; justify-content: center; }
-.empty-quest-icon { font-size: 64px; margin-bottom: 16px; opacity: 0.5; }
-.empty-label { color: var(--color-bright-grey); font-size: 14px; -unity-font-style: bold; text-align: center; }
+.empty-quest-icon {
+    width: 64px; height: 64px; margin-bottom: 16px; opacity: 0.55;
+    -unity-background-scale-mode: scale-to-fit;
+}
+.empty-label { color: var(--color-bright-grey); font-size: 14px; -unity-font-style: bold; -unity-text-align: middle-center; }
 
 /* Content State Detail */
 .detail-content-state {
@@ -150,7 +181,6 @@
 
 .detail-description-text {
     color: var(--color-bright-grey); font-size: 14px; white-space: normal;
-    -unity-paragraph-layout: enabled; line-height: 20px;
 }
 
 /* Progress bar section */
@@ -197,7 +227,30 @@
     margin-right: 8px; position: relative; overflow: hidden; flex-shrink: 0;
 }
 
-.reward-emoji { font-size: 24px; margin: 0; padding: 0; -unity-text-align: middle-center; }
+.reward-icon {
+    width: 30px; height: 30px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.reward-icon-image {
+    width: 32px; height: 32px;
+}
+
+.quest-reward-pos {
+    background-image: url('project://database/Assets/Sprites/icon/BoSungIcon/Giau.png');
+}
+
+.quest-reward-exp {
+    background-image: url('project://database/Assets/Sprites/icon/BoSungIcon/EXP.png');
+}
+
+.quest-reward-diamond {
+    background-image: url('project://database/Assets/Sprites/icon/BoSungIcon/GoiThuong.png');
+}
+
+.quest-reward-gift {
+    background-image: url('project://database/Assets/Sprites/icon/SanPham/VatPham/giftbox.png');
+}
 
 .reward-amount {
     position: absolute; bottom: 2px; right: 4px;

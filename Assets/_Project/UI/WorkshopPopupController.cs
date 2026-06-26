@@ -24,6 +24,7 @@ public class WorkshopPopupController : MonoBehaviour
     
     // Detail Elements
     private Label lblToolIcon;
+    private Image imgToolIcon;
     private Label lblToolName;
     private Label lblUpgradeEffect;
     
@@ -32,6 +33,7 @@ public class WorkshopPopupController : MonoBehaviour
     private Label lblReqStone;
     private Label lblReqIron;
     
+    private VisualElement rowReqPOS;
     private VisualElement rowReqWood;
     private VisualElement rowReqStone;
     private VisualElement rowReqIron;
@@ -76,6 +78,7 @@ public class WorkshopPopupController : MonoBehaviour
         detailContent = root.Q<VisualElement>("WorkshopDetailContent");
         
         lblToolIcon = root.Q<Label>("LblToolIcon");
+        imgToolIcon = root.Q<Image>("ImgToolIcon");
         lblToolName = root.Q<Label>("LblToolName");
         lblUpgradeEffect = root.Q<Label>("LblUpgradeEffect");
         lblReqTitle = root.Q<Label>("LblReqTitle");
@@ -85,6 +88,7 @@ public class WorkshopPopupController : MonoBehaviour
         lblReqStone = root.Q<Label>("LblReqStone");
         lblReqIron = root.Q<Label>("LblReqIron");
         
+        rowReqPOS = root.Q<VisualElement>("RowReqPOS");
         rowReqWood = root.Q<VisualElement>("RowReqWood");
         rowReqStone = root.Q<VisualElement>("RowReqStone");
         rowReqIron = root.Q<VisualElement>("RowReqIron");
@@ -95,21 +99,13 @@ public class WorkshopPopupController : MonoBehaviour
         root.Q<Label>("WorkshopTitle").text = "TI\u1EC6M R\u00C8N";
         root.Q<Label>(className: "workshop-sidebar-section").text = "D\u1EE4NG C\u1EE4";
         lblDetailEmpty.text = "Ch\u1ECDn m\u1ED9t d\u1EE5ng c\u1EE5 \u0111\u1EC3 xem chi ti\u1EBFt...";
-        btnClose.text = "\u2715";
+        btnClose.text = "X";
         if (lblReqTitle != null) lblReqTitle.text = "Y\u00CAU C\u1EA6U:";
         
-        // Set req row icons and names from C#
-        SetReqRowContent("RowReqWood", "\ud83e\udeb5", "G\u1ED7");
-        SetReqRowContent("RowReqStone", "\ud83e\udea8", "\u0110\u00E1");
-        SetReqRowContent("RowReqIron", "\u26D3", "S\u1EAFt");
-        // POS row icon
-        var posRow = root.Q<VisualElement>("ReqContainer").Children().GetEnumerator();
-        if (posRow.MoveNext())
-        {
-            var firstRow = posRow.Current;
-            var labels = firstRow.Query<Label>().ToList();
-            if (labels.Count >= 1) labels[0].text = "\ud83e\ude99";
-        }
+        SetReqRowContent(rowReqPOS, null, "workshop-icon-pos", "POS");
+        SetReqRowContent(rowReqWood, "wood_01", null, "G\u1ED7");
+        SetReqRowContent(rowReqStone, "stone_01", null, "\u0110\u00E1");
+        SetReqRowContent(rowReqIron, "iron_01", null, "S\u1EAFt");
         
         btnClose.clicked += Hide;
         btnUpgrade.clicked += OnUpgradeClicked;
@@ -123,16 +119,19 @@ public class WorkshopPopupController : MonoBehaviour
         Hide();
     }
 
-    private void SetReqRowContent(string rowName, string icon, string name)
+    private void SetReqRowContent(VisualElement row, string itemId, string fallbackIconClass, string name)
     {
-        var row = root.Q<VisualElement>(rowName);
         if (row == null) return;
         var labels = row.Query<Label>().ToList();
         if (labels.Count >= 2)
         {
-            labels[0].text = icon;
+            labels[0].text = "";
+            labels[0].style.display = DisplayStyle.None;
             labels[1].text = name;
         }
+
+        var icon = CreateItemIcon(itemId, fallbackIconClass, "workshop-req-icon-image");
+        row.Insert(0, icon);
     }
 
     public void Show()
@@ -173,10 +172,7 @@ public class WorkshopPopupController : MonoBehaviour
             VisualElement toolVisual = new VisualElement();
             toolVisual.AddToClassList("workshop-tool-item");
             
-            // Icon
-            Label iconLabel = new Label(itemDef.iconEmoji);
-            iconLabel.AddToClassList("workshop-tool-item-icon");
-            toolVisual.Add(iconLabel);
+            toolVisual.Add(CreateItemIcon(itemDef, "workshop-tool-item-icon-image"));
             
             // Name with Level
             string displayName = ToolManager.Instance.GetToolDisplayName(toolId, itemDef.itemName);
@@ -237,7 +233,13 @@ public class WorkshopPopupController : MonoBehaviour
         
         string baseName = itemDef != null ? itemDef.itemName.Replace(" Lv1", "") : "D\u1EE5ng c\u1EE5";
         
-        lblToolIcon.text = itemDef != null ? itemDef.iconEmoji : "\ud83d\udd27";
+        bool hasGraphicIcon = ApplyItemIcon(imgToolIcon, itemDef);
+        if (imgToolIcon != null) imgToolIcon.style.display = hasGraphicIcon ? DisplayStyle.Flex : DisplayStyle.None;
+        if (lblToolIcon != null)
+        {
+            lblToolIcon.style.display = hasGraphicIcon ? DisplayStyle.None : DisplayStyle.Flex;
+            lblToolIcon.text = itemDef != null ? itemDef.iconEmoji : "?";
+        }
         
         if (currentLevel >= ToolManager.MAX_TOOL_LEVEL)
         {
@@ -331,6 +333,48 @@ public class WorkshopPopupController : MonoBehaviour
             lbl.RemoveFromClassList("workshop-req-value--enough");
             lbl.AddToClassList("workshop-req-value--not-enough");
         }
+    }
+
+    private VisualElement CreateItemIcon(string itemId, string fallbackIconClass, string className)
+    {
+        ItemDefinition itemDef = !string.IsNullOrEmpty(itemId) ? itemDatabase?.GetItem(itemId) : null;
+        return CreateItemIcon(itemDef, className, fallbackIconClass);
+    }
+
+    private VisualElement CreateItemIcon(ItemDefinition itemDef, string className, string fallbackIconClass = null)
+    {
+        var image = new Image { scaleMode = ScaleMode.ScaleToFit };
+        image.AddToClassList(className);
+        if (ApplyItemIcon(image, itemDef))
+            return image;
+
+        var fallback = new VisualElement();
+        fallback.AddToClassList(className);
+        if (!string.IsNullOrEmpty(fallbackIconClass))
+            fallback.AddToClassList(fallbackIconClass);
+        return fallback;
+    }
+
+    private bool ApplyItemIcon(Image image, ItemDefinition itemDef)
+    {
+        if (image == null || itemDef == null) return false;
+
+        image.image = null;
+        image.sprite = null;
+
+        if (itemDef.iconTexture != null)
+        {
+            image.image = itemDef.iconTexture;
+            return true;
+        }
+
+        if (itemDef.iconSprite != null)
+        {
+            image.sprite = itemDef.iconSprite;
+            return true;
+        }
+
+        return false;
     }
 
     private void OnUpgradeClicked()

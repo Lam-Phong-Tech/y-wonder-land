@@ -17,7 +17,7 @@
             <ui:VisualElement class="confirm-header">
                 <ui:Label name="confirm-title" class="confirm-header-title" text="XÁC NHẬN" />
                 <ui:VisualElement class="confirm-close-btn-container">
-                    <ui:Button name="btn-close" class="confirm-close-btn" text="✕" />
+                    <ui:Button name="btn-close" class="confirm-close-btn" text="X" />
                 </ui:VisualElement>
             </ui:VisualElement>
 

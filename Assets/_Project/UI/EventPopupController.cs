@@ -12,6 +12,7 @@ public class EventPopupController : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private UIDocument eventDocument;
+    private YWonderLand.Data.ItemDatabase itemDatabase;
 
     // Elements
     private VisualElement overlay;
@@ -31,7 +32,7 @@ public class EventPopupController : MonoBehaviour
     private Button tabWheel;
     private VisualElement panelWheel;
     private VisualElement wheelCircle;
-    private Label wheelHub;
+    private VisualElement wheelHub;
     private Button btnSpin;
     private Label lblSpinsLeft;
     private Label lblWheelResult;
@@ -103,6 +104,7 @@ public class EventPopupController : MonoBehaviour
     private struct DayReward
     {
         public string itemId; public string name; public string emoji;
+        public string iconClass;
         public int qty; public bool isPoint; public bool isNothing;
     }
 
@@ -111,14 +113,14 @@ public class EventPopupController : MonoBehaviour
     {
         switch (day)
         {
-            case 1:  return new DayReward { isPoint = true,        name = "Point",   emoji = "🪙", qty = 26 };
-            case 3:  return new DayReward { itemId = "wood_01",    name = "Gỗ",      emoji = "🪵", qty = 4 };
-            case 5:  return new DayReward { isPoint = true,        name = "Point",   emoji = "🪙", qty = 26 };
+            case 1:  return new DayReward { isPoint = true,        name = "Point",   emoji = "🪙", iconClass = "attendance-icon-point", qty = 26 };
+            case 3:  return new DayReward { itemId = "wood_01",    name = "Gỗ",      emoji = "🪵", iconClass = "attendance-icon-wood", qty = 4 };
+            case 5:  return new DayReward { isPoint = true,        name = "Point",   emoji = "🪙", iconClass = "attendance-icon-point", qty = 26 };
             case 7:  return new DayReward { itemId = "corn_01",    name = "Bắp ngô", emoji = "🌽", qty = 10 };
             case 10: return new DayReward { itemId = "pumpkin_01", name = "Bí ngô",  emoji = "🎃", qty = 10 };
-            case 11: return new DayReward { itemId = "wood_01",    name = "Gỗ",      emoji = "🪵", qty = 8 };
-            case 15: return new DayReward { itemId = "rabbit_01",  name = "Thỏ",     emoji = "🐰", qty = 1 };
-            default: return new DayReward { isNothing = true, name = "—", emoji = "📅", qty = 0 };
+            case 11: return new DayReward { itemId = "wood_01",    name = "Gỗ",      emoji = "🪵", iconClass = "attendance-icon-wood", qty = 8 };
+            case 15: return new DayReward { itemId = "rabbit_01",  name = "Thỏ",     emoji = "🐰", iconClass = "attendance-icon-rabbit", qty = 1 };
+            default: return new DayReward { isNothing = true, name = "—", emoji = "📅", iconClass = "attendance-icon-calendar", qty = 0 };
         }
     }
 
@@ -126,23 +128,24 @@ public class EventPopupController : MonoBehaviour
     private struct WheelPrize
     {
         public string itemId; public string name; public string emoji;
+        public string iconClass;
         public int qty; public int weight; public bool isNothing;
     }
 
     private readonly List<WheelPrize> wheelPrizes = new List<WheelPrize>
     {
-        new WheelPrize { itemId = "goat_01",            name = "Dê",           emoji = "🐐", qty = 1,  weight = 1 },
-        new WheelPrize { itemId = "duck_01",            name = "Vịt",          emoji = "🦆", qty = 1,  weight = 3 },
-        new WheelPrize { itemId = "rabbit_01",          name = "Thỏ",          emoji = "🐰", qty = 1,  weight = 5 },
-        new WheelPrize { itemId = "wood_01",            name = "Gỗ",           emoji = "🪵", qty = 4,  weight = 10 },
-        new WheelPrize { itemId = "stone_01",           name = "Đá lát đường", emoji = "🪨", qty = 4,  weight = 5 },
+        new WheelPrize { itemId = "goat_01",            name = "Dê",           emoji = "🐐", iconClass = "wheel-icon-goat", qty = 1,  weight = 1 },
+        new WheelPrize { itemId = "duck_01",            name = "Vịt",          emoji = "🦆", iconClass = "wheel-icon-duck", qty = 1,  weight = 3 },
+        new WheelPrize { itemId = "rabbit_01",          name = "Thỏ",          emoji = "🐰", iconClass = "wheel-icon-rabbit", qty = 1,  weight = 5 },
+        new WheelPrize { itemId = "wood_01",            name = "Gỗ",           emoji = "🪵", iconClass = "wheel-icon-wood", qty = 4,  weight = 10 },
+        new WheelPrize { itemId = "stone_01",           name = "Đá lát đường", emoji = "🪨", iconClass = "wheel-icon-stone", qty = 4,  weight = 5 },
         new WheelPrize { itemId = "corn_01",            name = "Bắp ngô",      emoji = "🌽", qty = 5,  weight = 1 },
         new WheelPrize { itemId = "cabbage_01",         name = "Bắp cải",      emoji = "🥬", qty = 5,  weight = 1 },
         new WheelPrize { itemId = "grass_01",           name = "Cỏ voi",       emoji = "🌿", qty = 5,  weight = 1 },
-        new WheelPrize { itemId = "chicken_01",         name = "Gà",           emoji = "🐔", qty = 1,  weight = 3 },
+        new WheelPrize { itemId = "chicken_01",         name = "Gà",           emoji = "🐔", iconClass = "wheel-icon-chicken", qty = 1,  weight = 3 },
         new WheelPrize { itemId = "carrot_seed_01",     name = "Hạt cà rốt",   emoji = "🥕", qty = 10, weight = 5 },
         new WheelPrize { itemId = "watermelon_seed_01", name = "Hạt dưa hấu",  emoji = "🍉", qty = 5,  weight = 5 },
-        new WheelPrize { name = "Chúc may mắn lần sau", emoji = "🍀", qty = 0,  weight = 60, isNothing = true },
+        new WheelPrize { name = "Chúc may mắn lần sau", emoji = "🍀", iconClass = "wheel-icon-luck", qty = 0,  weight = 60, isNothing = true },
     };
 
     private const int MaxSpinsPerDay = 3;
@@ -156,6 +159,7 @@ public class EventPopupController : MonoBehaviour
     {
         if (eventDocument == null)
             eventDocument = GetComponent<UIDocument>();
+        itemDatabase = Resources.Load<YWonderLand.Data.ItemDatabase>("ItemDatabase");
     }
 
     private void OnEnable()
@@ -185,7 +189,7 @@ public class EventPopupController : MonoBehaviour
         tabWheel = root.Q<Button>("TabWheel");
         panelWheel = root.Q<VisualElement>("PanelWheel");
         wheelCircle = root.Q<VisualElement>("WheelCircle");
-        wheelHub = root.Q<Label>("WheelHub");
+        wheelHub = root.Q<VisualElement>("WheelHub");
         btnSpin = root.Q<Button>("BtnSpin");
         lblSpinsLeft = root.Q<Label>("LblSpinsLeft");
         lblWheelResult = root.Q<Label>("LblWheelResult");
@@ -366,9 +370,6 @@ public class EventPopupController : MonoBehaviour
             var card = new VisualElement();
             card.AddToClassList("event-bundle-card");
 
-            var icon = new Label(bundle.icon);
-            icon.AddToClassList("event-bundle-icon");
-
             var name = new Label(bundle.name);
             name.AddToClassList("event-bundle-name");
 
@@ -386,7 +387,6 @@ public class EventPopupController : MonoBehaviour
                 card.Add(tagWrap);
             }
 
-            card.Add(icon);
             card.Add(name);
             card.Add(desc);
 
@@ -462,10 +462,7 @@ public class EventPopupController : MonoBehaviour
                 if (special) title.AddToClassList("title-special");
                 slot.Add(title);
 
-                var emoji = new Label(r.emoji);
-                emoji.AddToClassList("day-slot-emoji");
-                if (special) emoji.AddToClassList("emoji-special");
-                slot.Add(emoji);
+                slot.Add(CreateAttendanceRewardIcon(r, special));
 
                 var amount = new Label(r.isNothing ? "—" : (r.isPoint ? $"+{r.qty}" : $"x{r.qty}"));
                 amount.AddToClassList("day-slot-amount");
@@ -503,6 +500,41 @@ public class EventPopupController : MonoBehaviour
         }
     }
 
+    private VisualElement CreateAttendanceRewardIcon(DayReward reward, bool special)
+    {
+        if (!string.IsNullOrEmpty(reward.iconClass))
+        {
+            var icon = new VisualElement();
+            icon.AddToClassList("day-slot-icon");
+            icon.AddToClassList(reward.iconClass);
+            if (special) icon.AddToClassList("day-slot-icon-special");
+            return icon;
+        }
+
+        var itemDef = !string.IsNullOrEmpty(reward.itemId) && itemDatabase != null
+            ? itemDatabase.GetItem(reward.itemId)
+            : null;
+
+        if (itemDef != null && (itemDef.iconTexture != null || itemDef.iconSprite != null))
+        {
+            var icon = new Image { scaleMode = ScaleMode.ScaleToFit };
+            icon.AddToClassList("day-slot-icon");
+            if (special) icon.AddToClassList("day-slot-icon-special");
+
+            if (itemDef.iconTexture != null)
+                icon.image = itemDef.iconTexture;
+            else
+                icon.sprite = itemDef.iconSprite;
+
+            return icon;
+        }
+
+        var fallback = new Label(reward.emoji);
+        fallback.AddToClassList("day-slot-emoji");
+        if (special) fallback.AddToClassList("emoji-special");
+        return fallback;
+    }
+
     private void ClaimDailyReward()
     {
         LoadAttendance();
@@ -535,7 +567,7 @@ public class EventPopupController : MonoBehaviour
 
     // ── Vòng quay may mắn ──
 
-    // Dựng emoji các phần thưởng quanh vành vòng tròn.
+    // Dựng icon các phần thưởng quanh vành vòng tròn.
     private void BuildWheel()
     {
         if (wheelCircle == null) return;
@@ -543,7 +575,7 @@ public class EventPopupController : MonoBehaviour
 
         int n = wheelPrizes.Count;
         float seg = 360f / n;
-        const float radius = 92f;   // bán kính đặt emoji
+        const float radius = 92f;   // bán kính đặt icon
         const float center = 112f;  // tâm content-box vòng (236 - 2*6 viền = 224 → /2)
         for (int i = 0; i < n; i++)
         {
@@ -551,13 +583,42 @@ public class EventPopupController : MonoBehaviour
             float x = center + radius * Mathf.Sin(ang);
             float y = center - radius * Mathf.Cos(ang);
 
-            var e = new Label(wheelPrizes[i].emoji);
-            e.AddToClassList("wheel-emoji");
-            e.style.position = Position.Absolute;
-            e.style.left = x - 12;
-            e.style.top = y - 14;
-            wheelCircle.Add(e);
+            var icon = CreateWheelPrizeIcon(wheelPrizes[i]);
+            icon.style.position = Position.Absolute;
+            icon.style.left = x - 13;
+            icon.style.top = y - 13;
+            wheelCircle.Add(icon);
         }
+    }
+
+    private VisualElement CreateWheelPrizeIcon(WheelPrize prize)
+    {
+        if (!string.IsNullOrEmpty(prize.iconClass))
+        {
+            var icon = new VisualElement();
+            icon.AddToClassList("wheel-icon");
+            icon.AddToClassList(prize.iconClass);
+            return icon;
+        }
+
+        var itemDef = !string.IsNullOrEmpty(prize.itemId) && itemDatabase != null
+            ? itemDatabase.GetItem(prize.itemId)
+            : null;
+
+        if (itemDef != null && (itemDef.iconTexture != null || itemDef.iconSprite != null))
+        {
+            var icon = new Image { scaleMode = ScaleMode.ScaleToFit };
+            icon.AddToClassList("wheel-icon");
+            if (itemDef.iconTexture != null)
+                icon.image = itemDef.iconTexture;
+            else
+                icon.sprite = itemDef.iconSprite;
+            return icon;
+        }
+
+        var fallback = new Label(prize.emoji);
+        fallback.AddToClassList("wheel-emoji");
+        return fallback;
     }
 
     // Đếm lượt quay theo NGÀY THẬT (reset khi sang ngày mới).
@@ -584,7 +645,7 @@ public class EventPopupController : MonoBehaviour
         if (btnSpin != null)
         {
             btnSpin.SetEnabled(left > 0);
-            btnSpin.text = left > 0 ? "🎡 QUAY" : "Hết lượt hôm nay";
+            btnSpin.text = left > 0 ? "QUAY" : "Hết lượt hôm nay";
         }
     }
 
@@ -615,9 +676,9 @@ public class EventPopupController : MonoBehaviour
         isSpinning = true;
         if (btnSpin != null) { btnSpin.SetEnabled(false); btnSpin.text = "Đang quay..."; }
         if (lblWheelResult != null) lblWheelResult.text = "";
-        if (wheelHub != null) wheelHub.text = "🎡";
+        SetWheelHubIcon(null);
 
-        // Quay 5 vòng + dừng sao cho emoji TRÚNG nằm trên đỉnh (dưới kim).
+        // Quay 5 vòng + dừng sao cho icon trúng nằm trên đỉnh (dưới kim).
         float seg = 360f / wheelPrizes.Count;
         float targetMod = (360f - (idx * seg) % 360f) % 360f;
         float curMod = ((wheelAngle % 360f) + 360f) % 360f;
@@ -638,12 +699,42 @@ public class EventPopupController : MonoBehaviour
         if (!won.isNothing && !string.IsNullOrEmpty(won.itemId) && won.qty > 0)
             YWonderLand.Managers.InventoryManager.Instance?.AddItem(won.itemId, won.qty);
 
-        if (wheelHub != null) wheelHub.text = won.emoji;
-        string msg = won.isNothing ? "🍀 Chúc may mắn lần sau!" : $"🎉 Trúng: {won.name} x{won.qty}!";
+        SetWheelHubIcon(won);
+        string msg = won.isNothing ? "Chúc may mắn lần sau!" : $"Trúng: {won.name} x{won.qty}!";
         if (lblWheelResult != null) lblWheelResult.text = msg;
         YWonderLand.Environment.ScreenToast.ShowInfo(msg);
 
         RefreshWheel();
+    }
+
+    private void SetWheelHubIcon(WheelPrize? prize)
+    {
+        if (wheelHub == null) return;
+
+        wheelHub.Clear();
+        wheelHub.RemoveFromClassList("wheel-icon-goat");
+        wheelHub.RemoveFromClassList("wheel-icon-duck");
+        wheelHub.RemoveFromClassList("wheel-icon-rabbit");
+        wheelHub.RemoveFromClassList("wheel-icon-wood");
+        wheelHub.RemoveFromClassList("wheel-icon-stone");
+        wheelHub.RemoveFromClassList("wheel-icon-chicken");
+        wheelHub.RemoveFromClassList("wheel-icon-luck");
+        wheelHub.AddToClassList("wheel-icon-spin");
+
+        if (!prize.HasValue) return;
+
+        wheelHub.RemoveFromClassList("wheel-icon-spin");
+        var won = prize.Value;
+
+        if (!string.IsNullOrEmpty(won.iconClass))
+        {
+            wheelHub.AddToClassList(won.iconClass);
+            return;
+        }
+
+        var icon = CreateWheelPrizeIcon(won);
+        icon.AddToClassList("wheel-hub-icon-image");
+        wheelHub.Add(icon);
     }
 
     // ── Helpers ──

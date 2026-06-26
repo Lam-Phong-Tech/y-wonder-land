@@ -37,6 +37,7 @@ public class InventoryPopupController : MonoBehaviour
     // Detail panel references
     private VisualElement detailEmptyState;
     private VisualElement detailContent;
+    private Image detailIconImage;
     private Label lblDetailIcon;
     private Label lblDetailName;
     private Label lblDetailQty;
@@ -60,6 +61,8 @@ public class InventoryPopupController : MonoBehaviour
     {
         public string id;
         public string icon;
+        public Sprite iconSprite;
+        public Texture2D iconTexture;
         public string name;
         public int quantity;
         public string description;
@@ -106,6 +109,17 @@ public class InventoryPopupController : MonoBehaviour
         detailEmptyState = root.Q<VisualElement>("InventoryDetailEmptyState");
         detailContent = root.Q<VisualElement>("InventoryDetailContent");
         lblDetailIcon = root.Q<Label>("LblDetailIcon");
+        detailIconImage = lblDetailIcon?.parent?.Q<Image>("InventoryDetailIconImage");
+        if (detailIconImage == null && lblDetailIcon?.parent != null)
+        {
+            detailIconImage = new Image
+            {
+                name = "InventoryDetailIconImage",
+                scaleMode = ScaleMode.ScaleToFit
+            };
+            detailIconImage.AddToClassList("inventory-detail-icon-image");
+            lblDetailIcon.parent.Insert(0, detailIconImage);
+        }
         lblDetailName = root.Q<Label>("LblDetailName");
         lblDetailQty = root.Q<Label>("LblDetailQty");
         lblDetailDesc = root.Q<Label>("LblDetailDesc");
@@ -220,6 +234,8 @@ public class InventoryPopupController : MonoBehaviour
                 categoryItems.Add(new InventoryItem
                 {
                     id = def.id,
+                    iconSprite = def.iconSprite,
+                    iconTexture = def.iconTexture,
                     icon = !string.IsNullOrEmpty(def.iconEmoji) ? def.iconEmoji : "📦",
                     name = def.itemName,
                     quantity = slot.quantity,
@@ -275,9 +291,18 @@ public class InventoryPopupController : MonoBehaviour
         var iconContainer = new VisualElement();
         iconContainer.AddToClassList("inventory-item-icon");
 
-        var iconLabel = new Label(item.icon);
-        iconLabel.AddToClassList("inventory-item-icon-text");
-        iconContainer.Add(iconLabel);
+        var iconImage = new Image { scaleMode = ScaleMode.ScaleToFit };
+        iconImage.AddToClassList("inventory-item-icon-image");
+        if (ApplyGraphicIcon(iconImage, item))
+        {
+            iconContainer.Add(iconImage);
+        }
+        else
+        {
+            var iconLabel = new Label(item.icon);
+            iconLabel.AddToClassList("inventory-item-icon-text");
+            iconContainer.Add(iconLabel);
+        }
 
         // Name
         var nameLabel = new Label(item.name);
@@ -328,7 +353,13 @@ public class InventoryPopupController : MonoBehaviour
         if (detailEmptyState != null) detailEmptyState.style.display = DisplayStyle.None;
         if (detailContent != null) detailContent.style.display = DisplayStyle.Flex;
 
-        if (lblDetailIcon != null) lblDetailIcon.text = item.icon;
+        bool hasGraphicIcon = ApplyGraphicIcon(detailIconImage, item);
+        if (detailIconImage != null) detailIconImage.style.display = hasGraphicIcon ? DisplayStyle.Flex : DisplayStyle.None;
+        if (lblDetailIcon != null)
+        {
+            lblDetailIcon.style.display = hasGraphicIcon ? DisplayStyle.None : DisplayStyle.Flex;
+            lblDetailIcon.text = item.icon;
+        }
         if (lblDetailName != null) lblDetailName.text = item.name;
         if (lblDetailQty != null) lblDetailQty.text = $"x{item.quantity}";
         if (lblDetailDesc != null)
@@ -356,6 +387,28 @@ public class InventoryPopupController : MonoBehaviour
              + $"\nGiá mua: {d.buyPrice} POS   |   Cần: {d.penSlots} ô đất"
              + $"\nThức ăn chính: {Food(d.foodMainName, d.foodMainAmount)}"
              + $"\nThức ăn phụ: {Food(d.foodAltName, d.foodAltAmount)}";
+    }
+
+    private bool ApplyGraphicIcon(Image iconImage, InventoryItem item)
+    {
+        if (iconImage == null) return false;
+
+        iconImage.image = null;
+        iconImage.sprite = null;
+
+        if (item.iconTexture != null)
+        {
+            iconImage.image = item.iconTexture;
+            return true;
+        }
+
+        if (item.iconSprite != null)
+        {
+            iconImage.sprite = item.iconSprite;
+            return true;
+        }
+
+        return false;
     }
 
     private void ShowEmptyDetails()

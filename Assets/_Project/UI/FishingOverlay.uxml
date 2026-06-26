@@ -14,7 +14,7 @@
             <!-- Header: tiêu đề + nút đóng X -->
             <ui:VisualElement class="fish-panel-header">
                 <ui:Label text="CÂU CÁ" class="fish-panel-title" />
-                <ui:Button name="BtnExitFishing" text="✕" class="fish-close-x" />
+                <ui:Button name="BtnExitFishing" text="X" class="fish-close-x" />
             </ui:VisualElement>
 
             <!-- Số lượt câu trong ngày (tích hợp luôn) -->

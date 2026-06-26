@@ -5,6 +5,206 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-06-26] — Interaction, chuồng, câu cá và icon build/popup
+
+### Added
+- Câu cá chuyển sang luồng hành động có thời lượng 8.7s khớp clip `Fishing`, có UI hủy/progress và nhả chuột trong lúc hành động đang chạy.
+- Kết thúc câu cá mới cộng cá vào túi: cá thường hoặc cá hiếm, tỉ lệ cá hiếm 20%.
+- Popup chuồng hỗ trợ xem theo nhóm: click vào vùng chuồng liền kề sẽ hiện danh sách toàn bộ thú trong chuồng dưới dạng card, chọn card nào thì hành động đúng con đó.
+- Card thú trong popup chuồng dùng icon thật từ `ItemDatabase`, không còn dùng chữ cái/emoji fallback nếu item đã có ảnh.
+- Build Mode dùng icon công trình từ `Assets/Sprites/icon/BoSungIcon/` cho Ruộng, Đường đá và Chuồng.
+
+### Changed
+- Tầm tương tác câu cá được chỉnh để đứng trên bờ vẫn câu được, hiện giới hạn khoảng 5m.
+- Khi đang câu cá, prompt `F Câu cá` được ẩn để không đè lên nút hủy/progress.
+- Các hành động thế giới đang được chuẩn hóa theo hướng có thể hủy, chạy theo độ dài clip: chặt cây, đào khoáng, cuốc/trồng/tưới, cho ăn.
+- Popup chuồng gom nút hành động vào một hàng; `Chữa bệnh` và `Vaccine` vẫn hiển thị nhưng bị khóa/mờ vì dữ liệu vaccine/bệnh chưa được khách chốt.
+- Thanh đói/thanh nước trên world bar dùng material URP Unlit riêng để tránh lỗi màu tím trong build.
+
+### Fixed
+- Không còn hiện UI câu cá khi nhân vật đang bơi/dưới nước.
+- Chặn lỗi `Collider.ClosestPoint` với collider không hỗ trợ/non-convex khi tính khoảng cách tương tác.
+- Sửa các lỗi prompt/click của ô đất, chuồng, con vật sau các lần chỉnh raycast/tầm tương tác.
+- Hủy chuồng liền kề giờ dọn sạch UI tương tác còn sót, xóa object thú trong chuồng, trả con giống về túi và hoàn vật liệu theo rule hoàn tài nguyên hiện có.
+- Build Mode trên Android tiếp tục dùng touch/pointer để đặt công trình; các glyph dễ thành ô vuông được thay bằng chữ/icon an toàn hơn.
+
+### Changed Files
+- `Assets/_Project/Scripts/Environment/FarmInteractionController.cs`
+- `Assets/_Project/Scripts/Environment/FarmAnimal.cs`
+- `Assets/_Project/Scripts/Environment/FarmTile.cs`
+- `Assets/_Project/Scripts/Environment/GhostPlacementController.cs`
+- `Assets/_Project/Scripts/Environment/PenEnclosure.cs`
+- `Assets/_Project/UI/AnimalInteractionPopup.uxml`
+- `Assets/_Project/UI/AnimalInteractionPopupController.cs`
+- `Assets/_Project/UI/FishingOverlay.uxml`
+- `Assets/_Project/UI/FishingOverlayController.cs`
+- `Assets/_Project/UI/BuildModeOverlay.uxml`
+- `Assets/_Project/UI/BuildModeOverlayController.cs`
+- `Assets/_Project/UI/GameHUDController.cs`
+- `Assets/_Project/UI/Styles/AnimalInteractionPopup.uss`
+- `Assets/_Project/UI/Styles/BuildModeOverlay.uss`
+- `Assets/Art/Environment/Material/WorldBar_Unlit.mat`
+- `Assets/Resources/Materials/WorldBar_Unlit.mat`
+- `Assets/Building/New/fence/Fence.prefab`
+- `Assets/Sprites/icon/BoSungIcon/**`
+
+---
+## [2026-06-25] — Existing character login flow
+
+### Changed
+- Thêm `characterCreated` vào `player_profile` ở Unity client và Node server stub.
+- Login giờ nạp `/player/profile` trước; nếu `characterCreated=true` thì bỏ qua màn tạo nhân vật.
+- `DemoRich01` đến `DemoRich05` được coi là tài khoản đã có nhân vật, nên tester đăng nhập là vào game, không phải chọn giới tính/đặt tên.
+- Màn tạo nhân vật sẽ đánh dấu profile là đã tạo nhân vật khi người chơi xác nhận tên/giới tính.
+
+### Changed Files
+- `Assets/_Project/UI/LoginScreenController.cs`
+- `Assets/_Project/Scripts/Managers/GameManager.cs`
+- `Assets/_Project/Scripts/Backend/PlayerProfileService.cs`
+- `server/index.js`
+- `server/README.md`
+- `docs/API_CONTRACTS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/DB_SCHEMA.md`
+- `docs/TECHNICAL_DESIGN.md`
+
+---
+## [2026-06-25] — Shop tab icon cleanup
+
+### Changed
+- Popup shop bỏ emoji icon trong các tab chế độ/danh mục: `Mua`, `Bán`, `Hạt giống`, `Vật nuôi`, `Dụng cụ`, `Vật phẩm`.
+- Icon ảnh của hàng hóa trong card item và panel chi tiết vẫn giữ theo `ItemDefinition.iconTexture/iconSprite`.
+- Tên shop dài được căn giữa trong vùng header còn trống, không còn tràn xuống dưới pill POS hoặc nút đóng.
+- Bỏ thuộc tính `z-index` không được UI Toolkit hỗ trợ trong `ShopPopup.uss`.
+
+### Changed Files
+- `Assets/_Project/UI/ShopPopup.uxml`
+- `Assets/_Project/UI/Styles/ShopPopup.uss`
+
+---
+## [2026-06-25] — Workshop icon rendering
+
+### Changed
+- Popup Tiệm rèn hiển thị icon dụng cụ và nguyên liệu nâng cấp bằng ảnh asset thay vì emoji label.
+- Gắn `iconTexture` cho nhóm dụng cụ/vật liệu: rìu, cuốc, cần câu, xô tưới, cuốc chim, gỗ, đá, sắt, quặng.
+- Bỏ thuộc tính `z-index` không được UI Toolkit hỗ trợ trong `WorkshopPopup.uss`.
+
+### Changed Files
+- `Assets/_Project/UI/WorkshopPopup.uxml`
+- `Assets/_Project/UI/WorkshopPopupController.cs`
+- `Assets/_Project/UI/Styles/WorkshopPopup.uss`
+- `Assets/Resources/Items/axe_01.asset`
+- `Assets/Resources/Items/hoe_01.asset`
+- `Assets/Resources/Items/fishing_rod_01.asset`
+- `Assets/Resources/Items/watering_can_01.asset`
+- `Assets/Resources/Items/pickaxe_01.asset`
+- `Assets/Resources/Items/wood_01.asset`
+- `Assets/Resources/Items/stone_01.asset`
+- `Assets/Resources/Items/iron_01.asset`
+- `Assets/Resources/Items/ore_01.asset`
+
+---
+## [2026-06-25] — Quest popup icon cleanup
+
+### Changed
+- Popup Nhiệm vụ bỏ emoji kiếm/quà/check trong danh sách nhiệm vụ; nhiệm vụ đang làm/đợi nhận dùng icon ảnh từ `Assets/Sprites/icon/`.
+- Nhiệm vụ đã nhận thưởng hiển thị dấu tích visual trong ô vuông, đồng bộ cách nhìn với Hộp thư.
+- Ô phần thưởng nhiệm vụ dùng icon từ `ItemDatabase` hoặc `Assets/Sprites/icon/BoSungIcon/`, không còn render emoji cũ.
+- Bỏ các thuộc tính `z-index` không được UI Toolkit hỗ trợ trong `QuestPopup.uss` để tránh warning.
+
+### Changed Files
+- `Assets/_Project/UI/QuestPopup.uxml`
+- `Assets/_Project/UI/QuestPopupController.cs`
+- `Assets/_Project/UI/Styles/QuestPopup.uss`
+
+---
+## [2026-06-25] — Mailbox read/reward icons
+
+### Changed
+- Hộp thư: ô trạng thái thư đã đọc hiển thị dấu tích vẽ bằng UI thay vì emoji/glyph dễ thành ô vuông.
+- Badge quà trong danh sách thư dùng icon mới `Assets/Sprites/icon/SanPham/VatPham/giftbox.png`; quà đã nhận hiển thị dấu tích.
+- Phần thưởng đính kèm trong chi tiết thư dùng icon ảnh từ `ItemDatabase` hoặc `Assets/Sprites/icon/BoSungIcon/`, không còn render emoji cũ.
+
+### Changed Files
+- `Assets/_Project/UI/MailboxPopupController.cs`
+- `Assets/_Project/UI/Styles/MailboxPopup.uss`
+
+---
+## [2026-06-25] — Piggy bank icon cleanup
+
+### Changed
+- Popup Heo đất bỏ emoji icon ở balance pill, tab, gói gửi, nút gửi và title thời gian còn lại.
+- Icon heo ở trạng thái đang gửi/lịch sử gửi chuyển sang ảnh `Assets/Sprites/icon/BoSungIcon/Piggy.png`.
+- Bỏ các thuộc tính `z-index` không được UI Toolkit hỗ trợ trong `PiggyBankPopup.uss` để tránh warning.
+
+### Changed Files
+- `Assets/_Project/UI/PiggyBankPopup.uxml`
+- `Assets/_Project/UI/PiggyBankPopupController.cs`
+- `Assets/_Project/UI/Styles/PiggyBankPopup.uss`
+
+---
+## [2026-06-25] — Event popup icon cleanup
+
+### Changed
+- Popup Sự kiện & Quà tặng bỏ icon trang trí ở tiêu đề.
+- Pill thời gian sự kiện bỏ emoji đồng hồ, chỉ giữ chữ thời gian.
+- Các tab trong popup Sự kiện giờ chỉ hiển thị chữ, không còn emoji icon.
+- Các card gói ưu đãi không còn render emoji icon của gói; vẫn giữ tag, tên gói, mô tả, giá và trạng thái mua/hết hàng.
+- Bảng điểm danh hiển thị icon ảnh từ `Assets/Sprites/icon` khi có, riêng quà cây trồng dùng icon đang gắn trong `ItemDatabase`.
+- Vòng quay may mắn hiển thị icon ảnh cho các phần thưởng từ `Assets/Sprites/icon` và `ItemDatabase`; tiêu đề, hub giữa vòng, nút QUAY bỏ emoji text.
+- Bỏ các thuộc tính `z-index` không được UI Toolkit hỗ trợ trong `EventPopup.uss` để tránh warning.
+
+### Changed Files
+- `Assets/_Project/UI/EventPopup.uxml`
+- `Assets/_Project/UI/EventPopupController.cs`
+- `Assets/_Project/UI/Styles/EventPopup.uss`
+
+---
+## [2026-06-25] — Leaderboard tab icons
+
+### Changed
+- Popup Leaderboard đổi 5 tab `EXP`, `Level`, `Fashion`, `Pet`, `Rich` sang icon ảnh từ `Assets/Sprites/icon/BoSungIcon/`.
+- Tab `Level` dùng icon riêng `lv.png`.
+- Hạng 1/2/3 trong bảng Leaderboard dùng icon huy chương vàng/bạc/đồng thật thay cho emoji.
+- Cột giá trị Leaderboard: Fashion hiện số bộ trang phục, Pet hiện số lượng pet, Rich bỏ glyph kim cương và chỉ còn số Gold.
+
+### Changed Files
+- `Assets/_Project/UI/LeaderboardPopupController.cs`
+- `Assets/_Project/UI/Styles/LeaderboardPopup.uss`
+
+---
+## [2026-06-25] — Inventory item icon rendering
+
+### Fixed
+- Kho đồ giờ hiển thị `ItemDefinition.iconTexture/iconSprite` cho card vật phẩm và panel chi tiết, đồng bộ với cách cửa hàng đang hiển thị icon.
+- Vật phẩm chưa có ảnh được gán vẫn fallback về emoji/text như cũ.
+
+### Changed Files
+- `Assets/_Project/UI/InventoryPopupController.cs`
+- `Assets/_Project/UI/Styles/InventoryPopup.uss`
+
+---
+## [2026-06-25] — HUD POS/UPOS pill
+
+### Added
+- Thêm pill `UPOS` ở HUD top-right để hiển thị premium currency song song với `POS`.
+- `EconomyManager` có event `OnUPOSChanged` và helper `AddUPOS`/`SpendUPOS` để số dư premium cập nhật live.
+
+---
+## [2026-06-25] — APK build-mode touch + safe glyph hotfix
+
+### Fixed
+- `BuildModeOverlayController` không còn phụ thuộc `Mouse.current`/`Keyboard.current` để đặt công trình; Android tap giờ đi qua `Touchscreen.current`, ép ghost raycast ngay tại điểm tap trước khi pin vị trí.
+- `GhostPlacementController` đọc cả touch lẫn mouse để ghost cập nhật trên APK, vẫn giữ mouse cho Editor/Windows.
+- Thay glyph điều khiển dễ lỗi font Android (`✕`, `✔`, `⌂`) trong các nút close/build placement bằng ASCII an toàn (`X`, `OK`, `B`) để tránh nút hiện thành ô vuông trên điện thoại.
+
+### Changed Files
+- `Assets/_Project/Scripts/Environment/GhostPlacementController.cs`
+- `Assets/_Project/UI/BuildModeOverlayController.cs`
+- `Assets/_Project/UI/BuildModeOverlay.uxml`
+- `Assets/_Project/UI/*.uxml` (các nút close chuyển `✕` -> `X`)
+
+---
 ## [2026-06-24] — Tối ưu cảm ứng Mobile + Sprint theo hướng PUBG/FreeFire
 
 ### Changed

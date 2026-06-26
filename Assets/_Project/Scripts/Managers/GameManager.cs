@@ -344,6 +344,25 @@ public class GameManager : MonoBehaviour
         SetGameState(GameState.Cutscene);
     }
 
+    public void StartGameFromProfile()
+    {
+        var auth = YWonderLand.Backend.AuthService.Instance;
+        var profileService = YWonderLand.Backend.PlayerProfileService.Instance;
+        var profile = profileService != null ? profileService.Profile : null;
+
+        playerName = !string.IsNullOrEmpty(profile?.name)
+            ? profile.name
+            : (!string.IsNullOrEmpty(auth?.Username) ? auth.Username : "Player");
+
+        selectedCharacterIndex = string.Equals(profile?.gender, "female", System.StringComparison.OrdinalIgnoreCase) ? 1 : 0;
+
+        if (auth != null && profileService != null)
+            ApplyDemoAccountOverrides(auth.Username, profileService);
+
+        Debug.Log($"[GameManager] Starting from existing profile: {playerName}, gender={selectedCharacterIndex}.");
+        SetGameState(GameState.Cutscene);
+    }
+
     private async Awaitable SignInAndLoadProfileAsync()
     {
         var auth = YWonderLand.Backend.AuthService.Instance;
@@ -399,6 +418,11 @@ public class GameManager : MonoBehaviour
             || string.Equals(username, DemoFreshAccount, System.StringComparison.OrdinalIgnoreCase);
     }
 
+    public static bool IsRichDemoAccountName(string username)
+    {
+        return IsRichDemoAccount(username);
+    }
+
     private static bool IsRichDemoAccount(string username)
     {
         if (string.IsNullOrEmpty(username)) return false;
@@ -415,8 +439,14 @@ public class GameManager : MonoBehaviour
         if (!IsRichDemoAccount(username))
             return;
 
-        if (profile != null && profile.Profile != null && !profile.Profile.tutorialCompleted)
-            profile.SetTutorialCompleted(true);
+        if (profile != null && profile.Profile != null)
+        {
+            if (!profile.Profile.characterCreated)
+                profile.ApplyCharacterInfo(username, profile.Profile.gender);
+
+            if (!profile.Profile.tutorialCompleted)
+                profile.SetTutorialCompleted(true);
+        }
 
         string seedKey = "YW_DemoLoadoutSeeded_" + username;
         if (PlayerPrefs.GetInt(seedKey, 0) == 1) return;

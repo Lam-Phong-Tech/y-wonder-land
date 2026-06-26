@@ -17,7 +17,7 @@ MonoBehaviour:
   description: "Cu\u1ED1c chim \u0111\u1EADp \u0111\xE1."
   iconEmoji: "\u26CF\uFE0F"
   iconSprite: {fileID: 0}
-  iconTexture: {fileID: 0}
+  iconTexture: {fileID: 2800000, guid: e06199778f190ef4a9cb92c1a70a647a, type: 3}
   category: tools
   buyPrice: 100
   sellPrice: 50

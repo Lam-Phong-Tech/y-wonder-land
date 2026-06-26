@@ -16,19 +16,18 @@
                 <ui:VisualElement class="event-header">
                     <!-- Timer pill -->
                     <ui:VisualElement class="event-timer-pill">
-                        <ui:Label text="⏰" class="event-pill-icon" />
                         <ui:Label name="LblEventTimer" text="6d 12h" class="event-pill-value" />
                     </ui:VisualElement>
 
-                    <ui:Label text="🎁 SỰ KIỆN &amp; QUÀ TẶNG" class="event-header-title" />
+                    <ui:Label text="SỰ KIỆN &amp; QUÀ TẶNG" class="event-header-title" />
                 </ui:VisualElement>
 
                 <!-- Tab Bar -->
                 <ui:VisualElement class="event-tab-bar">
-                    <ui:Button name="TabExchange" text="🔄 Đổi quà" class="event-tab event-tab--active" />
-                    <ui:Button name="TabBundle" text="💎 Ưu đãi" class="event-tab" />
-                    <ui:Button name="TabAttendance" text="📅 Điểm danh" class="event-tab" />
-                    <ui:Button name="TabWheel" text="🎡 Vòng quay" class="event-tab" />
+                    <ui:Button name="TabExchange" text="Đổi quà" class="event-tab event-tab--active" />
+                    <ui:Button name="TabBundle" text="Ưu đãi" class="event-tab" />
+                    <ui:Button name="TabAttendance" text="Điểm danh" class="event-tab" />
+                    <ui:Button name="TabWheel" text="Vòng quay" class="event-tab" />
                 </ui:VisualElement>
 
                 <!-- TAB 1: EXCHANGE -->
@@ -147,7 +146,7 @@
 
                 <!-- TAB 4: WHEEL (Vòng quay may mắn) -->
                 <ui:VisualElement name="PanelWheel" class="event-body event-wheel-panel">
-                    <ui:Label class="wheel-desc" text="🎡 Vòng quay may mắn — 3 lượt mỗi ngày!" />
+                    <ui:Label class="wheel-desc" text="Vòng quay may mắn — 3 lượt mỗi ngày!" />
 
                     <!-- Sân khấu vòng quay -->
                     <ui:VisualElement class="wheel-stage">
@@ -155,17 +154,17 @@
                         <ui:VisualElement class="wheel-pointer-row">
                             <ui:VisualElement class="wheel-pointer" />
                         </ui:VisualElement>
-                        <!-- Vòng tròn quay (emoji quanh vành do Controller dựng) -->
+                        <!-- Vòng tròn quay (icon quanh vành do Controller dựng) -->
                         <ui:VisualElement name="WheelCircle" class="wheel-circle" />
                         <!-- Ô giữa hiện quà trúng -->
-                        <ui:Label name="WheelHub" class="wheel-hub" text="🎡" />
+                        <ui:VisualElement name="WheelHub" class="wheel-hub wheel-icon-spin" />
                     </ui:VisualElement>
 
                     <ui:Label name="LblWheelResult" class="wheel-result" text="" />
 
                     <ui:VisualElement class="wheel-footer">
                         <ui:Label name="LblSpinsLeft" class="wheel-spins-left" text="Lượt còn: 3/3" />
-                        <ui:Button name="BtnSpin" class="claim-attendance-btn wheel-spin-btn" text="🎡 QUAY" />
+                        <ui:Button name="BtnSpin" class="claim-attendance-btn wheel-spin-btn" text="QUAY" />
                     </ui:VisualElement>
                 </ui:VisualElement>
 
@@ -173,7 +172,7 @@
 
             <!-- Close Button -->
             <ui:VisualElement class="event-close-shadow">
-                <ui:Button name="BtnCloseEvent" text="✕" class="event-close-btn" />
+                <ui:Button name="BtnCloseEvent" text="X" class="event-close-btn" />
             </ui:VisualElement>
 
         </ui:VisualElement>

@@ -1,5 +1,193 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-06-26 (Interaction, enclosure, fishing, and icon polish)
+
+### Added
+- Fishing now uses a timed 8.7s action flow matching the `Fishing` animation clip, with a visible cancel/progress UI and cursor release while the action is running.
+- Fishing reward logic grants a normal fish or rare fish at completion, with rare fish at 20%.
+- Animal enclosure popup now supports a group view: clicking a connected pen opens all animals in that enclosure as selectable cards, then actions target the selected animal.
+- Animal cards in the enclosure popup now render real animal item icons from `ItemDatabase` instead of text/emoji fallback.
+- Build Mode item cards now render construction icons from `Assets/Sprites/icon/BoSungIcon/` for farm plot, stone path, and pen.
+
+### Changed
+- Fishing interaction range is tuned for shore use and currently capped around 5m.
+- The floating interaction prompt is hidden while fishing is active so it no longer overlaps the cancel/progress UI.
+- Timed world actions are being standardized toward cancelable clip-length flows for chopping, mining, planting, watering, and feeding.
+- Enclosure popup actions are compacted into one row; disease/vaccine actions remain visible but disabled because vaccine/disease costs are not finalized.
+- World hunger/water bars now use an explicit URP Unlit material template to avoid magenta bars in builds.
+
+### Fixed
+- Prevented fishing prompts from appearing while the player is swimming/underwater.
+- Hardened interaction distance checks against non-convex colliders that cannot use `Collider.ClosestPoint`.
+- Fixed farm tile/pen/animal interaction edge cases where prompts or click actions could disappear after range/raycast changes.
+- Demolishing a connected pen now clears leftover animal interaction UI, destroys contained animal objects, returns animal items to inventory, and refunds build materials according to the existing demolish refund rules.
+- Build Mode touch placement on Android remains pointer-based, while UI glyphs that became square boxes are replaced with safer text/icon assets.
+
+### Changed Files
+- `Assets/_Project/Scripts/Environment/FarmInteractionController.cs`
+- `Assets/_Project/Scripts/Environment/FarmAnimal.cs`
+- `Assets/_Project/Scripts/Environment/FarmTile.cs`
+- `Assets/_Project/Scripts/Environment/GhostPlacementController.cs`
+- `Assets/_Project/Scripts/Environment/PenEnclosure.cs`
+- `Assets/_Project/UI/AnimalInteractionPopup.uxml`
+- `Assets/_Project/UI/AnimalInteractionPopupController.cs`
+- `Assets/_Project/UI/FishingOverlay.uxml`
+- `Assets/_Project/UI/FishingOverlayController.cs`
+- `Assets/_Project/UI/BuildModeOverlay.uxml`
+- `Assets/_Project/UI/BuildModeOverlayController.cs`
+- `Assets/_Project/UI/GameHUDController.cs`
+- `Assets/_Project/UI/Styles/AnimalInteractionPopup.uss`
+- `Assets/_Project/UI/Styles/BuildModeOverlay.uss`
+- `Assets/Art/Environment/Material/WorldBar_Unlit.mat`
+- `Assets/Resources/Materials/WorldBar_Unlit.mat`
+- `Assets/Building/New/fence/Fence.prefab`
+- `Assets/Sprites/icon/BoSungIcon/**`
+
+## [Unreleased] - 2026-06-25 (Existing character login flow)
+
+### Changed
+- Added `characterCreated` to `player_profile` on the Unity client and Node server stub.
+- Login now loads `/player/profile` and skips Character Select when `characterCreated=true`.
+- `DemoRich01` through `DemoRich05` are treated as existing-character accounts, so testers no longer need to choose gender or name after login.
+- Character Select now marks the profile as created when the player confirms name/gender.
+
+### Changed Files
+- `Assets/_Project/UI/LoginScreenController.cs`
+- `Assets/_Project/Scripts/Managers/GameManager.cs`
+- `Assets/_Project/Scripts/Backend/PlayerProfileService.cs`
+- `server/index.js`
+- `server/README.md`
+- `docs/API_CONTRACTS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/DB_SCHEMA.md`
+- `docs/TECHNICAL_DESIGN.md`
+
+## [Unreleased] - 2026-06-25 (Shop tab icon cleanup)
+
+### Changed
+- Shop popup mode/category tabs now use text-only labels (`Mua`, `Bán`, `Hạt giống`, `Vật nuôi`, `Dụng cụ`, `Vật phẩm`) without emoji icons.
+- Item cards and item detail panel still keep graphic product icons from `ItemDefinition.iconTexture/iconSprite`.
+- Long shop names now stay centered in the header and no longer slide underneath the POS pill or close button.
+- Removed unsupported `z-index` from `ShopPopup.uss`.
+
+### Changed Files
+- `Assets/_Project/UI/ShopPopup.uxml`
+- `Assets/_Project/UI/Styles/ShopPopup.uss`
+
+## [Unreleased] - 2026-06-25 (Workshop icon rendering)
+
+### Changed
+- Workshop / Forge popup now renders tool and requirement icons with image assets instead of emoji labels.
+- Added `iconTexture` links for basic tools and upgrade materials: axe, hoe, fishing rod, watering can, pickaxe, wood, stone, iron, and ore.
+- Removed unsupported `z-index` from `WorkshopPopup.uss`.
+
+### Changed Files
+- `Assets/_Project/UI/WorkshopPopup.uxml`
+- `Assets/_Project/UI/WorkshopPopupController.cs`
+- `Assets/_Project/UI/Styles/WorkshopPopup.uss`
+- `Assets/Resources/Items/axe_01.asset`
+- `Assets/Resources/Items/hoe_01.asset`
+- `Assets/Resources/Items/fishing_rod_01.asset`
+- `Assets/Resources/Items/watering_can_01.asset`
+- `Assets/Resources/Items/pickaxe_01.asset`
+- `Assets/Resources/Items/wood_01.asset`
+- `Assets/Resources/Items/stone_01.asset`
+- `Assets/Resources/Items/iron_01.asset`
+- `Assets/Resources/Items/ore_01.asset`
+
+## [Unreleased] - 2026-06-25 (Quest popup icon cleanup)
+
+### Changed
+- Quest list no longer renders sword/gift/check emoji glyphs; in-progress and claimable quests use image icons from `Assets/Sprites/icon/`.
+- Claimed quest rows now show a visual check mark inside the square, matching the mailbox read/claimed treatment.
+- Quest reward slots now render icon elements from `ItemDatabase` or `Assets/Sprites/icon/BoSungIcon/` instead of emoji labels.
+- Removed unsupported `z-index` properties from `QuestPopup.uss` to avoid Unity UI Toolkit warnings.
+
+### Changed Files
+- `Assets/_Project/UI/QuestPopup.uxml`
+- `Assets/_Project/UI/QuestPopupController.cs`
+- `Assets/_Project/UI/Styles/QuestPopup.uss`
+
+## [Unreleased] - 2026-06-25 (Mailbox read/reward icons)
+
+### Changed
+- Mailbox read-state square now renders a visual check mark instead of emoji/file glyphs.
+- Mailbox reward badge now uses `Assets/Sprites/icon/SanPham/VatPham/giftbox.png`; claimed rewards show a check mark.
+- Mailbox attachment rewards now render image icons from `ItemDatabase` or `Assets/Sprites/icon/BoSungIcon/` instead of emoji labels.
+
+### Changed Files
+- `Assets/_Project/UI/MailboxPopupController.cs`
+- `Assets/_Project/UI/Styles/MailboxPopup.uss`
+
+## [Unreleased] - 2026-06-25 (Piggy bank icon cleanup)
+
+### Changed
+- Piggy Bank popup tabs, balance pill, package cards, deposit button, and countdown title no longer use emoji icons.
+- Piggy Bank active/history pig markers now use `Assets/Sprites/icon/BoSungIcon/Piggy.png`.
+- Removed unsupported `z-index` properties from `PiggyBankPopup.uss` to avoid Unity UI Toolkit warnings.
+
+### Changed Files
+- `Assets/_Project/UI/PiggyBankPopup.uxml`
+- `Assets/_Project/UI/PiggyBankPopupController.cs`
+- `Assets/_Project/UI/Styles/PiggyBankPopup.uss`
+
+## [Unreleased] - 2026-06-25 (Event popup icon cleanup)
+
+### Changed
+- Removed the decorative gift icon from the Event & Gifts popup title.
+- Removed the clock emoji from the event timer pill.
+- Event popup tabs now show plain text labels without emoji icons.
+- Event bundle cards no longer render package emoji icons; they keep tag, name, description, price, and purchase state only.
+- Attendance reward slots now render image icons from `Assets/Sprites/icon` where available, with item database icons for crop rewards.
+- Lucky wheel prize slots now render image icons from `Assets/Sprites/icon` and `ItemDatabase` instead of emoji glyphs; the wheel title, hub, and spin button no longer use emoji text.
+- Removed unsupported `z-index` properties from `EventPopup.uss` to avoid Unity UI Toolkit warnings.
+
+### Changed Files
+- `Assets/_Project/UI/EventPopup.uxml`
+- `Assets/_Project/UI/EventPopupController.cs`
+- `Assets/_Project/UI/Styles/EventPopup.uss`
+
+## [Unreleased] - 2026-06-25 (Leaderboard tab icons)
+
+### Changed
+- Leaderboard category tabs now use graphic icons from `Assets/Sprites/icon/BoSungIcon/` for EXP, Level, Fashion, Pet, and Rich.
+- `Level` uses the dedicated `lv.png` icon.
+- Leaderboard rank 1/2/3 badges now use `HuyChuongVang.png`, `HuyChuongBac.png`, and `HuyChuongDong.png` instead of emoji medals.
+- Leaderboard value column now shows plain outfit counts for Fashion, plain pet counts for Pet, and numeric Gold values without the diamond glyph.
+
+### Changed Files
+- `Assets/_Project/UI/LeaderboardPopupController.cs`
+- `Assets/_Project/UI/Styles/LeaderboardPopup.uss`
+
+## [Unreleased] - 2026-06-25 (Inventory item icon rendering)
+
+### Fixed
+- `InventoryPopupController` now renders `ItemDefinition.iconTexture/iconSprite` for inventory grid cards and the detail panel, matching shop icon behavior.
+- Items without assigned art still fall back to the old emoji/text icon.
+
+### Changed Files
+- `Assets/_Project/UI/InventoryPopupController.cs`
+- `Assets/_Project/UI/Styles/InventoryPopup.uss`
+
+## [Unreleased] - 2026-06-25 (HUD POS/UPOS pill)
+
+### Added
+- HUD top-right now shows an `UPOS` pill alongside `POS`.
+- `EconomyManager` now exposes `OnUPOSChanged`, `AddUPOS`, and `SpendUPOS` so the premium balance can update live too.
+
+## [Unreleased] - 2026-06-25 (APK build-mode touch + safe glyph hotfix)
+
+### Fixed
+- `BuildModeOverlayController` không còn phụ thuộc `Mouse.current`/`Keyboard.current` để đặt công trình; Android tap giờ đi qua `Touchscreen.current`, ép ghost raycast ngay tại điểm tap trước khi pin vị trí.
+- `GhostPlacementController` đọc cả touch lẫn mouse để ghost cập nhật trên APK, vẫn giữ mouse cho Editor/Windows.
+- Thay glyph điều khiển dễ lỗi font Android (`✕`, `✔`, `⌂`) trong các nút close/build placement bằng ASCII an toàn (`X`, `OK`, `B`) để tránh nút hiện thành ô vuông trên điện thoại.
+
+### Changed Files
+- `Assets/_Project/Scripts/Environment/GhostPlacementController.cs`
+- `Assets/_Project/UI/BuildModeOverlayController.cs`
+- `Assets/_Project/UI/BuildModeOverlay.uxml`
+- `Assets/_Project/UI/*.uxml` (các nút close chuyển `✕` -> `X`)
+
 ## [Unreleased] - 2026-06-24 (UI quit/build-mode interaction/loadout polish)
 
 ### Added

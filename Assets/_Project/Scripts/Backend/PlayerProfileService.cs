@@ -13,6 +13,7 @@ namespace YWonderLand.Backend
         public string avatarId = "";
         public int level = 1;
         public float exp = 0f;
+        public bool characterCreated = false;
         public bool tutorialCompleted = false;
         public string createdAt;
         public string updatedAt;
@@ -31,6 +32,7 @@ namespace YWonderLand.Backend
 
         public PlayerProfile Profile { get; private set; }
         public bool IsLoaded { get; private set; }
+        public bool HasCharacterCreated => Profile != null && Profile.characterCreated;
 
         [System.Serializable] private class ProfileEnvelope { public PlayerProfile player_profile; }
 
@@ -53,14 +55,14 @@ namespace YWonderLand.Backend
                     Profile = res.data.player_profile;
                     SaveCache();
                     IsLoaded = true;
-                    Debug.Log($"[Profile] Nạp từ server: tutorialCompleted={Profile.tutorialCompleted}");
+                    Debug.Log($"[Profile] Nạp từ server: characterCreated={Profile.characterCreated}, tutorialCompleted={Profile.tutorialCompleted}");
                     return;
                 }
             }
 
             // Fallback: dùng cache local (đã nạp ở Awake) — game vẫn chạy offline
             IsLoaded = true;
-            Debug.Log($"[Profile] Dùng cache local (offline): tutorialCompleted={Profile.tutorialCompleted}");
+            Debug.Log($"[Profile] Dùng cache local (offline): characterCreated={Profile.characterCreated}, tutorialCompleted={Profile.tutorialCompleted}");
         }
 
         /// <summary>Ghi cache local ngay + đẩy server (best-effort).</summary>
@@ -84,11 +86,13 @@ namespace YWonderLand.Backend
             _ = SaveProfileAsync();
         }
 
-        public void ApplyCharacterInfo(string playerName, string gender)
+        public void ApplyCharacterInfo(string playerName, string gender, bool markCreated = true)
         {
+            if (Profile == null) Profile = new PlayerProfile();
             if (!string.IsNullOrEmpty(playerName)) Profile.name = playerName;
             if (!string.IsNullOrEmpty(gender)) Profile.gender = gender;
-            SaveCache();
+            if (markCreated) Profile.characterCreated = true;
+            _ = SaveProfileAsync();
         }
 
         // ── Cache local (PlayerPrefs) ──

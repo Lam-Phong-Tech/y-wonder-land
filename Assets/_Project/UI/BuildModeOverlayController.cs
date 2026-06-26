@@ -65,16 +65,16 @@ public class BuildModeOverlayController : MonoBehaviour
 
     private struct BuildItemData
     {
-        public string emoji;
+        public string iconClass;
         public string name;
         public string size;
         public string materialId;   // "" = miễn phí
         public int materialAmount;  // số lượng vật liệu cần
         public string description;
 
-        public BuildItemData(string emoji, string name, string size, string materialId, int materialAmount, string description)
+        public BuildItemData(string iconClass, string name, string size, string materialId, int materialAmount, string description)
         {
-            this.emoji = emoji;
+            this.iconClass = iconClass;
             this.name = name;
             this.size = size;
             this.materialId = materialId;
@@ -106,9 +106,9 @@ public class BuildModeOverlayController : MonoBehaviour
         {
             { 0, new List<BuildItemData>
                 {
-                    new BuildItemData("\U0001F33E", "Ru\u1ed9ng", "1x1", "", 0, "\u00d4 \u0111\u1ea5t canh t\u00e1c \u2014 \u0111\u1eb7t t\u1eebng \u00f4 \u0111\u1ec3 tr\u1ed3ng c\u00e2y. (Mi\u1ec5n ph\u00ed)"),
-                    new BuildItemData("\U0001FAA8", "\u0110\u01b0\u1eddng \u0111\u00e1", "1x1", "stone_01", pathStoneCost, $"M\u1eb7t \u0111\u01b0\u1eddng \u0111\u00e1 l\u00e1t l\u1ed1i \u0111i. ({pathStoneCost} \u0110\u00e1)"),
-                    new BuildItemData("\U0001F404", "Chu\u1ed3ng", "1x1", "wood_01", penWoodCost, $"H\u00e0ng r\u00e0o qu\u00e2y chu\u1ed3ng \u2014 gh\u00e9p nhi\u1ec1u \u00f4 th\u00e0nh chu\u1ed3ng to. ({penWoodCost} G\u1ed7/\u00f4 r\u00e0o)"),
+                    new BuildItemData("build-icon-farm-plot", "Ru\u1ed9ng", "1x1", "", 0, "\u00d4 \u0111\u1ea5t canh t\u00e1c \u2014 \u0111\u1eb7t t\u1eebng \u00f4 \u0111\u1ec3 tr\u1ed3ng c\u00e2y. (Mi\u1ec5n ph\u00ed)"),
+                    new BuildItemData("build-icon-stone-path", "\u0110\u01b0\u1eddng \u0111\u00e1", "1x1", "stone_01", pathStoneCost, $"M\u1eb7t \u0111\u01b0\u1eddng \u0111\u00e1 l\u00e1t l\u1ed1i \u0111i. ({pathStoneCost} \u0110\u00e1)"),
+                    new BuildItemData("build-icon-pen", "Chu\u1ed3ng", "1x1", "wood_01", penWoodCost, $"H\u00e0ng r\u00e0o qu\u00e2y chu\u1ed3ng \u2014 gh\u00e9p nhi\u1ec1u \u00f4 th\u00e0nh chu\u1ed3ng to. ({penWoodCost} G\u1ed7/\u00f4 r\u00e0o)"),
                 }
             }
         };
@@ -151,11 +151,9 @@ public class BuildModeOverlayController : MonoBehaviour
         if (state == BuildState.Hidden) return;
 
         var keyboard = Keyboard.current;
-        var mouse = Mouse.current;
-        if (keyboard == null || mouse == null) return;
 
         // Escape = Exit build mode or cancel placement
-        if (keyboard.escapeKey.wasPressedThisFrame)
+        if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame)
         {
             if (state == BuildState.Placing)
             {
@@ -177,11 +175,13 @@ public class BuildModeOverlayController : MonoBehaviour
                     UpdatePlacementControlsPosition(ghost.GhostPosition);
                 }
 
-                if (mouse.leftButton.wasPressedThisFrame && !IsPointerOverUI())
+                if (TryGetPointerDownPosition(out Vector2 pointerPos) && !IsPointerOverUI(pointerPos))
                 {
+                    ghost.RefreshPlacementAtScreenPosition(pointerPos);
+
                     if (!ghost.IsPinned)
                     {
-                        if (!ghost.IsPlacementValid || ghost.IsScreenPositionBlockedForPlacement(mouse.position.ReadValue()))
+                        if (!ghost.IsPlacementValid || ghost.IsScreenPositionBlockedForPlacement(pointerPos))
                         {
                             ShowStatusMessage("V\u1ecb tr\u00ed kh\u00f4ng h\u1ee3p l\u1ec7 ho\u1eb7c qu\u00e1 s\u00e1t r\u00eca m\u00e0n h\u00ecnh.", false);
                             return;
@@ -189,7 +189,7 @@ public class BuildModeOverlayController : MonoBehaviour
 
                         ghost.SetPinned(true);
                         ShowPlacementControls();
-                        ShowStatusMessage("\u0110\u00e3 ghim v\u1ecb tr\u00ed. B\u1ea5m \u2714 \u0111\u1ec3 x\u00e2y.", true); // "Đã ghim vị trí. Bấm ✔ để xây."
+                        ShowStatusMessage("\u0110\u00e3 ghim v\u1ecb tr\u00ed. B\u1ea5m OK \u0111\u1ec3 x\u00e2y.", true);
                     }
                     else
                     {
@@ -202,20 +202,83 @@ public class BuildModeOverlayController : MonoBehaviour
         }
         else if (state == BuildState.Browsing)
         {
-            if (mouse.leftButton.wasPressedThisFrame && !IsPointerOverUI())
+            if (TryGetPointerDownPosition(out Vector2 pointerPos) && !IsPointerOverUI(pointerPos))
             {
-                HandleContextualClick(mouse.position.ReadValue());
+                HandleContextualClick(pointerPos);
             }
         }
     }
 
     private bool IsPointerOverUI()
     {
+        if (!TryGetCurrentPointerPosition(out Vector2 pointerPos)) return false;
+        return IsPointerOverUI(pointerPos);
+    }
+
+    private bool IsPointerOverUI(Vector2 screenPos)
+    {
         if (buildDocument == null || buildDocument.rootVisualElement == null || buildDocument.rootVisualElement.panel == null) return false;
-        var mousePos = Mouse.current.position.ReadValue();
-        Vector2 invertedY = new Vector2(mousePos.x, Screen.height - mousePos.y);
+        Vector2 invertedY = new Vector2(screenPos.x, Screen.height - screenPos.y);
         var picked = buildDocument.rootVisualElement.panel.Pick(RuntimePanelUtils.ScreenToPanel(buildDocument.rootVisualElement.panel, invertedY));
         return picked != null && picked != buildRoot;
+    }
+
+    private bool TryGetPointerDownPosition(out Vector2 screenPos)
+    {
+        var touch = Touchscreen.current;
+        if (touch != null)
+        {
+            var primary = touch.primaryTouch;
+            if (primary.press.wasPressedThisFrame)
+            {
+                screenPos = primary.position.ReadValue();
+                return true;
+            }
+
+            for (int i = 0; i < touch.touches.Count; i++)
+            {
+                var finger = touch.touches[i];
+                if (finger.press.wasPressedThisFrame)
+                {
+                    screenPos = finger.position.ReadValue();
+                    return true;
+                }
+            }
+        }
+
+        var mouse = Mouse.current;
+        if (mouse != null && mouse.leftButton.wasPressedThisFrame)
+        {
+            screenPos = mouse.position.ReadValue();
+            return true;
+        }
+
+        screenPos = default;
+        return false;
+    }
+
+    private bool TryGetCurrentPointerPosition(out Vector2 screenPos)
+    {
+        var touch = Touchscreen.current;
+        if (touch != null)
+        {
+            var primary = touch.primaryTouch;
+            if (primary.press.isPressed)
+            {
+                screenPos = primary.position.ReadValue();
+                return true;
+            }
+        }
+
+        var mouse = Mouse.current;
+        if (mouse != null)
+        {
+            screenPos = mouse.position.ReadValue();
+            return true;
+        }
+
+        screenPos = default;
+        return false;
     }
 
     private void UpdatePlacementControlsPosition(Vector3 worldPos)
@@ -467,9 +530,11 @@ public class BuildModeOverlayController : MonoBehaviour
             var card = new VisualElement();
             card.AddToClassList("build-item-card");
 
-            var emojiLabel = new Label(item.emoji);
-            emojiLabel.AddToClassList("build-item-emoji");
-            card.Add(emojiLabel);
+            var icon = new VisualElement();
+            icon.AddToClassList("build-item-icon");
+            if (!string.IsNullOrEmpty(item.iconClass))
+                icon.AddToClassList(item.iconClass);
+            card.Add(icon);
 
             var nameLabel = new Label(item.name);
             nameLabel.AddToClassList("build-item-name");
@@ -537,7 +602,7 @@ public class BuildModeOverlayController : MonoBehaviour
         HideContextMenu();
         HideInfoTooltip();
 
-        ShowStatusMessage($"Click chu\u1ed9t \u0111\u1ec3 ghim {item.name}", true); // "Click chuột để ghim [name]"
+        ShowStatusMessage($"Ch\u1ea1m \u0111\u1ec3 ghim {item.name}", true);
         Debug.Log($"[BuildMode] Item selected & ghost activated: {item.name}");
     }
 
@@ -584,7 +649,7 @@ public class BuildModeOverlayController : MonoBehaviour
         }
 
         ghost.ConfirmPlacement();
-        // Unpin so the next one follows mouse immediately
+        // Unpin so the next one follows pointer immediately.
         ghost.SetPinned(false);
         HidePlacementControls();
     }

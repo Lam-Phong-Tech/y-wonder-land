@@ -13,11 +13,22 @@
             <!-- Header -->
             <ui:VisualElement class="ap-header">
                 <ui:Label name="LblAnimalName" text="Con vật" class="ap-title" />
-                <ui:Button name="BtnClose" text="✕" class="ap-close" />
+                <ui:Button name="BtnClose" text="X" class="ap-close" />
             </ui:VisualElement>
 
             <!-- Status -->
             <ui:Label name="LblStatus" text="Trạng thái: Khỏe mạnh" class="ap-status" />
+
+            <!-- Danh sách thú trong cụm chuồng -->
+            <ui:VisualElement name="EnclosurePanel" class="ap-enclosure">
+                <ui:VisualElement class="ap-enclosure-header">
+                    <ui:Label name="LblEnclosureSummary" text="Chuồng" class="ap-enclosure-summary" />
+                    <ui:Button name="BtnAddAnimal" text="+ Thả thú" class="ap-btn-small ap-btn-primary" />
+                </ui:VisualElement>
+                <ui:ScrollView name="AnimalCardScroll" class="ap-card-scroll">
+                    <ui:VisualElement name="AnimalCardList" class="ap-card-list" />
+                </ui:ScrollView>
+            </ui:VisualElement>
 
             <!-- Bảng thông tin -->
             <ui:VisualElement class="ap-info">
@@ -56,6 +67,7 @@
                 <ui:Button name="BtnFeed" text="Cho ăn" class="ap-btn ap-btn-primary" />
                 <ui:Button name="BtnHarvest" text="Thu hoạch" class="ap-btn ap-btn-primary" />
                 <ui:Button name="BtnHeal" text="Chữa bệnh" class="ap-btn ap-btn-secondary" />
+                <ui:Button name="BtnVaccine" text="Vaccine" class="ap-btn ap-btn-secondary ap-btn-last" />
             </ui:VisualElement>
 
         </ui:VisualElement>

@@ -15,6 +15,10 @@ namespace YWonderLand.Environment
     /// </summary>
     public class FarmAnimal : MonoBehaviour
     {
+        private const string WorldBarMaterialResourcePath = "Materials/WorldBar_Unlit";
+        private static Material worldBarMaterialTemplate;
+        private static bool worldBarMaterialLogged;
+
         public enum AnimalState
         {
             Healthy = 0,
@@ -391,15 +395,65 @@ namespace YWonderLand.Environment
             var r = quad.GetComponent<Renderer>();
             if (r != null)
             {
-                var mat = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
-                mat.SetColor("_BaseColor", color);
-                mat.color = color;
-                mat.SetFloat("_Cull", 0f); // 2 mặt — luôn thấy dù quay hướng nào
-                r.material = mat;
+                var mat = CreateWorldBarMaterial(color);
+                if (mat != null)
+                {
+                    mat.SetFloat("_Cull", 0f); // 2 mặt — luôn thấy dù quay hướng nào
+                    r.material = mat;
+                }
                 r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                 r.receiveShadows = false;
             }
             return quad;
+        }
+
+        private static Material CreateWorldBarMaterial(Color color)
+        {
+            if (worldBarMaterialTemplate == null)
+                worldBarMaterialTemplate = Resources.Load<Material>(WorldBarMaterialResourcePath);
+
+            Material mat = null;
+            if (worldBarMaterialTemplate != null)
+            {
+                mat = new Material(worldBarMaterialTemplate);
+            }
+            else
+            {
+                Shader shader = Shader.Find("Universal Render Pipeline/Unlit");
+                if (shader == null) shader = Shader.Find("Unlit/Color");
+                if (shader != null) mat = new Material(shader);
+            }
+
+            if (mat == null)
+            {
+                Shader fallbackShader = Shader.Find("Sprites/Default");
+                if (fallbackShader == null) fallbackShader = Shader.Find("Hidden/Internal-Colored");
+                if (fallbackShader != null) mat = new Material(fallbackShader);
+            }
+
+            LogWorldBarMaterial("FarmAnimal", mat);
+            ApplyWorldBarColor(mat, color);
+            return mat;
+        }
+
+        private static void LogWorldBarMaterial(string owner, Material mat)
+        {
+            if (worldBarMaterialLogged) return;
+            worldBarMaterialLogged = true;
+
+            string shaderName = mat != null && mat.shader != null ? mat.shader.name : "null";
+            bool loadedTemplate = worldBarMaterialTemplate != null;
+            Debug.Log($"[WorldBar] {owner}: templateLoaded={loadedTemplate}, resource='{WorldBarMaterialResourcePath}', shader='{shaderName}'");
+
+            if (!loadedTemplate || string.IsNullOrEmpty(shaderName) || !shaderName.Contains("Unlit"))
+                Debug.LogWarning($"[WorldBar] {owner}: material template/shader may be wrong. Expected Resources/{WorldBarMaterialResourcePath} using an Unlit shader.");
+        }
+
+        private static void ApplyWorldBarColor(Material mat, Color color)
+        {
+            if (mat == null) return;
+            if (mat.HasProperty("_BaseColor")) mat.SetColor("_BaseColor", color);
+            if (mat.HasProperty("_Color")) mat.SetColor("_Color", color);
         }
 
         private void BillboardStatusBar()
@@ -462,8 +516,7 @@ namespace YWonderLand.Environment
             {
                 Color c = Color.Lerp(new Color(0.9f, 0.25f, 0.2f), new Color(0.3f, 0.85f, 0.3f), frac);
                 if (currentState == AnimalState.Sick) c = new Color(0.6f, 0.4f, 0.85f); // tím = bệnh
-                hungerFillRenderer.material.SetColor("_BaseColor", c);
-                hungerFillRenderer.material.color = c;
+                ApplyWorldBarColor(hungerFillRenderer.material, c);
             }
         }
 

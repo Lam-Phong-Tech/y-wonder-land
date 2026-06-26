@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 using YWonderLand.Data;
@@ -20,12 +21,27 @@ public class AnimalInteractionPopupController : MonoBehaviour
     private Label lblProducts;
     private Label lblHunger;
     private Label lblHarvest;
+    private VisualElement enclosurePanel;
+    private VisualElement infoPanel;
+    private VisualElement actionsPanel;
+    private Label lblEnclosureSummary;
+    private Button btnAddAnimal;
+    private VisualElement animalCardList;
     private Button btnClose;
     private Button btnFeed;
     private Button btnHarvest;
     private Button btnHeal;
+    private Button btnVaccine;
+    private ItemDatabase itemDatabase;
 
     private FarmAnimal currentAnimal;
+    private List<BuildSurfaceCell> currentEnclosure;
+    private readonly List<FarmAnimal> enclosureAnimals = new List<FarmAnimal>();
+    private readonly Dictionary<FarmAnimal, VisualElement> animalCards = new Dictionary<FarmAnimal, VisualElement>();
+
+    private float refreshTimer;
+
+    private bool IsEnclosureMode => currentEnclosure != null;
 
     void Awake()
     {
@@ -37,6 +53,9 @@ public class AnimalInteractionPopupController : MonoBehaviour
     {
         if (document == null) document = GetComponent<UIDocument>();
         if (document == null || document.rootVisualElement == null) return;
+
+        if (itemDatabase == null)
+            itemDatabase = Resources.Load<ItemDatabase>("ItemDatabase");
 
         var root = document.rootVisualElement;
 
@@ -50,7 +69,14 @@ public class AnimalInteractionPopupController : MonoBehaviour
         lblProducts = root.Q<Label>("LblProducts");
         lblHunger = root.Q<Label>("LblHunger");
         lblHarvest = root.Q<Label>("LblHarvest");
-        // Cho phép xuống dòng nếu chữ dài (chống tràn ra ngoài panel).
+        enclosurePanel = root.Q<VisualElement>("EnclosurePanel");
+        infoPanel = root.Q<VisualElement>(className: "ap-info");
+        actionsPanel = root.Q<VisualElement>(className: "ap-actions");
+        lblEnclosureSummary = root.Q<Label>("LblEnclosureSummary");
+        btnAddAnimal = root.Q<Button>("BtnAddAnimal");
+        animalCardList = root.Q<VisualElement>("AnimalCardList");
+
+        // Cho phép xuống dòng nếu chữ dài, tránh tràn ra ngoài panel.
         if (lblHarvest != null) lblHarvest.style.whiteSpace = WhiteSpace.Normal;
         if (lblStatus != null) lblStatus.style.whiteSpace = WhiteSpace.Normal;
 
@@ -58,33 +84,246 @@ public class AnimalInteractionPopupController : MonoBehaviour
         btnFeed = root.Q<Button>("BtnFeed");
         btnHarvest = root.Q<Button>("BtnHarvest");
         btnHeal = root.Q<Button>("BtnHeal");
+        btnVaccine = root.Q<Button>("BtnVaccine");
 
         if (btnClose != null) btnClose.clicked += Hide;
         if (btnFeed != null) btnFeed.clicked += OnFeedClicked;
         if (btnHarvest != null) btnHarvest.clicked += OnHarvestClicked;
         if (btnHeal != null) btnHeal.clicked += OnHealClicked;
+        if (btnAddAnimal != null) btnAddAnimal.clicked += OnAddAnimalClicked;
 
         Hide();
     }
 
     // An toàn: nếu popup bị tắt/destroy khi đang mở (vd đổi đảo) mà chưa kịp gọi Hide(),
-    // vẫn gỡ khỏi UIPopupTracker để chuột không bị kẹt + tương tác thế giới không chết.
+    // vẫn gỡ khỏi UIPopupTracker để chuột không bị kẹt và tương tác thế giới không chết.
     private void OnDisable()
     {
         UIPopupTracker.SetOpen(this, false);
+        UnsubscribeCurrentAnimal();
+        ClearAnimalCards();
     }
 
     public void Show(FarmAnimal animal)
     {
         if (animal == null || container == null) return;
 
-        currentAnimal = animal;
-        currentAnimal.OnAnimalStateChanged += RefreshUI; // Listen for changes
+        currentEnclosure = null;
+        if (enclosurePanel != null) enclosurePanel.style.display = DisplayStyle.None;
+        ClearAnimalCards();
 
         container.style.display = DisplayStyle.Flex;
         UIPopupTracker.SetOpen(this, true);
-        PopulateInfo(currentAnimal);
-        RefreshUI(currentAnimal);
+        SelectAnimal(animal);
+    }
+
+    public void ShowEnclosure(List<BuildSurfaceCell> enclosure)
+    {
+        if (enclosure == null || container == null) return;
+
+        currentEnclosure = new List<BuildSurfaceCell>(enclosure);
+        container.style.display = DisplayStyle.Flex;
+        UIPopupTracker.SetOpen(this, true);
+        if (enclosurePanel != null) enclosurePanel.style.display = DisplayStyle.Flex;
+
+        RefreshEnclosureUI();
+    }
+
+    private void SelectAnimal(FarmAnimal animal)
+    {
+        if (animal == null)
+        {
+            UnsubscribeCurrentAnimal();
+            currentAnimal = null;
+            ShowEmptyAnimalDetails();
+            RefreshSelectedCardStyles();
+            return;
+        }
+
+        if (currentAnimal == animal)
+        {
+            PopulateInfo(currentAnimal);
+            RefreshUI(currentAnimal);
+            RefreshSelectedCardStyles();
+            return;
+        }
+
+        UnsubscribeCurrentAnimal();
+        currentAnimal = animal;
+
+        if (currentAnimal != null)
+        {
+            currentAnimal.OnAnimalStateChanged += OnAnimalStateChanged;
+            PopulateInfo(currentAnimal);
+            RefreshUI(currentAnimal);
+        }
+        else
+        {
+            ShowEmptyAnimalDetails();
+        }
+
+        RefreshSelectedCardStyles();
+    }
+
+    private void UnsubscribeCurrentAnimal()
+    {
+        if (currentAnimal != null)
+            currentAnimal.OnAnimalStateChanged -= OnAnimalStateChanged;
+    }
+
+    private void OnAnimalStateChanged(FarmAnimal animal)
+    {
+        if (animal == currentAnimal)
+        {
+            PopulateInfo(animal);
+            RefreshUI(animal);
+        }
+
+        if (IsEnclosureMode)
+            RefreshEnclosureUI();
+    }
+
+    private void RefreshEnclosureUI()
+    {
+        if (!IsEnclosureMode)
+            return;
+
+        RefreshEnclosureAnimals();
+
+        if (currentAnimal == null || !enclosureAnimals.Contains(currentAnimal))
+            SelectAnimal(enclosureAnimals.Count > 0 ? enclosureAnimals[0] : null);
+        else
+            RefreshUI(currentAnimal);
+
+        int free = PenEnclosure.AvailableCount(currentEnclosure);
+        if (lblEnclosureSummary != null)
+            lblEnclosureSummary.text = $"Chuồng: {enclosureAnimals.Count} thú · còn {free} ô";
+
+        if (btnAddAnimal != null)
+        {
+            btnAddAnimal.style.display = DisplayStyle.Flex;
+            btnAddAnimal.SetEnabled(free > 0);
+            btnAddAnimal.text = free > 0 ? "+ Thả thú" : "Chuồng đầy";
+        }
+
+        RebuildAnimalCards();
+    }
+
+    private void RefreshEnclosureAnimals()
+    {
+        enclosureAnimals.Clear();
+        var animals = PenEnclosure.FindAnimals(currentEnclosure);
+        foreach (var animal in animals)
+        {
+            if (animal != null && animal.currentState != FarmAnimal.AnimalState.Dead)
+                enclosureAnimals.Add(animal);
+        }
+    }
+
+    private void RebuildAnimalCards()
+    {
+        if (animalCardList == null) return;
+
+        ClearAnimalCards();
+
+        if (enclosureAnimals.Count == 0)
+        {
+            var empty = new Label("Chuồng chưa có thú. Bấm Thả thú để thêm.");
+            empty.AddToClassList("ap-empty");
+            animalCardList.Add(empty);
+            return;
+        }
+
+        foreach (var animal in enclosureAnimals)
+        {
+            var captured = animal;
+            var card = new VisualElement();
+            card.pickingMode = PickingMode.Position;
+            card.AddToClassList("ap-animal-card");
+            if (captured == currentAnimal)
+                card.AddToClassList("ap-animal-card-selected");
+
+            var icon = CreateAnimalIconElement(captured);
+            icon.AddToClassList("ap-card-icon");
+            card.Add(icon);
+
+            var name = new Label(captured.data != null ? captured.data.animalName : "Thú nuôi");
+            name.AddToClassList("ap-card-name");
+            card.Add(name);
+
+            var meta = new Label(CardStatusText(captured));
+            meta.AddToClassList("ap-card-meta");
+            card.Add(meta);
+
+            card.RegisterCallback<ClickEvent>(evt =>
+            {
+                SelectAnimal(captured);
+                evt.StopPropagation();
+            });
+            card.RegisterCallback<PointerUpEvent>(evt =>
+            {
+                SelectAnimal(captured);
+                evt.StopPropagation();
+            }, TrickleDown.TrickleDown);
+
+            animalCards[captured] = card;
+            animalCardList.Add(card);
+        }
+    }
+
+    private void ClearAnimalCards()
+    {
+        animalCards.Clear();
+        if (animalCardList != null)
+            animalCardList.Clear();
+    }
+
+    private void RefreshSelectedCardStyles()
+    {
+        foreach (var pair in animalCards)
+        {
+            if (pair.Value == null) continue;
+            if (pair.Key == currentAnimal)
+                pair.Value.AddToClassList("ap-animal-card-selected");
+            else
+                pair.Value.RemoveFromClassList("ap-animal-card-selected");
+        }
+    }
+
+    private VisualElement CreateAnimalIconElement(FarmAnimal animal)
+    {
+        string itemId = animal != null && animal.data != null ? animal.data.animalId : "";
+        ItemDefinition def = !string.IsNullOrEmpty(itemId) && itemDatabase != null ? itemDatabase.GetItem(itemId) : null;
+
+        if (def != null && (def.iconTexture != null || def.iconSprite != null))
+        {
+            var image = new Image { scaleMode = ScaleMode.ScaleToFit };
+            if (def.iconTexture != null)
+                image.image = def.iconTexture;
+            else
+                image.sprite = def.iconSprite;
+            return image;
+        }
+
+        var fallback = new Label(AnimalIconText(animal));
+        fallback.AddToClassList("ap-card-icon-fallback");
+        return fallback;
+    }
+
+    private static string AnimalIconText(FarmAnimal animal)
+    {
+        string name = animal != null && animal.data != null ? animal.data.animalName : "";
+        if (string.IsNullOrEmpty(name)) return "T";
+        return name.Substring(0, 1).ToUpperInvariant();
+    }
+
+    private static string CardStatusText(FarmAnimal animal)
+    {
+        if (animal == null) return "";
+        if (animal.currentState == FarmAnimal.AnimalState.Sick) return "Đang bệnh";
+        if (animal.currentState == FarmAnimal.AnimalState.Hungry) return "Đang đói";
+        if (animal.hasProductReady) return "Có sản phẩm";
+        return "No " + Mathf.RoundToInt(animal.GetHungerFraction() * 100f) + "%";
     }
 
     // Nạp bảng thông tin tĩnh của con vật (giá / ô chuồng / thức ăn / sản phẩm) từ AnimalDefinition.
@@ -107,29 +346,29 @@ public class AnimalInteractionPopupController : MonoBehaviour
     private static string ProductText(AnimalDefinition d)
     {
         string main = FoodText(d.productMainName, d.productMainAmount);
-        // Chỉ hiện sản phẩm phụ (THỊT) nếu con vật THẬT SỰ ra thịt. Gia cầm bỏ thịt (meatItemId rỗng) → ẩn,
-        // tránh popup ghi "5x Thịt gà" trong khi gameplay không cho thịt.
+        // Chỉ hiện sản phẩm phụ (thịt) nếu con vật thật sự ra thịt.
         string alt = string.IsNullOrEmpty(d.meatItemId) ? "—" : FoodText(d.productAltName, d.productAltAmount);
         if (main != "—" && alt != "—") return $"{main}, {alt}";
         if (main != "—") return main;
         return alt;
     }
 
-    // Đếm ngược vụ thu là số "sống" → cập nhật định kỳ khi popup đang mở.
-    private float refreshTimer;
+    // Đếm ngược vụ thu là số "sống" nên cập nhật định kỳ khi popup đang mở.
     void Update()
     {
-        if (currentAnimal == null || container == null) return;
-        if (container.style.display == DisplayStyle.None) return;
+        if (container == null || container.style.display == DisplayStyle.None) return;
+
         refreshTimer += Time.deltaTime;
-        if (refreshTimer >= 0.25f)
-        {
-            refreshTimer = 0f;
+        if (refreshTimer < 0.25f) return;
+
+        refreshTimer = 0f;
+        if (IsEnclosureMode)
+            RefreshEnclosureUI();
+        else if (currentAnimal != null)
             RefreshUI(currentAnimal);
-        }
     }
 
-    // "Vụ tới 12s · 20/20 lần" — gộp đếm ngược + tổng số lần thu (gọn cho 1 dòng).
+    // "Vụ tới 12s · 20/20 lần" - gộp đếm ngược + tổng số lần thu.
     private static string HarvestInfoText(FarmAnimal animal)
     {
         if (animal == null || animal.data == null) return "—";
@@ -158,23 +397,48 @@ public class AnimalInteractionPopupController : MonoBehaviour
     {
         UIPopupTracker.SetOpen(this, false);
         if (container != null)
-        {
             container.style.display = DisplayStyle.None;
-        }
-        if (currentAnimal != null)
-        {
-            currentAnimal.OnAnimalStateChanged -= RefreshUI;
-            currentAnimal = null;
-        }
+
+        UnsubscribeCurrentAnimal();
+        currentAnimal = null;
+        currentEnclosure = null;
+        enclosureAnimals.Clear();
+        if (enclosurePanel != null) enclosurePanel.style.display = DisplayStyle.None;
+        ClearAnimalCards();
+    }
+
+    private void ShowEmptyAnimalDetails()
+    {
+        if (lblAnimalName != null) lblAnimalName.text = "Chuồng thú";
+        if (lblStatus != null) lblStatus.text = "Chưa chọn thú.";
+        if (lblPrice != null) lblPrice.text = "—";
+        if (lblSlots != null) lblSlots.text = "—";
+        if (lblFoodMain != null) lblFoodMain.text = "—";
+        if (lblFoodAlt != null) lblFoodAlt.text = "—";
+        if (lblProducts != null) lblProducts.text = "—";
+        if (lblHunger != null) lblHunger.text = "—";
+        if (lblHarvest != null) lblHarvest.text = "—";
+        if (infoPanel != null) infoPanel.style.display = DisplayStyle.None;
+        if (actionsPanel != null) actionsPanel.style.display = DisplayStyle.None;
+        if (btnFeed != null) btnFeed.style.display = DisplayStyle.None;
+        if (btnHarvest != null) btnHarvest.style.display = DisplayStyle.None;
+        if (btnHeal != null) btnHeal.style.display = DisplayStyle.None;
+        if (btnVaccine != null) btnVaccine.style.display = DisplayStyle.None;
     }
 
     private void RefreshUI(FarmAnimal animal)
     {
-        if (animal != currentAnimal) return;
+        if (animal == null || animal != currentAnimal)
+        {
+            if (currentAnimal == null) ShowEmptyAnimalDetails();
+            return;
+        }
 
-        lblAnimalName.text = animal.data != null ? animal.data.animalName : "Thú nuôi";
+        if (infoPanel != null) infoPanel.style.display = DisplayStyle.Flex;
+        if (actionsPanel != null) actionsPanel.style.display = DisplayStyle.Flex;
 
-        // Status text
+        if (lblAnimalName != null) lblAnimalName.text = animal.data != null ? animal.data.animalName : "Thú nuôi";
+
         string statusStr = "Khỏe mạnh";
         switch (animal.currentState)
         {
@@ -183,64 +447,89 @@ public class AnimalInteractionPopupController : MonoBehaviour
             case FarmAnimal.AnimalState.Dead: statusStr = "<color=#000000>Đã chết</color>"; break;
         }
         if (animal.hasProductReady)
-        {
             statusStr += " - <color=#00AA00>Có sản phẩm!</color>";
-        }
-        lblStatus.text = "Trạng thái: " + statusStr;
 
-        // Độ no + thời gian/số lần thu → mỗi cái 1 DÒNG RIÊNG trong bảng (tránh tràn chữ).
+        if (lblStatus != null) lblStatus.text = "Trạng thái: " + statusStr;
         if (lblHunger != null) lblHunger.text = Mathf.RoundToInt(animal.GetHungerFraction() * 100f) + "%";
         if (lblHarvest != null) lblHarvest.text = HarvestInfoText(animal);
 
-        // Button visibility
         bool isDead = animal.currentState == FarmAnimal.AnimalState.Dead;
-        
-        btnFeed.style.display = (animal.currentState == FarmAnimal.AnimalState.Hungry || animal.currentState == FarmAnimal.AnimalState.Healthy) && !isDead ? DisplayStyle.Flex : DisplayStyle.None;
-        btnHarvest.style.display = animal.hasProductReady && !isDead ? DisplayStyle.Flex : DisplayStyle.None;
-        btnHeal.style.display = animal.currentState == FarmAnimal.AnimalState.Sick && !isDead ? DisplayStyle.Flex : DisplayStyle.None;
+        bool canFeed = (animal.currentState == FarmAnimal.AnimalState.Hungry || animal.currentState == FarmAnimal.AnimalState.Healthy) && !isDead;
 
-        // Demo tutorial cho phep cho an ngay sau khi tha thu, ke ca khi thanh no con day.
-        btnFeed.SetEnabled((animal.currentState == FarmAnimal.AnimalState.Hungry || animal.currentState == FarmAnimal.AnimalState.Healthy) && !isDead);
+        if (btnFeed != null)
+        {
+            btnFeed.style.display = DisplayStyle.Flex;
+            btnFeed.SetEnabled(canFeed);
+        }
+        if (btnHarvest != null)
+        {
+            btnHarvest.style.display = DisplayStyle.Flex;
+            btnHarvest.SetEnabled(animal.hasProductReady && !isDead);
+        }
+        if (btnHeal != null)
+        {
+            btnHeal.style.display = DisplayStyle.Flex;
+            btnHeal.SetEnabled(false);
+        }
+        if (btnVaccine != null)
+        {
+            btnVaccine.style.display = DisplayStyle.Flex;
+            btnVaccine.SetEnabled(false);
+        }
+    }
+
+    private void OnAddAnimalClicked()
+    {
+        if (!IsEnclosureMode || currentEnclosure == null) return;
+
+        var enclosure = new List<BuildSurfaceCell>(currentEnclosure);
+        Hide();
+
+        var fic = Object.FindFirstObjectByType<FarmInteractionController>();
+        if (fic != null)
+            fic.BeginPlaceAnimalInEnclosure(enclosure);
+        else
+            Debug.LogWarning("[AnimalPopup] Không tìm thấy FarmInteractionController để mở túi thả thú.");
     }
 
     private void OnFeedClicked()
     {
         if (currentAnimal == null) return;
 
-        // Đi CÙNG luồng với phím F: đóng popup -> mở túi đồ chọn thức ăn -> animation cho ăn.
+        // Đi cùng luồng phím F: đóng popup -> mở túi đồ chọn thức ăn -> animation cho ăn.
         var animal = currentAnimal;
         Hide();
 
         var fic = Object.FindFirstObjectByType<FarmInteractionController>();
         if (fic != null)
-        {
             fic.BeginFeed(animal);
-        }
         else
-        {
             Debug.LogWarning("[AnimalPopup] Không tìm thấy FarmInteractionController để mở luồng cho ăn.");
-        }
     }
 
     private void OnHarvestClicked()
     {
         if (currentAnimal == null) return;
 
-        // Chu kỳ ra sản phẩm (lấy TRƯỚC khi harvest vì vụ cuối có thể huỷ con vật).
-        float animalDays = (currentAnimal.data != null)
-            ? currentAnimal.data.produceCycleTimeSec / YWonderLand.Core.GameTimeConfig.SecondsPerGameDay : 0f;
+        var animal = currentAnimal;
+        bool wasEnclosureMode = IsEnclosureMode;
 
-        if (currentAnimal.HarvestProduct(out string itemId, out int amount))
+        float animalDays = (animal.data != null)
+            ? animal.data.produceCycleTimeSec / YWonderLand.Core.GameTimeConfig.SecondsPerGameDay : 0f;
+
+        if (animal.HarvestProduct(out string itemId, out int amount))
         {
             Debug.Log($"[AnimalPopup] Harvested {amount} of {itemId}");
             InventoryManager.Instance?.AddItem(itemId, amount);
 
-            // EXP (khách chốt 22/06: số NGÀY 1 chu kỳ ra sản phẩm × 10).
             int aexp = Mathf.Max(1, Mathf.RoundToInt(animalDays * 10f));
             ExperienceManager.Instance?.AddEXP(aexp);
+            ScreenToast.ShowInfo($"Thu hoạch: +{amount} {itemId}");
 
-            // Optionally hide after harvest
-            Hide();
+            if (wasEnclosureMode)
+                RefreshEnclosureUI();
+            else
+                Hide();
         }
     }
 
@@ -248,10 +537,12 @@ public class AnimalInteractionPopupController : MonoBehaviour
     {
         if (currentAnimal == null) return;
 
-        // TODO: Check inventory for vaccine
+        // TODO: Chờ khách chốt vaccine/thuốc chữa bệnh để trừ item đúng thiết kế.
         if (currentAnimal.Heal())
         {
             Debug.Log("[AnimalPopup] Healed the animal.");
+            RefreshUI(currentAnimal);
+            if (IsEnclosureMode) RefreshEnclosureUI();
         }
     }
 }

@@ -6,7 +6,7 @@
 .leaderboard-overlay {
     position: absolute; top: 0; left: 0; right: 0; bottom: 0;
     background-color: rgba(21, 26, 39, 0.8);
-    align-items: center; justify-content: center; display: none; z-index: 100;
+    align-items: center; justify-content: center; display: none;
 }
 
 /* ── Panel Shadow ── */
@@ -45,7 +45,7 @@
 
 /* ── Close Button (Sync with others) ── */
 .leaderboard-close-shadow {
-    position: absolute; right: 12px; top: 12px; z-index: 50;
+    position: absolute; right: 12px; top: 12px;
 }
 
 .leaderboard-close-btn {
@@ -70,11 +70,51 @@
     background-color: rgba(255, 255, 255, 0.05);
     font-size: 14px; -unity-font-style: bold; color: var(--color-bright-grey);
     -unity-text-align: middle-center;
+    align-items: center; justify-content: center;
     transition-property: scale, background-color, color; transition-duration: 0.1s;
+}
+
+.leaderboard-tab-with-icon {
+    flex-direction: column;
+    min-height: 62px;
+}
+
+.leaderboard-tab-label {
+    font-size: 14px; -unity-font-style: bold; color: var(--color-bright-grey);
+    -unity-text-align: middle-center; margin: 0 0 4px 0; padding: 0;
+}
+
+.leaderboard-tab-icon {
+    width: 24px; height: 24px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.leaderboard-tab-icon-exp {
+    background-image: url('project://database/Assets/Sprites/icon/BoSungIcon/EXP.png');
+}
+
+.leaderboard-tab-icon-level {
+    background-image: url('project://database/Assets/Sprites/icon/BoSungIcon/lv.png');
+}
+
+.leaderboard-tab-icon-fashion {
+    background-image: url('project://database/Assets/Sprites/icon/BoSungIcon/Fashion.png');
+}
+
+.leaderboard-tab-icon-pet {
+    background-image: url('project://database/Assets/Sprites/icon/BoSungIcon/Pet.png');
+}
+
+.leaderboard-tab-icon-rich {
+    background-image: url('project://database/Assets/Sprites/icon/BoSungIcon/Giau.png');
 }
 
 .leaderboard-tab:hover {
     background-color: rgba(255, 255, 255, 0.1); color: var(--color-text-white);
+}
+
+.leaderboard-tab:hover .leaderboard-tab-label {
+    color: var(--color-text-white);
 }
 
 .leaderboard-tab:active { scale: 0.95; }
@@ -82,6 +122,10 @@
 .leaderboard-tab--active {
     background-color: var(--color-primary-navy);
     border-color: var(--color-accent-yellow);
+    color: var(--color-accent-yellow);
+}
+
+.leaderboard-tab--active .leaderboard-tab-label {
     color: var(--color-accent-yellow);
 }
 
@@ -106,7 +150,7 @@
     font-size: 13px; -unity-font-style: bold; color: var(--color-bright-grey);
 }
 
-.col-rank { width: 80px; -unity-text-align: middle-center; }
+.col-rank { width: 80px; -unity-text-align: middle-center; align-items: center; justify-content: center; }
 .col-player { flex-grow: 1; -unity-text-align: middle-left; padding-left: 20px; }
 .col-value { width: 140px; -unity-text-align: middle-center; }
 .col-guild { width: 160px; -unity-text-align: middle-center; }
@@ -140,7 +184,23 @@
 
 /* Rank column icon */
 .rank-medal {
-    font-size: 24px; margin: 0; padding: 0; -unity-text-align: middle-center;
+    width: 32px; height: 32px;
+    font-size: 0; color: transparent;
+    margin: 0; padding: 0;
+    -unity-text-align: middle-center;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.row-rank-1 .rank-medal {
+    background-image: url('project://database/Assets/Sprites/icon/BoSungIcon/HuyChuongVang.png');
+}
+
+.row-rank-2 .rank-medal {
+    background-image: url('project://database/Assets/Sprites/icon/BoSungIcon/HuyChuongBac.png');
+}
+
+.row-rank-3 .rank-medal {
+    background-image: url('project://database/Assets/Sprites/icon/BoSungIcon/HuyChuongDong.png');
 }
 
 /* Rank column diamond badge (Rank 4+) */
@@ -180,7 +240,7 @@
 
 /* ── My Rank Floating Card ── */
 .leaderboard-my-rank-shadow {
-    position: absolute; right: 24px; bottom: 24px; z-index: 60;
+    position: absolute; right: 24px; bottom: 24px;
 }
 
 .leaderboard-my-rank-card {

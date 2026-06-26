@@ -96,7 +96,7 @@
 
             <!-- Close Button (X) -->
             <ui:VisualElement class="profile-close-shadow">
-                <ui:Button name="BtnClose" text="✕" class="profile-close-btn" />
+                <ui:Button name="BtnClose" text="X" class="profile-close-btn" />
             </ui:VisualElement>
 
         </ui:VisualElement>

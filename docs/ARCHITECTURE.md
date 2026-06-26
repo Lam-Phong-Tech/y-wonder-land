@@ -24,7 +24,7 @@
 | `BackendConfig` | `Scripts/Backend/BackendConfig.cs` | baseUrl/timeout (không hardcode URL) | ✅ Đợt 1 |
 | `ApiClient` | `Scripts/Backend/ApiClient.cs` | GET/POST/PUT, không ném exception | ✅ Đợt 1 |
 | `AuthService` | `Scripts/Backend/AuthService.cs` | đăng nhập/đăng ký ngầm, lưu token | ✅ Đợt 1 |
-| `PlayerProfileService` | `Scripts/Backend/PlayerProfileService.cs` | profile + tutorialCompleted | ✅ Đợt 1 |
+| `PlayerProfileService` | `Scripts/Backend/PlayerProfileService.cs` | profile + characterCreated + tutorialCompleted | ✅ Đợt 1 |
 | EconomyService / InventoryService | (đợt 2) | tiền & túi đồ server-authoritative | ⏳ |
 | FarmSyncService / AnimalSyncService | (đợt 3) | đồng bộ nông trại/vật nuôi | ⏳ |
 

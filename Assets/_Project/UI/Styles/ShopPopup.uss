@@ -7,7 +7,7 @@
 .shop-overlay {
     position: absolute; top: 0; left: 0; right: 0; bottom: 0;
     background-color: rgba(21, 26, 39, 0.7); /* Mystic Black 70% */
-    align-items: center; justify-content: center; display: none; z-index: 100;
+    align-items: center; justify-content: center; display: none;
 }
 
 /* === PANEL SHADOW === */
@@ -29,13 +29,14 @@
     background-color: var(--color-deep-blue);
     padding: 24px 20px;
     border-bottom-width: 1px; border-bottom-color: rgba(255, 255, 255, 0.05);
-    min-height: 80px;
+    min-height: 80px; position: relative;
 }
 
 .shop-header-title {
-    font-size: 32px; -unity-font-style: bold;
+    font-size: 30px; -unity-font-style: bold;
     color: var(--color-accent-yellow); -unity-text-align: middle-center;
-    letter-spacing: 2px; position: absolute; left: 0; right: 0;
+    letter-spacing: 2px; position: absolute; left: 220px; right: 72px; top: 0; bottom: 0;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 12px;
 }
 
 /* === BALANCE PILL === */
@@ -44,7 +45,7 @@
     flex-direction: row; align-items: center;
     background-color: var(--color-mystic-black);
     border-radius: var(--radius-button); padding: 8px 16px;
-    border-width: 0; z-index: 2;
+    border-width: 0;
 }
 .shop-balance-icon { font-size: 18px; margin-right: 6px; padding: 0; -unity-text-align: middle-center; }
 .shop-balance-value { font-size: 16px; -unity-font-style: bold; color: var(--color-text-white); padding: 0; -unity-text-align: middle-center; }
