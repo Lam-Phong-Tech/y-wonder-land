@@ -81,6 +81,10 @@ workflows:
         XCODE_SCHEME: Unity-iPhone
 
     scripts:
+      - name: Fetch Git LFS assets
+        script: |
+          git lfs pull
+
       - name: Verify exported Unity Xcode project
         script: |
           if [ ! -d "$UNITY_IOS_DIR/$XCODE_PROJECT" ]; then
