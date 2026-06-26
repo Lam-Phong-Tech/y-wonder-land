@@ -1,0 +1,65 @@
+# CodeMagic workflow for Y WONDER GREEN FARM.
+# Signing secrets must be configured in CodeMagic, not committed to git.
+
+workflows:
+  unity-ios-release:
+    name: Unity iOS Release
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+
+    environment:
+      unity: 6000.3.15f1
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.ywonder.greenfarm
+      groups:
+        - unity_credentials
+      vars:
+        UNITY_IOS_DIR: ios
+        XCODE_PROJECT: Unity-iPhone.xcodeproj
+        XCODE_SCHEME: Unity-iPhone
+        BUNDLE_ID: com.ywonder.greenfarm
+        APP_VERSION: 0.1.0
+
+    scripts:
+      - name: Fetch Git LFS assets
+        script: |
+          git lfs pull
+
+      - name: Activate Unity license
+        script: |
+          $UNITY_HOME/Contents/MacOS/Unity -batchmode -quit -logFile - \
+            -serial ${UNITY_SERIAL} \
+            -username ${UNITY_EMAIL} \
+            -password ${UNITY_PASSWORD}
+
+      - name: Generate Xcode project from Unity
+        script: |
+          $UNITY_HOME/Contents/MacOS/Unity -batchmode \
+            -quit \
+            -logFile - \
+            -projectPath . \
+            -buildTarget iOS \
+            -executeMethod YWonderLand.CI.BuildScript.BuildIos \
+            -nographics
+
+      - name: Set up iOS code signing
+        script: |
+          xcode-project use-profiles
+
+      - name: Build IPA
+        script: |
+          xcode-project build-ipa \
+            --project "$UNITY_IOS_DIR/$XCODE_PROJECT" \
+            --scheme "$XCODE_SCHEME"
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Logs/**/*.xcactivitylog
+
+    publishing:
+      scripts:
+        - name: Deactivate Unity license
+          script: |
+            $UNITY_HOME/Contents/MacOS/Unity -batchmode -quit -logFile - -returnlicense -username ${UNITY_EMAIL} -password ${UNITY_PASSWORD}
