@@ -15,7 +15,10 @@ namespace YWonderLand.Managers
         public static FarmManager Instance { get; private set; }
 
         [Header("Farm Layout")]
-        [Tooltip("Số ô đất (demo: 10)")]
+        [Tooltip("BẬT = tự spawn lưới ô. TẮT (mặc định) = KHÔNG tự xây, chỉ track ô có sẵn + lo persistence.")]
+        [SerializeField] private bool autoSpawnTiles = false;
+
+        [Tooltip("Số ô đất tự spawn (CHỈ dùng khi Auto Spawn Tiles BẬT)")]
         [SerializeField] private int totalTiles = 10;
 
         [Tooltip("Số cột trong grid")]
@@ -56,6 +59,13 @@ namespace YWonderLand.Managers
         void Start()
         {
             SpawnFarmTiles();
+            StartCoroutine(LoadAfterTilesReady());
+        }
+
+        // Hoãn 1 frame để FarmTile.Start() chạy xong (visual sẵn sàng) rồi mới khôi phục.
+        private System.Collections.IEnumerator LoadAfterTilesReady()
+        {
+            yield return null;
             LoadFarmState();
         }
 
@@ -64,15 +74,21 @@ namespace YWonderLand.Managers
         /// </summary>
         private void SpawnFarmTiles()
         {
-            // Check if tiles already exist in scene (e.g. tutorial tile)
+            // Pick up ô CÓ SẴN trong scene (ô đặt sẵn) — BỎ QUA ô của TilePlacementSystem (Stage 2 tự lo ô gõ-búa).
             FarmTile[] existingTiles = FindObjectsByType<FarmTile>(FindObjectsSortMode.None);
             foreach (var existing in existingTiles)
             {
-                if (existing.tileIndex < 0)
-                {
-                    existing.tileIndex = farmTiles.Count;
-                }
+                if (existing == null) continue;
+                if (existing.GetComponentInParent<YWonderLand.Environment.TilePlacementSystem>() != null) continue; // ô gõ-búa → Stage 2 lo
+                if (existing.tileIndex < 0) existing.tileIndex = farmTiles.Count;
                 farmTiles.Add(existing);
+            }
+
+            // Anh chốt: KHÔNG tự xây lưới ô nữa. Chỉ spawn khi BẬT autoSpawnTiles.
+            if (!autoSpawnTiles)
+            {
+                Debug.Log($"[FarmManager] Auto-spawn TẮT — track {farmTiles.Count} ô có sẵn (persistence vẫn chạy).");
+                return;
             }
 
             int tilesToSpawn = totalTiles - farmTiles.Count;
@@ -143,65 +159,50 @@ namespace YWonderLand.Managers
 
         public void SaveFarmState()
         {
-            FarmSaveData saveData = new FarmSaveData();
-            saveData.tiles = new List<TileSaveData>();
+            var saveData = new FarmSaveData { tiles = new List<FarmTile.CropSave>() };
 
             foreach (var tile in farmTiles)
             {
-                saveData.tiles.Add(new TileSaveData
-                {
-                    index = tile.tileIndex,
-                    state = (int)tile.currentState,
-                    seedId = tile.plantedSeedId,
-                    growthPercent = tile.GetGrowthPercentage()
-                });
+                if (tile == null) continue;
+                var cs = tile.ExportSaveOrNull();   // null nếu đất trống / ô slave / cây nhiều ô
+                if (cs == null) continue;
+                cs.posKey = PosKey(tile.transform.position);
+                saveData.tiles.Add(cs);
             }
 
-            string json = JsonUtility.ToJson(saveData);
-            PlayerPrefs.SetString(SAVE_KEY, json);
+            PlayerPrefs.SetString(SAVE_KEY, JsonUtility.ToJson(saveData));
             PlayerPrefs.Save();
-            Debug.Log("[FarmManager] Farm state saved.");
+            Debug.Log($"[FarmManager] Saved {saveData.tiles.Count} crop tiles.");
         }
 
         public void LoadFarmState()
         {
             if (!PlayerPrefs.HasKey(SAVE_KEY)) return;
 
-            string json = PlayerPrefs.GetString(SAVE_KEY);
-            FarmSaveData saveData = JsonUtility.FromJson<FarmSaveData>(json);
-
+            FarmSaveData saveData = JsonUtility.FromJson<FarmSaveData>(PlayerPrefs.GetString(SAVE_KEY));
             if (saveData == null || saveData.tiles == null) return;
 
-            foreach (var tileData in saveData.tiles)
+            // Khớp ô theo VỊ TRÍ (ổn định hơn tileIndex — không phụ thuộc thứ tự tạo).
+            var byPos = new Dictionary<string, FarmTile>();
+            foreach (var tile in farmTiles)
+                if (tile != null) byPos[PosKey(tile.transform.position)] = tile;
+
+            int restored = 0;
+            foreach (var cs in saveData.tiles)
             {
-                if (tileData.index >= 0 && tileData.index < farmTiles.Count)
+                if (cs == null || string.IsNullOrEmpty(cs.posKey)) continue;
+                if (byPos.TryGetValue(cs.posKey, out FarmTile tile) && tile != null)
                 {
-                    FarmTile tile = farmTiles[tileData.index];
-
-                    // Only restore tiles that were actively growing
-                    if (tileData.state > (int)FarmTile.TileState.Soil && !string.IsNullOrEmpty(tileData.seedId))
-                    {
-                        // Restore planted state and let player continue
-                        if (tileData.state >= (int)FarmTile.TileState.Planted)
-                        {
-                            tile.InteractPlow();
-                            tile.InteractPlant(tileData.seedId);
-
-                            if (tileData.state >= (int)FarmTile.TileState.Watered)
-                            {
-                                tile.InteractWater();
-                            }
-                        }
-                        else if (tileData.state == (int)FarmTile.TileState.Plowed)
-                        {
-                            tile.InteractPlow();
-                        }
-                    }
+                    tile.RestoreSave(cs, cropDatabase);   // tự lớn-bù / chết-bù theo thời gian thực
+                    restored++;
                 }
             }
-
-            Debug.Log("[FarmManager] Farm state loaded.");
+            Debug.Log($"[FarmManager] Restored {restored} crop tiles.");
         }
+
+        /// <summary>Key vị trí ô (làm tròn 0.1m) — khóa lưu/khớp ô, ổn định qua các phiên.</summary>
+        private static string PosKey(Vector3 p)
+            => $"{Mathf.RoundToInt(p.x * 10f)}_{Mathf.RoundToInt(p.z * 10f)}";
 
         void OnApplicationPause(bool paused)
         {
@@ -218,16 +219,7 @@ namespace YWonderLand.Managers
         [System.Serializable]
         private class FarmSaveData
         {
-            public List<TileSaveData> tiles;
-        }
-
-        [System.Serializable]
-        private class TileSaveData
-        {
-            public int index;
-            public int state;
-            public string seedId;
-            public float growthPercent;
+            public List<FarmTile.CropSave> tiles;
         }
     }
 }

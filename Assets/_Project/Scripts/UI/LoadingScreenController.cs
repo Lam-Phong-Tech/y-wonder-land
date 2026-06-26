@@ -12,6 +12,8 @@ public class LoadingScreenController : MonoBehaviour
     private VisualElement rootContainer;
     private VisualElement progressBarFill;
     private Label loadingText;
+    private Label logoText;
+    private Label subtitleText;
 
     private bool isVisible = false;
 
@@ -82,6 +84,8 @@ public class LoadingScreenController : MonoBehaviour
         {
             progressBarFill = rootContainer.Q<VisualElement>("ProgressBarFill");
             loadingText = rootContainer.Q<Label>("LoadingText");
+            logoText = rootContainer.Q<Label>("LogoText");
+            subtitleText = rootContainer.Q<Label>("SubtitleText");
 
             // TẮT HIỂN THỊ ĐỂ KHÔNG CHẶN CLICK
             rootContainer.style.display = DisplayStyle.None;
@@ -108,12 +112,26 @@ public class LoadingScreenController : MonoBehaviour
     /// <summary>
     /// Hiển thị màn hình chờ (Fade In)
     /// </summary>
-    public async Task ShowLoadingAsync(string message = "Đang đồng bộ thế giới...")
+    public async Task ShowLoadingAsync(string message = "Đang đồng bộ thế giới...", string destinationName = "")
     {
         if (rootContainer == null) return;
 
         if (loadingText != null)
             loadingText.text = message;
+
+        if (logoText != null)
+        {
+            if (string.IsNullOrEmpty(destinationName))
+            {
+                logoText.text = "Y WONDER GREEN FARM";
+                if (subtitleText != null) subtitleText.style.display = DisplayStyle.Flex;
+            }
+            else
+            {
+                logoText.text = destinationName.ToUpper();
+                if (subtitleText != null) subtitleText.style.display = DisplayStyle.None;
+            }
+        }
 
         rootContainer.style.display = DisplayStyle.Flex;
         

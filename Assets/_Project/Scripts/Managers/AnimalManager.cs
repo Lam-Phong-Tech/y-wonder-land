@@ -56,6 +56,22 @@ namespace YWonderLand.Managers
             return null;
         }
 
+        /// <summary>
+        /// Tra AnimalDefinition theo id — CHẮC ĂN: ưu tiên AnimalManager (nếu có trong scene),
+        /// nếu không có/không thấy thì load thẳng asset từ Resources (Assets/Resources/Items/Animal_&lt;id&gt;.asset).
+        /// Dùng cho UI túi/shop + validate thả thú để không phụ thuộc việc scene có gắn AnimalManager hay chưa.
+        /// </summary>
+        public static AnimalDefinition LookupDefinition(string animalId)
+        {
+            if (string.IsNullOrEmpty(animalId)) return null;
+            if (Instance != null)
+            {
+                var d = Instance.GetDefinition(animalId);
+                if (d != null) return d;
+            }
+            return Resources.Load<AnimalDefinition>("Items/Animal_" + animalId);
+        }
+
         public System.Action<string> OnAnimalBought;
 
         public bool BuyAndSpawnAnimal(string animalId)

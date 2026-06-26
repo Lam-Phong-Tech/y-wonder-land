@@ -1,184 +1,228 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Handles the ghost preview object during Build Mode.
-/// Creates a Cube placeholder that follows the mouse cursor,
-/// snaps to grid, and changes color based on placement validity.
+/// Ghost preview khi Build Mode. Ưu tiên hiển thị BẢN MỜ của chính prefab thật
+/// (kiểu ROK/Hay Day) — kéo thấy luôn hình công trình mờ xanh (đặt được) / đỏ (không),
+/// dễ căn vị trí. Item chưa khai báo prefab thì fallback khối Cube như cũ.
+/// Vị trí/xoay/scale của ghost = y hệt lúc đặt thật (WYSIWYG): đặt = clone ghost ra.
 /// </summary>
 public class GhostPlacementController : MonoBehaviour
 {
     public static GhostPlacementController Instance { get; private set; }
 
-    /// <summary>
-    /// Fired when a building is placed. Parameter is the item price.
-    /// </summary>
-    public static event System.Action<int> OnBuildingPlaced;
+    /// <summary>Bắn khi đặt 1 công trình (tham số: tên item + giá).</summary>
+    public static event System.Action<string, int> OnBuildingPlaced;
 
     [Header("Ghost Settings")]
-    [SerializeField] private Color validColor = new Color(0.2f, 0.9f, 0.3f, 0.4f);
-    [SerializeField] private Color invalidColor = new Color(0.9f, 0.2f, 0.2f, 0.4f);
-    [SerializeField] private float ghostHeight = 0.6f;
+    [SerializeField] private Color validColor = new Color(0.3f, 1f, 0.4f, 0.45f);   // xanh lá mờ — đặt được
+    [SerializeField] private Color invalidColor = new Color(1f, 0.25f, 0.25f, 0.45f); // đỏ mờ — không đặt được
+    [SerializeField] private float ghostHeight = 0.6f; // chỉ dùng cho fallback Cube
+
+    [Tooltip("Cạnh ô đất xây dựng (khối cube map = 0.8). Dùng co giãn hàng rào cho khít khối khi prefab cần stretch.")]
+    [SerializeField] private float surfaceCellSize = 0.8f;
 
     [Header("Raycast")]
     [SerializeField] private LayerMask groundMask = ~0;
 
+    [Header("Placement Feel")]
+    [Tooltip("Tỉ lệ vùng rìa màn hình bị khóa đặt để tránh bấm nhầm khi kéo sát mép.")]
+    [SerializeField, Range(0f, 0.25f)] private float screenEdgeBlockPercent = 0.08f;
+    [Tooltip("Cỡ tối thiểu của vùng rìa bị khóa đặt, tính bằng pixel.")]
+    [SerializeField] private float minScreenEdgeBlockPixels = 64f;
+    [Tooltip("Tốc độ nhân vật xoay nhìn theo điểm ghost khi đang chọn chỗ xây.")]
+    [SerializeField] private float playerFaceGhostTurnSpeed = 540f;
+
     // Ghost object
     private GameObject ghostObject;
-    private Renderer ghostRenderer;
-    private Material ghostMaterial;
+    private bool ghostIsPrefab = false;
+    private readonly List<Material> ghostMats = new List<Material>(); // các material mờ để đổi màu xanh/đỏ
 
     // Current placement state
     private bool isActive = false;
     private Vector2Int currentItemSize = new Vector2Int(1, 1);
     private string currentItemName = "";
-    private int currentItemPrice = 0;
+    private int currentItemPrice = 0;          // = SỐ LƯỢNG vật liệu cần (0 = miễn phí)
+    private string currentMaterialId = "";     // id vật liệu (wood_01/stone_01...); "" = miễn phí
+
+    // Tên hiển thị vật liệu theo id (cho thông báo thiếu vật liệu).
+    private static string MatLabel(string id)
+    {
+        return id == "wood_01" ? "Gỗ" : id == "stone_01" ? "Đá" : id == "iron_01" ? "Sắt" : id;
+    }
     private int rotationAngle = 0;
-    private Vector2Int currentGridCell;
     private bool currentPlacementValid = false;
+    private float currentGroundY = 0f;
+    private YWonderLand.Environment.BuildPrefabLibrary.Entry currentEntry;
+
+    // Surface-cell snapping: ô đất (cube) đang ngắm + vị trí snap (tâm mặt trên ô).
+    private YWonderLand.Environment.BuildSurfaceCell currentCell;
+    private Vector3 currentSnapPos;
+
     public bool IsPinned { get; private set; } = false;
     public Vector3 GhostPosition => ghostObject != null ? ghostObject.transform.position : Vector3.zero;
 
-    // Reference
     private Camera mainCamera;
     private BuildGridManager gridManager;
 
     void Awake()
     {
-        if (Instance == null)
-            Instance = this;
-        else
-        {
-            Destroy(gameObject);
-            return;
-        }
+        if (Instance == null) Instance = this;
+        else { Destroy(gameObject); return; }
     }
 
     void Start()
     {
         mainCamera = Camera.main;
         gridManager = BuildGridManager.Instance;
+
+        // Tự gắn BuildPersistence (lưu/khôi phục công trình build) nếu scene chưa có — khỏi cần gắn tay.
+        if (Object.FindFirstObjectByType<YWonderLand.Environment.BuildPersistence>(FindObjectsInactive.Include) == null)
+        {
+            gameObject.AddComponent<YWonderLand.Environment.BuildPersistence>();
+            Debug.Log("[GhostPlacement] Tự gắn BuildPersistence để lưu/khôi phục công trình build.");
+        }
     }
 
     void Update()
     {
-        if (!isActive || ghostObject == null || gridManager == null) return;
-        
-        // Skip raycast if pinned
+        if (!isActive || ghostObject == null) return;
         if (IsPinned) return;
 
-        // Update camera reference if needed
         if (mainCamera == null) mainCamera = Camera.main;
         if (mainCamera == null) return;
 
-        // Raycast from mouse to ground
         var mouse = UnityEngine.InputSystem.Mouse.current;
         if (mouse == null) return;
 
         Vector2 mousePos = mouse.position.ReadValue();
-        Ray ray = mainCamera.ScreenPointToRay(new Vector3(mousePos.x, mousePos.y, 0));
-
-        if (Physics.Raycast(ray, out RaycastHit hit, 200f, groundMask))
+        bool edgeBlocked = IsInScreenEdgeBlockedArea(mousePos);
+        if (edgeBlocked)
         {
-            // Snap to grid
-            Vector2Int gridCell = gridManager.WorldToGrid(hit.point);
-            currentGridCell = gridCell;
+            currentPlacementValid = false;
+            UpdateGhostColor(false);
+        }
+        else
+        {
+            Ray ray = mainCamera.ScreenPointToRay(new Vector3(mousePos.x, mousePos.y, 0));
 
-            // Get effective size (swapped if rotated 90/270)
-            Vector2Int effectiveSize = GetEffectiveSize();
+            var hits = Physics.RaycastAll(ray, 200f, groundMask);
+            if (hits.Length > 0)
+            {
+                System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
 
-            // Position ghost at grid-snapped location
-            Vector3 worldPos = gridManager.GridToWorldCentered(gridCell, effectiveSize);
-            worldPos.y = hit.point.y + ghostHeight * 0.5f;
-            ghostObject.transform.position = worldPos;
+                // Tìm Ô ĐẤT (BuildSurfaceCell) GẦN NHẤT — bỏ qua collider nền/mesh đảo chắn phía trước.
+                currentCell = null;
+                Vector3 fallback = hits[0].point;
+                foreach (var h in hits)
+                {
+                    var bsc = h.collider.GetComponentInParent<YWonderLand.Environment.BuildSurfaceCell>();
+                    if (bsc != null) { currentCell = bsc; break; }
+                }
 
-            // Check validity
-            currentPlacementValid = gridManager.CanPlace(gridCell, effectiveSize);
+                currentSnapPos = (currentCell != null) ? currentCell.SurfaceCenter : fallback;
+                currentGroundY = currentSnapPos.y;
+                ApplyGhostTransform();
 
-            // Update color
-            UpdateGhostColor(currentPlacementValid);
+                // Chỉ đặt được khi đang trỏ vào ô đất hợp lệ và ô còn TRỐNG.
+                currentPlacementValid = (currentCell != null && !currentCell.IsOccupied);
+                UpdateGhostColor(currentPlacementValid);
+
+                if (currentCell != null)
+                    FacePlayerTowards(currentSnapPos);
+            }
+            else
+            {
+                currentPlacementValid = false;
+                UpdateGhostColor(false);
+            }
         }
 
-        // Right click to cancel
-        if (mouse.rightButton.wasPressedThisFrame)
-        {
-            Deactivate();
-        }
+        if (mouse.rightButton.wasPressedThisFrame) Deactivate();
+    }
+
+    private bool IsInScreenEdgeBlockedArea(Vector2 screenPos)
+    {
+        float shorterSide = Mathf.Min(Screen.width, Screen.height);
+        float edge = Mathf.Max(minScreenEdgeBlockPixels, shorterSide * screenEdgeBlockPercent);
+        return screenPos.x < edge
+            || screenPos.x > Screen.width - edge
+            || screenPos.y < edge
+            || screenPos.y > Screen.height - edge;
+    }
+
+    public bool IsScreenPositionBlockedForPlacement(Vector2 screenPos) => IsInScreenEdgeBlockedArea(screenPos);
+
+    private void FacePlayerTowards(Vector3 worldPoint)
+    {
+        var player = PlayerController.Instance;
+        if (player == null || player.IsBusy) return;
+
+        Transform playerTransform = player.transform;
+        Vector3 dir = worldPoint - playerTransform.position;
+        dir.y = 0f;
+        if (dir.sqrMagnitude < 0.0001f) return;
+
+        Quaternion targetRotation = Quaternion.LookRotation(dir.normalized);
+        playerTransform.rotation = Quaternion.RotateTowards(
+            playerTransform.rotation,
+            targetRotation,
+            playerFaceGhostTurnSpeed * Time.deltaTime);
     }
 
     // ── Activation ──
 
-    /// <summary>
-    /// Activate ghost preview for a given item.
-    /// </summary>
-    public void Activate(string itemName, Vector2Int size, int price)
+    public void Activate(string itemName, Vector2Int size, string materialId, int materialAmount)
     {
         currentItemName = itemName;
         currentItemSize = size;
-        currentItemPrice = price;
+        currentMaterialId = materialId;
+        currentItemPrice = materialAmount;
         rotationAngle = 0;
         isActive = true;
         IsPinned = false;
 
-        // Ensure grid manager reference
         if (gridManager == null) gridManager = BuildGridManager.Instance;
 
-        // Create or update ghost object
-        CreateGhostObject();
+        // Lấy thư viện prefab. Nếu Instance chưa set (GameObject đang inactive / Awake chưa chạy /
+        // bị cái rỗng giành Instance) -> tự tìm trong scene kể cả object inactive, để KHÔNG im lặng rơi về Cube.
+        var lib = YWonderLand.Environment.BuildPrefabLibrary.Instance;
+        if (lib == null)
+            lib = Object.FindFirstObjectByType<YWonderLand.Environment.BuildPrefabLibrary>(FindObjectsInactive.Include);
 
-        Debug.Log($"[GhostPlacement] Activated for '{itemName}' size ({size.x},{size.y})");
+        currentEntry = lib != null ? lib.Find(itemName) : null;
+
+        if (lib == null)
+            Debug.LogWarning("[GhostPlacement] KHÔNG tìm thấy BuildPrefabLibrary trong scene -> ghost dùng Cube. Hãy thêm 1 GameObject ĐANG BẬT gắn BuildPrefabLibrary.");
+        else if (currentEntry == null)
+            Debug.LogWarning($"[GhostPlacement] '{itemName}' không khớp entry nào trong BuildPrefabLibrary -> ghost dùng Cube. Kiểm tra 'Name Contains' + đã gán Prefab chưa.");
+
+        BuildGhost();
+        Debug.Log($"[GhostPlacement] Activated '{itemName}' size ({size.x},{size.y}) — ghost={(ghostIsPrefab ? "PREFAB mờ" : "Cube")}");
     }
 
-    /// <summary>
-    /// Deactivate and hide ghost.
-    /// </summary>
     public void Deactivate()
     {
         isActive = false;
-        if (ghostObject != null)
-        {
-            ghostObject.SetActive(false);
-        }
-        Debug.Log("[GhostPlacement] Deactivated");
+        IsPinned = false;
+        currentPlacementValid = false;
+        currentCell = null;
+
+        if (ghostObject != null) ghostObject.SetActive(false);
     }
 
     public bool IsActive => isActive;
-
-    public void SetPinned(bool pinned)
-    {
-        IsPinned = pinned;
-    }
+    public void SetPinned(bool pinned) => IsPinned = pinned;
+    public bool IsPlacementValid => currentPlacementValid;
 
     // ── Rotation ──
 
-    /// <summary>
-    /// Rotate ghost 90 degrees clockwise.
-    /// </summary>
     public void Rotate()
     {
         rotationAngle = (rotationAngle + 90) % 360;
-
-        if (ghostObject != null)
-        {
-            ghostObject.transform.rotation = Quaternion.Euler(0, rotationAngle, 0);
-
-            // Update scale for swapped dimensions
-            Vector2Int effectiveSize = GetEffectiveSize();
-            float cellSize = gridManager != null ? gridManager.CellSize : 1f;
-            ghostObject.transform.localScale = new Vector3(
-                effectiveSize.x * cellSize * 0.95f,
-                ghostHeight,
-                effectiveSize.y * cellSize * 0.95f
-            );
-
-            // Re-check validity if pinned
-            if (gridManager != null)
-            {
-                currentPlacementValid = gridManager.CanPlace(currentGridCell, effectiveSize);
-                UpdateGhostColor(currentPlacementValid);
-            }
-        }
-
-        Debug.Log($"[GhostPlacement] Rotated to {rotationAngle} degrees");
+        ApplyGhostTransform();
+        currentPlacementValid = (currentCell != null && !currentCell.IsOccupied);
+        UpdateGhostColor(currentPlacementValid);
     }
 
     private Vector2Int GetEffectiveSize()
@@ -188,159 +232,298 @@ public class GhostPlacementController : MonoBehaviour
         return currentItemSize;
     }
 
-    // ── Ghost Object ──
+    // ── Tạo ghost ──
 
-    private void CreateGhostObject()
+    private void BuildGhost()
     {
-        if (ghostObject == null)
-        {
-            ghostObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            ghostObject.name = "BuildGhost";
+        // Mỗi item có thể là prefab khác nhau -> hủy ghost cũ, tạo lại.
+        if (ghostObject != null) { Destroy(ghostObject); ghostObject = null; }
+        ghostMats.Clear();
 
-            // Disable collider so it doesn't block raycasts
-            var col = ghostObject.GetComponent<Collider>();
-            if (col != null) Destroy(col);
+        if (currentEntry != null && currentEntry.prefab != null)
+            BuildPrefabGhost();
+        else
+            BuildCubeGhost();
 
-            // Create transparent material
-            ghostRenderer = ghostObject.GetComponent<Renderer>();
-            ghostMaterial = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-            // URP Lit transparency settings
-            ghostMaterial.SetFloat("_Surface", 1); // 0=Opaque, 1=Transparent
-            ghostMaterial.SetFloat("_Blend", 0);   // 0=Alpha, 1=Premultiply
-            ghostMaterial.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
-            ghostMaterial.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-            ghostMaterial.SetFloat("_ZWrite", 0);
-            ghostMaterial.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
-            ghostMaterial.renderQueue = 3000;
-            ghostRenderer.material = ghostMaterial;
-
-            // Add a small indicator to show the "Front" so 1x1 items visibly rotate
-            GameObject forwardIndicator = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            forwardIndicator.name = "FrontIndicator";
-            forwardIndicator.transform.SetParent(ghostObject.transform);
-            // Local pos: at the front face (Z = +0.5)
-            forwardIndicator.transform.localPosition = new Vector3(0f, 0.5f, 0.5f); 
-            // Local scale: small box
-            forwardIndicator.transform.localScale = new Vector3(0.2f, 0.2f, 0.1f);
-            
-            var indicatorCol = forwardIndicator.GetComponent<Collider>();
-            if (indicatorCol != null) Destroy(indicatorCol);
-            
-            var indicatorRenderer = forwardIndicator.GetComponent<Renderer>();
-            if (indicatorRenderer != null)
-            {
-                Material indMat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-                indMat.color = Color.yellow;
-                indicatorRenderer.material = indMat;
-            }
-        }
-
-        ghostObject.SetActive(true);
-
-        // Set size based on item
-        float cellSize = gridManager != null ? gridManager.CellSize : 1f;
-        ghostObject.transform.localScale = new Vector3(
-            currentItemSize.x * cellSize * 0.95f,
-            ghostHeight,
-            currentItemSize.y * cellSize * 0.95f
-        );
-        ghostObject.transform.rotation = Quaternion.Euler(0, rotationAngle, 0);
-
+        ApplyGhostTransform();
         UpdateGhostColor(false);
+    }
+
+    // Ghost = bản mờ của prefab thật (bọc wrapper căn tâm để pivot lệch cũng đúng vị trí).
+    private void BuildPrefabGhost()
+    {
+        float cell = surfaceCellSize;
+        ghostObject = MakeCenteredClone(currentEntry.prefab, currentEntry.stretchToFootprint, currentItemSize, cell);
+        ghostObject.name = "BuildGhost_" + currentEntry.prefab.name;
+        ghostIsPrefab = true;
+
+        // Bỏ mọi collider + script để ghost chỉ là hình ảnh (không chạy logic, không chặn tia).
+        foreach (var col in ghostObject.GetComponentsInChildren<Collider>(true))
+            if (col != null) Destroy(col);
+        foreach (var mb in ghostObject.GetComponentsInChildren<MonoBehaviour>(true))
+            if (mb != null) { try { Destroy(mb); } catch { } }
+
+        TintAllRenderers(ghostObject);
+    }
+
+    /// <summary>
+    /// Clone prefab vào 1 wrapper, dịch để TÂM cụm mesh (XZ) về gốc wrapper.
+    /// Nhờ vậy prefab có pivot lệch tâm bao nhiêu cũng hiện/đặt đúng ngay vị trí nhắm.
+    /// Xoay wrapper = xoay quanh tâm cụm (đúng cảm giác kéo thả).
+    /// </summary>
+    private GameObject MakeCenteredClone(GameObject prefab, bool stretch, Vector2Int footprint, float cell)
+    {
+        GameObject wrap = new GameObject("BuildWrap_" + prefab.name);
+        wrap.transform.position = Vector3.zero;
+        wrap.transform.rotation = Quaternion.identity;
+
+        GameObject inner = Instantiate(prefab, wrap.transform, false);
+        inner.transform.localPosition = Vector3.zero;
+        inner.transform.localRotation = prefab.transform.rotation; // giữ tư thế gốc (Blender offset)
+        inner.transform.localScale = prefab.transform.localScale;
+
+        // Stretch ĐÚNG 1 ô (100%, không chừa mép) để hàng rào/đất khít sát nhau khi đặt liền kề.
+        if (stretch)
+            StretchToFootprint(inner, footprint.x * cell, footprint.y * cell);
+
+        // Căn tâm XZ: dịch inner sao cho tâm bounds trùng gốc wrapper.
+        var rends = inner.GetComponentsInChildren<Renderer>(true);
+        if (rends.Length > 0)
+        {
+            Bounds b = rends[0].bounds;
+            for (int i = 1; i < rends.Length; i++) b.Encapsulate(rends[i].bounds);
+            Vector3 c = b.center; // world; wrap đang ở (0,0,0)
+            inner.transform.position -= new Vector3(c.x, 0f, c.z);
+        }
+        return wrap;
+    }
+
+    // Fallback: khối Cube mờ như cũ (cho item chưa khai báo prefab).
+    private void BuildCubeGhost()
+    {
+        ghostObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        ghostObject.name = "BuildGhost_Cube";
+        ghostIsPrefab = false;
+
+        var col = ghostObject.GetComponent<Collider>();
+        if (col != null) Destroy(col);
+
+        TintAllRenderers(ghostObject);
+
+        // Mũi chỉ hướng (để 1x1 thấy được khi xoay)
+        GameObject front = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        front.name = "FrontIndicator";
+        front.transform.SetParent(ghostObject.transform, false);
+        front.transform.localPosition = new Vector3(0f, 0.5f, 0.5f);
+        front.transform.localScale = new Vector3(0.2f, 0.2f, 0.1f);
+        var fc = front.GetComponent<Collider>();
+        if (fc != null) Destroy(fc);
+    }
+
+    // Phủ material mờ lên TẤT CẢ renderer của ghost (lưu lại để đổi xanh/đỏ).
+    private void TintAllRenderers(GameObject go)
+    {
+        var rends = go.GetComponentsInChildren<Renderer>(true);
+        foreach (var r in rends)
+        {
+            int count = Mathf.Max(1, r.sharedMaterials.Length);
+            var mats = new Material[count];
+            for (int i = 0; i < count; i++)
+            {
+                var m = CreateGhostMaterial(validColor);
+                mats[i] = m;
+                ghostMats.Add(m);
+            }
+            r.materials = mats;
+        }
+    }
+
+    private Material CreateGhostMaterial(Color c)
+    {
+        var m = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+        m.SetFloat("_Surface", 1f); // Transparent
+        m.SetFloat("_Blend", 0f);
+        m.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+        m.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+        m.SetInt("_ZWrite", 0);
+        m.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+        m.renderQueue = 3000;
+        m.color = c;
+        m.SetColor("_BaseColor", c);
+        return m;
+    }
+
+    // Đặt ghost đúng vị trí/xoay/scale (giống y lúc đặt thật).
+    private void ApplyGhostTransform()
+    {
+        if (ghostObject == null) return;
+
+        Vector3 worldPos = currentSnapPos; // tâm mặt trên ô đất đang ngắm
+
+        if (ghostIsPrefab)
+        {
+            worldPos.y = currentGroundY + (currentEntry != null ? currentEntry.yOffset : 0f);
+            ghostObject.transform.position = worldPos;
+            // Wrapper đã giữ tư thế gốc prefab (ở inner) -> chỉ cần xoay yaw quanh tâm.
+            ghostObject.transform.rotation = Quaternion.Euler(0, rotationAngle, 0);
+        }
+        else
+        {
+            worldPos.y = currentGroundY + ghostHeight * 0.5f;
+            ghostObject.transform.position = worldPos;
+            ghostObject.transform.rotation = Quaternion.Euler(0, rotationAngle, 0);
+            // Khối fallback co theo kích thước ô đất (vd 0.8 x 0.8).
+            float fw = currentCell != null ? currentCell.FootprintSize.x : surfaceCellSize;
+            float fd = currentCell != null ? currentCell.FootprintSize.y : surfaceCellSize;
+            ghostObject.transform.localScale = new Vector3(fw, ghostHeight, fd);
+        }
     }
 
     private void UpdateGhostColor(bool valid)
     {
-        if (ghostMaterial != null)
+        Color c = valid ? validColor : invalidColor;
+        foreach (var m in ghostMats)
         {
-            ghostMaterial.color = valid ? validColor : invalidColor;
+            if (m == null) continue;
+            m.color = c;
+            m.SetColor("_BaseColor", c);
         }
     }
-
-    public bool IsPlacementValid => currentPlacementValid;
 
     // ── Placement ──
 
     public void ConfirmPlacement()
     {
-        if (gridManager == null) return;
+        if (ghostObject == null) return;
+        // Chỉ đặt khi đang trỏ vào ô đất hợp lệ còn TRỐNG (snap theo cube, không theo lưới ảo).
+        if (!currentPlacementValid || currentCell == null || currentCell.IsOccupied) return;
 
-        Vector2Int effectiveSize = GetEffectiveSize();
-
-        // Mark cells as occupied
-        gridManager.OccupyCells(currentGridCell, effectiveSize);
-
-        // Spawn placed building (Cube placeholder)
-        Vector3 worldPos = gridManager.GridToWorldCentered(currentGridCell, effectiveSize);
-        if (ghostObject != null)
+        // Chi phí VẬT LIỆU: đủ → trừ; thiếu → KHÔNG đặt + báo. (0/"" = miễn phí, vd ô ruộng.)
+        if (currentItemPrice > 0 && !string.IsNullOrEmpty(currentMaterialId))
         {
-            worldPos.y = ghostObject.transform.position.y;
+            var inv = YWonderLand.Managers.InventoryManager.Instance;
+            if (inv == null || inv.GetItemQuantity(currentMaterialId) < currentItemPrice)
+            {
+                YWonderLand.Environment.ScreenToast.Show($"Không đủ vật liệu! Cần {currentItemPrice} {MatLabel(currentMaterialId)} để xây.");
+                return;
+            }
+            inv.RemoveItem(currentMaterialId, currentItemPrice);
         }
-        SpawnPlacedBuilding(worldPos, effectiveSize);
 
-        // Notify listeners (UI controller handles balance deduction)
-        OnBuildingPlaced?.Invoke(currentItemPrice);
+        if (ghostIsPrefab && currentEntry != null)
+        {
+            // WYSIWYG: clone căn tâm (GIỮ script/collider) đặt đúng vị trí/xoay của ghost.
+            GameObject go = MakeCenteredClone(currentEntry.prefab, currentEntry.stretchToFootprint, currentItemSize, surfaceCellSize);
+            go.transform.position = ghostObject.transform.position;
+            go.transform.rotation = ghostObject.transform.rotation;
+            go.name = $"Building_{currentItemName}_{currentCell.name}";
+            if (go.CompareTag("Untagged")) go.tag = "PlacedBuilding";
 
-        Debug.Log($"[GhostPlacement] Placed '{currentItemName}' at grid ({currentGridCell.x},{currentGridCell.y}) rotation {rotationAngle}");
+            // Đánh dấu để PERSISTENCE dựng lại đúng prefab khi mở lại game.
+            var pb = go.AddComponent<YWonderLand.Environment.PlacedBuilding>();
+            pb.itemName = currentItemName;
+            pb.footprintX = currentItemSize.x;
+            pb.footprintY = currentItemSize.y;
+            pb.materialId = currentMaterialId;
+            pb.cost = currentItemPrice;
 
-        // Keep ghost active for continued placement
-        // Player can place multiple of the same item
+            currentCell.SetOccupant(go); // ghi vật vào ô (để biết ô có rào/công trình)
+            currentCell.SetBuildMaterial(currentMaterialId, currentItemPrice); // lưu vật liệu để hoàn khi phá
+            Debug.Log($"[GhostPlacement] Đặt PREFAB '{currentEntry.prefab.name}' (căn tâm) tại {go.transform.position} trên ô '{currentCell.name}'");
+        }
+        else
+        {
+            SpawnCubeBuilding(GetEffectiveSize());
+        }
+
+        OnBuildingPlaced?.Invoke(currentItemName, currentItemPrice);
+        // Giữ ghost để đặt tiếp nhiều cái.
     }
 
-    private void SpawnPlacedBuilding(Vector3 position, Vector2Int size)
+    /// <summary>Đặt LẠI 1 công trình từ SAVE (persistence): clone prefab + đặt đúng vị trí/góc + gán vào ô.
+    /// KHÔNG trừ vật liệu (đã trả khi xây lần đầu), KHÔNG bắn OnBuildingPlaced. Trả object (null nếu thiếu prefab/lib).</summary>
+    public GameObject PlaceFromSave(string itemName, Vector2Int size, Vector3 position, Quaternion rotation,
+                                    YWonderLand.Environment.BuildSurfaceCell cell, string materialId, int cost)
     {
-        float cellSize = gridManager != null ? gridManager.CellSize : 1f;
+        var lib = YWonderLand.Environment.BuildPrefabLibrary.Instance;
+        if (lib == null) lib = Object.FindFirstObjectByType<YWonderLand.Environment.BuildPrefabLibrary>(FindObjectsInactive.Include);
+        var entry = lib != null ? lib.Find(itemName) : null;
+        if (entry == null || entry.prefab == null)
+        {
+            Debug.LogWarning($"[GhostPlacement] PlaceFromSave: không tra được prefab cho '{itemName}' → bỏ qua.");
+            return null;
+        }
+
+        GameObject go = MakeCenteredClone(entry.prefab, entry.stretchToFootprint, size, surfaceCellSize);
+        go.transform.position = position;   // dùng đúng transform đã lưu (đã gồm yOffset/căn tâm)
+        go.transform.rotation = rotation;
+        go.name = $"Building_{itemName}_restored";
+        if (go.CompareTag("Untagged")) go.tag = "PlacedBuilding";
+
+        var pb = go.AddComponent<YWonderLand.Environment.PlacedBuilding>();
+        pb.itemName = itemName;
+        pb.footprintX = size.x;
+        pb.footprintY = size.y;
+        pb.materialId = materialId;
+        pb.cost = cost;
+
+        if (cell != null)
+        {
+            cell.SetOccupant(go);
+            cell.SetBuildMaterial(materialId, cost);
+        }
+        return go;
+    }
+
+    private void SpawnCubeBuilding(Vector2Int size)
+    {
+        float cell = surfaceCellSize;
+        Vector3 pos = ghostObject.transform.position;
+        pos.y = currentGroundY + ghostHeight * 0.75f;
 
         GameObject building = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        building.name = $"Building_{currentItemName}_{currentGridCell.x}_{currentGridCell.y}";
-        building.transform.position = position;
+        building.name = $"Building_{currentItemName}_{(currentCell != null ? currentCell.name : "cell")}";
+        building.transform.position = pos;
         building.transform.rotation = Quaternion.Euler(0, rotationAngle, 0);
-        building.transform.localScale = new Vector3(
-            size.x * cellSize * 0.95f,
-            ghostHeight * 1.5f,
-            size.y * cellSize * 0.95f
-        );
+        building.transform.localScale = new Vector3(size.x * cell * 0.95f, ghostHeight * 1.5f, size.y * cell * 0.95f);
 
-        // Give it a solid color based on category
         Renderer renderer = building.GetComponent<Renderer>();
         if (renderer != null)
         {
             Material mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-            // Ensure spawned building is opaque (URP Lit defaults)
-            mat.SetFloat("_Surface", 0); // 0=Opaque
-            mat.DisableKeyword("_SURFACE_TYPE_TRANSPARENT");
-            mat.SetFloat("_ZWrite", 1);
-            mat.renderQueue = -1; // Use shader default queue
             mat.color = GetBuildingColor();
             renderer.material = mat;
         }
-
-        // Add a small indicator to show the "Front" so 1x1 items visibly rotate
-        GameObject forwardIndicator = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        forwardIndicator.name = "FrontIndicator";
-        forwardIndicator.transform.SetParent(building.transform);
-        forwardIndicator.transform.localPosition = new Vector3(0f, 0.5f, 0.5f); 
-        forwardIndicator.transform.localScale = new Vector3(0.2f, 0.2f, 0.1f);
-        
-        var indicatorRenderer = forwardIndicator.GetComponent<Renderer>();
-        if (indicatorRenderer != null)
-        {
-            Material indMat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-            indMat.color = Color.yellow;
-            indicatorRenderer.material = indMat;
-        }
-
-        // Tag for identification (used by Delete/Move tools)
         building.tag = "PlacedBuilding";
-
-        Debug.Log($"[GhostPlacement] Spawned building '{building.name}' at {position}");
+        if (currentCell != null)
+        {
+            currentCell.SetOccupant(building); // ghi vật vào ô
+            currentCell.SetBuildMaterial(currentMaterialId, currentItemPrice); // lưu vật liệu để hoàn khi phá
+        }
     }
 
     private Color GetBuildingColor()
     {
-        // Simple color based on item name hash for variety
         int hash = currentItemName.GetHashCode();
         float hue = Mathf.Abs(hash % 360) / 360f;
         return Color.HSVToRGB(hue, 0.5f, 0.8f);
+    }
+
+    /// <summary>Co giãn theo trục X/Z (world) cho vừa footprint ô lưới, giữ chiều cao.</summary>
+    private void StretchToFootprint(GameObject go, float targetX, float targetZ)
+    {
+        var rends = go.GetComponentsInChildren<Renderer>();
+        if (rends.Length == 0) return;
+
+        Bounds b = rends[0].bounds;
+        for (int i = 1; i < rends.Length; i++) b.Encapsulate(rends[i].bounds);
+
+        float curX = b.size.x, curZ = b.size.z;
+        if (curX < 0.0001f || curZ < 0.0001f) return;
+
+        Vector3 s = go.transform.localScale;
+        s.x *= targetX / curX;
+        s.z *= targetZ / curZ;
+        go.transform.localScale = s;
     }
 }

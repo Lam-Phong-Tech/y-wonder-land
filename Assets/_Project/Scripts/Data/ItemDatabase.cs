@@ -34,6 +34,8 @@ namespace YWonderLand.Data
 
         public ItemDefinition GetItem(string id)
         {
+            if (string.IsNullOrEmpty(id)) return null; // slot rỗng → bỏ qua, không cảnh báo thừa
+
             if (itemCache == null || itemCache.Count != items.Count)
             {
                 InitializeCache();

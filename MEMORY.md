@@ -20,3 +20,12 @@
 ## Về UI Feedback
 - **Vấn đề:** Người dùng click chuột liên tục 100 lần vào ô đất vì tưởng game không nhận lệnh.
 - **Bài học:** Bất cứ khi nào có yếu tố chờ đợi (Timer), **phải có Progress Bar hoặc Countdown Number** hiện lên rõ ràng để chứng minh cho người chơi thấy "hệ thống đang hoạt động và đang xử lý". Đừng chỉ dựa vào Console log.
+
+## Về Mô Hình Chuồng Từ Hàng Rào (20/06)
+- **Vấn đề:** Mất CẢ CHỤC vòng debug vì hiểu sai bản chất hàng rào: cứ tưởng "chuồng = vòng nhiều ô rào quây 1 vùng đất trống ở giữa" → thử flood-fill ô-trống, raycast collider tường... đều sai.
+- **Sự thật:** Hàng rào của dự án này (FenceAutoConnect) là **1 hộp vuông NẰM TRÊN đúng 1 ô** → **Ô CÓ RÀO chính là ô chuồng** để thả thú. Nhiều ô-rào kề nhau = chuồng to.
+- **Bài học:** Trước khi code hệ phụ thuộc hình học prefab (rào/tường/ô), **hỏi/nhìn kỹ prefab THẬT chiếm bao nhiêu ô + collider ở đâu** rồi mới chọn thuật toán. Đừng giả định mô hình "ring + interior" mặc định. Dùng **gizmo `OnDrawGizmos`** để nhìn trạng thái ô (tagged/occupied/animal) là cách debug nhanh nhất.
+
+## Về Lookup Dữ Liệu Không Phụ Thuộc Singleton Trong Scene
+- **Vấn đề:** UI túi/shop không hiện thông tin con vật vì `AnimalManager.Instance` null (quên gắn vào scene).
+- **Bài học:** Hàm tra cứu data (def/asset) nên có **fallback load thẳng từ `Resources`** khi Manager-singleton chưa có trong scene (vd `AnimalManager.LookupDefinition` → `Resources.Load`). Như vậy tính năng không chết chỉ vì thiếu 1 GameObject manager, đỡ phụ thuộc setup Editor.

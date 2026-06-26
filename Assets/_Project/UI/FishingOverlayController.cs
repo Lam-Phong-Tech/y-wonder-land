@@ -1,12 +1,14 @@
-﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// Controller for the Fishing Overlay and mini-game.
-/// Handles casting, waiting, QTE timing gauge, bait stocks, results, and cheats.
+/// Controller overlay Câu Cá — bản GỌN (khách 21/06).
+/// Chỉ còn 1 popup "căn thời gian" ở góc phải: hiện số lượt câu trong ngày + nút X.
+/// Bỏ: chọn mồi, test cheat, chỉ số mồi, panel kết quả (báo bằng ScreenToast).
+/// Luồng: bấm F (hoặc nút Quăng cần) -> cửa sổ căn cá ~8.7s -> giật đúng vùng xanh
+///        -> +1 cá vào túi + toast. Trượt/hết giờ -> toast "sẩy cá".
 /// </summary>
 public class FishingOverlayController : MonoBehaviour
 {
@@ -14,656 +16,328 @@ public class FishingOverlayController : MonoBehaviour
 
     [Header("References")]
     [SerializeField] private UIDocument fishingDocument;
-    [SerializeField] private ConfirmDialogController confirmDialog;
 
-    // UI Elements
+    [Header("Luật câu cá (chỉnh được)")]
+    [Tooltip("Tổng thời gian (giây) căn cá tính từ lúc bắt đầu 1 lần câu — khách: ~8.7s.")]
+    [SerializeField] private float castDuration = 8.7f;
+    [Tooltip("Số lượt câu MIỄN PHÍ mỗi ngày.")]
+    [SerializeField] private int dailyTurns = 10;
+    [Tooltip("Bề rộng vùng xanh 'ăn cá' (% thanh). To hơn = dễ hơn.")]
+    [SerializeField] private float safeZoneWidthPercent = 28f;
+    [Tooltip("Tốc độ kim chạy (%/giây).")]
+    [SerializeField] private float pointerSpeed = 110f;
+
+    // UI elements
     private VisualElement root;
-    private Button btnExitFishing;
+    private Button btnExit;
+    private Button btnAction;
     private Label lblFreeTurns;
-    private Label lblBaitNormal;
-    private Label lblBaitPremium;
-
-    // Ready Panel
-    private VisualElement panelReady;
-    private Button btnBaitNone;
-    private Button btnBaitNormal;
-    private Button btnBaitPremium;
-    private Button btnCast;
-
-    // Waiting Panel
-    private VisualElement panelWaiting;
-    private Label lblBobberEmoji;
-    private Button btnCancelCast;
-
-    // QTE Panel
-    private VisualElement panelQte;
+    private Label lblHint;
     private VisualElement qteSafeZone;
     private VisualElement qtePointer;
     private VisualElement qteTimerBar;
-    private Button btnPull;
 
-    // Result Panel
-    private VisualElement panelResultShadow;
-    private VisualElement panelResult;
-    private VisualElement resultHeader;
-    private Label lblResultTitle;
-    private Label lblResultEmoji;
-    private Label lblResultName;
-    private Label lblResultRarity;
-    private Label lblResultDesc;
-    private Button btnResultClose;
-
-    // Cheat Bar
-    private Button btnCheatRefill;
-    private Button btnCheatAddBait;
-    private Toggle toggleCheatAutoWin;
-
-    // Gameplay States
-    private enum FishingState { Idle, Casting, Waiting, QTE, Result }
+    private enum FishingState { Idle, Timing, AutoFishing }
     private FishingState state = FishingState.Idle;
 
-    private enum BaitType { None, Normal, Premium }
-    private BaitType selectedBait = BaitType.None;
-
-    // Game Variables
     private int freeTurns = 10;
-    private int normalBait = 5;
 
-    // QTE Variables
-    private float qteTimerElapsed = 0f;
-    private const float QTE_TIME_LIMIT = 1.5f;
-    private float safeZoneWidthPercent = 20f;
-    private float safeZoneLeftPercent = 40f;
+    // Căn cá
+    private float timerElapsed = 0f;
+    private float safeZoneLeftPercent = 36f;
     private float pointerPosPercent = 0f;
-    private float pointerOscillationSpeed = 160f; // Bounces back and forth quickly
     private bool pointerMovingRight = true;
 
-    // Coroutine tracking
-    private Coroutine waitingCoroutine;
-
-    // Fish Database Item
+    // ── Bảng cá ──
     private struct FishItem
     {
         public string itemId;
         public string name;
-        public string emoji;
         public string rarity;
-        public string desc;
-        public float rewardCoins;
-        public string rarityColorHex;
 
-        public FishItem(string itemId, string name, string emoji, string rarity, string desc, float rewardCoins, string colorHex)
+        public FishItem(string itemId, string name, string rarity)
         {
             this.itemId = itemId;
             this.name = name;
-            this.emoji = emoji;
             this.rarity = rarity;
-            this.desc = desc;
-            this.rewardCoins = rewardCoins;
-            this.rarityColorHex = colorHex;
         }
     }
 
     private readonly List<FishItem> commonFish = new List<FishItem>
     {
-        new FishItem("fish_01", "Cá Rô Phi", "🐟", "Thường", "Cá rô phi ngọt thịt, rất phổ biến ở ao thành phố. Nhận +20 POS!", 20f, "#9E9E9E"),
-        new FishItem("fish_01", "Cá Chép", "🐟", "Thường", "Cá chép sông dày mình, nấu canh rất ngon. Nhận +30 POS!", 30f, "#9E9E9E")
+        new FishItem("fish_01", "Cá Rô Phi", "Thường"),
+        new FishItem("fish_01", "Cá Chép", "Thường")
     };
 
     private readonly List<FishItem> rareFish = new List<FishItem>
     {
-        new FishItem("fish_02", "Cá Trắm Đen", "🐟", "Hiếm", "Cá trắm đen to lớn khỏe mạnh, cực kỳ hiếm gặp ở vùng nước ngọt. Nhận +60 POS!", 60f, "#5B42F3"),
-        new FishItem("fish_02", "Cá Hồi Vây Đỏ", "🐟", "Hiếm", "Cá hồi di cư ngược dòng nước xiết, thịt béo bổ dưỡng. Nhận +80 POS!", 80f, "#5B42F3")
+        new FishItem("fish_02", "Cá Trắm Đen", "Hiếm"),
+        new FishItem("fish_02", "Cá Hồi Vây Đỏ", "Hiếm")
     };
 
     private readonly List<FishItem> epicFish = new List<FishItem>
     {
-        new FishItem("fish_02", "Cá Kiếm Vàng", "🐠", "Sử Thi", "Chú cá cảnh lấp lánh mang sắc vàng hoàng gia kiêu hãnh. Nhận +150 POS!", 150f, "#FFC107"),
-        new FishItem("gift_box_01", "Bao Lì Xì Event", "🎁", "Sự Kiện", "Bao lì xì rớt ra từ sự kiện sông nước Y WONDER GREEN FARM. Nhận +3 Vật phẩm sự kiện 🎫!", 0f, "#9C27B0")
+        new FishItem("fish_02", "Cá Kiếm Vàng", "Sử Thi")
     };
 
     private void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-            return;
-        }
+        if (Instance == null) Instance = this;
+        else { Destroy(gameObject); return; }
 
-        if (fishingDocument == null)
-            fishingDocument = GetComponent<UIDocument>();
+        if (fishingDocument == null) fishingDocument = GetComponent<UIDocument>();
 
-        // Check date for resetting free turns
+        // Reset lượt câu miễn phí theo NGÀY thật.
         string lastDate = PlayerPrefs.GetString("FishingLastDate", "");
         string today = System.DateTime.Now.ToString("yyyy-MM-dd");
-        
         if (lastDate != today)
         {
-            freeTurns = 10;
+            freeTurns = dailyTurns;
             PlayerPrefs.SetString("FishingLastDate", today);
             PlayerPrefs.SetInt("FishingFreeTurns", freeTurns);
             PlayerPrefs.Save();
         }
         else
         {
-            freeTurns = PlayerPrefs.GetInt("FishingFreeTurns", 10);
+            freeTurns = PlayerPrefs.GetInt("FishingFreeTurns", dailyTurns);
         }
     }
 
     private void OnEnable()
     {
-        if (confirmDialog == null) confirmDialog = FindFirstObjectByType<ConfirmDialogController>();
         if (fishingDocument == null) return;
-
         root = fishingDocument.rootVisualElement;
 
-        // Query Status Bar
-        btnExitFishing = root.Q<Button>("BtnExitFishing");
+        btnExit = root.Q<Button>("BtnExitFishing");
+        btnAction = root.Q<Button>("BtnAction");
         lblFreeTurns = root.Q<Label>("LblFreeTurns");
-        lblBaitNormal = root.Q<Label>("LblBaitNormal");
-        lblBaitPremium = root.Q<Label>("LblBaitPremium");
-
-        // Query Ready Panel
-        panelReady = root.Q<VisualElement>("PanelReady");
-        btnBaitNone = root.Q<Button>("BtnBaitNone");
-        btnBaitNormal = root.Q<Button>("BtnBaitNormal");
-        btnBaitPremium = root.Q<Button>("BtnBaitPremium");
-        btnCast = root.Q<Button>("BtnCast");
-
-        // Query Waiting Panel
-        panelWaiting = root.Q<VisualElement>("PanelWaiting");
-        lblBobberEmoji = root.Q<Label>("LblBobberEmoji");
-        btnCancelCast = root.Q<Button>("BtnCancelCast");
-
-        // Query QTE Panel
-        panelQte = root.Q<VisualElement>("PanelQTE");
+        lblHint = root.Q<Label>("LblHint");
         qteSafeZone = root.Q<VisualElement>("QTESafeZone");
         qtePointer = root.Q<VisualElement>("QTEPointer");
         qteTimerBar = root.Q<VisualElement>("QTETimerBar");
-        btnPull = root.Q<Button>("BtnPull");
 
-        // Query Result Panel
-        panelResultShadow = root.Q<VisualElement>("PanelResultShadow");
-        panelResult = root.Q<VisualElement>("PanelResult");
-        resultHeader = root.Q<VisualElement>("ResultHeader");
-        lblResultTitle = root.Q<Label>("LblResultTitle");
-        lblResultEmoji = root.Q<Label>("LblResultEmoji");
-        lblResultName = root.Q<Label>("LblResultName");
-        lblResultRarity = root.Q<Label>("LblResultRarity");
-        lblResultDesc = root.Q<Label>("LblResultDesc");
-        btnResultClose = root.Q<Button>("BtnResultClose");
+        btnExit?.RegisterCallback<ClickEvent>(OnExitClicked);
+        btnAction?.RegisterCallback<ClickEvent>(OnActionClicked);
 
-        // Query Cheat Bar
-        btnCheatRefill = root.Q<Button>("BtnCheatRefill");
-        btnCheatAddBait = root.Q<Button>("BtnCheatAddBait");
-        toggleCheatAutoWin = root.Q<Toggle>("ToggleCheatAutoWin");
-
-        RegisterCallbacks();
         UpdateUI();
-        
-        // Start Hidden
         Hide();
     }
 
-    private void RegisterCallbacks()
+    private void OnDisable()
     {
-        // Exit
-        btnExitFishing?.RegisterCallback<ClickEvent>(evt => Hide());
+        btnExit?.UnregisterCallback<ClickEvent>(OnExitClicked);
+        btnAction?.UnregisterCallback<ClickEvent>(OnActionClicked);
 
-        // Cast & Cancel
-        btnCast?.RegisterCallback<ClickEvent>(evt => TryCastRod());
-        btnCancelCast?.RegisterCallback<ClickEvent>(evt => CancelFishing());
+        // An toàn: gỡ khỏi tracker để chuột không kẹt nếu overlay tắt giữa chừng (đổi đảo...).
+        UIPopupTracker.SetOpen(this, false);
+    }
 
-        // Bait choices
-        btnBaitNone?.RegisterCallback<ClickEvent>(evt => SelectBait(BaitType.None));
-        btnBaitNormal?.RegisterCallback<ClickEvent>(evt => SelectBait(BaitType.Normal));
-        btnBaitPremium?.RegisterCallback<ClickEvent>(evt => SelectBait(BaitType.Premium));
+    private void OnExitClicked(ClickEvent evt) => Hide();
 
-        // Pull & Result Close
-        btnPull?.RegisterCallback<ClickEvent>(evt => AttemptPull());
-        btnResultClose?.RegisterCallback<ClickEvent>(evt => CloseResult());
-
-        // Cheats
-        btnCheatRefill?.RegisterCallback<ClickEvent>(evt =>
-        {
-            freeTurns = 10;
-            PlayerPrefs.SetInt("FishingFreeTurns", freeTurns);
-            UpdateUI();
-            Debug.Log("[Fishing] Cheat: Refilled free turns to 10.");
-        });
-
-        btnCheatAddBait?.RegisterCallback<ClickEvent>(evt =>
-        {
-            var inv = YWonderLand.Managers.InventoryManager.Instance;
-            if (inv != null) inv.AddItem("bait_01", 10);
-            UpdateUI();
-            Debug.Log("[Fishing] Cheat: Added 10 normal baits.");
-        });
+    private void OnActionClicked(ClickEvent evt)
+    {
+        if (state == FishingState.Idle) StartCast(true);
+        else AttemptPull();
     }
 
     private void Update()
     {
-        if (state == FishingState.Idle) return;
+        // BẢN TẠM: câu tự động — đợi hết thời gian rồi trao cá (không cần thao tác).
+        if (state == FishingState.AutoFishing)
+        {
+            timerElapsed += Time.deltaTime;
+            if (timerElapsed >= castDuration)
+                HandleCatch();
+            return;
+        }
 
-        // Global hotkey Space to Pull when in QTE state
+        if (state != FishingState.Timing) return;
+
+        // Phím tắt giật cần: Space hoặc F.
         var keyboard = Keyboard.current;
-        if (keyboard != null)
+        if (keyboard != null && (keyboard.spaceKey.wasPressedThisFrame || keyboard.fKey.wasPressedThisFrame))
         {
-            if (state == FishingState.QTE && keyboard.spaceKey.wasPressedThisFrame)
-            {
-                AttemptPull();
-            }
+            AttemptPull();
+            return;
         }
 
-        // State 2 Waiting: Bobber Animation
-        if (state == FishingState.Waiting && lblBobberEmoji != null)
+        // Kim chạy qua lại.
+        float delta = pointerSpeed * Time.deltaTime;
+        if (pointerMovingRight)
         {
-            float bobAmount = Mathf.Sin(Time.time * 6f) * 12f;
-            lblBobberEmoji.style.translate = new Translate(0f, bobAmount, 0f);
+            pointerPosPercent += delta;
+            if (pointerPosPercent >= 100f) { pointerPosPercent = 100f; pointerMovingRight = false; }
         }
-
-        // State 3 QTE: Needle oscillation + Timer decay
-        if (state == FishingState.QTE)
+        else
         {
-            // Bouncing pointer calculation
-            float delta = pointerOscillationSpeed * Time.deltaTime;
-            if (pointerMovingRight)
-            {
-                pointerPosPercent += delta;
-                if (pointerPosPercent >= 100f)
-                {
-                    pointerPosPercent = 100f;
-                    pointerMovingRight = false;
-                }
-            }
-            else
-            {
-                pointerPosPercent -= delta;
-                if (pointerPosPercent <= 0f)
-                {
-                    pointerPosPercent = 0f;
-                    pointerMovingRight = true;
-                }
-            }
+            pointerPosPercent -= delta;
+            if (pointerPosPercent <= 0f) { pointerPosPercent = 0f; pointerMovingRight = true; }
+        }
+        if (qtePointer != null) qtePointer.style.left = Length.Percent(pointerPosPercent);
 
-            if (qtePointer != null)
-            {
-                qtePointer.style.left = Length.Percent(pointerPosPercent);
-            }
+        // Thời gian căn cá còn lại (8.7s).
+        timerElapsed += Time.deltaTime;
+        float ratio = Mathf.Clamp01(1f - (timerElapsed / castDuration));
+        if (qteTimerBar != null) qteTimerBar.style.width = Length.Percent(ratio * 100f);
 
-            // Time decay
-            qteTimerElapsed += Time.deltaTime;
-            float timeRatio = Mathf.Clamp01(1f - (qteTimerElapsed / QTE_TIME_LIMIT));
-            if (qteTimerBar != null)
-            {
-                qteTimerBar.style.width = Length.Percent(timeRatio * 100f);
-            }
-
-            if (qteTimerElapsed >= QTE_TIME_LIMIT)
-            {
-                HandleQTEFail("Cá đớp mồi chạy mất tiêu vì bạn giật quá chậm! 😢");
-            }
+        if (timerElapsed >= castDuration)
+        {
+            HandleMiss("Hết giờ, cá bơi mất rồi!");
         }
     }
 
     /// <summary>
-    /// Open the Fishing interface screen.
+    /// BẢN TẠM (khách 21/06): ẩn popup câu cá. Bấm F -> đợi hết thời gian (animation 8.7s đang chạy)
+    /// -> tự cộng 1 con cá + toast. Minigame căn-giờ (Show cũ) giữ lại để SỬA SAU.
     /// </summary>
     public void Show()
     {
-        if (fishingDocument != null && fishingDocument.rootVisualElement != null)
+        if (state != FishingState.Idle) return; // đang câu rồi thì bỏ qua
+
+        if (freeTurns <= 0)
         {
-            fishingDocument.rootVisualElement.style.display = DisplayStyle.Flex;
-            state = FishingState.Idle;
-            SelectBait(BaitType.None);
-            UpdateUI();
-
-            // Trả chuột ỔN ĐỊNH + dừng tương tác thế giới khi đang câu (hết "lưỡng lự" con trỏ):
-            // báo cho ThirdPersonCamera mở khoá chuột và FarmInteractionController ngừng raycast.
-            UIPopupTracker.SetOpen(this, true);
-
-            // Hide GameHUD to avoid overlap
-            var hud = FindFirstObjectByType<GameHUDController>();
-            if (hud != null) hud.SetHUDVisible(false);
-
-            Debug.Log("[Fishing] Entering Fishing Mode");
+            YWonderLand.Environment.ScreenToast.Show("Hết lượt câu hôm nay rồi! Mai quay lại nhé.");
+            return;
         }
+
+        freeTurns--;
+        PlayerPrefs.SetInt("FishingFreeTurns", freeTurns);
+        PlayerPrefs.Save();
+
+        // KHÔNG hiện popup; chỉ chờ animation + thời gian rồi trao cá.
+        state = FishingState.AutoFishing;
+        timerElapsed = 0f;
+        YWonderLand.Environment.ScreenToast.ShowInfo("Đang câu cá... chờ chút nhé!");
+        Debug.Log("[Fishing] Auto-fishing started (popup hidden).");
     }
 
-    /// <summary>
-    /// Close the Fishing interface screen.
-    /// </summary>
+    /// <summary>Đóng overlay câu cá.</summary>
     public void Hide()
     {
-        if (fishingDocument != null && fishingDocument.rootVisualElement != null)
-        {
-            CancelFishing();
-            fishingDocument.rootVisualElement.style.display = DisplayStyle.None;
+        if (fishingDocument == null || fishingDocument.rootVisualElement == null) return;
 
-            // Khoá lại chuột cho gameplay (gỡ khỏi tracker)
-            UIPopupTracker.SetOpen(this, false);
+        state = FishingState.Idle;
+        fishingDocument.rootVisualElement.style.display = DisplayStyle.None;
 
-            // Restore GameHUD
-            var hud = FindFirstObjectByType<GameHUDController>();
-            if (hud != null) hud.SetHUDVisible(true);
+        // Thu dây câu + phao về.
+        if (YWonderLand.Environment.FishingLineController.Instance != null)
+            YWonderLand.Environment.FishingLineController.Instance.Reel();
 
-            Debug.Log("[Fishing] Exiting Fishing Mode");
-        }
-    }
-
-    // An toàn: nếu overlay bị tắt/destroy lúc đang câu (vd đổi đảo) mà chưa kịp Hide(),
-    // vẫn gỡ khỏi UIPopupTracker để chuột không bị kẹt.
-    private void OnDisable()
-    {
         UIPopupTracker.SetOpen(this, false);
+
+        var hud = FindFirstObjectByType<GameHUDController>();
+        if (hud != null) hud.SetHUDVisible(true);
+
+        Debug.Log("[Fishing] Exiting Fishing Mode");
     }
 
-    private void UpdateUI()
-    {
-        var inv = YWonderLand.Managers.InventoryManager.Instance;
-        int currentNormalBait = inv != null ? inv.GetItemQuantity("bait_01") : 0;
-        int currentPremiumBait = 0; // Not implemented yet
-        
-        if (lblFreeTurns != null) lblFreeTurns.text = $"Lượt câu: {freeTurns}/10";
-        if (lblBaitNormal != null) lblBaitNormal.text = $"Mồi thường: {currentNormalBait}";
-        if (lblBaitPremium != null) lblBaitPremium.text = $"Mồi xịn: {currentPremiumBait}";
-
-        // Bait button active classes
-        btnBaitNone?.EnableInClassList("active-bait", selectedBait == BaitType.None);
-        btnBaitNormal?.EnableInClassList("active-bait", selectedBait == BaitType.Normal);
-        btnBaitPremium?.EnableInClassList("active-bait", selectedBait == BaitType.Premium);
-
-        // Display Panels based on current state
-        panelReady?.EnableInClassList("hidden", state != FishingState.Idle);
-        panelWaiting?.EnableInClassList("hidden", state != FishingState.Waiting);
-        panelQte?.EnableInClassList("hidden", state != FishingState.QTE);
-        panelResultShadow?.EnableInClassList("hidden", state != FishingState.Result);
-    }
-
-    private void SelectBait(BaitType baitType)
+    /// <summary>Bắt đầu 1 lần căn cá (trừ 1 lượt). playAnim=true thì cho nhân vật vung cần lại.</summary>
+    private void StartCast(bool playAnim)
     {
         if (state != FishingState.Idle) return;
 
-        var inv = YWonderLand.Managers.InventoryManager.Instance;
-
-        // Validation: do we have enough?
-        if (baitType == BaitType.Normal && (inv == null || inv.GetItemQuantity("bait_01") <= 0))
+        if (freeTurns <= 0)
         {
-            Debug.LogWarning("[Fishing] Hết mồi thường!");
-            return;
-        }
-        if (baitType == BaitType.Premium)
-        {
-            Debug.LogWarning("[Fishing] Hết mồi xịn!");
+            YWonderLand.Environment.ScreenToast.Show("Hết lượt câu hôm nay rồi! Mai quay lại nhé.");
+            UpdateUI();
             return;
         }
 
-        selectedBait = baitType;
-        UpdateUI();
-    }
+        freeTurns--;
+        PlayerPrefs.SetInt("FishingFreeTurns", freeTurns);
+        PlayerPrefs.Save();
 
-    private void TryCastRod()
-    {
-        if (state != FishingState.Idle) return;
+        if (playAnim && PlayerController.Instance != null)
+            PlayerController.Instance.PlayActionAnimation("Fishing", castDuration, YWonderLand.Player.ToolType.FishingRod);
 
-        // Check turn count
-        if (freeTurns <= 0 && selectedBait == BaitType.None)
-        {
-            // Require bait if no free turns
-            if (confirmDialog != null)
-            {
-                confirmDialog.Show(
-                    "HẾT LƯỢT MIỄN PHÍ",
-                    "Bạn đã hết lượt câu miễn phí hôm nay. Hãy chọn Mồi câu để tiếp tục, hoặc mua thêm Mồi từ cửa hàng.",
-                    "Đã hiểu",
-                    "Thoát",
-                    () => { }
-                );
-            }
-            else
-            {
-                Debug.LogWarning("[Fishing] Hết lượt câu, yêu cầu mồi!");
-            }
-            return;
-        }
-
-        // Deduct turn and bait
-        if (freeTurns > 0)
-        {
-            freeTurns--;
-            PlayerPrefs.SetInt("FishingFreeTurns", freeTurns);
-        }
-        
-        var inv = YWonderLand.Managers.InventoryManager.Instance;
-        if (selectedBait == BaitType.Normal && inv != null)
-        {
-            inv.RemoveItem("bait_01", 1);
-        }
-
-        state = FishingState.Waiting;
-        UpdateUI();
-        Debug.Log($"[Fishing] CastRod successful. Spent 1 turn. Bait selected: {selectedBait}");
-
-        // Start waiting coroutine (random wait time 3 to 6s)
-        float waitTime = Random.Range(3f, 6f);
-        waitingCoroutine = StartCoroutine(CastingWaitRoutine(waitTime));
-    }
-
-    private void OnConfirmBaitPurchase()
-    {
-        // Mock buying turns/bait
-        freeTurns += 5;
-        normalBait += 5;
-        UpdateUI();
-        Debug.Log("[Fishing] Mua 5 lượt câu thành công bằng POS!");
-    }
-
-    private IEnumerator CastingWaitRoutine(float seconds)
-    {
-        yield return new WaitForSeconds(seconds);
-        
-        // Trigger QTE Phase
-        state = FishingState.QTE;
-        qteTimerElapsed = 0f;
-        pointerPosPercent = 0f;
-        pointerMovingRight = true;
-
-        // Configure Safe Zone sizes and location dynamically
-        // Bait gives benefits: None = 15% width, Normal = 26% width, Premium = 40% width
-        switch (selectedBait)
-        {
-            case BaitType.None:
-                safeZoneWidthPercent = 15f;
-                pointerOscillationSpeed = 160f;
-                break;
-            case BaitType.Normal:
-                safeZoneWidthPercent = 26f;
-                pointerOscillationSpeed = 130f; // slightly slower pointer
-                break;
-            case BaitType.Premium:
-                safeZoneWidthPercent = 40f;
-                pointerOscillationSpeed = 100f; // much slower pointer, easier
-                break;
-        }
-
-        // Random safe zone position (keep it inside the 0-100% track boundary)
-        safeZoneLeftPercent = Random.Range(10f, 90f - safeZoneWidthPercent);
-
+        // Đặt vùng xanh ngẫu nhiên trong thanh.
+        safeZoneLeftPercent = Random.Range(12f, 88f - safeZoneWidthPercent);
         if (qteSafeZone != null)
         {
             qteSafeZone.style.width = Length.Percent(safeZoneWidthPercent);
             qteSafeZone.style.left = Length.Percent(safeZoneLeftPercent);
         }
 
+        state = FishingState.Timing;
+        timerElapsed = 0f;
+        pointerPosPercent = 0f;
+        pointerMovingRight = true;
+
         UpdateUI();
-        Debug.Log("[Fishing] Fish is biting! QTE phase started.");
+        Debug.Log("[Fishing] Cast started. Timing window begins.");
     }
 
-    private void CancelFishing()
-    {
-        if (waitingCoroutine != null)
-        {
-            StopCoroutine(waitingCoroutine);
-            waitingCoroutine = null;
-        }
-
-        state = FishingState.Idle;
-        UpdateUI();
-        Debug.Log("[Fishing] Fishing cancelled.");
-    }
-
+    /// <summary>Giật cần — trúng vùng xanh thì ăn cá.</summary>
     private void AttemptPull()
     {
-        if (state != FishingState.QTE) return;
+        if (state != FishingState.Timing) return;
 
-        bool isAutoWin = toggleCheatAutoWin != null && toggleCheatAutoWin.value;
-        bool isSuccess = false;
+        float safeMin = safeZoneLeftPercent;
+        float safeMax = safeZoneLeftPercent + safeZoneWidthPercent;
+        bool success = pointerPosPercent >= safeMin && pointerPosPercent <= safeMax;
 
-        if (isAutoWin)
-        {
-            isSuccess = true;
-            Debug.Log("[Fishing] Cheat: QTE auto-win activated.");
-        }
-        else
-        {
-            // Safe zone boundary check
-            float safeMin = safeZoneLeftPercent;
-            float safeMax = safeZoneLeftPercent + safeZoneWidthPercent;
-            if (pointerPosPercent >= safeMin && pointerPosPercent <= safeMax)
-            {
-                isSuccess = true;
-            }
-        }
-
-        if (isSuccess)
-        {
-            HandleQTESuccess();
-        }
-        else
-        {
-            HandleQTEFail("Hụt mất rồi! Bạn giật cần khi cá chưa đớp đúng tầm phao! 😢");
-        }
+        if (success) HandleCatch();
+        else HandleMiss("Trượt rồi! Giật khi phao nằm trong vùng xanh nhé.");
     }
 
-    private void HandleQTESuccess()
-    {
-        state = FishingState.Result;
-        
-        // Payout determination based on bait
-        FishItem caught;
-        float roll = Random.Range(0f, 1f);
-
-        // Odds modify based on Premium vs Normal vs None bait
-        float epicChance = 0.08f; // 8% base
-        float rareChance = 0.25f; // 25% base
-
-        if (selectedBait == BaitType.Normal)
-        {
-            epicChance = 0.15f;
-            rareChance = 0.40f;
-        }
-        else if (selectedBait == BaitType.Premium)
-        {
-            epicChance = 0.35f;
-            rareChance = 0.50f;
-        }
-
-        if (roll < epicChance)
-        {
-            caught = epicFish[Random.Range(0, epicFish.Count)];
-        }
-        else if (roll < epicChance + rareChance)
-        {
-            caught = rareFish[Random.Range(0, rareFish.Count)];
-        }
-        else
-        {
-            caught = commonFish[Random.Range(0, commonFish.Count)];
-        }
-
-        // Configure Result Screen
-        resultHeader?.EnableInClassList("success-bg", true);
-        resultHeader?.EnableInClassList("fail-bg", false);
-
-        if (lblResultTitle != null) lblResultTitle.text = "CÂU THÀNH CÔNG!";
-        if (lblResultEmoji != null) lblResultEmoji.text = caught.emoji;
-        if (lblResultName != null) lblResultName.text = caught.name;
-        if (lblResultRarity != null)
-        {
-            lblResultRarity.text = $"Độ hiếm: {caught.rarity}";
-            lblResultRarity.style.color = ParseColor(caught.rarityColorHex);
-            lblResultRarity.style.backgroundColor = ParseColor(caught.rarityColorHex + "1A"); // 10% opacity
-        }
-        if (lblResultDesc != null) lblResultDesc.text = caught.desc;
-
-        UpdateUI();
-        Debug.Log($"[Fishing] QTE success. Caught: {caught.name} ({caught.rarity})");
-
-        // Reward Payout Log
-        if (caught.rewardCoins > 0)
-        {
-            // Simulating coin reward addition
-            Debug.Log($"[Fishing] Reward coin added to player: +{caught.rewardCoins} POS");
-        }
-        
-        // Add to Inventory
-        var inv = YWonderLand.Managers.InventoryManager.Instance;
-        if (inv != null && !string.IsNullOrEmpty(caught.itemId))
-        {
-            inv.AddItem(caught.itemId, 1);
-            Debug.Log($"[Fishing] Added 1x {caught.itemId} to inventory.");
-        }
-        
-        // Connect to Event exchange if Gift box caught
-        if (caught.rarity == "Sự Kiện")
-        {
-            Debug.Log("[Fishing] Event gift box added! Triggered +3 tickets.");
-        }
-    }
-
-    private void HandleQTEFail(string failureMessage)
-    {
-        state = FishingState.Result;
-
-        // Configure Result Screen for Failures
-        resultHeader?.EnableInClassList("success-bg", false);
-        resultHeader?.EnableInClassList("fail-bg", true);
-
-        if (lblResultTitle != null) lblResultTitle.text = "HỤT MẤT RỒI!";
-        if (lblResultEmoji != null) lblResultEmoji.text = "💨";
-        if (lblResultName != null) lblResultName.text = "Cá Đã Thoát";
-        if (lblResultRarity != null)
-        {
-            lblResultRarity.text = "Độ hiếm: Không";
-            lblResultRarity.style.color = Color.gray;
-            lblResultRarity.style.backgroundColor = new Color(0.5f, 0.5f, 0.5f, 0.1f);
-        }
-        if (lblResultDesc != null) lblResultDesc.text = failureMessage;
-
-        UpdateUI();
-        Debug.Log("[Fishing] QTE failed. Fish escaped.");
-    }
-
-    private void CloseResult()
+    private void HandleCatch()
     {
         state = FishingState.Idle;
-        SelectBait(BaitType.None); // default back to none
+
+        // Bốc loại cá theo tỉ lệ (không còn mồi -> tỉ lệ cơ bản).
+        FishItem caught;
+        float roll = Random.Range(0f, 1f);
+        if (roll < 0.08f) caught = epicFish[Random.Range(0, epicFish.Count)];
+        else if (roll < 0.33f) caught = rareFish[Random.Range(0, rareFish.Count)];
+        else caught = commonFish[Random.Range(0, commonFish.Count)];
+
+        var inv = YWonderLand.Managers.InventoryManager.Instance;
+        if (inv != null && !string.IsNullOrEmpty(caught.itemId))
+            inv.AddItem(caught.itemId, 1);
+
+        YWonderLand.Environment.ScreenToast.ShowInfo($"Câu được: +1 {caught.name} ({caught.rarity})");
+        Debug.Log($"[Fishing] Caught {caught.name}.");
+
+        // Thu dây câu + phao về (vì StartFishing đã quăng dây ra).
+        if (YWonderLand.Environment.FishingLineController.Instance != null)
+            YWonderLand.Environment.FishingLineController.Instance.Reel();
+
         UpdateUI();
     }
 
-    /// <summary>
-    /// Helper to parse color hex strings.
-    /// </summary>
-    private Color ParseColor(string hex)
+    private void HandleMiss(string reason)
     {
-        if (ColorUtility.TryParseHtmlString(hex, out Color color))
+        state = FishingState.Idle;
+        YWonderLand.Environment.ScreenToast.Show(reason);
+        Debug.Log($"[Fishing] Miss: {reason}");
+        UpdateUI();
+    }
+
+    private void UpdateUI()
+    {
+        if (lblFreeTurns != null) lblFreeTurns.text = $"Lượt câu hôm nay: {freeTurns}/{dailyTurns}";
+
+        bool timing = state == FishingState.Timing;
+
+        if (btnAction != null)
         {
-            return color;
+            btnAction.text = timing ? "GIẬT CẦN!" : "QUĂNG CẦN";
+            btnAction.EnableInClassList("fish-action-btn--pull", timing);
+            btnAction.SetEnabled(timing || freeTurns > 0); // hết lượt + đang Idle -> mờ nút
         }
-        return Color.white;
+
+        if (lblHint != null)
+        {
+            if (timing)
+                lblHint.text = "Canh phao vào VÙNG XANH rồi Giật (F / Space)!";
+            else if (freeTurns > 0)
+                lblHint.text = "Bấm Quăng cần (F) để bắt đầu";
+            else
+                lblHint.text = "Hết lượt câu hôm nay — mai quay lại nhé!";
+        }
+
+        // Cập nhật vị trí kim; thanh giờ về đầy khi không trong lúc căn cá.
+        if (qtePointer != null) qtePointer.style.left = Length.Percent(pointerPosPercent);
+        if (!timing && qteTimerBar != null) qteTimerBar.style.width = Length.Percent(100f);
     }
 }

@@ -9,6 +9,17 @@ public class BoatCutscene : MonoBehaviour
     public float movementSpeed = 3.0f;
     public float arrivalDistance = 0.5f;
 
+    [Header("Model Rotation Offset")]
+    [Tooltip("BẬT (khuyến nghị): script TỰ tính góc bù từ rotation anh đã căn sẵn trên thuyền (lúc đứng yên) " +
+             "+ hướng tới waypoint đầu. Anh chỉ cần chỉnh Transform thuyền cho mũi hướng đúng đảo, script giữ tư thế đó khi di chuyển.")]
+    public bool autoOffsetFromInitialRotation = true;
+
+    [Tooltip("Chỉ dùng khi TẮT auto ở trên: góc bù thủ công (Blender thường -90 X).")]
+    public Vector3 rotationOffsetEuler = new Vector3(-90f, 0f, 0f);
+
+    // Offset thực tế áp dụng (tính ở StartCutscene nếu auto, hoặc lấy từ rotationOffsetEuler).
+    private Quaternion modelOffset = Quaternion.identity;
+
     [Header("Cinematic Camera Angles")]
     public Transform cameraPosition1; // Wide Angle (e.g., High in the sky looking at boat)
     public Transform cameraPosition2; // Character Close-up (usually parented to the boat!)
@@ -53,6 +64,9 @@ public class BoatCutscene : MonoBehaviour
         startPosition = transform.position;
         cutsceneTimer = 0f;
 
+        // Ẩn name tag trong lúc cutscene để người chơi tập trung quang cảnh (hiện lại ở EndCutscene).
+        FloatingNameTag.GloballyHidden = true;
+
         if (waypoints.Count > 0)
         {
             Transform lastWaypoint = waypoints[waypoints.Count - 1];
@@ -68,8 +82,30 @@ public class BoatCutscene : MonoBehaviour
             Debug.LogWarning("Please configure Waypoints for the Boat Cutscene in Inspector!");
         }
 
+        // Tính góc bù model (giữ tư thế thuyền anh đã căn) trước khi bắt đầu xoay theo đường đi.
+        ComputeModelOffset();
+
         // Setup the dynamic Cutscene UI
         SetupCutsceneUI();
+    }
+
+    // Suy ra offset model: so rotation anh đã căn sẵn (mũi hướng đảo) với hướng tới waypoint đầu.
+    // Nhờ vậy thuyền giữ đúng tư thế anh chỉnh trong Inspector khi di chuyển/xoay, không bị lật.
+    private void ComputeModelOffset()
+    {
+        if (autoOffsetFromInitialRotation && waypoints.Count > 0 && waypoints[0] != null)
+        {
+            Vector3 dir0 = waypoints[0].position - transform.position;
+            dir0.y = 0f;
+            if (dir0.sqrMagnitude > 0.0001f)
+            {
+                modelOffset = Quaternion.Inverse(Quaternion.LookRotation(dir0.normalized)) * transform.rotation;
+                Debug.Log("[BoatCutscene] Offset model tự suy từ rotation đã căn sẵn.");
+                return;
+            }
+        }
+        // Fallback: dùng offset Euler thủ công.
+        modelOffset = Quaternion.Euler(rotationOffsetEuler);
     }
 
     void Update()
@@ -123,11 +159,12 @@ public class BoatCutscene : MonoBehaviour
 
         transform.position = Vector3.MoveTowards(transform.position, targetPos, movementSpeed * Time.deltaTime);
 
-        // Rotate boat to face target waypoint smoothly
+        // Rotate boat to face target waypoint smoothly.
+        // GIỮ offset model (Blender xoay) bằng cách nhân thêm rotationOffsetEuler -> không bị lật.
         Vector3 direction = (targetPos - transform.position).normalized;
         if (direction != Vector3.zero)
         {
-            Quaternion targetRotation = Quaternion.LookRotation(direction);
+            Quaternion targetRotation = Quaternion.LookRotation(direction) * modelOffset;
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 5f * Time.deltaTime);
         }
 
@@ -364,7 +401,7 @@ public class BoatCutscene : MonoBehaviour
                 if (waypoints.Count > 1)
                 {
                     Vector3 arrivalDir = (finalWaypoint.position - waypoints[waypoints.Count - 2].position).normalized;
-                    if (arrivalDir != Vector3.zero) transform.rotation = Quaternion.LookRotation(arrivalDir);
+                    if (arrivalDir != Vector3.zero) transform.rotation = Quaternion.LookRotation(arrivalDir) * modelOffset;
                 }
                 else
                 {
@@ -383,11 +420,38 @@ public class BoatCutscene : MonoBehaviour
         EndCutscene();
     }
 
+    /// <summary>Đặt thuyền NGAY tại bến (waypoint cuối) — gọi khi RESUME (bỏ cutscene) để thuyền
+    /// không nằm lại điểm xuất phát. Dùng lại logic teleport của SkipCutscene.</summary>
+    public void SnapToDock()
+    {
+        if (waypoints == null || waypoints.Count == 0) return;
+        ComputeModelOffset(); // suy offset tư thế thuyền (StartCutscene chưa chạy khi resume)
+
+        Transform finalWaypoint = waypoints[waypoints.Count - 1];
+        if (finalWaypoint == null) return;
+
+        transform.position = finalWaypoint.position;
+        if (waypoints.Count > 1 && waypoints[waypoints.Count - 2] != null)
+        {
+            Vector3 arrivalDir = (finalWaypoint.position - waypoints[waypoints.Count - 2].position).normalized;
+            if (arrivalDir != Vector3.zero) transform.rotation = Quaternion.LookRotation(arrivalDir) * modelOffset;
+        }
+        else
+        {
+            transform.rotation = finalWaypoint.rotation;
+        }
+        isCutscenePlaying = false;
+        Debug.Log("[BoatCutscene] SnapToDock — đặt thuyền tại bến (resume).");
+    }
+
     private void EndCutscene()
     {
         if (!isCutscenePlaying) return; // Prevent double trigger
         isCutscenePlaying = false;
         Debug.Log("[BoatCutscene] Boat Cutscene Completed!");
+
+        // Hiện lại name tag khi cập bến / bấm skip / timeout (EndCutscene là điểm hội tụ chung).
+        FloatingNameTag.GloballyHidden = false;
         
         // Clean up UI
         if (cutsceneUIDocument != null)

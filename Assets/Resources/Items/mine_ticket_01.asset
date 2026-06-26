@@ -17,6 +17,7 @@ MonoBehaviour:
   description: "Th\xEAm 5 l\u01B0\u1EE3t \u0111\xE0o qu\u1EB7ng."
   iconEmoji: "\U0001F3AB"
   iconSprite: {fileID: 0}
+  iconTexture: {fileID: 2800000, guid: ef1501acff120e14bacb1b40c358ada3, type: 3}
   category: items
   buyPrice: 100
   sellPrice: 0

@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cac8b9f5919afc44599c356803f7ca4a, type: 3}
+  m_Name: coconut_seed_01
+  m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.ItemDefinition
+  id: coconut_seed_01
+  itemName: "Gi\u1ED1ng d\u1EEBa"
+  description: "Gi\u1ED1ng c\xE2y d\u1EEBa."
+  iconEmoji: "\U0001F965"
+  iconSprite: {fileID: 0}
+  iconTexture: {fileID: 2800000, guid: cf3bed39766bf224fae64204663740e8, type: 3}
+  category: seeds
+  buyPrice: 200
+  sellPrice: 20
+  canSell: 1
+  isStackable: 1
+  maxStack: 999

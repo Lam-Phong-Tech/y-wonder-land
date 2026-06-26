@@ -1,6 +1,33 @@
 ﻿# API Contracts — Y WONDER GREEN FARM
-# Cập nhật: 2026-06-01
-# Backend: Unity Gaming Services (UGS)
+# Cập nhật: 2026-06-16
+# Backend: REST API riêng (Node/Go/Python) + DB (theo kịch bản khách)
+
+> ⚠️ **ĐỔI HƯỚNG (16/06/2026):** Dự án dùng **REST API riêng**, KHÔNG dùng UGS.
+> Phần "UGS" bên dưới giữ lại làm tham khảo cũ — KHÔNG còn áp dụng.
+
+---
+
+## REST API — Đợt 1 (Profile + Tutorial) — ĐÃ IMPLEMENT (server stub)
+
+Server stub dev: `server/` (Node/Express, lưu `data.json`), mặc định `http://localhost:3000`.
+Client: `Assets/_Project/Scripts/Backend/` (`ApiClient`, `AuthService`, `PlayerProfileService`). Offline-first: lỗi mạng -> fallback cache `PlayerPrefs`.
+
+| Method | Endpoint | Body | Trả về |
+|---|---|---|---|
+| GET  | `/` | — | `{ ok }` (health) |
+| POST | `/auth/register` | `{ username, password }` | `{ token, userId }` |
+| POST | `/auth/login` | `{ username, password }` | `{ token, userId }` |
+| GET  | `/player/profile` | header `Authorization: Bearer <token>` | `{ player_profile {...} }` |
+| PUT  | `/player/profile` | `{ player_profile {...} }` + Bearer | `{ ok, updatedAt }` |
+
+`player_profile`: theo `docs/DATA_SCHEMA.md` + field `tutorialCompleted` (bool).
+**Token đợt 1:** JWT đơn giản (stub, KHÔNG production). Auth đợt 1 dùng username = tên nhân vật, mật khẩu sinh & lưu local (chưa nối UI Login — để đợt 2).
+
+> **Lộ trình:** Đợt 2 nối UI Login/Register + Economy + Inventory; Đợt 3 Farm/Animal/Resource; Đợt 4 realtime (Photon) + Firebase push.
+
+---
+
+# (THAM KHẢO CŨ — UGS, KHÔNG còn áp dụng)
 
 > **Lưu ý:** Đây là blueprint cho việc tích hợp UGS. Các service chưa tích hợp thật.
 > Cập nhật file này khi implement từng service.

@@ -17,6 +17,7 @@ MonoBehaviour:
   description: "G\u1ED7 ch\u1EB7t t\u1EEB c\xE2y."
   iconEmoji: "\U0001FAB5"
   iconSprite: {fileID: 0}
+  iconTexture: {fileID: 0}
   category: materials
   buyPrice: 0
   sellPrice: 8

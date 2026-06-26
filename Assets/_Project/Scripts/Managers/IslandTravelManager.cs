@@ -46,6 +46,12 @@ public class IslandTravelManager : MonoBehaviour
     [Tooltip("ID đảo nhân vật đang đứng lúc bắt đầu game")]
     [SerializeField] private string startingIslandId = "farm";
 
+    [Header("Tối ưu hiệu năng — vật thể CHỈ thuộc Nông trại")]
+    [Tooltip("Kéo các object NẶNG chỉ có ở Nông trại (khối Biển 10000, địa hình, đá, cây...) vào đây. " +
+             "Chúng sẽ TỰ ẨN khi sang đảo khác (đỡ render + hết ngập), tự BẬT lại khi về Nông trại. " +
+             "TUYỆT ĐỐI KHÔNG kéo Player / UI / Manager vào đây.")]
+    [SerializeField] private List<GameObject> farmOnlyObjects = new List<GameObject>();
+
     /// <summary>ID đảo hiện tại nhân vật đang đứng.</summary>
     public string CurrentIslandId { get; private set; }
 
@@ -73,6 +79,14 @@ public class IslandTravelManager : MonoBehaviour
         if (_isTraveling)
         {
             Debug.Log("[IslandTravel] Đang di chuyển, bỏ qua yêu cầu mới.");
+            return;
+        }
+
+        // DEMO (chỉ thị cấp trên): chỉ mở Nông trại + Thành phố. Đảo khác (Mỏ/Hải Phú/Mộc Nhi) KHOÁ.
+        if (targetId != "farm" && targetId != "city")
+        {
+            Debug.Log($"[IslandTravel] Đảo '{targetId}' đang KHOÁ (demo).");
+            YWonderLand.Environment.ScreenToast.Show("Chưa đủ điều kiện để di chuyển.");
             return;
         }
 
@@ -133,12 +147,17 @@ public class IslandTravelManager : MonoBehaviour
                 Debug.Log($"[IslandTravel] Đã unload đảo cũ: {previous.sceneName}");
             }
 
+            // 4.5 Tối ưu + hết ngập: vật thể chỉ-Nông-trại (biển, địa hình) CHỈ bật khi ở Nông trại
+            // (base scene). Sang thành phố/mỏ -> ẩn để đỡ render + không bị biển 10000 phủ lên.
+            // Đặt sau Unload, behind màn hình chờ nên người chơi không thấy nhấp nháy.
+            SetFarmOnlyObjectsActive(target.isBaseScene);
+
             // 5. Thả nhân vật tới điểm spawn của đảo đích
             if (player != null)
             {
                 player.transform.position = target.spawnPosition;
                 player.transform.rotation = Quaternion.Euler(0, target.spawnYRotation, 0);
-                player.isSwimming = false; // reset trạng thái bơi phòng khi teleport ra khỏi vùng nước
+                player.ResetSwimState(); // reset sạch cờ bơi (tắt biển có thể không bắn OnTriggerExit)
             }
 
             // Đợi 1 frame cho Physics cập nhật trước khi bật lại CharacterController
@@ -163,6 +182,16 @@ public class IslandTravelManager : MonoBehaviour
             }
 
             _isTraveling = false;
+        }
+    }
+
+    // Bật/tắt các vật thể chỉ thuộc Nông trại (biển, địa hình) — đỡ render + chống biển phủ đảo khác.
+    private void SetFarmOnlyObjectsActive(bool active)
+    {
+        if (farmOnlyObjects == null) return;
+        foreach (var go in farmOnlyObjects)
+        {
+            if (go != null && go.activeSelf != active) go.SetActive(active);
         }
     }
 

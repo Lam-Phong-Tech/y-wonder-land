@@ -78,3 +78,13 @@ Thumbs.db
 .gemini/
 
 Assets/Building/Map1*
+
+# ============================================
+# Build temp + texture NPC gốc nặng (391MB) — extract lại được từ .glb (22/06)
+# ============================================
+/.utmp/
+/Assets/OptimizedNPCAssets/
+/Assets/OptimizedNPCAssets.meta
+
+# File khóa tạm của Word/Office (~$...) khi đang mở .docx
+~$*

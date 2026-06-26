@@ -11,8 +11,8 @@
         
         <ui:VisualElement class="content-wrapper">
             <!-- Logo Text -->
-            <ui:Label text="Y-WONDERLAND" class="logo-text" />
-            <ui:Label text="3D FARMING ADVENTURE" class="subtitle-text" />
+            <ui:Label name="LogoText" text="Y WONDER GREEN FARM" class="logo-text" />
+            <ui:Label name="SubtitleText" text="3D FARMING ADVENTURE" class="subtitle-text" />
 
             <!-- Progress Bar -->
             <ui:VisualElement class="progress-bar-container">

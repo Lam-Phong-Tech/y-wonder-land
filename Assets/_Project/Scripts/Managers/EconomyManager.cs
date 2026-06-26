@@ -27,9 +27,10 @@ namespace YWonderLand.Managers
                 Instance = this;
                 LoadBalances();
             }
-            else
+            else if (Instance != this)
             {
-                Destroy(gameObject);
+                // Chỉ huỷ COMPONENT trùng, KHÔNG Destroy(gameObject) (tránh huỷ nhầm GameObject nếu gắn chung GameManager).
+                Destroy(this);
             }
         }
 

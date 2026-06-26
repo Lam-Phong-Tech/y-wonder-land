@@ -28,6 +28,7 @@ public class InventoryPopupController : MonoBehaviour
     private Button tabSeeds;
     private Button tabFood;
     private Button tabOutfit;
+    private Button tabAnimals;
     private Button tabSpecial;
 
     private Button activeTab;
@@ -98,6 +99,7 @@ public class InventoryPopupController : MonoBehaviour
         tabSeeds = root.Q<Button>("TabSeeds");
         tabFood = root.Q<Button>("TabFood");
         tabOutfit = root.Q<Button>("TabOutfit");
+        tabAnimals = root.Q<Button>("TabAnimals");
         tabSpecial = root.Q<Button>("TabSpecial");
 
         // Query detail panel elements
@@ -152,7 +154,8 @@ public class InventoryPopupController : MonoBehaviour
         tabSeeds?.RegisterCallback<ClickEvent>(evt => SetActiveTab(tabSeeds, "seeds", "Hạt giống"));
         tabFood?.RegisterCallback<ClickEvent>(evt => SetActiveTab(tabFood, "food", "Thực phẩm"));
         tabOutfit?.RegisterCallback<ClickEvent>(evt => SetActiveTab(tabOutfit, "outfit", "Trang phục"));
-        tabSpecial?.RegisterCallback<ClickEvent>(evt => SetActiveTab(tabSpecial, "special", "Đặc biệt"));
+        tabAnimals?.RegisterCallback<ClickEvent>(evt => SetActiveTab(tabAnimals, "animals", "Thú nuôi"));
+        tabSpecial?.RegisterCallback<ClickEvent>(evt => SetActiveTab(tabSpecial, "products", "Sản phẩm"));
 
         // Detail Action clicks
         btnDetailAction?.RegisterCallback<ClickEvent>(evt =>
@@ -328,12 +331,31 @@ public class InventoryPopupController : MonoBehaviour
         if (lblDetailIcon != null) lblDetailIcon.text = item.icon;
         if (lblDetailName != null) lblDetailName.text = item.name;
         if (lblDetailQty != null) lblDetailQty.text = $"x{item.quantity}";
-        if (lblDetailDesc != null) lblDetailDesc.text = item.description;
+        if (lblDetailDesc != null)
+        {
+            // Nếu là CON VẬT -> chèn thêm thông tin nuôi (giá / ô đất / thức ăn).
+            var animalDef = YWonderLand.Managers.AnimalManager.LookupDefinition(item.id);
+            lblDetailDesc.text = animalDef != null
+                ? item.description + AnimalInfoText(animalDef)
+                : item.description;
+        }
 
         if (btnDetailAction != null)
         {
             btnDetailAction.text = !string.IsNullOrEmpty(item.actionText) ? item.actionText : "Sử dụng";
         }
+    }
+
+    // Thông tin nuôi cơ bản của con vật (chèn vào mô tả): giá / số ô / thức ăn chính-phụ.
+    private static string AnimalInfoText(YWonderLand.Data.AnimalDefinition d)
+    {
+        string Food(string name, int amount) =>
+            string.IsNullOrEmpty(name) ? "—" : (amount > 0 ? $"{amount}x {name}" : name);
+
+        return $"\n\nThông tin nuôi:"
+             + $"\nGiá mua: {d.buyPrice} POS   |   Cần: {d.penSlots} ô đất"
+             + $"\nThức ăn chính: {Food(d.foodMainName, d.foodMainAmount)}"
+             + $"\nThức ăn phụ: {Food(d.foodAltName, d.foodAltAmount)}";
     }
 
     private void ShowEmptyDetails()
@@ -402,6 +424,9 @@ public class InventoryPopupController : MonoBehaviour
                 break;
             case "outfit":
                 SetActiveTab(tabOutfit, "outfit", "Trang ph\u1ee5c");
+                break;
+            case "animals":
+                SetActiveTab(tabAnimals, "animals", "Th\u00fa nu\u00f4i");
                 break;
             case "special":
                 SetActiveTab(tabSpecial, "special", "\u0110\u1eb7c bi\u1ec7t");

@@ -149,6 +149,7 @@ public class SettingsPopupController : MonoBehaviour
 
     private void SetInitialValues()
     {
+        cameraSensitivity = PlayerPrefs.GetFloat("YW_CamSensitivity", cameraSensitivity); // nạp độ nhạy đã lưu
         if (sliderMusic != null) sliderMusic.value = musicVolume * 100f;
         if (sliderSFX != null) sliderSFX.value = sfxVolume * 100f;
         if (sliderCameraSens != null) sliderCameraSens.value = cameraSensitivity * 100f;
@@ -198,8 +199,9 @@ public class SettingsPopupController : MonoBehaviour
         {
             cameraSensitivity = evt.newValue / 100f;
             UpdateLabel(lblCameraSensValue, evt.newValue);
-            Debug.Log($"[Settings] Camera sensitivity: {cameraSensitivity:F2}");
-            // TODO: CameraController.Instance.SetSensitivity(cameraSensitivity);
+            PlayerPrefs.SetFloat("YW_CamSensitivity", cameraSensitivity); // lưu lại
+            if (ThirdPersonCamera.Instance != null)
+                ThirdPersonCamera.Instance.SetUserSensitivity(cameraSensitivity); // nối camera (cả chuột PC + chạm mobile)
         });
 
         sliderCameraZoom?.RegisterValueChangedCallback(evt =>
@@ -281,7 +283,7 @@ public class SettingsPopupController : MonoBehaviour
             {
                 confirmDialog.Show(
                     "THOÁT GAME",
-                    "Bạn có chắc chắn muốn thoát game? Tiến trình đã được lưu tự động.",
+                    "Bạn có chắc muốn thoát về màn hình chính? Tiến trình đã được lưu tự động.",
                     "Thoát",
                     "Ở lại",
                     OnExitGameConfirmed,
@@ -290,7 +292,9 @@ public class SettingsPopupController : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning("[Settings] ConfirmDialogController chưa được gán! Kéo thả vào Inspector.");
+                // ConfirmDialog chưa gán Inspector → vẫn thoát được (khỏi kẹt nút "không dùng được").
+                Debug.LogWarning("[Settings] ConfirmDialog chưa gán — thoát thẳng về menu.");
+                OnExitGameConfirmed();
             }
         });
     }
@@ -307,13 +311,13 @@ public class SettingsPopupController : MonoBehaviour
 
     private void OnExitGameConfirmed()
     {
-        Debug.Log("[Settings] ✅ Xác nhận THOÁT GAME — đang thoát...");
-        // TODO: Save settings trước khi thoát
-        #if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-        #else
-        Application.Quit();
-        #endif
+        Debug.Log("[Settings] Thoát game → về màn hình chính (Login).");
+        Hide();
+        // Khách chốt: KHÔNG kill app (iOS không khuyến khích) — về Menu/Login. Save tự chạy lúc Quit/Pause.
+        if (GameManager.Instance != null)
+            GameManager.Instance.SetGameState(GameManager.GameState.Login);
+        else
+            Debug.LogWarning("[Settings] Không thấy GameManager để về menu.");
     }
 
     private void UpdateLabel(Label label, float value)
@@ -342,6 +346,8 @@ public class SettingsPopupController : MonoBehaviour
             overlay.style.display = DisplayStyle.Flex;
             Debug.Log("[Settings] Popup opened");
         }
+        if (settingsDocument != null) settingsDocument.sortingOrder = 100; // render TRÊN HUD + thanh chat
+        UIPopupTracker.SetOpen(this, true); // khoá camera/tương tác + để chat tự ẩn
     }
 
     /// <summary>
@@ -354,6 +360,7 @@ public class SettingsPopupController : MonoBehaviour
             overlay.style.display = DisplayStyle.None;
             Debug.Log("[Settings] Popup closed");
         }
+        UIPopupTracker.SetOpen(this, false);
     }
 
     /// <summary>

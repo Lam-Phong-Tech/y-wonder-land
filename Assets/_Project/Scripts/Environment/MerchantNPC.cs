@@ -23,6 +23,10 @@ namespace YWonderLand.Environment
         [Tooltip("NPC này cung cấp dịch vụ gì khi click vào")]
         public ServiceType serviceType = ServiceType.ShopBuy;
 
+        [Tooltip("Catalog riêng (asset). Gán để click NPC mở đúng hàng MUA/BÁN của shop này. " +
+                 "Để trống = dùng shop mock mặc định (chỉ áp dụng cho ShopBuy/ShopSell).")]
+        public YWonderLand.Data.ShopDefinition shopData;
+
         [Tooltip("Nhãn nút gợi ý khi rê tâm ngắm (để trống = tự đặt theo loại dịch vụ)")]
         public string interactionLabel = "";
 
@@ -83,14 +87,22 @@ namespace YWonderLand.Environment
         private void OpenShop(ShopPopupController.ShopAccessMode mode)
         {
             var shop = Object.FindFirstObjectByType<ShopPopupController>(FindObjectsInactive.Include);
-            if (shop != null)
+            if (shop == null)
             {
-                shop.Show(mode);
-                Debug.Log($"[MerchantNPC] Mở Shop chế độ {mode} thành công!");
+                Debug.LogWarning("[MerchantNPC] Lỗi: Không tìm thấy ShopPopupController trong scene!");
+                return;
+            }
+
+            // Có catalog riêng -> mở theo asset (chế độ Mua/Bán lấy từ asset). Không có -> shop mock theo mode cũ.
+            if (shopData != null)
+            {
+                shop.Show(shopData);
+                Debug.Log($"[MerchantNPC] Mở Shop '{shopData.shopName}' (catalog riêng) thành công!");
             }
             else
             {
-                Debug.LogWarning("[MerchantNPC] Lỗi: Không tìm thấy ShopPopupController trong scene!");
+                shop.Show(mode);
+                Debug.Log($"[MerchantNPC] Mở Shop chế độ {mode} (mock) thành công!");
             }
         }
 

@@ -12,6 +12,9 @@ public class MapPopupController : MonoBehaviour
     [Header("References")]
     [SerializeField] private UIDocument mapDocument;
 
+    [Tooltip("BẬT để hiện nút cheat Level/VIP (CHỈ để dev test). Build cho người chơi PHẢI tắt.")]
+    [SerializeField] private bool showCheatButtons = false;
+
     // Top-level
     private VisualElement overlay;
     private Button btnClose;
@@ -23,6 +26,7 @@ public class MapPopupController : MonoBehaviour
     private VisualElement islandMine;
     private VisualElement islandHaiphu;
     private VisualElement islandMocnhi;
+    private VisualElement lockMine;
     private VisualElement lockHaiphu;
     private VisualElement lockMocnhi;
 
@@ -131,12 +135,17 @@ public class MapPopupController : MonoBehaviour
         islandMine = root.Q<VisualElement>("IslandMine");
         islandHaiphu = root.Q<VisualElement>("IslandHaiphu");
         islandMocnhi = root.Q<VisualElement>("IslandMocnhi");
+        lockMine = root.Q<VisualElement>("LockMine");
         lockHaiphu = root.Q<VisualElement>("LockHaiphu");
         lockMocnhi = root.Q<VisualElement>("LockMocnhi");
 
         // Cheat
         btnCheatLevel = root.Q<Button>("BtnCheatLevel");
         btnCheatVip = root.Q<Button>("BtnCheatVip");
+
+        // Ẩn cả thanh cheat khỏi người chơi (trừ khi dev bật cờ test).
+        var cheatBar = root.Q<VisualElement>(className: "map-cheat-bar");
+        if (cheatBar != null) cheatBar.style.display = showCheatButtons ? DisplayStyle.Flex : DisplayStyle.None;
 
         // Player Indicator
         btnCompass = root.Q<Button>("BtnCompass");
@@ -244,6 +253,7 @@ public class MapPopupController : MonoBehaviour
     private void RefreshIslandStates()
     {
         // Update lock overlays
+        UpdateLockOverlay(lockMine, "mine");
         UpdateLockOverlay(lockHaiphu, "haiphu");
         UpdateLockOverlay(lockMocnhi, "mocnhi");
     }
@@ -313,7 +323,7 @@ public class MapPopupController : MonoBehaviour
         var loc = locationData[id];
         bool unlocked = IsUnlocked(loc);
 
-        ConfirmDialogController dialog = FindObjectOfType<ConfirmDialogController>();
+        ConfirmDialogController dialog = FindFirstObjectByType<ConfirmDialogController>();
 
         if (unlocked)
         {
@@ -349,13 +359,12 @@ public class MapPopupController : MonoBehaviour
         }
         else
         {
-            string reqMsg = $"Cần đạt Cấp {loc.requiredLevel} để mở khóa {loc.name}.";
-            if (loc.requiresVipOrTicket) reqMsg += $"\n(Hoặc có VIP / Vé tương ứng)";
+            string reqMsg = "Chưa đủ điều kiện để di chuyển.";
 
             if (dialog != null)
             {
                 dialog.Show(
-                    "ĐẢO CHƯA MỞ KHÓA",
+                    "CHƯA THỂ DI CHUYỂN",
                     reqMsg,
                     "Đóng",
                     "",
@@ -383,6 +392,8 @@ public class MapPopupController : MonoBehaviour
     {
         if (loc.id == "farm") return true;
         if (loc.id == "city") return isTutorialCompleted;
+        // DEMO: đảo Mỏ chưa dựng scene -> KHÓA cứng (kể cả khi cheat lên cấp). Mở lại khi có MineScene.
+        if (loc.id == "mine") return false;
         if (playerLevel < loc.requiredLevel) return false;
 
         if (loc.requiresVipOrTicket)

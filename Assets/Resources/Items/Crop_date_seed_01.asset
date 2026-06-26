@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3334ccb6c504b8468a3bcc8773d485c, type: 3}
+  m_Name: Crop_date_seed_01
+  m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.CropDefinition
+  seedItemId: date_seed_01
+  harvestItemId: date_01
+  growthTimeSec: 120
+  waterIntervalSec: 25
+  noWaterDeathSec: 20
+  wateredLifeSec: 50
+  harvestYield: 4
+  expReward: 200
+  posReward: 0
+  growthStages: 5
+  cropColor: {r: 0.6, g: 0.35, b: 0.15, a: 1}
+  iconEmoji: "\U0001F334"
+  cropPrefab: {fileID: 263502988410696749, guid: cee9492707436dc4ba9ab694367bd1d9, type: 3}
+  modelGroundOffset: 0
+  seedlingScale: 0.25
+  plotSlots: 1
+  maxHarvests: 1
+  reHarvestCycleSec: 0
+  finalProductItemId: 
+  finalProductAmount: 0

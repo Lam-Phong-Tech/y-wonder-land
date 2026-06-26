@@ -17,8 +17,9 @@ MonoBehaviour:
   description: "H\u1EA1t gi\u1ED1ng b\xED ng\xF4 m\xF9a event."
   iconEmoji: "\U0001F383"
   iconSprite: {fileID: 0}
+  iconTexture: {fileID: 2800000, guid: adee5268bf81ba84095c747abc0618bc, type: 3}
   category: seeds
-  buyPrice: 25
+  buyPrice: 7
   sellPrice: 12
   canSell: 1
   isStackable: 1

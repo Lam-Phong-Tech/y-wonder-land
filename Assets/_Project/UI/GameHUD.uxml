@@ -6,14 +6,18 @@
     <ui:VisualElement class="hud-root" picking-mode="Ignore">
 
         <!-- ============================== -->
+        <!-- 0. LOOK ZONE — nửa phải: kéo 1 ngón xoay camera (mobile). -->
+        <!-- Đặt làm con ĐẦU TIÊN để mọi nút/gợi ý vẽ ĐÈ LÊN TRÊN (ưu tiên chạm). -->
+        <!-- ============================== -->
+        <ui:VisualElement name="LookZone" class="hud-look-zone" />
+
+        <!-- ============================== -->
         <!-- 1. PLAYER INFO — Top Left      -->
         <!-- ============================== -->
         <ui:VisualElement class="hud-top-left">
             <!-- Avatar + Name + Level + EXP -->
             <ui:VisualElement name="PlayerInfo" class="player-info clickable-hud-element">
-                <ui:VisualElement class="player-avatar">
-                    <ui:Label text="👤" class="player-avatar-icon" />
-                </ui:VisualElement>
+                <ui:VisualElement name="PlayerAvatar" class="player-avatar" />
                 <ui:VisualElement class="player-details">
                     <ui:Label name="PlayerName" text="YWonderPlayer" class="player-name" />
                     <ui:VisualElement class="player-level-row">
@@ -86,13 +90,6 @@
                     </ui:Button>
                 </ui:VisualElement>
 
-                <!-- Build Mode -->
-                <ui:VisualElement class="sidebar-btn-shadow" style="display: none;">
-                    <ui:Button name="BtnBuild" class="sidebar-btn sidebar-btn-build">
-                        <ui:VisualElement class="sidebar-btn-icon sidebar-btn-icon-white" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_08.png'); -unity-background-scale-mode: scale-to-fit;" />
-                    </ui:Button>
-                </ui:VisualElement>
-
                 <!-- Fishing (Temporary) -->
                 <ui:VisualElement class="sidebar-btn-shadow" style="display: none;">
                     <ui:Button name="BtnFishing" class="sidebar-btn sidebar-btn-fishing">
@@ -138,11 +135,19 @@
                 </ui:VisualElement>
             </ui:VisualElement>
 
-            <!-- Row 2: Bag / Inventory -->
-            <ui:VisualElement class="bag-btn-shadow">
-                <ui:Button name="BtnBag" class="bag-btn">
-                    <ui:VisualElement class="bag-btn-icon" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_11.png'); -unity-background-scale-mode: scale-to-fit;" />
-                </ui:Button>
+            <!-- Row 2: Build (TRÁI) + Bag / Inventory -->
+            <ui:VisualElement class="hud-bag-row">
+                <!-- Build Mode — nút búa: chuyển lên đây, BÊN TRÁI túi đồ (khách yêu cầu) -->
+                <ui:VisualElement class="build-btn-shadow">
+                    <ui:Button name="BtnBuild" class="build-btn">
+                        <ui:VisualElement class="build-btn-icon" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_08.png'); -unity-background-scale-mode: scale-to-fit;" />
+                    </ui:Button>
+                </ui:VisualElement>
+                <ui:VisualElement class="bag-btn-shadow">
+                    <ui:Button name="BtnBag" class="bag-btn">
+                        <ui:VisualElement class="bag-btn-icon" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_11.png'); -unity-background-scale-mode: scale-to-fit;" />
+                    </ui:Button>
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
 
@@ -150,6 +155,9 @@
         <!-- 4. JOYSTICK & SPRINT — Bottom Left -->
         <!-- ============================== -->
         <ui:VisualElement class="hud-bottom-left">
+            <ui:VisualElement name="SprintHint" class="sprint-hint">
+                <ui:VisualElement class="sprint-hint-icon" />
+            </ui:VisualElement>
 
             <ui:VisualElement name="Joystick" class="joystick-outer">
                 <!-- Direction arrows -->
@@ -169,15 +177,9 @@
         <!-- ============================== -->
         <!-- 6. ACTION BUTTONS — Right      -->
         <!-- ============================== -->
+        <!-- Chỉ còn nút X (Hủy hoạt ảnh). Nút bàn tay Interact đã bỏ; tương tác qua các nút gợi ý nổi quanh tâm ngắm. -->
         <ui:VisualElement class="hud-right-actions" style="display: none;">
-            <!-- Interact (hand) — largest -->
-            <ui:VisualElement class="action-btn-shadow">
-                <ui:Button name="BtnInteract" class="action-btn action-btn-interact">
-                    <ui:VisualElement class="action-btn-icon action-btn-icon-dark" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_13.png'); -unity-background-scale-mode: scale-to-fit; -unity-background-image-tint-color: black;" />
-                </ui:Button>
-            </ui:VisualElement>
-
-            <!-- Cancel -->
+            <!-- Cancel — hủy hoạt ảnh đang chạy -->
             <ui:VisualElement class="action-btn-shadow">
                 <ui:Button name="BtnCancel" class="action-btn action-btn-cancel">
                     <ui:Label text="✕" class="action-btn-icon action-btn-icon-white" />
@@ -200,15 +202,17 @@
         <!-- ============================== -->
         <ui:VisualElement name="Crosshair" class="crosshair" picking-mode="Ignore">
             <ui:VisualElement class="crosshair-dot" picking-mode="Ignore" />
-            <ui:VisualElement name="InteractionContainer" class="interaction-container" picking-mode="Ignore" />
         </ui:VisualElement>
+
+        <!-- Nút gợi ý tương tác nổi: BẤM/TAP được (mỗi nhát = 1 lần chặt/cuốc...). Co theo nội dung để chỉ chặn đúng vùng nút. -->
+        <ui:VisualElement name="InteractionContainer" class="interaction-container" />
 
         <!-- ============================== -->
         <!-- SPRINT BUTTON — Middle Left    -->
         <!-- ============================== -->
         <ui:VisualElement class="sprint-btn-shadow">
             <ui:Button name="BtnSprint" class="sprint-btn">
-                <ui:Label text="⚡" class="sprint-btn-icon" />
+                <ui:VisualElement class="sprint-btn-icon" />
             </ui:Button>
         </ui:VisualElement>
 

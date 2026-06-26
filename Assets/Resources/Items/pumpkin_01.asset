@@ -14,12 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.ItemDefinition
   id: pumpkin_01
   itemName: "B\xED ng\xF4"
-  description: "B\xED ng\xF4 to tr\xF2n."
+  description: "Th\u1EE9c \u0103n ch\u0103n nu\xF4i (kh\xF4ng b\xE1n)."
   iconEmoji: "\U0001F383"
   iconSprite: {fileID: 0}
-  category: items
+  iconTexture: {fileID: 2800000, guid: b124d1937c0f92f408bec78869b827b8, type: 3}
+  category: food
   buyPrice: 0
-  sellPrice: 35
-  canSell: 1
+  sellPrice: 0
+  canSell: 0
   isStackable: 1
   maxStack: 999

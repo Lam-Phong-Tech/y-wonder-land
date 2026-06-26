@@ -9,6 +9,11 @@ public struct InteractionAction
     public string keyName;
     public string actionName;
     public Action onClick;
+
+    // GIỮ-ĐỂ-LẶP (vd chặt cây): set 2 cái này thay cho onClick. Giữ nút -> onHoldStart, thả -> onHoldEnd.
+    // Việc lặp hành động mỗi frame do logic bên ngoài lo (đặt cờ lúc Start, xử lý trong Update).
+    public Action onHoldStart;
+    public Action onHoldEnd;
 }
 
 /// <summary>
@@ -42,6 +47,7 @@ public class GameHUDController : MonoBehaviour
 
     // Player Info
     private VisualElement playerInfo;
+    private VisualElement playerAvatar;
     private Label playerName;
     private Label playerLevel;
     private Label playerCurrencySmall;
@@ -67,13 +73,42 @@ public class GameHUDController : MonoBehaviour
     private Button btnBuild;
 
     // Action buttons
-    private Button btnInteract;
     private Button btnCancel;
     private Button btnJump;
     private Button btnBag;
     private Button btnSettings;
     private Button btnSprint;
     private VisualElement interactionContainer;
+
+    // Joystick ảo (mobile)
+    private VisualElement joystickOuter;
+    private VisualElement joystickKnob;
+    private VisualElement sprintHint;
+    private int joystickPointerId = -1;
+    // Tầm kéo núm + chuẩn hoá input. Đi theo size .joystick-outer trong GameHUD.uss
+    // (outer 200 → bán kính ~70). Đổi size joystick thì chỉnh số này theo tỉ lệ.
+    private const float JoystickRadius = 70f;
+    [Header("Mobile Feel")]
+    [SerializeField, Range(0f, 0.4f)] private float joystickDeadZone = 0.18f;
+    [SerializeField, Range(1f, 3f)] private float joystickResponseExponent = 1.6f;
+    [SerializeField, Range(0.1f, 1f)] private float joystickSprintHoldSeconds = 0.35f;
+    [SerializeField, Range(0f, 1f)] private float joystickSprintForwardMin = 0.55f;
+    private float joystickRawMagnitude = 0f;
+    private float joystickRawForward = 0f;
+    private float joystickSprintHoldTimer = 0f;
+    private float sprintPressStartTime = -1f;
+    private bool suppressNextSprintClick = false;
+    private const float SprintTapThresholdSeconds = 0.18f;
+
+    // Vùng nhìn (mobile) — kéo 1 ngón nửa phải để xoay camera
+    private VisualElement lookZone;
+    private int lookPointerId = -1;
+    private Vector2 lookLastPos;
+
+    private YWonderLand.Managers.ExperienceManager _expMgr;
+
+    // Cụm nút phải: chỉ còn nút X (hủy hoạt ảnh), hiện khi nhân vật đang bận.
+    private VisualElement rightActionsContainer;
 
 
 
@@ -115,6 +150,7 @@ public class GameHUDController : MonoBehaviour
         SetPlayerInfo("YWonderPlayer", 1);
         SetPlayerEXP(0.00f);
         SetQuest("Kh\u00e1m ph\u00e1 \u0111\u1ea3o hoang v\u00e0 t\u00ecm ng\u00f4i nh\u00e0 \u0111\u1ea7u ti\u00ean!");
+        UpdateAvatar();
 
         // Sync player name from GameManager (retry until available)
         StartCoroutine(SyncPlayerName());
@@ -124,6 +160,18 @@ public class GameHUDController : MonoBehaviour
             SetCurrency(YWonderLand.Managers.EconomyManager.Instance.GetPOS());
             YWonderLand.Managers.EconomyManager.Instance.OnPOSChanged += SetCurrency;
         }
+
+        // EXP/Level (tối giản) — hiện cấp + % EXP thật, cập nhật khi cộng EXP.
+        _expMgr = YWonderLand.Managers.ExperienceManager.Instance;
+        if (_expMgr != null)
+        {
+            if (playerLevel != null) playerLevel.text = $"Level: {_expMgr.Level}";
+            SetPlayerEXP(_expMgr.ExpPercent);
+            _expMgr.OnEXPChanged += OnExpChanged;
+        }
+
+        // Nhạc nền (tự tạo AudioManager; thiếu file Resources/Audio/bgm thì im, không lỗi).
+        YWonderLand.Managers.AudioManager.Instance?.PlayMusic("bgm");
     }
 
     void OnDisable()
@@ -132,12 +180,23 @@ public class GameHUDController : MonoBehaviour
         {
             YWonderLand.Managers.EconomyManager.Instance.OnPOSChanged -= SetCurrency;
         }
+
+        if (_expMgr != null) _expMgr.OnEXPChanged -= OnExpChanged;
+        if (PlayerController.Instance != null) PlayerController.Instance.SetStickAutoSprint(false);
+    }
+
+    // Cập nhật cấp + % EXP lên HUD khi ExperienceManager báo đổi.
+    private void OnExpChanged(int level, float percent)
+    {
+        if (playerLevel != null) playerLevel.text = $"Level: {level}";
+        SetPlayerEXP(percent);
     }
 
     private void QueryElements(VisualElement root)
     {
         // Player Info
         playerInfo = root.Q<VisualElement>("PlayerInfo");
+        playerAvatar = root.Q<VisualElement>("PlayerAvatar");
         playerName = root.Q<Label>("PlayerName");
         playerLevel = root.Q<Label>("PlayerLevel");
         playerCurrencySmall = root.Q<Label>("PlayerEXP");
@@ -163,13 +222,17 @@ public class GameHUDController : MonoBehaviour
         btnBuild = root.Q<Button>("BtnBuild");
 
         // Actions
-        btnInteract = root.Q<Button>("BtnInteract");
         btnCancel = root.Q<Button>("BtnCancel");
         btnJump = root.Q<Button>("BtnJump");
         btnBag = root.Q<Button>("BtnBag");
         btnSettings = root.Q<Button>("BtnSettings");
         btnSprint = root.Q<Button>("BtnSprint");
         interactionContainer = root.Q<VisualElement>("InteractionContainer");
+        joystickOuter = root.Q<VisualElement>("Joystick");
+        joystickKnob = joystickOuter?.Q<VisualElement>(className: "joystick-inner");
+        sprintHint = root.Q<VisualElement>("SprintHint");
+        lookZone = root.Q<VisualElement>("LookZone");
+        rightActionsContainer = root.Q<VisualElement>(className: "hud-right-actions");
 
 
     }
@@ -303,37 +366,67 @@ public class GameHUDController : MonoBehaviour
                 Debug.Log("[GameHUD] Event clicked (no event popup assigned)");
         });
 
-        // Action buttons
-        btnInteract?.RegisterCallback<ClickEvent>(evt =>
-        {
-            Debug.Log("[GameHUD] Interact clicked");
-        });
-
+        // Nút X (Cancel) = HỦY HOẠT ẢNH đang chạy (chặt/đào/cuốc/tưới/câu...).
         btnCancel?.RegisterCallback<ClickEvent>(evt =>
         {
-            Debug.Log("[GameHUD] Cancel clicked");
+            if (PlayerController.Instance != null) PlayerController.Instance.CancelAction();
         });
 
         btnJump?.RegisterCallback<ClickEvent>(evt =>
         {
-            Debug.Log("[GameHUD] Jump clicked");
+            if (PlayerController.Instance != null) PlayerController.Instance.TriggerJump();
         });
 
         if (btnSprint != null)
         {
-            btnSprint.RegisterCallback<PointerDownEvent>(evt => 
+            // Mặc định mobile TPS: GIỮ nút để sprint. Auto-run giữ riêng, không là cơ chế chính.
+            btnSprint.RegisterCallback<PointerDownEvent>(evt =>
             {
-                if (PlayerController.Instance != null) PlayerController.Instance.SetSprintUI(true);
-            });
-            btnSprint.RegisterCallback<PointerUpEvent>(evt => 
+                if (PlayerController.Instance == null) return;
+                sprintPressStartTime = Time.unscaledTime;
+                suppressNextSprintClick = false;
+                btnSprint.CapturePointer(evt.pointerId);
+                PlayerController.Instance.SetSprintUI(true);
+                RefreshSprintVisual();
+            }, TrickleDown.TrickleDown);
+
+            btnSprint.RegisterCallback<PointerUpEvent>(evt =>
             {
-                if (PlayerController.Instance != null) PlayerController.Instance.SetSprintUI(false);
-            });
-            btnSprint.RegisterCallback<PointerOutEvent>(evt => 
+                if (PlayerController.Instance == null) return;
+                float heldTime = sprintPressStartTime >= 0f ? (Time.unscaledTime - sprintPressStartTime) : 0f;
+                suppressNextSprintClick = heldTime > SprintTapThresholdSeconds;
+                if (btnSprint.HasPointerCapture(evt.pointerId)) btnSprint.ReleasePointer(evt.pointerId);
+                PlayerController.Instance.SetSprintUI(false);
+                RefreshSprintVisual();
+            }, TrickleDown.TrickleDown);
+
+            btnSprint.RegisterCallback<PointerCaptureOutEvent>(evt =>
             {
-                if (PlayerController.Instance != null) PlayerController.Instance.SetSprintUI(false);
+                if (PlayerController.Instance == null) return;
+                sprintPressStartTime = -1f;
+                PlayerController.Instance.SetSprintUI(false);
+                RefreshSprintVisual();
             });
-        }        // Bag
+
+            // BẤM NHẢ (click/tap) = bật/tắt auto-run.
+            // Cho phép người chơi đứng yên rồi bấm sprint để nhân vật tự chạy tới.
+            btnSprint.RegisterCallback<ClickEvent>(evt =>
+            {
+                if (PlayerController.Instance == null) return;
+                if (suppressNextSprintClick)
+                {
+                    suppressNextSprintClick = false;
+                    return;
+                }
+                PlayerController.Instance.ToggleAutoRun();
+                RefreshSprintVisual();
+            });
+        }
+
+        SetupJoystick();
+        SetupLookZone();
+
+        // Bag
         btnBag?.RegisterCallback<ClickEvent>(evt =>
         {
             HideAllPopups();
@@ -382,6 +475,22 @@ public class GameHUDController : MonoBehaviour
     {
         if (playerName != null) playerName.text = name;
         if (playerLevel != null) playerLevel.text = $"Level: {level}";
+        UpdateAvatar();
+    }
+
+    public void UpdateAvatar()
+    {
+        if (playerAvatar != null)
+        {
+            playerAvatar.RemoveFromClassList("avatar-male");
+            playerAvatar.RemoveFromClassList("avatar-female");
+            
+            int gender = GameManager.Instance != null ? GameManager.Instance.selectedCharacterIndex : 0;
+            if (gender == 0)
+                playerAvatar.AddToClassList("avatar-male");
+            else
+                playerAvatar.AddToClassList("avatar-female");
+        }
     }
 
     /// <summary>
@@ -437,7 +546,8 @@ public class GameHUDController : MonoBehaviour
         {
             if (GameManager.Instance != null && !string.IsNullOrEmpty(GameManager.Instance.playerName))
             {
-                SetPlayerInfo(GameManager.Instance.playerName, 1);
+                int lvl = _expMgr != null ? _expMgr.Level : 1;
+                SetPlayerInfo(GameManager.Instance.playerName, lvl);
                 Debug.Log($"[GameHUD] Synced player name: {GameManager.Instance.playerName}");
                 yield break;
             }
@@ -455,6 +565,10 @@ public class GameHUDController : MonoBehaviour
         // Không xử lý phím tắt nếu GameHUD đang bị ẩn (ví dụ: đang ở Login hoặc Cutscene)
         if (uiDocument == null || uiDocument.rootVisualElement == null || uiDocument.rootVisualElement.style.display == DisplayStyle.None)
             return;
+
+        // Hiện/ẩn nút X (hủy hoạt ảnh) theo trạng thái bận — chạy cả khi không có bàn phím (mobile).
+        UpdateCancelButton();
+        UpdateJoystickSprintState();
 
         // Chặn các phím tắt nếu người chơi đang gõ phím trong khung chat
         if (ChatPanelController.Instance != null && ChatPanelController.Instance.IsTyping())
@@ -535,6 +649,151 @@ public class GameHUDController : MonoBehaviour
         }
     }
 
+    // ───────────────────────────────────────────────
+    //  JOYSTICK ẢO (MOBILE) — kéo núm để di chuyển nhân vật
+    // ───────────────────────────────────────────────
+    private void SetupJoystick()
+    {
+        if (joystickOuter == null) return;
+        joystickOuter.RegisterCallback<PointerDownEvent>(OnJoystickDown);
+        joystickOuter.RegisterCallback<PointerMoveEvent>(OnJoystickMove);
+        joystickOuter.RegisterCallback<PointerUpEvent>(OnJoystickUp);
+        // Mất quyền bắt con trỏ (kéo ra ngoài / nhả ngoài vùng) -> reset cho an toàn
+        joystickOuter.RegisterCallback<PointerCaptureOutEvent>(evt => ResetJoystick());
+    }
+
+    private void OnJoystickDown(PointerDownEvent evt)
+    {
+        joystickPointerId = evt.pointerId;
+        joystickOuter.CapturePointer(evt.pointerId);
+        UpdateJoystick(joystickOuter.WorldToLocal((Vector2)evt.position));
+        evt.StopPropagation();
+    }
+
+    private void OnJoystickMove(PointerMoveEvent evt)
+    {
+        if (joystickPointerId != evt.pointerId || !joystickOuter.HasPointerCapture(evt.pointerId)) return;
+        UpdateJoystick(joystickOuter.WorldToLocal((Vector2)evt.position));
+    }
+
+    private void OnJoystickUp(PointerUpEvent evt)
+    {
+        if (joystickPointerId != evt.pointerId) return;
+        if (joystickOuter.HasPointerCapture(evt.pointerId)) joystickOuter.ReleasePointer(evt.pointerId);
+        ResetJoystick();
+    }
+
+    // Tính vector di chuyển từ vị trí chạm (local trong joystick-outer) rồi đẩy vào PlayerController.
+    private void UpdateJoystick(Vector2 localPos)
+    {
+        Vector2 center = new Vector2(joystickOuter.resolvedStyle.width * 0.5f, joystickOuter.resolvedStyle.height * 0.5f);
+        Vector2 offset = Vector2.ClampMagnitude(localPos - center, JoystickRadius);
+
+        if (joystickKnob != null) joystickKnob.style.translate = new Translate(offset.x, offset.y, 0);
+
+        float rawMagnitude = Mathf.Clamp01(offset.magnitude / JoystickRadius);
+        float curvedMagnitude = 0f;
+        if (rawMagnitude > joystickDeadZone)
+        {
+            float normalizedMagnitude = Mathf.InverseLerp(joystickDeadZone, 1f, rawMagnitude);
+            curvedMagnitude = Mathf.Pow(normalizedMagnitude, joystickResponseExponent);
+        }
+
+        Vector2 direction = offset.sqrMagnitude > 0.0001f ? offset.normalized : Vector2.zero;
+        // Trục Y của UI hướng XUỐNG -> đảo dấu để kéo lên = đi tới (forward).
+        Vector2 move = new Vector2(direction.x * curvedMagnitude, -direction.y * curvedMagnitude);
+        joystickRawMagnitude = rawMagnitude;
+        joystickRawForward = Mathf.Max(0f, -direction.y) * rawMagnitude;
+        if (PlayerController.Instance != null) PlayerController.Instance.SetMoveInput(move, rawMagnitude);
+    }
+
+    private void ResetJoystick()
+    {
+        joystickPointerId = -1;
+        if (joystickKnob != null) joystickKnob.style.translate = new Translate(0, 0, 0);
+        joystickRawMagnitude = 0f;
+        joystickRawForward = 0f;
+        joystickSprintHoldTimer = 0f;
+        if (sprintHint != null)
+        {
+            sprintHint.style.display = DisplayStyle.None;
+            sprintHint.EnableInClassList("sprint-hint-active", false);
+        }
+        if (PlayerController.Instance != null) PlayerController.Instance.SetMoveInput(Vector2.zero, 0f);
+        RefreshSprintVisual();
+    }
+
+    private void UpdateJoystickSprintState()
+    {
+        if (PlayerController.Instance == null) return;
+
+        float sprintThreshold = PlayerController.Instance.StickAutoSprintThreshold;
+        bool alreadyLatched = PlayerController.Instance.IsStickAutoSprintOn;
+        if (alreadyLatched) joystickSprintHoldTimer = 0f;
+        bool eligible = joystickRawMagnitude >= sprintThreshold && joystickRawForward >= joystickSprintForwardMin;
+        if (!alreadyLatched && eligible)
+        {
+            joystickSprintHoldTimer += Time.deltaTime;
+        }
+        else if (!alreadyLatched)
+        {
+            joystickSprintHoldTimer = 0f;
+        }
+
+        if (!alreadyLatched && eligible && joystickSprintHoldTimer >= joystickSprintHoldSeconds)
+        {
+            PlayerController.Instance.SetStickAutoSprint(true);
+            alreadyLatched = true;
+        }
+
+        if (sprintHint != null)
+        {
+            bool showHint = eligible;
+            sprintHint.style.display = showHint ? DisplayStyle.Flex : DisplayStyle.None;
+            sprintHint.EnableInClassList("sprint-hint-active", alreadyLatched || (eligible && joystickSprintHoldTimer >= joystickSprintHoldSeconds));
+        }
+
+        RefreshSprintVisual();
+    }
+
+    // ───────────────────────────────────────────────
+    //  VÙNG NHÌN (MOBILE) — kéo 1 ngón nửa phải để xoay camera (giống joystick nửa trái)
+    // ───────────────────────────────────────────────
+    private void SetupLookZone()
+    {
+        if (lookZone == null) return;
+        lookZone.RegisterCallback<PointerDownEvent>(OnLookDown);
+        lookZone.RegisterCallback<PointerMoveEvent>(OnLookMove);
+        lookZone.RegisterCallback<PointerUpEvent>(OnLookUp);
+        lookZone.RegisterCallback<PointerCaptureOutEvent>(evt => lookPointerId = -1);
+    }
+
+    private void OnLookDown(PointerDownEvent evt)
+    {
+        if (UIPopupTracker.AnyOpen) return;
+        lookPointerId = evt.pointerId;
+        lookZone.CapturePointer(evt.pointerId);
+        lookLastPos = (Vector2)evt.position;
+        evt.StopPropagation();
+    }
+
+    private void OnLookMove(PointerMoveEvent evt)
+    {
+        if (lookPointerId != evt.pointerId || !lookZone.HasPointerCapture(evt.pointerId)) return;
+        Vector2 cur = (Vector2)evt.position;
+        Vector2 delta = cur - lookLastPos;
+        lookLastPos = cur;
+        if (!UIPopupTracker.AnyOpen && ThirdPersonCamera.Instance != null)
+            ThirdPersonCamera.Instance.AddTouchLook(delta);
+    }
+
+    private void OnLookUp(PointerUpEvent evt)
+    {
+        if (lookPointerId != evt.pointerId) return;
+        if (lookZone.HasPointerCapture(evt.pointerId)) lookZone.ReleasePointer(evt.pointerId);
+        lookPointerId = -1;
+    }
+
     public void ShowInteractionPrompts(List<InteractionAction> actions)
     {
         if (interactionContainer == null) return;
@@ -566,8 +825,21 @@ public class GameHUDController : MonoBehaviour
             actionLabel.AddToClassList("interaction-action-label");
             btn.Add(actionLabel);
 
-            // Gán sự kiện click
-            if (action.onClick != null)
+            // Gán sự kiện: GIỮ-ĐỂ-LẶP (vd chặt cây) hoặc click thường.
+            if (action.onHoldStart != null || action.onHoldEnd != null)
+            {
+                var holdStart = action.onHoldStart;
+                var holdEnd = action.onHoldEnd;
+                Button heldBtn = btn;
+                btn.RegisterCallback<PointerDownEvent>(evt =>
+                {
+                    holdStart?.Invoke();
+                    heldBtn.CapturePointer(evt.pointerId); // bắt con trỏ -> nhả ngoài nút vẫn nhận PointerUp
+                }, TrickleDown.TrickleDown);
+                btn.RegisterCallback<PointerUpEvent>(evt => holdEnd?.Invoke(), TrickleDown.TrickleDown);
+                btn.RegisterCallback<PointerCaptureOutEvent>(evt => holdEnd?.Invoke()); // mất bắt -> dừng an toàn
+            }
+            else if (action.onClick != null)
             {
                 btn.clicked += action.onClick;
             }
@@ -581,5 +853,21 @@ public class GameHUDController : MonoBehaviour
         if (interactionContainer == null) return;
         interactionContainer.style.display = DisplayStyle.None;
         interactionContainer.Clear();
+    }
+
+    // Nút X (hủy hoạt ảnh) chỉ hiện khi nhân vật đang khóa trong một hành động.
+    // Đặt TRƯỚC mọi early-return phụ thuộc bàn phím trong Update() để chạy cả trên mobile.
+    private void UpdateCancelButton()
+    {
+        if (rightActionsContainer == null) return;
+        bool busy = PlayerController.Instance != null && PlayerController.Instance.IsBusy;
+        rightActionsContainer.style.display = busy ? DisplayStyle.Flex : DisplayStyle.None;
+    }
+
+    private void RefreshSprintVisual()
+    {
+        if (btnSprint == null || PlayerController.Instance == null) return;
+        bool sprintLit = PlayerController.Instance.IsSprintActive();
+        btnSprint.EnableInClassList("sprint-btn-active", sprintLit);
     }
 }

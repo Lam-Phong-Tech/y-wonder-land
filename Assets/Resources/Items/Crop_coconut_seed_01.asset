@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3334ccb6c504b8468a3bcc8773d485c, type: 3}
+  m_Name: Crop_coconut_seed_01
+  m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.CropDefinition
+  seedItemId: coconut_seed_01
+  harvestItemId: coconut_01
+  growthTimeSec: 120
+  waterIntervalSec: 25
+  noWaterDeathSec: 20
+  wateredLifeSec: 50
+  harvestYield: 2
+  expReward: 150
+  posReward: 0
+  growthStages: 5
+  cropColor: {r: 0.6, g: 0.45, b: 0.25, a: 1}
+  iconEmoji: "\U0001F965"
+  cropPrefab: {fileID: 67896809435985132, guid: 37aa72331e5ffb64e9cc76cc5cb3606d, type: 3}
+  modelGroundOffset: 0
+  seedlingScale: 0.25
+  plotSlots: 1
+  maxHarvests: 1
+  reHarvestCycleSec: 0
+  finalProductItemId: 
+  finalProductAmount: 0

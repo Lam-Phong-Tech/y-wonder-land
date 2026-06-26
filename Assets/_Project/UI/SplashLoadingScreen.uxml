@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
     <ui:Style src="Styles/DesignSystem.uss" />
     <ui:Style src="Styles/SplashLoadingScreen.uss" />
@@ -6,11 +6,7 @@
     <!-- Full Screen Splash Container -->
     <ui:VisualElement name="SplashRoot" class="splash-screen">
 
-        <!-- Decorative Corner Stars -->
-        <ui:Label text="&#x2726;" class="splash-star splash-star-tl" />
-        <ui:Label text="&#x2727;" class="splash-star splash-star-tr" />
-        <ui:Label text="&#x2727;" class="splash-star splash-star-bl" />
-        <ui:Label text="&#x2726;" class="splash-star splash-star-br" />
+
 
         <!-- Brand Logo Group (Centered) -->
         <ui:VisualElement class="splash-logo-container">
@@ -18,19 +14,8 @@
             <!-- Brand Logo Image — lưu PNG vào Assets/_Project/UI/Sprites/Logo_YWonderHub.png -->
             <ui:VisualElement name="SplashLogo" class="splash-brand-logo" />
 
-            <!-- Title (tô màu theo từng chữ cho khớp thiết kế) -->
-            <ui:VisualElement class="splash-title-row">
-                <ui:Label text="Y " class="splash-title-word splash-word-green" />
-                <ui:Label text="WONDER " class="splash-title-word splash-word-light" />
-                <ui:Label text="GREEN " class="splash-title-word splash-word-green" />
-                <ui:Label text="FARM" class="splash-title-word splash-word-blue" />
-            </ui:VisualElement>
-
             <!-- Subtitle -->
             <ui:Label text="CUỘC PHIÊU LƯU BẮT ĐẦU" class="splash-subtitle" />
-
-            <!-- Decorative Divider -->
-            <ui:VisualElement class="splash-divider" />
         </ui:VisualElement>
 
         <!-- Loading Group (Bottom Center) -->
@@ -58,8 +43,6 @@
             <ui:Label text="Click để bỏ qua" class="splash-skip-hint" />
         </ui:VisualElement>
 
-        <!-- Version Label (Bottom Right) -->
-        <ui:Label text="v0.1.0-alpha" class="splash-version" />
 
     </ui:VisualElement>
 </ui:UXML>

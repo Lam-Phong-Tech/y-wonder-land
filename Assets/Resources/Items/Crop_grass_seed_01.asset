@@ -14,11 +14,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.CropDefinition
   seedItemId: grass_seed_01
   harvestItemId: grass_01
-  growthTimeSec: 30
+  growthTimeSec: 60
   waterIntervalSec: 15
-  harvestYield: 3
-  expReward: 5
-  posReward: 10
+  noWaterDeathSec: 20
+  wateredLifeSec: 50
+  harvestYield: 2
+  expReward: 175
+  posReward: 0
   growthStages: 2
   cropColor: {r: 0.2, g: 0.6, b: 0.2, a: 1}
   iconEmoji: "\U0001F33F"
+  cropPrefab: {fileID: 7502525246004137508, guid: 35ad3642d8f693648bd9f75a03211f40, type: 3}
+  modelGroundOffset: 0
+  seedlingScale: 0.25
+  plotSlots: 1
+  maxHarvests: 1
+  reHarvestCycleSec: 0
+  finalProductItemId: 
+  finalProductAmount: 0

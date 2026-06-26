@@ -4,23 +4,58 @@
     xmlns:ui="UnityEngine.UIElements"
     xsi:noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd">
 
-    <ui:VisualElement name="AnimalPopupContainer" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: none; align-items: center; justify-content: center; background-color: rgba(0, 0, 0, 0.4);">
-        <ui:VisualElement style="background-color: rgb(255, 245, 230); border-radius: 20px; padding: 20px; width: 350px; border-width: 4px; border-color: rgb(150, 100, 50);">
-            
+    <ui:Style src="Styles/DesignSystem.uss" />
+    <ui:Style src="Styles/AnimalInteractionPopup.uss" />
+
+    <ui:VisualElement name="AnimalPopupContainer" class="ap-overlay">
+        <ui:VisualElement class="ap-panel">
+
             <!-- Header -->
-            <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <ui:Label name="LblAnimalName" text="Con Gà" style="font-size: 24px; -unity-font-style: bold; color: rgb(120, 60, 20);" />
-                <ui:Button name="BtnClose" text="X" style="width: 30px; height: 30px; background-color: rgb(200, 50, 50); color: white; border-radius: 15px; -unity-font-style: bold;" />
+            <ui:VisualElement class="ap-header">
+                <ui:Label name="LblAnimalName" text="Con vật" class="ap-title" />
+                <ui:Button name="BtnClose" text="✕" class="ap-close" />
             </ui:VisualElement>
 
             <!-- Status -->
-            <ui:Label name="LblStatus" text="Trạng thái: Khỏe mạnh" style="font-size: 16px; margin-bottom: 20px; color: rgb(50, 50, 50);" />
+            <ui:Label name="LblStatus" text="Trạng thái: Khỏe mạnh" class="ap-status" />
 
-            <!-- Buttons -->
-            <ui:VisualElement style="flex-direction: column; align-items: stretch;">
-                <ui:Button name="BtnFeed" text="Cho Ăn (1 Thức ăn)" style="height: 45px; margin-bottom: 10px; background-color: rgb(100, 200, 100); color: white; font-size: 16px; -unity-font-style: bold; border-radius: 10px;" />
-                <ui:Button name="BtnHarvest" text="Thu Hoạch" style="height: 45px; margin-bottom: 10px; background-color: rgb(250, 200, 50); color: white; font-size: 16px; -unity-font-style: bold; border-radius: 10px;" />
-                <ui:Button name="BtnHeal" text="Chữa Bệnh (1 Vaccine)" style="height: 45px; background-color: rgb(100, 150, 250); color: white; font-size: 16px; -unity-font-style: bold; border-radius: 10px;" />
+            <!-- Bảng thông tin -->
+            <ui:VisualElement class="ap-info">
+                <ui:VisualElement class="ap-row">
+                    <ui:Label text="Giá mua" class="ap-key" />
+                    <ui:Label name="LblPrice" text="—" class="ap-val" />
+                </ui:VisualElement>
+                <ui:VisualElement class="ap-row">
+                    <ui:Label text="Số ô chuồng" class="ap-key" />
+                    <ui:Label name="LblSlots" text="—" class="ap-val" />
+                </ui:VisualElement>
+                <ui:VisualElement class="ap-row">
+                    <ui:Label text="Thức ăn chính" class="ap-key" />
+                    <ui:Label name="LblFoodMain" text="—" class="ap-val" />
+                </ui:VisualElement>
+                <ui:VisualElement class="ap-row">
+                    <ui:Label text="Thức ăn phụ" class="ap-key" />
+                    <ui:Label name="LblFoodAlt" text="—" class="ap-val" />
+                </ui:VisualElement>
+                <ui:VisualElement class="ap-row">
+                    <ui:Label text="Sản phẩm" class="ap-key" />
+                    <ui:Label name="LblProducts" text="—" class="ap-val" />
+                </ui:VisualElement>
+                <ui:VisualElement class="ap-row">
+                    <ui:Label text="Độ no" class="ap-key" />
+                    <ui:Label name="LblHunger" text="—" class="ap-val" />
+                </ui:VisualElement>
+                <ui:VisualElement class="ap-row ap-row-last">
+                    <ui:Label text="Thu hoạch" class="ap-key" />
+                    <ui:Label name="LblHarvest" text="—" class="ap-val" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Hành động -->
+            <ui:VisualElement class="ap-actions">
+                <ui:Button name="BtnFeed" text="Cho ăn" class="ap-btn ap-btn-primary" />
+                <ui:Button name="BtnHarvest" text="Thu hoạch" class="ap-btn ap-btn-primary" />
+                <ui:Button name="BtnHeal" text="Chữa bệnh" class="ap-btn ap-btn-secondary" />
             </ui:VisualElement>
 
         </ui:VisualElement>

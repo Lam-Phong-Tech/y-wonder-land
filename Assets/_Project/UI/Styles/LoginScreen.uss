@@ -6,6 +6,10 @@
 .login-screen {
     width: 100%; height: 100%;
     position: absolute; align-items: center; justify-content: center;
+    /* Brand Colors */
+    --color-brand-orange: #eb6b2a;
+    --color-brand-green: #7cb641;
+    --color-brand-blue: #2596be;
 }
 
 .login-shadow {
@@ -17,15 +21,52 @@
     background-color: var(--color-primary-navy); /* Base Navy */
     border-radius: var(--radius-panel);
     flex-grow: 1; overflow: hidden;
+    position: relative;
+}
+
+.login-close-btn {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    width: 132px;
+    height: 42px;
+    border-radius: 21px;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.22);
+    background-color: rgba(15, 23, 38, 0.72);
+    color: var(--color-text-white);
+    font-size: 14px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    padding: 0 14px;
+    transition-property: background-color, scale;
+    transition-duration: 0.1s;
+}
+
+.login-close-btn:hover {
+    background-color: var(--color-danger);
+    scale: 1.05;
+}
+
+.login-close-btn:active {
+    scale: 0.95;
 }
 
 /* -- Header -- */
 .login-header {
-    background-color: var(--color-deep-blue);
+    background-color: transparent;
     padding: 32px 24px 32px 24px;
     align-items: center; justify-content: center;
     border-top-left-radius: var(--radius-panel);
     border-top-right-radius: var(--radius-panel);
+}
+
+.game-logo {
+    width: 440px; height: 220px;
+    background-image: url('project://database/Assets/_Project/UI/Sprites/Y_Wonder_Hub_Logo2.png');
+    -unity-background-scale-mode: scale-to-fit;
+    align-self: center; margin-bottom: -16px;
+    scale: 1.35;
 }
 
 .game-title {
@@ -49,13 +90,18 @@
 .login-tab {
     background-color: var(--color-mystic-black); color: var(--color-bright-grey);
     font-size: 16px; -unity-font-style: bold; padding: 12px 32px; margin: 0 4px;
-    border-width: 0; border-radius: 24px; /* Pill shape */
-    transition-property: color, background-color; transition-duration: 0.15s;
+    border-width: 2px; border-color: transparent; border-radius: 24px; /* Thêm border 2px trong suốt để chờ hover */
+    transition-property: color, background-color, border-color; transition-duration: 0.15s;
 }
-.login-tab:hover { color: var(--color-text-white); background-color: var(--color-deep-blue); }
+.login-tab:hover { 
+    color: var(--color-text-white); 
+    background-color: var(--color-deep-blue); /* Trả lại màu nền khi hover cho tab */
+    border-color: transparent; /* Đã bỏ viền xanh lá khi hover */
+}
 .login-tab-active { 
-    color: var(--color-mystic-black); 
-    background-color: var(--color-tan); /* Tan/Cream active tab */
+    color: white; 
+    background-color: var(--color-brand-blue); /* Tab Đăng nhập / Đăng ký dùng màu Blue */
+    border-color: var(--color-brand-green); /* Viền xanh lá bao quanh tab hiện tại (Active) */
 }
 
 /* -- Form Area -- */
@@ -71,8 +117,8 @@
     transition-property: border-color; transition-duration: 0.15s;
 }
 
-.login-input-group:hover { border-color: rgba(255, 255, 255, 0.1); }
-.login-input-group-focus { border-color: var(--color-accent-yellow); }
+.login-input-group:hover { border-color: rgba(255, 255, 255, 0.2); }
+.login-input-group-focus { border-color: var(--color-brand-green); /* Input focus màu Xanh lá */ }
 
 .login-icon {
     width: 24px; height: 24px; margin-right: 12px;
@@ -106,7 +152,7 @@
     -unity-background-image-tint-color: var(--color-mystic-black);
 }
 .remember-toggle > .unity-toggle__input:checked > .unity-toggle__checkmark {
-    background-color: var(--color-accent-yellow); border-color: var(--color-accent-yellow);
+    background-color: var(--color-brand-green); border-color: var(--color-brand-green);
 }
 
 .remember-label { font-size: 14px; color: var(--color-bright-grey); margin-left: 12px; }
@@ -116,18 +162,23 @@
 /* -- Login Button (Pill shape with tactile lip) -- */
 .login-btn-shadow { margin-top: 8px; }
 .btn-login {
-    background-color: var(--color-accent-yellow);
-    color: var(--color-mystic-black);
+    background-color: var(--color-brand-orange); /* Nút Đăng nhập/Đăng ký màu Cam */
+    color: white;
     font-size: 18px; -unity-font-style: bold;
-    border-width: 0;
+    border-width: 2px; border-color: transparent; /* Sẵn sàng viền cho hover */
     border-radius: var(--radius-button); /* Pill shape 24px */
     padding: 16px 0; -unity-text-align: middle-center; flex-grow: 1; letter-spacing: 1px;
-    transition-property: background-color; 
+    transition-property: background-color, scale; 
     transition-duration: 0.1s; transition-timing-function: ease-out;
 }
-.btn-login:hover { background-color: #FFF890; }
+.btn-login:hover { 
+    background-color: #F78044; /* Cam sáng hơn khi hover */ 
+    border-color: var(--color-brand-green); /* Viền xanh lá giống ô input */
+    scale: 1.02; 
+}
 .btn-login:active { 
-    background-color: #D0C350; 
+    background-color: #D65A1E; /* Cam tối hơn khi click */
+    scale: 0.98;
 }
 .btn-login:disabled, .btn-login.unity-disabled {
     background-color: var(--color-overcast-grey);

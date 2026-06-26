@@ -28,6 +28,7 @@
                     <ui:Button name="TabExchange" text="🔄 Đổi quà" class="event-tab event-tab--active" />
                     <ui:Button name="TabBundle" text="💎 Ưu đãi" class="event-tab" />
                     <ui:Button name="TabAttendance" text="📅 Điểm danh" class="event-tab" />
+                    <ui:Button name="TabWheel" text="🎡 Vòng quay" class="event-tab" />
                 </ui:VisualElement>
 
                 <!-- TAB 1: EXCHANGE -->
@@ -142,6 +143,30 @@
                         <ui:Button name="BtnClaimAttendance" class="claim-attendance-btn" text="Điểm danh" />
                     </ui:VisualElement>
 
+                </ui:VisualElement>
+
+                <!-- TAB 4: WHEEL (Vòng quay may mắn) -->
+                <ui:VisualElement name="PanelWheel" class="event-body event-wheel-panel">
+                    <ui:Label class="wheel-desc" text="🎡 Vòng quay may mắn — 3 lượt mỗi ngày!" />
+
+                    <!-- Sân khấu vòng quay -->
+                    <ui:VisualElement class="wheel-stage">
+                        <!-- Kim chỉ (tam giác chỉ xuống) -->
+                        <ui:VisualElement class="wheel-pointer-row">
+                            <ui:VisualElement class="wheel-pointer" />
+                        </ui:VisualElement>
+                        <!-- Vòng tròn quay (emoji quanh vành do Controller dựng) -->
+                        <ui:VisualElement name="WheelCircle" class="wheel-circle" />
+                        <!-- Ô giữa hiện quà trúng -->
+                        <ui:Label name="WheelHub" class="wheel-hub" text="🎡" />
+                    </ui:VisualElement>
+
+                    <ui:Label name="LblWheelResult" class="wheel-result" text="" />
+
+                    <ui:VisualElement class="wheel-footer">
+                        <ui:Label name="LblSpinsLeft" class="wheel-spins-left" text="Lượt còn: 3/3" />
+                        <ui:Button name="BtnSpin" class="claim-attendance-btn wheel-spin-btn" text="🎡 QUAY" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
 
             </ui:VisualElement>

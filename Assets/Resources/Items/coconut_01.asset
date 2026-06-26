@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cac8b9f5919afc44599c356803f7ca4a, type: 3}
+  m_Name: coconut_01
+  m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.ItemDefinition
+  id: coconut_01
+  itemName: "D\u1EEBa"
+  description: "Tr\xE1i d\u1EEBa t\u01B0\u01A1i."
+  iconEmoji: "\U0001F965"
+  iconSprite: {fileID: 0}
+  iconTexture: {fileID: 2800000, guid: 5a83e56462d42184d9a4781fbbc6c804, type: 3}
+  category: products
+  buyPrice: 0
+  sellPrice: 120
+  canSell: 1
+  isStackable: 1
+  maxStack: 999

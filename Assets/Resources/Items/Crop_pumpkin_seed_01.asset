@@ -14,11 +14,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.CropDefinition
   seedItemId: pumpkin_seed_01
   harvestItemId: pumpkin_01
-  growthTimeSec: 55
-  waterIntervalSec: 24
-  harvestYield: 4
-  expReward: 25
-  posReward: 70
+  growthTimeSec: 60
+  waterIntervalSec: 25
+  noWaterDeathSec: 20
+  wateredLifeSec: 50
+  harvestYield: 11
+  expReward: 125
+  posReward: 0
   growthStages: 3
   cropColor: {r: 0.9, g: 0.5, b: 0.1, a: 1}
   iconEmoji: "\U0001F383"
+  cropPrefab: {fileID: 7698582702517547490, guid: 312452072b536dc47b69ee1a2cce0043, type: 3}
+  modelGroundOffset: 0
+  seedlingScale: 0.25
+  plotSlots: 1
+  maxHarvests: 1
+  reHarvestCycleSec: 0
+  finalProductItemId: 
+  finalProductAmount: 0

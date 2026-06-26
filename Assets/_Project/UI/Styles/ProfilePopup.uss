@@ -68,10 +68,21 @@
 }
 
 .profile-avatar-large {
-    width: 140px; height: 140px; border-radius: 70px;
-    background-color: rgba(255, 255, 255, 0.05);
+    width: 100px; height: 100px; border-radius: 50px;
+    background-color: var(--color-deep-blue);
     border-width: 4px; border-color: var(--color-accent-yellow);
-    align-items: center; justify-content: center; margin-bottom: 24px;
+    align-items: center; justify-content: center; margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.avatar-male {
+    background-image: url('project://database/Assets/_Project/UI/Sprites/Male_Avatar.jpg');
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+.avatar-female {
+    background-image: url('project://database/Assets/_Project/UI/Sprites/Female_avatar2.jpg');
+    -unity-background-scale-mode: scale-and-crop;
 }
 
 .avatar-emoji { font-size: 70px; margin: 0; padding: 0; -unity-text-align: middle-center; }

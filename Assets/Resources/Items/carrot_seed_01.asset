@@ -17,8 +17,9 @@ MonoBehaviour:
   description: "H\u1EA1t gi\u1ED1ng c\xE0 r\u1ED1t. Thu ho\u1EA1ch sau 24h."
   iconEmoji: "\U0001F955"
   iconSprite: {fileID: 0}
+  iconTexture: {fileID: 2800000, guid: 93c85659b1230574ea89fbdadb709e2d, type: 3}
   category: seeds
-  buyPrice: 10
+  buyPrice: 3
   sellPrice: 5
   canSell: 1
   isStackable: 1

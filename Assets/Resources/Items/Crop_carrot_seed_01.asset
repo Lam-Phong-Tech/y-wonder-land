@@ -14,14 +14,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.CropDefinition
   seedItemId: carrot_seed_01
   harvestItemId: carrot_01
-  growthTimeSec: 45
-  waterIntervalSec: 20
-  harvestYield: 3
-  expReward: 20
-  posReward: 50
+  growthTimeSec: 60
+  waterIntervalSec: 25
+  noWaterDeathSec: 20
+  wateredLifeSec: 50
+  harvestYield: 1
+  expReward: 25
+  posReward: 0
   growthStages: 3
   cropColor: {r: 1, g: 0.55, b: 0.1, a: 1}
   iconEmoji: "\U0001F955"
-  cropPrefab: {fileID: 7044781635394294090, guid: 8b2a75548d9fbc840aa0a6326822af98, type: 3}
+  cropPrefab: {fileID: 6782129264081958535, guid: 8600d48776e48cc438e203a6c17b56bc, type: 3}
   modelGroundOffset: 0
   seedlingScale: 0.25
+  plotSlots: 1
+  maxHarvests: 1
+  reHarvestCycleSec: 0
+  finalProductItemId: 
+  finalProductAmount: 0

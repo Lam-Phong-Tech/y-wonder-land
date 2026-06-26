@@ -16,6 +16,7 @@ namespace YWonderLand.Data
         [Header("Hiển thị")]
         public string iconEmoji; // Emoji hiển thị tạm thời (do chưa có ảnh)
         public Sprite iconSprite; // Ảnh hiển thị thực tế
+        public Texture2D iconTexture; // Ảnh icon import dạng Texture2D (không cần sửa .meta sang Sprite)
         
         [Header("Phân loại")]
         [Tooltip("tools, materials, seeds, food, outfit, special, animals, items, buildings")]

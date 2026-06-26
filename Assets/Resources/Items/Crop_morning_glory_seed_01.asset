@@ -14,11 +14,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.CropDefinition
   seedItemId: morning_glory_seed_01
   harvestItemId: morning_glory_01
-  growthTimeSec: 30
+  growthTimeSec: 60
   waterIntervalSec: 15
-  harvestYield: 2
-  expReward: 10
-  posReward: 25
+  noWaterDeathSec: 20
+  wateredLifeSec: 50
+  harvestYield: 1
+  expReward: 60
+  posReward: 0
   growthStages: 2
   cropColor: {r: 0.4, g: 0.7, b: 0.3, a: 1}
   iconEmoji: "\U0001F33E"
+  cropPrefab: {fileID: 9052297801457225207, guid: d28195a8a4922c844b4a32b25c190801, type: 3}
+  modelGroundOffset: 0
+  seedlingScale: 0.25
+  plotSlots: 1
+  maxHarvests: 1
+  reHarvestCycleSec: 0
+  finalProductItemId: 
+  finalProductAmount: 0

@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cac8b9f5919afc44599c356803f7ca4a, type: 3}
+  m_Name: beef_01
+  m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.ItemDefinition
+  id: beef_01
+  itemName: "Th\u1ECBt b\xF2"
+  description: "Th\u1ECBt b\xF2 t\u01B0\u01A1i."
+  iconEmoji: "\U0001F969"
+  iconSprite: {fileID: 0}
+  iconTexture: {fileID: 2800000, guid: d8ae3418e6645e748b783cc71cc2b4a1, type: 3}
+  category: products
+  buyPrice: 0
+  sellPrice: 325
+  canSell: 1
+  isStackable: 1
+  maxStack: 999

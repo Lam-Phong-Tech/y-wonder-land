@@ -30,24 +30,13 @@
         <ui:VisualElement class="build-category-sidebar">
             <ui:Button name="CatBuildings" class="build-cat-btn build-cat-active">
                 <ui:Label text="⌂" class="build-cat-icon" />
-                <ui:Label text="Nhà cửa" class="build-cat-label" />
+                <ui:Label text="Xây dựng" class="build-cat-label" />
             </ui:Button>
-            <ui:Button name="CatFarm" class="build-cat-btn">
-                <ui:Label text="♣" class="build-cat-icon" />
-                <ui:Label text="Nông trại" class="build-cat-label" />
-            </ui:Button>
-            <ui:Button name="CatFence" class="build-cat-btn">
-                <ui:Label text="▦" class="build-cat-icon" />
-                <ui:Label text="Hàng rào" class="build-cat-label" />
-            </ui:Button>
-            <ui:Button name="CatDecor" class="build-cat-btn">
-                <ui:Label text="✿" class="build-cat-icon" />
-                <ui:Label text="Trang trí" class="build-cat-label" />
-            </ui:Button>
-            <ui:Button name="CatPath" class="build-cat-btn">
-                <ui:Label text="═" class="build-cat-icon" />
-                <ui:Label text="Đường đi" class="build-cat-label" />
-            </ui:Button>
+            <!-- Đã rút gọn menu Build còn 1 nhóm (Ruộng/Đường đá/Chuồng) — ẩn 4 tab cũ. -->
+            <ui:Button name="CatFarm" class="build-cat-btn" style="display: none;" />
+            <ui:Button name="CatFence" class="build-cat-btn" style="display: none;" />
+            <ui:Button name="CatDecor" class="build-cat-btn" style="display: none;" />
+            <ui:Button name="CatPath" class="build-cat-btn" style="display: none;" />
         </ui:VisualElement>
 
         <!-- ================================ -->
@@ -67,9 +56,6 @@
             <ui:Button name="BtnConfirmPlace" class="build-placement-btn build-placement-confirm">
                 <ui:Label text="✔" class="build-placement-btn-icon" />
             </ui:Button>
-            <ui:Button name="BtnRotatePlace" class="build-placement-btn build-placement-rotate">
-                <ui:Label text="Xoay" class="build-placement-btn-icon" style="font-size: 14px;" />
-            </ui:Button>
             <ui:Button name="BtnCancelPlace" class="build-placement-btn build-placement-cancel">
                 <ui:Label text="✕" class="build-placement-btn-icon" />
             </ui:Button>
@@ -81,10 +67,6 @@
         <!-- is clicked                       -->
         <!-- ================================ -->
         <ui:VisualElement name="ContextMenu" class="build-context-menu hidden">
-            <ui:Button name="BtnCtxRotate" class="build-ctx-btn">
-                <ui:Label text="⟳" class="build-ctx-icon" />
-                <ui:Label text="Xoay" class="build-ctx-label" />
-            </ui:Button>
             <ui:Button name="BtnCtxMove" class="build-ctx-btn">
                 <ui:Label text="↔" class="build-ctx-icon" />
                 <ui:Label text="Nhấc" class="build-ctx-label" />

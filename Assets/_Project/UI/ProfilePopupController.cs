@@ -11,6 +11,7 @@ public class ProfilePopupController : MonoBehaviour
     private Button btnClose;
 
     // Profile Details Elements
+    private VisualElement profileAvatarLarge;
     private Label profileName;
     private Label profileLevel;
     private VisualElement profileExpFill;
@@ -49,6 +50,7 @@ public class ProfilePopupController : MonoBehaviour
         btnClose = root.Q<Button>("BtnClose");
 
         // Profile details
+        profileAvatarLarge = root.Q<VisualElement>("ProfileAvatarLarge");
         profileName = root.Q<Label>("ProfileName");
         profileLevel = root.Q<Label>("ProfileLevel");
         profileExpFill = root.Q<VisualElement>("ProfileExpFill");
@@ -89,6 +91,18 @@ public class ProfilePopupController : MonoBehaviour
         // Set dynamic texts
         if (profileName != null) profileName.text = name;
         if (profileLevel != null) profileLevel.text = levelStr;
+
+        if (profileAvatarLarge != null)
+        {
+            profileAvatarLarge.RemoveFromClassList("avatar-male");
+            profileAvatarLarge.RemoveFromClassList("avatar-female");
+            
+            int gender = GameManager.Instance != null ? GameManager.Instance.selectedCharacterIndex : 0;
+            if (gender == 0)
+                profileAvatarLarge.AddToClassList("avatar-male");
+            else
+                profileAvatarLarge.AddToClassList("avatar-female");
+        }
 
         // Calculate and set EXP progress bar width
         float expVal = 0f;

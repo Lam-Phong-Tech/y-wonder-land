@@ -17,8 +17,9 @@ MonoBehaviour:
   description: "C\u1ECF voi l\xE0m th\u1EE9c \u0103n cho v\u1EADt nu\xF4i."
   iconEmoji: "\U0001F33F"
   iconSprite: {fileID: 0}
+  iconTexture: {fileID: 2800000, guid: 8906443875ae0a24cbd9a6ffcc19504a, type: 3}
   category: seeds
-  buyPrice: 5
+  buyPrice: 12
   sellPrice: 2
   canSell: 1
   isStackable: 1

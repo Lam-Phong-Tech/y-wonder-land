@@ -19,10 +19,14 @@ public class FloatingNameTag : MonoBehaviour
     public float outlineWidth = 0.35f; // Thicker for retro Tangible Playground feel
 
     [Header("Font Size")]
-    public float tmpFontSize = 3.5f;
+    [SerializeField] public float tmpFontSize = 2.5f; // Đã thu nhỏ gọn gàng hơn
 
     [Header("Visibility")]
     public float maxVisibleDistance = 30f;
+
+    /// <summary>Ẩn TẤT CẢ name tag (vd trong cutscene để người chơi tập trung quang cảnh).
+    /// Đặt false để hiện lại (lúc cập bến hoặc bấm skip).</summary>
+    public static bool GloballyHidden = false;
 
     // Design System color constants
     public static readonly Color COLOR_HERO = new Color(0.357f, 0.259f, 0.953f, 1f);       // #5B42F3
@@ -52,7 +56,7 @@ public class FloatingNameTag : MonoBehaviour
 
         // TextMeshPro 3D component (NOT TextMeshProUGUI — that's for Canvas)
         nameText = nameTagRoot.AddComponent<TextMeshPro>();
-        nameText.text = displayName;
+        nameText.text = displayName; // Removed FormatName
         nameText.fontSize = tmpFontSize;
         nameText.fontStyle = FontStyles.Bold;
         nameText.color = nameColor;
@@ -79,11 +83,35 @@ public class FloatingNameTag : MonoBehaviour
 
         // Force initial mesh update
         nameText.ForceMeshUpdate();
+
+        // Create Background Quad
+        bgObj = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        bgObj.name = "Background";
+        Destroy(bgObj.GetComponent<Collider>());
+        
+        bgObj.transform.SetParent(nameTagRoot.transform);
+        bgObj.transform.localPosition = new Vector3(0, 0, 0.05f); 
+        
+        // Material
+        MeshRenderer bgRenderer = bgObj.GetComponent<MeshRenderer>();
+        bgMat = new Material(Shader.Find("Sprites/Default"));
+        bgMat.color = new Color(0f, 0f, 0f, 0.4f); // 40% black
+        bgRenderer.material = bgMat;
+        bgRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        bgRenderer.sortingOrder = 99; // Text is 100
+        
+        UpdateBackground();
     }
+
+    private GameObject bgObj;
+    private Material bgMat;
 
     void LateUpdate()
     {
         if (nameTagRoot == null) return;
+
+        // Ẩn toàn cục (vd trong cutscene) — hiện lại khi cập bến/skip.
+        if (GloballyHidden) { nameTagRoot.SetActive(false); return; }
 
         // Always refresh camera reference (GameManager swaps cameras between states)
         mainCamera = Camera.main;
@@ -116,14 +144,51 @@ public class FloatingNameTag : MonoBehaviour
                 Color c = nameColor;
                 c.a = alpha;
                 nameText.color = c;
+
+                if (bgMat != null)
+                {
+                    Color bgC = bgMat.color;
+                    bgC.a = alpha * 0.4f;
+                    bgMat.color = bgC;
+                }
             }
             else
             {
                 Color c = nameColor;
                 c.a = 1f;
                 nameText.color = c;
+
+                if (bgMat != null)
+                {
+                    Color bgC = bgMat.color;
+                    bgC.a = 0.4f;
+                    bgMat.color = bgC;
+                }
             }
         }
+    }
+
+    private void UpdateBackground()
+    {
+        if (nameText == null || bgObj == null) return;
+        nameText.ForceMeshUpdate();
+
+        // Sử dụng preferredWidth / preferredHeight để lấy CHÍNH XÁC kích thước chữ thực tế
+        // Tránh dùng GetRenderedValues hay textBounds vì nó dính tới khung RectTransform (20x5)
+        float textWidth = nameText.preferredWidth;
+        float textHeight = nameText.preferredHeight;
+
+        // Padding cho nền đen ôm VỪA KHÍT chữ
+        float paddingX = 0.3f; // Padding cố định thay vì nhân tỷ lệ
+        float paddingY = 0.1f;
+        
+        float width = textWidth + paddingX;
+        float height = textHeight + paddingY;
+        bgObj.transform.localScale = new Vector3(width, height, 1f);
+
+        // Đặt Quad thẳng vào gốc toạ độ (0, 0) vì TextMeshPro đã được căn MiddleCenter
+        // Nó sẽ tự động nằm ngay chính giữa chữ
+        bgObj.transform.localPosition = new Vector3(0f, 0f, 0.05f); // Đẩy ra sau Text 1 tí xíu
     }
 
     /// <summary>
@@ -132,7 +197,11 @@ public class FloatingNameTag : MonoBehaviour
     public void SetName(string newName)
     {
         displayName = newName;
-        if (nameText != null) nameText.text = newName;
+        if (nameText != null) 
+        {
+            nameText.text = newName;
+            UpdateBackground();
+        }
     }
 
     /// <summary>

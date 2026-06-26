@@ -27,7 +27,8 @@
                         <ui:Button name="TabSeeds" text="Hạt giống" class="inventory-tab" />
                         <ui:Button name="TabFood" text="Thực phẩm" class="inventory-tab" />
                         <ui:Button name="TabOutfit" text="Trang phục" class="inventory-tab" />
-                        <ui:Button name="TabSpecial" text="Đặc biệt" class="inventory-tab" />
+                        <ui:Button name="TabAnimals" text="Thú nuôi" class="inventory-tab" />
+                        <ui:Button name="TabSpecial" text="Sản phẩm" class="inventory-tab" />
                     </ui:VisualElement>
 
                     <!-- Middle: Items Grid -->
