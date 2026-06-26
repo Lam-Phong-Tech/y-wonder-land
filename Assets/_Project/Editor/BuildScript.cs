@@ -17,7 +17,7 @@ namespace YWonderLand.CI
 
             if (!string.IsNullOrWhiteSpace(bundleId))
             {
-                PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.iOS, bundleId);
+                PlayerSettings.SetApplicationIdentifier(UnityEditor.Build.NamedBuildTarget.iOS, bundleId);
             }
 
             if (!string.IsNullOrWhiteSpace(appVersion))
