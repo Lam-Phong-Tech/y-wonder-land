@@ -10,6 +10,7 @@
 ### Added
 - Thêm `README.md` ở root repo để người clone `main` nắm cách mở project, build, trạng thái backend và nhánh làm việc.
 - Thêm `codemagic.yaml` ở root repo để CodeMagic nhận workflow build Unity iOS.
+- Thêm workflow CodeMagic Xcode-only/TestFlight: build từ Xcode project iOS đã export sẵn, không cần activate Unity trên CodeMagic.
 - Thêm `Assets/_Project/Editor/BuildScript.cs` để CI có thể export Xcode project iOS từ Unity bằng batch mode.
 - Thêm asset thumbnail/icon game trong `Assets/_Project/UI/Sprites/`.
 - Gắn `ThumbnailGame.jpg` vào icon Standalone và Android adaptive icon trong `ProjectSettings/ProjectSettings.asset`.

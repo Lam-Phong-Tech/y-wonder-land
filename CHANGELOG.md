@@ -5,6 +5,7 @@
 ### Added
 - Added a root `README.md` for clone/build handoff, backend scope, branch usage, and CodeMagic/iOS notes.
 - Added `codemagic.yaml` at the repository root with a Unity iOS release workflow for CodeMagic.
+- Added a CodeMagic Xcode-only TestFlight workflow that builds from a pre-exported Unity iOS Xcode project without activating Unity on CodeMagic.
 - Added `Assets/_Project/Editor/BuildScript.cs` so CI can export an iOS Xcode project from Unity in batch mode.
 - Added game thumbnail/icon assets under `Assets/_Project/UI/Sprites/`.
 - Wired `ThumbnailGame.jpg` into Standalone app icon slots and Android adaptive icon slots in `ProjectSettings/ProjectSettings.asset`.

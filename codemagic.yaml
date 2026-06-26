@@ -3,7 +3,7 @@
 
 workflows:
   unity-ios-release:
-    name: Unity iOS Release
+    name: Unity iOS Release (Unity export + IPA)
     max_build_duration: 120
     instance_type: mac_mini_m2
 
@@ -63,3 +63,51 @@ workflows:
         - name: Deactivate Unity license
           script: |
             $UNITY_HOME/Contents/MacOS/Unity -batchmode -quit -logFile - -returnlicense -username ${UNITY_EMAIL} -password ${UNITY_PASSWORD}
+
+  ios-testflight-from-exported-xcode:
+    name: iOS TestFlight (exported Xcode project, no Unity)
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.ywonder.greenfarm
+      groups:
+        - appstore_credentials
+      vars:
+        UNITY_IOS_DIR: ios
+        XCODE_PROJECT: Unity-iPhone.xcodeproj
+        XCODE_SCHEME: Unity-iPhone
+
+    scripts:
+      - name: Verify exported Unity Xcode project
+        script: |
+          if [ ! -d "$UNITY_IOS_DIR/$XCODE_PROJECT" ]; then
+            echo "Missing exported Unity Xcode project: $UNITY_IOS_DIR/$XCODE_PROJECT"
+            echo "This workflow intentionally does not run Unity."
+            echo "Export iOS from Unity locally, then commit/push the generated ios/ folder, or use the unity-ios-release workflow."
+            exit 1
+          fi
+
+      - name: Set up iOS code signing
+        script: |
+          xcode-project use-profiles
+
+      - name: Build IPA
+        script: |
+          xcode-project build-ipa \
+            --project "$UNITY_IOS_DIR/$XCODE_PROJECT" \
+            --scheme "$XCODE_SCHEME"
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Logs/**/*.xcactivitylog
+
+    publishing:
+      app_store_connect:
+        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
+        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+        submit_to_testflight: true
