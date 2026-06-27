@@ -22,8 +22,8 @@ MonoBehaviour:
   foodAltAmount: 0
   productMainName: "Tr\u1EE9ng v\u1ECBt"
   productMainAmount: 1
-  productAltName: "Th\u1ECBt v\u1ECBt"
-  productAltAmount: 5
+  productAltName: 
+  productAltAmount: 0
   produceItemId: duck_egg_01
   produceAmount: 1
   produceCycleTimeSec: 60

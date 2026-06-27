@@ -22,8 +22,8 @@ MonoBehaviour:
   foodAltAmount: 3
   productMainName: "Tr\u1EE9ng ng\u1ED7ng"
   productMainAmount: 2
-  productAltName: "Th\u1ECBt ng\u1ED7ng"
-  productAltAmount: 5
+  productAltName: 
+  productAltAmount: 0
   produceItemId: goose_egg_01
   produceAmount: 2
   produceCycleTimeSec: 180

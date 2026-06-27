@@ -22,8 +22,8 @@ MonoBehaviour:
   foodAltAmount: 0
   productMainName: "Tr\u1EE9ng g\xE0"
   productMainAmount: 1
-  productAltName: "Th\u1ECBt g\xE0"
-  productAltAmount: 5
+  productAltName: 
+  productAltAmount: 0
   produceItemId: egg_01
   produceAmount: 1
   produceCycleTimeSec: 120
