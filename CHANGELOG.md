@@ -5,9 +5,11 @@
 ### Fixed
 - Added a CodeMagic pre-signing step for the exported-Xcode workflow that forces the pre-exported Unity Xcode project bundle id to `com.ywonder.greenfarm` before `xcode-project use-profiles` runs.
 - This lets CodeMagic match the `ywonderland_greenfarm_appstore` App Store provisioning profile created for `com.ywonder.greenfarm`.
+- Set the Unity iPhone application identifier in `ProjectSettings` to `com.ywonder.greenfarm` so future local Unity iOS exports match Apple Developer and App Store Connect.
 
 ### Changed Files
 - `codemagic.yaml`
+- `ProjectSettings/ProjectSettings.asset`
 
 ## [Unreleased] - 2026-06-27 (Poultry meat demo data cleanup)
 
