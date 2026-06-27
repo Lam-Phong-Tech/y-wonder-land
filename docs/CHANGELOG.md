@@ -10,9 +10,11 @@
 ### Fixed
 - Thêm bước trong workflow CodeMagic Xcode-only để ép bundle id của Xcode project đã export sẵn về `com.ywonder.greenfarm` trước khi chạy `xcode-project use-profiles`.
 - Mục tiêu là để CodeMagic match đúng provisioning profile App Store `ywonderland_greenfarm_appstore` mà bên build đã tạo cho bundle id `com.ywonder.greenfarm`.
+- Đặt Unity iPhone Bundle ID trong `ProjectSettings` thành `com.ywonder.greenfarm` để các lần export iOS sau khớp Apple Developer và App Store Connect.
 
 ### Changed Files
 - `codemagic.yaml`
+- `ProjectSettings/ProjectSettings.asset`
 
 ---
 ## [2026-06-27] — Dọn dữ liệu thịt gia cầm trong loadout demo
