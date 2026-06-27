@@ -22,8 +22,8 @@ MonoBehaviour:
   foodAltAmount: 0
   productMainName: "Tr\u1EE9ng \u0111\xE0 \u0111i\u1EC3u"
   productMainAmount: 1
-  productAltName: "Th\u1ECBt \u0111\xE0 \u0111i\u1EC3u"
-  productAltAmount: 20
+  productAltName: 
+  productAltAmount: 0
   produceItemId: ostrich_egg_01
   produceAmount: 1
   produceCycleTimeSec: 360

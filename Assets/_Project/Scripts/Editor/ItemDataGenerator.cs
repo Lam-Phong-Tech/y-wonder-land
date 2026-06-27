@@ -101,14 +101,14 @@ namespace YWonderLand.EditorScripts
 
             // S\u1EA3n ph\u1EA9m th\u1ECBt (Pro2 \u2014 v\u1EE5 cu\u1ED1i) \u2014 gi\u00E1 b\u00E1n theo c\u1ED9t "Gi\u00E1 product 2" trong VatNuoi.md
             AddItem(db, "pork_01", "Th\u1ECBt heo", "Th\u1ECBt heo t\u01B0\u01A1i.", "\ud83e\udd69", "products", 0, 292, true);
-            AddItem(db, "chicken_meat_01", "Th\u1ECBt g\u00E0", "Th\u1ECBt g\u00E0 t\u01B0\u01A1i.", "\uD83C\uDF57", "products", 0, 310, true);
+            AddItem(db, "chicken_meat_01", "Th\u1ECBt g\u00E0", "Th\u1ECBt g\u00E0 t\u01B0\u01A1i.", "\uD83C\uDF57", "products", 0, 0, false);
             AddItem(db, "beef_01", "Th\u1ECBt b\u00F2", "Th\u1ECBt b\u00F2 t\u01B0\u01A1i.", "\ud83e\udd69", "products", 0, 325, true);
-            AddItem(db, "ostrich_meat_01", "Th\u1ECBt \u0111\u00E0 \u0111i\u1EC3u", "Th\u1ECBt \u0111\u00E0 \u0111i\u1EC3u.", "\uD83C\uDF57", "products", 0, 1050, true);
+            AddItem(db, "ostrich_meat_01", "Th\u1ECBt \u0111\u00E0 \u0111i\u1EC3u", "Th\u1ECBt \u0111\u00E0 \u0111i\u1EC3u.", "\uD83C\uDF57", "products", 0, 0, false);
             AddItem(db, "deer_meat_01", "Th\u1ECBt h\u01B0\u01A1u", "Th\u1ECBt h\u01B0\u01A1u.", "\uD83C\uDF56", "products", 0, 933, true);
             AddItem(db, "goat_meat_01", "Th\u1ECBt d\u00EA", "Th\u1ECBt d\u00EA.", "\uD83C\uDF56", "products", 0, 118, true);
             AddItem(db, "rabbit_meat_01", "Th\u1ECBt th\u1ECF", "Th\u1ECBt th\u1ECF.", "\uD83C\uDF56", "products", 0, 289, true);
-            AddItem(db, "goose_meat_01", "Th\u1ECBt ng\u1ED7ng", "Th\u1ECBt ng\u1ED7ng.", "\uD83C\uDF57", "products", 0, 665, true);
-            AddItem(db, "duck_meat_01", "Th\u1ECBt v\u1ECBt", "Th\u1ECBt v\u1ECBt.", "\uD83C\uDF57", "products", 0, 332, true);
+            AddItem(db, "goose_meat_01", "Th\u1ECBt ng\u1ED7ng", "Th\u1ECBt ng\u1ED7ng.", "\uD83C\uDF57", "products", 0, 0, false);
+            AddItem(db, "duck_meat_01", "Th\u1ECBt v\u1ECBt", "Th\u1ECBt v\u1ECBt.", "\uD83C\uDF57", "products", 0, 0, false);
             AddItem(db, "turtle_meat_01", "Th\u1ECBt r\u00F9a", "Th\u1ECBt r\u00F9a.", "\uD83C\uDF56", "products", 0, 1084, true);
 
             // \u2500\u2500 S\u1EA3n ph\u1EA9m C\u00C2Y L\u00C2U N\u0102M (10) \u2014 gi\u00E1 b\u00E1n: Sa Chi/S\u1EA7u Ri\u00EAng theo CayTrong.md, c\u00F2n l\u1EA1i DEMO.
@@ -315,15 +315,15 @@ namespace YWonderLand.EditorScripts
 
             // Thông tin chăn nuôi (giá/ô/thức ăn/sản phẩm) — nguồn: bảng VatNuoi khách gửi.
             // Chỉ set trường hiển thị + tên/giá; GIỮ nguyên field gameplay (cycle, produceItemId) nếu asset đã có.
-            SetHusbandry("chicken_01", "Gà mái V2", 156, 1, "Bắp Ngô", 2, "Cám", 0, "Trứng gà", 1, "Thịt gà", 5);
+            SetHusbandry("chicken_01", "Gà mái V2", 156, 1, "Bắp Ngô", 2, "Cám", 0, "Trứng gà", 1, "", 0);
             SetHusbandry("cow_01", "Bò sữa", 7800, 9, "Cỏ Voi", 2, "Khoai Lang", 4, "Sữa bò", 10, "Thịt bò", 50);
             SetHusbandry("pig_01", "Heo con", 2600, 9, "Khoai lang", 2, "Bí ngô", 2, "Da heo", 1, "Thịt heo", 50);
-            SetHusbandry("ostrich_01", "Đà điểu V2", 4420, 1, "Dưa Hấu", 4, "Cám", 0, "Trứng đà điểu", 1, "Thịt đà điểu", 20);
+            SetHusbandry("ostrich_01", "Đà điểu V2", 4420, 1, "Dưa Hấu", 4, "Cám", 0, "Trứng đà điểu", 1, "", 0);
             SetHusbandry("deer_01", "Hươu", 10400, 9, "Bắp Ngô", 5, "Cám", 0, "Nhung hươu", 2, "Thịt hươu", 40);
             SetHusbandry("goat_01", "Dê con V2", 1300, 9, "Bí ngô", 2, "Cỏ voi", 2, "Sữa dê", 2, "Thịt dê", 20);
             SetHusbandry("rabbit_01", "Thỏ con V2", 130, 1, "Cà rốt", 1, "Bắp ngô", 1, "Lông thỏ", 8, "Thịt thỏ", 5);
-            SetHusbandry("goose_01", "Ngỗng con V2", 260, 1, "Bắp Cải", 2, "Bắp Ngô", 3, "Trứng ngỗng", 2, "Thịt ngỗng", 5);
-            SetHusbandry("duck_01", "Vịt V3", 208, 1, "Bắp Ngô", 1, "Cám", 0, "Trứng vịt", 1, "Thịt vịt", 5);
+            SetHusbandry("goose_01", "Ngỗng con V2", 260, 1, "Bắp Cải", 2, "Bắp Ngô", 3, "Trứng ngỗng", 2, "", 0);
+            SetHusbandry("duck_01", "Vịt V3", 208, 1, "Bắp Ngô", 1, "Cám", 0, "Trứng vịt", 1, "", 0);
             SetHusbandry("turtle_01", "Rùa con", 2340, 1, "Rau Muống", 7, "Dưa hấu", 12, "Mai rùa", 1, "Thịt rùa", 10);
 
             // Logic gameplay theo VatNuoi: produceId, SL sản phẩm/vụ (Pro1), TỔNG SỐ LẦN THU, thịt vụ cuối (Pro2), SL thịt.

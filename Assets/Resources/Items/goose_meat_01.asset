@@ -20,7 +20,7 @@ MonoBehaviour:
   iconTexture: {fileID: 0}
   category: products
   buyPrice: 0
-  sellPrice: 665
-  canSell: 1
+  sellPrice: 0
+  canSell: 0
   isStackable: 1
   maxStack: 999

@@ -1,5 +1,33 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-06-27 (CodeMagic iOS signing bundle fix)
+
+### Fixed
+- Added a CodeMagic pre-signing step for the exported-Xcode workflow that forces the pre-exported Unity Xcode project bundle id to `com.ywonder.greenfarm` before `xcode-project use-profiles` runs.
+- This lets CodeMagic match the `ywonderland_greenfarm_appstore` App Store provisioning profile created for `com.ywonder.greenfarm`.
+
+### Changed Files
+- `codemagic.yaml`
+
+## [Unreleased] - 2026-06-27 (Poultry meat demo data cleanup)
+
+### Fixed
+- Removed poultry meat items from the rich/demo inventory loadout so testers no longer receive unsellable chicken/duck/goose/ostrich meat by default.
+- Marked poultry meat item definitions as non-sellable with `sellPrice = 0`, matching the current customer decision that poultry only produces eggs.
+- Cleared poultry animal alternate meat-product display data while keeping egg production intact.
+
+### Changed Files
+- `Assets/_Project/Scripts/Managers/InventoryManager.cs`
+- `Assets/_Project/Scripts/Editor/ItemDataGenerator.cs`
+- `Assets/Resources/Items/Animal_chicken_01.asset`
+- `Assets/Resources/Items/Animal_ostrich_01.asset`
+- `Assets/Resources/Items/Animal_goose_01.asset`
+- `Assets/Resources/Items/Animal_duck_01.asset`
+- `Assets/Resources/Items/chicken_meat_01.asset`
+- `Assets/Resources/Items/ostrich_meat_01.asset`
+- `Assets/Resources/Items/goose_meat_01.asset`
+- `Assets/Resources/Items/duck_meat_01.asset`
+
 ## [Unreleased] - 2026-06-26 (iOS CI and app icon setup)
 
 ### Added

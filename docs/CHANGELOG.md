@@ -5,6 +5,36 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-06-27] — Fix bundle id cho CodeMagic iOS signing
+
+### Fixed
+- Thêm bước trong workflow CodeMagic Xcode-only để ép bundle id của Xcode project đã export sẵn về `com.ywonder.greenfarm` trước khi chạy `xcode-project use-profiles`.
+- Mục tiêu là để CodeMagic match đúng provisioning profile App Store `ywonderland_greenfarm_appstore` mà bên build đã tạo cho bundle id `com.ywonder.greenfarm`.
+
+### Changed Files
+- `codemagic.yaml`
+
+---
+## [2026-06-27] — Dọn dữ liệu thịt gia cầm trong loadout demo
+
+### Fixed
+- Bỏ các item thịt gia cầm khỏi loadout rich/demo để tester không còn được cấp sẵn "Thịt gà", "Thịt vịt", "Thịt ngỗng", "Thịt đà điểu" rồi hiểu nhầm là hàng phải bán được.
+- Đánh dấu các item thịt gia cầm là không bán được (`canSell=false`, `sellPrice=0`), khớp quyết định hiện tại: gia cầm chỉ lấy trứng.
+- Xóa dữ liệu hiển thị sản phẩm phụ dạng thịt khỏi 4 definition gia cầm, vẫn giữ sản phẩm chính là trứng.
+
+### Changed Files
+- `Assets/_Project/Scripts/Managers/InventoryManager.cs`
+- `Assets/_Project/Scripts/Editor/ItemDataGenerator.cs`
+- `Assets/Resources/Items/Animal_chicken_01.asset`
+- `Assets/Resources/Items/Animal_ostrich_01.asset`
+- `Assets/Resources/Items/Animal_goose_01.asset`
+- `Assets/Resources/Items/Animal_duck_01.asset`
+- `Assets/Resources/Items/chicken_meat_01.asset`
+- `Assets/Resources/Items/ostrich_meat_01.asset`
+- `Assets/Resources/Items/goose_meat_01.asset`
+- `Assets/Resources/Items/duck_meat_01.asset`
+
+---
 ## [2026-06-26] — iOS CI, CodeMagic và icon game
 
 ### Added

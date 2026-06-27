@@ -101,8 +101,8 @@ namespace YWonderLand.Managers
             foreach (var id in new[] {
                 "pigskin_01","ostrich_egg_01","deer_velvet_01","goat_milk_01","rabbit_fur_01",
                 "goose_egg_01","duck_egg_01","turtle_shell_01",
-                "chicken_meat_01","beef_01","ostrich_meat_01","deer_meat_01","goat_meat_01",
-                "rabbit_meat_01","goose_meat_01","duck_meat_01","turtle_meat_01",
+                "beef_01","deer_meat_01","goat_meat_01",
+                "rabbit_meat_01","turtle_meat_01",
                 "banana_01","coconut_01","areca_01","date_01","sacha_01","tea_01","durian_01",
                 "asparagus_01","red_ginseng_01","royal_ginseng_01" })
                 AddItem(id, productQty);
