@@ -100,6 +100,16 @@ workflows:
           perl -0pi -e 's/com\.Unity-Technologies\.com\.unity\.template\.urp-blank/com.ywonder.greenfarm/g' "$PROJECT_FILE"
           grep -n "PRODUCT_BUNDLE_IDENTIFIER" "$PROJECT_FILE"
 
+      - name: Remove stale IL2CPP linker flag
+        script: |
+          PROJECT_FILE="$UNITY_IOS_DIR/$XCODE_PROJECT/project.pbxproj"
+          perl -0pi -e 's/\n\s*"\\\"\$CONFIGURATION_BUILD_DIR\/il2cpp\.a\\\"",//g' "$PROJECT_FILE"
+          if grep -n 'il2cpp\.a' "$PROJECT_FILE"; then
+            echo "Stale il2cpp.a linker flag still exists"
+            exit 1
+          fi
+          grep -n "libGameAssembly.a" "$PROJECT_FILE"
+
       - name: Set up iOS code signing
         script: |
           xcode-project use-profiles
