@@ -43,6 +43,11 @@ workflows:
             -executeMethod YWonderLand.CI.BuildScript.BuildIos \
             -nographics
 
+      - name: Prepare iOS executable scripts
+        script: |
+          chmod +x "$UNITY_IOS_DIR/process_symbols.sh" "$UNITY_IOS_DIR/usymtool" "$UNITY_IOS_DIR/usymtoolarm64"
+          ls -lh "$UNITY_IOS_DIR/process_symbols.sh" "$UNITY_IOS_DIR/usymtool" "$UNITY_IOS_DIR/usymtoolarm64"
+
       - name: Set up iOS code signing
         script: |
           xcode-project use-profiles
@@ -93,6 +98,11 @@ workflows:
             echo "Export iOS from Unity locally, then commit/push the generated ios/ folder, or use the unity-ios-release workflow."
             exit 1
           fi
+
+      - name: Prepare iOS executable scripts
+        script: |
+          chmod +x "$UNITY_IOS_DIR/process_symbols.sh" "$UNITY_IOS_DIR/usymtool" "$UNITY_IOS_DIR/usymtoolarm64"
+          ls -lh "$UNITY_IOS_DIR/process_symbols.sh" "$UNITY_IOS_DIR/usymtool" "$UNITY_IOS_DIR/usymtoolarm64"
 
       - name: Force iOS bundle identifier
         script: |
