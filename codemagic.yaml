@@ -100,14 +100,10 @@ workflows:
           perl -0pi -e 's/com\.Unity-Technologies\.com\.unity\.template\.urp-blank/com.ywonder.greenfarm/g' "$PROJECT_FILE"
           grep -n "PRODUCT_BUNDLE_IDENTIFIER" "$PROJECT_FILE"
 
-      - name: Remove stale IL2CPP linker flag
+      - name: Verify IL2CPP linker flags
         script: |
           PROJECT_FILE="$UNITY_IOS_DIR/$XCODE_PROJECT/project.pbxproj"
-          perl -0pi -e 's/\n\s*"\\\"\$CONFIGURATION_BUILD_DIR\/il2cpp\.a\\\"",//g' "$PROJECT_FILE"
-          if grep -n 'il2cpp\.a' "$PROJECT_FILE"; then
-            echo "Stale il2cpp.a linker flag still exists"
-            exit 1
-          fi
+          grep -n '\$CONFIGURATION_BUILD_DIR/il2cpp\.a' "$PROJECT_FILE"
           grep -n "libGameAssembly.a" "$PROJECT_FILE"
 
       - name: Set up iOS code signing
@@ -136,14 +132,18 @@ workflows:
             -sdk iphoneos \
             build \
             | tee build/diagnostics/gameassembly-xcodebuild.log
-          echo "Searching for generated libGameAssembly.a"
+          echo "Searching for generated IL2CPP static libraries"
           find "$HOME/Library/Developer/Xcode/DerivedData" "$PWD/$UNITY_IOS_DIR" \
-            -name "libGameAssembly.a" \
+            \( -name "libGameAssembly.a" -o -name "il2cpp.a" \) \
             -print \
             -exec ls -lh {} \; \
             | tee build/diagnostics/gameassembly-artifacts.log
           if ! find "$HOME/Library/Developer/Xcode/DerivedData" "$PWD/$UNITY_IOS_DIR" -name "libGameAssembly.a" -print -quit | grep -q .; then
             echo "libGameAssembly.a was not generated before Build IPA"
+            exit 1
+          fi
+          if ! find "$HOME/Library/Developer/Xcode/DerivedData" "$PWD/$UNITY_IOS_DIR" -name "il2cpp.a" -print -quit | grep -q .; then
+            echo "il2cpp.a was not generated before Build IPA"
             exit 1
           fi
 
