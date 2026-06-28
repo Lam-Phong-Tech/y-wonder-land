@@ -114,6 +114,39 @@ workflows:
         script: |
           xcode-project use-profiles
 
+      - name: Diagnose GameAssembly build
+        script: |
+          set -o pipefail
+          PROJECT_PATH="$UNITY_IOS_DIR/$XCODE_PROJECT"
+          mkdir -p build/diagnostics
+          echo "Inspecting GameAssembly build settings"
+          xcodebuild \
+            -project "$PROJECT_PATH" \
+            -target GameAssembly \
+            -configuration Release \
+            -sdk iphoneos \
+            -showBuildSettings \
+            | grep -E "TARGET_NAME|PRODUCT_NAME|CONFIGURATION_BUILD_DIR|TARGET_BUILD_DIR|ARCHS|SDKROOT|ONLY_ACTIVE_ARCH|SYMROOT|OBJROOT" \
+            || true
+          echo "Building GameAssembly target before IPA archive"
+          xcodebuild \
+            -project "$PROJECT_PATH" \
+            -target GameAssembly \
+            -configuration Release \
+            -sdk iphoneos \
+            build \
+            | tee build/diagnostics/gameassembly-xcodebuild.log
+          echo "Searching for generated libGameAssembly.a"
+          find "$HOME/Library/Developer/Xcode/DerivedData" "$PWD/$UNITY_IOS_DIR" \
+            -name "libGameAssembly.a" \
+            -print \
+            -exec ls -lh {} \; \
+            | tee build/diagnostics/gameassembly-artifacts.log
+          if ! find "$HOME/Library/Developer/Xcode/DerivedData" "$PWD/$UNITY_IOS_DIR" -name "libGameAssembly.a" -print -quit | grep -q .; then
+            echo "libGameAssembly.a was not generated before Build IPA"
+            exit 1
+          fi
+
       - name: Build IPA
         script: |
           xcode-project build-ipa \
@@ -122,6 +155,7 @@ workflows:
 
     artifacts:
       - build/ios/ipa/*.ipa
+      - build/diagnostics/*.log
       - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
       - $HOME/Library/Developer/Xcode/DerivedData/**/Logs/**/*.xcactivitylog
 
