@@ -21,10 +21,27 @@
 *.md linguist-documentation
 *.fbx filter=lfs diff=lfs merge=lfs -text
 
-# Pre-exported Unity iOS Xcode projects can contain large static libraries and
-# asset payloads. Keep them in LFS so GitHub accepts the emergency TestFlight
-# handoff workflow.
-/ios/** text eol=lf
+# Pre-exported Unity iOS Xcode projects contain Mach-O/.NET runtime binaries.
+# Treat the export as binary by default; opt text/source files back in below.
+/ios/** -text
+/ios/**/*.c text eol=lf
+/ios/**/*.cc text eol=lf
+/ios/**/*.cpp text eol=lf
+/ios/**/*.h text eol=lf
+/ios/**/*.hpp text eol=lf
+/ios/**/*.m text eol=lf
+/ios/**/*.mm text eol=lf
+/ios/**/*.cs text eol=lf
+/ios/**/*.json text eol=lf
+/ios/**/*.plist text eol=lf
+/ios/**/*.pbxproj text eol=lf
+/ios/**/*.xcscheme text eol=lf
+/ios/**/*.xcworkspacedata text eol=lf
+/ios/**/*.xcconfig text eol=lf
+/ios/**/*.entitlements text eol=lf
+/ios/**/*.storyboard text eol=lf
+/ios/**/*.sh text eol=lf
+/ios/**/*.txt text eol=lf
 /ios/**/*.a filter=lfs diff=lfs merge=lfs -text
 /ios/**/*.resS filter=lfs diff=lfs merge=lfs -text
 /ios/usymtool filter=lfs diff=lfs merge=lfs -text
