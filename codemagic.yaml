@@ -19,7 +19,8 @@ workflows:
         XCODE_PROJECT: Unity-iPhone.xcodeproj
         XCODE_SCHEME: Unity-iPhone
         BUNDLE_ID: com.ywonder.greenfarm
-        APP_VERSION: 0.1.0
+        APP_VERSION: 0.1.1
+        BUILD_NUMBER: 1
 
     scripts:
       - name: Fetch Git LFS assets
@@ -84,6 +85,8 @@ workflows:
         UNITY_IOS_DIR: ios
         XCODE_PROJECT: Unity-iPhone.xcodeproj
         XCODE_SCHEME: Unity-iPhone
+        APP_VERSION: 0.1.1
+        BUILD_NUMBER: 1
 
     scripts:
       - name: Fetch Git LFS assets
@@ -109,6 +112,17 @@ workflows:
           PROJECT_FILE="$UNITY_IOS_DIR/$XCODE_PROJECT/project.pbxproj"
           perl -0pi -e 's/com\.Unity-Technologies\.com\.unity\.template\.urp-blank/com.ywonder.greenfarm/g' "$PROJECT_FILE"
           grep -n "PRODUCT_BUNDLE_IDENTIFIER" "$PROJECT_FILE"
+
+      - name: Force iOS version and build number
+        script: |
+          PROJECT_FILE="$UNITY_IOS_DIR/$XCODE_PROJECT/project.pbxproj"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $APP_VERSION" "$UNITY_IOS_DIR/Info.plist"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" "$UNITY_IOS_DIR/Info.plist"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $APP_VERSION" "$UNITY_IOS_DIR/UnityFramework/Info.plist" || true
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" "$UNITY_IOS_DIR/UnityFramework/Info.plist" || true
+          perl -0pi -e "s/CURRENT_PROJECT_VERSION = [^;]+;/CURRENT_PROJECT_VERSION = ${BUILD_NUMBER};/g" "$PROJECT_FILE"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$UNITY_IOS_DIR/Info.plist"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$UNITY_IOS_DIR/Info.plist"
 
       - name: Verify IL2CPP linker flags
         script: |
