@@ -20,7 +20,7 @@ workflows:
         XCODE_SCHEME: Unity-iPhone
         BUNDLE_ID: com.ywonder.greenfarm
         APP_VERSION: 0.1.1
-        BUILD_NUMBER: 1
+        BUILD_NUMBER: 2
 
     scripts:
       - name: Fetch Git LFS assets
@@ -59,6 +59,21 @@ workflows:
             --project "$UNITY_IOS_DIR/$XCODE_PROJECT" \
             --scheme "$XCODE_SCHEME"
 
+      - name: Verify IPA version before publish
+        script: |
+          set -e
+          IPA_PATH=$(ls build/ios/ipa/*.ipa | head -n 1)
+          TMP_DIR=$(mktemp -d)
+          unzip -q "$IPA_PATH" -d "$TMP_DIR"
+          APP_PLIST=$(find "$TMP_DIR/Payload" -maxdepth 2 -name Info.plist -path "*.app/Info.plist" -print -quit)
+          IPA_VERSION=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$APP_PLIST")
+          IPA_BUILD=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$APP_PLIST")
+          echo "Built IPA version: $IPA_VERSION ($IPA_BUILD)"
+          if [ "$IPA_VERSION" != "$APP_VERSION" ] || [ "$IPA_BUILD" != "$BUILD_NUMBER" ]; then
+            echo "IPA version mismatch. Expected $APP_VERSION ($BUILD_NUMBER), got $IPA_VERSION ($IPA_BUILD)."
+            exit 1
+          fi
+
     artifacts:
       - build/ios/ipa/*.ipa
       - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
@@ -86,7 +101,7 @@ workflows:
         XCODE_PROJECT: Unity-iPhone.xcodeproj
         XCODE_SCHEME: Unity-iPhone
         APP_VERSION: 0.1.1
-        BUILD_NUMBER: 1
+        BUILD_NUMBER: 2
 
     scripts:
       - name: Fetch Git LFS assets
@@ -177,6 +192,21 @@ workflows:
             --project "$UNITY_IOS_DIR/$XCODE_PROJECT" \
             --scheme "$XCODE_SCHEME"
 
+      - name: Verify IPA version before publish
+        script: |
+          set -e
+          IPA_PATH=$(ls build/ios/ipa/*.ipa | head -n 1)
+          TMP_DIR=$(mktemp -d)
+          unzip -q "$IPA_PATH" -d "$TMP_DIR"
+          APP_PLIST=$(find "$TMP_DIR/Payload" -maxdepth 2 -name Info.plist -path "*.app/Info.plist" -print -quit)
+          IPA_VERSION=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$APP_PLIST")
+          IPA_BUILD=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$APP_PLIST")
+          echo "Built IPA version: $IPA_VERSION ($IPA_BUILD)"
+          if [ "$IPA_VERSION" != "$APP_VERSION" ] || [ "$IPA_BUILD" != "$BUILD_NUMBER" ]; then
+            echo "IPA version mismatch. Expected $APP_VERSION ($BUILD_NUMBER), got $IPA_VERSION ($IPA_BUILD)."
+            exit 1
+          fi
+
     artifacts:
       - build/ios/ipa/*.ipa
       - build/diagnostics/*.log
@@ -188,4 +218,3 @@ workflows:
         api_key: $APP_STORE_CONNECT_PRIVATE_KEY
         key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
         issuer_id: $APP_STORE_CONNECT_ISSUER_ID
-        submit_to_testflight: true
