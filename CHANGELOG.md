@@ -1,5 +1,35 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-06-29 (Handoff iOS/TestFlight + fish/mining data)
+
+### Added
+- Added handoff notes for the next session: upcoming customer request is to expand fishing rewards with new fish tiers and mining rewards with new stone/gem tiers.
+- Recorded the new fish point tiers for implementation:
+  - 2 point: Ca com, ca nuc, ca hong.
+  - 4 point: Ca su tu, ca naso, ca nhong.
+  - 6 point: Ca soc dua, ca khe, ca mu.
+  - 10 point: Ca mat quy, ca heo bien.
+  - 15 point: Ca hoang de, ca ngu hoang kim.
+  - 25 point: Ca rong do.
+  - Fishing rarity weights from high value down to low value: 2%, 4%, 7%, 17%, 25%, 45%.
+- Recorded the new mining/stone point tiers for implementation:
+  - Image 1: 2 point/stone, 4 stones, 50% hit rate.
+  - Image 2: 3 point/stone, 4 stones, 30% hit rate.
+  - Image 3: 6 point/stone, 3 stones, 12% hit rate.
+  - Image 4: 12 point/stone, 2 stones, 5% hit rate.
+  - Image 5: 500 point/stone, 1 stone, 2% hit rate, pickaxe lv2 upgrade costs 250 point/attempt.
+  - Image 6: rare ruby, 3000 point/stone, 1% hit rate, pickaxe lv3 upgrade costs 1500 point.
+  - Mining limit: 10 attempts/day.
+
+### Changed
+- Stabilized CodeMagic exported-Xcode iOS workflow enough for TestFlight: signing, bundle id `com.ywonder.greenfarm`, iOS app icon set, executable symbol scripts, IL2CPP binary handling, and build number bump to `0.1.1 (1)`.
+- iOS/TestFlight artifact reached TestFlight. Current install issue must be checked against the newest build `0.1.1 (1)` instead of stale `0.1.0 (0)`.
+- TestFlight package size was observed around 309 MB; size optimization is intentionally deferred after functional TestFlight validation.
+
+### Notes
+- Current fish/mining data above is only documented for the next implementation pass; it has not yet been wired into gameplay data/assets.
+- Do not stage unrelated Unity/iOS generated dirty files unless the next task explicitly needs them.
+
 ## [Unreleased] - 2026-06-27 (CodeMagic iOS signing bundle fix)
 
 ### Fixed

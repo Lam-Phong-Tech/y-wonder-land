@@ -1,5 +1,39 @@
 # Danh sách công việc dự án (Task Backlog & Progress)
 
+## Ưu tiên tiếp theo - 29/06/2026: thêm cá mới + dữ liệu đào đá mới
+
+> Khách vừa gửi số liệu mới. Đây là task kế tiếp cho session mới. Dữ liệu bên dưới mới chỉ được ghi nhận, chưa implement vào gameplay/data assets.
+
+### A. Câu cá - thêm giống cá và tỉ lệ
+- `[ ]` Tìm lại hệ câu cá hiện tại (`FarmInteractionController`, item definitions/generator, shop/inventory liên quan).
+- `[ ]` Thêm item/product cho các loài cá mới, chỉ gắn icon nếu anh đã cung cấp đúng asset; thiếu icon thì hỏi, không đoán bừa.
+- `[ ]` Áp giá point:
+  - 2 point: Cá cơm, Cá nục, Cá hồng.
+  - 4 point: Cá sư tử, Cá naso, Cá nhồng.
+  - 6 point: Cá sọc dưa, Cá khế, Cá mú.
+  - 10 point: Cá mặt quỷ, Cá heo biển.
+  - 15 point: Cá hoàng đế, Cá ngừ hoàng kim.
+  - 25 point: Cá rồng đỏ.
+- `[ ]` Áp tỉ lệ câu từ cá giá trị cao xuống thấp: 2%, 4%, 7%, 17%, 25%, 45%.
+- `[ ]` Rà shop bán cá/thành phố/kho đồ/toast thu hoạch để đảm bảo cá câu được hiện đúng tên, icon, số lượng và giá trị point.
+
+### B. Đào đá - thêm bảng đá/gem và lượt đào
+- `[ ]` Tìm lại hệ đào đá hiện tại trước khi sửa; xác định đang là tài nguyên thường hay minigame riêng.
+- `[ ]` Thêm dữ liệu reward:
+  - Ảnh 1: 2 point/viên, 4 viên, 50% đào trúng.
+  - Ảnh 2: 3 point/viên, 4 viên, 30% đào trúng.
+  - Ảnh 3: 6 point/viên, 3 viên, 12% đào trúng.
+  - Ảnh 4: 12 point/viên, 2 viên, 5% đào trúng.
+  - Ảnh 5: 500 point/viên, 1 viên, 2% đào trúng; nâng cấp cuốc lv2 tốn 250 point/lượt.
+  - Ảnh 6 ruby quý hiếm: 3000 point/viên, 1% đào trúng; nâng cấp cuốc lv3 tốn 1500 point.
+- `[ ]` Áp giới hạn mỗi ngày 10 lượt đào.
+- `[ ]` Xác định với anh cách hiển thị/nâng cấp cuốc lv2/lv3 nếu UI hiện tại chưa có màn nâng cấp phù hợp.
+
+### C. iOS/TestFlight follow-up nếu bị hỏi lại
+- `[x]` CodeMagic đã build/upload TestFlight được bằng exported-Xcode workflow.
+- `[ ]` Nếu tester báo không cài được, xác nhận họ đang dùng bản `0.1.1 (1)`, không phải `0.1.0 (0)`.
+- `[ ]` Tối ưu dung lượng iOS sau, hiện TestFlight khoảng 309 MB.
+
 ## Tiến độ đã hoàn thành (Completed)
 
 ### 1. Nâng cấp Giao diện HUD (UI/UX)

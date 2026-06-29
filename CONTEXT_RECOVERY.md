@@ -1,9 +1,41 @@
 # 🌿 Y WONDER GREEN FARM - MEMENTO PROTOCOL (BẢN GHI NHỚ TIẾN ĐỘ)
 
 *Dự án: BaChuKhuRung3D (Game nông trại 3D YWONDERLAND)*
-*Ngày cập nhật: 24/06/2026*
+*Ngày cập nhật: 29/06/2026*
 
-## 0. Cập nhật 24/06 (mới nhất)
+## 0. Cập nhật 29/06 (mới nhất)
+
+> Nhánh làm việc hiện tại: `dev`. Main đã được merge các patch iOS gần nhất để bên build iOS/CodeMagic lấy được repo ổn định. Chi tiết xem `CHANGELOG.md` + `task.md`.
+
+- **iOS/TestFlight:** CodeMagic exported-Xcode workflow đã build được IPA và upload lên TestFlight. Các vấn đề đã xử lý: tránh Unity license bằng workflow Xcode-only, signing/profile cho bundle `com.ywonder.greenfarm`, tạo đủ iOS app icon, chmod `process_symbols.sh`/`usymtool`, giữ `il2cpp.a`, bảo toàn IL2CPP binary bằng `.gitattributes`, bump build lên `0.1.1 (1)`.
+- **Nếu tester báo không cài được iOS:** xác nhận họ đang cài bản TestFlight mới `0.1.1 (1)`, không phải bản cũ `0.1.0 (0)`. Dung lượng TestFlight khoảng 309 MB, tạm để sau khi cài/chạy ổn mới tối ưu.
+- **Cảnh báo worktree:** có thể còn file Unity/iOS generated dirty như `ios/Data`, `ios/Unity-iPhone.xcodeproj`, `ProjectSettings`, `AddressableAssetsData`, `.claude/`, `_Recovery`. Không stage/revert bừa nếu task không cần.
+- **Việc tiếp theo khách vừa giao:** thêm cá mới và bảng đào đá mới. Dữ liệu dưới đây mới là yêu cầu cần implement, chưa wire gameplay.
+
+### Dữ liệu cá cần làm tiếp
+- 2 point: Cá cơm, Cá nục, Cá hồng.
+- 4 point: Cá sư tử, Cá naso, Cá nhồng.
+- 6 point: Cá sọc dưa, Cá khế, Cá mú.
+- 10 point: Cá mặt quỷ, Cá heo biển.
+- 15 point: Cá hoàng đế, Cá ngừ hoàng kim.
+- 25 point: Cá rồng đỏ.
+- Tỉ lệ câu từ cá giá trị cao xuống thấp: 2%, 4%, 7%, 17%, 25%, 45%.
+
+### Dữ liệu đào đá cần làm tiếp
+- Ảnh 1: 2 point/viên, 4 viên, 50% đào trúng.
+- Ảnh 2: 3 point/viên, 4 viên, 30% đào trúng.
+- Ảnh 3: 6 point/viên, 3 viên, 12% đào trúng.
+- Ảnh 4: 12 point/viên, 2 viên, 5% đào trúng.
+- Ảnh 5: 500 point/viên, 1 viên, 2% đào trúng; nâng cấp cuốc lv2 tốn 250 point/lượt.
+- Ảnh 6 ruby quý hiếm: 3000 point/viên, 1% đào trúng; nâng cấp cuốc lv3 tốn 1500 point.
+- Mỗi ngày 10 lượt đào.
+
+### Gợi ý resume cho session mới
+- Đọc `RULES.md`, `docs/CONTEXT_RECOVERY.md`, `task.md`, `CHANGELOG.md`.
+- Tìm hệ câu cá/đào đá hiện tại trước khi sửa: ưu tiên `FarmInteractionController`, item data/generator, shop/inventory liên quan.
+- Hỏi anh nếu thiếu icon/ảnh cho cá hoặc đá; không đoán bừa asset.
+
+## 1. Cập nhật 24/06
 
 > Nhánh đang dùng: `feat/animal-husbandry` (đã có thay đổi cục bộ touch-control/build-flow). Chi tiết xem `CHANGELOG.md` + `docs/CHANGELOG.md` + `task.md`.
 
