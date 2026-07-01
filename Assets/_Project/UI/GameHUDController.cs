@@ -533,7 +533,7 @@ public class GameHUDController : MonoBehaviour
     }
 
     /// <summary>
-    /// Update currency display (POS).
+    /// Update currency display (Point).
     /// </summary>
     public void SetCurrency(long amount)
     {
@@ -541,11 +541,11 @@ public class GameHUDController : MonoBehaviour
     }
 
     /// <summary>
-    /// Update currency display (UPOS).
+    /// Update premium currency display (UPoint).
     /// </summary>
     public void SetUPOS(long amount)
     {
-        if (uposValue != null) uposValue.text = $"{amount:N0} UPOS";
+        if (uposValue != null) uposValue.text = $"{amount:N0} UPoint";
     }
 
     /// <summary>

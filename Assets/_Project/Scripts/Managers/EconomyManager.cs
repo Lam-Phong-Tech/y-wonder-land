@@ -36,7 +36,7 @@ namespace YWonderLand.Managers
 
         private void LoadBalances()
         {
-            // Nếu chưa có data, tặng 5000 POS làm vốn khởi nghiệp
+            // Nếu chưa có data, tặng 5000 Point làm vốn khởi nghiệp
             currentPOS = PlayerPrefs.GetInt(POS_KEY, 5000); 
             currentUPOS = PlayerPrefs.GetInt(UPOS_KEY, 0);
         }
@@ -57,7 +57,7 @@ namespace YWonderLand.Managers
             currentPOS += amount;
             SaveBalances();
             OnPOSChanged?.Invoke(currentPOS);
-            Debug.Log($"[Economy] Add {amount} POS. Balance: {currentPOS}");
+            Debug.Log($"[Economy] Add {amount} Point. Balance: {currentPOS}");
         }
 
         public bool SpendPOS(long amount)
@@ -68,10 +68,10 @@ namespace YWonderLand.Managers
                 currentPOS -= amount;
                 SaveBalances();
                 OnPOSChanged?.Invoke(currentPOS);
-                Debug.Log($"[Economy] Spend {amount} POS. Balance: {currentPOS}");
+                Debug.Log($"[Economy] Spend {amount} Point. Balance: {currentPOS}");
                 return true;
             }
-            Debug.LogWarning($"[Economy] Not enough POS! Needed: {amount}, Have: {currentPOS}");
+            Debug.LogWarning($"[Economy] Not enough Point! Needed: {amount}, Have: {currentPOS}");
             return false;
         }
 
@@ -81,7 +81,7 @@ namespace YWonderLand.Managers
             currentUPOS += amount;
             SaveBalances();
             OnUPOSChanged?.Invoke(currentUPOS);
-            Debug.Log($"[Economy] Add {amount} UPOS. Balance: {currentUPOS}");
+            Debug.Log($"[Economy] Add {amount} UPoint. Balance: {currentUPOS}");
         }
 
         public bool SpendUPOS(long amount)
@@ -92,11 +92,11 @@ namespace YWonderLand.Managers
                 currentUPOS -= amount;
                 SaveBalances();
                 OnUPOSChanged?.Invoke(currentUPOS);
-                Debug.Log($"[Economy] Spend {amount} UPOS. Balance: {currentUPOS}");
+                Debug.Log($"[Economy] Spend {amount} UPoint. Balance: {currentUPOS}");
                 return true;
             }
 
-            Debug.LogWarning($"[Economy] Not enough UPOS! Needed: {amount}, Have: {currentUPOS}");
+            Debug.LogWarning($"[Economy] Not enough UPoint! Needed: {amount}, Have: {currentUPOS}");
             return false;
         }
         

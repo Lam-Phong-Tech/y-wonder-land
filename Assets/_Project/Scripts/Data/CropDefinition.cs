@@ -40,7 +40,7 @@ namespace YWonderLand.Data
         [Tooltip("EXP nhận được khi thu hoạch")]
         public int expReward = 20;
 
-        [Tooltip("POS nhận được khi thu hoạch")]
+        [Tooltip("Point nhận được khi thu hoạch")]
         public int posReward = 50;
 
         [Header("Visual")]

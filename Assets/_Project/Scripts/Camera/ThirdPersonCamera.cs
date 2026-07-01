@@ -37,7 +37,7 @@ public class ThirdPersonCamera : MonoBehaviour
     [Tooltip("Minimum pitch angle. Đặt >= 0 để tránh góc nhìn không phù hợp kiểm duyệt.")]
     public float minVerticalAngle = 6f;
     [Tooltip("Maximum pitch angle (positive = look upward).")]
-    public float maxVerticalAngle = 30f;
+    public float maxVerticalAngle = 45f;
 
     [Header("Camera Collision")]
     [Tooltip("Layer mask for obstacles (walls, ground) that should block the camera.")]
@@ -77,6 +77,7 @@ public class ThirdPersonCamera : MonoBehaviour
     private InputAction lookAction;
     // Safety floor cho kiểm duyệt: không cho camera hạ xuống dưới ngưỡng này.
     private const float ComplianceMinVerticalAngle = 6f;
+    private const float MaxAllowedVerticalAngle = 60f;
 
     void Awake()
     {
@@ -116,7 +117,7 @@ public class ThirdPersonCamera : MonoBehaviour
         horizontalSensitivity = Mathf.Min(horizontalSensitivity, 0.8f);
         verticalSensitivity = Mathf.Min(verticalSensitivity, 0.6f);
         minVerticalAngle = Mathf.Max(minVerticalAngle, ComplianceMinVerticalAngle);
-        maxVerticalAngle = Mathf.Clamp(maxVerticalAngle, minVerticalAngle + 5f, 30f);
+        maxVerticalAngle = Mathf.Clamp(maxVerticalAngle, minVerticalAngle + 5f, MaxAllowedVerticalAngle);
         if (Mathf.Abs(shoulderOffsetX) > 0.45f)
         {
             shoulderOffsetX = Mathf.Sign(shoulderOffsetX) * 0.45f;

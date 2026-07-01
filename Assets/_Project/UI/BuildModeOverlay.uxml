@@ -14,7 +14,7 @@
             <!-- Left: Balance Pill -->
             <ui:VisualElement class="build-balance-pill">
                 <ui:Label text="◆" class="build-balance-icon" />
-                <ui:Label name="lblBuildBalance" text="5,000 POS" class="build-balance-value" />
+                <ui:Label name="lblBuildBalance" text="0 Gỗ   0 Đá" class="build-balance-value" />
             </ui:VisualElement>
 
             <!-- Center: Title -->
@@ -85,7 +85,7 @@
             <ui:Label name="InfoTooltipName" text="Nhà gỗ nhỏ" class="build-info-name" />
             <ui:VisualElement class="build-info-row">
                 <ui:Label name="InfoTooltipSize" text="2x2" class="build-info-size" />
-                <ui:Label name="InfoTooltipPrice" text="500 POS" class="build-info-price" />
+                <ui:Label name="InfoTooltipPrice" text="Miễn phí" class="build-info-price" />
             </ui:VisualElement>
             <ui:Label name="InfoTooltipDesc" text="Ngôi nhà gỗ ấm cúng." class="build-info-desc" />
         </ui:VisualElement>

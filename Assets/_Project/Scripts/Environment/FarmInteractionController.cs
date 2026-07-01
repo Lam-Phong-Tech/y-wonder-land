@@ -51,15 +51,43 @@ namespace YWonderLand.Environment
         [Tooltip("Layer mask cho FarmTile raycasting")]
         [SerializeField] private LayerMask farmTileLayer = ~0; // Default: all layers
 
+        [System.Serializable]
+        private class GemstoneMiningReward
+        {
+            public string itemId;
+            public string displayName;
+            public int amount;
+            public float chancePercent;
+
+            public GemstoneMiningReward(string itemId, string displayName, int amount, float chancePercent)
+            {
+                this.itemId = itemId;
+                this.displayName = displayName;
+                this.amount = amount;
+                this.chancePercent = chancePercent;
+            }
+        }
+
         [Header("Sản lượng tài nguyên (khách chốt)")]
         [Tooltip("Chặt xong 1 CÂY nhận bao nhiêu gỗ (khách: 10). Ép cứng nên không cần chỉnh từng cây trong scene.")]
         [SerializeField] private int treeYield = 10;
-        [Tooltip("Đào xong 1 KHỐI ĐÁ nhận bao nhiêu đá (khách: 10).")]
+        [Tooltip("Đào xong 1 KHỐI ĐÁ nhận bao nhiêu đá thường (giữ theo gameplay hiện tại: 10 rock, 100%).")]
         [SerializeField] private int rockYield = 10;
         [Tooltip("EXP nhận mỗi lần CHẶT CÂY xong (hệ Level tối giản).")]
         [SerializeField] private int resourceExp = 5;
         [Tooltip("EXP nhận mỗi lần ĐÀO KHOÁNG xong (khách chốt 22/06: 15).")]
         [SerializeField] private int mineExp = 15;
+
+        [Header("Dao da quy (khach chot 29/06)")]
+        [SerializeField] private List<GemstoneMiningReward> gemstoneRewards = new List<GemstoneMiningReward>
+        {
+            new GemstoneMiningReward("gem_ruby_01", "Ruby qu\u00FD hi\u1EBFm", 1, 1f),
+            new GemstoneMiningReward("gem_amethyst_01", "Amethyst", 1, 2f),
+            new GemstoneMiningReward("gem_fire_quartz_01", "Fire Quartz", 2, 5f),
+            new GemstoneMiningReward("gem_green_calcite_01", "Green Calcite", 3, 12f),
+            new GemstoneMiningReward("gem_orange_calcite_01", "Orange Calcite", 4, 30f),
+            new GemstoneMiningReward("gem_kyanite_01", "Kyanite", 4, 50f),
+        };
 
 
         [Header("References")]
@@ -145,16 +173,88 @@ namespace YWonderLand.Environment
             if (done)
             {
                 int gained = (inv != null && !string.IsNullOrEmpty(yieldId)) ? inv.GetItemQuantity(yieldId) - before : 0;
-                string verb = resource.type == HarvestableResource.ResourceType.Tree ? "Chặt cây" : "Đào khoáng";
-                if (gained > 0)
-                    ScreenToast.ShowInfo($"{verb}: +{gained} {GetItemDisplayName(yieldId)}");
-                else
-                    ScreenToast.ShowInfo($"{verb} xong!");
+                GemstoneMiningReward gemstoneReward = null;
+                if (resource.type == HarvestableResource.ResourceType.Rock && inv != null)
+                {
+                    gemstoneReward = RollGemstoneReward();
+                    if (gemstoneReward != null)
+                    {
+                        inv.AddItem(gemstoneReward.itemId, Mathf.Max(1, gemstoneReward.amount));
+                    }
+                }
+
+                ShowResourceHarvestToast(resource.type, yieldId, gained, gemstoneReward);
                 int rexp = resource.type == HarvestableResource.ResourceType.Rock ? mineExp : resourceExp;
                 YWonderLand.Managers.ExperienceManager.Instance?.AddEXP(rexp);
                 YWonderLand.Managers.AudioManager.Instance?.PlaySFX("chop");
             }
             return done;
+        }
+
+        private GemstoneMiningReward RollGemstoneReward()
+        {
+            if (gemstoneRewards == null || gemstoneRewards.Count == 0) return null;
+
+            float totalChance = 0f;
+            GemstoneMiningReward lastValidReward = null;
+            foreach (var reward in gemstoneRewards)
+            {
+                if (!IsValidGemstoneReward(reward)) continue;
+                totalChance += reward.chancePercent;
+                lastValidReward = reward;
+            }
+
+            if (totalChance <= 0f) return null;
+
+            float roll = Random.Range(0f, totalChance);
+            foreach (var reward in gemstoneRewards)
+            {
+                if (!IsValidGemstoneReward(reward)) continue;
+
+                if (roll < reward.chancePercent) return reward;
+                roll -= reward.chancePercent;
+            }
+
+            return lastValidReward;
+        }
+
+        private static bool IsValidGemstoneReward(GemstoneMiningReward reward)
+        {
+            return reward != null
+                && !string.IsNullOrEmpty(reward.itemId)
+                && reward.amount > 0
+                && reward.chancePercent > 0f;
+        }
+
+        private void ShowResourceHarvestToast(
+            HarvestableResource.ResourceType resourceType,
+            string yieldId,
+            int gained,
+            GemstoneMiningReward gemstoneReward)
+        {
+            string verb = resourceType == HarvestableResource.ResourceType.Tree ? "Chặt cây" : "Đào khoáng";
+            if (resourceType == HarvestableResource.ResourceType.Rock && gemstoneReward != null)
+            {
+                ItemDefinition gemstoneDef = FoodDb != null ? FoodDb.GetItem(gemstoneReward.itemId) : null;
+                string gemstoneName = gemstoneDef != null && !string.IsNullOrEmpty(gemstoneDef.itemName)
+                    ? gemstoneDef.itemName
+                    : (!string.IsNullOrEmpty(gemstoneReward.displayName) ? gemstoneReward.displayName : gemstoneReward.itemId);
+                int gemstoneAmount = Mathf.Max(1, gemstoneReward.amount);
+                string rockText = gained > 0 ? $"+{gained} {GetItemDisplayName(yieldId)}, " : string.Empty;
+
+                ScreenToast.ShowInfoWithIcon(
+                    $"Đào trúng: {rockText}+{gemstoneAmount} {gemstoneName}",
+                    gemstoneDef != null ? gemstoneDef.iconTexture : null,
+                    gemstoneDef != null ? gemstoneDef.iconSprite : null,
+                    "Gem");
+                Debug.Log($"[Mining] Gem reward: +{gemstoneAmount} {gemstoneReward.itemId}");
+                return;
+            }
+
+            if (gained > 0)
+                ScreenToast.ShowInfo($"{verb}: +{gained} {GetItemDisplayName(yieldId)}");
+            else
+                ScreenToast.ShowInfo($"{verb} xong!");
         }
 
         private HarvestableResource currentHarvestTarget;
@@ -977,8 +1077,8 @@ namespace YWonderLand.Environment
 
                     // Chỉ hiện nút khi TÂM NGẮM chạm bề mặt cây/đá trong tầm với (resource.interactionRange).
                     // Đo từ nhân vật tới ĐIỂM CHẠM (hit.point) cho trực quan, đúng cả với cây to.
-                    // ĐÀO ĐÁ chỉ ở thành phố → ở đảo khác KHÔNG hiện nút "Đào khoáng" (chặt cây vẫn hiện).
-                    bool resourceUsable = resource.type != HarvestableResource.ResourceType.Rock || IsOnCityIsland();
+                    // Đào đá chỉ hiện ở City hoặc Mine; chặt cây vẫn hiện ở nơi có tài nguyên.
+                    bool resourceUsable = resource.type != HarvestableResource.ResourceType.Rock || IsMiningAllowedHere();
                     if (resourceUsable)
                     {
                         foundObj = resource.gameObject;
@@ -1137,6 +1237,13 @@ namespace YWonderLand.Environment
             var itm = IslandTravelManager.Instance;
             return itm != null && itm.CurrentIslandId == "city";
         }
+
+        private bool IsMiningAllowedHere()
+        {
+            var itm = IslandTravelManager.Instance;
+            return itm != null && (itm.CurrentIslandId == "city" || itm.CurrentIslandId == "mine");
+        }
+
         private bool IsPlayerSwimming()
         {
             var player = PlayerController.Instance;
@@ -1377,10 +1484,10 @@ namespace YWonderLand.Environment
 
         private void ClickHarvestResource(HarvestableResource resource)
         {
-            // ĐÀO ĐÁ chỉ ở thành phố — ở đảo khác thì chặn (chặt cây vẫn bình thường).
-            if (resource != null && resource.type == HarvestableResource.ResourceType.Rock && !IsOnCityIsland())
+            // Đào đá chỉ ở các đảo có khu khai thác; chặt cây vẫn bình thường ở nơi có tài nguyên.
+            if (resource != null && resource.type == HarvestableResource.ResourceType.Rock && !IsMiningAllowedHere())
             {
-                ScreenToast.Show("Chỉ đào đá được ở Đảo Thành phố thôi!");
+                ScreenToast.Show("Chỉ đào đá được ở Thành phố hoặc Đảo mỏ thôi!");
                 return;
             }
 
@@ -1491,8 +1598,8 @@ namespace YWonderLand.Environment
                     resource = hit.collider.GetComponentInParent<HarvestableResource>();
                 if (resource != null)
                 {
-                    // ĐÀO ĐÁ chỉ ở thành phố — bỏ qua tảng đá nếu đang ở đảo khác (chặt cây thì vẫn được).
-                    if (resource.type == HarvestableResource.ResourceType.Rock && !IsOnCityIsland()) continue;
+                    // Đào đá chỉ ở City hoặc Mine; bỏ qua tảng đá nếu đang ở đảo khác.
+                    if (resource.type == HarvestableResource.ResourceType.Rock && !IsMiningAllowedHere()) continue;
 
                     // Quá xa thì không cho chặt/đập (đo tới điểm chạm, khớp với lúc hiện gợi ý)
                     Vector3 holdPlayerPos = PlayerController.Instance != null ? PlayerController.Instance.transform.position : transform.position;
@@ -2269,12 +2376,12 @@ namespace YWonderLand.Environment
                 {
                     float care = tile.LastCareFactor; // <1 nếu cây từng bị khát (behavior B)
 
-                    // Add POS reward (giảm theo độ chăm sóc)
+                    // Add Point reward (giảm theo độ chăm sóc)
                     if (YWonderLand.Managers.EconomyManager.Instance != null)
                     {
                         int pos = Mathf.RoundToInt(crop.posReward * care);
                         YWonderLand.Managers.EconomyManager.Instance.AddPOS(pos);
-                        Debug.Log($"[FarmInteraction] +{pos} POS (care {care:0.00})");
+                        Debug.Log($"[FarmInteraction] +{pos} Point (care {care:0.00})");
                     }
 
                     // CayTrong2/CayTrongLauNam2: EXP cong o lan thu ket thuc vong doi.

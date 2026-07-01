@@ -1,18 +1,28 @@
 # 🌿 Y WONDER GREEN FARM - MEMENTO PROTOCOL (BẢN GHI NHỚ TIẾN ĐỘ)
 
 *Dự án: BaChuKhuRung3D (Game nông trại 3D YWONDERLAND)*
-*Ngày cập nhật: 29/06/2026*
+*Ngày cập nhật: 30/06/2026*
 
-## 0. Cập nhật 29/06 (mới nhất)
+## 0. Cập nhật 29-30/06 (mới nhất)
 
 > Nhánh làm việc hiện tại: `dev`. Main đã được merge các patch iOS gần nhất để bên build iOS/CodeMagic lấy được repo ổn định. Chi tiết xem `CHANGELOG.md` + `task.md`.
 
-- **iOS/TestFlight:** CodeMagic exported-Xcode workflow đã build được IPA và upload lên TestFlight. Các vấn đề đã xử lý: tránh Unity license bằng workflow Xcode-only, signing/profile cho bundle `com.ywonder.greenfarm`, tạo đủ iOS app icon, chmod `process_symbols.sh`/`usymtool`, giữ `il2cpp.a`, bảo toàn IL2CPP binary bằng `.gitattributes`, bump build lên `0.1.1 (1)`.
-- **Nếu tester báo không cài được iOS:** xác nhận họ đang cài bản TestFlight mới `0.1.1 (1)`, không phải bản cũ `0.1.0 (0)`. Dung lượng TestFlight khoảng 309 MB, tạm để sau khi cài/chạy ổn mới tối ưu.
+- **Đảo đào khoáng MVP 30/06:** đã mở nền code để chọn `mine` trên bản đồ và travel tới `MineScene`. `IslandTravelManager` có fallback `MineMap -> MineScene` để dữ liệu Inspector cũ không làm vỡ runtime. `FarmInteractionController` giữ câu cá chỉ ở `city`, nhưng đào đá nay cho phép ở `city` hoặc `mine`. `ResourceSpawner` hỗ trợ gắn prefab cây/đá, snap xuống nền, random lại vị trí khi tài nguyên hồi sinh, và spawn trong nhiều vùng `Collider` kiểm soát được thay vì chỉ spawn hình tròn. **Cần Editor:** thêm `Assets/_Project/_Scenes/MineScene.unity` vào Build Settings thay entry cũ `MineMap`, set island `mine` sceneName `MineScene`, đặt `ResourceSpawner` trong `MineScene` với `spawnerID = Mine`, `treeCount = 0`, `rockCount` theo mật độ test, bật `randomizePositionOnRespawn`, gắn `rockPrefab` nếu có. Với map méo/rộng, tạo vài `BoxCollider` trigger cao phủ vùng đất hợp lệ, kéo vào `ResourceSpawner > Spawn Areas`, bật `snapSpawnToGround` với ground mask riêng, rồi dùng context menu `Clear Saved Resource State` nếu cần rải lại theo vùng mới. Daily 10 lượt/nâng cuốc/shop đá quý chưa làm trong MVP này.
+- **Polish 29/06:** đã đổi text hiển thị `POS` -> `Point`, `UPOS` -> `UPoint` ở UI/toast/log demo liên quan; giữ tên biến/API nội bộ `POS/UPOS` để không đụng logic kinh tế. Câu cá thành công có icon cá nổi/fade qua `ScreenToast.ShowInfoWithIcon`. Nước biển Farm/City đã sáng và xanh hơn trên `Assets/IgniteCoders/Simple Water Shader/Resources/Water_mat_01.mat` và mesh nước phụ City `Assets/Art/Environment/Materials/water.mat`.
+- **Chăn nuôi 29/06:** khách đổi lại quyết định gia cầm. Gà/đà điểu/ngỗng/vịt vẫn lấy trứng theo chu kỳ, nhưng vụ cuối sẽ trả thịt theo Product 2 trong `VatNuoi2.md` (`chicken_meat_01`, `ostrich_meat_01`, `goose_meat_01`, `duck_meat_01`) và bán được ở Mini Garden.
+- **Icon thịt gia cầm 29/06:** 4 item thịt gia cầm đã gắn icon mới từ `Assets/Sprites/icon/ThitGiaCam/`. Toast vụ cuối của `FarmAnimal` dùng `ScreenToast.ShowInfoWithIcon`; túi đồ và shop tự hiển thị icon qua `ItemDefinition.iconTexture`.
+- **iOS/App Store Connect:** CodeMagic exported-Xcode workflow đã build được IPA và upload lên App Store Connect. Các vấn đề đã xử lý: tránh Unity license bằng workflow Xcode-only, signing/profile cho bundle `com.ywonder.greenfarm`, tạo đủ iOS app icon, chmod `process_symbols.sh`/`usymtool`, giữ `il2cpp.a`, bảo toàn IL2CPP binary bằng `.gitattributes`, bump build lên `0.1.1 (2)`. Cập nhật theo góp ý bên build: đã bỏ `submit_to_testflight: true`, nên Codemagic chỉ upload IPA; việc add build vào Internal Testing làm thủ công trong App Store Connect. Sau lỗi App Store Connect báo IPA vẫn là build `1`, đã bake trực tiếp `0.1.1 (2)` vào exported iOS project và thêm bước verify IPA version trước publish.
+- **Hotfix iOS/App Store Connect mới nhất:** bên build báo cần tăng build number và bổ sung khai báo export compliance. Đã tăng bản kế tiếp lên `0.1.1 (4)`, thêm `ITSAppUsesNonExemptEncryption=false` trong `ios/Info.plist`, đồng thời cập nhật `codemagic.yaml` để sau mỗi lần Unity export CodeMagic tự ép lại `CFBundleVersion=4` và key export compliance này trước khi archive/upload.
+- **Nếu tester báo không cài được iOS:** sau hotfix mới nhất, xác nhận họ đang cài bản TestFlight mới `0.1.1 (4)`, không phải bản cũ `0.1.0 (0)`, `0.1.1 (1)`, `0.1.1 (2)` hoặc `0.1.1 (3)`. Dung lượng TestFlight khoảng 309 MB, tạm để sau khi cài/chạy ổn mới tối ưu.
 - **Cảnh báo worktree:** có thể còn file Unity/iOS generated dirty như `ios/Data`, `ios/Unity-iPhone.xcodeproj`, `ProjectSettings`, `AddressableAssetsData`, `.claude/`, `_Recovery`. Không stage/revert bừa nếu task không cần.
-- **Việc tiếp theo khách vừa giao:** thêm cá mới và bảng đào đá mới. Dữ liệu dưới đây mới là yêu cầu cần implement, chưa wire gameplay.
+- **Cá mới 29/06 đã implement:** đã thêm 14 `ItemDefinition` cá mới trong `Assets/Resources/Items/`, gắn icon từ `Assets/Sprites/icon/CacLoaiCa/`, đổi reward câu cá sang random theo tier Point, và whitelist toàn bộ cá mới trong Fish Shop. `ItemDatabase.GetItem` có fallback load `Resources/Items/{id}` để shop/túi đồ/toast resolve item mới trước khi generator refresh `ItemDatabase.asset`.
+- **Cutscene thuyền 29/06:** `Assets/_Project/Scripts/Cutscenes/BoatCutscene.cs` đã đổi failsafe từ cắt cứng 35 giây sang `effectiveCutsceneTimeout`: tính theo tổng quãng đường waypoint / `movementSpeed` + `cutsceneTimeoutBuffer`, rồi lấy lớn hơn `cutsceneTimeout`. Mục tiêu là cho thuyền đủ thời gian cập bờ, nhưng vẫn tự kết thúc nếu cutscene thật sự bị kẹt.
+- **Đá quý 29/06:** `Assets/_Project/Docs_KichBan/CacLoaiDaQuy.md` đã ghi bảng đá quý khách chốt; đã thêm 6 item `gem_*.asset` với icon trong `Assets/Sprites/icon/CacLoaiDaQuy/`. Đào đá hiện giữ đá thường 100% với 10 rock, rồi roll thêm 1 đá quý theo tỉ lệ Ruby 1%, Amethyst 2%, Fire Quartz 5%, Green Calcite 12%, Orange Calcite 30%, Kyanite 50%; toast đào trúng dùng icon qua `ScreenToast.ShowInfoWithIcon`. Shop thu mua đá quý và giới hạn 10 lượt/ngày chưa implement.
+- **Biểu cảm 30/06:** popup biểu cảm trong chat/HUD đã bỏ 2 động tác ngoài thiết kế (`Laughing`, `Dancing`), chỉ giữ `Waving` và `Pointing`; icon nút nay lấy ảnh `Assets/Sprites/icon/BoSungIcon/VayTay.png` và `Assets/Sprites/icon/BoSungIcon/ChiTay.png` thay cho emoji text.
+- **Hồi sinh tài nguyên 29/06:** gỗ/đá do `ResourceSpawner` quản lý giờ lưu mốc hồi sinh theo thời gian thật `respawnEndUnix`. Khi người chơi thoát app rồi mở lại, tài nguyên tự bù thời gian offline nếu đã qua đủ `respawnTimeSec`; save cũ chỉ có `respawnTimer` vẫn fallback đọc được.
+- **Việc tiếp theo khách vừa giao còn lại:** implement giới hạn đào 10 lượt/ngày, nâng cấp cuốc lv2/lv3 và shop thu mua đá quý khi có yêu cầu/UI phù hợp.
 
-### Dữ liệu cá cần làm tiếp
+### Dữ liệu cá đang dùng trong gameplay
 - 2 point: Cá cơm, Cá nục, Cá hồng.
 - 4 point: Cá sư tử, Cá naso, Cá nhồng.
 - 6 point: Cá sọc dưa, Cá khế, Cá mú.
@@ -32,15 +42,15 @@
 
 ### Gợi ý resume cho session mới
 - Đọc `RULES.md`, `docs/CONTEXT_RECOVERY.md`, `task.md`, `CHANGELOG.md`.
-- Tìm hệ câu cá/đào đá hiện tại trước khi sửa: ưu tiên `FarmInteractionController`, item data/generator, shop/inventory liên quan.
-- Hỏi anh nếu thiếu icon/ảnh cho cá hoặc đá; không đoán bừa asset.
+- Cá mới đã xong; ưu tiên tìm hệ đào đá hiện tại trước khi sửa: `FarmInteractionController`, resource/item data/generator, shop/inventory liên quan.
+- Hỏi anh nếu thiếu icon/ảnh cho đá/gem; không đoán bừa asset.
 
 ## 1. Cập nhật 24/06
 
 > Nhánh đang dùng: `feat/animal-husbandry` (đã có thay đổi cục bộ touch-control/build-flow). Chi tiết xem `CHANGELOG.md` + `docs/CHANGELOG.md` + `task.md`.
 
 - **Login/profile existing character:** `player_profile` thêm `characterCreated`; login nạp profile trước, account đã có nhân vật vào game luôn. `DemoRich01`-`DemoRich05` được coi là đã có nhân vật để tester không phải đặt tên/chọn giới tính.
-- **Shop tab/header polish:** các tab chế độ/danh mục trong popup shop đã bỏ emoji icon, chỉ giữ chữ; card/panel chi tiết hàng hóa vẫn dùng icon ảnh từ `ItemDefinition.iconTexture/iconSprite`; title shop dài được giới hạn/căn giữa trong header để không tràn dưới pill POS.
+- **Shop tab/header polish:** các tab chế độ/danh mục trong popup shop đã bỏ emoji icon, chỉ giữ chữ; card/panel chi tiết hàng hóa vẫn dùng icon ảnh từ `ItemDefinition.iconTexture/iconSprite`; title shop dài được giới hạn/căn giữa trong header để không tràn dưới pill Point.
 - **Workshop icons:** popup Tiệm rèn render dụng cụ/nguyên liệu nâng cấp bằng icon ảnh; đã gắn `iconTexture` cho rìu/cuốc/cần câu/xô tưới/cuốc chim/gỗ/đá/sắt/quặng; bỏ `z-index` trong USS.
 - **Quest popup icons:** danh sách nhiệm vụ bỏ emoji kiếm/quà/check; nhiệm vụ đã nhận thưởng dùng ô vuông có dấu tích visual như Hộp thư; reward slots dùng icon ảnh từ `ItemDatabase`/`BoSungIcon`.
 - **Mailbox icons:** hộp thư đã đọc hiển thị dấu tích visual; badge quà dùng `Assets/Sprites/icon/SanPham/VatPham/giftbox.png`; attachment rewards dùng icon ảnh từ `ItemDatabase`/`BoSungIcon`.
@@ -50,7 +60,7 @@
 - **Lucky wheel icons:** vòng quay may mắn render icon ảnh cho phần thưởng từ `Assets/Sprites/icon`/`ItemDatabase`; tiêu đề, hub giữa vòng và nút QUAY bỏ emoji text.
 - **Leaderboard icons/UI:** 5 tab `EXP/Level/Fashion/Pet/Rich` dùng icon ảnh từ `Assets/Sprites/icon/BoSungIcon/`; Level dùng `lv.png`; hạng 1/2/3 dùng huy chương vàng/bạc/đồng thật; Fashion/Pet/Rich hiện số thuần thay vì sao/Lv/kim cương.
 - **Inventory icons:** `InventoryPopupController` hiển thị `ItemDefinition.iconTexture/iconSprite` trong card kho đồ và panel chi tiết; item chưa có ảnh vẫn fallback emoji/text.
-- **HUD tiền tệ:** top-right giờ có pill `UPOS` đi cùng `POS`; `EconomyManager` đã có `OnUPOSChanged` + helper `AddUPOS`/`SpendUPOS`.
+- **HUD tiền tệ:** top-right giờ hiển thị `UPoint` đi cùng `Point`; tên nội bộ `POS/UPOS` trong `EconomyManager` vẫn giữ để tránh đổi logic lưu tiền.
 - **Điều khiển mobile đã ổn định cho sprint/tap-hold/auto-run:** `PlayerController` có state sprint chung, `GameHUD` giữ đúng trạng thái sprint khi bấm hoặc giữ.
 - **Camera touch chỉnh lại:** smoothing riêng cho touch, pitch clamp theo yêu cầu kiểm duyệt.
 - **Build/chuồng đang hoàn thiện:** ghost preview là prefab mờ, rào có auto-connect; cài đặt búa animation khi đặt công trình.

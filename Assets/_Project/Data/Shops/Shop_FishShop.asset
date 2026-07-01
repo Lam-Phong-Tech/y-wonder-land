@@ -19,4 +19,18 @@ MonoBehaviour:
   sellItemIds:
   - fish_01
   - fish_02
+  - fish_ca_com_01
+  - fish_ca_nuc_01
+  - fish_ca_hong_01
+  - fish_ca_su_tu_01
+  - fish_ca_naso_01
+  - fish_ca_nhong_01
+  - fish_ca_soc_dua_01
+  - fish_ca_khe_01
+  - fish_ca_mu_01
+  - fish_ca_mat_quy_01
+  - fish_ca_heo_bien_01
+  - fish_ca_hoang_de_01
+  - fish_ca_ngu_hoang_kim_01
+  - fish_ca_rong_do_01
   - gift_box_01

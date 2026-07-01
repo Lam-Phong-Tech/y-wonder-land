@@ -106,7 +106,7 @@ public class MapPopupController : MonoBehaviour
             {
                 id = "mine", icon = "⛏️", name = "Khai thác mỏ",
                 description = "Hang động huyền bí với quặng quý. Mỗi ngày được đào miễn phí 10 lần. Quặng dùng để chế tác và xây đèn.",
-                requiredLevel = 10, requiresVipOrTicket = false, ticketName = "", sceneName = "MineScene"
+                requiredLevel = 0, requiresVipOrTicket = false, ticketName = "", sceneName = "MineScene"
             },
             ["haiphu"] = new MapLocation
             {
@@ -197,7 +197,8 @@ public class MapPopupController : MonoBehaviour
         selectedIslandId = null;
         selectedIslandElement = null;
         cheatLevelIndex = 0;
-        playerLevel = 1;
+        var expManager = YWonderLand.Managers.ExperienceManager.Instance;
+        playerLevel = expManager != null ? expManager.Level : 1;
         isVip = false;
         hasHaiphuTicket = false;
         hasMocnhiTicket = false;
@@ -392,8 +393,6 @@ public class MapPopupController : MonoBehaviour
     {
         if (loc.id == "farm") return true;
         if (loc.id == "city") return isTutorialCompleted;
-        // DEMO: đảo Mỏ chưa dựng scene -> KHÓA cứng (kể cả khi cheat lên cấp). Mở lại khi có MineScene.
-        if (loc.id == "mine") return false;
         if (playerLevel < loc.requiredLevel) return false;
 
         if (loc.requiresVipOrTicket)

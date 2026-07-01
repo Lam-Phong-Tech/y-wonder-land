@@ -17,7 +17,7 @@
                     <!-- Balance pill (left side) -->
                     <ui:VisualElement name="ShopBalancePill" class="shop-balance-pill">
                         <ui:Label text="🪙" class="shop-balance-icon" />
-                        <ui:Label name="LblShopBalance" text="5,000 POS" class="shop-balance-value" />
+                        <ui:Label name="LblShopBalance" text="5,000 Point" class="shop-balance-value" />
                     </ui:VisualElement>
 
                     <!-- Title (centered) -->
@@ -75,7 +75,7 @@
                             <!-- Price row -->
                             <ui:VisualElement class="shop-price-row">
                                 <ui:Label name="LblShopPriceIcon" text="🪙" class="shop-price-icon" />
-                                <ui:Label name="LblShopPrice" text="100 POS" class="shop-price-text" />
+                                <ui:Label name="LblShopPrice" text="100 Point" class="shop-price-text" />
                             </ui:VisualElement>
 
                             <ui:VisualElement class="shop-detail-divider" />
@@ -92,7 +92,7 @@
                             <!-- Total -->
                             <ui:VisualElement class="shop-total-row">
                                 <ui:Label text="Tổng:" class="shop-total-label" />
-                                <ui:Label name="LblTotal" text="100 POS" class="shop-total-value" />
+                                <ui:Label name="LblTotal" text="100 Point" class="shop-total-value" />
                             </ui:VisualElement>
 
                             <!-- Action button -->

@@ -39,7 +39,7 @@ namespace YWonderLand.Managers
         // ⚠️ ĐÃ TẮT cho bản BUILD DEMO (22/06) — người chơi KHÔNG được tặng sẵn tiền/đồ.
         // 👉 Muốn test lại trong Editor (có sẵn tiền/đồ) thì tạm đổi về true, build thì để false.
         [SerializeField] private bool giveTestLoadoutOnStart = false; // ĐÃ TẮT cho BUILD (người chơi KHÔNG được tặng sẵn tiền/đồ). Test Editor thì tạm đổi true.
-        [Tooltip("Số POS cộng thêm khi nạp loadout test.")]
+        [Tooltip("Số Point cộng thêm khi nạp loadout test.")]
         [SerializeField] private long testMoney = 500000;
 
         private const string INV_KEY = "YW_Inventory_Data";
@@ -101,8 +101,8 @@ namespace YWonderLand.Managers
             foreach (var id in new[] {
                 "pigskin_01","ostrich_egg_01","deer_velvet_01","goat_milk_01","rabbit_fur_01",
                 "goose_egg_01","duck_egg_01","turtle_shell_01",
-                "beef_01","deer_meat_01","goat_meat_01",
-                "rabbit_meat_01","turtle_meat_01",
+                "chicken_meat_01","beef_01","ostrich_meat_01","deer_meat_01","goat_meat_01",
+                "rabbit_meat_01","goose_meat_01","duck_meat_01","turtle_meat_01",
                 "banana_01","coconut_01","areca_01","date_01","sacha_01","tea_01","durian_01",
                 "asparagus_01","red_ginseng_01","royal_ginseng_01" })
                 AddItem(id, productQty);
@@ -118,7 +118,7 @@ namespace YWonderLand.Managers
 
             if (EconomyManager.Instance != null) EconomyManager.Instance.AddPOS(testMoney);
 
-            Debug.Log($"[Inventory] Đã nạp LOADOUT TEST: thức ăn/nông sản/vật liệu/hạt + {testMoney} POS.");
+            Debug.Log($"[Inventory] Đã nạp LOADOUT TEST: thức ăn/nông sản/vật liệu/hạt + {testMoney} Point.");
         }
 
         private void LoadInventory()

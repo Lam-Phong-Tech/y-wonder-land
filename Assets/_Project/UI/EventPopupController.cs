@@ -5,7 +5,7 @@ using UnityEngine.UIElements;
 /// <summary>
 /// Controller for the Event / Rewards Hub Popup.
 /// Tab 0: Exchange — trade event items for rare rewards.
-/// Tab 1: Bundle — limited-time UPOS deals.
+/// Tab 1: Bundle — limited-time UPoint deals.
 /// Tab 2: Attendance — daily login rewards.
 /// </summary>
 public class EventPopupController : MonoBehaviour
@@ -86,9 +86,9 @@ public class EventPopupController : MonoBehaviour
 
     private List<BundleItem> bundleItems = new List<BundleItem>
     {
-        new BundleItem { icon = "💎", name = "Gói Khởi Đầu", desc = "500 UPOS + 3 Vé sự kiện", oldPrice = 100000, newPrice = 49000, tag = "-50%", soldOut = false },
-        new BundleItem { icon = "🎁", name = "Gói Mùa Hè", desc = "1000 UPOS + 1 Pet + 5 Hạt giống V2", oldPrice = 200000, newPrice = 99000, tag = "HOT", soldOut = false },
-        new BundleItem { icon = "👑", name = "Gói VIP 30 ngày", desc = "VIP 30 ngày + 2000 UPOS", oldPrice = 500000, newPrice = 299000, tag = "-40%", soldOut = true },
+        new BundleItem { icon = "💎", name = "Gói Khởi Đầu", desc = "500 UPoint + 3 Vé sự kiện", oldPrice = 100000, newPrice = 49000, tag = "-50%", soldOut = false },
+        new BundleItem { icon = "🎁", name = "Gói Mùa Hè", desc = "1000 UPoint + 1 Pet + 5 Hạt giống V2", oldPrice = 200000, newPrice = 99000, tag = "HOT", soldOut = false },
+        new BundleItem { icon = "👑", name = "Gói VIP 30 ngày", desc = "VIP 30 ngày + 2000 UPoint", oldPrice = 500000, newPrice = 299000, tag = "-40%", soldOut = true },
     };
 
     // ── Điểm danh TÂN THỦ 15 ngày (khách chốt 22/06: trao thưởng THẬT, chỉ 1 lần/ngày thật) ──

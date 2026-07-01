@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEngine.InputSystem;
@@ -15,6 +16,7 @@ public class FishingOverlayController : MonoBehaviour
 
     [Header("References")]
     [SerializeField] private UIDocument fishingDocument;
+    private YWonderLand.Data.ItemDatabase itemDatabase;
 
     [Header("Luật câu cá (chỉnh được)")]
     [Tooltip("Tổng thời gian (giây) căn cá tính từ lúc bắt đầu 1 lần câu — khách: ~8.7s.")]
@@ -25,6 +27,8 @@ public class FishingOverlayController : MonoBehaviour
     [SerializeField] private float safeZoneWidthPercent = 28f;
     [Tooltip("Tốc độ kim chạy (%/giây).")]
     [SerializeField] private float pointerSpeed = 110f;
+    [Tooltip("Ti le ca theo nhom Point. De trong thi dung bang khach chot ngay 29/06.")]
+    [SerializeField] private List<FishRewardTier> fishRewardTiers = new List<FishRewardTier>();
 
     // UI elements
     private VisualElement root;
@@ -67,8 +71,36 @@ public class FishingOverlayController : MonoBehaviour
         }
     }
 
-    private readonly FishItem commonFish = new FishItem("fish_01", "Cá chép", "Thường");
-    private readonly FishItem rareFish = new FishItem("fish_02", "Cá hiếm", "Hiếm");
+    [System.Serializable]
+    private class FishRewardTier
+    {
+        public int pointValue;
+        [Range(0f, 100f)] public float chancePercent;
+        public string[] itemIds;
+
+        public FishRewardTier()
+        {
+        }
+
+        public FishRewardTier(int pointValue, float chancePercent, params string[] itemIds)
+        {
+            this.pointValue = pointValue;
+            this.chancePercent = chancePercent;
+            this.itemIds = itemIds;
+        }
+
+        public bool HasValidItems()
+        {
+            if (itemIds == null || itemIds.Length == 0) return false;
+
+            for (int i = 0; i < itemIds.Length; i++)
+            {
+                if (!string.IsNullOrWhiteSpace(itemIds[i])) return true;
+            }
+
+            return false;
+        }
+    }
 
     private void Awake()
     {
@@ -76,6 +108,8 @@ public class FishingOverlayController : MonoBehaviour
         else { Destroy(gameObject); return; }
 
         if (fishingDocument == null) fishingDocument = GetComponent<UIDocument>();
+        itemDatabase = Resources.Load<YWonderLand.Data.ItemDatabase>("ItemDatabase");
+        EnsureFishRewardTiers();
 
         // Reset lượt câu miễn phí theo NGÀY thật.
         string lastDate = PlayerPrefs.GetString("FishingLastDate", "");
@@ -349,18 +383,109 @@ public class FishingOverlayController : MonoBehaviour
         else HandleMiss("Trượt rồi! Giật khi phao nằm trong vùng xanh nhé.");
     }
 
+    private void EnsureFishRewardTiers()
+    {
+        if (fishRewardTiers == null)
+        {
+            fishRewardTiers = new List<FishRewardTier>();
+        }
+
+        if (fishRewardTiers.Count > 0) return;
+
+        fishRewardTiers.Add(new FishRewardTier(25, 2f, "fish_ca_rong_do_01"));
+        fishRewardTiers.Add(new FishRewardTier(15, 4f, "fish_ca_hoang_de_01", "fish_ca_ngu_hoang_kim_01"));
+        fishRewardTiers.Add(new FishRewardTier(10, 7f, "fish_ca_mat_quy_01", "fish_ca_heo_bien_01"));
+        fishRewardTiers.Add(new FishRewardTier(6, 17f, "fish_ca_soc_dua_01", "fish_ca_khe_01", "fish_ca_mu_01"));
+        fishRewardTiers.Add(new FishRewardTier(4, 25f, "fish_ca_su_tu_01", "fish_ca_naso_01", "fish_ca_nhong_01"));
+        fishRewardTiers.Add(new FishRewardTier(2, 45f, "fish_ca_com_01", "fish_ca_nuc_01", "fish_ca_hong_01"));
+    }
+
+    private FishItem PickCaughtFish()
+    {
+        EnsureFishRewardTiers();
+
+        FishRewardTier tier = PickFishTier();
+        string itemId = PickFishItemId(tier);
+        var itemDef = itemDatabase != null ? itemDatabase.GetItem(itemId) : null;
+        string displayName = itemDef != null && !string.IsNullOrEmpty(itemDef.itemName)
+            ? itemDef.itemName
+            : itemId;
+
+        return new FishItem(itemId, displayName, $"{tier.pointValue} Point");
+    }
+
+    private FishRewardTier PickFishTier()
+    {
+        float totalChance = 0f;
+        FishRewardTier lastValidTier = null;
+
+        foreach (var tier in fishRewardTiers)
+        {
+            if (tier == null || tier.chancePercent <= 0f || !tier.HasValidItems()) continue;
+
+            totalChance += tier.chancePercent;
+            lastValidTier = tier;
+        }
+
+        if (totalChance <= 0f)
+        {
+            return new FishRewardTier(2, 100f, "fish_ca_com_01", "fish_ca_nuc_01", "fish_ca_hong_01");
+        }
+
+        float roll = Random.Range(0f, totalChance);
+        foreach (var tier in fishRewardTiers)
+        {
+            if (tier == null || tier.chancePercent <= 0f || !tier.HasValidItems()) continue;
+
+            if (roll < tier.chancePercent) return tier;
+            roll -= tier.chancePercent;
+        }
+
+        return lastValidTier ?? new FishRewardTier(2, 100f, "fish_ca_com_01", "fish_ca_nuc_01", "fish_ca_hong_01");
+    }
+
+    private static string PickFishItemId(FishRewardTier tier)
+    {
+        if (tier == null || !tier.HasValidItems()) return "fish_ca_com_01";
+
+        for (int guard = 0; guard < 8; guard++)
+        {
+            string itemId = tier.itemIds[Random.Range(0, tier.itemIds.Length)];
+            if (!string.IsNullOrWhiteSpace(itemId)) return itemId;
+        }
+
+        for (int i = 0; i < tier.itemIds.Length; i++)
+        {
+            if (!string.IsNullOrWhiteSpace(tier.itemIds[i])) return tier.itemIds[i];
+        }
+
+        return "fish_ca_com_01";
+    }
+
     private void HandleCatch()
     {
         state = FishingState.Idle;
 
-        // 80% cá chép, 20% cá hiếm.
-        FishItem caught = Random.value < 0.2f ? rareFish : commonFish;
+        // Customer table 29/06: pick tier first, then a random fish inside that tier.
+        FishItem caught = PickCaughtFish();
 
         var inv = YWonderLand.Managers.InventoryManager.Instance;
         if (inv != null && !string.IsNullOrEmpty(caught.itemId))
             inv.AddItem(caught.itemId, 1);
 
-        YWonderLand.Environment.ScreenToast.ShowInfo($"Câu được: +1 {caught.name} ({caught.rarity})");
+        var itemDef = itemDatabase != null ? itemDatabase.GetItem(caught.itemId) : null;
+        var fallbackDef = itemDatabase != null ? itemDatabase.GetItem("fish_01") : null;
+        Texture2D toastIconTexture = itemDef != null && itemDef.iconTexture != null
+            ? itemDef.iconTexture
+            : (fallbackDef != null ? fallbackDef.iconTexture : null);
+        Sprite toastIconSprite = itemDef != null && itemDef.iconSprite != null
+            ? itemDef.iconSprite
+            : (fallbackDef != null ? fallbackDef.iconSprite : null);
+        YWonderLand.Environment.ScreenToast.ShowInfoWithIcon(
+            $"Câu được: +1 {caught.name} ({caught.rarity})",
+            toastIconTexture,
+            toastIconSprite,
+            "Fish");
         Debug.Log($"[Fishing] Caught {caught.name}.");
 
         // Thu dây câu + phao về (vì StartFishing đã quăng dây ra).

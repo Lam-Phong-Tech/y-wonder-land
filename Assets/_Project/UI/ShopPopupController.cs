@@ -555,7 +555,7 @@ public class ShopPopupController : MonoBehaviour
 
         // Price
         int displayPrice = isSellMode ? item.sellPrice : item.price;
-        var priceLabel = new Label($"{displayPrice} POS");
+        var priceLabel = new Label($"{displayPrice} Point");
         priceLabel.AddToClassList("shop-item-price");
 
         card.Add(iconWrap);
@@ -607,7 +607,7 @@ public class ShopPopupController : MonoBehaviour
         }
 
         int unitPrice = isSellMode ? item.sellPrice : item.price;
-        if (lblShopPrice != null) lblShopPrice.text = $"{unitPrice} POS";
+        if (lblShopPrice != null) lblShopPrice.text = $"{unitPrice} Point";
 
         if (lblOwned != null)
         {
@@ -634,7 +634,7 @@ public class ShopPopupController : MonoBehaviour
             string.IsNullOrEmpty(name) ? "—" : (amount > 0 ? $"{amount}x {name}" : name);
 
         return $"\n\nThông tin nuôi:"
-             + $"\nGiá mua: {d.buyPrice} POS   |   Cần: {d.penSlots} ô đất"
+             + $"\nGiá mua: {d.buyPrice} Point   |   Cần: {d.penSlots} ô đất"
              + $"\nThức ăn chính: {Food(d.foodMainName, d.foodMainAmount)}"
              + $"\nThức ăn phụ: {Food(d.foodAltName, d.foodAltAmount)}";
     }
@@ -716,14 +716,14 @@ public class ShopPopupController : MonoBehaviour
 
         int unitPrice = isSellMode ? selectedItem.Value.sellPrice : selectedItem.Value.price;
         int total = unitPrice * selectedQty;
-        if (lblTotal != null) lblTotal.text = $"{total:N0} POS";
+        if (lblTotal != null) lblTotal.text = $"{total:N0} Point";
     }
 
     private void UpdateQtyDisplay(int unitPrice)
     {
         if (txtQty != null) txtQty.SetValueWithoutNotify(selectedQty.ToString());
         int total = unitPrice * selectedQty;
-        if (lblTotal != null) lblTotal.text = $"{total:N0} POS";
+        if (lblTotal != null) lblTotal.text = $"{total:N0} Point";
     }
 
     // ── Action (Buy / Sell) ──
@@ -745,25 +745,25 @@ public class ShopPopupController : MonoBehaviour
                 // build-mode enclosures. Pen capacity is validated when placing, not buying.
                 if (!YWonderLand.Managers.EconomyManager.Instance.SpendPOS(totalCost))
                 {
-                    Debug.Log($"[Shop] Không đủ POS để mua thú!");
-                    YWonderLand.Environment.ScreenToast.Show("Không đủ POS để mua thú!");
+                    Debug.Log($"[Shop] Không đủ Point để mua thú!");
+                    YWonderLand.Environment.ScreenToast.Show("Không đủ Point để mua thú!");
                     return;
                 }
 
                 YWonderLand.Managers.InventoryManager.Instance.AddItem(item.id, selectedQty);
-                Debug.Log($"[Shop] Mua {selectedQty}x {item.name} vào túi đồ. Trừ {totalCost} POS.");
-                YWonderLand.Environment.ScreenToast.ShowInfo($"Đã mua: {selectedQty}x {item.name}  (-{totalCost} POS)");
+                Debug.Log($"[Shop] Mua {selectedQty}x {item.name} vào túi đồ. Trừ {totalCost} Point.");
+                YWonderLand.Environment.ScreenToast.ShowInfo($"Đã mua: {selectedQty}x {item.name}  (-{totalCost} Point)");
                 YWonderLand.Managers.AudioManager.Instance?.PlaySFX("coin");
                 UpdateBalance();
                 ShowEmptyDetails();
                 return;
 
                 /*
-                // Pre-check POS for the FULL selected quantity. If they want 3, they must afford 3.
+                // Pre-check Point balance for the FULL selected quantity. If they want 3, they must afford 3.
                 if (!YWonderLand.Managers.EconomyManager.Instance.SpendPOS(totalCost))
                 {
-                    Debug.Log($"[Shop] Không đủ POS để mua thú!");
-                    YWonderLand.Environment.ScreenToast.Show("Không đủ POS để mua thú!");
+                    Debug.Log($"[Shop] Không đủ Point để mua thú!");
+                    YWonderLand.Environment.ScreenToast.Show("Không đủ Point để mua thú!");
                     return;
                 }
 
@@ -791,8 +791,8 @@ public class ShopPopupController : MonoBehaviour
 
                 int actualCost = unitPrice * spawnedCount;
                 YWonderLand.Managers.EconomyManager.Instance.SpendPOS(actualCost);
-                Debug.Log($"[Shop] Mua {spawnedCount}x {item.name} — Trừ {actualCost} POS.");
-                YWonderLand.Environment.ScreenToast.ShowInfo($"Đã mua: {spawnedCount}x {item.name}  (-{actualCost} POS)");
+                Debug.Log($"[Shop] Mua {spawnedCount}x {item.name} — Trừ {actualCost} Point.");
+                YWonderLand.Environment.ScreenToast.ShowInfo($"Đã mua: {spawnedCount}x {item.name}  (-{actualCost} Point)");
                 YWonderLand.Managers.AudioManager.Instance?.PlaySFX("coin");
                 */
             }
@@ -801,13 +801,13 @@ public class ShopPopupController : MonoBehaviour
                 // Standard items go to inventory
                 if (!YWonderLand.Managers.EconomyManager.Instance.SpendPOS(totalCost))
                 {
-                    Debug.Log($"[Shop] Không đủ POS!");
-                    YWonderLand.Environment.ScreenToast.Show("Không đủ POS để mua!");
+                    Debug.Log($"[Shop] Không đủ Point!");
+                    YWonderLand.Environment.ScreenToast.Show("Không đủ Point để mua!");
                     return;
                 }
                 YWonderLand.Managers.InventoryManager.Instance.AddItem(item.id, selectedQty);
-                Debug.Log($"[Shop] Mua {selectedQty}x {item.name} — Trừ {totalCost} POS.");
-                YWonderLand.Environment.ScreenToast.ShowInfo($"Đã mua: {selectedQty}x {item.name}  (-{totalCost} POS)");
+                Debug.Log($"[Shop] Mua {selectedQty}x {item.name} — Trừ {totalCost} Point.");
+                YWonderLand.Environment.ScreenToast.ShowInfo($"Đã mua: {selectedQty}x {item.name}  (-{totalCost} Point)");
                 YWonderLand.Managers.AudioManager.Instance?.PlaySFX("coin");
             }
         }
@@ -822,8 +822,8 @@ public class ShopPopupController : MonoBehaviour
             }
 
             YWonderLand.Managers.EconomyManager.Instance.AddPOS(totalCost);
-            Debug.Log($"[Shop] Bán {selectedQty}x {item.name} — Nhận {totalCost} POS.");
-            YWonderLand.Environment.ScreenToast.ShowInfo($"Đã bán: {selectedQty}x {item.name}  (+{totalCost} POS)");
+            Debug.Log($"[Shop] Bán {selectedQty}x {item.name} — Nhận {totalCost} Point.");
+            YWonderLand.Environment.ScreenToast.ShowInfo($"Đã bán: {selectedQty}x {item.name}  (+{totalCost} Point)");
             YWonderLand.Managers.AudioManager.Instance?.PlaySFX("coin");
             
             OnItemSold?.Invoke(item.id, selectedQty);
@@ -839,7 +839,7 @@ public class ShopPopupController : MonoBehaviour
         if (lblBalance != null && YWonderLand.Managers.EconomyManager.Instance != null)
         {
             long balance = YWonderLand.Managers.EconomyManager.Instance.GetPOS();
-            lblBalance.text = $"{balance:N0} POS";
+            lblBalance.text = $"{balance:N0} Point";
         }
     }
 

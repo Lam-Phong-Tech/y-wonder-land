@@ -102,7 +102,7 @@ public class WorkshopPopupController : MonoBehaviour
         btnClose.text = "X";
         if (lblReqTitle != null) lblReqTitle.text = "Y\u00CAU C\u1EA6U:";
         
-        SetReqRowContent(rowReqPOS, null, "workshop-icon-pos", "POS");
+        SetReqRowContent(rowReqPOS, null, "workshop-icon-pos", "Point");
         SetReqRowContent(rowReqWood, "wood_01", null, "G\u1ED7");
         SetReqRowContent(rowReqStone, "stone_01", null, "\u0110\u00E1");
         SetReqRowContent(rowReqIron, "iron_01", null, "S\u1EAFt");
@@ -276,7 +276,7 @@ public class WorkshopPopupController : MonoBehaviour
 
         bool canUpgrade = true;
 
-        // POS
+        // Point balance
         UpdateReqLabel(lblReqPOS, posOwned, req.posCost);
         if (posOwned < req.posCost) canUpgrade = false;
 

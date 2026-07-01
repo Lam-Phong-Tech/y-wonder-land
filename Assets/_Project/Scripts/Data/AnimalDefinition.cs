@@ -13,7 +13,7 @@ namespace YWonderLand.Data
         public string animalId;
         public string animalName;
 
-        [Tooltip("Giá mua tại shop (POS)")]
+        [Tooltip("Giá mua tại shop (Point)")]
         public int buyPrice = 500;
 
         [Header("Thông tin chăn nuôi (hiển thị)")]

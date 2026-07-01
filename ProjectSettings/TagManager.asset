@@ -6,11 +6,12 @@ TagManager:
   tags:
   - PlacedBuilding
   - Water
+  - MineGround
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - MineGround
   - Water
   - UI
   - 

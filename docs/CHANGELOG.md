@@ -5,6 +5,100 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-06-30] — Nền MVP đảo đào khoáng
+
+### Added
+- Mở nền code cho đảo đào khoáng: bản đồ thế giới có thể chọn `mine`, `IslandTravelManager` có thể đi tới `MineScene`, và tương tác đào đá được phép ở cả `city` lẫn `mine`.
+- `ResourceSpawner` hỗ trợ gắn prefab cây/đá thật, raycast xuống nền nếu cần, và random lại vị trí khi tài nguyên hồi sinh để đá ở đảo mỏ có thể xuất hiện lại ở vị trí khác trong vùng spawn.
+- `ResourceSpawner` hỗ trợ vùng spawn kiểm soát bằng các `Collider` anh đặt trong scene: random có trọng số theo diện tích vùng, giữ khoảng cách tối thiểu giữa tài nguyên, có gizmo trong Scene view, và vẫn fallback về `spawnRadius` nếu chưa gán vùng.
+
+### Changed
+- Giữ câu cá chỉ ở `city`; riêng đào đá được mở rộng từ city-only sang `city` hoặc `mine`.
+- Thêm fallback runtime `MineMap -> MineScene` để dữ liệu Inspector/scene cũ chưa dọn vẫn có thể load đúng scene mới trong lúc setup Unity.
+
+### Editor cần làm
+- Trong Build Settings, thay entry cũ `Assets/_Project/_Scenes/MineMap.unity` bằng `Assets/_Project/_Scenes/MineScene.unity`.
+- Trong `IslandTravelManager` ở scene chính, set island `mine` dùng `sceneName = MineScene`.
+- Trong `MineScene`, đặt một `ResourceSpawner` cho đảo mỏ: `spawnerID = Mine`, `treeCount = 0`, `rockCount` theo mật độ test, bật `randomizePositionOnRespawn`, gắn `rockPrefab` nếu có.
+- Với map đảo méo/rộng, tạo vài `BoxCollider` cao dạng trigger phủ các vùng mặt đất hợp lệ, kéo các collider đó vào `ResourceSpawner > Spawn Areas`; script sẽ tự rải đá bên trong các vùng này thay vì spawn hình tròn.
+- Nếu bật `snapSpawnToGround`, tạo layer/mask riêng cho nền đảo mỏ để raycast không bắt nhầm collider khác.
+- Nếu đã từng chạy spawner trước đó, dùng context menu `Clear Saved Resource State` trên component hoặc đổi `spawnerID` để tài nguyên được sinh lại theo vùng mới.
+
+### Chưa làm trong MVP này
+- Giới hạn 10 lượt đào/ngày.
+- Nâng cấp cuốc lv2/lv3 theo chi phí Point.
+- Shop/NPC thu mua đá quý.
+
+### Changed Files
+- `Assets/_Project/Scripts/Managers/IslandTravelManager.cs`
+- `Assets/_Project/UI/MapPopupController.cs`
+- `Assets/_Project/Scripts/Environment/FarmInteractionController.cs`
+- `Assets/_Project/Scripts/Managers/ResourceSpawner.cs`
+- `Assets/_Project/Scripts/Environment/HarvestableResource.cs`
+
+---
+## [2026-06-29] — Point wording, fish reward icon, water color, poultry final meat
+
+### Added
+- Câu cá thành công giờ gọi `ScreenToast.ShowInfoWithIcon`: toast vẫn hiện kết quả như cũ, đồng thời có icon cá bay nhẹ/fade phía trên toast; nếu thiếu icon item thì dùng fallback an toàn.
+- Thêm `Assets/_Project/Docs_KichBan/CacLoaiCa.md` để ghi dữ liệu cá mới: giá Point, tỉ lệ câu theo tier, item ID đề xuất và đường dẫn icon.
+- Thêm `Assets/_Project/Docs_KichBan/CacLoaiDaQuy.md` để ghi dữ liệu đá quý mới: giá Point, tỉ lệ đào trúng, số viên, ghi chú nâng cấp cuốc, giới hạn lượt/ngày và đường dẫn icon.
+- Thêm 14 `ItemDefinition` cá mới trong `Assets/Resources/Items/`, gắn icon từ `Assets/Sprites/icon/CacLoaiCa/` để shop/túi đồ/toast dùng chung một nguồn dữ liệu.
+- Thêm 6 `ItemDefinition` đá quý trong `Assets/Resources/Items/`, gắn icon từ `Assets/Sprites/icon/CacLoaiDaQuy/` để túi đồ/toast dùng chung một nguồn dữ liệu.
+- Gắn 4 icon thịt gia cầm mới từ `Assets/Sprites/icon/ThitGiaCam/` cho thịt gà, thịt vịt, thịt ngỗng và thịt đà điểu.
+
+### Changed
+- Popup biểu cảm nhân vật trong chat/HUD chỉ còn 2 động tác được duyệt: bỏ `Laughing` và `Dancing`, đồng thời đổi 2 nút còn lại sang icon ảnh `Assets/Sprites/icon/BoSungIcon/VayTay.png` và `Assets/Sprites/icon/BoSungIcon/ChiTay.png`.
+- Đổi text hiển thị tiền từ `POS` sang `Point` ở HUD, shop, inventory/animal info, Heo đất, Tiệm rèn, Event/Attendance, toast/log demo và test UI. Giữ nguyên tên biến/API nội bộ `POS/UPOS` để tránh rủi ro đổi logic kinh tế.
+- Đổi text hiển thị tiền premium từ `UPOS` sang `UPoint`.
+- Cấu hình tỉ lệ câu cá theo bảng khách chốt: 25 Point = 2%, 15 Point = 4%, 10 Point = 7%, 6 Point = 17%, 4 Point = 25%, 2 Point = 45%; sau khi trúng nhóm giá, game chọn ngẫu nhiên một loài trong nhóm đó.
+- Fish Shop đã whitelist toàn bộ cá mới để cá câu được bán lại đúng tên, icon và giá Point.
+- `ItemDatabase.GetItem` có fallback load `Resources/Items/{id}` để item mới vẫn resolve được trước khi Unity/generator refresh lại list trong `ItemDatabase.asset`.
+- Đào đá giữ đá thường 100% với 10 rock, sau đó roll thêm 1 đá quý theo bảng khách chốt: Ruby 1%, Amethyst 2%, Fire Quartz 5%, Green Calcite 12%, Orange Calcite 30%, Kyanite 50%.
+- Khi đào trúng đá quý, toast gọi `ScreenToast.ShowInfoWithIcon` để hiện icon đá quý; item đá quý hiển thị trong tab Nguyên liệu của túi đồ qua `ItemDefinition.iconTexture`.
+- Hồi sinh tài nguyên gỗ/đá giờ bù thời gian khi người chơi thoát app: `HarvestableResource` lưu mốc `respawnEndUnix`, `ResourceSpawner` lưu khi đào/chặt xong, pause app và quit app; save cũ chỉ có `respawnTimer` vẫn đọc được.
+- Cutscene thuyền không còn bị cắt cứng ở 35 giây: timeout failsafe tự tính theo tổng quãng đường waypoint + tốc độ thuyền + buffer, nên thuyền có thời gian cập bờ trước khi vào gameplay.
+- Chỉnh màu nước biển Farm/City sáng hơn và xanh hơn trên material đang được scene dùng, không đổi shader/sóng.
+- Khách đổi lại: 4 gia cầm gà/đà điểu/ngỗng/vịt vẫn lấy trứng theo chu kỳ, nhưng vụ cuối sẽ trả thịt theo Product 2 trong `VatNuoi2.md`; thịt gia cầm bán được ở Mini Garden.
+- Toast vụ cuối của gia cầm chuyển sang `ScreenToast.ShowInfoWithIcon`, nên lúc nhận thịt sẽ hiện icon thịt mới; túi đồ và shop dùng cùng `ItemDefinition.iconTexture`.
+- Điều chỉnh CodeMagic iOS: chỉ upload IPA lên App Store Connect, bỏ tự động `submit_to_testflight` để bên build add vào Internal Testing thủ công.
+- Tăng CodeMagic iOS `BUILD_NUMBER` lên `2` để upload lại bản `0.1.1 (2)` lên App Store Connect.
+- Bake trực tiếp `0.1.1 (2)` vào exported iOS Xcode project và thêm bước kiểm tra version/build của IPA trước khi publish.
+- Tăng tiếp iOS build lên `0.1.1 (4)` và thêm `ITSAppUsesNonExemptEncryption=false` vào `ios/Info.plist`; CodeMagic cũng ép key này sau mỗi lần Unity export để tránh App Store Connect treo build ở trạng thái Missing Export Compliance.
+
+### Changed Files
+- `Assets/_Project/Scripts/Environment/ScreenToast.cs`
+- `Assets/_Project/UI/FishingOverlayController.cs`
+- `Assets/_Project/Docs_KichBan/CacLoaiCa.md`
+- `Assets/_Project/Docs_KichBan/CacLoaiDaQuy.md`
+- `Assets/_Project/Scripts/Data/ItemDatabase.cs`
+- `Assets/Resources/Items/fish_ca_*.asset`
+- `Assets/Resources/Items/gem_*.asset`
+- `Assets/_Project/Data/Shops/Shop_FishShop.asset`
+- `Assets/_Project/Scripts/Cutscenes/BoatCutscene.cs`
+- `Assets/_Project/Scripts/Environment/HarvestableResource.cs`
+- `Assets/_Project/Scripts/Environment/FarmInteractionController.cs`
+- `Assets/_Project/Scripts/Managers/ResourceSpawner.cs`
+- `Assets/IgniteCoders/Simple Water Shader/Resources/Water_mat_01.mat`
+- `Assets/Art/Environment/Materials/water.mat`
+- `Assets/_Project/Scripts/Editor/ItemDataGenerator.cs`
+- `Assets/_Project/Scripts/Editor/ShopDataGenerator.cs`
+- `Assets/_Project/Scripts/Managers/InventoryManager.cs`
+- `Assets/_Project/Data/Shops/Shop_MiniGarden.asset`
+- `Assets/Resources/Items/Animal_{chicken,ostrich,goose,duck}_01.asset`
+- `Assets/Resources/Items/{chicken,ostrich,goose,duck}_meat_01.asset`
+- `Assets/Sprites/icon/ThitGiaCam/{ThitGa,ThitVit,ThitNgong,ThitDaDieu}.png`
+- `codemagic.yaml`
+- `ios/Info.plist`
+- `ios/UnityFramework/Info.plist`
+- `ios/Unity-iPhone.xcodeproj/project.pbxproj`
+- `Assets/_Project/UI/**`
+- `Assets/_Project/Scripts/Managers/EconomyManager.cs`
+- `Assets/_Project/Scripts/Environment/FarmInteractionController.cs`
+- `Assets/_Project/Scripts/Data/*Definition.cs`
+- `Assets/Test/UITestHelper.cs`
+
+---
 ## [2026-06-27] — Fix bundle id cho CodeMagic iOS signing
 
 ### Fixed
@@ -21,8 +115,11 @@
 
 ### Fixed
 - Bỏ các item thịt gia cầm khỏi loadout rich/demo để tester không còn được cấp sẵn "Thịt gà", "Thịt vịt", "Thịt ngỗng", "Thịt đà điểu" rồi hiểu nhầm là hàng phải bán được.
-- Đánh dấu các item thịt gia cầm là không bán được (`canSell=false`, `sellPrice=0`), khớp quyết định hiện tại: gia cầm chỉ lấy trứng.
+- Đánh dấu các item thịt gia cầm là không bán được (`canSell=false`, `sellPrice=0`), khớp quyết định lúc 27/06: gia cầm chỉ lấy trứng.
 - Xóa dữ liệu hiển thị sản phẩm phụ dạng thịt khỏi 4 definition gia cầm, vẫn giữ sản phẩm chính là trứng.
+
+### Superseded
+- Cập nhật 29/06: quyết định này đã bị khách đổi lại; 4 gia cầm nay có thịt ở vụ cuối và thịt bán được.
 
 ### Changed Files
 - `Assets/_Project/Scripts/Managers/InventoryManager.cs`

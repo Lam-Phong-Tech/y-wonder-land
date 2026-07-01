@@ -22,15 +22,15 @@ MonoBehaviour:
   foodAltAmount: 3
   productMainName: "Tr\u1EE9ng ng\u1ED7ng"
   productMainAmount: 2
-  productAltName: 
-  productAltAmount: 0
+  productAltName: "Th\u1ECBt ng\u1ED7ng"
+  productAltAmount: 5
   produceItemId: goose_egg_01
   produceAmount: 2
   produceCycleTimeSec: 180
   maxHarvests: 30
   expReward: 4500
-  meatItemId: 
-  meatAmount: 0
+  meatItemId: goose_meat_01
+  meatAmount: 5
   feedIntervalSec: 60
   noFeedDeathSec: 60
   fedLifeSec: 120

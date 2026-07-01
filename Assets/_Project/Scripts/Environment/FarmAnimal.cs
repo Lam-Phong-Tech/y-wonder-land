@@ -273,8 +273,21 @@ namespace YWonderLand.Environment
             {
                 var inv = YWonderLand.Managers.InventoryManager.Instance;
                 if (inv != null) inv.AddItem(data.meatItemId, data.meatAmount);
-                string meatName = !string.IsNullOrEmpty(data.productAltName) ? data.productAltName : "thịt";
-                ScreenToast.ShowInfo($"Làm thịt {data.animalName}: +{data.meatAmount} {meatName}");
+
+                ItemDefinition meatDef = null;
+                ItemDatabase itemDb = Resources.Load<ItemDatabase>("ItemDatabase");
+                if (itemDb != null) meatDef = itemDb.GetItem(data.meatItemId);
+                if (meatDef == null) meatDef = Resources.Load<ItemDefinition>($"Items/{data.meatItemId}");
+
+                string meatName = meatDef != null && !string.IsNullOrEmpty(meatDef.itemName)
+                    ? meatDef.itemName
+                    : (!string.IsNullOrEmpty(data.productAltName) ? data.productAltName : "thịt");
+
+                ScreenToast.ShowInfoWithIcon(
+                    $"Làm thịt {data.animalName}: +{data.meatAmount} {meatName}",
+                    meatDef != null ? meatDef.iconTexture : null,
+                    meatDef != null ? meatDef.iconSprite : null,
+                    "Meat");
             }
 
             // Trả ô chuồng về trống (rào vẫn còn) để thả con mới.

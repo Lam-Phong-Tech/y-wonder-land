@@ -51,10 +51,10 @@
                                 <ui:Label text="." class="workshop-req-title" name="LblReqTitle" />
 
                                 <ui:VisualElement name="ReqContainer" class="workshop-req-container">
-                                    <!-- POS -->
+                                    <!-- Point -->
                                     <ui:VisualElement class="workshop-req-row" name="RowReqPOS">
                                         <ui:Label text="." class="workshop-req-icon" />
-                                        <ui:Label text="POS" class="workshop-req-name" />
+                                        <ui:Label text="Point" class="workshop-req-name" />
                                         <ui:Label name="LblReqPOS" text="." class="workshop-req-value" />
                                     </ui:VisualElement>
 

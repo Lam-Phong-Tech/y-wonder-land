@@ -255,7 +255,7 @@ public struct RewardItemData
     /// <summary>Icon hiển thị (emoji hoặc ký tự Unicode, VD: "🥕", "💰", "⭐")</summary>
     public string Icon;
 
-    /// <summary>Tên vật phẩm (VD: "Cà rốt", "100 POS")</summary>
+    /// <summary>Tên vật phẩm (VD: "Cà rốt", "100 Point")</summary>
     public string Name;
 
     /// <summary>Số lượng (0 = không hiển thị số lượng)</summary>

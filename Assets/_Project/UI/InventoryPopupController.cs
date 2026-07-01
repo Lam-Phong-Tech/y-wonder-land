@@ -384,7 +384,7 @@ public class InventoryPopupController : MonoBehaviour
             string.IsNullOrEmpty(name) ? "—" : (amount > 0 ? $"{amount}x {name}" : name);
 
         return $"\n\nThông tin nuôi:"
-             + $"\nGiá mua: {d.buyPrice} POS   |   Cần: {d.penSlots} ô đất"
+             + $"\nGiá mua: {d.buyPrice} Point   |   Cần: {d.penSlots} ô đất"
              + $"\nThức ăn chính: {Food(d.foodMainName, d.foodMainAmount)}"
              + $"\nThức ăn phụ: {Food(d.foodAltName, d.foodAltAmount)}";
     }

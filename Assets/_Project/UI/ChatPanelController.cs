@@ -33,8 +33,6 @@ public class ChatPanelController : MonoBehaviour
     private VisualElement emotePopup;
     private Button btnEmoteWave;
     private Button btnEmotePoint;
-    private Button btnEmoteLaugh;
-    private Button btnEmoteDance;
 
     // State Variables
     private bool isExpanded = false;
@@ -94,8 +92,6 @@ public class ChatPanelController : MonoBehaviour
         emotePopup = root.Q<VisualElement>("EmotePopup");
         btnEmoteWave = root.Q<Button>("BtnEmoteWave");
         btnEmotePoint = root.Q<Button>("BtnEmotePoint");
-        btnEmoteLaugh = root.Q<Button>("BtnEmoteLaugh");
-        btnEmoteDance = root.Q<Button>("BtnEmoteDance");
 
         RegisterCallbacks();
         
@@ -129,8 +125,6 @@ public class ChatPanelController : MonoBehaviour
         // Emote actions
         btnEmoteWave?.RegisterCallback<ClickEvent>(evt => PlayEmote("Waving", 2.0f));
         btnEmotePoint?.RegisterCallback<ClickEvent>(evt => PlayEmote("Pointing", 2.0f));
-        btnEmoteLaugh?.RegisterCallback<ClickEvent>(evt => PlayEmote("Laughing", 2.0f));
-        btnEmoteDance?.RegisterCallback<ClickEvent>(evt => PlayEmote("Dancing", 2.0f));
 
         // Text field enter key submit callback (UI Toolkit standard)
         inputMessage?.RegisterCallback<KeyDownEvent>(evt =>

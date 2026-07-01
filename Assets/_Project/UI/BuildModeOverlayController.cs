@@ -82,7 +82,7 @@ public class BuildModeOverlayController : MonoBehaviour
             this.description = description;
         }
 
-        // Chữ chi phí hiển thị trên menu Build (thay "X POS").
+        // Chữ chi phí hiển thị trên menu Build (thay tiền bằng vật liệu).
         public string CostText()
         {
             if (materialAmount <= 0 || string.IsNullOrEmpty(materialId)) return "Miễn phí";
@@ -825,7 +825,7 @@ public class BuildModeOverlayController : MonoBehaviour
     private void UpdateBalance()
     {
         if (lblBuildBalance == null) return;
-        // Build mode dùng VẬT LIỆU → hiện số gỗ/đá người chơi đang có (thay vì POS).
+        // Build mode dùng VẬT LIỆU → hiện số gỗ/đá người chơi đang có.
         var inv = YWonderLand.Managers.InventoryManager.Instance;
         if (inv != null)
             lblBuildBalance.text = $"🪵 {inv.GetItemQuantity("wood_01")} Gỗ   🪨 {inv.GetItemQuantity("stone_01")} Đá";

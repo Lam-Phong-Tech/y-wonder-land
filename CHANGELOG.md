@@ -1,8 +1,37 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-06-30 (Mining island MVP groundwork)
+
+### Added
+- Added code groundwork for the mining island MVP: the world map can unlock/select `mine`, `IslandTravelManager` can travel to `MineScene`, and mining interactions are allowed on both `city` and `mine`.
+- `ResourceSpawner` now supports optional tree/rock prefabs, ground snapping, and random-position respawn so mine rocks can reappear at a new position inside the configured spawn zone.
+- `ResourceSpawner` now supports controlled spawn areas through assigned `Collider` volumes, weighted random sampling, minimum spacing, and scene gizmos; this lets the mine map spawn many rocks inside irregular hand-defined zones instead of a single circular area.
+
+### Changed
+- Kept fishing restricted to `city`, but expanded rock mining from city-only to city-or-mine.
+- Added a runtime fallback that maps old `MineMap` island scene data to `MineScene`, reducing risk while existing Unity Inspector/scene data is being cleaned up.
+
+### Notes
+- Editor setup is still required: replace the old `MineMap` Build Settings entry with `Assets/_Project/_Scenes/MineScene.unity`, set the mine island scene name to `MineScene` in `IslandTravelManager`, and place/configure a `ResourceSpawner` in `MineScene`.
+- For irregular mine terrain, create a few tall `BoxCollider`/trigger volumes over valid ground, assign them to `ResourceSpawner > Spawn Areas`, enable `snapSpawnToGround` with a ground-only mask, then use the component context menu `Clear Saved Resource State` once if old PlayerPrefs positions should be regenerated.
+- Daily 10 mining attempts, pickaxe lv2/lv3 upgrade costs, and a gemstone buyer shop remain deferred.
+
+### Changed Files
+- `Assets/_Project/Scripts/Managers/IslandTravelManager.cs`
+- `Assets/_Project/UI/MapPopupController.cs`
+- `Assets/_Project/Scripts/Environment/FarmInteractionController.cs`
+- `Assets/_Project/Scripts/Managers/ResourceSpawner.cs`
+- `Assets/_Project/Scripts/Environment/HarvestableResource.cs`
+
 ## [Unreleased] - 2026-06-29 (Handoff iOS/TestFlight + fish/mining data)
 
 ### Added
+- Added a fish catch reward icon effect: successful fishing now shows the caught fish icon through `ScreenToast.ShowInfoWithIcon`, falling back safely if item art is missing.
+- Added `Assets/_Project/Docs_KichBan/CacLoaiCa.md` as the canonical fish data note for new fish prices, rarity tiers, proposed item IDs, and icon paths.
+- Added `Assets/_Project/Docs_KichBan/CacLoaiDaQuy.md` as the canonical gemstone mining data note for point values, drop rates, quantities, pickaxe upgrade notes, daily limit, and icon paths.
+- Added 14 new fish `ItemDefinition` assets under `Assets/Resources/Items/` using the customer-provided icons from `Assets/Sprites/icon/CacLoaiCa/`.
+- Added 6 gemstone `ItemDefinition` assets under `Assets/Resources/Items/` using the customer-provided icons from `Assets/Sprites/icon/CacLoaiDaQuy/`.
+- Added customer-provided poultry meat icons from `Assets/Sprites/icon/ThitGiaCam/` to chicken, duck, goose, and ostrich meat item definitions.
 - Added handoff notes for the next session: upcoming customer request is to expand fishing rewards with new fish tiers and mining rewards with new stone/gem tiers.
 - Recorded the new fish point tiers for implementation:
   - 2 point: Ca com, ca nuc, ca hong.
@@ -12,7 +41,7 @@
   - 15 point: Ca hoang de, ca ngu hoang kim.
   - 25 point: Ca rong do.
   - Fishing rarity weights from high value down to low value: 2%, 4%, 7%, 17%, 25%, 45%.
-- Recorded the new mining/stone point tiers for implementation:
+- Recorded the new mining/gemstone point tiers for implementation:
   - Image 1: 2 point/stone, 4 stones, 50% hit rate.
   - Image 2: 3 point/stone, 4 stones, 30% hit rate.
   - Image 3: 6 point/stone, 3 stones, 12% hit rate.
@@ -22,12 +51,28 @@
   - Mining limit: 10 attempts/day.
 
 ### Changed
-- Stabilized CodeMagic exported-Xcode iOS workflow enough for TestFlight: signing, bundle id `com.ywonder.greenfarm`, iOS app icon set, executable symbol scripts, IL2CPP binary handling, and build number bump to `0.1.1 (1)`.
-- iOS/TestFlight artifact reached TestFlight. Current install issue must be checked against the newest build `0.1.1 (1)` instead of stale `0.1.0 (0)`.
+- Trimmed the character emote popup to the approved two actions only: removed laugh and dance, and swapped the remaining wave/point buttons to use `Assets/Sprites/icon/BoSungIcon/VayTay.png` and `Assets/Sprites/icon/BoSungIcon/ChiTay.png` instead of emoji text.
+- Renamed visible currency copy from `POS` to `Point` across gameplay UI, shop, inventory, HUD, event rewards, piggy bank, workshop, tutorial/reward toasts, and test UI while keeping internal `POS/UPOS` code names unchanged for low-risk demo stability.
+- Updated the premium visible currency suffix from `UPOS` to `UPoint`.
+- Fishing reward selection now uses the customer fish tier table: 25 Point = 2%, 15 Point = 4%, 10 Point = 7%, 6 Point = 17%, 4 Point = 25%, 2 Point = 45%; after a tier is picked, one fish in that tier is selected randomly.
+- Fish Shop now whitelists all new fish IDs for selling, so newly caught fish can appear with icon/name/price in shop sell mode.
+- `ItemDatabase.GetItem` now falls back to `Resources/Items/{id}` when an item is not listed in `ItemDatabase.asset`, which lets newly added item assets resolve in fishing, inventory, shop, and toast before the Unity generator refreshes the database list.
+- Boat cutscene failsafe now uses estimated waypoint travel time plus a buffer instead of cutting at a fixed 35 seconds, so the boat has time to reach the shore before gameplay starts.
+- Mining now keeps the normal rock reward at 100% with 10 rock, then rolls one gemstone reward by customer tiers: Ruby 1%, Amethyst 2%, Fire Quartz 5%, Green Calcite 12%, Orange Calcite 30%, Kyanite 50%.
+- Successful gemstone mining now shows `ScreenToast.ShowInfoWithIcon` with the gemstone icon, and gemstone items appear in the inventory materials tab through `ItemDefinition.iconTexture`.
+- Resource respawn now catches up while the app is closed: `HarvestableResource` stores a real-world `respawnEndUnix` timestamp, and `ResourceSpawner` persists it on harvest/pause/quit while remaining compatible with old `respawnTimer` saves.
+- Brightened/blued the active Farm/City sea water materials while preserving their existing shaders, texture setup, transparency, and wave settings.
+- Restored final-harvest meat for poultry per the customer's 29/06 reversal: chicken/ostrich/goose/duck still produce eggs by cycle, then give meat on the final harvest and can sell that meat at Mini Garden.
+- Poultry final-harvest meat toast now uses `ScreenToast.ShowInfoWithIcon`, so the new meat icon appears immediately when the animal is slaughtered at the last harvest; inventory and shop UI reuse the same `ItemDefinition.iconTexture`.
+- Stabilized CodeMagic exported-Xcode iOS workflow enough for TestFlight: signing, bundle id `com.ywonder.greenfarm`, iOS app icon set, executable symbol scripts, IL2CPP binary handling, and build number bump to `0.1.1 (2)`.
+- Adjusted CodeMagic App Store Connect publishing to upload the IPA only; removed automatic `submit_to_testflight` so Internal Testing assignment can be handled manually in App Store Connect.
+- Baked `0.1.1 (2)` into the exported iOS Xcode project and added an IPA version sanity check before App Store Connect publishing.
+- Bumped the next iOS/TestFlight upload to `0.1.1 (4)` and added `ITSAppUsesNonExemptEncryption=false` to the exported app `Info.plist`; CodeMagic now also forces this key after Unity export so App Store Connect should not block the build with Missing Export Compliance.
+- iOS/TestFlight artifact reached TestFlight. After this hotfix, current install/publish issues must be checked against the newest build `0.1.1 (4)` instead of stale `0.1.0 (0)`, `0.1.1 (1)`, `0.1.1 (2)`, or `0.1.1 (3)`.
 - TestFlight package size was observed around 309 MB; size optimization is intentionally deferred after functional TestFlight validation.
 
 ### Notes
-- Current fish/mining data above is only documented for the next implementation pass; it has not yet been wired into gameplay data/assets.
+- Fish data above is now wired into gameplay reward selection, item data, icons, and Fish Shop selling. Gemstone/mining data is wired for item data, inventory icons, mining reward roll, and toast icon; gemstone shop selling is intentionally deferred because no gemstone buyer shop exists yet.
 - Do not stage unrelated Unity/iOS generated dirty files unless the next task explicitly needs them.
 
 ## [Unreleased] - 2026-06-27 (CodeMagic iOS signing bundle fix)
@@ -311,7 +356,7 @@
 - Shop mở bằng nút HUD/legacy mock giờ cũng tra `ItemDatabase` cho giá mua/bán/tên/icon, tránh lệch số liệu so với NPC shop data-driven.
 
 ### Notes
-- Không gán thịt gia cầm (`chicken_meat_01`, `duck_meat_01`, `goose_meat_01`, `ostrich_meat_01`) vì gameplay hiện đang chốt gia cầm chỉ lấy trứng.
+- Lưu ý 29/06: quyết định "gia cầm chỉ lấy trứng" đã bị thay thế; 4 thịt gia cầm đã bật lại ở vụ cuối.
 
 ### Changed Files
 - `Assets/_Project/Scripts/Editor/ItemDataGenerator.cs`
@@ -327,7 +372,7 @@
   - `goat_milk_01`: 24 -> 12
   - `goose_egg_01`: 28 -> 14
   - `rabbit_fur_01`: 172 -> 21
-- Giữ nguyên quyết định cũ: gia cầm chỉ lấy trứng, không bật thịt ngỗng.
+- Lưu ý 29/06: quyết định cũ "gia cầm chỉ lấy trứng" đã bị thay thế; thịt ngỗng và các thịt gia cầm khác đã bật lại ở vụ cuối.
 
 ### Changed Files
 - `Assets/_Project/Scripts/Editor/ItemDataGenerator.cs`
@@ -402,7 +447,7 @@
 - **Generator:** `CropDataGenerator` set 8h/20h; `ItemDataGenerator.SetAnimalGameplay` thêm noFeed/fedLife (24h/48h · rùa 5/10 ngày).
 
 ### Docs / Audit
-- **RÀ SOÁT KINH TẾ THÚ** (`RaSoat_SoLieu_MauThuan.md`, mục 23/06): đối chiếu `VatNuoi2.xlsx` (cả tab "Thuyết minh cách tính" — đọc thẳng .xlsx vì .md thiếu) ↔ generator. **Giá mua/bán/sản lượng/số lần thu = KHỚP 100%.** Công thức `maxHarvests = floor(số ngày nuôi ÷ chu kỳ thu)` đúng. Gia cầm chỉ-trứng = **khách chốt, giữ nguyên**. **Chi phí bệnh (vắc-xin/thuốc) chưa áp (Gói B) → lời game > bảng tới khi làm bệnh.** Trứng vịt 4.5→làm tròn 5.
+- **RÀ SOÁT KINH TẾ THÚ** (`RaSoat_SoLieu_MauThuan.md`, mục 23/06): đối chiếu `VatNuoi2.xlsx` (cả tab "Thuyết minh cách tính" — đọc thẳng .xlsx vì .md thiếu) ↔ generator. **Giá mua/bán/sản lượng/số lần thu = KHỚP 100%.** Công thức `maxHarvests = floor(số ngày nuôi ÷ chu kỳ thu)` đúng. Cập nhật 29/06: quyết định gia cầm chỉ-trứng đã bị thay bằng trứng theo chu kỳ + thịt ở vụ cuối. **Chi phí bệnh (vắc-xin/thuốc) chưa áp (Gói B) → lời game > bảng tới khi làm bệnh.** Trứng vịt 4.5→làm tròn 5.
 - Thêm ghi chú "cây ngắn ngày chín 24h" vào `CayTrong2.md`. Xoá `CayTrong.md` + `CayTrongLauNam.md` (cũ, đã có bản …2).
 
 ### Fixed
@@ -437,7 +482,7 @@
 
 ### Changed
 - **ÁP BỘ GIÁ MỚI (file …2.xlsx khách gửi):** MỌI giá = **Point = USDT × 26**; giá BÁN hạ để giữ lời ~250%. 54 mục trong `ItemDataGenerator`. Con giống: Bò 7800/Hươu 10400/Gà 156… Giá bán: sữa bò **50**, da heo 7042, mai rùa 11893, Hộp Sa Chi 194, chanh leo 57… (1 USDT = 26 Point.)
-- **Gia cầm BỎ THỊT** (gà/vịt/ngỗng/đà điểu): `meatItemId` rỗng → chỉ lấy trứng, hết số lần thu thì biến mất; gỡ 4 thịt gia cầm khỏi Mini Garden.
+- **Gia cầm tạm BỎ THỊT ở thời điểm 22/06** (gà/vịt/ngỗng/đà điểu): `meatItemId` rỗng → chỉ lấy trứng, hết số lần thu thì biến mất; gỡ 4 thịt gia cầm khỏi Mini Garden. Cập nhật 29/06: quyết định này đã bị đảo lại, 4 gia cầm nay có thịt ở vụ cuối.
 - **EXP/Level (khách chốt):** ramp **250 + (cấp−1)×5**, Level Cap **90**; EXP thu hoạch = **số ngày × 10** (cây/thú); đào khoáng **15**.
 - **Mobile UI:** nút búa Build chuyển sang PHẢI (trên Jump); phóng to nút điều khiển ~**+27%** (joystick/sidebar/settings/bag/sprint/jump/X); Sprint **giữ→bấm-toggle**; PanelSettings ref 1280×720; popup clamp max-w/h %.
 - **Vắc-xin 30 / thuốc 70** (giá mua).

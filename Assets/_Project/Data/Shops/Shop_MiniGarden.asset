@@ -46,8 +46,12 @@ MonoBehaviour:
   - duck_egg_01
   - turtle_shell_01
   - pork_01
+  - chicken_meat_01
   - beef_01
+  - ostrich_meat_01
   - deer_meat_01
   - goat_meat_01
   - rabbit_meat_01
+  - goose_meat_01
+  - duck_meat_01
   - turtle_meat_01

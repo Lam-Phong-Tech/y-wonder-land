@@ -6,7 +6,7 @@ using UnityEngine.UIElements;
 
 /// <summary>
 /// Controller for the Piggy Bank (Heo Đất) Popup.
-/// Allows players to deposit POS into 3 savings packages (12/30/180 days).
+/// Allows players to deposit Point into 3 savings packages (12/30/180 days).
 /// Only 1 active deposit at a time. Cannot withdraw early.
 /// When matured, principal + interest auto-sent to Mailbox.
 /// </summary>
@@ -302,11 +302,11 @@ public class PiggyBankPopupController : MonoBehaviour
         float total = amount + interest;
 
         if (lblPreviewPrincipal != null)
-            lblPreviewPrincipal.text = $"{amount:N0} POS";
+            lblPreviewPrincipal.text = $"{amount:N0} Point";
         if (lblPreviewInterest != null)
-            lblPreviewInterest.text = $"+{interest:N0} POS";
+            lblPreviewInterest.text = $"+{interest:N0} Point";
         if (lblPreviewTotal != null)
-            lblPreviewTotal.text = $"{total:N0} POS";
+            lblPreviewTotal.text = $"{total:N0} Point";
     }
 
     private float ParseAmount()
@@ -335,7 +335,7 @@ public class PiggyBankPopupController : MonoBehaviour
         }
         if (amount > playerBalance)
         {
-            ShowError($"Số dư không đủ! Hiện có: {playerBalance:N0} POS");
+            ShowError($"Số dư không đủ! Hiện có: {playerBalance:N0} Point");
             return;
         }
 
@@ -356,7 +356,7 @@ public class PiggyBankPopupController : MonoBehaviour
         ClearError();
         RefreshDepositView();
 
-        Debug.Log($"[PiggyBank] Gửi {amount:N0} POS vào gói {pkg.label} (+{pkg.rate * 100}%). Đáo hạn test: {testSeconds}s");
+        Debug.Log($"[PiggyBank] Gửi {amount:N0} Point vào gói {pkg.label} (+{pkg.rate * 100}%). Đáo hạn test: {testSeconds}s");
     }
 
     private void RefreshDepositView()
@@ -373,9 +373,9 @@ public class PiggyBankPopupController : MonoBehaviour
             if (lblActivePkg != null)
                 lblActivePkg.text = $"{pkg.label} (+{pkg.rate * 100:0}%)";
             if (lblActivePrincipal != null)
-                lblActivePrincipal.text = $"{activePrincipal:N0} POS";
+                lblActivePrincipal.text = $"{activePrincipal:N0} Point";
             if (lblActiveInterest != null)
-                lblActiveInterest.text = $"+{activeInterestAmount:N0} POS";
+                lblActiveInterest.text = $"+{activeInterestAmount:N0} Point";
 
             // Start countdown
             if (countdownCoroutine != null) StopCoroutine(countdownCoroutine);
@@ -432,7 +432,7 @@ public class PiggyBankPopupController : MonoBehaviour
         RefreshDepositView();
         RefreshHistory();
 
-        Debug.Log($"[PiggyBank] 🎉 ĐÁO HẠN! Nhận {total:N0} POS (gốc {activePrincipal:N0} + lãi {activeInterestAmount:N0}). Đã gửi về hộp thư.");
+        Debug.Log($"[PiggyBank] ĐÁO HẠN! Nhận {total:N0} Point (gốc {activePrincipal:N0} + lãi {activeInterestAmount:N0}). Đã gửi về hộp thư.");
     }
 
     // ── History ──
@@ -465,7 +465,7 @@ public class PiggyBankPopupController : MonoBehaviour
             var pkgName = new Label(entry.pkgName);
             pkgName.AddToClassList("piggy-history-pkg-name");
 
-            var detail = new Label($"Gốc: {entry.principal:N0} POS • {entry.date}");
+            var detail = new Label($"Gốc: {entry.principal:N0} Point • {entry.date}");
             detail.AddToClassList("piggy-history-detail");
 
             info.Add(pkgName);
@@ -474,7 +474,7 @@ public class PiggyBankPopupController : MonoBehaviour
             var result = new VisualElement();
             result.AddToClassList("piggy-history-result");
 
-            var amount = new Label($"+{entry.interest:N0} POS");
+            var amount = new Label($"+{entry.interest:N0} Point");
             amount.AddToClassList("piggy-history-amount");
 
             var status = new Label(entry.status);
@@ -496,7 +496,7 @@ public class PiggyBankPopupController : MonoBehaviour
     private void UpdateBalance()
     {
         if (lblBalance != null)
-            lblBalance.text = $"{playerBalance:N0} POS";
+            lblBalance.text = $"{playerBalance:N0} Point";
     }
 
     private void ShowError(string msg)

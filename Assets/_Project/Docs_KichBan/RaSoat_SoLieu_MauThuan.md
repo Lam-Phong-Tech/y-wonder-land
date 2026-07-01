@@ -27,8 +27,8 @@
 
 ### ⚠️ Điểm cần lưu (KHÔNG phải lỗi áp số)
 
-**1. Gia cầm (gà · đà điểu · ngỗng · vịt) = CHỈ LẤY TRỨNG, BỎ THỊT — KHÁCH CHỐT, GIỮ NGUYÊN (không sửa).**
-Trong VatNuoi2, THỊT chiếm phần lớn doanh thu gia cầm: gà **76%** · đà điểu **63%** · ngỗng **80%** · vịt **89%**. Bỏ thịt → lời gia cầm thấp hơn % bảng (vịt gần huề vốn). **Đây là quyết định khách — code đã làm đúng (`meatItemId` rỗng cho 4 gia cầm), KHÔNG đổi.** (Trong game thức ăn tự trồng/sellPrice 0 nên gia cầm vẫn lời = trứng − giá mua.)
+**1. Gia cầm (gà · đà điểu · ngỗng · vịt) = LẤY TRỨNG THEO CHU KỲ + THỊT Ở VỤ CUỐI — KHÁCH ĐỔI LẠI 29/06.**
+Trong VatNuoi2, Product 2 của gia cầm là thịt và chiếm phần lớn doanh thu: gà **76%** · đà điểu **63%** · ngỗng **80%** · vịt **89%**. Cập nhật 29/06: game bật lại `meatItemId` cho 4 gia cầm theo đúng Product 2 trong bảng: gà 5 thịt, đà điểu 20 thịt, ngỗng 5 thịt, vịt 5 thịt.
 
 **2. Công thức CHI PHÍ có tính TIỀN BỆNH → game CHƯA áp (để Gói B, khách hẹn phase sau).**
 ```

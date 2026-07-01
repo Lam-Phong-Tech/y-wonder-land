@@ -32,8 +32,11 @@ public class BoatCutscene : MonoBehaviour
     public float camLerpSpeed = 2.0f;
 
     [Header("Failsafe Settings")]
-    public float cutsceneTimeout = 35.0f; // Force end cutscene after 35 seconds as a failsafe
+    public float cutsceneTimeout = 75.0f; // Base minimum failsafe; long waypoint paths can extend it automatically.
+    [Tooltip("Extra seconds added on top of estimated boat travel time before the failsafe can cut the cutscene.")]
+    public float cutsceneTimeoutBuffer = 12.0f;
     private float cutsceneTimer = 0f;
+    private float effectiveCutsceneTimeout = 75.0f;
 
     private Vector3 startPosition;
     private float totalJourneyDistance;
@@ -75,11 +78,14 @@ public class BoatCutscene : MonoBehaviour
                 finalWaypointPosition = lastWaypoint.position;
                 totalJourneyDistance = Vector3.Distance(startPosition, finalWaypointPosition);
             }
-            Debug.Log($"[BoatCutscene] Cutscene started with {waypoints.Count} waypoints. Failsafe timeout set to {cutsceneTimeout}s.");
+
+            effectiveCutsceneTimeout = CalculateEffectiveCutsceneTimeout();
+            Debug.Log($"[BoatCutscene] Cutscene started with {waypoints.Count} waypoints. Failsafe timeout set to {effectiveCutsceneTimeout:F1}s.");
         }
         else
         {
             Debug.LogWarning("Please configure Waypoints for the Boat Cutscene in Inspector!");
+            effectiveCutsceneTimeout = Mathf.Max(1f, cutsceneTimeout);
         }
 
         // Tính góc bù model (giữ tư thế thuyền anh đã căn) trước khi bắt đầu xoay theo đường đi.
@@ -114,9 +120,9 @@ public class BoatCutscene : MonoBehaviour
 
         // Failsafe timer
         cutsceneTimer += Time.deltaTime;
-        if (cutsceneTimer >= cutsceneTimeout)
+        if (cutsceneTimer >= effectiveCutsceneTimeout)
         {
-            Debug.LogWarning($"[BoatCutscene] Cutscene exceeded timeout failsafe of {cutsceneTimeout} seconds! Forcing completion to ensure gameplay starts.");
+            Debug.LogWarning($"[BoatCutscene] Cutscene exceeded timeout failsafe of {effectiveCutsceneTimeout:F1} seconds! Forcing completion to ensure gameplay starts.");
             EndCutscene();
             return;
         }
@@ -178,6 +184,39 @@ public class BoatCutscene : MonoBehaviour
                 EndCutscene();
             }
         }
+    }
+
+    private float CalculateEffectiveCutsceneTimeout()
+    {
+        float pathDistance = CalculateWaypointPathDistance();
+        float safeSpeed = Mathf.Max(0.01f, movementSpeed);
+        float estimatedTravelSeconds = pathDistance / safeSpeed;
+        float bufferedEstimate = estimatedTravelSeconds + Mathf.Max(0f, cutsceneTimeoutBuffer);
+
+        return Mathf.Max(1f, cutsceneTimeout, bufferedEstimate);
+    }
+
+    private float CalculateWaypointPathDistance()
+    {
+        if (waypoints == null || waypoints.Count == 0) return 0f;
+
+        float waterY = transform.position.y;
+        Vector3 previous = startPosition;
+        previous.y = waterY;
+        float distance = 0f;
+
+        for (int i = 0; i < waypoints.Count; i++)
+        {
+            Transform waypoint = waypoints[i];
+            if (waypoint == null) continue;
+
+            Vector3 next = waypoint.position;
+            next.y = waterY;
+            distance += Vector3.Distance(previous, next);
+            previous = next;
+        }
+
+        return distance;
     }
 
     private int currentStage = -1;

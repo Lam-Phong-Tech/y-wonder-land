@@ -815,7 +815,7 @@ public class TutorialManager : MonoBehaviour
 
     private void GiveTutorialRewards()
     {
-        Debug.Log("[TutorialManager] Giving Rewards: +50 POS, +20 EXP + starter items.");
+        Debug.Log("[TutorialManager] Giving Rewards: +50 Point, +20 EXP + starter items.");
 
         if (YWonderLand.Managers.EconomyManager.Instance != null)
             YWonderLand.Managers.EconomyManager.Instance.AddPOS(50);

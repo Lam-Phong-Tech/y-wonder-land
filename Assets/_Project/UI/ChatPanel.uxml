@@ -54,10 +54,8 @@
         <!-- EMOTE POPUP GRID (Phương án 2) -->
         <ui:VisualElement name="EmotePopup" class="emote-popup" style="display: none;">
             <ui:VisualElement class="emote-grid">
-                <ui:Button name="BtnEmoteWave" class="emote-btn" text="👋" />
-                <ui:Button name="BtnEmotePoint" class="emote-btn" text="👉" />
-                <ui:Button name="BtnEmoteLaugh" class="emote-btn" text="😂" />
-                <ui:Button name="BtnEmoteDance" class="emote-btn" text="💃" />
+                <ui:Button name="BtnEmoteWave" class="emote-btn" />
+                <ui:Button name="BtnEmotePoint" class="emote-btn" />
             </ui:VisualElement>
         </ui:VisualElement>
 

@@ -30,7 +30,7 @@ namespace YWonderLand.Data
         [Tooltip("Số quặng/sắt cần thiết (iron_01)")]
         public int oreCost = 0;
 
-        [Tooltip("Số POS cần thiết")]
+        [Tooltip("Số Point cần thiết")]
         public int posCost = 0;
 
         [Header("Visual (Primitive Fallback)")]

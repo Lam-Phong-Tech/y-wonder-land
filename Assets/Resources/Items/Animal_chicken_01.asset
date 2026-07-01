@@ -22,15 +22,15 @@ MonoBehaviour:
   foodAltAmount: 0
   productMainName: "Tr\u1EE9ng g\xE0"
   productMainAmount: 1
-  productAltName: 
-  productAltAmount: 0
+  productAltName: "Th\u1ECBt g\xE0"
+  productAltAmount: 5
   produceItemId: egg_01
   produceAmount: 1
   produceCycleTimeSec: 120
   maxHarvests: 45
   expReward: 3000
-  meatItemId: 
-  meatAmount: 0
+  meatItemId: chicken_meat_01
+  meatAmount: 5
   feedIntervalSec: 60
   noFeedDeathSec: 60
   fedLifeSec: 120

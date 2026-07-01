@@ -4,22 +4,35 @@
 
 > Khách vừa gửi số liệu mới. Đây là task kế tiếp cho session mới. Dữ liệu bên dưới mới chỉ được ghi nhận, chưa implement vào gameplay/data assets.
 
+### 0. Polish đã xong ngày 29/06 trước khi sang data cá/đá
+- `[x]` Đổi text hiển thị `POS` -> `Point`, `UPOS` -> `UPoint` ở UI/toast/log demo liên quan; giữ tên biến/API nội bộ.
+- `[x]` Câu cá thành công có icon cá nổi/fade kèm toast, dùng icon trong `ItemDatabase` nếu có.
+- `[x]` Nước biển Farm/City sáng hơn, xanh hơn; không đổi shader/sóng.
+- `[x]` Khách đổi lại chăn nuôi: gia cầm gà/đà điểu/ngỗng/vịt có thịt ở vụ cuối theo Product 2 trong `VatNuoi2.md`; thịt gia cầm bán được ở Mini Garden.
+- `[x]` Gắn icon mới cho thịt gà/vịt/ngỗng/đà điểu trong item assets, generator, toast vụ cuối, túi đồ và shop.
+- `[x]` Cutscene thuyền không còn bị failsafe 35 giây cắt sớm; timeout nay tự tính theo quãng đường waypoint, tốc độ thuyền và buffer để thuyền kịp cập bờ.
+- `[x]` Popup biểu cảm chỉ còn 2 động tác được duyệt (`Waving`, `Pointing`); bỏ `Laughing`/`Dancing` và đổi icon nút sang `BoSungIcon/VayTay.png`, `BoSungIcon/ChiTay.png`.
+
 ### A. Câu cá - thêm giống cá và tỉ lệ
-- `[ ]` Tìm lại hệ câu cá hiện tại (`FarmInteractionController`, item definitions/generator, shop/inventory liên quan).
-- `[ ]` Thêm item/product cho các loài cá mới, chỉ gắn icon nếu anh đã cung cấp đúng asset; thiếu icon thì hỏi, không đoán bừa.
-- `[ ]` Áp giá point:
+- `[x]` Tìm lại hệ câu cá hiện tại (`FarmInteractionController`, item definitions/generator, shop/inventory liên quan).
+- `[x]` Thêm item/product cho các loài cá mới, chỉ gắn icon nếu anh đã cung cấp đúng asset; thiếu icon thì hỏi, không đoán bừa.
+- `[x]` Ghi dữ liệu cá mới vào `Assets/_Project/Docs_KichBan/CacLoaiCa.md`, kèm giá Point, tỉ lệ tier và đường dẫn icon mới.
+- `[x]` Áp giá point:
   - 2 point: Cá cơm, Cá nục, Cá hồng.
   - 4 point: Cá sư tử, Cá naso, Cá nhồng.
   - 6 point: Cá sọc dưa, Cá khế, Cá mú.
   - 10 point: Cá mặt quỷ, Cá heo biển.
   - 15 point: Cá hoàng đế, Cá ngừ hoàng kim.
   - 25 point: Cá rồng đỏ.
-- `[ ]` Áp tỉ lệ câu từ cá giá trị cao xuống thấp: 2%, 4%, 7%, 17%, 25%, 45%.
-- `[ ]` Rà shop bán cá/thành phố/kho đồ/toast thu hoạch để đảm bảo cá câu được hiện đúng tên, icon, số lượng và giá trị point.
+- `[x]` Áp tỉ lệ câu từ cá giá trị cao xuống thấp: 2%, 4%, 7%, 17%, 25%, 45%.
+- `[x]` Rà shop bán cá/thành phố/kho đồ/toast thu hoạch để đảm bảo cá câu được hiện đúng tên, icon, số lượng và giá trị point.
 
 ### B. Đào đá - thêm bảng đá/gem và lượt đào
-- `[ ]` Tìm lại hệ đào đá hiện tại trước khi sửa; xác định đang là tài nguyên thường hay minigame riêng.
-- `[ ]` Thêm dữ liệu reward:
+- `[x]` Ghi dữ liệu đá quý mới vào `Assets/_Project/Docs_KichBan/CacLoaiDaQuy.md`, kèm giá Point, tỉ lệ, số viên, icon và ghi chú rock thường vẫn 100% với 10 rock/lượt.
+- `[x]` Tìm lại hệ đào đá hiện tại trước khi sửa; xác định đang là tài nguyên thường trong `FarmInteractionController`/`HarvestableResource`.
+- `[x]` Thêm item/icon đá quý cho túi đồ và toast khi đào trúng; chưa thêm shop thu mua đá quý.
+- `[x]` Hồi sinh gỗ/đá bù thời gian thật khi thoát app: lưu `respawnEndUnix` cho tài nguyên do `ResourceSpawner` quản lý, vẫn tương thích save cũ `respawnTimer`.
+- `[x]` Thêm dữ liệu reward:
   - Ảnh 1: 2 point/viên, 4 viên, 50% đào trúng.
   - Ảnh 2: 3 point/viên, 4 viên, 30% đào trúng.
   - Ảnh 3: 6 point/viên, 3 viên, 12% đào trúng.
@@ -29,9 +42,27 @@
 - `[ ]` Áp giới hạn mỗi ngày 10 lượt đào.
 - `[ ]` Xác định với anh cách hiển thị/nâng cấp cuốc lv2/lv3 nếu UI hiện tại chưa có màn nâng cấp phù hợp.
 
-### C. iOS/TestFlight follow-up nếu bị hỏi lại
-- `[x]` CodeMagic đã build/upload TestFlight được bằng exported-Xcode workflow.
-- `[ ]` Nếu tester báo không cài được, xác nhận họ đang dùng bản `0.1.1 (1)`, không phải `0.1.0 (0)`.
+### C. Đảo mỏ / map đào khoáng MVP - 30/06/2026
+- `[x]` Mở khóa điểm `mine` trên bản đồ thế giới để demo có thể chọn đảo đào khoáng ngay.
+- `[x]` `IslandTravelManager` cho phép travel tới `mine` và load `MineScene`; có fallback runtime `MineMap -> MineScene` cho dữ liệu Inspector cũ.
+- `[x]` `FarmInteractionController` giữ câu cá chỉ ở `city`, nhưng đào đá được phép ở `city` hoặc `mine`.
+- `[x]` `ResourceSpawner` hỗ trợ gắn prefab cây/đá, snap spawn xuống nền nếu cần, và random lại vị trí khi tài nguyên hồi sinh để đá mỏ không respawn cố định một chỗ.
+- `[x]` `ResourceSpawner` hỗ trợ nhiều vùng spawn bằng `Collider` để anh kiểm soát khu rải đá trên map méo/rộng; nếu không gán vùng thì vẫn fallback về `spawnRadius` cũ.
+- `[ ]` Editor: trong Build Settings, thay entry cũ `Assets/_Project/_Scenes/MineMap.unity` bằng `Assets/_Project/_Scenes/MineScene.unity`.
+- `[ ]` Editor: trong `IslandTravelManager` scene chính, set island `mine` dùng `sceneName = MineScene` và kiểm tra `spawnPosition` rơi đúng mặt đảo mỏ.
+- `[ ]` Editor: trong `MineScene`, đặt `ResourceSpawner` với `spawnerID = Mine`, `treeCount = 0`, `rockCount` theo mật độ test, `spawnRadius/spawnCenter` phủ vùng đào, bật `randomizePositionOnRespawn`, gắn `rockPrefab` nếu có.
+- `[ ]` Editor: tạo vài `BoxCollider` trigger cao phủ vùng đất hợp lệ trên map mỏ, kéo vào `ResourceSpawner > Spawn Areas`; nếu đã từng chạy spawner cũ thì dùng context menu `Clear Saved Resource State` hoặc đổi `spawnerID` để rải lại.
+- `[ ]` Editor: nếu bật `snapSpawnToGround`, dùng layer/mask riêng cho nền đảo mỏ để raycast không bắt nhầm collider nhân vật/đá.
+- `[ ]` Test: Map -> chọn Khai thác mỏ -> load `MineScene` -> đào đá -> nhận 10 rock + roll đá quý/toast icon -> chờ respawn và xác nhận đá xuất hiện ở vị trí ngẫu nhiên mới.
+- `[ ]` Sau MVP: áp giới hạn 10 lượt đào/ngày, nâng cuốc lv2/lv3, và shop/NPC thu mua đá quý.
+
+### D. iOS/App Store Connect follow-up nếu bị hỏi lại
+- `[x]` CodeMagic đã build/upload IPA lên App Store Connect được bằng exported-Xcode workflow.
+- `[x]` Theo góp ý bên build, đã bỏ `submit_to_testflight: true`; build chỉ upload lên App Store Connect, add vào Internal Testing làm thủ công.
+- `[x]` Tăng CodeMagic `BUILD_NUMBER` lên `2` cho bản upload lại `0.1.1 (2)`.
+- `[x]` Bake `0.1.1 (2)` vào exported iOS project và thêm bước verify IPA version trước publish để tránh upload nhầm `CFBundleVersion = 1`.
+- `[x]` Tăng tiếp iOS build lên `0.1.1 (4)` và thêm `ITSAppUsesNonExemptEncryption=false` vào `ios/Info.plist`; CodeMagic ép lại version/build/export-compliance key sau Unity export.
+- `[ ]` Nếu tester báo không cài được, xác nhận họ đang dùng bản `0.1.1 (4)`, không phải `0.1.0 (0)`, `0.1.1 (1)`, `0.1.1 (2)` hoặc `0.1.1 (3)`.
 - `[ ]` Tối ưu dung lượng iOS sau, hiện TestFlight khoảng 309 MB.
 
 ## Tiến độ đã hoàn thành (Completed)

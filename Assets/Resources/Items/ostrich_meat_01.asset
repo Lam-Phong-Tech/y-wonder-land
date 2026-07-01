@@ -17,10 +17,10 @@ MonoBehaviour:
   description: "Th\u1ECBt \u0111\xE0 \u0111i\u1EC3u."
   iconEmoji: "\U0001F357"
   iconSprite: {fileID: 0}
-  iconTexture: {fileID: 0}
+  iconTexture: {fileID: 2800000, guid: 2f8d1ac8389ac8343b4a42222cc57f3d, type: 3}
   category: products
   buyPrice: 0
-  sellPrice: 0
-  canSell: 0
+  sellPrice: 1050
+  canSell: 1
   isStackable: 1
   maxStack: 999
