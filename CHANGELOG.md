@@ -1,5 +1,116 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-07-02 (Realtime chat delivery)
+
+### Fixed
+- Serialized Unity WebSocket sends in `RealtimeClient` so chat messages no longer race against frequent `player_state` updates on the same `ClientWebSocket`.
+- Chat now appears immediately in the sender's history when realtime accepts the message, while self echo from the server is ignored to avoid duplicate bubbles.
+- Added a lightweight `[Realtime] Chat from ...` log when a remote chat packet reaches Unity, making future chat debugging visible in Console.
+
+### Verified
+- Local backend WebSocket smoke test confirmed two independent clients in `city` both receive a `chat` broadcast.
+
+## [Unreleased] - 2026-07-01 (Login profile cache isolation)
+
+### Fixed
+- Isolated `PlayerProfileService` local cache per signed-in `AuthService.UserId`/`Username` instead of reusing the legacy global `YW_Profile_Cache` for every account.
+- Reset the runtime profile when auth identity changes, and accept `player_profile` returned by `/auth/web-login` before the follow-up profile load. This prevents DemoRich05/Demo 05 from falling back to a stale DemoRich02/Demo 02 profile when testing multiple accounts in the same Editor/app session or when `/player/profile` temporarily fails.
+- Refreshed the top-left HUD profile name from the active session after gameplay starts. The HUD now follows `GameManager.playerName` first, then auth/profile fallback, so the corner profile card no longer stays on DemoRich02 while the world name tag already shows DemoRich03.
+
+### Notes
+- The old `YW_Profile_Cache` remains as a fallback only when no auth identity exists, so old/offline local flows still have a migration path.
+
+## [Unreleased] - 2026-07-01 (Web auth bridge + realtime MVP)
+
+### Added
+- Added backend WebSocket realtime support at `/realtime` and `/game-api/realtime` using `ws`, with shared rooms `city` and `mine`, max 20 players per room, global chat, presence, remote player state, and `Waving`/`Pointing` emote broadcast.
+- Added Unity runtime `RealtimeClient` and `RemotePlayerController` for auto-connecting on shared islands, sending local movement/emote state, receiving global chat, and spawning remote players from the existing character prefabs without local input/colliders.
+
+### Changed
+- Updated `AuthService.LoginAsync` to try `/auth/web-login` first, then fall back to legacy `/auth/login` for local/dev compatibility.
+- Updated `webAuthProvider` for the handed-off web contract: `POST https://api.ywonder.net/api/game/auth` with `Authorization: Bearer <WEB_AUTH_SECRET|GAME_API_SECRET>`, plus JWT HS256 verification for the returned `gameToken`.
+- Chat sends through realtime when connected; if realtime is unavailable it keeps the existing local/mock chat behavior.
+
+### Notes
+- Unity never receives `GAME_API_SECRET`; only the game server reads it from environment variables.
+- Nginx/Caddy must proxy WebSocket Upgrade requests for `/realtime`, otherwise REST can work while chat/remote players cannot connect.
+
+## [Unreleased] - 2026-07-01 (Backend public URL compatibility)
+
+### Added
+- Added `/health` to the Node server stub and mounted the existing API under both local routes and the legacy `/game-api` prefix.
+- Added `server/Caddyfile.example` and `server/DEPLOY_WINDOWS.md` with the minimum Windows/Caddy reverse-proxy setup for `https://api.ywonder.net`.
+- Redirected Unity `BackendConfig.asset` to `https://api.ywonder.net`, keeping `ywonder.net` free for the existing web VPS.
+- Added `server/webAuthProvider.js` as a mock/http adapter layer for web-account login while waiting for the real web API contract.
+- Added Game API MVP endpoints for `auth/web-login`, player bootstrap, economy, inventory, and farm-state.
+- Added `server/schema.sql` as the PostgreSQL target schema for `game_players`, profiles, economy, inventory, farm-state, and transactions.
+
+### Notes
+- DNS currently resolves `ywonder.net` and `api.ywonder.net` to `45.119.83.233`, but external checks from this machine could not connect to ports `80`, `443`, or `3000`; the server/router/firewall/Caddy side still needs to be fixed on the physical server.
+- `WEB_AUTH_MODE=mock` is the current unblocker. When the web team provides login/verify endpoints, switch to `WEB_AUTH_MODE=http` and configure `WEB_AUTH_LOGIN_URL` / `WEB_AUTH_VERIFY_URL`.
+
+## [Unreleased] - 2026-07-01 (Segmented lucky wheel)
+
+### Changed
+- Redesigned the lucky wheel UI from icons placed around a dark ring into a fixed-square 12-segment colored wheel. Prize segments now show item icons only; product names and quantities were removed for a cleaner spin view.
+- The "better luck next time" segment is intentionally blank, while the prize list and existing weighted drop logic stay unchanged.
+- Moved the spin button into the center of the wheel and removed the decorative center wheel icon; the footer now only shows remaining daily spins.
+- Replaced the drawn center pointer/`QUAY` text with the new `arrowforspin.png` spin icon as the clickable center button.
+
+### Notes
+- The segment background is generated at runtime in `EventPopupController`, so no new wheel background asset is required.
+
+## [Unreleased] - 2026-07-01 (Mobile build placement assist)
+
+### Added
+- Added touch-only Build Mode placement assist in `GhostPlacementController`: mobile touches now aim slightly above the finger and can snap to the nearest visible `BuildSurfaceCell` within a screen-space assist radius if the raycast misses the exact small tile collider.
+
+### Changed
+- `BuildModeOverlayController` now tells the ghost placement system whether the pin tap came from touch or mouse, so mobile gets the forgiving placement path while desktop/mouse placement keeps the exact raycast behavior.
+
+### Notes
+- New Inspector knobs on `GhostPlacementController`: `enableMobilePlacementAssist`, `touchAimOffsetPixels`, and `touchAssistRadiusPixels`. Defaults are enabled, 90px aim offset, and 96px assist radius.
+
+## [Unreleased] - 2026-07-01 (Farm tile model visuals)
+
+### Changed
+- Disabled the automatic `FarmTileMarker` colored border overlay, removing the white/yellow/green/orange tile outline during farming.
+- `FarmTile` no longer creates primitive cube/sphere/cylinder fallback visuals by default. Soil/plowed visuals now come from the assigned Inspector models, and planted/watered/ripe states keep the plowed soil model underneath the crop.
+- Crop visuals now prefer `CropDefinition.cropPrefab` when available, even if the old `useCustomCropModels` flag was not manually enabled.
+- `FarmTile` now supports `soilVisual`/`plowedVisual` fields assigned to prefab assets at runtime. It instantiates prefab visuals as children and toggles renderers when `soilVisual` is the tile root, so plowing `DatThuong` can reveal `DatDaCuoc` without disabling the whole tile object.
+- Build-mode farm plots can now be demolished like pens: gameplay prompt adds `G`/`Hủy ô trồng` with a second-tap confirmation, and the Build Mode delete menu resolves child mesh hits back to the placed root before deleting.
+- Deleting a placed farm plot clears the owning `BuildSurfaceCell`, saves `BuildPersistence` immediately, and `FarmTile.OnDestroy` now cleans independent water bars/crop labels.
+
+### Notes
+- Assign `soilVisual` and `plowedVisual` on the farm tile prefab/scene objects. If a crop has no `cropPrefab`, no colored fallback plant will appear unless `createPrimitiveFallbackVisuals` is explicitly enabled for prototype testing.
+
+## [Unreleased] - 2026-07-01 (Mobile keyboard avoidance)
+
+### Added
+- Added `MobileKeyboardAvoidance`, a shared UI Toolkit helper for keeping focused text inputs above the iOS/Android soft keyboard.
+
+### Changed
+- Login/Register now shifts the login panel upward only while a text field is focused and the mobile keyboard is expected to cover it.
+- Chat now reuses the same keyboard-height calculation instead of its local hardcoded keyboard fallback, while preserving the existing Build Mode chat offset.
+
+## [Unreleased] - 2026-07-01 (Gem shop and market filters)
+
+### Added
+- Added `Shop_GemShop` as a sell-only gemstone buyer shop definition for the six mining gemstone item IDs.
+- Added Fish and Gemstone category filters to the shared Shop Popup so Fish Shop and Gem Shop can expose their product categories instead of relying only on the All filter.
+- Added reusable item-icon toast helpers in `ScreenToast` so item rewards/purchases can resolve icon/name from `ItemDatabase` instead of duplicating fish/gem-only code.
+
+### Changed
+- Updated `ShopDataGenerator` so regenerating shop data preserves the gemstone buyer shop.
+- Switched fishing, mining, crop/animal harvest, water scooping, shop buy/sell, attendance rewards, and lucky wheel item rewards to the shared item-icon toast path.
+- Updated Build Mode material balance and item costs to show the new `Go`/`Da` icons from `Assets/Sprites/icon/BoSungIcon/`.
+- Mapped `wood_01`, `stone_01`, and `watering_water_01` to `Go.png`, `Da.png`, and `NuocTuoi.png` in `ItemDataGenerator`; `watering_water_01.asset` now has an icon texture assigned.
+
+### Notes
+- Gemstone shop still needs Unity Editor setup: assign `Shop_GemShop` to a `ShopZoneTrigger` or `MerchantNPC` on the intended mine/city shop object.
+- Fish and gemstone card/detail icons continue to resolve from `ItemDefinition.iconTexture`; no economy values were changed.
+- Wood/stone economy logic was not changed; this pass only changes icons/UI feedback.
+
 ## [Unreleased] - 2026-06-30 (Mining island MVP groundwork)
 
 ### Added

@@ -12,9 +12,13 @@
 Server stub dev: `server/` (Node/Express, lưu `data.json`), mặc định `http://localhost:3000`.
 Client: `Assets/_Project/Scripts/Backend/` (`ApiClient`, `AuthService`, `PlayerProfileService`). Offline-first: lỗi mạng -> fallback cache `PlayerPrefs`.
 
+Public demo target cho Unity: `https://api.ywonder.net`. Trong lúc test local/LAN, `BackendConfig.asset` có thể tạm trỏ `http://127.0.0.1:3000` hoặc IP LAN của máy chạy backend.
+Server stub vẫn hỗ trợ cả endpoint local (`/auth/login`) và endpoint legacy có prefix (`/game-api/auth/login`) để tránh vỡ nếu sau này cần proxy qua `ywonder.net/game-api`.
+
 | Method | Endpoint | Body | Trả về |
 |---|---|---|---|
 | GET  | `/` | — | `{ ok }` (health) |
+| GET  | `/health` | — | `{ ok, checkedAt }` |
 | POST | `/auth/register` | `{ username, password }` | `{ token, userId }` |
 | POST | `/auth/login` | `{ username, password }` | `{ token, userId }` |
 | GET  | `/player/profile` | header `Authorization: Bearer <token>` | `{ player_profile {...} }` |
@@ -24,6 +28,90 @@ Client: `Assets/_Project/Scripts/Backend/` (`ApiClient`, `AuthService`, `PlayerP
 **Token đợt 1:** JWT đơn giản (stub, KHÔNG production). Auth đợt 1 dùng username = tên nhân vật, mật khẩu sinh & lưu local (chưa nối UI Login — để đợt 2).
 
 > **Lộ trình:** Đợt 2 nối UI Login/Register + Economy + Inventory; Đợt 3 Farm/Animal/Resource; Đợt 4 realtime (Photon) + Firebase push.
+
+---
+
+## REST API - Game backend MVP bridge (lam truoc trong luc cho Web API)
+
+Muc tieu: game backend co contract on dinh truoc, web auth that se cam vao adapter sau. Hien `WEB_AUTH_MODE=mock` cho dev/test; khi ben web cung cap endpoint, doi sang `WEB_AUTH_MODE=http` va set `WEB_AUTH_LOGIN_URL`.
+
+| Method | Endpoint | Body | Tra ve |
+|---|---|---|---|
+| POST | `/auth/web-login` | `{ username/email/refCode, password }` hoac `{ token }` | `{ token, playerId, webUserId, player_profile }` |
+| GET | `/player/bootstrap` | Bearer token | `{ player_profile, economy, inventory, farm_state }` |
+| GET | `/player/economy` | Bearer token | `{ economy }` |
+| PUT | `/player/economy` | `{ economy }` + Bearer | `{ ok, economy }` |
+| POST | `/player/economy/apply` | `{ delta_pos, delta_upos, type, ref, idempotency_key }` + Bearer | `{ ok, economy, transaction }` |
+| GET | `/player/inventory` | Bearer token | `{ inventory }` |
+| PUT | `/player/inventory` | `{ inventory }` + Bearer | `{ ok, inventory }` |
+| POST | `/player/inventory/adjust` | `{ item_id, quantity_delta, type, ref }` + Bearer | `{ ok, inventory, transaction }` |
+| GET | `/player/farm-state` | Bearer token | `{ farm_state }` |
+| PUT | `/player/farm-state` | `{ farm_state }` + Bearer | `{ ok, farm_state }` |
+
+Quy uoc mapping:
+- `web_user_id` la ID on dinh do web tra ve.
+- `playerId` la ID noi bo game backend.
+- DB game rieng luu `web_user_id -> playerId`, khong ghi truc tiep vao DB web.
+- MVP chua dung chung Point web; endpoint economy hien la vi game rieng.
+
+### Web auth contract do web team bàn giao
+
+Game-server gọi web, Unity KHÔNG gọi trực tiếp và KHÔNG giữ `GAME_API_SECRET`.
+
+| Method | Endpoint | Header | Body | Trả về |
+|---|---|---|---|---|
+| POST | `https://api.ywonder.net/api/game/auth` | `Authorization: Bearer <GAME_API_SECRET>` | `{ "username": "<username|email|refCode>", "password": "..." }` | `{ ok, userId, user_id, username, refCode, ref_code, fullName, full_name, gameToken, game_token, tokenType, expiresIn, expires_in }` |
+| GET | `https://ywonder.net/api/game/balance?uid=<username>` | `Authorization: Bearer <GAME_API_SECRET>` | — | Web Point balance |
+| POST | `https://ywonder.net/api/game/credit` | `Authorization: Bearer <GAME_API_SECRET>` | `{ "uid":"<username>", "amount": number, "ref":"<event id>", "reason":"..." }` | Web credit result |
+
+Production env for `server/webAuthProvider.js`:
+
+```powershell
+$env:WEB_AUTH_MODE="http"
+$env:WEB_AUTH_LOGIN_URL="https://api.ywonder.net/api/game/auth"
+$env:WEB_AUTH_SECRET="<GAME_API_SECRET>"
+```
+
+`gameToken` format mới: JWT chuẩn HS256, payload includes `{ sub, uid, username, iat, exp }` (`sub`/`uid` = web `userId`). Game-server verifies with `jwt.verify(token, GAME_API_SECRET, { algorithms: ["HS256"] })`.
+Nếu hạ tầng `api.ywonder.net` chưa sẵn sàng SSL, có thể override tạm `WEB_AUTH_LOGIN_URL=https://ywonder.net/api/game/auth` mà không đổi Unity.
+
+## Realtime WebSocket MVP
+
+Unity connects to game-server after login:
+
+```text
+wss://api.ywonder.net/realtime?token=<game-server-jwt>
+```
+
+Legacy path if needed:
+
+```text
+wss://ywonder.net/game-api/realtime?token=<game-server-jwt>
+```
+
+Client -> server:
+
+| Type | Payload |
+|---|---|
+| `join` | `{ type, room: "city"|"mine", name, gender }` |
+| `player_state` | `{ type, position:{x,y,z}, yaw, animation:"Idle"|"Walk"|"Run" }` |
+| `chat` | `{ type, message }` |
+| `emote` | `{ type, emote:"Waving"|"Pointing", duration }` |
+| `leave` | `{ type }` |
+
+Server -> client:
+
+| Type | Payload |
+|---|---|
+| `connected` | `{ type, connectionId, sharedRooms, maxPlayers }` |
+| `welcome` | `{ type, selfId, room, players }` |
+| `player_joined` | `{ type, player }` |
+| `player_left` | `{ type, playerId, room }` |
+| `player_state` | `{ type, playerId, name, room, gender, position, yaw, animation }` |
+| `chat` | `{ type, playerId, name, room, message }` |
+| `emote` | `{ type, playerId, name, room, emote, duration }` |
+
+Scope hiện tại: chat toàn server, remote player visual trong `city`/`mine`, tối đa 20 người/room. Chưa đồng bộ gameplay server-authoritative.
 
 ---
 

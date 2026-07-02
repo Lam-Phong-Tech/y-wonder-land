@@ -3,7 +3,6 @@ using Newtonsoft.Json;
 
 namespace YWonderLand.Backend
 {
-    /// <summary>Hồ sơ người chơi (player_profile) — khớp docs/DATA_SCHEMA.md + cờ tutorialCompleted.</summary>
     [System.Serializable]
     public class PlayerProfile
     {
@@ -20,15 +19,15 @@ namespace YWonderLand.Backend
     }
 
     /// <summary>
-    /// Nạp/lưu player_profile. Offline-first:
-    /// - Load: thử server -> fallback cache local (PlayerPrefs) -> mặc định.
-    /// - Save: ghi cache local NGAY (không mất dữ liệu) rồi đẩy server best-effort.
+    /// Loads and saves one player profile per signed-in user. The legacy shared cache
+    /// is kept only for old/offline flows that do not have an auth identity yet.
     /// </summary>
     public class PlayerProfileService : MonoBehaviour
     {
         public static PlayerProfileService Instance { get; private set; }
 
         private const string KEY_CACHE = "YW_Profile_Cache";
+        private const string KEY_CACHE_PREFIX = "YW_Profile_Cache_";
 
         public PlayerProfile Profile { get; private set; }
         public bool IsLoaded { get; private set; }
@@ -40,10 +39,9 @@ namespace YWonderLand.Backend
         {
             if (Instance != null && Instance != this) { Destroy(this); return; }
             Instance = this;
-            Profile = LoadCache() ?? new PlayerProfile();
+            Profile = LoadCacheForCurrentUser(true) ?? CreateDefaultProfileForCurrentAuth();
         }
 
-        /// <summary>Nạp hồ sơ: ưu tiên server, lỗi thì dùng cache local.</summary>
         public async Awaitable LoadProfileAsync()
         {
             string token = AuthService.Instance != null ? AuthService.Instance.Token : null;
@@ -55,20 +53,23 @@ namespace YWonderLand.Backend
                     Profile = res.data.player_profile;
                     SaveCache();
                     IsLoaded = true;
-                    Debug.Log($"[Profile] Nạp từ server: characterCreated={Profile.characterCreated}, tutorialCompleted={Profile.tutorialCompleted}");
+                    Debug.Log($"[Profile] Loaded from server: name={Profile.name}, characterCreated={Profile.characterCreated}, tutorialCompleted={Profile.tutorialCompleted}");
                     return;
                 }
+
+                Debug.LogWarning($"[Profile] Server load failed for {GetCurrentCacheKey()}: {res.error}");
             }
 
-            // Fallback: dùng cache local (đã nạp ở Awake) — game vẫn chạy offline
+            bool hasAuthIdentity = HasAuthIdentity();
+            Profile = LoadCacheForCurrentUser(!hasAuthIdentity) ?? CreateDefaultProfileForCurrentAuth();
             IsLoaded = true;
-            Debug.Log($"[Profile] Dùng cache local (offline): characterCreated={Profile.characterCreated}, tutorialCompleted={Profile.tutorialCompleted}");
+            Debug.Log($"[Profile] Loaded local fallback for {GetCurrentCacheKey()}: name={Profile.name}, characterCreated={Profile.characterCreated}, tutorialCompleted={Profile.tutorialCompleted}");
         }
 
-        /// <summary>Ghi cache local ngay + đẩy server (best-effort).</summary>
         public async Awaitable SaveProfileAsync()
         {
-            SaveCache(); // không mất dữ liệu kể cả khi server fail
+            if (Profile == null) Profile = CreateDefaultProfileForCurrentAuth();
+            SaveCache();
 
             string token = AuthService.Instance != null ? AuthService.Instance.Token : null;
             if (string.IsNullOrEmpty(token)) return;
@@ -76,38 +77,102 @@ namespace YWonderLand.Backend
             var res = await ApiClient.PutAsync<object>("/player/profile",
                 new ProfileEnvelope { player_profile = Profile }, token);
             if (!res.ok)
-                Debug.LogWarning("[Profile] Đẩy server thất bại (sẽ giữ ở local): " + res.error);
+                Debug.LogWarning("[Profile] Failed to push profile to server, kept local cache: " + res.error);
         }
 
-        /// <summary>Đặt cờ hoàn thành tutorial rồi lưu (fire-and-forget).</summary>
+        public void ResetRuntimeProfileForAuthChange()
+        {
+            Profile = CreateDefaultProfileForCurrentAuth();
+            IsLoaded = false;
+        }
+
+        public void AcceptServerProfile(PlayerProfile serverProfile)
+        {
+            if (serverProfile == null) return;
+            Profile = serverProfile;
+            IsLoaded = true;
+            SaveCache();
+        }
+
         public void SetTutorialCompleted(bool done)
         {
+            if (Profile == null) Profile = CreateDefaultProfileForCurrentAuth();
             Profile.tutorialCompleted = done;
             _ = SaveProfileAsync();
         }
 
         public void ApplyCharacterInfo(string playerName, string gender, bool markCreated = true)
         {
-            if (Profile == null) Profile = new PlayerProfile();
+            if (Profile == null) Profile = CreateDefaultProfileForCurrentAuth();
             if (!string.IsNullOrEmpty(playerName)) Profile.name = playerName;
             if (!string.IsNullOrEmpty(gender)) Profile.gender = gender;
             if (markCreated) Profile.characterCreated = true;
             _ = SaveProfileAsync();
         }
 
-        // ── Cache local (PlayerPrefs) ──
         private void SaveCache()
         {
-            PlayerPrefs.SetString(KEY_CACHE, JsonConvert.SerializeObject(Profile));
+            PlayerPrefs.SetString(GetCurrentCacheKey(), JsonConvert.SerializeObject(Profile));
             PlayerPrefs.Save();
         }
 
-        private PlayerProfile LoadCache()
+        private PlayerProfile LoadCacheForCurrentUser(bool allowLegacyFallback)
         {
-            string json = PlayerPrefs.GetString(KEY_CACHE, "");
+            string key = GetCurrentCacheKey();
+            PlayerProfile profile = LoadCache(key);
+            if (profile != null) return profile;
+
+            if (allowLegacyFallback && key != KEY_CACHE)
+                return LoadCache(KEY_CACHE);
+
+            return null;
+        }
+
+        private static PlayerProfile LoadCache(string key)
+        {
+            string json = PlayerPrefs.GetString(key, "");
             if (string.IsNullOrEmpty(json)) return null;
             try { return JsonConvert.DeserializeObject<PlayerProfile>(json); }
             catch { return null; }
+        }
+
+        private static PlayerProfile CreateDefaultProfileForCurrentAuth()
+        {
+            var profile = new PlayerProfile();
+            string username = AuthService.Instance != null ? AuthService.Instance.Username : "";
+            if (!string.IsNullOrEmpty(username))
+                profile.name = username;
+            return profile;
+        }
+
+        private static bool HasAuthIdentity()
+        {
+            var auth = AuthService.Instance;
+            return auth != null
+                   && (!string.IsNullOrEmpty(auth.UserId) || !string.IsNullOrEmpty(auth.Username));
+        }
+
+        private static string GetCurrentCacheKey()
+        {
+            var auth = AuthService.Instance;
+            if (auth != null)
+            {
+                if (!string.IsNullOrEmpty(auth.UserId))
+                    return KEY_CACHE_PREFIX + SanitizeCacheKeyPart(auth.UserId);
+                if (!string.IsNullOrEmpty(auth.Username))
+                    return KEY_CACHE_PREFIX + "name_" + SanitizeCacheKeyPart(auth.Username.ToLowerInvariant());
+            }
+
+            return KEY_CACHE;
+        }
+
+        private static string SanitizeCacheKeyPart(string value)
+        {
+            if (string.IsNullOrEmpty(value)) return "unknown";
+            return value.Replace("\\", "_")
+                .Replace("/", "_")
+                .Replace(":", "_")
+                .Replace(" ", "_");
         }
     }
 }

@@ -1,0 +1,23 @@
+# Caddy example for the Windows server.
+# Keep the real website config if ywonder.net already serves web pages.
+# This only shows the API reverse proxy needed by the Unity client.
+
+ywonder.net {
+    encode zstd gzip
+
+    # Includes REST /game-api/* and WebSocket /game-api/realtime.
+    handle /game-api* {
+        reverse_proxy 127.0.0.1:3000
+    }
+
+    # Optional placeholder if this machine does not host the main website yet.
+    handle {
+        respond "YWONDER web host is not configured on this server." 404
+    }
+}
+
+api.ywonder.net {
+    encode zstd gzip
+    # Includes REST endpoints and WebSocket /realtime.
+    reverse_proxy 127.0.0.1:3000
+}

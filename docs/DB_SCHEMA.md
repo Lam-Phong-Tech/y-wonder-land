@@ -34,6 +34,20 @@
 
 ## 2. Bảng ĐÃ HIỆN THỰC (Đợt 1)
 
+### `game_players` — mapping tài khoản web sang người chơi game
+> Hướng mới 01/07/2026: web giữ VPS riêng và là nguồn tài khoản; game backend có DB riêng, map bằng `web_user_id`.
+
+| Cột | Kiểu | Ghi chú |
+|---|---|---|
+| `id` | TEXT/UUID PK | `player_id` nội bộ game |
+| `web_user_id` | TEXT UNIQUE | ID ổn định do web trả về |
+| `username` | TEXT | username/email/phone hoặc tên web |
+| `display_name` | TEXT | tên hiển thị ban đầu |
+| `auth_source` | TEXT | `mock`, `web`, ... |
+| `created_at` / `updated_at` | TIMESTAMP | |
+
+> MVP hiện có `server/webAuthProvider.js` dạng adapter. Khi bên web có API login/verify thật, chỉ thay adapter, không đổi schema game.
+
 ### `users` — định danh + xác thực
 | Cột | Kiểu | Ghi chú |
 |---|---|---|

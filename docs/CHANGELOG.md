@@ -5,6 +5,86 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-07-02] — Hotfix chat realtime
+
+### Fixed
+- Sửa đường gửi chat realtime trong Unity: các gói WebSocket gửi ra được xếp hàng tuần tự, tránh tin chat bị rơi khi đang spam gói vị trí nhân vật.
+- Khi bấm gửi chat online, người gửi thấy tin của mình ngay trong lịch sử chat; echo từ server của chính mình bị bỏ qua để không bị trùng bong bóng.
+- Thêm log nhẹ `[Realtime] Chat from ...` khi Unity nhận được tin chat từ người chơi khác để dễ kiểm tra trên Console.
+
+### Test cần làm
+- Build lại EXE mới, mở Editor + EXE, đăng nhập 2 tài khoản khác nhau.
+- Cả hai vào `city` hoặc `mine`, mở chat và gửi qua lại; bên còn lại phải thấy tin nhắn, Console nên có log `[Realtime] Chat from ...` ở máy nhận.
+- Không test chat gặp nhau ở `farm` vì farm vẫn là đảo riêng.
+
+---
+## [2026-07-01] — Vòng quay may mắn dạng 12 múi
+
+### Changed
+- Đổi giao diện vòng quay từ kiểu icon rải quanh vòng tối sang vòng quay 12 múi màu giống mẫu anh gửi.
+- Mỗi múi chỉ hiển thị icon item đang có trong `ItemDatabase`; đã bỏ tên item và số lượng trong múi cho gọn.
+- Ô “may mắn lần sau” vẫn giữ trong danh sách thưởng nhưng để trống, không còn dùng icon vòng quay.
+- Nút quay được đưa vào tâm vòng bằng icon mới `arrowforspin.png`; icon vòng quay ở giữa và mũi tên vẽ bằng USS đã bị bỏ, footer chỉ còn hiển thị số lượt còn lại.
+- Logic phần thưởng không đổi: vẫn dùng danh sách 12 phần thưởng và tỉ lệ/weight hiện tại.
+
+### Test cần làm
+- Mở Sự kiện -> Vòng quay, kiểm tra vòng tròn không bị méo khi quay, đủ 12 múi, chỉ hiện icon item.
+- Kiểm tra ô “may mắn lần sau” trống, tâm vòng có icon `Spin` mới và vẫn bấm quay được.
+- Bấm quay vài lần, vòng quay phải dừng đúng phần thưởng, trừ lượt ngày và trao item/toast như cũ.
+
+## [2026-07-01] — Tối ưu đặt Build Mode trên mobile
+
+### Added
+- Thêm trợ giúp đặt công trình chỉ áp dụng cho touch/mobile trong `GhostPlacementController`: điểm ngắm được nâng lên trên ngón tay và nếu tap không trúng chính xác collider ô nhỏ thì hệ thống chọn `BuildSurfaceCell` gần nhất trên màn hình trong bán kính hỗ trợ.
+
+### Changed
+- `BuildModeOverlayController` truyền rõ tap đặt vị trí là touch hay mouse; mobile dùng đường đặt dễ bấm hơn, còn PC/mouse vẫn giữ raycast chính xác như cũ.
+
+### Test cần làm
+- Trên điện thoại, vào Build Mode -> chọn Ruộng/Đường đá/Chuồng -> kéo/tap quanh các ô nhỏ, đặc biệt hơi lệch khỏi ô, ghost vẫn nên bắt vào ô hợp lệ gần nhất.
+- Trên PC/Editor, click chuột đặt công trình vẫn phải giữ cảm giác cũ, không tự nhảy sang ô khác nếu ray không trúng ô.
+
+## [2026-07-01] — Farm tile dùng model đất thật
+
+### Changed
+- Tắt `FarmTileMarker` tự vẽ viền ô đất màu trắng/vàng/xanh/cam khi trồng trọt.
+- `FarmTile` không tự tạo cube/sphere/cylinder màu prototype mặc định nữa; đất thường/đất đã cuốc lấy từ `soilVisual`/`plowedVisual` anh gán trong Inspector.
+- Khi gieo/tưới/chín, ô vẫn giữ model đất đã cuốc bên dưới cây; cây ưu tiên lấy model thật từ `CropDefinition.cropPrefab`.
+- `FarmTile` hỗ trợ trường hợp `Soil Visual`/`Plowed Visual` trỏ tới prefab asset: tự sinh instance con trong scene, và nếu `Soil Visual` là chính object `DatThuong` thì chỉ tắt renderer đất thường chứ không tắt cả GameObject/FarmTile.
+- Ô trồng đặt bằng Build Mode có thể hủy như chuồng: prompt ngoài gameplay thêm `G - Hủy ô trồng` với xác nhận 2 lần, còn menu xóa trong Build Mode bắt được cả khi click vào mesh con của `DatThuong`.
+- Khi hủy ô trồng, hệ thống clear `BuildSurfaceCell`, lưu `BuildPersistence` ngay và `FarmTile.OnDestroy` dọn thanh nước/chữ nổi độc lập để không còn sót UI trên không.
+
+### Editor cần làm
+- Gán model đất mới xây vào `Soil Visual`, model đất đã cuốc vào `Plowed Visual`.
+- Đảm bảo các `CropDefinition` cần hiển thị cây đã có `cropPrefab`; nếu thiếu prefab cây thì sẽ không còn fallback màu vàng/xanh/đỏ.
+
+## [2026-07-01] — Tránh bàn phím mềm che input mobile
+
+### Added
+- Thêm `MobileKeyboardAvoidance` dùng chung cho UI Toolkit để đo/ước lượng chiều cao bàn phím mềm iOS/Android.
+
+### Changed
+- Login/Register tự dịch panel lên khi người chơi focus ô nhập, giúp username/password/email không bị bàn phím che.
+- Chat dùng lại helper chung thay cho fallback cục bộ; vẫn giữ offset riêng khi đang ở Build Mode.
+
+## [2026-07-01] — Shop thu mua đá quý và filter chợ cá
+
+### Added
+- Thêm `Shop_GemShop` dạng SellOnly để thu mua 6 item đá quý `gem_*`.
+- Thêm filter `Cá` (`food`) và `Đá quý` (`materials`) trong Shop Popup, dùng cho Fish Shop/Gem Shop.
+- Thêm helper toast dùng chung trong `ScreenToast` để toast nhận/mua vật phẩm tự resolve tên và icon từ `ItemDatabase`.
+
+### Changed
+- Cập nhật `ShopDataGenerator` để chạy lại generator vẫn sinh/cập nhật đủ 8 shop, gồm shop đá quý.
+- Chuyển toast câu cá, đào đá, thu hoạch cây/thú, múc nước, mua/bán shop, điểm danh và vòng quay sang helper item-icon chung.
+- Build Mode nay hiển thị icon `Go`/`Da` ở pill vật liệu và chi phí từng ô xây.
+- `ItemDataGenerator` map `wood_01`, `stone_01`, `watering_water_01` sang `BoSungIcon/Go.png`, `Da.png`, `NuocTuoi.png`; item nước tưới đã được gắn icon texture.
+
+### Editor cần làm
+- Gắn `Shop_GemShop` vào `ShopZoneTrigger` hoặc `MerchantNPC` ở quầy/NPC thu mua đá quý muốn dùng.
+- Test bán đá quý từ túi đồ: icon hiện đúng, số lượng bị trừ, Point cộng theo `sellPrice`.
+- Test thêm: chặt cây/đào đá/múc nước/thu hoạch/mua bán shop để xác nhận toast có icon đúng và không đè nhau.
+
 ## [2026-06-30] — Nền MVP đảo đào khoáng
 
 ### Added

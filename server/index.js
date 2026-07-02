@@ -1,10 +1,13 @@
 // index.js — Server stub REST cho YWONDERLAND (Đợt 1: Profile + Tutorial).
 // CHỈ dùng cho dev/test ở local. KHÔNG bảo mật cho production (JWT secret cứng, không rate-limit).
 const express = require("express");
+const http = require("http");
 const cors = require("cors");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const store = require("./store");
+const webAuth = require("./webAuthProvider");
+const { attachRealtimeServer } = require("./realtimeServer");
 
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || "ywonderland_dev_secret_change_me";
@@ -13,6 +16,9 @@ const TOKEN_TTL = "30d";
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Mount the same routes for local dev and the public Unity baseUrl.
+const api = express.Router();
 
 // ── Helpers ──
 function nowISO() {
@@ -34,8 +40,18 @@ function makeDefaultProfile() {
   };
 }
 
-function signToken(userId) {
-  return jwt.sign({ uid: userId }, JWT_SECRET, { expiresIn: TOKEN_TTL });
+function makeDefaultProfileForName(name) {
+  const profile = makeDefaultProfile();
+  if (name) profile.name = name;
+  return profile;
+}
+
+function signToken(userId, extra = {}) {
+  return jwt.sign({ uid: userId, ...extra }, JWT_SECRET, { expiresIn: TOKEN_TTL });
+}
+
+function verifyTokenPayload(token) {
+  return jwt.verify(token, JWT_SECRET);
 }
 
 // Middleware: xác thực Bearer token -> gắn req.userId
@@ -46,6 +62,7 @@ function auth(req, res, next) {
   try {
     const payload = jwt.verify(token, JWT_SECRET);
     req.userId = payload.uid;
+    req.auth = payload;
     next();
   } catch (e) {
     return res.status(401).json({ error: "Token không hợp lệ" });
@@ -53,10 +70,13 @@ function auth(req, res, next) {
 }
 
 // ── Health check ──
-app.get("/", (req, res) => res.json({ ok: true, service: "ywonderland-stub" }));
+api.get("/", (req, res) => res.json({ ok: true, service: "ywonderland-stub" }));
+api.get("/health", (req, res) =>
+  res.json({ ok: true, service: "ywonderland-stub", checkedAt: nowISO() })
+);
 
 // ── Auth ──
-app.post("/auth/register", (req, res) => {
+api.post("/auth/register", (req, res) => {
   const { username, password } = req.body || {};
   if (!username || !password)
     return res.status(400).json({ error: "Thiếu username/password" });
@@ -80,7 +100,7 @@ app.post("/auth/register", (req, res) => {
   res.json({ token: signToken(id), userId: id });
 });
 
-app.post("/auth/login", (req, res) => {
+api.post("/auth/login", (req, res) => {
   const { username, password } = req.body || {};
   if (!username || !password)
     return res.status(400).json({ error: "Thiếu username/password" });
@@ -93,8 +113,44 @@ app.post("/auth/login", (req, res) => {
   res.json({ token: signToken(user.id), userId: user.id });
 });
 
+api.post("/auth/web-login", async (req, res) => {
+  let authResult;
+  try {
+    authResult = await webAuth.verifyLogin(req.body || {});
+  } catch (e) {
+    console.warn("[auth] Web login adapter exception:", e.message);
+    return res.status(502).json({ error: "WEB_AUTH_ADAPTER_EXCEPTION" });
+  }
+
+  if (!authResult.ok) {
+    return res.status(authResult.status || 401).json({ error: authResult.error || "WEB_AUTH_FAILED" });
+  }
+
+  const player = store.getOrCreatePlayerForWebUser(authResult.webUser);
+  let profile = store.getProfile(player.id);
+  if (!profile) {
+    profile = makeDefaultProfileForName(player.displayName);
+    store.setProfile(player.id, profile);
+  }
+
+  const token = signToken(player.id, {
+    webUserId: player.webUserId,
+    authSource: player.authSource,
+  });
+
+  console.log(`[auth] Web login mapped ${player.webUserId} -> ${player.id}`);
+  res.json({
+    token,
+    userId: player.id,
+    playerId: player.id,
+    webUserId: player.webUserId,
+    authSource: player.authSource,
+    player_profile: profile,
+  });
+});
+
 // ── Player profile ──
-app.get("/player/profile", auth, (req, res) => {
+api.get("/player/profile", auth, (req, res) => {
   let profile = store.getProfile(req.userId);
   if (!profile) {
     profile = makeDefaultProfile();
@@ -103,7 +159,7 @@ app.get("/player/profile", auth, (req, res) => {
   res.json({ player_profile: profile });
 });
 
-app.put("/player/profile", auth, (req, res) => {
+api.put("/player/profile", auth, (req, res) => {
   const incoming = (req.body && req.body.player_profile) || null;
   if (!incoming)
     return res.status(400).json({ error: "Thiếu player_profile trong body" });
@@ -118,6 +174,90 @@ app.put("/player/profile", auth, (req, res) => {
   res.json({ ok: true, updatedAt: merged.updatedAt });
 });
 
-app.listen(PORT, () => {
+api.get("/player/bootstrap", auth, (req, res) => {
+  let profile = store.getProfile(req.userId);
+  if (!profile) {
+    profile = makeDefaultProfile();
+    store.setProfile(req.userId, profile);
+  }
+
+  res.json({
+    player_profile: profile,
+    economy: store.getEconomy(req.userId),
+    inventory: store.getInventory(req.userId),
+    farm_state: store.getFarmState(req.userId),
+  });
+});
+
+api.get("/player/economy", auth, (req, res) => {
+  res.json({ economy: store.getEconomy(req.userId) });
+});
+
+api.put("/player/economy", auth, (req, res) => {
+  const incoming = req.body && req.body.economy;
+  if (!incoming) return res.status(400).json({ error: "Missing economy" });
+  res.json({ ok: true, economy: store.setEconomy(req.userId, incoming) });
+});
+
+api.post("/player/economy/apply", auth, (req, res) => {
+  const body = req.body || {};
+  const result = store.applyEconomyDelta(
+    req.userId,
+    { pos: body.delta_pos || body.deltaPos || 0, upos: body.delta_upos || body.deltaUpos || 0 },
+    {
+      type: body.type || "adjust",
+      ref: body.ref || "",
+      idempotencyKey: body.idempotency_key || body.idempotencyKey || "",
+    }
+  );
+
+  if (!result.ok) return res.status(409).json({ error: result.error, economy: result.economy });
+  res.json(result);
+});
+
+api.get("/player/inventory", auth, (req, res) => {
+  res.json({ inventory: store.getInventory(req.userId) });
+});
+
+api.put("/player/inventory", auth, (req, res) => {
+  const incoming = req.body && req.body.inventory;
+  if (!incoming) return res.status(400).json({ error: "Missing inventory" });
+  res.json({ ok: true, inventory: store.setInventory(req.userId, incoming) });
+});
+
+api.post("/player/inventory/adjust", auth, (req, res) => {
+  const body = req.body || {};
+  const itemId = body.item_id || body.itemId;
+  const quantityDelta = body.quantity_delta || body.quantityDelta;
+  if (!itemId || !Number.isFinite(Number(quantityDelta))) {
+    return res.status(400).json({ error: "Missing item_id or quantity_delta" });
+  }
+
+  const result = store.adjustInventoryItem(req.userId, itemId, Number(quantityDelta), {
+    type: body.type || "inventory_adjust",
+    ref: body.ref || itemId,
+  });
+
+  if (!result.ok) return res.status(409).json({ error: result.error, inventory: result.inventory });
+  res.json(result);
+});
+
+api.get("/player/farm-state", auth, (req, res) => {
+  res.json({ farm_state: store.getFarmState(req.userId) });
+});
+
+api.put("/player/farm-state", auth, (req, res) => {
+  const incoming = req.body && req.body.farm_state;
+  if (!incoming) return res.status(400).json({ error: "Missing farm_state" });
+  res.json({ ok: true, farm_state: store.setFarmState(req.userId, incoming) });
+});
+
+app.use("/game-api", api);
+app.use("/", api);
+
+const server = http.createServer(app);
+attachRealtimeServer(server, { verifyToken: verifyTokenPayload });
+
+server.listen(PORT, () => {
   console.log(`[ywonderland-stub] listening on :${PORT}`);
 });

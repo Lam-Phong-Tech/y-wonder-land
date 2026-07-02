@@ -22,7 +22,21 @@ namespace YWonderLand.Backend
 
         // DTOs khớp với server stub
         [System.Serializable] private class AuthRequest { public string username; public string password; }
-        [System.Serializable] private class AuthResponse { public string token; public string userId; }
+        [System.Serializable]
+        private class AuthResponse
+        {
+            public string token;
+            public string userId;
+            public string user_id;
+            public string playerId;
+            public string player_id;
+            public string webUserId;
+            public string web_user_id;
+            public string username;
+            public string refCode;
+            public string ref_code;
+            public PlayerProfile player_profile;
+        }
 
         private void Awake()
         {
@@ -42,6 +56,10 @@ namespace YWonderLand.Backend
 
         public async Awaitable<bool> LoginAsync(string username, string password)
         {
+            var webRes = await ApiClient.PostAsync<AuthResponse>("/auth/web-login",
+                new AuthRequest { username = username, password = password });
+            if (ApplyAuth(webRes, username)) return true;
+
             var res = await ApiClient.PostAsync<AuthResponse>("/auth/login",
                 new AuthRequest { username = username, password = password });
             return ApplyAuth(res, username);
@@ -59,15 +77,49 @@ namespace YWonderLand.Backend
             if (!res.ok || res.data == null || string.IsNullOrEmpty(res.data.token))
                 return false;
 
+            string nextUserId = ResolveUserId(res.data);
+            string nextUsername = ResolveUsername(res.data, username);
+            bool identityChanged = !string.Equals(UserId, nextUserId, System.StringComparison.Ordinal)
+                                   || !string.Equals(Username, nextUsername, System.StringComparison.OrdinalIgnoreCase);
+
             Token = res.data.token;
-            UserId = res.data.userId;
-            Username = username;
+            UserId = nextUserId;
+            Username = nextUsername;
             PlayerPrefs.SetString(KEY_TOKEN, Token);
             PlayerPrefs.SetString(KEY_USERID, UserId);
-            PlayerPrefs.SetString(KEY_USERNAME, username);
+            PlayerPrefs.SetString(KEY_USERNAME, Username);
             PlayerPrefs.Save();
+            if (identityChanged)
+                PlayerProfileService.Instance?.ResetRuntimeProfileForAuthChange();
+
+            if (res.data.player_profile != null)
+                PlayerProfileService.Instance?.AcceptServerProfile(res.data.player_profile);
             Debug.Log($"[Auth] Đăng nhập thành công: {username} ({UserId})");
             return true;
+        }
+
+        private static string ResolveUserId(AuthResponse data)
+        {
+            if (data == null) return "";
+            if (!string.IsNullOrEmpty(data.playerId)) return data.playerId;
+            if (!string.IsNullOrEmpty(data.player_id)) return data.player_id;
+            if (!string.IsNullOrEmpty(data.userId)) return data.userId;
+            if (!string.IsNullOrEmpty(data.user_id)) return data.user_id;
+            if (!string.IsNullOrEmpty(data.webUserId)) return data.webUserId;
+            if (!string.IsNullOrEmpty(data.web_user_id)) return data.web_user_id;
+            return "";
+        }
+
+        private static string ResolveUsername(AuthResponse data, string requestedUsername)
+        {
+            if (data != null)
+            {
+                if (!string.IsNullOrEmpty(data.username)) return data.username;
+                if (!string.IsNullOrEmpty(data.refCode)) return data.refCode;
+                if (!string.IsNullOrEmpty(data.ref_code)) return data.ref_code;
+            }
+
+            return requestedUsername;
         }
 
         public void SignOut()
@@ -79,6 +131,7 @@ namespace YWonderLand.Backend
             PlayerPrefs.DeleteKey(KEY_USERID);
             PlayerPrefs.DeleteKey(KEY_USERNAME);
             PlayerPrefs.Save();
+            PlayerProfileService.Instance?.ResetRuntimeProfileForAuthChange();
         }
     }
 }
