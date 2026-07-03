@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-07-03 (Backend LAN realtime test)
+
+### Fixed
+- `AuthService` now stores the backend URL used for the cached auth token and clears cached auth automatically when `BackendConfig.baseUrl` changes, preventing stale tokens from breaking realtime WebSocket handshakes after switching between local/domain/LAN backend servers.
+
+### Changed
+- Pointed `Assets/Resources/BackendConfig.asset` at `http://192.168.1.50:3000` for current LAN testing against the physical case backend.
+- Enabled insecure HTTP connections in Player Settings for the current LAN test build so Unity can call the temporary `http://192.168.1.50:3000` backend.
+
 ## [Unreleased] - 2026-07-03 (Clone asset dependency fix)
 
 ### Fixed

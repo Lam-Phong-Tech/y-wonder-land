@@ -14,6 +14,7 @@ namespace YWonderLand.Backend
         private const string KEY_TOKEN = "YW_Auth_Token";
         private const string KEY_USERID = "YW_Auth_UserId";
         private const string KEY_USERNAME = "YW_Auth_Username";
+        private const string KEY_BACKEND_URL = "YW_Auth_BackendUrl";
 
         public string Token { get; private set; }
         public string UserId { get; private set; }
@@ -45,6 +46,15 @@ namespace YWonderLand.Backend
             Token = PlayerPrefs.GetString(KEY_TOKEN, "");
             UserId = PlayerPrefs.GetString(KEY_USERID, "");
             Username = PlayerPrefs.GetString(KEY_USERNAME, "");
+
+            string cachedBackendUrl = PlayerPrefs.GetString(KEY_BACKEND_URL, "");
+            string activeBackendUrl = GetActiveBackendUrl();
+            if (!string.IsNullOrEmpty(Token) &&
+                !string.Equals(cachedBackendUrl, activeBackendUrl, System.StringComparison.OrdinalIgnoreCase))
+            {
+                Debug.Log("[Auth] Backend URL changed, clearing cached token.");
+                ClearCachedAuth();
+            }
         }
 
         /// <summary>Thử đăng nhập; nếu tài khoản chưa tồn tại thì tự đăng ký. Trả về true nếu có token.</summary>
@@ -88,6 +98,7 @@ namespace YWonderLand.Backend
             PlayerPrefs.SetString(KEY_TOKEN, Token);
             PlayerPrefs.SetString(KEY_USERID, UserId);
             PlayerPrefs.SetString(KEY_USERNAME, Username);
+            PlayerPrefs.SetString(KEY_BACKEND_URL, GetActiveBackendUrl());
             PlayerPrefs.Save();
             if (identityChanged)
                 PlayerProfileService.Instance?.ResetRuntimeProfileForAuthChange();
@@ -127,11 +138,25 @@ namespace YWonderLand.Backend
             Token = "";
             UserId = "";
             Username = "";
+            ClearCachedAuth();
+            PlayerProfileService.Instance?.ResetRuntimeProfileForAuthChange();
+        }
+
+        private static string GetActiveBackendUrl()
+        {
+            return BackendConfig.Active != null ? BackendConfig.Active.baseUrl.TrimEnd('/') : "";
+        }
+
+        private void ClearCachedAuth()
+        {
+            Token = "";
+            UserId = "";
+            Username = "";
             PlayerPrefs.DeleteKey(KEY_TOKEN);
             PlayerPrefs.DeleteKey(KEY_USERID);
             PlayerPrefs.DeleteKey(KEY_USERNAME);
+            PlayerPrefs.DeleteKey(KEY_BACKEND_URL);
             PlayerPrefs.Save();
-            PlayerProfileService.Instance?.ResetRuntimeProfileForAuthChange();
         }
     }
 }
