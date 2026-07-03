@@ -4,6 +4,7 @@
 
 ### Fixed
 - Added missing tracked dependencies under `Assets/Building/Map1.1` that were referenced by farm scene materials/prefabs but ignored by Git, covering tree trunks, rocks, stone paths, garden plots, several building textures, NPC texture dependencies, and the exclamation/stonewalk source FBX assets for fresh clones.
+- Redirected `SeedNPC.prefab` away from an ignored `OptimizedNPCAssets` material and back to the tracked SeedNPC material so fresh clones no longer show SeedNPC with a missing material.
 
 ## [Unreleased] - 2026-07-02 (Realtime chat delivery)
 
