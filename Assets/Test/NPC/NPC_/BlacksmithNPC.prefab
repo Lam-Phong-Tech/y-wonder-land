@@ -11,7 +11,7 @@ PrefabInstance:
     - target: {fileID: -8392912137918744515, guid: dd2b1a69bcf2394449809fb8df167afa, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 961434d6442bb6645850422795037245, type: 2}
+      objectReference: {fileID: 2100000, guid: 8a02fd41691788848b2d76faa75c03a8, type: 2}
     - target: {fileID: -5339900960228322797, guid: dd2b1a69bcf2394449809fb8df167afa, type: 3}
       propertyPath: m_Name
       value: BlacksmithNPC
