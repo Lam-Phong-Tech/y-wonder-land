@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-07-03 (Clone asset dependency fix)
+
+### Fixed
+- Added missing tracked dependencies under `Assets/Building/Map1.1` that were referenced by farm scene materials/prefabs but ignored by Git, covering tree trunks, rocks, stone paths, garden plots, several building textures, NPC texture dependencies, and the exclamation/stonewalk source FBX assets for fresh clones.
+
 ## [Unreleased] - 2026-07-02 (Realtime chat delivery)
 
 ### Fixed
