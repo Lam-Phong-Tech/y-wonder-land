@@ -3,6 +3,7 @@
 ## [Unreleased] - 2026-07-03 (Remote visual and NPC material cleanup)
 
 ### Fixed
+- Realtime state sending now validates the local player source before broadcasting position/yaw. If `PlayerController.Instance` points at an invalid remote clone, it falls back to the active tagged local `Player` object, preventing one Editor from sending another player's remote visual position as its own.
 - Realtime remote clones now restore the real local `PlayerController.Instance` immediately after cloning if any remote prefab script tries to claim it during `Awake()`, preventing one client from broadcasting another player's visual clone as its own movement state.
 - Realtime self-filtering now trusts the server-provided `selfId` from the `welcome` packet in addition to the cached auth user id, reducing stale-token/self-echo cases while testing multiple accounts in Editor.
 - Remote player clones are now instantiated under an inactive staging root, stripped of gameplay scripts/colliders/listeners/root motion, and have all equipment/fishing-line visuals hidden before being activated in the scene. This prevents remote clones from pairing `PlayerInput` devices and from showing every tool at once.

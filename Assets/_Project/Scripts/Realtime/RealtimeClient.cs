@@ -320,7 +320,7 @@ namespace YWonderLand.Realtime
 
         private void SendLocalState()
         {
-            var player = PlayerController.Instance;
+            var player = ResolveLocalPlayerForState();
             if (player == null) return;
 
             Vector3 pos = player.transform.position;
@@ -427,7 +427,7 @@ namespace YWonderLand.Realtime
             }
 
             Quaternion rotation = Quaternion.Euler(0f, yaw, 0f);
-            PlayerController localPlayerBeforeClone = PlayerController.Instance;
+            PlayerController localPlayerBeforeClone = ResolveLocalPlayerForState();
             GameObject stagingRoot = null;
             GameObject go;
             if (prefab != null)
@@ -471,6 +471,45 @@ namespace YWonderLand.Realtime
             if (remote == null) remote = go.AddComponent<RemotePlayerController>();
             remote.Initialize(playerId, name);
             return go;
+        }
+
+        private PlayerController ResolveLocalPlayerForState()
+        {
+            var instance = PlayerController.Instance;
+            if (IsValidLocalStateSource(instance)) return instance;
+
+            var taggedPlayer = GameObject.FindGameObjectWithTag("Player");
+            if (taggedPlayer != null &&
+                taggedPlayer.TryGetComponent(out PlayerController taggedController) &&
+                IsValidLocalStateSource(taggedController))
+            {
+                if (instance != null && instance != taggedController)
+                    Debug.LogWarning($"[Realtime] Ignoring invalid PlayerController.Instance '{instance.name}', using tagged local player '{taggedController.name}'.");
+                return taggedController;
+            }
+
+            foreach (var candidate in FindObjectsByType<PlayerController>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
+            {
+                if (!IsValidLocalStateSource(candidate)) continue;
+                if (instance != null && instance != candidate)
+                    Debug.LogWarning($"[Realtime] Ignoring invalid PlayerController.Instance '{instance.name}', using local player '{candidate.name}'.");
+                return candidate;
+            }
+
+            return null;
+        }
+
+        private static bool IsValidLocalStateSource(PlayerController player)
+        {
+            if (player == null || !player.isActiveAndEnabled) return false;
+            if (player.GetComponent<RemotePlayerController>() != null ||
+                player.GetComponentInParent<RemotePlayerController>() != null)
+                return false;
+            if (player.name.StartsWith("RemotePlayer_", StringComparison.OrdinalIgnoreCase))
+                return false;
+            if (!player.gameObject.scene.IsValid()) return false;
+
+            return player.CompareTag("Player") || player.GetComponent<PlayerInput>() != null;
         }
 
         private static string GetLocalLocomotionAnimation(PlayerController player, float speed)
