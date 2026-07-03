@@ -40,6 +40,21 @@ namespace YWonderLand.Realtime
 
         private readonly ConcurrentQueue<Action> mainThreadQueue = new ConcurrentQueue<Action>();
         private readonly Dictionary<string, RemotePlayerController> remotePlayers = new Dictionary<string, RemotePlayerController>();
+        private static readonly HashSet<string> RemoteToolObjectNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "Axe",
+            "Pickaxe",
+            "BasicPickaxe",
+            "MetalHoe",
+            "Plant",
+            "WaterBucket",
+            "binhnuoc",
+            "fishingrod",
+            "hammer",
+            "oat",
+            "FishingLine",
+            "Bobber",
+        };
 
         public bool IsConnected => socket != null && socket.State == WebSocketState.Open;
 
@@ -407,13 +422,25 @@ namespace YWonderLand.Realtime
                 prefab = gender == "female" ? GameManager.Instance.femalePrefab : GameManager.Instance.malePrefab;
             }
 
-            GameObject go = prefab != null
-                ? Instantiate(prefab, position, Quaternion.Euler(0f, yaw, 0f))
-                : GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            Quaternion rotation = Quaternion.Euler(0f, yaw, 0f);
+            GameObject stagingRoot = null;
+            GameObject go;
+            if (prefab != null)
+            {
+                stagingRoot = new GameObject("RemotePlayer_Staging");
+                stagingRoot.SetActive(false);
+                go = Instantiate(prefab, position, rotation, stagingRoot.transform);
+            }
+            else
+            {
+                go = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                go.transform.SetPositionAndRotation(position, rotation);
+            }
 
             go.name = $"RemotePlayer_{name}_{playerId}";
             go.tag = "Untagged";
 
+            HideRemoteEquipmentVisuals(go);
             DisableRemoteGameplayComponents(go);
 
             foreach (var characterController in go.GetComponentsInChildren<CharacterController>(true)) characterController.enabled = false;
@@ -427,6 +454,13 @@ namespace YWonderLand.Realtime
             foreach (var camera in go.GetComponentsInChildren<Camera>(true)) camera.enabled = false;
             foreach (var listener in go.GetComponentsInChildren<AudioListener>(true)) listener.enabled = false;
 
+            if (stagingRoot != null)
+            {
+                go.transform.SetParent(null, true);
+                go.transform.SetPositionAndRotation(position, rotation);
+                Destroy(stagingRoot);
+            }
+
             var remote = go.GetComponent<RemotePlayerController>();
             if (remote == null) remote = go.AddComponent<RemotePlayerController>();
             remote.Initialize(playerId, name);
@@ -439,6 +473,38 @@ namespace YWonderLand.Realtime
             if (speed <= 0.15f) return string.IsNullOrWhiteSpace(player.animIdle) ? "Idle" : player.animIdle;
             if (player.IsSprintActive()) return string.IsNullOrWhiteSpace(player.animRun) ? "Run" : player.animRun;
             return string.IsNullOrWhiteSpace(player.animWalk) ? "Walk" : player.animWalk;
+        }
+
+        private static void HideRemoteEquipmentVisuals(GameObject remoteRoot)
+        {
+            foreach (var equipment in remoteRoot.GetComponentsInChildren<YWonderLand.Player.EquipmentManager>(true))
+            {
+                SetInactive(equipment.axeModel);
+                SetInactive(equipment.wateringCanModel);
+                SetInactive(equipment.fishingRodModel);
+                SetInactive(equipment.hoeModel);
+                SetInactive(equipment.seedBagModel);
+                SetInactive(equipment.pickaxeModel);
+                SetInactive(equipment.feedModel);
+                SetInactive(equipment.hammerModel);
+            }
+
+            foreach (var fishingLine in remoteRoot.GetComponentsInChildren<YWonderLand.Environment.FishingLineController>(true))
+            {
+                if (fishingLine.line != null) SetInactive(fishingLine.line.gameObject);
+                if (fishingLine.bobber != null) SetInactive(fishingLine.bobber.gameObject);
+            }
+
+            foreach (var child in remoteRoot.GetComponentsInChildren<Transform>(true))
+            {
+                if (child != remoteRoot.transform && RemoteToolObjectNames.Contains(child.name))
+                    SetInactive(child.gameObject);
+            }
+        }
+
+        private static void SetInactive(GameObject go)
+        {
+            if (go != null) go.SetActive(false);
         }
 
         private static void DisableRemoteGameplayComponents(GameObject remoteRoot)

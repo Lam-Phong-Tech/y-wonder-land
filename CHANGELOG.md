@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-07-03 (Remote visual and NPC material cleanup)
+
+### Fixed
+- Remote player clones are now instantiated under an inactive staging root, stripped of gameplay scripts/colliders/listeners/root motion, and have all equipment/fishing-line visuals hidden before being activated in the scene. This prevents remote clones from pairing `PlayerInput` devices and from showing every tool at once.
+- Restored high-confidence NPC-specific materials for `GameBoyNPC` and `GiftGirlNPC`.
+- Removed shared `NPCText.mat` fallback from the remaining city NPC prefabs that did not have confirmed texture mappings, assigning tracked opaque fallback materials instead so fresh clones no longer show blotchy UV-mismatched NPC textures.
+- Replaced missing material GUID references on `KNXNPC`, `NPCWorkshop`, `BankNPC1`, `BlacksmithNPC`, and `FishNPC` with tracked materials to avoid magenta rendering on fresh clones.
+
 ## [Unreleased] - 2026-07-03 (Realtime remote clone stability)
 
 ### Fixed

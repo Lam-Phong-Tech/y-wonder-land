@@ -11,7 +11,7 @@ PrefabInstance:
     - target: {fileID: -2079770505414813096, guid: e3517ca6f4cab414d9b3f3411fe7976f, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 0f611ac949f8550428319b0adcb8be72, type: 2}
+      objectReference: {fileID: 2100000, guid: e556c9985dd1a0a43a66954a5b9a0eb2, type: 2}
     - target: {fileID: 596692508106033181, guid: e3517ca6f4cab414d9b3f3411fe7976f, type: 3}
       propertyPath: m_Name
       value: MiniGardenNPC
