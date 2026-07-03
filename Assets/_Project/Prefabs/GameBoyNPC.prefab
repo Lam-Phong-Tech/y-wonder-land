@@ -11,7 +11,7 @@ PrefabInstance:
     - target: {fileID: -8473767215593981177, guid: 746ddb71677cc614195fe3ceaea580e0, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 9a48ed18d4d2d3f41a3de8d8f727306b, type: 2}
+      objectReference: {fileID: 2100000, guid: 0f611ac949f8550428319b0adcb8be72, type: 2}
     - target: {fileID: 6080675339879464420, guid: 746ddb71677cc614195fe3ceaea580e0, type: 3}
       propertyPath: m_Name
       value: GameBoyNPC

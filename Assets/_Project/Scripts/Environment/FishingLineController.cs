@@ -47,10 +47,28 @@ namespace YWonderLand.Environment
 
         private void Awake()
         {
+            var owner = GetComponent<PlayerController>();
+            if (owner != null && PlayerController.Instance != null && PlayerController.Instance != owner)
+            {
+                enabled = false;
+                return;
+            }
+
+            if (Instance != null && Instance != this)
+            {
+                enabled = false;
+                return;
+            }
+
             Instance = this;
             if (line == null) line = CreateLine();
             if (bobber == null) bobber = CreateBobber();
             HideLine();
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
         }
 
         /// <summary>Ném phao tới 1 điểm cụ thể (vd vị trí vùng nước).</summary>

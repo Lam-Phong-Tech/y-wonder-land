@@ -313,7 +313,7 @@ namespace YWonderLand.Realtime
             lastSamplePosition = pos;
             lastSampleTime = now;
 
-            string animationName = speed > 0.15f ? (player.IsSprintActive() ? "Run" : "Walk") : "Idle";
+            string animationName = GetLocalLocomotionAnimation(player, speed);
             _ = SendJsonAsync(new
             {
                 type = "player_state",
@@ -414,8 +414,8 @@ namespace YWonderLand.Realtime
             go.name = $"RemotePlayer_{name}_{playerId}";
             go.tag = "Untagged";
 
-            foreach (var input in go.GetComponentsInChildren<PlayerInput>(true)) input.enabled = false;
-            foreach (var controller in go.GetComponentsInChildren<PlayerController>(true)) controller.enabled = false;
+            DisableRemoteGameplayComponents(go);
+
             foreach (var characterController in go.GetComponentsInChildren<CharacterController>(true)) characterController.enabled = false;
             foreach (var collider in go.GetComponentsInChildren<Collider>(true)) collider.enabled = false;
             foreach (var rb in go.GetComponentsInChildren<Rigidbody>(true))
@@ -423,11 +423,33 @@ namespace YWonderLand.Realtime
                 rb.isKinematic = true;
                 rb.useGravity = false;
             }
+            foreach (var animator in go.GetComponentsInChildren<Animator>(true)) animator.applyRootMotion = false;
+            foreach (var camera in go.GetComponentsInChildren<Camera>(true)) camera.enabled = false;
+            foreach (var listener in go.GetComponentsInChildren<AudioListener>(true)) listener.enabled = false;
 
             var remote = go.GetComponent<RemotePlayerController>();
             if (remote == null) remote = go.AddComponent<RemotePlayerController>();
             remote.Initialize(playerId, name);
             return go;
+        }
+
+        private static string GetLocalLocomotionAnimation(PlayerController player, float speed)
+        {
+            if (player == null) return "Idle";
+            if (speed <= 0.15f) return string.IsNullOrWhiteSpace(player.animIdle) ? "Idle" : player.animIdle;
+            if (player.IsSprintActive()) return string.IsNullOrWhiteSpace(player.animRun) ? "Run" : player.animRun;
+            return string.IsNullOrWhiteSpace(player.animWalk) ? "Walk" : player.animWalk;
+        }
+
+        private static void DisableRemoteGameplayComponents(GameObject remoteRoot)
+        {
+            foreach (var behaviour in remoteRoot.GetComponentsInChildren<MonoBehaviour>(true))
+            {
+                if (behaviour == null) continue;
+                if (behaviour is RemotePlayerController) continue;
+                if (behaviour is FloatingNameTag) continue;
+                behaviour.enabled = false;
+            }
         }
 
         private void PlayRemoteEmote(JObject data)

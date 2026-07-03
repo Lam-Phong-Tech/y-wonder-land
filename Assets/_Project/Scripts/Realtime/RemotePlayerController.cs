@@ -76,7 +76,12 @@ namespace YWonderLand.Realtime
         {
             if (animator == null || string.IsNullOrWhiteSpace(animationName) || currentAnimation == animationName) return;
 
-            animator.CrossFadeInFixedTime(animationName, 0.15f);
+            const int baseLayer = 0;
+            int stateHash = Animator.StringToHash(animationName);
+            if (animator.layerCount <= baseLayer || !animator.HasState(baseLayer, stateHash))
+                return;
+
+            animator.CrossFadeInFixedTime(stateHash, 0.15f, baseLayer);
             currentAnimation = animationName;
         }
     }

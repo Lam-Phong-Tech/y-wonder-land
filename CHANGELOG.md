@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-07-03 (Realtime remote clone stability)
+
+### Fixed
+- Remote player clones now disable all non-visual gameplay scripts, cameras, listeners, colliders, rigidbodies, and root motion so they cannot steal local player singletons or interfere with input/tools.
+- Realtime locomotion state now sends the active local `PlayerController` animation names instead of hardcoded `Idle/Walk/Run`, and remote animation crossfades now target base layer 0 only when the state exists. This avoids `Invalid Layer Index '-1'` spam from remote players.
+- `EquipmentManager` and `FishingLineController` now ignore duplicate remote character owners during `Awake()` and clear their singleton references on destroy.
+- Redirected the city NPC prefabs `GiftGirlNPC`, `MiniGardenNPC`, `GameBoyNPC`, `YwonderNPC`, `MaidNPC`, `ThuYNPC`, and `HaiLuaNPC` from missing material GUIDs to the tracked `NPCText.mat` fallback so fresh clones do not render those NPCs magenta.
+
 ## [Unreleased] - 2026-07-03 (Backend LAN realtime test)
 
 ### Fixed
