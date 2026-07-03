@@ -20,6 +20,7 @@
 # Docs — not code
 *.md linguist-documentation
 *.fbx filter=lfs diff=lfs merge=lfs -text
+/Assets/_Project/Materials/NPC/Textures/*.png filter=lfs diff=lfs merge=lfs -text
 
 # Pre-exported Unity iOS Xcode projects contain Mach-O/.NET runtime binaries.
 # Treat the export as binary by default; opt text/source files back in below.

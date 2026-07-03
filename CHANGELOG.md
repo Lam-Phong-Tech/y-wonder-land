@@ -5,6 +5,7 @@
 ### Fixed
 - Remote player clones are now instantiated under an inactive staging root, stripped of gameplay scripts/colliders/listeners/root motion, and have all equipment/fishing-line visuals hidden before being activated in the scene. This prevents remote clones from pairing `PlayerInput` devices and from showing every tool at once.
 - Added dedicated tracked `MAT_NPC_*` materials under `Assets/_Project/Materials/NPC` and reassigned the real NPC prefabs so fresh clones no longer fall back to shared `NPCText.mat`, `Brown.mat`, or `Yellow.mat` placeholders.
+- Moved the matching NPC base-color textures into tracked LFS-backed files under `Assets/_Project/Materials/NPC/Textures` so fresh clones receive the texture assets instead of showing white materials.
 - Kept `NPCWorkshop` as the temporary capsule/trigger placeholder; the visible workshop NPC uses `BlacksmithNPC` with its own material.
 
 ## [Unreleased] - 2026-07-03 (Realtime remote clone stability)
