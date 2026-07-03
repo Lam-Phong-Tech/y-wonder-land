@@ -31,6 +31,7 @@ namespace YWonderLand.Realtime
         private CancellationTokenSource socketCts;
         private bool connectInProgress;
         private string currentRoom = "";
+        private string serverSelfId = "";
         private float nextConnectionCheck;
         private float nextReconnectAt;
         private float nextStateSendAt;
@@ -191,6 +192,7 @@ namespace YWonderLand.Realtime
         private async Task DisconnectAsync()
         {
             currentRoom = "";
+            serverSelfId = "";
             ClearRemotePlayers();
 
             try
@@ -358,6 +360,8 @@ namespace YWonderLand.Realtime
                     break;
                 case "welcome":
                     currentRoom = msg.Value<string>("room") ?? currentRoom;
+                    serverSelfId = msg.Value<string>("selfId") ?? serverSelfId;
+                    Debug.Log($"[Realtime] Joined {currentRoom}: selfId={serverSelfId}, authUserId={AuthService.Instance?.UserId}");
                     SyncInitialPlayers(msg["players"] as JArray);
                     break;
                 case "player_joined":
@@ -423,6 +427,7 @@ namespace YWonderLand.Realtime
             }
 
             Quaternion rotation = Quaternion.Euler(0f, yaw, 0f);
+            PlayerController localPlayerBeforeClone = PlayerController.Instance;
             GameObject stagingRoot = null;
             GameObject go;
             if (prefab != null)
@@ -440,6 +445,7 @@ namespace YWonderLand.Realtime
             go.name = $"RemotePlayer_{name}_{playerId}";
             go.tag = "Untagged";
 
+            RestoreLocalPlayerInstance(localPlayerBeforeClone, go);
             HideRemoteEquipmentVisuals(go);
             DisableRemoteGameplayComponents(go);
 
@@ -500,6 +506,34 @@ namespace YWonderLand.Realtime
                 if (child != remoteRoot.transform && RemoteToolObjectNames.Contains(child.name))
                     SetInactive(child.gameObject);
             }
+        }
+
+        private static void RestoreLocalPlayerInstance(PlayerController localPlayer, GameObject remoteRoot)
+        {
+            foreach (var remotePlayer in remoteRoot.GetComponentsInChildren<PlayerController>(true))
+            {
+                remotePlayer.enabled = false;
+            }
+
+            if (localPlayer == null || PlayerController.Instance == localPlayer) return;
+
+            var property = typeof(PlayerController).GetProperty(
+                "Instance",
+                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            var setter = property?.GetSetMethod(true);
+            if (setter != null)
+            {
+                setter.Invoke(null, new object[] { localPlayer });
+            }
+            else
+            {
+                var backingField = typeof(PlayerController).GetField(
+                    "<Instance>k__BackingField",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+                backingField?.SetValue(null, localPlayer);
+            }
+
+            Debug.LogWarning("[Realtime] Remote clone attempted to replace PlayerController.Instance; restored local player instance.");
         }
 
         private static void SetInactive(GameObject go)
@@ -572,6 +606,8 @@ namespace YWonderLand.Realtime
 
         private bool IsSelf(string playerId)
         {
+            if (string.IsNullOrEmpty(playerId)) return false;
+            if (!string.IsNullOrEmpty(serverSelfId) && playerId == serverSelfId) return true;
             return AuthService.Instance != null && playerId == AuthService.Instance.UserId;
         }
 
