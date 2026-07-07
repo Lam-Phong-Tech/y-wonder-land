@@ -5,6 +5,19 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-07-07] — Front-cell build workflow step 3
+
+### Changed
+- Chọn item trong build list giờ tự đưa ghost preview lên đúng `BuildSurfaceCell` đang có viền trắng trước mặt nhân vật và ghim tại đó.
+- Trong workflow mới, người chơi không cần tap màn hình để ghim vị trí nữa; chỉ cần bấm OK để xác nhận hoặc X để hủy.
+- `GhostPlacementController.ConfirmPlacement()` trả về kết quả thật để UI chỉ thoát placement khi đặt thành công; thiếu vật liệu hoặc ô bị chiếm sẽ giữ ghost lại và báo lỗi.
+
+### Test cần làm
+- Build/test Editor/APK: đứng trước một ô có viền trắng, bấm búa, chọn Ruộng/Đường đá/Chuồng; ghost phải hiện ngay trên ô viền trắng.
+- Bấm OK phải đặt công trình vào đúng ô đó; bấm X phải hủy ghost và quay lại build list.
+- Thử ô đã bị chiếm hoặc thiếu vật liệu: ghost đỏ/báo lỗi, không được đặt sai.
+
+---
 ## [2026-07-07] — Front-cell build workflow step 2
 
 ### Changed

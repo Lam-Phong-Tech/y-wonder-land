@@ -224,6 +224,25 @@ public class GhostPlacementController : MonoBehaviour
             FacePlayerTowards(currentSnapPos);
     }
 
+    public bool SnapToCell(YWonderLand.Environment.BuildSurfaceCell cell, bool pinned = true)
+    {
+        if (!isActive || ghostObject == null || cell == null)
+        {
+            InvalidatePlacement();
+            return false;
+        }
+
+        currentCell = cell;
+        currentSnapPos = cell.SurfaceCenter;
+        currentGroundY = currentSnapPos.y;
+        ApplyGhostTransform();
+
+        currentPlacementValid = !cell.IsOccupied;
+        UpdateGhostColor(currentPlacementValid);
+        IsPinned = pinned;
+        return true;
+    }
+
     private void InvalidatePlacement()
     {
         currentPlacementValid = false;
@@ -482,11 +501,11 @@ public class GhostPlacementController : MonoBehaviour
 
     // ── Placement ──
 
-    public void ConfirmPlacement()
+    public bool ConfirmPlacement()
     {
-        if (ghostObject == null) return;
+        if (ghostObject == null) return false;
         // Chỉ đặt khi đang trỏ vào ô đất hợp lệ còn TRỐNG (snap theo cube, không theo lưới ảo).
-        if (!currentPlacementValid || currentCell == null || currentCell.IsOccupied) return;
+        if (!currentPlacementValid || currentCell == null || currentCell.IsOccupied) return false;
 
         // Chi phí VẬT LIỆU: đủ → trừ; thiếu → KHÔNG đặt + báo. (0/"" = miễn phí, vd ô ruộng.)
         if (currentItemPrice > 0 && !string.IsNullOrEmpty(currentMaterialId))
@@ -495,7 +514,7 @@ public class GhostPlacementController : MonoBehaviour
             if (inv == null || inv.GetItemQuantity(currentMaterialId) < currentItemPrice)
             {
                 YWonderLand.Environment.ScreenToast.Show($"Không đủ vật liệu! Cần {currentItemPrice} {MatLabel(currentMaterialId)} để xây.");
-                return;
+                return false;
             }
             inv.RemoveItem(currentMaterialId, currentItemPrice);
         }
@@ -527,6 +546,7 @@ public class GhostPlacementController : MonoBehaviour
         }
 
         OnBuildingPlaced?.Invoke(currentItemName, currentItemPrice);
+        return true;
         // Giữ ghost để đặt tiếp nhiều cái.
     }
 

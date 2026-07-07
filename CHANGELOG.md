@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-07-07 (Front-cell build workflow step 3)
+
+### Changed
+- Selecting a build item now snaps and pins the ghost preview directly onto the currently highlighted front `BuildSurfaceCell`.
+- The new character-facing build flow no longer requires tapping the ground to pin placement; after selecting an item, the player only confirms with OK or cancels with X.
+- `GhostPlacementController.ConfirmPlacement()` now returns success/failure so the UI only exits placement after a real successful build.
+
+### Needs Test
+- In Editor/APK, stand in front of a highlighted cell, open build, select Farm Plot/Stone Path/Pen, and confirm the ghost appears on the highlighted cell immediately.
+- Confirm OK places on that cell and X cancels cleanly.
+- Test occupied cell or missing materials: placement must fail without closing the ghost incorrectly.
+
 ## [Unreleased] - 2026-07-07 (Front-cell build workflow step 2)
 
 ### Changed

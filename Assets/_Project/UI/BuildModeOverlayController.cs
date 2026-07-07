@@ -23,6 +23,7 @@ public class BuildModeOverlayController : MonoBehaviour
     [Header("Character-Facing Build Flow")]
     [SerializeField] private bool useTopDownBuildCamera = false;
     [SerializeField] private bool hideGameHudWhileOpen = false;
+    [SerializeField] private bool useFrontCellGhostPlacement = true;
 
     // State
     private enum BuildState { Hidden, Browsing, Placing }
@@ -178,6 +179,9 @@ public class BuildModeOverlayController : MonoBehaviour
                 {
                     UpdatePlacementControlsPosition(ghost.GhostPosition);
                 }
+
+                if (useFrontCellGhostPlacement)
+                    return;
 
                 if (TryGetPointerDownPosition(out Vector2 pointerPos) && !IsPointerOverUI(pointerPos))
                 {
@@ -595,21 +599,66 @@ public class BuildModeOverlayController : MonoBehaviour
         if (index < 0 || index >= items.Count) return;
         var item = items[index];
 
-        // Activate ghost placement immediately
-        if (GhostPlacementController.Instance != null)
+        var ghost = GhostPlacementController.Instance;
+        if (ghost == null)
         {
-            Vector2Int size = ParseSize(item.size);
-            GhostPlacementController.Instance.Activate(item.name, size, item.materialId, item.materialAmount);
+            ShowStatusMessage("Build ghost ch\u01b0a s\u1eb5n s\u00e0ng.", false);
+            ClearSelectedItem();
+            return;
         }
 
-        // Show placement controls (confirm/rotate/cancel)
+        Vector2Int size = ParseSize(item.size);
+        ghost.Activate(item.name, size, item.materialId, item.materialAmount);
+
         state = BuildState.Placing;
-        HidePlacementControls(); // Wait for user to pin before showing
         HideContextMenu();
         HideInfoTooltip();
 
-        ShowStatusMessage($"Ch\u1ea1m \u0111\u1ec3 ghim {item.name}", true);
+        if (useFrontCellGhostPlacement)
+        {
+            if (!TryPinGhostToFrontCell())
+            {
+                ghost.Deactivate();
+                state = BuildState.Browsing;
+                HidePlacementControls();
+                ClearSelectedItem();
+                ShowStatusMessage("Kh\u00f4ng c\u00f3 \u00f4 \u0111\u1ea5t h\u1ee3p l\u1ec7 tr\u01b0\u1edbc m\u1eb7t nh\u00e2n v\u1eadt.", false);
+                return;
+            }
+
+            ShowPlacementControls();
+            UpdatePlacementControlsPosition(ghost.GhostPosition);
+            ShowStatusMessage(
+                ghost.IsPlacementValid
+                    ? $"B\u1ea5m OK \u0111\u1ec3 x\u00e2y {item.name}, ho\u1eb7c X \u0111\u1ec3 h\u1ee7y."
+                    : "\u00d4 tr\u01b0\u1edbc m\u1eb7t \u0111ang b\u1ecb chi\u1ebfm, kh\u00f4ng th\u1ec3 x\u00e2y.",
+                ghost.IsPlacementValid);
+        }
+        else
+        {
+            HidePlacementControls(); // Wait for user to pin before showing
+            ShowStatusMessage($"Ch\u1ea1m \u0111\u1ec3 ghim {item.name}", true);
+        }
+
         Debug.Log($"[BuildMode] Item selected & ghost activated: {item.name}");
+    }
+
+    private bool TryPinGhostToFrontCell()
+    {
+        var ghost = GhostPlacementController.Instance;
+        var selector = YWonderLand.Environment.FrontBuildCellSelector.Instance;
+        var cell = selector != null ? selector.CurrentCell : null;
+        return ghost != null && cell != null && ghost.SnapToCell(cell, true);
+    }
+
+    private void ClearSelectedItem()
+    {
+        if (selectedCardElement != null)
+        {
+            selectedCardElement.RemoveFromClassList("build-item-selected");
+            selectedCardElement = null;
+        }
+        selectedItemIndex = -1;
     }
 
     private Vector2Int ParseSize(string sizeStr)
@@ -654,9 +703,21 @@ public class BuildModeOverlayController : MonoBehaviour
             return;
         }
 
-        ghost.ConfirmPlacement();
-        // Unpin so the next one follows pointer immediately.
-        ghost.SetPinned(false);
+        if (!ghost.ConfirmPlacement())
+            return;
+
+        if (useFrontCellGhostPlacement)
+        {
+            ghost.Deactivate();
+            state = BuildState.Browsing;
+            ClearSelectedItem();
+        }
+        else
+        {
+            // Unpin so the next one follows pointer immediately.
+            ghost.SetPinned(false);
+        }
+
         HidePlacementControls();
     }
 
@@ -668,13 +729,7 @@ public class BuildModeOverlayController : MonoBehaviour
         state = BuildState.Browsing;
         HidePlacementControls();
 
-        // Deselect item
-        if (selectedCardElement != null)
-        {
-            selectedCardElement.RemoveFromClassList("build-item-selected");
-            selectedCardElement = null;
-        }
-        selectedItemIndex = -1;
+        ClearSelectedItem();
     }
 
     // ── Contextual Menu (for placed buildings) ──
