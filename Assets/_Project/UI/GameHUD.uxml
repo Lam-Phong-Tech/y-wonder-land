@@ -161,13 +161,6 @@
             </ui:VisualElement>
 
             <ui:VisualElement name="Joystick" class="joystick-outer">
-                <!-- Direction arrows -->
-                <ui:VisualElement class="joystick-arrow-container">
-                    <ui:Label text="▲" class="joystick-arrow joystick-arrow-up" />
-                    <ui:Label text="▼" class="joystick-arrow joystick-arrow-down" />
-                    <ui:Label text="◄" class="joystick-arrow joystick-arrow-left" />
-                    <ui:Label text="►" class="joystick-arrow joystick-arrow-right" />
-                </ui:VisualElement>
                 <!-- Inner stick -->
                 <ui:VisualElement class="joystick-inner" />
             </ui:VisualElement>

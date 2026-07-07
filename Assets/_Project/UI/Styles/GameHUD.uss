@@ -188,9 +188,6 @@
     background-image: url('project://database/Assets/_Project/UI/Sprites/Female_avatar2.jpg');
     -unity-background-scale-mode: scale-and-crop;
 }
-.joystick-arrow-container { position: absolute; width: 200px; height: 200px; align-items: center; justify-content: center; }
-.joystick-arrow { position: absolute; font-size: 17px; color: rgba(255, 255, 255, 0.4); }
-.joystick-arrow-up { top: 10px; } .joystick-arrow-down { bottom: 10px; } .joystick-arrow-left { left: 12px; } .joystick-arrow-right { right: 12px; }
 .joystick-inner { width: 88px; height: 88px; border-radius: 44px; background-color: rgba(255, 255, 255, 0.55); border-width: 1px; border-color: rgba(255, 255, 255, 0.45); }
 
 /* ── 6. ACTION BUTTONS ── */

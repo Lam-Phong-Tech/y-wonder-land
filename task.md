@@ -47,6 +47,8 @@
 - `[ ]` Thêm/kiểm tra chức năng thu phóng cả map/camera và UI theo nhu cầu khách.
 - `[x]` Bỏ chức năng kéo joystick mạnh/giữ lâu thì tự chạy nhanh; giữ lại nút chạy tự động để người chơi chủ động bật/tắt auto-run. Anh đã test APK và xác nhận tốt.
 - `[~]` Auto-run cancel mới: khi auto-run đang bật mà người chơi bắt đầu điều khiển joystick, `GameHUDController` sẽ tắt auto-run ngay và cập nhật lại trạng thái nút Sprint. Chờ anh build APK/EXE test.
+- `[~]` Joystick mobile: đã bỏ các mũi tên text trang trí trong joystick để tránh lỗi mũi tên trái render thành ô vuông/missing glyph trên thiết bị. Chờ anh build APK/EXE test lại.
+- `[~]` Nhân vật đứng yên: đã bỏ nhánh tự xoay về yaw camera khi thả joystick; nhân vật sẽ giữ hướng di chuyển cuối cùng. Chờ anh build APK/EXE test kéo joystick xuống rồi thả tay.
 - `[x]` Sửa bug joystick mobile: đã tách touch khỏi action `Look`, chặn pointer joystick không đi vào vùng xoay camera, và đảo lại trục dọc touch-look để vuốt lên = camera ngẩng lên, vuốt xuống = camera cúi xuống. Anh đã test APK: joystick/camera đỡ hơn, trục dọc đúng cảm giác hơn, logic di chuyển giữ đồng bộ giữa các map.
 
 #### G. Tiết kiệm / Version 2

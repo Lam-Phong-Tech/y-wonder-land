@@ -5,6 +5,17 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-07-07] — Joystick không còn ô vuông, nhân vật giữ hướng khi thả tay
+
+### Fixed
+- Bỏ các ký tự mũi tên text trang trí trong joystick mobile để tránh lỗi font/device render mũi tên trái thành ô vuông.
+- Khi thả joystick, nhân vật không còn tự xoay về yaw camera; hướng đứng yên sẽ giữ theo hướng di chuyển cuối cùng.
+
+### Test cần làm
+- Build APK/EXE: joystick trái không còn hiện ô vuông nhỏ ở mép trái vòng tròn.
+- Kéo joystick xuống để nhân vật quay mặt về phía màn hình rồi thả tay; nhân vật phải giữ hướng đó, không tự quay lưng lại.
+
+---
 ## [2026-07-07] — Auto-run tắt khi kéo joystick
 
 ### Changed

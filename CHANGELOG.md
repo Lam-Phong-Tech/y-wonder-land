@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-07-07 (Joystick glyph and idle facing)
+
+### Fixed
+- Removed decorative text arrow glyphs from the mobile joystick, avoiding the left arrow rendering as a square/missing glyph on some devices.
+- Player no longer auto-rotates back to camera yaw after joystick release; idle now keeps the last facing direction from movement input.
+
+### Needs Test
+- In APK/EXE, confirm the joystick no longer shows a small square on the left side of the circle.
+- Pull the joystick backward so the character faces the screen, then release; the character should stay facing that direction instead of turning back away from the camera.
+
 ## [Unreleased] - 2026-07-07 (Auto-run joystick cancel)
 
 ### Changed

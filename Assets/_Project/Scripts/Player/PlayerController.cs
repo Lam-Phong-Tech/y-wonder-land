@@ -266,17 +266,6 @@ public class PlayerController : MonoBehaviour
             controller.Move(moveDirectionNormalized * (currentSpeed * inputMagnitude) * Time.deltaTime);
         }
 
-        // Không có input di chuyển: mới quay follow camera (tránh cảm giác bị "kéo lùi" khi đang lái joystick).
-        if (!IsFreeLook() && !hasMoveInput && mainCameraTransform != null)
-        {
-            ThirdPersonCamera tpc = mainCameraTransform.GetComponent<ThirdPersonCamera>();
-            if (tpc != null)
-            {
-                Quaternion targetRotation = Quaternion.Euler(0, tpc.Yaw, 0);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * 1.4f * Time.deltaTime);
-            }
-        }
-
         // 4. Handle Jumping — nhảy trên cạn HOẶC bật lên khỏi mặt nước để trèo lên bờ.
         if (jumpPressed && (isGrounded || isSwimming))
         {
