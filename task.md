@@ -34,7 +34,7 @@
 - `[ ]` Thêm dấu chấm đỏ ở các nút cần bấm để ngầm chỉ dẫn người chơi nhận quà/khám phá/chức năng mới; hiện game chưa có hệ thống red-dot guidance này.
 
 #### E. Tâm tương tác, build/farm thao tác ô đất
-- `[ ]` Đổi tâm tương tác trước mũi chân nhân vật thành ô vuông kích thước 1 ô đất: ray/tia vô hình từ hướng nhân vật chọn ô phía trước, ô được chọn phát sáng viền.
+- `[~]` Đổi tâm tương tác trước mũi chân nhân vật thành ô vuông kích thước 1 ô đất: bước 1 đã thêm `FrontBuildCellSelector` tự chọn `BuildSurfaceCell` ngay phía trước theo hướng mặt nhân vật và vẽ viền trắng runtime. Chưa nối nút búa/build list/ghost cố định; cần test Editor/APK.
 - `[ ]` Khi đặt khung vào ô đất thì hiện biểu tượng làm nông; bấm biểu tượng mở ngay 3 lựa chọn: cuốc đất, lát đá, xây chuồng.
 - `[ ]` Menu 3 lựa chọn này không được chuyển sang trang khác như hiện tại; phải là thao tác tại chỗ, icon/chữ to hơn khoảng 3 lần.
 

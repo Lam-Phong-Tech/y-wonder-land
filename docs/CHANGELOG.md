@@ -5,6 +5,17 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-07-07] — Front-cell build workflow step 1
+
+### Added
+- Thêm `FrontBuildCellSelector` runtime: tự chọn `BuildSurfaceCell` ngay phía trước mũi chân nhân vật theo hướng mặt nhân vật và vẽ viền trắng trên mặt ô.
+- Đây là bước đầu của workflow build mới: không đổi camera build, không dùng ghost di chuyển tự do; các bước nút búa/build list/ghost cố định sẽ nối sau.
+
+### Test cần làm
+- Test Editor/APK: khi nhân vật xoay/di chuyển, ô ngay trước chân đổi viền trắng đúng hướng mặt nhân vật.
+- Kiểm tra viền không hiện khi không có `BuildSurfaceCell` hợp lệ trước mặt và không che UI/camera mobile.
+
+---
 ## [2026-07-07] — Hotfix joystick mobile không xoay camera
 
 ### Fixed

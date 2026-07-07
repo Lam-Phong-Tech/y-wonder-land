@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-07-07 (Front-cell build workflow step 1)
+
+### Added
+- Added `FrontBuildCellSelector`, a runtime selector that finds the `BuildSurfaceCell` directly in front of the player based on character facing and draws a white outline on that cell.
+- This is step 1 of the new build workflow: no build camera switch and no freely movable ghost yet; hammer button/build list/fixed ghost integration comes next.
+
+### Needs Test
+- In Editor/APK, rotate and move the player and confirm the white outline follows the cell in front of the character's feet.
+- Confirm the outline hides when there is no valid `BuildSurfaceCell` in front.
+
 ## [Unreleased] - 2026-07-07 (Mobile joystick camera isolation)
 
 ### Fixed

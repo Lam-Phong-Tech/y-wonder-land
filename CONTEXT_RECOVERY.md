@@ -2,6 +2,8 @@
 
 > Update 2026-07-07: mobile joystick/camera hotfix. `InputSystem_Actions.inputactions` now uses `<Mouse>/delta` for Player `Look` instead of `<Pointer>/delta`, so mobile touch drags are not read as camera look globally. `GameHUDController` also isolates joystick pointer capture from `LookZone`. `ThirdPersonCamera` touch pitch was inverted after phone feedback so swipe up looks up and swipe down looks down, without changing PC mouse look. Joystick-driven auto sprint/auto-run was removed; the HUD Sprint button is now the explicit auto-run toggle. Needs phone test: left joystick must not rotate camera/map and must keep normal movement speed at the edge; right-half drag must still rotate camera with the expected vertical feel; Sprint button toggles auto-run.
 
+> Update 2026-07-07: new front-cell build workflow step 1. `FrontBuildCellSelector` now selects the `BuildSurfaceCell` directly in front of the player's feet based on character facing and draws a white outline. Next steps are moving the hammer button to the right hand area, opening the old build list without top-down camera, and showing a fixed ghost preview at the selected front cell.
+
 *Dự án: BaChuKhuRung3D (Game nông trại 3D YWONDERLAND)*
 *Ngày cập nhật: 06/07/2026*
 
