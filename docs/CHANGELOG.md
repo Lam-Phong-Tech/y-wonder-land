@@ -5,6 +5,18 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-07-07] — Front-cell build workflow step 2
+
+### Changed
+- Chuyển nút búa/build khỏi cụm túi đồ góc phải-trên xuống cụm tay phải, nằm trên nút Jump.
+- `BuildModeOverlayController` mặc định không kích hoạt camera top-down và không ẩn GameHUD khi mở build list, để người chơi giữ góc nhìn nhân vật và vẫn điều khiển được nhân vật/camera.
+- Giữ lại hai cờ Inspector `useTopDownBuildCamera` và `hideGameHudWhileOpen` nếu cần bật lại flow build cũ để debug.
+
+### Test cần làm
+- Build/test Editor/APK: bấm nút búa bên phải phải mở build list cũ nhưng camera không đổi sang top-down.
+- Khi build list đang mở, joystick và vùng xoay camera vẫn hoạt động; chưa test/hoàn thiện ghost cố định tại ô trước mặt.
+
+---
 ## [2026-07-07] — Front-cell build workflow step 1
 
 ### Added

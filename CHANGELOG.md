@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-07-07 (Front-cell build workflow step 2)
+
+### Changed
+- Moved the hammer/build HUD button from the top-right inventory cluster to the right-hand action cluster above Jump.
+- Build mode now opens its existing item list without activating the top-down build camera or hiding the GameHUD by default, so the player keeps the normal character-facing view.
+- Added Inspector flags to `BuildModeOverlayController` for the legacy behavior: `useTopDownBuildCamera` and `hideGameHudWhileOpen`.
+
+### Needs Test
+- In Editor/APK, press the right-side hammer button and confirm the build list opens without switching camera.
+- While the build list is open, confirm joystick movement and right-side camera look still work. Fixed ghost placement at the highlighted front cell is still the next step.
+
 ## [Unreleased] - 2026-07-07 (Front-cell build workflow step 1)
 
 ### Added

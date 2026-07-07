@@ -85,7 +85,7 @@
 .settings-btn:active { scale: 0.95; }
 .settings-btn-icon { font-size: 30px; color: var(--color-text-white); width: 33px; height: 33px; }
 
-/* Row 2 góc phải-trên: Build (trái) + Bag — xếp ngang */
+/* Row 2 góc phải-trên: Bag */
 .hud-bag-row { flex-direction: row; align-items: center; margin-top: 10px; }
 .bag-btn-shadow { align-self: center; }
 .bag-btn {
@@ -237,7 +237,7 @@
 .hud-bottom-right { position: absolute; bottom: 90px; right: 24px; align-items: flex-end; }
 
 /* Nút búa (Build) bên phải, nằm trên nút Jump — tròn cho khớp Jump */
-.build-btn-shadow { margin-right: 10px; align-self: center; }
+.build-btn-shadow { margin-right: 12px; margin-bottom: 12px; align-self: center; }
 .build-btn {
     width: 72px; height: 72px; border-radius: 50%;
     background-color: rgba(58, 71, 102, 0.5); border-width: var(--border-medium); border-color: rgba(255, 255, 255, 0.2);

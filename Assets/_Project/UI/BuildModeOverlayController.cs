@@ -20,6 +20,10 @@ public class BuildModeOverlayController : MonoBehaviour
     [Header("Delete/Move Raycast")]
     [SerializeField] private LayerMask buildingRayMask = ~0;
 
+    [Header("Character-Facing Build Flow")]
+    [SerializeField] private bool useTopDownBuildCamera = false;
+    [SerializeField] private bool hideGameHudWhileOpen = false;
+
     // State
     private enum BuildState { Hidden, Browsing, Placing }
     private BuildState state = BuildState.Hidden;
@@ -392,8 +396,8 @@ public class BuildModeOverlayController : MonoBehaviour
             BuildGridManager.Instance.SetFollowTarget(playerTransform);
         }
 
-        // Activate Top-Down camera
-        if (BuildCameraController.Instance != null)
+        // Optional legacy top-down camera. The mobile flow now builds from the character-facing view.
+        if (useTopDownBuildCamera && BuildCameraController.Instance != null)
             BuildCameraController.Instance.Activate();
 
         // Lưới hiển thị: ĐÃ TẮT theo yêu cầu khách (giữ logic snap ô, chỉ bỏ phần vẽ lưới).
@@ -405,8 +409,9 @@ public class BuildModeOverlayController : MonoBehaviour
         GhostPlacementController.OnBuildingPlaced -= OnBuildingPlacedHandler;
         GhostPlacementController.OnBuildingPlaced += OnBuildingPlacedHandler;
 
-        // Hide GameHUD to prevent UI click overlaps
-        SetGameHUDVisible(false);
+        // Optional legacy behavior. Keep the HUD visible so the player can move and aim at the front cell.
+        if (hideGameHudWhileOpen)
+            SetGameHUDVisible(false);
 
         // Shift Chat up to avoid overlapping build items
         if (ChatPanelController.Instance != null)
@@ -428,10 +433,10 @@ public class BuildModeOverlayController : MonoBehaviour
         // Unsubscribe from building placed event
         GhostPlacementController.OnBuildingPlaced -= OnBuildingPlacedHandler;
 
-        // Deactivate ghost and camera
+        // Deactivate ghost and optional legacy camera
         if (GhostPlacementController.Instance != null)
             GhostPlacementController.Instance.Deactivate();
-        if (BuildCameraController.Instance != null)
+        if (useTopDownBuildCamera && BuildCameraController.Instance != null)
             BuildCameraController.Instance.Deactivate();
 
         // Stop grid following + hide
@@ -441,8 +446,9 @@ public class BuildModeOverlayController : MonoBehaviour
         if (gridRenderer != null)
             gridRenderer.Hide();
 
-        // Show GameHUD again
-        SetGameHUDVisible(true);
+        // Restore GameHUD only if this controller hid it on open.
+        if (hideGameHudWhileOpen)
+            SetGameHUDVisible(true);
 
         // Reset Chat position
         if (ChatPanelController.Instance != null)
