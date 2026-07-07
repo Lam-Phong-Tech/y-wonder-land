@@ -257,15 +257,15 @@
 .jump-btn:active { scale: 0.95; }
 .jump-btn-icon { width: 58px; height: 58px; }
 
-.crosshair { position: absolute; left: 0; top: 0; right: 0; bottom: 0; align-items: center; justify-content: center; }
+.crosshair { display: none; position: absolute; left: 0; top: 0; right: 0; bottom: 0; align-items: center; justify-content: center; }
 .crosshair-dot { width: 8px; height: 8px; border-radius: 4px; background-color: rgba(255, 255, 255, 0.9); border-width: 1px; border-color: rgba(0, 0, 0, 0.5); }
 
 /* ── 9. INTERACTION MENU (Nút nổi Mobile & PC) ── */
 .interaction-container {
     position: absolute;
-    top: 55%; /* Nằm dưới crosshair */
+    top: 55%; /* Floating action prompt sau khi tap/click vật thể */
     left: 50%;
-    translate: -50% 0; /* Co theo nội dung + căn GIỮA dưới tâm ngắm (KHÔNG full-width để khỏi chặn cả dải ngang) */
+    translate: -50% 0; /* Co theo nội dung + căn giữa màn hình, không full-width để khỏi chặn cả dải ngang */
     align-items: center;
     flex-direction: row; /* Xếp ngang các nút */
 }

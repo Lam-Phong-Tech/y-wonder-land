@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-07-07 (Direct tap world interaction)
+
+### Changed
+- World interactions now use direct tap/click targeting instead of continuous center-crosshair scanning.
+- Trees, rocks, water/fishing spots, shops, pens, and farm/build cells only show action UI after the player taps the actual nearby object.
+- Direct tap range is capped through `directTapMaxRange` at the requested 1-2m interaction band, reducing accidental long-distance prompts.
+- The HUD crosshair dot is hidden because the new interaction flow no longer uses center-screen targeting.
+
+### Needs Test
+- In APK/EXE, stand near a tree, rock, water source, pen/shop, or farm object and tap the object directly; the action UI should appear.
+- Press the shown UI action and confirm the previous behavior still works.
+- Tap empty ground or stand outside roughly 2m and confirm no world action prompt appears.
+
 ## [Unreleased] - 2026-07-07 (Front-cell build workflow step 3)
 
 ### Changed

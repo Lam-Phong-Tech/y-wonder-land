@@ -5,6 +5,20 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-07-07] — Direct tap world interaction
+
+### Changed
+- Chuyển tương tác thế giới sang kiểu tap/click trực tiếp lên vật thể trong tầm gần thay vì quét theo tâm màn hình liên tục.
+- Cây, đá, hồ nước/câu cá, shop, chuồng/ô build chỉ hiện UI action sau khi người chơi bấm vào đúng vật thể đủ gần; tap xa hoặc tap trống sẽ không mở action.
+- Giới hạn flow tap trực tiếp trong khoảng 1-2m qua `directTapMaxRange` để khớp yêu cầu khách và tránh bấm vật thể từ xa.
+- Ẩn chấm `Crosshair` trên HUD vì flow mới không còn dùng tâm tương tác.
+
+### Test cần làm
+- Build/test APK/EXE: đứng gần cây, đá, hồ nước, chuồng/cửa hàng rồi tap đúng vật thể; UI action phải hiện.
+- Bấm action trên UI phải thao tác như trước; nếu đi xa khỏi vật thể thì action không được thực hiện.
+- Tap nền trống hoặc đứng ngoài tầm khoảng 2m phải không hiện prompt tương tác.
+
+---
 ## [2026-07-07] — Front-cell build workflow step 3
 
 ### Changed
