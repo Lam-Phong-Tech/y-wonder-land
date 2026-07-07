@@ -11,11 +11,14 @@
 - Chuyển tương tác thế giới sang kiểu tap/click trực tiếp lên vật thể trong tầm gần thay vì quét theo tâm màn hình liên tục.
 - Cây, đá, hồ nước/câu cá, shop, chuồng/ô build chỉ hiện UI action sau khi người chơi bấm vào đúng vật thể đủ gần; tap xa hoặc tap trống sẽ không mở action.
 - Tầm tap trực tiếp hiện dùng `directTapMaxRange = 3.5m` để dễ chọn vật thể hơn trên mobile.
+- Direct tap nay gom raycast thường với spherecast assist nhỏ trong world-space để tap hơi lệch hoặc collider nhỏ/lệch vẫn dễ bắt hơn.
+- Kiểm tra tầm direct-tap nay đo theo object/collider gốc đã resolve, không chỉ đo đúng điểm `hit.point`, giảm lỗi cùng một vật thể nhưng góc này hiện/góc khác không hiện.
 - UI action của flow direct-tap tự ẩn khi nhân vật đi ra khỏi tầm vật thể đang chọn.
 - Ẩn chấm `Crosshair` trên HUD vì flow mới không còn dùng tâm tương tác.
 
 ### Test cần làm
 - Build/test APK/EXE: đứng gần cây, đá, hồ nước, chuồng/cửa hàng rồi tap đúng vật thể; UI action phải hiện.
+- Test cùng một vật thể từ nhiều góc camera/nhân vật khác nhau; prompt không nên chỉ hiện ở một góc may mắn.
 - Bấm action trên UI phải thao tác như trước; nếu đi xa khỏi vật thể thì action không được thực hiện.
 - Tap nền trống hoặc đứng ngoài tầm khoảng 3.5m phải không hiện prompt tương tác.
 - Sau khi prompt hiện, đi xa khỏi vật thể đó thì UI action phải tự ẩn.

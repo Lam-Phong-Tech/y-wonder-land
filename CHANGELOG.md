@@ -6,11 +6,14 @@
 - World interactions now use direct tap/click targeting instead of continuous center-crosshair scanning.
 - Trees, rocks, water/fishing spots, shops, pens, and farm/build cells only show action UI after the player taps the actual nearby object.
 - Direct tap range now uses `directTapMaxRange = 3.5m` so nearby objects are easier to select on mobile.
+- Direct tap now combines raycast hits with a small world-space spherecast assist, so slight tap offsets and small/misaligned colliders are less likely to miss.
+- Direct-tap range checks now measure against the resolved interactive object/root collider instead of only the exact `hit.point`, reducing angle-dependent misses on large objects.
 - Direct-tap prompts auto-hide when the player walks out of range from the selected target.
 - The HUD crosshair dot is hidden because the new interaction flow no longer uses center-screen targeting.
 
 ### Needs Test
 - In APK/EXE, stand near a tree, rock, water source, pen/shop, or farm object and tap the object directly; the action UI should appear.
+- Test the same object from several camera/player angles; the prompt should no longer appear only from one lucky side.
 - Press the shown UI action and confirm the previous behavior still works.
 - Tap empty ground or stand outside roughly 3.5m and confirm no world action prompt appears.
 - After a prompt appears, walk away from that object and confirm the action UI hides automatically.

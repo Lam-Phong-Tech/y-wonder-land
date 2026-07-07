@@ -51,6 +51,8 @@ namespace YWonderLand.Environment
         [SerializeField] private bool useDirectTapInteraction = true;
         [Tooltip("Tam click truc tiep len cay, da, nuoc, chuong. Khach yeu cau khoang 3.5m.")]
         [SerializeField, Range(1f, 3.5f)] private float directTapMaxRange = 3.5f;
+        [Tooltip("Ban kinh ho tro tap truc tiep trong world-space de bu collider nho/le chuan tren mobile.")]
+        [SerializeField, Range(0f, 1.25f)] private float directTapAssistWorldRadius = 0.45f;
 
         [Tooltip("Layer mask cho FarmTile raycasting")]
         [SerializeField] private LayerMask farmTileLayer = ~0; // Default: all layers
@@ -472,6 +474,11 @@ namespace YWonderLand.Environment
         private bool IsInDirectTapRangeAtPoint(Vector3 hitPoint, float configuredRange, float fallbackRange) =>
             HorizontalDistanceToPlayer(hitPoint) <= GetDirectTapRange(configuredRange, fallbackRange);
 
+        private bool IsDirectTapObjectInRange(GameObject root, Vector3 fallbackWorldPos, float configuredRange, float fallbackRange)
+        {
+            return HorizontalDistanceToClosestColliderPoint(root, fallbackWorldPos) <= GetDirectTapRange(configuredRange, fallbackRange);
+        }
+
         private bool IsInInteractRange(Vector3 worldPos) =>
             IsInInteractRange(worldPos, interactRange);
 
@@ -484,8 +491,9 @@ namespace YWonderLand.Environment
             float best = HorizontalDistance(playerPos, fallbackWorldPos);
             if (root == null) return best;
 
-            var colliders = root.GetComponentsInChildren<Collider>();
-            foreach (var col in colliders)
+            colliderDistanceBuffer.Clear();
+            root.GetComponentsInChildren(false, colliderDistanceBuffer);
+            foreach (var col in colliderDistanceBuffer)
             {
                 if (col == null || !col.enabled) continue;
                 float dist = HorizontalDistance(playerPos, SafeClosestPoint(col, playerPos));
@@ -524,18 +532,8 @@ namespace YWonderLand.Environment
 
         private float GetResourceDistanceToPlayer(HarvestableResource resource)
         {
-            Vector3 playerPos = PlayerController.Instance != null ? PlayerController.Instance.transform.position : transform.position;
             if (resource == null) return float.PositiveInfinity;
-
-            Collider resourceCollider = resource.GetComponent<Collider>();
-            if (resourceCollider == null)
-                resourceCollider = resource.GetComponentInChildren<Collider>();
-
-            Vector3 targetPoint = resource.transform.position;
-            if (resourceCollider != null)
-                targetPoint = resourceCollider.ClosestPoint(playerPos);
-
-            return HorizontalDistance(playerPos, targetPoint);
+            return HorizontalDistanceToClosestColliderPoint(resource.gameObject, resource.transform.position);
         }
 
         private BuildSurfaceCell ResolveBuildSurfaceCellFromHit(RaycastHit hit)
@@ -578,7 +576,7 @@ namespace YWonderLand.Environment
             return cell.Occupant.GetComponentInChildren<FarmTile>();
         }
 
-        private bool TryResolveFarmTileFromAim(Ray ray, out FarmTile tile)
+        private bool TryResolveFarmTileFromAim(Ray ray, out FarmTile tile, bool directTap = false)
         {
             tile = null;
             int hitCount = Physics.SphereCastNonAlloc(ray, FarmTileAimFallbackRadius, tileAimHitResults, 100f, InteractionLayerMask, QueryTriggerInteraction.Collide);
@@ -588,7 +586,7 @@ namespace YWonderLand.Environment
             for (int i = 0; i < hitCount; i++)
             {
                 var candidate = ResolveFarmTileFromHit(tileAimHitResults[i]);
-                if (candidate == null || !IsTileInRange(candidate)) continue;
+                if (candidate == null || !IsTileInRange(candidate, directTap)) continue;
                 tile = candidate;
                 return true;
             }
@@ -741,8 +739,7 @@ namespace YWonderLand.Environment
         {
             if (!directTap) return IsFishingSpotInRange(spot, hitPoint);
             if (spot == null) return false;
-            Vector3 playerPos = PlayerController.Instance != null ? PlayerController.Instance.transform.position : transform.position;
-            return HorizontalDistance(playerPos, hitPoint) <= GetDirectTapRange(GetFishingRange(spot), fishingInteractRange);
+            return IsDirectTapObjectInRange(spot.gameObject, hitPoint, GetFishingRange(spot), fishingInteractRange);
         }
 
         private bool CanPriorityScanPassThrough(RaycastHit hit)
@@ -1152,21 +1149,63 @@ namespace YWonderLand.Environment
             return HorizontalDistanceToClosestColliderPoint(target, target.transform.position) <= GetDirectTapRange(interactRange, interactRange);
         }
 
-        private RaycastHit[] hoverHitResults = new RaycastHit[30];
+        private RaycastHit[] hoverHitResults = new RaycastHit[64];
+        private RaycastHit[] directTapAssistHitResults = new RaycastHit[48];
         private RaycastHit[] tileAimHitResults = new RaycastHit[32];
+        private readonly List<Collider> colliderDistanceBuffer = new List<Collider>(16);
         private GameObject currentHoverObject = null;
         private FarmAnimal.AnimalState lastAnimalState;
         private bool lastAnimalProductReady;
         private string lastActionSignature = "";
         private List<InteractionAction> currentActions = new List<InteractionAction>();
 
+        private int CollectInteractionHits(Ray ray, bool directTap)
+        {
+            int hitCount = Physics.RaycastNonAlloc(ray, hoverHitResults, 100f, InteractionLayerMask, QueryTriggerInteraction.Collide);
+
+            if (directTap && directTapAssistWorldRadius > 0f)
+            {
+                int assistCount = Physics.SphereCastNonAlloc(
+                    ray,
+                    directTapAssistWorldRadius,
+                    directTapAssistHitResults,
+                    100f,
+                    InteractionLayerMask,
+                    QueryTriggerInteraction.Collide);
+
+                for (int i = 0; i < assistCount && hitCount < hoverHitResults.Length; i++)
+                {
+                    var assistHit = directTapAssistHitResults[i];
+                    if (assistHit.collider == null) continue;
+
+                    bool duplicate = false;
+                    for (int j = 0; j < hitCount; j++)
+                    {
+                        if (hoverHitResults[j].collider == assistHit.collider)
+                        {
+                            duplicate = true;
+                            break;
+                        }
+                    }
+
+                    if (!duplicate)
+                        hoverHitResults[hitCount++] = assistHit;
+                }
+            }
+
+            System.Array.Sort(hoverHitResults, 0, hitCount, Comparer<RaycastHit>.Create((a, b) => a.distance.CompareTo(b.distance)));
+            return hitCount;
+        }
+
         private void HandleHover(Vector2 screenPos, bool directTap = false)
         {
             Ray ray = mainCamera.ScreenPointToRay(screenPos);
-            int hitCount = Physics.RaycastNonAlloc(ray, hoverHitResults, 100f, InteractionLayerMask, QueryTriggerInteraction.Collide);
-            System.Array.Sort(hoverHitResults, 0, hitCount, Comparer<RaycastHit>.Create((a, b) => a.distance.CompareTo(b.distance)));
+            int hitCount = CollectInteractionHits(ray, directTap);
             Vector3 playerPos = PlayerController.Instance != null ? PlayerController.Instance.transform.position : transform.position;
             float solidPassthroughLimit = float.PositiveInfinity;
+            float passthroughTolerance = directTap
+                ? Mathf.Max(SolidHitPassthroughTolerance, directTapAssistWorldRadius + 1.25f)
+                : SolidHitPassthroughTolerance;
 
             List<InteractionAction> foundActions = new List<InteractionAction>();
             GameObject foundObj = null;
@@ -1218,7 +1257,10 @@ namespace YWonderLand.Environment
                     float resourceRange = directTap
                         ? GetDirectTapRange(resource.interactionRange, resourceInteractRange)
                         : ClampedRange(resource.interactionRange, resourceInteractRange);
-                    if (HorizontalDistance(playerPos, hit.point) > resourceRange)
+                    float resourceDistance = directTap
+                        ? GetResourceDistanceToPlayer(resource)
+                        : HorizontalDistance(playerPos, hit.point);
+                    if (resourceDistance > resourceRange)
                         continue;
 
                     // Chỉ hiện nút khi TÂM NGẮM chạm bề mặt cây/đá trong tầm với (resource.interactionRange).
@@ -1237,7 +1279,7 @@ namespace YWonderLand.Environment
                 else if (hit.collider.TryGetComponent<MerchantNPC>(out var merchant) || (hit.collider.transform.parent != null && hit.collider.transform.parent.TryGetComponent<MerchantNPC>(out merchant)))
                 {
                     if (directTap
-                        ? !IsInDirectTapRangeAtPoint(hit.point, merchantInteractRange, merchantInteractRange)
+                        ? !IsDirectTapObjectInRange(merchant.gameObject, hit.point, merchantInteractRange, merchantInteractRange)
                         : !IsInInteractRangeAtPoint(hit.point, merchantInteractRange))
                         continue;
 
@@ -1317,12 +1359,12 @@ namespace YWonderLand.Environment
                 {
                     // Cho phép nhìn xuyên thêm một đoạn rất ngắn sau mặt đất/collider mỏng
                     // để bắt các object sát nền mà vẫn không quét xuyên quá sâu.
-                    solidPassthroughLimit = Mathf.Min(solidPassthroughLimit, hit.distance + SolidHitPassthroughTolerance);
+                    solidPassthroughLimit = Mathf.Min(solidPassthroughLimit, hit.distance + passthroughTolerance);
                     continue;
                 }
             }
 
-            if (foundActions.Count == 0 && TryResolveFarmTileFromAim(ray, out var aimTile))
+            if (foundActions.Count == 0 && TryResolveFarmTileFromAim(ray, out var aimTile, directTap))
             {
                 foundObj = aimTile.gameObject;
                 AddTileAction(aimTile, foundActions);
