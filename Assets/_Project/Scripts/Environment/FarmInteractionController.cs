@@ -49,8 +49,8 @@ namespace YWonderLand.Environment
         [SerializeField] private float fishingInteractRange = DefaultFishingInteractRange;
         [Tooltip("Flow moi: tap/click truc tiep len vat the de hien UI tuong tac, khong quet theo tam man hinh.")]
         [SerializeField] private bool useDirectTapInteraction = true;
-        [Tooltip("Tam toi da khi tap/click truc tiep len cay, da, nuoc, chuong. Khach yeu cau khoang 1-2m.")]
-        [SerializeField, Range(1f, 2f)] private float directTapMaxRange = 2f;
+        [Tooltip("Tam click truc tiep len cay, da, nuoc, chuong. Khach yeu cau khoang 3.5m.")]
+        [SerializeField, Range(1f, 3.5f)] private float directTapMaxRange = 3.5f;
 
         [Tooltip("Layer mask cho FarmTile raycasting")]
         [SerializeField] private LayerMask farmTileLayer = ~0; // Default: all layers
@@ -466,8 +466,7 @@ namespace YWonderLand.Environment
 
         private float GetDirectTapRange(float configuredRange, float fallbackRange)
         {
-            float range = configuredRange > 0f ? configuredRange : NormalizeRange(fallbackRange);
-            return Mathf.Clamp(range, 1f, Mathf.Max(1f, directTapMaxRange));
+            return Mathf.Max(1f, directTapMaxRange);
         }
 
         private bool IsInDirectTapRangeAtPoint(Vector3 hitPoint, float configuredRange, float fallbackRange) =>
@@ -514,6 +513,13 @@ namespace YWonderLand.Environment
         {
             if (resource == null) return NormalizeRange(resourceInteractRange);
             return ClampedRange(resource.interactionRange, resourceInteractRange) + ResourceExecuteRangePadding;
+        }
+
+        private float GetResourceActionRange(HarvestableResource resource)
+        {
+            return useDirectTapInteraction
+                ? GetDirectTapRange(resource != null ? resource.interactionRange : resourceInteractRange, resourceInteractRange)
+                : GetResourceExecuteRange(resource);
         }
 
         private float GetResourceDistanceToPlayer(HarvestableResource resource)
@@ -824,7 +830,7 @@ namespace YWonderLand.Environment
                 actionName = "Xem chuồng",
                 onClick = () =>
                 {
-                    if (AnimalInteractionPopupController.Instance != null)
+                    if (IsEnclosureInRange(viewEnclosure, useDirectTapInteraction) && AnimalInteractionPopupController.Instance != null)
                         AnimalInteractionPopupController.Instance.ShowEnclosure(viewEnclosure);
                 }
             });
@@ -832,17 +838,17 @@ namespace YWonderLand.Environment
             if (PenEnclosure.AvailableCount(enclosure) > 0)
             {
                 var addEnclosure = new List<BuildSurfaceCell>(enclosure);
-                actions.Add(new InteractionAction { keyName = "E", actionName = "Thả thú", onClick = () => OpenEnclosurePicker(addEnclosure) });
+                actions.Add(new InteractionAction { keyName = "E", actionName = "Thả thú", onClick = () => { if (IsEnclosureInRange(addEnclosure, useDirectTapInteraction)) OpenEnclosurePicker(addEnclosure); } });
             }
 
             var demolishEnclosure = new List<BuildSurfaceCell>(enclosure);
-            actions.Add(new InteractionAction { keyName = "G", actionName = "Hủy chuồng", onClick = () => RequestDemolishEnclosure(demolishEnclosure) });
+            actions.Add(new InteractionAction { keyName = "G", actionName = "Hủy chuồng", onClick = () => { if (IsEnclosureInRange(demolishEnclosure, useDirectTapInteraction)) RequestDemolishEnclosure(demolishEnclosure); } });
         }
 
         private bool TryShowAnimalEnclosurePopup(FarmAnimal animal)
         {
             if (!TryGetAnimalEnclosure(animal, out var enclosure)) return false;
-            if (!IsEnclosureInRange(enclosure)) return false;
+            if (!IsEnclosureInRange(enclosure, useDirectTapInteraction)) return false;
 
             if (AnimalInteractionPopupController.Instance != null)
                 AnimalInteractionPopupController.Instance.ShowEnclosure(enclosure);
@@ -929,6 +935,8 @@ namespace YWonderLand.Environment
             bool pointerPressed = pointer.press.wasPressedThisFrame;
             bool pointerOverUI = UnityEngine.EventSystems.EventSystem.current != null &&
                 UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
+
+            ClearDirectTapPromptIfOutOfRange();
 
             if (!timedActionActive && TryInvokeCurrentHotkeyAction())
                 return;
@@ -1088,6 +1096,62 @@ namespace YWonderLand.Environment
             ClearWorldInteractionState();
         }
 
+        private void ClearDirectTapPromptIfOutOfRange()
+        {
+            if (!useDirectTapInteraction || currentHoverObject == null || currentActions == null || currentActions.Count == 0)
+                return;
+
+            if (!IsDirectTapTargetStillInRange(currentHoverObject))
+                ClearWorldInteractionState();
+        }
+
+        private bool IsDirectTapTargetStillInRange(GameObject target)
+        {
+            if (target == null) return false;
+
+            var resource = target.GetComponentInParent<HarvestableResource>();
+            if (resource != null)
+                return GetResourceDistanceToPlayer(resource) <= GetDirectTapRange(resource.interactionRange, resourceInteractRange);
+
+            var animal = target.GetComponentInParent<FarmAnimal>();
+            if (animal != null)
+                return IsAnimalInRange(animal, true);
+
+            var waterSource = target.GetComponentInParent<WaterSource>();
+            if (waterSource != null)
+                return IsWaterSourceInRange(waterSource, true);
+
+            var fishingSpot = target.GetComponentInParent<FishingSpot>();
+            if (fishingSpot != null)
+                return HorizontalDistanceToClosestColliderPoint(fishingSpot.gameObject, fishingSpot.transform.position) <= GetDirectTapRange(GetFishingRange(fishingSpot), fishingInteractRange);
+
+            var merchant = target.GetComponentInParent<MerchantNPC>();
+            if (merchant != null)
+                return HorizontalDistanceToClosestColliderPoint(merchant.gameObject, merchant.transform.position) <= GetDirectTapRange(merchantInteractRange, merchantInteractRange);
+
+            var penSpawner = target.GetComponentInParent<AnimalPenSpawner>();
+            if (penSpawner != null)
+                return IsPenSpawnerInRange(penSpawner, true);
+
+            var tile = target.GetComponentInParent<FarmTile>();
+            if (tile != null)
+                return IsTileInRange(tile, true);
+
+            var cell = target.GetComponentInParent<BuildSurfaceCell>();
+            if (cell != null)
+            {
+                if (cell.HasFence)
+                {
+                    var enclosure = PenEnclosure.FindPen(cell);
+                    return IsEnclosureInRange(enclosure, true);
+                }
+
+                return HorizontalDistanceToClosestColliderPoint(cell.gameObject, cell.SurfaceCenter) <= GetDirectTapRange(tileInteractRange, DefaultTileInteractRange);
+            }
+
+            return HorizontalDistanceToClosestColliderPoint(target, target.transform.position) <= GetDirectTapRange(interactRange, interactRange);
+        }
+
         private RaycastHit[] hoverHitResults = new RaycastHit[30];
         private RaycastHit[] tileAimHitResults = new RaycastHit[32];
         private GameObject currentHoverObject = null;
@@ -1152,7 +1216,7 @@ namespace YWonderLand.Environment
                 else if (hit.collider.TryGetComponent<HarvestableResource>(out var resource) || (hit.collider.transform.parent != null && hit.collider.transform.parent.TryGetComponent<HarvestableResource>(out resource)))
                 {
                     float resourceRange = directTap
-                        ? Mathf.Min(GetResourceExecuteRange(resource), Mathf.Max(1f, directTapMaxRange))
+                        ? GetDirectTapRange(resource.interactionRange, resourceInteractRange)
                         : ClampedRange(resource.interactionRange, resourceInteractRange);
                     if (HorizontalDistance(playerPos, hit.point) > resourceRange)
                         continue;
@@ -1187,7 +1251,7 @@ namespace YWonderLand.Environment
                     if (penS.HasSpace && IsPenSpawnerInRange(penS, directTap))
                     {
                         foundObj = penS.gameObject;
-                        foundActions.Add(new InteractionAction { keyName = "Click", actionName = "Thả thú", onClick = () => { if (IsPenSpawnerInRange(penS)) OpenPenAnimalPicker(penS); } });
+                        foundActions.Add(new InteractionAction { keyName = "Click", actionName = "Thả thú", onClick = () => { if (IsPenSpawnerInRange(penS, useDirectTapInteraction)) OpenPenAnimalPicker(penS); } });
                     }
                     break;
                 }
@@ -1344,7 +1408,7 @@ namespace YWonderLand.Environment
                 return;
             }
 
-            if (!IsFishingSpotInRange(spot, targetPoint))
+            if (!IsFishingSpotInRange(spot, targetPoint, useDirectTapInteraction))
             {
                 ScreenToast.Show("Đứng gần bờ hơn để câu cá nhé!");
                 return;
@@ -1575,7 +1639,7 @@ namespace YWonderLand.Environment
                 return;
             }
 
-            if (GetResourceDistanceToPlayer(resource) > GetResourceExecuteRange(resource))
+            if (GetResourceDistanceToPlayer(resource) > GetResourceActionRange(resource))
                 return;
 
             StartResourceTimedAction(resource);
@@ -1624,7 +1688,7 @@ namespace YWonderLand.Environment
             if (resource == null || !resource.isHarvestable) { _buttonHeldResource = null; return; }
 
             PlayerController player = PlayerController.Instance;
-            if (GetResourceDistanceToPlayer(resource) > GetResourceExecuteRange(resource)) return; // quá xa -> khựng
+            if (GetResourceDistanceToPlayer(resource) > GetResourceActionRange(resource)) return; // quá xa -> khựng
 
             _chopAnimTimer -= Time.deltaTime;
             if (_chopAnimTimer <= 0f && player != null)
@@ -1650,7 +1714,7 @@ namespace YWonderLand.Environment
         private void PerformTileAction(FarmTile tile)
         {
             if (PlayerController.Instance == null) return; // chống NullReferenceException khi player chưa spawn / đang teleport
-            if (!IsTileInRange(tile))
+            if (!IsTileInRange(tile, useDirectTapInteraction))
             {
                 Debug.LogWarning($"[FarmInteraction] Tile action blocked by range: tile={(tile != null ? tile.name : "null")}, range={GetTileInteractRange():0.00}");
                 return;
