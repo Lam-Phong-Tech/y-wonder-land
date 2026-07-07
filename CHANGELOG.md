@@ -1,5 +1,59 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-07-07 (Mobile joystick camera isolation)
+
+### Fixed
+- Changed the Player `Look` binding from `<Pointer>/delta` to `<Mouse>/delta` so mobile touch/joystick drags are no longer read as full-screen camera look input.
+- Tightened `GameHUDController` joystick/look-zone pointer handling: joystick captures its own pointer, stops propagation on pointer down/move/up/capture-out, and `LookZone` rejects joystick-owned pointers.
+- Inverted the mobile touch-look vertical axis in `ThirdPersonCamera` so swipe up looks up and swipe down looks down, without changing PC mouse look.
+- Removed joystick-driven auto sprint/auto-run; the HUD Sprint button now remains the explicit auto-run toggle.
+
+### Needs Test
+- Build/test on a phone: dragging the left joystick must not rotate the camera/map, while dragging the right half of the screen still rotates the camera.
+- Confirm right-half touch vertical look now feels correct, and PC mouse/gamepad right-stick camera look still work.
+- Confirm dragging/holding the joystick at the edge keeps normal movement speed, and only the Sprint button toggles auto-run.
+
+## [Unreleased] - 2026-07-06 (Backend storage adapter and daily limits)
+
+### Added
+- Added `docs/WEB_GAME_BACKEND_JOURNEY.md` to clarify the Web account -> Game account -> backend gameplay journey, development loops, expected results, and verification steps.
+- Added a backend storage facade in `server/store.js` with a `JsonStore` class for local/dev data and `STORE_MODE=json|postgres` selection.
+- Added `server/postgresStore.js` as a PostgreSQL adapter scaffold so API routes can keep a stable store interface before production DB queries are implemented.
+- Added a local dev backend dashboard at `/admin` for inspecting players, profiles, economy, inventory, daily limits, farm state, and transactions.
+- Added `player_daily_limits` to `server/schema.sql` for server-side fishing/mining daily counters.
+- Added `daily_limits` to `/player/bootstrap`, plus `GET /player/daily-limits` and `POST /player/daily-limits/consume`.
+- Added `server/realtimeSmokeTest.js` and `npm run test:realtime` to test auth + WebSocket using provisioned/mock accounts while web auth is unavailable.
+
+### Changed
+- Updated `task.md`, `server/README.md`, `docs/API_CONTRACTS.md`, `docs/ARCHITECTURE.md`, `docs/TECHNICAL_DESIGN.md`, `docs/DB_SCHEMA.md`, and context recovery docs to state that backend is currently an MVP API/dashboard/WebSocket while Unity shop/economy/inventory are still local, with online account flow + realtime as the next proof loop under the new scope.
+- Recorded the later wallet direction: money topped up from the web for in-game use must go through web wallet APIs called by the game server; the exact target currency (`Point`, `UPoint`, or a new wallet) and spend/debit/reserve endpoint still need confirmation for the post-MVP money phase.
+- Recorded the backend interview decisions: web login uses email/phone/password; players must have an account before playing; 1 account maps to 1 game character; locked/soft-deleted web accounts must block game access; multiple devices on one account must share server state.
+- Converted the boss's rough requirement into a roadmap: web/provisioned login, public-island realtime for `city`/`mine` excluding farm, server-authoritative Point/inventory/shop, daily/farm/animal server-time sync, secured admin dashboard with audit logs, and PostgreSQL/HTTPS/WebSocket/backup infrastructure.
+- Updated the wallet direction around `Point`: Point is both game currency and web top-up currency, while `UPoint`, the final Point ledger owner, and spend/debit/reserve endpoints still need confirmation.
+- Recorded the new MVP scope: the next MVP does not need deposit/withdrawal; prioritize online account flow and realtime customer demo first. Web wallet/top-up/spend is deferred to a later phase.
+- Updated Unity realtime connection scope: `RealtimeClient` now keeps the WebSocket alive during gameplay for server-wide chat, but only joins `city`/`mine` rooms for remote player state, so farm stays private.
+- Game-server JWT/WebSocket now carries `username/displayName`, so chat-only clients outside a room still broadcast with the correct account name instead of the `Player` fallback.
+- `economy/apply` now checks idempotency before balance validation and returns duplicate results without applying the delta again.
+- `inventory/adjust` now accepts `idempotency_key` and avoids duplicate item adjustments on retry.
+- Daily-limit consumption records transactions with `idempotency_key` so retrying the same mining/fishing consume action does not spend extra turns.
+
+### Verified
+- `node --check` passed for `server/store.js`, `server/postgresStore.js`, and `server/index.js`.
+- `node --check` passed for `server/adminDashboard.js`.
+- Node smoke test with a temporary JSON data file confirmed mining blocks after 10 daily consumes and economy/inventory idempotency does not double-apply.
+- Express smoke test on a temporary localhost server confirmed `/player/bootstrap` includes `daily_limits` and the 11th mining consume returns HTTP 409.
+- Admin dashboard smoke test confirmed `/admin` serves HTML, creates a demo user, edits economy JSON, and deletes that user from a temporary JSON store.
+- Local realtime smoke test with `WEB_AUTH_MODE=mock` passed: `DemoRealtime01`, `DemoRealtime02`, and `DemoRealtime03` logged in through `/auth/web-login`; two clients joined `city`, a third no-room client still received/sent global chat, player state worked, and `farm` join was rejected with `ROOM_NOT_SHARED`.
+
+## [Unreleased] - 2026-07-05 (Mining daily limit and Gem Shop sell catalog)
+
+### Fixed
+- Gem Shop sell mode now lists every whitelisted gemstone even when the player owns 0, shows the owned quantity on each card/detail, and disables selling for items with no stock.
+- Mining now enforces the customer rule of 10 rock-mining attempts per real-world day using PlayerPrefs date keys. The limit resets daily, blocks new mining when exhausted, and successful rock harvest toasts show the remaining daily mining turns.
+
+### Notes
+- Fishing already had the 10-free-turns-per-real-day limit through `FishingOverlayController` (`dailyTurns`, `FishingLastDate`, `FishingFreeTurns`), so no fishing code change was needed in this pass.
+
 ## [Unreleased] - 2026-07-03 (Remote visual and NPC material cleanup)
 
 ### Fixed

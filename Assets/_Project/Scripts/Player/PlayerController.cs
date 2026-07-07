@@ -60,7 +60,21 @@ public class PlayerController : MonoBehaviour
 
     void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            enabled = false;
+            return;
+        }
+
         Instance = this;
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            Instance = null;
+        }
     }
 
     void Start()
@@ -337,13 +351,9 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     public void SetStickAutoSprint(bool enabled)
     {
-        isStickAutoSprintLatched = enableStickAutoSprint && enabled;
-        autoRunForward = isStickAutoSprintLatched;
-        if (!isStickAutoSprintLatched)
-        {
-            stickSprintDirectionLocked = false;
-            stickSprintLockDirection = Vector3.zero;
-        }
+        isStickAutoSprintLatched = false;
+        stickSprintDirectionLocked = false;
+        stickSprintLockDirection = Vector3.zero;
     }
 
     /// <summary>Nút Sprint trên HUD bấm 1 lần = bật/tắt chạy nhanh. Trả về trạng thái mới (true = đang chạy nhanh).</summary>

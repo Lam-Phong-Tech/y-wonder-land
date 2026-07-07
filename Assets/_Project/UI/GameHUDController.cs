@@ -92,6 +92,7 @@ public class GameHUDController : MonoBehaviour
     [Header("Mobile Feel")]
     [SerializeField, Range(0f, 0.4f)] private float joystickDeadZone = 0.18f;
     [SerializeField, Range(1f, 3f)] private float joystickResponseExponent = 1.6f;
+    private bool enableJoystickAutoSprint = false;
     [SerializeField, Range(0.1f, 1f)] private float joystickSprintHoldSeconds = 0.35f;
     [SerializeField, Range(0f, 1f)] private float joystickSprintForwardMin = 0.55f;
     private float joystickRawMagnitude = 0f;
@@ -113,6 +114,8 @@ public class GameHUDController : MonoBehaviour
     private VisualElement cancelButtonFrame;
     private bool fishingCancelMode;
     private float fishingCancelProgress01;
+    private float nextPlayerInfoRefreshTime;
+    private const float PlayerInfoRefreshInterval = 0.25f;
 
 
 
@@ -176,6 +179,7 @@ public class GameHUDController : MonoBehaviour
             SetPlayerEXP(_expMgr.ExpPercent);
             _expMgr.OnEXPChanged += OnExpChanged;
         }
+        RefreshPlayerInfoFromSession(true);
 
         // Nhạc nền (tự tạo AudioManager; thiếu file Resources/Audio/bgm thì im, không lỗi).
         YWonderLand.Managers.AudioManager.Instance?.PlayMusic("bgm");
@@ -410,14 +414,14 @@ public class GameHUDController : MonoBehaviour
 
         if (btnSprint != null)
         {
-            // Mặc định mobile TPS: GIỮ nút để sprint. Auto-run giữ riêng, không là cơ chế chính.
+            // Tap/click = bật/tắt auto-run; giữ nút không còn sprint thủ công.
             btnSprint.RegisterCallback<PointerDownEvent>(evt =>
             {
                 if (PlayerController.Instance == null) return;
                 sprintPressStartTime = Time.unscaledTime;
                 suppressNextSprintClick = false;
                 btnSprint.CapturePointer(evt.pointerId);
-                PlayerController.Instance.SetSprintUI(true);
+                PlayerController.Instance.SetSprintUI(false);
                 RefreshSprintVisual();
             }, TrickleDown.TrickleDown);
 
@@ -439,7 +443,6 @@ public class GameHUDController : MonoBehaviour
                 RefreshSprintVisual();
             });
 
-            // BẤM NHẢ (click/tap) = bật/tắt auto-run.
             // Cho phép người chơi đứng yên rồi bấm sprint để nhân vật tự chạy tới.
             btnSprint.RegisterCallback<ClickEvent>(evt =>
             {
@@ -580,18 +583,48 @@ public class GameHUDController : MonoBehaviour
     // ── Test: Press L = Level Up, E = Event ──
     private IEnumerator SyncPlayerName()
     {
-        // Retry every 0.5s until GameManager has a valid playerName
-        for (int i = 0; i < 20; i++) // Max 10 seconds
+        for (int i = 0; i < 20; i++)
         {
-            if (GameManager.Instance != null && !string.IsNullOrEmpty(GameManager.Instance.playerName))
-            {
-                int lvl = _expMgr != null ? _expMgr.Level : 1;
-                SetPlayerInfo(GameManager.Instance.playerName, lvl);
-                Debug.Log($"[GameHUD] Synced player name: {GameManager.Instance.playerName}");
+            RefreshPlayerInfoFromSession(true);
+            if (!string.IsNullOrEmpty(ResolveCurrentPlayerName()))
                 yield break;
-            }
             yield return new WaitForSeconds(0.5f);
         }
+    }
+
+    private void RefreshPlayerInfoFromSession(bool force = false)
+    {
+        if (!force && Time.unscaledTime < nextPlayerInfoRefreshTime) return;
+        nextPlayerInfoRefreshTime = Time.unscaledTime + PlayerInfoRefreshInterval;
+
+        string resolvedName = ResolveCurrentPlayerName();
+        if (string.IsNullOrEmpty(resolvedName)) return;
+
+        int level = _expMgr != null ? _expMgr.Level : 1;
+        string expectedLevel = $"Level: {level}";
+        bool changed = force
+                       || (playerName != null && playerName.text != resolvedName)
+                       || (playerLevel != null && playerLevel.text != expectedLevel);
+        if (!changed) return;
+
+        SetPlayerInfo(resolvedName, level);
+        Debug.Log($"[GameHUD] Synced player info: {resolvedName}");
+    }
+
+    private static string ResolveCurrentPlayerName()
+    {
+        if (GameManager.Instance != null && !string.IsNullOrWhiteSpace(GameManager.Instance.playerName))
+            return GameManager.Instance.playerName.Trim();
+
+        var auth = YWonderLand.Backend.AuthService.Instance;
+        if (auth != null && !string.IsNullOrWhiteSpace(auth.Username))
+            return auth.Username.Trim();
+
+        var profile = YWonderLand.Backend.PlayerProfileService.Instance?.Profile;
+        if (profile != null && !string.IsNullOrWhiteSpace(profile.name))
+            return profile.name.Trim();
+
+        return "";
     }
 
     private void Awake()
@@ -608,6 +641,7 @@ public class GameHUDController : MonoBehaviour
         // Hiện/ẩn nút X (hủy hoạt ảnh) theo trạng thái bận — chạy cả khi không có bàn phím (mobile).
         UpdateCancelButton();
         UpdateJoystickSprintState();
+        RefreshPlayerInfoFromSession();
 
         // Chặn các phím tắt nếu người chơi đang gõ phím trong khung chat
         if (ChatPanelController.Instance != null && ChatPanelController.Instance.IsTyping())
@@ -694,15 +728,25 @@ public class GameHUDController : MonoBehaviour
     private void SetupJoystick()
     {
         if (joystickOuter == null) return;
+        joystickOuter.pickingMode = PickingMode.Position;
         joystickOuter.RegisterCallback<PointerDownEvent>(OnJoystickDown);
         joystickOuter.RegisterCallback<PointerMoveEvent>(OnJoystickMove);
         joystickOuter.RegisterCallback<PointerUpEvent>(OnJoystickUp);
         // Mất quyền bắt con trỏ (kéo ra ngoài / nhả ngoài vùng) -> reset cho an toàn
-        joystickOuter.RegisterCallback<PointerCaptureOutEvent>(evt => ResetJoystick());
+        joystickOuter.RegisterCallback<PointerCaptureOutEvent>(OnJoystickCaptureOut);
     }
 
     private void OnJoystickDown(PointerDownEvent evt)
     {
+        if (joystickPointerId != -1 && joystickPointerId != evt.pointerId)
+        {
+            evt.StopPropagation();
+            return;
+        }
+
+        if (lookPointerId == evt.pointerId)
+            ReleaseLookPointer(evt.pointerId);
+
         joystickPointerId = evt.pointerId;
         joystickOuter.CapturePointer(evt.pointerId);
         UpdateJoystick(joystickOuter.WorldToLocal((Vector2)evt.position));
@@ -713,6 +757,7 @@ public class GameHUDController : MonoBehaviour
     {
         if (joystickPointerId != evt.pointerId || !joystickOuter.HasPointerCapture(evt.pointerId)) return;
         UpdateJoystick(joystickOuter.WorldToLocal((Vector2)evt.position));
+        evt.StopPropagation();
     }
 
     private void OnJoystickUp(PointerUpEvent evt)
@@ -720,6 +765,14 @@ public class GameHUDController : MonoBehaviour
         if (joystickPointerId != evt.pointerId) return;
         if (joystickOuter.HasPointerCapture(evt.pointerId)) joystickOuter.ReleasePointer(evt.pointerId);
         ResetJoystick();
+        evt.StopPropagation();
+    }
+
+    private void OnJoystickCaptureOut(PointerCaptureOutEvent evt)
+    {
+        if (joystickPointerId != evt.pointerId) return;
+        ResetJoystick();
+        evt.StopPropagation();
     }
 
     // Tính vector di chuyển từ vị trí chạm (local trong joystick-outer) rồi đẩy vào PlayerController.
@@ -779,17 +832,16 @@ public class GameHUDController : MonoBehaviour
             joystickSprintHoldTimer = 0f;
         }
 
-        if (!alreadyLatched && eligible && joystickSprintHoldTimer >= joystickSprintHoldSeconds)
+        if (enableJoystickAutoSprint && !alreadyLatched && eligible && joystickSprintHoldTimer >= joystickSprintHoldSeconds)
         {
-            PlayerController.Instance.SetStickAutoSprint(true);
-            alreadyLatched = true;
+            alreadyLatched = false;
         }
 
         if (sprintHint != null)
         {
-            bool showHint = eligible;
+            bool showHint = false;
             sprintHint.style.display = showHint ? DisplayStyle.Flex : DisplayStyle.None;
-            sprintHint.EnableInClassList("sprint-hint-active", alreadyLatched || (eligible && joystickSprintHoldTimer >= joystickSprintHoldSeconds));
+            sprintHint.EnableInClassList("sprint-hint-active", false);
         }
 
         RefreshSprintVisual();
@@ -801,15 +853,21 @@ public class GameHUDController : MonoBehaviour
     private void SetupLookZone()
     {
         if (lookZone == null) return;
+        lookZone.pickingMode = PickingMode.Position;
         lookZone.RegisterCallback<PointerDownEvent>(OnLookDown);
         lookZone.RegisterCallback<PointerMoveEvent>(OnLookMove);
         lookZone.RegisterCallback<PointerUpEvent>(OnLookUp);
-        lookZone.RegisterCallback<PointerCaptureOutEvent>(evt => lookPointerId = -1);
+        lookZone.RegisterCallback<PointerCaptureOutEvent>(OnLookCaptureOut);
     }
 
     private void OnLookDown(PointerDownEvent evt)
     {
-        if (UIPopupTracker.AnyOpen) return;
+        if (UIPopupTracker.AnyOpen || IsPointerReservedForJoystick(evt.pointerId, (Vector2)evt.position))
+        {
+            evt.StopPropagation();
+            return;
+        }
+
         lookPointerId = evt.pointerId;
         lookZone.CapturePointer(evt.pointerId);
         lookLastPos = (Vector2)evt.position;
@@ -819,18 +877,47 @@ public class GameHUDController : MonoBehaviour
     private void OnLookMove(PointerMoveEvent evt)
     {
         if (lookPointerId != evt.pointerId || !lookZone.HasPointerCapture(evt.pointerId)) return;
+        if (IsPointerReservedForJoystick(evt.pointerId, (Vector2)evt.position))
+        {
+            ReleaseLookPointer(evt.pointerId);
+            evt.StopPropagation();
+            return;
+        }
+
         Vector2 cur = (Vector2)evt.position;
         Vector2 delta = cur - lookLastPos;
         lookLastPos = cur;
         if (!UIPopupTracker.AnyOpen && ThirdPersonCamera.Instance != null)
             ThirdPersonCamera.Instance.AddTouchLook(delta);
+        evt.StopPropagation();
     }
 
     private void OnLookUp(PointerUpEvent evt)
     {
         if (lookPointerId != evt.pointerId) return;
-        if (lookZone.HasPointerCapture(evt.pointerId)) lookZone.ReleasePointer(evt.pointerId);
+        ReleaseLookPointer(evt.pointerId);
+        evt.StopPropagation();
+    }
+
+    private void OnLookCaptureOut(PointerCaptureOutEvent evt)
+    {
+        if (lookPointerId != evt.pointerId) return;
         lookPointerId = -1;
+        evt.StopPropagation();
+    }
+
+    private bool IsPointerReservedForJoystick(int pointerId, Vector2 panelPosition)
+    {
+        if (joystickPointerId == pointerId) return true;
+        return joystickOuter != null && joystickOuter.worldBound.Contains(panelPosition);
+    }
+
+    private void ReleaseLookPointer(int pointerId)
+    {
+        if (lookZone != null && lookZone.HasPointerCapture(pointerId))
+            lookZone.ReleasePointer(pointerId);
+        if (lookPointerId == pointerId)
+            lookPointerId = -1;
     }
 
     public void ShowInteractionPrompts(List<InteractionAction> actions)

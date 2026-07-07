@@ -210,11 +210,11 @@ public class ThirdPersonCamera : MonoBehaviour
             _smoothedTouchLook = Vector2.zero;
         }
 
-        // Trục Y panel hướng XUỐNG -> kéo NGÓN lên (delta.y âm) thì pitch tăng = nhìn lên.
+        // Touch mobile follows finger feel: swipe up looks up, swipe down looks down.
         if (_smoothedTouchLook != Vector2.zero)
         {
             yaw += _smoothedTouchLook.x * touchHorizontalSensitivity;
-            pitch -= _smoothedTouchLook.y * touchVerticalSensitivity;
+            pitch += _smoothedTouchLook.y * touchVerticalSensitivity;
         }
         _touchLookDelta = Vector2.zero;
 

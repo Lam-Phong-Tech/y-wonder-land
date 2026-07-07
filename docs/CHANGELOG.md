@@ -5,6 +5,54 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-07-07] — Hotfix joystick mobile không xoay camera
+
+### Fixed
+- Đổi binding `Look` trong `Assets/InputSystem_Actions.inputactions` từ `<Pointer>/delta` sang `<Mouse>/delta` để thao tác touch/joystick trên mobile không bị camera đọc như input nhìn toàn màn hình.
+- Siết pointer handling trong `GameHUDController`: joystick capture pointer riêng, chặn propagation ở down/move/up/capture-out, và `LookZone` từ chối pointer đang thuộc vùng joystick.
+- Đảo lại trục dọc touch-look trong `ThirdPersonCamera`: vuốt lên thì camera ngẩng lên, vuốt xuống thì camera cúi xuống; không đổi trục chuột PC.
+- Bỏ cơ chế joystick kéo mạnh/giữ lâu tự bật chạy nhanh; nút Sprint trên HUD chỉ còn dùng để bật/tắt auto-run chủ động.
+- Vẫn giữ luồng mong muốn trên mobile: ngón trái kéo joystick để di chuyển, ngón phải kéo nửa phải màn hình để xoay camera.
+
+### Test cần làm
+- Build/test trên điện thoại: kéo joystick bên trái không làm camera/map xoay.
+- Kéo nửa phải màn hình vẫn xoay camera bình thường, với trục dọc đúng cảm giác: vuốt lên nhìn lên, vuốt xuống nhìn xuống; PC mouse và gamepad right-stick vẫn điều khiển camera.
+- Kéo joystick hết biên/giữ lâu vẫn chỉ đi bộ thường; bấm nút Sprint mới bật/tắt auto-run.
+
+---
+## [2026-07-06] — Backend storage adapter và daily limits
+
+### Added
+- Thêm `docs/WEB_GAME_BACKEND_JOURNEY.md` để làm rõ hành trình Web account -> Game account -> backend gameplay, các loop phát triển, kết quả mong đợi và cách kiểm tra.
+- Thêm storage facade trong `server/store.js`: local/dev dùng `JsonStore`, có lựa chọn `STORE_MODE=json|postgres`.
+- Thêm `server/postgresStore.js` làm scaffold adapter PostgreSQL để route API giữ interface ổn định trước khi viết query DB thật.
+- Thêm dashboard backend local tại `/admin` để xem player, profile, economy, inventory, daily limits, farm state và transactions.
+- Thêm bảng `player_daily_limits` vào `server/schema.sql`.
+- `/player/bootstrap` trả thêm `daily_limits`; thêm `GET /player/daily-limits` và `POST /player/daily-limits/consume`.
+- Thêm `server/realtimeSmokeTest.js` và npm script `test:realtime` để test auth + WebSocket bằng account cấp sẵn khi web auth đang sập.
+
+### Changed
+- Cập nhật `task.md`, `server/README.md`, `docs/API_CONTRACTS.md`, `docs/ARCHITECTURE.md`, `docs/TECHNICAL_DESIGN.md`, `docs/DB_SCHEMA.md`, `docs/CONTEXT_RECOVERY.md` để ghi rõ backend hiện là MVP API/dashboard/WebSocket; Unity shop/economy/inventory còn local và loop tiếp theo theo scope mới là account online + realtime.
+- Ghi nhận quyết định định hướng cho phase sau: tiền nạp từ web để dùng trong game phải đi qua web wallet API do game-server gọi; còn cần chốt tiền nạp vào `Point`, `UPoint` hay ví mới và xin endpoint trừ tiền/spend/reserve nếu web chưa có.
+- Ghi nhận phỏng vấn backend mới: web đăng nhập bằng email/số điện thoại/password; khách phải có tài khoản trước khi chơi; 1 account = 1 nhân vật; account khóa/xóa mềm chặn game; nhiều máy cùng account dùng chung state server.
+- Chuyển yêu cầu thô từ sếp thành roadmap backend: account web/cấp sẵn, realtime đảo công cộng `city`/`mine` nhưng không gồm farm, server-authoritative Point/inventory/shop, daily/farm/animal theo server time, dashboard online có login/audit, và hạ tầng PostgreSQL/HTTPS/WebSocket/backup.
+- Cập nhật hướng ví: `Point` vừa là tiền game vừa là tiền nạp web; còn cần hỏi vai trò `UPoint`, web hay game-server là ledger cuối cùng, và endpoint spend/debit/reserve.
+- Bổ sung scope mới từ anh: MVP sắp tới chưa cần hệ thống nạp/rút; ưu tiên account online + realtime cho khách hàng. Web wallet/top-up/spend chuyển sang phase sau, không block lát MVP này.
+- Sửa scope kết nối Unity realtime: `RealtimeClient` giữ WebSocket khi đang gameplay để chat toàn server vẫn nhận/gửi được ngoài shared room; chỉ join room `city`/`mine` để hiện remote player/state, nên farm vẫn là đảo riêng.
+- Game-server JWT/WebSocket mang sẵn `username/displayName` để client chưa join room vẫn gửi chat với đúng tên account, không hiện fallback `Player`.
+- `economy/apply` kiểm tra `idempotency_key` trước khi validate số dư để retry không cộng/trừ Point thêm.
+- `inventory/adjust` nhận `idempotency_key` để retry không cộng/trừ item thêm.
+- `daily-limits/consume` ghi transaction theo `idempotency_key`, phục vụ giới hạn câu cá/đào đá 10 lượt/ngày trên server.
+
+### Verified
+- `node --check` passed cho `server/store.js`, `server/postgresStore.js`, `server/index.js`.
+- `node --check` passed cho `server/adminDashboard.js`.
+- Smoke test Node bằng data file tạm xác nhận đào mỏ bị chặn sau 10 lượt/ngày và retry economy/inventory không nhân đôi.
+- Smoke test Express bằng server localhost tạm xác nhận `/player/bootstrap` có `daily_limits` và lượt đào mỏ thứ 11 trả HTTP 409.
+- Smoke test dashboard xác nhận `/admin` có HTML, tạo được user demo, sửa economy JSON và xóa user khỏi JSON store tạm.
+- Smoke test realtime local bằng `WEB_AUTH_MODE=mock` pass: `DemoRealtime01`, `DemoRealtime02`, `DemoRealtime03` login qua `/auth/web-login`; 2 client join `city`, client thứ ba không join room vẫn nhận/gửi chat global, gửi `player_state`, và bị chặn khi join `farm` bằng `ROOM_NOT_SHARED`.
+
+---
 ## [2026-07-02] — Hotfix chat realtime
 
 ### Fixed
@@ -15,7 +63,7 @@
 ### Test cần làm
 - Build lại EXE mới, mở Editor + EXE, đăng nhập 2 tài khoản khác nhau.
 - Cả hai vào `city` hoặc `mine`, mở chat và gửi qua lại; bên còn lại phải thấy tin nhắn, Console nên có log `[Realtime] Chat from ...` ở máy nhận.
-- Không test chat gặp nhau ở `farm` vì farm vẫn là đảo riêng.
+- Farm vẫn là đảo riêng: không thấy remote player/interaction ở farm, nhưng chat thế giới vẫn phải nhận/gửi được khi client đang online.
 
 ---
 ## [2026-07-01] — Vòng quay may mắn dạng 12 múi

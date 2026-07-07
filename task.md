@@ -1,8 +1,189 @@
 # Danh sách công việc dự án (Task Backlog & Progress)
 
+## Ưu tiên hiện tại 06/07/2026: tạm gác backend, quay lại chỉnh sửa game
+
+> Quyết định mới từ anh: tạm dừng chuỗi backend sau khi đã có nền mock/API/dashboard/realtime; giữ toàn bộ task backend bên dưới để quay lại sau khi xong nhóm chỉnh sửa game trước mắt.
+
+### Yêu cầu khách 06/07/2026 - backlog chỉnh sửa game trước mắt
+
+> Nguyên tắc: đây là yêu cầu khách, chưa triển khai. Trước khi sửa từng mục phải đọc script/prefab/scene liên quan và ưu tiên những lỗi ảnh hưởng demo/build/mobile trước. Backend vẫn tạm gác cho tới khi nhóm này ổn.
+
+#### A. Nền game, ánh sáng, nước
+- `[ ]` Giữ hướng ánh sáng/màu nền hiện tại vì anh xác nhận đang đúng mẫu khách từng gửi; khi chỉnh scene phải tránh làm game tối lại.
+- `[~]` Màu nước biển hiện được xem là đúng, nhưng có lỗi khi lên điện thoại; chờ anh gửi triệu chứng/ảnh/video lỗi mobile rồi mới xử lý vật liệu/shader nước.
+
+#### B. Thành phố / City scene
+- `[ ]` Dời nhà MiniGarden bán sản phẩm sang bên trái nhà nâng cấp dụng cụ, giữ cửa quay ra đường chính.
+- `[ ]` Trang trí quanh nhà MiniGarden bằng hoa/cây cảnh thực tế hơn, tránh cảm giác khối đá/hoạt hình quá thô so với game 3D.
+- `[ ]` Làm bãi biển kéo từ khu nhà MiniGarden xuống phía biển theo yêu cầu khách; cần bố trí lối đi/khu bãi hợp lý để nối với phần bãi biển có thuyền, bờ kè và điểm câu cá.
+- `[ ]` Làm bãi biển thành phố có thuyền và bờ kè như bên farm; đặt vùng câu cá đúng khu bãi biển/gần bờ kè để người chơi tập trung đông vui.
+- `[ ]` Tất cả cửa hàng trong game cần bảng hiệu chuyên nghiệp dạng model 3D gắn trước nhà; dùng tên bảng hiệu hiện tại làm nội dung hiển thị.
+- `[ ]` Nơi dịch chuyển ở thành phố đổi thành căn nhà giống bên farm nhưng cao hơn, trang trí thêm để có phong cách riêng.
+- `[~]` MiniGarden/Sa Chi/Sầu Riêng/Chanh dây: repo hiện đã có seed/product, iconTexture và shop whitelist cho `sacha_01`, `durian_01`, `passion_fruit_01`; cần kiểm tra build/runtime vì khách vẫn báo thiếu chanh dây. Anh sẽ bổ sung icon sản phẩm chanh dây mới nếu muốn đổi khỏi icon `passion_box.png`.
+- `[~]` Chanh dây rule mới từ anh: `200 USDT / 20 cây` là giá cả cụm 20 cây; một lần gieo phải tốn 20 hạt và khi thu hoạch nhận sản phẩm tương ứng với 20 hạt đã gieo. Code hiện đang là 1 seed chiếm 20 ô, chưa phải consume 20 seed; cần sửa logic/data khi triển khai cây chanh dây.
+
+#### C. Nông trại / Farm scene và cửa hàng
+- `[ ]` Các cửa hàng trong game phải hiển thị vật phẩm và câu chữ to hơn khoảng 3 lần so với hiện tại, đặc biệt trên điện thoại.
+- `[ ]` Sửa trigger cửa hàng ở farm và city: chỉ đứng đúng khu vực cửa mới hiện vật phẩm/vật nuôi/shop; khi đã vào sâu hơn trong vùng cửa thì UI vẫn phải giữ, không bị mất.
+- `[ ]` Thêm 5 cây xanh trong trang trại để người chơi chặt cây và nhận gỗ.
+- `[ ]` Nhân vật phải có bóng người rõ ràng khi di chuyển trong scene.
+- `[ ]` Cối xoay gió phải quay và nhìn chuyên nghiệp hơn; hiện tại khách chưa thấy đạt.
+
+#### D. Tutorial, điểm danh, red-dot chỉ dẫn
+- `[ ]` Khi đăng nhập, người chơi phải làm hết hướng dẫn NPC tân thủ thì mới nhận được quà điểm danh ngày đầu trong popup.
+- `[ ]` Thêm dấu chấm đỏ ở các nút cần bấm để ngầm chỉ dẫn người chơi nhận quà/khám phá/chức năng mới; hiện game chưa có hệ thống red-dot guidance này.
+
+#### E. Tâm tương tác, build/farm thao tác ô đất
+- `[ ]` Đổi tâm tương tác trước mũi chân nhân vật thành ô vuông kích thước 1 ô đất: ray/tia vô hình từ hướng nhân vật chọn ô phía trước, ô được chọn phát sáng viền.
+- `[ ]` Khi đặt khung vào ô đất thì hiện biểu tượng làm nông; bấm biểu tượng mở ngay 3 lựa chọn: cuốc đất, lát đá, xây chuồng.
+- `[ ]` Menu 3 lựa chọn này không được chuyển sang trang khác như hiện tại; phải là thao tác tại chỗ, icon/chữ to hơn khoảng 3 lần.
+
+#### F. UI/HUD, zoom, mobile controls
+- `[ ]` Giao diện farm khi đăng nhập phải lớn hơn hiện tại; ưu tiên kiểm tra mobile vì có máy bị lẹm nút `X`.
+- `[ ]` Thêm/kiểm tra chức năng thu phóng cả map/camera và UI theo nhu cầu khách.
+- `[x]` Bỏ chức năng kéo joystick mạnh/giữ lâu thì tự chạy nhanh; giữ lại nút chạy tự động để người chơi chủ động bật/tắt auto-run. Anh đã test APK và xác nhận tốt.
+- `[x]` Sửa bug joystick mobile: đã tách touch khỏi action `Look`, chặn pointer joystick không đi vào vùng xoay camera, và đảo lại trục dọc touch-look để vuốt lên = camera ngẩng lên, vuốt xuống = camera cúi xuống. Anh đã test APK: joystick/camera đỡ hơn, trục dọc đúng cảm giác hơn, logic di chuyển giữ đồng bộ giữa các map.
+
+#### G. Tiết kiệm / Version 2
+- `[~]` Gói tiết kiệm để version 2: không sửa tên, chỉ sửa phần tiền và lãi suất; bỏ heo trong logic/visual liên quan nếu đang dùng.
+- `[~]` Lãi suất yêu cầu: 30 ngày = 2%, 90 ngày = 7%, 270 ngày = 22%. Cần kiểm tra thêm cách tính lãi/cuối kỳ khi bắt đầu làm version 2.
+
+#### H. Múc nước, tưới cây
+- `[ ]` Tưới cây phải trừ 1 nước mỗi lần.
+- `[ ]` Nhân vật muốn tưới cây phải đi múc nước; mỗi thao tác múc nước được 10 thùng/nước đưa về kho.
+- `[ ]` Khi tâm ô vuông đặt xuống hồ thì hiện biểu tượng thùng múc nước; bấm biểu tượng thì tự động múc nước.
+
+## Tạm gác 06/07/2026: backend làm tại nhà, chưa cần chung mạng công ty
+
+> Bối cảnh: anh làm online ở nhà khoảng 3 ngày, không phụ thuộc máy case/mạng công ty. Tập trung các phần có thể code/test local: DB-ready, API contract, server storage, Unity sync từng phần. Các việc public domain/máy vật lý/proxy production tạm gác đến khi có lại máy case.
+
+### Chốt lại phần mơ hồ: Web account -> Game account -> Backend gameplay
+- `[x]` Viết tài liệu hành trình rõ ràng tại `docs/WEB_GAME_BACKEND_JOURNEY.md`: web là nguồn tài khoản, game backend map `web_user_id -> playerId`, Unity chỉ gọi game-server, gameplay nhạy cảm chuyển dần sang server-authoritative.
+- `[x]` Ghi rõ hiện trạng: backend MVP đã có API/dashboard/data mẫu, nhưng Unity shop/economy/inventory vẫn còn local `PlayerPrefs`, nên mua/bán trong game hiện chưa tự làm đổi dashboard backend.
+- `[x]` Ghi nhận yêu cầu trước mắt từ sếp: khách đăng nhập bằng tài khoản web hoặc tài khoản được cấp sẵn, vào game online realtime để chat/tương tác ở các đảo công cộng; đảo farm không thuộc realtime công cộng trong phase này.
+- `[x]` Chốt thêm phạm vi MVP sắp tới: chưa cần làm hệ thống nạp/rút; ưu tiên đảm bảo yếu tố online + realtime cho khách hàng.
+- `[x]` Chốt account MVP: web hiện đăng nhập bằng email/số điện thoại/password; khách phải tạo tài khoản trước khi chơi; 1 account = 1 nhân vật; account bị khóa/xóa mềm thì game cũng bị chặn; nhiều máy cùng account phải dùng chung state server.
+- `[x]` Chốt gameplay online sau lát realtime: tiền, túi đồ, shop, farm/thú sẽ chuyển dần server-side; mất mạng thì không cho mua/bán; daily limit/timer nhạy cảm tính theo giờ server; sếp/admin có thể chỉnh dữ liệu qua dashboard nhưng phải có audit.
+- `[~]` Chốt ví cho phase sau: `Point` vừa là tiền trong game vừa là tiền nạp từ web, nhưng MVP online/realtime chưa làm nạp/rút. Còn cần hỏi `UPoint`, ledger cuối cùng của `Point`, và endpoint spend/reserve khi sang phase tiền thật.
+- `[~]` Tạm gác API ví web nạp/rút cho MVP online/realtime; chỉ giữ yêu cầu tương lai: đọc số dư, cộng tiền nạp/thưởng, trừ tiền khi mua vật phẩm, `ref/idempotency_key`.
+- `[~]` Hỏi/chốt timezone server cho daily reset: khuyến nghị `Asia/Saigon` nếu khách chủ yếu ở Việt Nam; nếu dùng UTC phải ghi rõ trên UI/tài liệu. Tạm gác đến khi quay lại backend.
+- `[~]` Chốt DB/hạ tầng: PostgreSQL cho staging/production; JSON chỉ dev/local; server case có backup, auto-start, HTTPS, WebSocket Upgrade, firewall/router và test ngoài LAN. Tạm gác đến khi quay lại backend.
+- `[~]` Loop A kế tiếp: chuẩn hóa login web/cấp sẵn -> game JWT, map `web_user_id -> playerId`, xử lý `active/locked/soft_deleted`. Tạm gác đến khi xong nhóm chỉnh sửa game.
+- `[x]` Loop B kế tiếp: kiểm lại realtime public islands (`city`/`mine`) và bảo đảm farm không join room realtime công cộng; chat vẫn là kênh global khi client online nhưng không join room.
+- `[~]` Loop C kế tiếp: dựng/test lát online + realtime end-to-end: 2 thiết bị/tài khoản đăng nhập, vào `city`/`mine`, chat và thấy remote player đã ổn theo test của anh; cần build lại để retest chat global khi một người ở farm/no-room.
+- `[~]` Loop D sau realtime: Unity đọc `/player/bootstrap` và hydrate `EconomyManager` + `InventoryManager` từ server sau login để nhiều máy cùng account không lệch state cơ bản. Tạm gác đến khi xong nhóm chỉnh sửa game.
+- `[~]` Loop E sau realtime/state: Shop buy/sell gọi backend transaction server-authoritative; dashboard và máy khác cùng account thấy Point/inventory đổi sau reload/bootstrap. Tạm gác đến khi xong nhóm chỉnh sửa game.
+- `[~]` Loop F sau đó: nâng `/admin` thành dashboard online cho sếp: login admin, role `super_admin`, audit log, reset demo/staging an toàn. Tạm gác đến khi xong nhóm chỉnh sửa game.
+
+### Đã có nền tảng
+- `[x]` Web auth contract đã có: game-server gọi web auth qua `WEB_AUTH_MODE=http`, Unity không giữ `GAME_API_SECRET`.
+- `[x]` Backend Node/Express stub đã có `auth`, `player/profile`, `player/bootstrap`, `economy`, `inventory`, `farm-state` MVP.
+- `[x]` Realtime MVP đã có WebSocket `/realtime` và `/game-api/realtime`, room chung `city`/`mine`, chat global, remote player state; Unity giữ WebSocket cho chat khi rời shared room nhưng không hiện remote player ở farm.
+- `[x]` Thêm smoke test tự động `server/realtimeSmokeTest.js` và npm script `test:realtime` để test realtime bằng account cấp sẵn khi web đang sập (`WEB_AUTH_MODE=mock`).
+- `[x]` Smoke test local bằng data tạm đã pass: `DemoRealtime01` + `DemoRealtime02` + `DemoRealtime03` login qua `/auth/web-login`; 2 client join `city`, client thứ ba không join room vẫn nhận/gửi chat global; `player_state` hoạt động và join `farm` bị chặn `ROOM_NOT_SHARED`.
+- `[x]` Test LAN mức cơ bản đã đạt: 2 Editor trong cùng mạng công ty có thể gặp nhau/chat ở city. Bug visual remote còn kiểm lại sau khi máy case online.
+- `[x]` `server/schema.sql` đã có hướng PostgreSQL target, nhưng chưa phải DB production đang chạy.
+
+### Đã làm / chờ quay lại sau task game
+- `[x]` Rà và chốt schema PostgreSQL tối thiểu cho MVP: `game_players`, `player_profiles`, `player_economy`, `player_inventory`, `player_farm_state`, `player_daily_limits`, `game_transactions`.
+- `[x]` Tách `server/store.js` thành lớp storage rõ ràng để sau này đổi `data.json` sang PostgreSQL không phải sửa API route nhiều.
+- `[x]` Giữ `jsonStore` cho dev/local test, thêm khung `postgresStore` hoặc adapter DB-ready theo env `STORE_MODE=json|postgres`.
+- `[x]` Hoàn thiện `/player/bootstrap` làm nguồn load đầu game: trả profile + economy + inventory + farm_state + daily_limits theo đúng user.
+- `[x]` Chuẩn hóa transaction/idempotency cho `economy/apply` và `inventory/adjust` để shop/mua/bán/đào/câu không bị nhân đôi khi retry.
+- `[x]` Thiết kế API daily limit server-side cho câu cá và đào đá 10 lượt/ngày; Unity vẫn fallback PlayerPrefs khi offline.
+- `[~]` Lập danh sách Unity managers còn đang lưu PlayerPrefs cần chuyển dần: Economy, Inventory, Farm/Build, Animal, Fishing, Mining, PiggyBank, Event. Tạm gác đến khi quay lại backend/state sync.
+- `[~]` Chọn 1 luồng nhỏ để nối thử trước theo scope mới: account + realtime `city/mine` vì đây là yêu cầu MVP gần nhất. `inventory + economy` qua shop bán/mua chuyển sang sau khi realtime pass. Tạm gác.
+- `[~]` Viết tài liệu handoff local test: chạy server, env mẫu, endpoint smoke test, cách đổi `BackendConfig` sang localhost/LAN. Tạm gác.
+
+### Cập nhật 06/07/2026 - backend storage adapter + daily limits
+- `[x]` `server/store.js` đã thành storage facade có `JsonStore` class cho dev/local, chọn mode bằng `STORE_MODE`.
+- `[x]` Thêm `server/postgresStore.js` scaffold để route API phụ thuộc vào interface store ổn định trước khi cắm PostgreSQL thật.
+- `[x]` Thêm dashboard backend local tại `http://127.0.0.1:3000/admin` để xem/tạo/sửa/xóa dữ liệu demo trong JSON store.
+- `[x]` `server/schema.sql` thêm bảng `player_daily_limits`, đủ nhóm tối thiểu `game_players`, `player_profiles`, `player_economy`, `player_inventory`, `player_farm_state`, `player_daily_limits`, `game_transactions`.
+- `[x]` `/player/bootstrap` trả thêm `daily_limits`; thêm `GET /player/daily-limits` và `POST /player/daily-limits/consume`.
+- `[x]` `economy/apply`, `inventory/adjust`, `daily-limits/consume` đều nhận `idempotency_key`; retry cùng key không cộng đôi Point/item/lượt.
+- `[x]` Smoke test Node với data file tạm: đào mỏ 10 lượt còn 0, lần 11 bị `DAILY_LIMIT_EXCEEDED`, economy/inventory retry không cộng đôi.
+- `[~]` Viết query thật cho `STORE_MODE=postgres` sau khi chốt driver/DB host (`pg` hoặc ORM khác) và có `DATABASE_URL`. Tạm gác.
+- `[~]` Nối Unity client đọc `daily_limits` từ `/player/bootstrap` và chuyển câu cá/đào đá sang server-authoritative khi online. Tạm gác.
+
+### Tạm gác đến khi có máy case/mạng công ty
+- `[~]` Public `api.ywonder.net`, Caddy/Nginx thật, SSL, firewall/router, service auto-start trên Windows server.
+- `[~]` Test điện thoại ngoài mạng công ty, test WebSocket public `wss://api.ywonder.net/realtime`.
+- `[~]` Backup DB thật trên máy case và giám sát uptime.
+- `[~]` Sửa/tái test các bug realtime chỉ xuất hiện khi 2 máy LAN cùng vào city nếu máy case đang mất mạng.
+
+### Gác phase sau, chưa nên làm trong 3 ngày này
+- `[~]` Firebase push notification cho cây/vật nuôi.
+- `[~]` IAP/UPOS thật và validate receipt server-side.
+- `[~]` Bạn bè/thăm farm, leaderboard production, report/profanity moderation.
+- `[~]` Photon/Mirror: chưa cần đổi vì WebSocket MVP hiện đủ cho mục tiêu gần là chat + thấy người chơi ở city/mine.
+
+## Cập nhật 01/07/2026: web auth bridge + realtime multiplayer MVP
+
+- `[x]` Ghi nhận contract web thật: `POST https://api.ywonder.net/api/game/auth` dùng `Authorization: Bearer <GAME_API_SECRET>`, trả cả camelCase/snake_case: `userId/user_id`, `refCode/ref_code`, `fullName/full_name`, `gameToken/game_token`, `expiresIn/expires_in`.
+- `[x]` Cập nhật `webAuthProvider` để game-server gọi web auth qua env `WEB_AUTH_MODE=http`, `WEB_AUTH_LOGIN_URL`, `WEB_AUTH_SECRET` hoặc `GAME_API_SECRET`; Unity không giữ secret.
+- `[x]` Verify `gameToken` JWT HS256 phía game-server theo spec `{ sub, uid, username, iat, exp }`, `sub/uid = web userId`.
+- `[x]` Unity login thử `/auth/web-login` trước, fallback `/auth/login` dev cũ nếu backend/local chưa sẵn sàng.
+- `[x]` Backend thêm WebSocket realtime `/realtime` và `/game-api/realtime` cho room chung `city` và `mine`, chat toàn server, presence, state remote player, emote `Waving`/`Pointing`.
+- `[x]` Unity thêm `RealtimeClient` tự tạo runtime, giữ kết nối WebSocket khi đang gameplay để nhận/gửi chat global; chỉ join room `city`/`mine` để gửi local state và nhận remote player.
+- `[x]` Remote player dùng prefab nhân vật hiện tại nhưng disable `PlayerInput`, `PlayerController`, `CharacterController`, collider/rigidbody để không chặn input/local gameplay.
+- `[~]` Infra tạm gác khi làm ở nhà: Nginx/Caddy proxy WebSocket Upgrade cho `/realtime`; REST chạy không đảm bảo realtime chạy nếu thiếu Upgrade headers.
+- `[x]` Test Unity 2 client mức LAN cơ bản: đăng nhập 2 tài khoản, cùng vào city thấy nhau/chat được theo test của anh; bug visual remote bám theo còn để kiểm lại khi máy case online.
+- `[~]` Production tạm gác đến khi có máy case/public endpoint: set env `WEB_AUTH_MODE=http`, `WEB_AUTH_LOGIN_URL=https://api.ywonder.net/api/game/auth`, `WEB_AUTH_SECRET=<GAME_API_SECRET>`, `JWT_SECRET=<secret dài>`, `REALTIME_MAX_ROOM_PLAYERS=20`. Nếu `api.ywonder.net` còn kẹt SSL thì override tạm `WEB_AUTH_LOGIN_URL=https://ywonder.net/api/game/auth`.
+
+## Cập nhật 01/07/2026: vòng quay may mắn dạng 12 múi
+
+- `[x]` Giữ 12 phần thưởng hiện tại, gồm cả ô `Chúc may mắn lần sau`.
+- `[x]` Giữ nguyên tỉ lệ/weight quay thưởng hiện tại trong `EventPopupController`.
+- `[x]` Đổi visual vòng quay sang nền 12 múi màu runtime, không cần asset nền mới.
+- `[x]` Mỗi múi chỉ hiển thị icon item đang có trong `ItemDatabase`; bỏ tên item và số lượng trong múi cho gọn.
+- `[x]` Ô `Chúc may mắn lần sau` vẫn tồn tại trong logic thưởng nhưng để trống, không hiện icon vòng quay.
+- `[x]` Đưa nút quay vào tâm vòng quay bằng icon mới `arrowforspin.png`; bỏ icon vòng quay ở giữa và mũi tên vẽ bằng USS, footer chỉ còn số lượt còn lại.
+- `[x]` Khóa kích thước vòng quay bằng min/max width/height để giảm nguy cơ flex làm méo vòng khi xoay.
+- `[ ]` Test Unity: mở Sự kiện -> Vòng quay, xác nhận đủ 12 múi, chỉ icon item, ô may mắn trống, tâm có icon `Spin` mới và vẫn bấm quay được.
+- `[ ]` Test Unity: quay thử và nhìn khi đang xoay, vòng không bị méo rõ ở desktop và mobile landscape.
+- `[ ]` Test Unity: quay thử, vòng dừng đúng phần thưởng, trừ lượt ngày, trao item/toast như trước.
+
+## Cập nhật 01/07/2026: tối ưu đặt Build Mode trên mobile
+
+- `[x]` Giữ nguyên luồng đặt bằng chuột/PC: raycast phải trúng `BuildSurfaceCell` như trước, không dùng assist.
+- `[x]` Thêm touch aim offset trong `GhostPlacementController` để điểm ngắm mobile nằm cao hơn ngón tay, đỡ bị tay che ô nhỏ.
+- `[x]` Thêm touch assist chọn `BuildSurfaceCell` gần nhất trên màn hình khi tap/kéo lệch khỏi collider ô nhỏ nhưng vẫn nằm trong bán kính hỗ trợ.
+- `[x]` `BuildModeOverlayController` truyền đúng nguồn input touch/mouse khi pin vị trí, để mobile và PC dùng hai mức hỗ trợ khác nhau.
+- `[ ]` Test trên điện thoại thật: Build Mode -> chọn Ruộng/Đường đá/Chuồng -> tap/kéo quanh ô nhỏ, đặc biệt hơi lệch khỏi ô, xác nhận ghost vẫn snap đúng ô mong muốn và nút OK/X hiện đúng.
+- `[ ]` Test lại Editor/PC: click chuột đặt công trình không bị thay đổi cảm giác cũ.
+
+## Cập nhật 01/07/2026: Farm tile dùng model đất thật
+
+- `[x]` Tắt `FarmTileMarker` tự vẽ viền ô đất màu trắng/vàng/xanh/cam khi trồng trọt.
+- `[x]` Tắt fallback primitive cube/sphere/cylinder trong `FarmTile` mặc định để không còn mảng màu prototype khi gieo/tưới/chín.
+- `[x]` Giữ `plowedVisual` dưới cây ở trạng thái Planted/Watered/Ripe và ưu tiên `CropDefinition.cropPrefab` khi có.
+- `[x]` Hỗ trợ `Soil Visual`/`Plowed Visual` gán trực tiếp prefab asset trong Inspector; `FarmTile` tự instantiate visual con và không tắt cả GameObject khi `Soil Visual` là chính prefab `DatThuong`.
+- `[x]` Thêm hủy ô trồng đặt bằng Build Mode: prompt ngoài gameplay có `G - Hủy ô trồng` xác nhận 2 lần như hủy chuồng, menu xóa trong Build Mode cũng bắt được mesh con và clear `BuildSurfaceCell`.
+- `[ ]` Editor: gán model đất mới xây vào `Soil Visual`, model đất đã cuốc vào `Plowed Visual`; kiểm tra crop nào thiếu `cropPrefab`.
+
+## Cập nhật 01/07/2026: tránh bàn phím mềm che input mobile
+
+- `[x]` Thêm helper `MobileKeyboardAvoidance` dùng chung cho UI Toolkit để đo/ước lượng chiều cao bàn phím mềm iOS/Android.
+- `[x]` Login/Register tự dịch panel lên khi focus username/password/email để input không bị bàn phím che.
+- `[x]` Chat dùng chung helper keyboard avoidance, vẫn giữ offset riêng khi Build Mode đang mở.
+- `[ ]` Test trên điện thoại thật: login username/password, register đủ 4 field, và chat input đều còn nhìn thấy khi bàn phím bật.
+
+## Cập nhật 01/07/2026: shop thu mua đá quý + filter chợ cá
+
+- `[x]` Tạo nhánh `codex/gem-shop-fish-market-icons` từ `dev` cho task shop mới.
+- `[x]` Thêm `Shop_GemShop` dạng SellOnly, whitelist 6 đá quý: Kyanite, Orange Calcite, Green Calcite, Fire Quartz, Amethyst, Ruby.
+- `[x]` Cập nhật `ShopDataGenerator` để khi chạy lại `YWonderLand > Generate Shop Data` không mất shop thu mua đá quý.
+- `[x]` Bổ sung filter `Cá` (`food`) và `Đá quý` (`materials`) cho Shop Popup; icon sản phẩm vẫn lấy từ `ItemDefinition.iconTexture`.
+- `[x]` Gắn icon `Da`/`Go` từ `Assets/Sprites/icon/BoSungIcon/` cho đá/gỗ ở túi đồ qua `ItemDefinition`, và hiển thị icon vật liệu trong Build Mode.
+- `[x]` Thêm helper toast item-icon dùng chung trong `ScreenToast`; đã áp dụng cho câu cá, đào đá, chặt cây, múc nước, thu hoạch cây/thú, shop mua/bán, điểm danh và vòng quay.
+- `[x]` Editor: anh đã gắn `Shop_GemShop` vào quầy/NPC thu mua đá quý trong scene.
+- `[ ]` Test trong Unity: đào được đá quý -> mở shop đá quý -> tab bán hiện đúng đá trong túi, icon đúng, bán cộng Point đúng theo `sellPrice`.
+- `[ ]` Test trong Unity: vào Build Mode kiểm tra pill vật liệu và chi phí ô xây hiện icon `Go`/`Da`; chặt cây/đào đá/múc nước/thu hoạch/mua bán shop đều có toast icon đúng.
+
 ## Ưu tiên tiếp theo - 29/06/2026: thêm cá mới + dữ liệu đào đá mới
 
-> Khách vừa gửi số liệu mới. Đây là task kế tiếp cho session mới. Dữ liệu bên dưới mới chỉ được ghi nhận, chưa implement vào gameplay/data assets.
+> Khách đã gửi số liệu mới. Phần cá/đá/daily limit/Gem Shop đã implement phần lớn; còn chờ chốt UI nâng cuốc lv2/lv3 và test Unity.
 
 ### 0. Polish đã xong ngày 29/06 trước khi sang data cá/đá
 - `[x]` Đổi text hiển thị `POS` -> `Point`, `UPOS` -> `UPoint` ở UI/toast/log demo liên quan; giữ tên biến/API nội bộ.
@@ -30,7 +211,7 @@
 ### B. Đào đá - thêm bảng đá/gem và lượt đào
 - `[x]` Ghi dữ liệu đá quý mới vào `Assets/_Project/Docs_KichBan/CacLoaiDaQuy.md`, kèm giá Point, tỉ lệ, số viên, icon và ghi chú rock thường vẫn 100% với 10 rock/lượt.
 - `[x]` Tìm lại hệ đào đá hiện tại trước khi sửa; xác định đang là tài nguyên thường trong `FarmInteractionController`/`HarvestableResource`.
-- `[x]` Thêm item/icon đá quý cho túi đồ và toast khi đào trúng; chưa thêm shop thu mua đá quý.
+- `[x]` Thêm item/icon đá quý cho túi đồ và toast khi đào trúng; shop thu mua đá quý đã bổ sung ở mục 01/07.
 - `[x]` Hồi sinh gỗ/đá bù thời gian thật khi thoát app: lưu `respawnEndUnix` cho tài nguyên do `ResourceSpawner` quản lý, vẫn tương thích save cũ `respawnTimer`.
 - `[x]` Thêm dữ liệu reward:
   - Ảnh 1: 2 point/viên, 4 viên, 50% đào trúng.
@@ -39,7 +220,7 @@
   - Ảnh 4: 12 point/viên, 2 viên, 5% đào trúng.
   - Ảnh 5: 500 point/viên, 1 viên, 2% đào trúng; nâng cấp cuốc lv2 tốn 250 point/lượt.
   - Ảnh 6 ruby quý hiếm: 3000 point/viên, 1% đào trúng; nâng cấp cuốc lv3 tốn 1500 point.
-- `[ ]` Áp giới hạn mỗi ngày 10 lượt đào.
+- `[x]` Áp giới hạn mỗi ngày 10 lượt đào theo ngày thật; hết lượt thì chặn đào, đào thành công thì trừ 1 lượt và toast hiện số lượt còn lại.
 - `[ ]` Xác định với anh cách hiển thị/nâng cấp cuốc lv2/lv3 nếu UI hiện tại chưa có màn nâng cấp phù hợp.
 
 ### C. Đảo mỏ / map đào khoáng MVP - 30/06/2026
@@ -48,13 +229,13 @@
 - `[x]` `FarmInteractionController` giữ câu cá chỉ ở `city`, nhưng đào đá được phép ở `city` hoặc `mine`.
 - `[x]` `ResourceSpawner` hỗ trợ gắn prefab cây/đá, snap spawn xuống nền nếu cần, và random lại vị trí khi tài nguyên hồi sinh để đá mỏ không respawn cố định một chỗ.
 - `[x]` `ResourceSpawner` hỗ trợ nhiều vùng spawn bằng `Collider` để anh kiểm soát khu rải đá trên map méo/rộng; nếu không gán vùng thì vẫn fallback về `spawnRadius` cũ.
-- `[ ]` Editor: trong Build Settings, thay entry cũ `Assets/_Project/_Scenes/MineMap.unity` bằng `Assets/_Project/_Scenes/MineScene.unity`.
-- `[ ]` Editor: trong `IslandTravelManager` scene chính, set island `mine` dùng `sceneName = MineScene` và kiểm tra `spawnPosition` rơi đúng mặt đảo mỏ.
-- `[ ]` Editor: trong `MineScene`, đặt `ResourceSpawner` với `spawnerID = Mine`, `treeCount = 0`, `rockCount` theo mật độ test, `spawnRadius/spawnCenter` phủ vùng đào, bật `randomizePositionOnRespawn`, gắn `rockPrefab` nếu có.
-- `[ ]` Editor: tạo vài `BoxCollider` trigger cao phủ vùng đất hợp lệ trên map mỏ, kéo vào `ResourceSpawner > Spawn Areas`; nếu đã từng chạy spawner cũ thì dùng context menu `Clear Saved Resource State` hoặc đổi `spawnerID` để rải lại.
-- `[ ]` Editor: nếu bật `snapSpawnToGround`, dùng layer/mask riêng cho nền đảo mỏ để raycast không bắt nhầm collider nhân vật/đá.
+- `[x]` Editor: anh đã setup `MineScene`/travel/spawn khu đào mỏ xong ở mức dùng được.
+- `[x]` Editor: trong Build Settings/IslandTravelManager, mine island đã dùng `MineScene` và spawn đúng mặt đảo theo xác nhận của anh.
+- `[x]` Editor: trong `MineScene`, đã đặt `ResourceSpawner`, vùng spawn và rock prefab để rải đá trên đảo mỏ.
+- `[x]` Editor: đã tạo vùng spawn bằng collider/area cho map mỏ không đều.
+- `[x]` Editor: đã xử lý layer/mask/snap đủ để đá spawn đúng vùng mỏ trong test hiện tại.
 - `[ ]` Test: Map -> chọn Khai thác mỏ -> load `MineScene` -> đào đá -> nhận 10 rock + roll đá quý/toast icon -> chờ respawn và xác nhận đá xuất hiện ở vị trí ngẫu nhiên mới.
-- `[ ]` Sau MVP: áp giới hạn 10 lượt đào/ngày, nâng cuốc lv2/lv3, và shop/NPC thu mua đá quý.
+- `[ ]` Sau MVP: nâng cuốc lv2/lv3 và hoàn thiện shop/NPC thu mua đá quý theo UI chốt cuối.
 
 ### D. iOS/App Store Connect follow-up nếu bị hỏi lại
 - `[x]` CodeMagic đã build/upload IPA lên App Store Connect được bằng exported-Xcode workflow.
@@ -291,3 +472,17 @@
 - `[ ]` **Sản xuất Asset:** Chạy AI với bộ Prompt đã tạo để sinh ra bộ vật phẩm 2.5D mới (Cà chua, Hạt giống, Rìu, Cuốc, Khoáng sản...).
 - `[ ]` **Tích hợp UI Popup:** Đưa các sprite 2.5D mới vào Unity, xử lý tách nền và gắn vào các slot chứa đồ trong `InventoryPopup.uxml` và `ShopPopup.uxml`.
 - `[ ]` **Kiểm thử Rigging FBX:** Import thử một file FBX nhân vật mới do bạn Artist làm theo workflow chuẩn để kiểm tra thẻ Rig Humanoid trong Unity.
+
+## Update 2026-07-01: login profile cache isolation
+
+- `[x]` Hotfix login nhieu tai khoan demo tren cung may: `PlayerProfileService` tach cache theo `AuthService.UserId/Username`, reset runtime profile khi doi tai khoan, va nhan `player_profile` tu `/auth/web-login` neu backend tra ve de tranh Demo05 bi dinh profile Demo02.
+- `[x]` Hotfix HUD profile goc trai con giu ten cu: `GameHUDController` refresh ten tu active session, uu tien `GameManager.playerName` de khop voi name tag tren dau nhan vat.
+
+## Cap nhat 05/07/2026: dao da 10 luot/ngay + Gem Shop catalog day du
+
+- `[x]` Cau ca da co gioi han 10 luot/ngay tu truoc trong `FishingOverlayController` (`dailyTurns = 10`, `FishingLastDate`, `FishingFreeTurns`).
+- `[x]` Dao da da co gioi han 10 luot/ngay theo ngay that. Khi het luot, nguoi choi khong bat dau dao tiep duoc; khi dao thanh cong, he thong tru 1 luot va toast hien so luot con lai.
+- `[x]` Gem Shop sell mode hien du toan bo da quy trong whitelist `Shop_GemShop`, ke ca da nguoi choi dang co 0 vien.
+- `[x]` Gem Shop hien so luong dang so huu tren card/detail va disable ban neu so luong bang 0.
+- `[ ]` Test Unity: mo Gem Shop -> tab ban phai thay du Kyanite, Orange Calcite, Green Calcite, Fire Quartz, Amethyst, Ruby; da nao 0 vien van hien nhung khong ban duoc.
+- `[ ]` Test Unity: dao da 10 lan trong ngay -> lan thu 11 bi chan bang toast het luot; doi ngay that hoac clear PlayerPrefs thi luot reset ve 10.
