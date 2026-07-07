@@ -1,5 +1,28 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-07-07 (Auto-run joystick cancel)
+
+### Changed
+- Mobile joystick input now immediately turns off HUD auto-run when the stick is moved past a small threshold.
+- The Sprint/auto-run HUD visual refreshes immediately after joystick cancel, so the button no longer stays lit after manual control begins.
+
+### Needs Test
+- Enable auto-run with the Sprint button, then drag the left joystick; the character should stop auto-run immediately and follow the joystick.
+- Release the joystick after canceling; the character must not resume auto-run unless the Sprint button is pressed again.
+
+## [Unreleased] - 2026-07-07 (Compact build popup)
+
+### Changed
+- Build Mode now opens as a compact right-side popup near the HUD hammer button instead of a full-width build HUD.
+- The popup shows only the materials used by the three available build choices, currently wood and stone.
+- Farm Plot, Stone Path, and Pen are shown as three horizontal cards; selecting a card pins its ghost to the highlighted front cell.
+- Confirm and cancel controls now appear directly under the selected card, so the player can build or cancel without using floating OK/X controls.
+
+### Needs Test
+- In APK/EXE, tap the hammer button and confirm the compact popup appears near the right-side HUD buttons without blocking joystick/camera/jump.
+- Select each card and confirm the ghost appears on the white front cell; tap the green check to place and the red X to cancel.
+- Test missing materials or an occupied cell: placement must fail without closing the popup or placing on the wrong cell.
+
 ## [Unreleased] - 2026-07-07 (Direct tap world interaction)
 
 ### Changed

@@ -37,6 +37,7 @@
 - `[~]` Đổi tâm tương tác trước mũi chân nhân vật thành ô vuông kích thước 1 ô đất: bước 1 đã thêm `FrontBuildCellSelector` tự chọn `BuildSurfaceCell` ngay phía trước theo hướng mặt nhân vật và vẽ viền trắng runtime. Anh đã test và xác nhận viền sáng tốt.
 - `[~]` Workflow build mới bước 2: đã chuyển nút búa/build xuống cụm tay phải phía trên nút Jump, và mở build list cũ ở góc nhìn nhân vật hiện tại, không tự bật camera top-down/ẩn GameHUD. Cần anh build APK/EXE test lại thao tác mở menu, di chuyển/xoay camera khi menu đang mở.
 - `[~]` Workflow build mới bước 3: khi chọn Ruộng/Đường đá/Chuồng, ghost tự snap và ghim vào đúng ô đang viền trắng trước mặt; người chơi chỉ cần bấm OK để xác nhận hoặc X để hủy. Đã code, chờ anh build test.
+- `[~]` Workflow build compact popup: đã thay full HUD build bằng popup ngang gọn bên phải gần nút búa; góc popup hiện vật liệu đúng cho 3 công trình (Gỗ/Đá), bên dưới có 3 thẻ Ruộng/Đường đá/Chuồng. Chọn thẻ sẽ pin ghost vào ô trắng; nút tích xanh và X nằm ngay dưới thẻ để xác nhận/hủy. Chờ anh build APK/EXE test.
 - `[~]` Yêu cầu mới của khách: bỏ tâm/crosshair cho tương tác cây, hồ nước, tảng đá, chuồng/cửa hàng; đã code flow tap/click trực tiếp lên vật thể trong tầm khoảng 3.5m để hiện UI action, có spherecast assist nhỏ để đỡ miss collider/góc bấm, và UI tự ẩn khi nhân vật đi xa khỏi vật thể đang chọn. Chờ anh build APK/EXE test nhiều góc camera.
 - `[ ]` Khi đặt khung vào ô đất thì hiện biểu tượng làm nông; bấm biểu tượng mở ngay 3 lựa chọn: cuốc đất, lát đá, xây chuồng.
 - `[ ]` Menu 3 lựa chọn này không được chuyển sang trang khác như hiện tại; phải là thao tác tại chỗ, icon/chữ to hơn khoảng 3 lần.
@@ -45,6 +46,7 @@
 - `[ ]` Giao diện farm khi đăng nhập phải lớn hơn hiện tại; ưu tiên kiểm tra mobile vì có máy bị lẹm nút `X`.
 - `[ ]` Thêm/kiểm tra chức năng thu phóng cả map/camera và UI theo nhu cầu khách.
 - `[x]` Bỏ chức năng kéo joystick mạnh/giữ lâu thì tự chạy nhanh; giữ lại nút chạy tự động để người chơi chủ động bật/tắt auto-run. Anh đã test APK và xác nhận tốt.
+- `[~]` Auto-run cancel mới: khi auto-run đang bật mà người chơi bắt đầu điều khiển joystick, `GameHUDController` sẽ tắt auto-run ngay và cập nhật lại trạng thái nút Sprint. Chờ anh build APK/EXE test.
 - `[x]` Sửa bug joystick mobile: đã tách touch khỏi action `Look`, chặn pointer joystick không đi vào vùng xoay camera, và đảo lại trục dọc touch-look để vuốt lên = camera ngẩng lên, vuốt xuống = camera cúi xuống. Anh đã test APK: joystick/camera đỡ hơn, trục dọc đúng cảm giác hơn, logic di chuyển giữ đồng bộ giữa các map.
 
 #### G. Tiết kiệm / Version 2

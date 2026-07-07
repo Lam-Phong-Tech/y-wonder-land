@@ -92,6 +92,7 @@ public class GameHUDController : MonoBehaviour
     [Header("Mobile Feel")]
     [SerializeField, Range(0f, 0.4f)] private float joystickDeadZone = 0.18f;
     [SerializeField, Range(1f, 3f)] private float joystickResponseExponent = 1.6f;
+    [SerializeField, Range(0f, 0.4f)] private float joystickAutoRunCancelThreshold = 0.08f;
     private bool enableJoystickAutoSprint = false;
     [SerializeField, Range(0.1f, 1f)] private float joystickSprintHoldSeconds = 0.35f;
     [SerializeField, Range(0f, 1f)] private float joystickSprintForwardMin = 0.55f;
@@ -796,7 +797,16 @@ public class GameHUDController : MonoBehaviour
         Vector2 move = new Vector2(direction.x * curvedMagnitude, -direction.y * curvedMagnitude);
         joystickRawMagnitude = rawMagnitude;
         joystickRawForward = Mathf.Max(0f, -direction.y) * rawMagnitude;
-        if (PlayerController.Instance != null) PlayerController.Instance.SetMoveInput(move, rawMagnitude);
+        if (PlayerController.Instance != null)
+        {
+            if (rawMagnitude > joystickAutoRunCancelThreshold && PlayerController.Instance.IsAutoRunOn)
+            {
+                PlayerController.Instance.ToggleAutoRun();
+                RefreshSprintVisual();
+            }
+
+            PlayerController.Instance.SetMoveInput(move, rawMagnitude);
+        }
     }
 
     private void ResetJoystick()

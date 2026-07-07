@@ -31,7 +31,10 @@ public class BuildModeOverlayController : MonoBehaviour
 
     // UI Elements — Header
     private VisualElement buildRoot;
+    private VisualElement buildBalancePill;
     private Label lblBuildBalance;
+    private Label lblBuildWood;
+    private Label lblBuildStone;
     private Label lblBuildStatus;
     private Button btnExitBuild;
 
@@ -65,6 +68,7 @@ public class BuildModeOverlayController : MonoBehaviour
 
     // Context-selected building
     private GameObject contextSelectedBuilding;
+    private bool lastPointerDownWasTouch;
 
     // ── Mock Data ──
 
@@ -175,21 +179,21 @@ public class BuildModeOverlayController : MonoBehaviour
             var ghost = GhostPlacementController.Instance;
             if (ghost != null && ghost.IsActive)
             {
+                if (useFrontCellGhostPlacement)
+                    return;
+
                 if (ghost.IsPinned)
                 {
                     UpdatePlacementControlsPosition(ghost.GhostPosition);
                 }
 
-                if (useFrontCellGhostPlacement)
-                    return;
-
                 if (TryGetPointerDownPosition(out Vector2 pointerPos) && !IsPointerOverUI(pointerPos))
                 {
-                    ghost.RefreshPlacementAtScreenPosition(pointerPos);
+                    ghost.RefreshPlacementAtScreenPosition(pointerPos, lastPointerDownWasTouch);
 
                     if (!ghost.IsPinned)
                     {
-                        if (!ghost.IsPlacementValid || ghost.IsScreenPositionBlockedForPlacement(pointerPos))
+                        if (!ghost.IsPlacementValid || ghost.IsScreenPositionBlockedForPlacement(pointerPos, lastPointerDownWasTouch))
                         {
                             ShowStatusMessage("V\u1ecb tr\u00ed kh\u00f4ng h\u1ee3p l\u1ec7 ho\u1eb7c qu\u00e1 s\u00e1t r\u00eca m\u00e0n h\u00ecnh.", false);
                             return;
@@ -240,6 +244,7 @@ public class BuildModeOverlayController : MonoBehaviour
             if (primary.press.wasPressedThisFrame)
             {
                 screenPos = primary.position.ReadValue();
+                lastPointerDownWasTouch = true;
                 return true;
             }
 
@@ -249,6 +254,7 @@ public class BuildModeOverlayController : MonoBehaviour
                 if (finger.press.wasPressedThisFrame)
                 {
                     screenPos = finger.position.ReadValue();
+                    lastPointerDownWasTouch = true;
                     return true;
                 }
             }
@@ -258,10 +264,12 @@ public class BuildModeOverlayController : MonoBehaviour
         if (mouse != null && mouse.leftButton.wasPressedThisFrame)
         {
             screenPos = mouse.position.ReadValue();
+            lastPointerDownWasTouch = false;
             return true;
         }
 
         screenPos = default;
+        lastPointerDownWasTouch = false;
         return false;
     }
 
@@ -315,6 +323,7 @@ public class BuildModeOverlayController : MonoBehaviour
     private void QueryElements(VisualElement root)
     {
         buildRoot = root.Q<VisualElement>("BuildRoot");
+        buildBalancePill = root.Q<VisualElement>(className: "build-balance-pill");
         lblBuildBalance = root.Q<Label>("lblBuildBalance");
         lblBuildStatus = root.Q<Label>("lblBuildStatus");
         btnExitBuild = root.Q<Button>("BtnExitBuild");
@@ -346,6 +355,47 @@ public class BuildModeOverlayController : MonoBehaviour
             root.Q<Button>("CatDecor"),
             root.Q<Button>("CatPath")
         };
+
+        ConfigureBuildBalancePill();
+    }
+
+    private void ConfigureBuildBalancePill()
+    {
+        if (buildBalancePill == null) return;
+
+        buildBalancePill.Clear();
+        lblBuildWood = AddBuildBalanceEntry("wood_01", "Gỗ");
+        lblBuildStone = AddBuildBalanceEntry("stone_01", "Đá");
+    }
+
+    private Label AddBuildBalanceEntry(string materialId, string displayName)
+    {
+        var entry = new VisualElement();
+        entry.AddToClassList("build-balance-material");
+
+        entry.Add(CreateMaterialIcon(materialId, "build-balance-material-icon"));
+
+        var label = new Label($"0 {displayName}");
+        label.AddToClassList("build-balance-material-text");
+        entry.Add(label);
+
+        buildBalancePill.Add(entry);
+        return label;
+    }
+
+    private VisualElement CreateMaterialIcon(string materialId, string baseClass)
+    {
+        var icon = new VisualElement();
+        icon.AddToClassList(baseClass);
+
+        if (materialId == "wood_01")
+            icon.AddToClassList("build-material-icon-wood");
+        else if (materialId == "stone_01")
+            icon.AddToClassList("build-material-icon-stone");
+        else
+            icon.AddToClassList("build-material-icon-generic");
+
+        return icon;
     }
 
     private void RegisterCallbacks()
@@ -417,11 +467,7 @@ public class BuildModeOverlayController : MonoBehaviour
         if (hideGameHudWhileOpen)
             SetGameHUDVisible(false);
 
-        // Shift Chat up to avoid overlapping build items
-        if (ChatPanelController.Instance != null)
-        {
-            ChatPanelController.Instance.ShiftForBuildMode(true);
-        }
+        // Compact build popup sits near the right HUD buttons, so chat no longer needs to move.
 
         Debug.Log("[BuildMode] Build Mode opened");
     }
@@ -550,22 +596,39 @@ public class BuildModeOverlayController : MonoBehaviour
             nameLabel.AddToClassList("build-item-name");
             card.Add(nameLabel);
 
+            var priceRow = new VisualElement();
+            priceRow.AddToClassList("build-item-price-row");
+            if (!string.IsNullOrEmpty(item.materialId) && item.materialAmount > 0)
+                priceRow.Add(CreateMaterialIcon(item.materialId, "build-item-price-icon"));
+
             var priceLabel = new Label(item.CostText());
             priceLabel.AddToClassList("build-item-price");
-            card.Add(priceLabel);
+            priceRow.Add(priceLabel);
+            card.Add(priceRow);
 
-            // Info badge (i button)
-            var infoBadge = new VisualElement();
-            infoBadge.AddToClassList("build-item-info-badge");
-            var infoIcon = new Label("i");
-            infoIcon.AddToClassList("build-item-info-icon");
-            infoBadge.Add(infoIcon);
-            infoBadge.RegisterCallback<ClickEvent>(evt =>
+            var actionsRow = new VisualElement();
+            actionsRow.AddToClassList("build-card-actions");
+
+            var confirmButton = new Button { text = "\u2713" };
+            confirmButton.AddToClassList("build-card-action-btn");
+            confirmButton.AddToClassList("build-card-confirm");
+            confirmButton.RegisterCallback<ClickEvent>(evt =>
             {
                 evt.StopPropagation();
-                ShowInfoTooltip(index);
+                OnConfirmPlacement();
             });
-            card.Add(infoBadge);
+            actionsRow.Add(confirmButton);
+
+            var cancelButton = new Button { text = "X" };
+            cancelButton.AddToClassList("build-card-action-btn");
+            cancelButton.AddToClassList("build-card-cancel");
+            cancelButton.RegisterCallback<ClickEvent>(evt =>
+            {
+                evt.StopPropagation();
+                OnCancelPlacement();
+            });
+            actionsRow.Add(cancelButton);
+            card.Add(actionsRow);
 
             // Click handler = select item and activate ghost
             card.RegisterCallback<ClickEvent>(evt =>
@@ -626,11 +689,10 @@ public class BuildModeOverlayController : MonoBehaviour
                 return;
             }
 
-            ShowPlacementControls();
-            UpdatePlacementControlsPosition(ghost.GhostPosition);
+            HidePlacementControls();
             ShowStatusMessage(
                 ghost.IsPlacementValid
-                    ? $"B\u1ea5m OK \u0111\u1ec3 x\u00e2y {item.name}, ho\u1eb7c X \u0111\u1ec3 h\u1ee7y."
+                    ? $"B\u1ea5m d\u1ea5u t\u00edch tr\u00ean th\u1ebb \u0111\u1ec3 x\u00e2y {item.name}."
                     : "\u00d4 tr\u01b0\u1edbc m\u1eb7t \u0111ang b\u1ecb chi\u1ebfm, kh\u00f4ng th\u1ec3 x\u00e2y.",
                 ghost.IsPlacementValid);
         }
@@ -741,19 +803,50 @@ public class BuildModeOverlayController : MonoBehaviour
 
         Ray ray = cam.ScreenPointToRay(new Vector3(mousePos.x, mousePos.y, 0f));
 
-        if (Physics.Raycast(ray, out RaycastHit hit, 200f, buildingRayMask))
+        GameObject building = FindContextBuilding(ray);
+        if (building != null)
         {
-            GameObject hitObj = hit.collider.gameObject;
-            if (hitObj.CompareTag("PlacedBuilding"))
-            {
-                contextSelectedBuilding = hitObj;
-                ShowContextMenu(mousePos);
-                return;
-            }
+            contextSelectedBuilding = building;
+            ShowContextMenu(mousePos);
+            return;
         }
 
         // Clicked empty area — hide context menu
         HideContextMenu();
+    }
+
+    private GameObject FindContextBuilding(Ray ray)
+    {
+        RaycastHit[] hits = Physics.RaycastAll(ray, 200f, buildingRayMask, QueryTriggerInteraction.Collide);
+        GameObject best = null;
+        float bestDistance = float.PositiveInfinity;
+
+        foreach (var hit in hits)
+        {
+            GameObject building = ResolveContextBuilding(hit);
+            if (building == null || hit.distance >= bestDistance) continue;
+
+            best = building;
+            bestDistance = hit.distance;
+        }
+
+        return best;
+    }
+
+    private GameObject ResolveContextBuilding(RaycastHit hit)
+    {
+        var placed = hit.collider.GetComponentInParent<YWonderLand.Environment.PlacedBuilding>();
+        if (placed != null) return placed.gameObject;
+
+        Transform current = hit.collider.transform;
+        while (current != null)
+        {
+            if (current.CompareTag("PlacedBuilding"))
+                return current.gameObject;
+            current = current.parent;
+        }
+
+        return null;
     }
 
     private void ShowContextMenu(Vector2 screenPos)
@@ -797,6 +890,9 @@ public class BuildModeOverlayController : MonoBehaviour
 
     private void DeleteBuildingAt(GameObject building)
     {
+        bool wasFarmTile = building != null && building.GetComponentInChildren<FarmTile>(true) != null;
+        string buildingName = building != null ? building.name : "(null)";
+
         if (BuildGridManager.Instance != null)
         {
             Vector2Int gridCell = BuildGridManager.Instance.WorldToGrid(building.transform.position);
@@ -812,9 +908,11 @@ public class BuildModeOverlayController : MonoBehaviour
             BuildGridManager.Instance.FreeCells(originCell, size);
         }
 
+        YWonderLand.Environment.BuildSurfaceCell.ClearOccupant(building);
         Destroy(building);
-        ShowStatusMessage("\u0110\u00e3 x\u00f3a!", true);
-        Debug.Log($"[BuildMode] Deleted building: {building.name}");
+        SaveBuildState();
+        ShowStatusMessage(wasFarmTile ? "\u0110\u00e3 h\u1ee7y \u00f4 tr\u1ed3ng!" : "\u0110\u00e3 x\u00f3a!", true);
+        Debug.Log($"[BuildMode] Deleted building: {buildingName}");
     }
 
     private void PickUpBuilding(GameObject building)
@@ -838,6 +936,7 @@ public class BuildModeOverlayController : MonoBehaviour
             BuildGridManager.Instance.FreeCells(originCell, size);
         }
 
+        YWonderLand.Environment.BuildSurfaceCell.ClearOccupant(building);
         Destroy(building);
 
         if (GhostPlacementController.Instance != null)
@@ -856,6 +955,12 @@ public class BuildModeOverlayController : MonoBehaviour
 
         ShowStatusMessage("\u0110\u00e3 nh\u1ea5c c\u00f4ng tr\u00ecnh \u2014 ch\u1ecdn v\u1ecb tr\u00ed m\u1edbi", true);
         Debug.Log($"[BuildMode] Picked up building: {buildingName}");
+    }
+
+    private void SaveBuildState()
+    {
+        var persistence = Object.FindFirstObjectByType<YWonderLand.Environment.BuildPersistence>(FindObjectsInactive.Include);
+        persistence?.SaveBuildings();
     }
 
     // ── Info Tooltip ──
@@ -885,13 +990,22 @@ public class BuildModeOverlayController : MonoBehaviour
 
     private void UpdateBalance()
     {
-        if (lblBuildBalance == null) return;
         // Build mode dùng VẬT LIỆU → hiện số gỗ/đá người chơi đang có.
         var inv = YWonderLand.Managers.InventoryManager.Instance;
         if (inv != null)
-            lblBuildBalance.text = $"🪵 {inv.GetItemQuantity("wood_01")} Gỗ   🪨 {inv.GetItemQuantity("stone_01")} Đá";
+        {
+            int wood = inv.GetItemQuantity("wood_01");
+            int stone = inv.GetItemQuantity("stone_01");
+            if (lblBuildWood != null) lblBuildWood.text = $"{wood} Gỗ";
+            if (lblBuildStone != null) lblBuildStone.text = $"{stone} Đá";
+            if (lblBuildBalance != null) lblBuildBalance.text = $"{wood} Gỗ   {stone} Đá";
+        }
         else
-            lblBuildBalance.text = "🪵 0 Gỗ   🪨 0 Đá";
+        {
+            if (lblBuildWood != null) lblBuildWood.text = "0 Gỗ";
+            if (lblBuildStone != null) lblBuildStone.text = "0 Đá";
+            if (lblBuildBalance != null) lblBuildBalance.text = "0 Gỗ   0 Đá";
+        }
     }
 
     private void OnBuildingPlacedHandler(string itemName, int price)

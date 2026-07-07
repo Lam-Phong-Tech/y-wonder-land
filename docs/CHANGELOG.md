@@ -5,6 +5,31 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-07-07] — Auto-run tắt khi kéo joystick
+
+### Changed
+- Khi auto-run đang bật, chỉ cần người chơi kéo joystick vượt một ngưỡng nhỏ thì `GameHUDController` tắt auto-run ngay.
+- Nút Sprint/auto-run cập nhật trạng thái sáng/tắt ngay khi joystick hủy auto-run, tránh cảm giác vẫn đang bật.
+
+### Test cần làm
+- Bấm Sprint để bật auto-run, sau đó kéo joystick trái; nhân vật phải dừng auto-run ngay và đi theo joystick.
+- Thả joystick sau khi đã hủy auto-run; nhân vật không được tự chạy tiếp nếu chưa bấm Sprint lại.
+
+---
+## [2026-07-07] — Compact build popup
+
+### Changed
+- Build Mode nay mở bằng popup ngang gọn ở bên phải gần nút búa, không còn dùng full HUD top/bottom rườm rà cho flow 3 công trình.
+- Popup chỉ hiển thị vật liệu đúng với 3 lựa chọn hiện có: Gỗ và Đá.
+- Ruộng, Đường đá, Chuồng hiển thị thành 3 thẻ ngang; bấm thẻ sẽ pin ghost preview vào ô viền trắng trước mặt.
+- Nút tích xanh và nút X nằm ngay dưới thẻ đang chọn để xác nhận đặt hoặc bỏ chọn, thay cho cụm OK/X nổi ngoài world.
+
+### Test cần làm
+- Build/test APK/EXE: bấm nút búa, popup phải nằm gần cụm nút phải và không che joystick/camera/jump.
+- Chọn từng thẻ: ghost phải hiện trên ô viền trắng; bấm tích xanh đặt đúng ô, bấm X dưới thẻ thì hủy chọn.
+- Test thiếu vật liệu hoặc ô bị chiếm: không được đặt sai, popup/ghost không được đóng nhầm.
+
+---
 ## [2026-07-07] — Direct tap world interaction
 
 ### Changed
