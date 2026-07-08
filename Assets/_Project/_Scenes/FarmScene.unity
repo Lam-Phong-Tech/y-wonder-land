@@ -8180,6 +8180,9 @@ MonoBehaviour:
   merchantInteractRange: 1
   waterInteractRange: 1.35
   fishingInteractRange: 1.2
+  useDirectTapInteraction: 1
+  directTapMaxRange: 2
+  directTapAssistWorldRadius: 0.45
   farmTileLayer:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -8187,6 +8190,7 @@ MonoBehaviour:
   rockYield: 10
   resourceExp: 5
   mineExp: 15
+  dailyMiningTurns: 10
   gemstoneRewards:
   - itemId: gem_ruby_01
     displayName: "Ruby qu\xFD hi\u1EBFm"
@@ -21423,15 +21427,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7018743353316234824, guid: 0059136c7b781e044970d0da70c9218d, type: 3}
       propertyPath: m_LocalScale.x
-      value: 2.3
+      value: 1.8
       objectReference: {fileID: 0}
     - target: {fileID: 7018743353316234824, guid: 0059136c7b781e044970d0da70c9218d, type: 3}
       propertyPath: m_LocalScale.y
-      value: 2.3
+      value: 1.8
       objectReference: {fileID: 0}
     - target: {fileID: 7018743353316234824, guid: 0059136c7b781e044970d0da70c9218d, type: 3}
       propertyPath: m_LocalScale.z
-      value: 2.3
+      value: 1.8
       objectReference: {fileID: 0}
     - target: {fileID: 7018743353316234824, guid: 0059136c7b781e044970d0da70c9218d, type: 3}
       propertyPath: m_LocalPosition.x
@@ -21439,7 +21443,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7018743353316234824, guid: 0059136c7b781e044970d0da70c9218d, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.71
+      value: 1.416
       objectReference: {fileID: 0}
     - target: {fileID: 7018743353316234824, guid: 0059136c7b781e044970d0da70c9218d, type: 3}
       propertyPath: m_LocalPosition.z
@@ -40006,6 +40010,9 @@ MonoBehaviour:
   buildingRayMask:
     serializedVersion: 2
     m_Bits: 4294967295
+  useTopDownBuildCamera: 0
+  hideGameHudWhileOpen: 0
+  useFrontCellGhostPlacement: 1
   penWoodCost: 4
   pathStoneCost: 4
 --- !u!114 &842159769
@@ -44618,7 +44625,7 @@ MonoBehaviour:
   service: 0
   shopData: {fileID: 11400000, guid: 1e1d781804aaaad418d9d6feec409253, type: 2}
   onlyDuringGameplay: 1
-  comingSoon: 0
+  comingSoon: 1
   nameTagTarget: {fileID: 1148050216}
   shopLabel: "C\u1EEDa h\xE0ng V\u1EADt ph\u1EA9m"
   nameTagHeight: 3
@@ -44641,8 +44648,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.07992913, y: 0.06905528, z: 0.06592947}
-  m_Center: {x: 0.0012492351, y: 0.0001969598, z: 0.007447855}
+  m_Size: {x: 0.018701598, y: 0.06905528, z: 0.032015964}
+  m_Center: {x: -0.029364513, y: 0.00019695998, z: -0.009508902}
 --- !u!64 &936977808
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -125970,8 +125977,10 @@ MonoBehaviour:
   workshopPopup: {fileID: 0}
   joystickDeadZone: 0.18
   joystickResponseExponent: 1.6
+  joystickAutoRunCancelThreshold: 0.08
   joystickSprintHoldSeconds: 0.35
   joystickSprintForwardMin: 0.55
+  previewMobileHudScaleInEditor: 0
 --- !u!4 &1296602394
 Transform:
   m_ObjectHideFlags: 0
@@ -129345,6 +129354,9 @@ MonoBehaviour:
   screenEdgeBlockPercent: 0.08
   minScreenEdgeBlockPixels: 64
   playerFaceGhostTurnSpeed: 540
+  enableMobilePlacementAssist: 1
+  touchAimOffsetPixels: 90
+  touchAssistRadiusPixels: 96
 --- !u!64 &1361284735
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -131394,8 +131406,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.08802904, y: 0.106905036, z: 0.077687316}
-  m_Center: {x: -0.0014770217, y: -0.0027021742, z: 0.008060108}
+  m_Size: {x: 0.06352743, y: 0.022826955, z: 0.046373088}
+  m_Center: {x: -0.0029138157, y: 0.039336976, z: -0.00759695}
 --- !u!64 &1396913238
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -146175,7 +146187,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Environment.BuildPrefabLibrary
   entries:
   - nameContains: "Ru\u1ED9ng"
-    prefab: {fileID: 2729896928635013558, guid: 0aa9141f7ec644a48a7c42434b30ea86, type: 3}
+    prefab: {fileID: 144497238127732390, guid: 61e531055fd0b3748970cfe94071c378, type: 3}
     stretchToFootprint: 1
     yOffset: 0.025
   - nameContains: "Chu\u1ED3ng"
@@ -151412,8 +151424,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.2, y: 0.14, z: 0.12542371}
-  m_Center: {x: 0.00020119543, y: -0.0020083245, z: 0.010672534}
+  m_Size: {x: 0.16386698, y: 0.044771496, z: 0.08762022}
+  m_Center: {x: 0.0012847137, y: -0.0338626, z: -0.008229154}
 --- !u!114 &1768604053
 MonoBehaviour:
   m_ObjectHideFlags: 0

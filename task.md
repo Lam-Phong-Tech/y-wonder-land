@@ -24,7 +24,7 @@
 
 #### C. Nông trại / Farm scene và cửa hàng
 - `[ ]` Các cửa hàng trong game phải hiển thị vật phẩm và câu chữ to hơn khoảng 3 lần so với hiện tại, đặc biệt trên điện thoại.
-- `[ ]` Sửa trigger cửa hàng ở farm và city: chỉ đứng đúng khu vực cửa mới hiện vật phẩm/vật nuôi/shop; khi đã vào sâu hơn trong vùng cửa thì UI vẫn phải giữ, không bị mất.
+- `[x]` Sửa trigger cửa hàng ở farm và city: anh đã thu/đặt lại trigger vừa vùng mặt trước cửa hàng để chỉ đứng đúng khu vực cửa mới hiện vật phẩm/vật nuôi/shop; khi đã vào sâu hơn trong vùng cửa thì UI vẫn phải giữ, không bị mất. Cần test lại nhanh trên APK/EXE sau build.
 - `[ ]` Thêm 5 cây xanh trong trang trại để người chơi chặt cây và nhận gỗ.
 - `[ ]` Nhân vật phải có bóng người rõ ràng khi di chuyển trong scene.
 - `[ ]` Cối xoay gió phải quay và nhìn chuyên nghiệp hơn; hiện tại khách chưa thấy đạt.
