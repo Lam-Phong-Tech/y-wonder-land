@@ -48,6 +48,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField, Range(0.6f, 1f)] private float stickAutoSprintThreshold = 0.88f;
     // Runtime cap để đảm bảo ngưỡng sprint bằng joystick không quá gắt trên mobile
     private const float MobileSprintThresholdCap = 0.62f;
+    private const float JoystickEmoteCancelThreshold = 0.08f;
     private float actionLockTimer = 0f;
     private float _actionSpeed = 1f;
 
@@ -385,6 +386,7 @@ public class PlayerController : MonoBehaviour
     public void SetMoveInput(Vector2 move)
     {
         virtualMoveInput = Vector2.ClampMagnitude(move, 1f);
+        CancelJoystickCancelableEmote(virtualMoveInput.magnitude);
     }
 
     /// <summary>
@@ -394,6 +396,7 @@ public class PlayerController : MonoBehaviour
     public void SetMoveInput(Vector2 move, float rawMagnitude)
     {
         virtualMoveInput = Vector2.ClampMagnitude(move, 1f);
+        CancelJoystickCancelableEmote(rawMagnitude);
     }
 
     // ── Nút Nhảy ảo (mobile) ──
@@ -404,6 +407,20 @@ public class PlayerController : MonoBehaviour
     // ── Hủy hoạt ảnh (nút X trên HUD) ──
     /// <summary>Nhân vật đang khóa trong một hoạt ảnh hành động (chặt/đào/cuốc/tưới/câu...).</summary>
     public bool IsBusy => actionLockTimer > 0f;
+    public bool IsJoystickCancelableEmote => actionLockTimer > 0f && IsJoystickCancelableEmoteState(currentAnimState);
+
+    private static bool IsJoystickCancelableEmoteState(string stateName)
+    {
+        return stateName == "Waving" || stateName == "Pointing";
+    }
+
+    private void CancelJoystickCancelableEmote(float inputMagnitude)
+    {
+        if (inputMagnitude <= JoystickEmoteCancelThreshold || !IsJoystickCancelableEmote)
+            return;
+
+        CancelAction();
+    }
     /// <summary>Nút X trên HUD gọi: ngắt hoạt ảnh đang chạy, cất đồ nghề, ẩn thanh tiến trình, về Idle.</summary>
     public void CancelAction()
     {

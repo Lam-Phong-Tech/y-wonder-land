@@ -256,9 +256,20 @@ public class GameHUDController : MonoBehaviour
         cancelButtonFrame = root.Q<VisualElement>("CancelActionFrame");
         if (cancelButtonFrame != null)
         {
+            cancelButtonFrame.pickingMode = PickingMode.Position;
             cancelButtonFrame.generateVisualContent -= DrawFishingCancelProgress;
             cancelButtonFrame.generateVisualContent += DrawFishingCancelProgress;
+            cancelButtonFrame.RegisterCallback<PointerDownEvent>(evt =>
+            {
+                if (evt.button != 0) return;
+                TryCancelCurrentActionFromHUD();
+                evt.StopImmediatePropagation();
+            }, TrickleDown.TrickleDown);
         }
+        if (rightActionsContainer != null)
+            rightActionsContainer.pickingMode = PickingMode.Position;
+        if (btnCancel != null)
+            btnCancel.pickingMode = PickingMode.Position;
 
 
     }
@@ -408,19 +419,8 @@ public class GameHUDController : MonoBehaviour
         // Nút X (Cancel) = HỦY HOẠT ẢNH đang chạy (chặt/đào/cuốc/tưới/câu...).
         btnCancel?.RegisterCallback<ClickEvent>(evt =>
         {
-            if (FishingOverlayController.Instance != null && FishingOverlayController.Instance.IsAutoFishing)
-            {
-                FishingOverlayController.Instance.CancelFishingFromHUD();
-                return;
-            }
-
-            if (YWonderLand.Environment.FarmInteractionController.Instance != null &&
-                YWonderLand.Environment.FarmInteractionController.Instance.CancelTimedActionFromHUD())
-            {
-                return;
-            }
-
-            if (PlayerController.Instance != null) PlayerController.Instance.CancelAction();
+            TryCancelCurrentActionFromHUD();
+            evt.StopPropagation();
         });
 
         btnJump?.RegisterCallback<ClickEvent>(evt =>
@@ -1048,10 +1048,37 @@ public class GameHUDController : MonoBehaviour
 
     // Nút X (hủy hoạt ảnh) chỉ hiện khi nhân vật đang khóa trong một hành động.
     // Đặt TRƯỚC mọi early-return phụ thuộc bàn phím trong Update() để chạy cả trên mobile.
+    private bool TryCancelCurrentActionFromHUD()
+    {
+        if (FishingOverlayController.Instance != null && FishingOverlayController.Instance.IsAutoFishing)
+        {
+            FishingOverlayController.Instance.CancelFishingFromHUD();
+            return true;
+        }
+
+        if (YWonderLand.Environment.FarmInteractionController.Instance != null &&
+            YWonderLand.Environment.FarmInteractionController.Instance.CancelTimedActionFromHUD())
+        {
+            return true;
+        }
+
+        if (PlayerController.Instance != null &&
+            PlayerController.Instance.IsBusy &&
+            !PlayerController.Instance.IsJoystickCancelableEmote)
+        {
+            PlayerController.Instance.CancelAction();
+            return true;
+        }
+
+        return false;
+    }
+
     private void UpdateCancelButton()
     {
         if (rightActionsContainer == null) return;
-        bool busy = PlayerController.Instance != null && PlayerController.Instance.IsBusy;
+        bool busy = PlayerController.Instance != null &&
+            PlayerController.Instance.IsBusy &&
+            !PlayerController.Instance.IsJoystickCancelableEmote;
         bool show = fishingCancelMode || busy;
         rightActionsContainer.EnableInClassList("hud-right-actions--fishing", fishingCancelMode);
         rightActionsContainer.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
