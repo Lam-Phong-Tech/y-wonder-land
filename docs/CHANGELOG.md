@@ -5,6 +5,23 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-07-08] — Shop popup mobile dễ đọc hơn
+
+### Changed
+- `ShopPopupController` tự gắn class `shop-mobile` khi chạy trên mobile build để shop dùng mật độ riêng cho điện thoại.
+- `ShopPopup.uss` thêm layout mobile giữ khung popup gần kích thước cũ, nhưng tăng card sản phẩm, icon, tên, giá/số lượng, nút +/- và nút mua/bán; mỗi màn hình hiển thị ít sản phẩm hơn và dùng scroll để xem tiếp.
+- Bật preview layout shop mobile trong Editor để test ngay trong Play Mode.
+- Filter shop nay đổi theo mode/shop hiện tại: Fish Shop dùng nhãn `Cá`, Mini Garden dùng `Nông sản`, tab Bán không kéo filter từ tab Mua.
+- Bỏ `gift_box_01` khỏi Fish Shop và sửa generator để không sinh lại quà trong shop cá.
+- Farm Item Shop được mở lại bằng cách trả `comingSoon = 0`.
+- `task.md` đã ghi nhận trigger cửa hàng farm/city được chỉnh scene và ShopPopup mobile đang chờ APK/EXE test.
+
+### Test cần làm
+- Build APK/EXE: mở các shop chính ở Farm/City, kiểm card/icon/chữ/nút dễ đọc/dễ bấm hơn.
+- Kiểm danh sách shop vẫn scroll được, chọn vật phẩm vẫn hiện panel chi tiết đúng, mua/bán vẫn cộng/trừ Point và inventory như trước.
+- Kiểm popup shop không che vỡ nút X, sidebar filter, panel chi tiết trên các máy điện thoại mục tiêu.
+
+---
 ## [2026-07-07] — HUD mobile lớn hơn, popup có vùng an toàn cho nút X
 
 ### Changed

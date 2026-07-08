@@ -212,3 +212,203 @@
 .shop-btn-action--sell { background-color: var(--color-accent-blue); color: var(--color-mystic-black); }
 .shop-btn-action--sell:hover { background-color: #6BC0F6; }
 .shop-btn-action--sell:active { background-color: #3886B8; scale: 0.97; }
+
+/* === MOBILE SHOP DENSITY ===
+   Keep the popup frame close to desktop size; enlarge product content so fewer
+   items fit per view and the ScrollView carries the rest. */
+.shop-mobile .shop-panel {
+    width: 1024px; height: 600px;
+    max-width: 96%; max-height: 92%;
+}
+
+.shop-mobile .shop-header {
+    min-height: 80px;
+    padding: 24px 20px;
+}
+
+.shop-mobile .shop-header-title {
+    font-size: 30px;
+    letter-spacing: 1px;
+    left: 220px; right: 72px;
+}
+
+.shop-mobile .shop-balance-pill {
+    left: 24px;
+    padding: 8px 16px;
+}
+
+.shop-mobile .shop-balance-icon { font-size: 18px; }
+.shop-mobile .shop-balance-value { font-size: 16px; }
+
+.shop-mobile .shop-close-btn-container { right: 16px; top: 16px; }
+.shop-mobile .shop-close-btn {
+    width: 44px; height: 44px;
+    font-size: 20px;
+}
+
+.shop-mobile .shop-sidebar {
+    width: 168px;
+    padding: 18px 14px;
+}
+
+.shop-mobile .shop-sidebar-section {
+    font-size: 13px;
+    margin-bottom: 8px; margin-top: 6px; padding-bottom: 6px;
+    letter-spacing: 0;
+}
+
+.shop-mobile .shop-mode-tab,
+.shop-mobile .shop-filter {
+    min-height: 38px;
+    padding: 8px 10px;
+    margin-bottom: 5px;
+    font-size: 15px;
+    -unity-text-align: middle-center;
+}
+
+.shop-mobile .shop-grid-area {
+    padding: 14px;
+}
+
+.shop-mobile .shop-grid-scroll {
+    flex-grow: 1;
+    width: 100%;
+}
+
+.shop-mobile .shop-grid-scroll .unity-scroller--horizontal {
+    display: none;
+}
+
+.shop-mobile .shop-grid {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    justify-content: flex-start;
+}
+
+.shop-mobile .shop-item-shadow {
+    width: 168px; height: 210px;
+    margin: 6px;
+}
+
+.shop-mobile .shop-item {
+    width: 168px; height: 210px;
+    border-radius: 14px;
+    padding: 12px 10px;
+}
+
+.shop-mobile .shop-item:hover {
+    scale: 1;
+}
+
+.shop-mobile .shop-item:active {
+    scale: 0.98;
+}
+
+.shop-mobile .shop-item-icon {
+    width: 108px; height: 108px;
+    border-radius: 14px;
+    margin-bottom: 10px;
+}
+
+.shop-mobile .shop-item-icon-text {
+    font-size: 56px;
+}
+
+.shop-mobile .shop-item-icon-image {
+    width: 100px; height: 100px;
+}
+
+.shop-mobile .shop-item-name {
+    font-size: 18px;
+    max-width: 146px;
+    height: 44px;
+    white-space: normal;
+    -unity-text-align: middle-center;
+    margin-bottom: 6px;
+}
+
+.shop-mobile .shop-item-price {
+    font-size: 16px;
+    -unity-text-align: middle-center;
+}
+
+.shop-mobile .shop-detail-panel {
+    width: 220px;
+    margin: 14px 14px 14px 0;
+    padding: 14px;
+}
+
+.shop-mobile .shop-detail-icon-wrap {
+    width: 80px; height: 80px;
+    margin-bottom: 8px;
+}
+
+.shop-mobile .shop-detail-icon { font-size: 40px; }
+.shop-mobile .shop-detail-icon-image { width: 72px; height: 72px; }
+
+.shop-mobile .shop-detail-name {
+    font-size: 17px;
+    margin-bottom: 6px;
+}
+
+.shop-mobile .shop-price-row {
+    margin-bottom: 8px;
+}
+
+.shop-mobile .shop-price-icon,
+.shop-mobile .shop-price-text {
+    font-size: 16px;
+}
+
+.shop-mobile .shop-detail-divider {
+    margin-bottom: 8px;
+}
+
+.shop-mobile .shop-detail-desc {
+    font-size: 13px;
+    margin-bottom: 8px;
+}
+
+.shop-mobile .shop-detail-owned-badge {
+    font-size: 13px;
+    margin-bottom: 10px;
+    padding: 7px 14px;
+}
+
+.shop-mobile .shop-qty-row {
+    margin-bottom: 10px;
+}
+
+.shop-mobile .shop-qty-btn {
+    width: 44px; height: 44px;
+    border-radius: 22px;
+    font-size: 24px;
+}
+
+.shop-mobile .shop-qty-input {
+    width: 72px; height: 44px;
+    margin: 0 10px;
+}
+
+.shop-mobile .shop-qty-input .unity-text-field__input {
+    font-size: 18px;
+}
+
+.shop-mobile .shop-total-row {
+    margin-bottom: 10px;
+    padding: 9px 12px;
+}
+
+.shop-mobile .shop-total-label,
+.shop-mobile .shop-total-value {
+    font-size: 17px;
+}
+
+.shop-mobile .shop-btn-action {
+    min-height: 52px;
+    padding: 12px 18px;
+    font-size: 18px;
+    letter-spacing: 0;
+}

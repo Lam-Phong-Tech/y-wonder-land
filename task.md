@@ -23,7 +23,7 @@
 - `[~]` Chanh dây rule mới từ anh: `200 USDT / 20 cây` là giá cả cụm 20 cây; một lần gieo phải tốn 20 hạt và khi thu hoạch nhận sản phẩm tương ứng với 20 hạt đã gieo. Code hiện đang là 1 seed chiếm 20 ô, chưa phải consume 20 seed; cần sửa logic/data khi triển khai cây chanh dây.
 
 #### C. Nông trại / Farm scene và cửa hàng
-- `[ ]` Các cửa hàng trong game phải hiển thị vật phẩm và câu chữ to hơn khoảng 3 lần so với hiện tại, đặc biệt trên điện thoại.
+- `[~]` Các cửa hàng trong game phải hiển thị vật phẩm và câu chữ to hơn khoảng 3 lần so với hiện tại, đặc biệt trên điện thoại: đã thêm layout mobile riêng cho ShopPopup theo hướng giữ khung popup gần kích thước cũ, chỉ làm card/icon/chữ/giá/nút thao tác lớn hơn để mỗi màn hình hiện ít sản phẩm hơn và scroll xem tiếp. Cập nhật 08/07: bật preview layout lớn trong Editor để anh test ngay, sửa filter theo đúng mode/shop hiện tại, bỏ `gift_box_01` khỏi Fish Shop và mở lại Farm Item Shop (`comingSoon = 0`). Chưa chốt xong cho tới khi anh test thấy ổn.
 - `[x]` Sửa trigger cửa hàng ở farm và city: anh đã thu/đặt lại trigger vừa vùng mặt trước cửa hàng để chỉ đứng đúng khu vực cửa mới hiện vật phẩm/vật nuôi/shop; khi đã vào sâu hơn trong vùng cửa thì UI vẫn phải giữ, không bị mất. Cần test lại nhanh trên APK/EXE sau build.
 - `[ ]` Thêm 5 cây xanh trong trang trại để người chơi chặt cây và nhận gỗ.
 - `[ ]` Nhân vật phải có bóng người rõ ràng khi di chuyển trong scene.

@@ -44625,7 +44625,7 @@ MonoBehaviour:
   service: 0
   shopData: {fileID: 11400000, guid: 1e1d781804aaaad418d9d6feec409253, type: 2}
   onlyDuringGameplay: 1
-  comingSoon: 1
+  comingSoon: 0
   nameTagTarget: {fileID: 1148050216}
   shopLabel: "C\u1EEDa h\xE0ng V\u1EADt ph\u1EA9m"
   nameTagHeight: 3
@@ -127665,6 +127665,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShopPopupController
   shopDocument: {fileID: 1326651971}
+  previewMobileShopLayoutInEditor: 1
 --- !u!64 &1326849486
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -151424,8 +151425,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.16386698, y: 0.044771496, z: 0.08762022}
-  m_Center: {x: 0.0012847137, y: -0.0338626, z: -0.008229154}
+  m_Size: {x: 0.16849191, y: 0.052319843, z: 0.08762022}
+  m_Center: {x: 0.0008125114, y: -0.03763674, z: -0.008229155}
 --- !u!114 &1768604053
 MonoBehaviour:
   m_ObjectHideFlags: 0

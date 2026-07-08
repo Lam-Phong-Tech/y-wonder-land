@@ -1,5 +1,22 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-07-08 (Mobile shop item readability)
+
+### Changed
+- `ShopPopupController` now applies a `shop-mobile` class on mobile builds, with an Editor preview toggle for layout checks.
+- `ShopPopup.uss` adds a mobile-specific shop density pass that keeps the popup frame close to the original size while enlarging item cards, icons, names, price/owned labels, quantity controls, and buy/sell action buttons.
+- Shop mobile preview is enabled in Editor Play Mode so the layout can be checked without making a phone build.
+- Shop filters now follow the current mode/shop context: Fish Shop labels `food` as fish, Mini Garden labels it as farm produce, and Sell mode no longer keeps categories that only belong to Buy mode.
+- Removed `gift_box_01` from Fish Shop data and `ShopDataGenerator` so gifts do not appear in the fish buyer.
+- Reopened the Farm Item Shop by setting its `ShopZoneTrigger.comingSoon` flag back to false.
+- The shop grid intentionally shows fewer products per view on phones and relies on scroll for the rest, matching the customer's "bigger items" intent without scaling the whole popup 3x.
+- `task.md` records the farm/city shop trigger scene adjustment and marks the mobile shop popup resize as implemented pending APK/EXE testing.
+
+### Needs Test
+- On APK/EXE, open the main Farm/City shops and verify item cards/icons/text/buttons are easier to read and tap.
+- Confirm shop lists still scroll, item selection/detail works, and buy/sell still updates Point and inventory.
+- Confirm the enlarged shop layout does not clip the close button, sidebar filters, or detail panel on target phones.
+
 ## [Unreleased] - 2026-07-07 (Mobile HUD density and popup safe inset)
 
 ### Changed

@@ -49,6 +49,8 @@
                         <ui:Button name="FilterAnimals" text="Vật nuôi" class="shop-filter" />
                         <ui:Button name="FilterTools" text="Dụng cụ" class="shop-filter" />
                         <ui:Button name="FilterItems" text="Vật phẩm" class="shop-filter" />
+                        <ui:Button name="FilterFood" text="Cá" class="shop-filter" />
+                        <ui:Button name="FilterMaterials" text="Đá quý" class="shop-filter" />
                     </ui:VisualElement>
 
                     <!-- Middle: Items Grid -->
