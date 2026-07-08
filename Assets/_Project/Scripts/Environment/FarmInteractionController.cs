@@ -83,6 +83,8 @@ namespace YWonderLand.Environment
         [SerializeField] private int resourceExp = 5;
         [Tooltip("EXP nhận mỗi lần ĐÀO KHOÁNG xong (khách chốt 22/06: 15).")]
         [SerializeField] private int mineExp = 15;
+        [Tooltip("Số lượt đào khoáng miễn phí mỗi ngày (khách chốt: 10).")]
+        [SerializeField] private int dailyMiningTurns = 10;
 
         [Header("Dao da quy (khach chot 29/06)")]
         [SerializeField] private List<GemstoneMiningReward> gemstoneRewards = new List<GemstoneMiningReward>
@@ -106,8 +108,13 @@ namespace YWonderLand.Environment
         private FarmAnimal pendingFeedAnimal; // Con vật đang chờ chọn thức ăn từ túi
         private List<BuildSurfaceCell> pendingEnclosure; // Vùng quây (rào) đang chờ thả thú
         private List<BuildSurfaceCell> pendingDemolishEnclosure;
+        private FarmTile pendingDemolishTile;
         private float demolishConfirmTimer;
         private const float DemolishConfirmWindow = 1.25f;
+        private const string MiningLastDateKey = "YW_MiningLastDate";
+        private const string MiningTurnsLeftKey = "YW_MiningTurnsLeft";
+        private int miningTurnsLeft = -1;
+        private float nextMiningLimitToastAt;
         private BuildSurfaceCell hoverEnclosureSeed;     // cache: ô đang rê để khỏi flood-fill mỗi frame
         private List<BuildSurfaceCell> hoverEnclosure;   // cache: kết quả vùng quây của ô đang rê
 
@@ -126,6 +133,7 @@ namespace YWonderLand.Environment
             if (merchantInteractRange <= 0f) merchantInteractRange = DefaultInteractionRange;
             if (waterInteractRange <= 0f) waterInteractRange = DefaultGroundInteractRange;
             if (fishingInteractRange <= 0f) fishingInteractRange = DefaultFishingInteractRange;
+            EnsureMiningDailyTurns();
 
             if (mainCamera == null)
                 mainCamera = Camera.main;
@@ -178,9 +186,16 @@ namespace YWonderLand.Environment
             bool done = resource.Harvest(delta);
             if (done)
             {
+                bool minedRock = resource.type == HarvestableResource.ResourceType.Rock;
+                if (minedRock && !ConsumeMiningTurn())
+                {
+                    ScreenToast.Show("Hết lượt đào hôm nay rồi! Mai quay lại nhé.");
+                    return true;
+                }
+
                 int gained = (inv != null && !string.IsNullOrEmpty(yieldId)) ? inv.GetItemQuantity(yieldId) - before : 0;
                 GemstoneMiningReward gemstoneReward = null;
-                if (resource.type == HarvestableResource.ResourceType.Rock && inv != null)
+                if (minedRock && inv != null)
                 {
                     gemstoneReward = RollGemstoneReward();
                     if (gemstoneReward != null)
@@ -189,8 +204,8 @@ namespace YWonderLand.Environment
                     }
                 }
 
-                ShowResourceHarvestToast(resource.type, yieldId, gained, gemstoneReward);
-                int rexp = resource.type == HarvestableResource.ResourceType.Rock ? mineExp : resourceExp;
+                ShowResourceHarvestToast(resource.type, yieldId, gained, gemstoneReward, minedRock ? miningTurnsLeft : -1);
+                int rexp = minedRock ? mineExp : resourceExp;
                 YWonderLand.Managers.ExperienceManager.Instance?.AddEXP(rexp);
                 YWonderLand.Managers.AudioManager.Instance?.PlaySFX("chop");
             }
@@ -236,9 +251,13 @@ namespace YWonderLand.Environment
             HarvestableResource.ResourceType resourceType,
             string yieldId,
             int gained,
-            GemstoneMiningReward gemstoneReward)
+            GemstoneMiningReward gemstoneReward,
+            int miningTurnsRemaining = -1)
         {
             string verb = resourceType == HarvestableResource.ResourceType.Tree ? "Chặt cây" : "Đào khoáng";
+            string miningTurnsSuffix = resourceType == HarvestableResource.ResourceType.Rock && miningTurnsRemaining >= 0
+                ? $"(còn {miningTurnsRemaining}/{Mathf.Max(0, dailyMiningTurns)} lượt hôm nay)"
+                : null;
             if (resourceType == HarvestableResource.ResourceType.Rock && gemstoneReward != null)
             {
                 ItemDefinition gemstoneDef = FoodDb != null ? FoodDb.GetItem(gemstoneReward.itemId) : null;
@@ -248,17 +267,16 @@ namespace YWonderLand.Environment
                 int gemstoneAmount = Mathf.Max(1, gemstoneReward.amount);
                 string rockText = gained > 0 ? $"+{gained} {GetItemDisplayName(yieldId)}, " : string.Empty;
 
-                ScreenToast.ShowInfoWithIcon(
-                    $"Đào trúng: {rockText}+{gemstoneAmount} {gemstoneName}",
-                    gemstoneDef != null ? gemstoneDef.iconTexture : null,
-                    gemstoneDef != null ? gemstoneDef.iconSprite : null,
-                    "Gem");
+                ScreenToast.ShowInfoForItem(
+                    gemstoneReward.itemId,
+                    $"Đào trúng: {rockText}+{gemstoneAmount} {gemstoneName} {miningTurnsSuffix}",
+                    fallbackText: "Gem");
                 Debug.Log($"[Mining] Gem reward: +{gemstoneAmount} {gemstoneReward.itemId}");
                 return;
             }
 
             if (gained > 0)
-                ScreenToast.ShowInfo($"{verb}: +{gained} {GetItemDisplayName(yieldId)}");
+                ScreenToast.ShowItemReward(yieldId, gained, verb, miningTurnsSuffix);
             else
                 ScreenToast.ShowInfo($"{verb} xong!");
         }
@@ -347,6 +365,7 @@ namespace YWonderLand.Environment
 
             currentHoverObject = null;
             currentActions.Clear();
+            currentPromptFromFrontCell = false;
             GameHUDController.Instance?.HideInteractionPrompt();
             if (YWonderLand.UI.ResourceInteractionUIController.Instance != null)
                 YWonderLand.UI.ResourceInteractionUIController.Instance.Hide();
@@ -609,6 +628,30 @@ namespace YWonderLand.Environment
             }
 
             actions.Add(new InteractionAction { keyName = "Click", actionName = actName, onClick = () => PerformTileAction(tile) });
+
+            FarmTile demolishTile = tile.masterTile != null ? tile.masterTile : tile;
+            if (CanDemolishFarmTile(demolishTile))
+            {
+                actions.Add(new InteractionAction
+                {
+                    keyName = "G",
+                    actionName = "H\u1ee7y \u00f4 tr\u1ed3ng",
+                    onClick = () => RequestDemolishFarmTile(demolishTile)
+                });
+            }
+        }
+
+        private bool CanDemolishFarmTile(FarmTile tile)
+        {
+            return ResolvePlacedBuildingRoot(tile) != null;
+        }
+
+        private GameObject ResolvePlacedBuildingRoot(FarmTile tile)
+        {
+            if (tile == null) return null;
+
+            var placed = tile.GetComponentInParent<PlacedBuilding>();
+            return placed != null ? placed.gameObject : null;
         }
 
         private bool IsPenSpawnerInRange(AnimalPenSpawner pen)
@@ -918,23 +961,30 @@ namespace YWonderLand.Environment
                 ClearWorldInteractionStateForSwimming();
                 return;
             }
-            if (UIPopupTracker.AnyOpen) return;
+            if (UIPopupTracker.AnyOpen) return; // Đang mở popup -> ngừng tương tác thế giới (tránh click xuyên qua UI)
 
+            // Pointer = lớp CHUNG cho Mouse (PC) lẫn Touchscreen (mobile) -> chạm tay cũng chạy.
             var pointer = Pointer.current;
             if (pointer == null || mainCamera == null) return;
 
+            // GIỮ nút "Chặt cây"/"Đào khoáng" trên HUD: ngón đang trên UI nên xử lý chặt liên tục TRƯỚC
+            // khi đoạn dưới bỏ qua tương tác (vì con trỏ trên UI). Thả nút -> onHoldEnd gỡ cờ này.
             if (_buttonHeldResource != null)
             {
                 HoldChopResource(_buttonHeldResource);
                 return;
             }
 
+            // NGẮM THEO TÂM MÀN HÌNH (crosshair) cho ỔN ĐỊNH: dùng cả khi pointer đang nằm trên UI
+            // (vd đang giữ joystick), để prompt thế giới vẫn cập nhật theo tâm ngắm.
             bool pointerPressed = pointer.press.wasPressedThisFrame;
             bool pointerOverUI = UnityEngine.EventSystems.EventSystem.current != null &&
                 UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
 
             ClearDirectTapPromptIfOutOfRange();
 
+            // Khi chuột đang khóa/tâm ngắm hoặc mobile tap ngoài UI, click/tap phải kích hoạt action "Click"
+            // đang hiện dưới tâm. Nếu chuột đã được nhả và đang bấm trực tiếp lên UI button thì để UI tự xử lý.
             if (!timedActionActive && TryInvokeCurrentHotkeyAction())
                 return;
 
@@ -947,6 +997,8 @@ namespace YWonderLand.Environment
                     if (YWonderLand.UI.ResourceInteractionUIController.Instance != null)
                         YWonderLand.UI.ResourceInteractionUIController.Instance.Hide();
                 }
+                if (!timedActionActive && useDirectTapInteraction)
+                    RefreshFrontCellInteractionPrompt();
                 return;
             }
 
@@ -967,7 +1019,11 @@ namespace YWonderLand.Environment
             }
             if (timedActionActive) return;
 
-            if (!useDirectTapInteraction)
+            if (useDirectTapInteraction)
+            {
+                RefreshFrontCellInteractionPrompt();
+            }
+            else
             {
                 Vector2 aimPos = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
                 HandleHover(aimPos);
@@ -986,16 +1042,19 @@ namespace YWonderLand.Environment
                 }
             }
 
+            // Timeout hủy chuồng: nhấn 2 lần trong thời gian ngắn
             if (demolishConfirmTimer > 0f)
             {
                 demolishConfirmTimer -= Time.deltaTime;
                 if (demolishConfirmTimer <= 0f)
                 {
                     pendingDemolishEnclosure = null;
+                    pendingDemolishTile = null;
                     demolishConfirmTimer = 0f;
                 }
             }
 
+            // Xử lý Phím tắt Tương tác (PC)
             TryInvokeCurrentHotkeyAction();
         }
 
@@ -1076,6 +1135,10 @@ namespace YWonderLand.Environment
 
             currentHoverObject = null;
             currentActions.Clear();
+            currentPromptFromFrontCell = false;
+            pendingDemolishEnclosure = null;
+            pendingDemolishTile = null;
+            demolishConfirmTimer = 0f;
 
             if (GameHUDController.Instance != null)
                 GameHUDController.Instance.HideInteractionPrompt();
@@ -1100,6 +1163,175 @@ namespace YWonderLand.Environment
 
             if (!IsDirectTapTargetStillInRange(currentHoverObject))
                 ClearWorldInteractionState();
+        }
+
+        private void RefreshFrontCellInteractionPrompt()
+        {
+            if (!useDirectTapInteraction || timedActionActive)
+                return;
+
+            // A direct-tapped tree/rock/NPC prompt should stay until it leaves range.
+            if (!currentPromptFromFrontCell && currentHoverObject != null && currentActions != null && currentActions.Count > 0)
+                return;
+
+            var selector = FrontBuildCellSelector.Instance;
+            var cell = selector != null ? selector.CurrentCell : null;
+            if (cell == null)
+            {
+                ClearFrontCellInteractionPrompt();
+                return;
+            }
+
+            var foundActions = new List<InteractionAction>();
+            GameObject foundObj = null;
+
+            if (!TryBuildFrontCellEnclosurePrompt(cell, foundActions, out foundObj) &&
+                !TryBuildFrontCellTilePrompt(cell, foundActions, out foundObj) &&
+                !TryBuildFrontCellWaterPrompt(cell, foundActions, out foundObj))
+            {
+                ClearFrontCellInteractionPrompt();
+                return;
+            }
+
+            if (foundActions.Count == 0 || foundObj == null)
+            {
+                ClearFrontCellInteractionPrompt();
+                return;
+            }
+
+            string actionSignature = BuildActionSignature(foundActions);
+            bool hadNoCurrentActions = currentActions == null || currentActions.Count == 0;
+            bool shouldRefreshPrompt =
+                hadNoCurrentActions ||
+                !currentPromptFromFrontCell ||
+                foundObj != currentHoverObject ||
+                actionSignature != lastActionSignature;
+
+            currentHoverObject = foundObj;
+            lastAnimalState = FarmAnimal.AnimalState.Healthy;
+            lastAnimalProductReady = false;
+            lastActionSignature = actionSignature;
+            currentActions = foundActions;
+            currentPromptFromFrontCell = true;
+
+            if (shouldRefreshPrompt && GameHUDController.Instance != null)
+                GameHUDController.Instance.ShowInteractionPrompts(foundActions);
+        }
+
+        private bool TryBuildFrontCellEnclosurePrompt(BuildSurfaceCell cell, List<InteractionAction> actions, out GameObject foundObj)
+        {
+            foundObj = null;
+            if (cell == null || !cell.HasFence)
+                return false;
+
+            if (cell != hoverEnclosureSeed || hoverEnclosure == null)
+            {
+                hoverEnclosureSeed = cell;
+                hoverEnclosure = PenEnclosure.FindPen(cell);
+            }
+
+            if (hoverEnclosure == null || !IsEnclosureInRange(hoverEnclosure, true))
+                return false;
+
+            foundObj = cell.gameObject;
+            AddEnclosureActions(hoverEnclosure, actions);
+            return actions != null && actions.Count > 0;
+        }
+
+        private bool TryBuildFrontCellTilePrompt(BuildSurfaceCell cell, List<InteractionAction> actions, out GameObject foundObj)
+        {
+            foundObj = null;
+            FarmTile tile = ResolveFarmTileFromCell(cell);
+            if (tile == null || !IsTileInRange(tile, true))
+                return false;
+
+            foundObj = tile.gameObject;
+            AddTileAction(tile, actions);
+            return actions != null && actions.Count > 0;
+        }
+
+        private bool TryBuildFrontCellWaterPrompt(BuildSurfaceCell cell, List<InteractionAction> actions, out GameObject foundObj)
+        {
+            foundObj = null;
+            WaterSource waterSource = FindWaterSourceNearFrontCell(cell);
+            if (waterSource == null)
+                return false;
+
+            foundObj = waterSource.gameObject;
+            var ws = waterSource;
+            actions.Add(new InteractionAction { keyName = "Click", actionName = "M\u00fac n\u01b0\u1edbc", onClick = () => ScoopWater(ws) });
+            return true;
+        }
+
+        private FarmTile ResolveFarmTileFromCell(BuildSurfaceCell cell)
+        {
+            if (cell == null) return null;
+
+            FarmTile tile = cell.GetComponent<FarmTile>();
+            if (tile != null) return tile;
+
+            tile = cell.GetComponentInParent<FarmTile>();
+            if (tile != null) return tile;
+
+            tile = cell.GetComponentInChildren<FarmTile>();
+            if (tile != null) return tile;
+
+            if (cell.Occupant == null) return null;
+
+            tile = cell.Occupant.GetComponent<FarmTile>();
+            if (tile != null) return tile;
+
+            return cell.Occupant.GetComponentInChildren<FarmTile>();
+        }
+
+        private WaterSource FindWaterSourceNearFrontCell(BuildSurfaceCell cell)
+        {
+            if (cell == null) return null;
+
+            Vector2 footprint = cell.FootprintSize;
+            float radius = Mathf.Max(0.85f, Mathf.Max(footprint.x, footprint.y) * 1.1f);
+            Vector3 center = cell.SurfaceCenter + Vector3.up * 0.2f;
+
+            int hitCount = Physics.OverlapSphereNonAlloc(
+                center,
+                radius,
+                frontCellOverlapResults,
+                InteractionLayerMask,
+                QueryTriggerInteraction.Collide);
+
+            WaterSource best = null;
+            float bestDistance = float.PositiveInfinity;
+            for (int i = 0; i < hitCount; i++)
+            {
+                Collider col = frontCellOverlapResults[i];
+                if (col == null) continue;
+
+                WaterSource water = col.GetComponentInParent<WaterSource>();
+                if (water == null || !IsWaterSourceInRange(water, true))
+                    continue;
+
+                float distance = HorizontalDistance(center, SafeClosestPoint(col, center));
+                if (distance < bestDistance)
+                {
+                    bestDistance = distance;
+                    best = water;
+                }
+            }
+
+            return best;
+        }
+
+        private void ClearFrontCellInteractionPrompt()
+        {
+            if (!currentPromptFromFrontCell)
+                return;
+
+            currentHoverObject = null;
+            lastActionSignature = "";
+            currentActions.Clear();
+            currentPromptFromFrontCell = false;
+            if (GameHUDController.Instance != null)
+                GameHUDController.Instance.HideInteractionPrompt();
         }
 
         private bool IsDirectTapTargetStillInRange(GameObject target)
@@ -1152,8 +1384,10 @@ namespace YWonderLand.Environment
         private RaycastHit[] hoverHitResults = new RaycastHit[64];
         private RaycastHit[] directTapAssistHitResults = new RaycastHit[48];
         private RaycastHit[] tileAimHitResults = new RaycastHit[32];
+        private Collider[] frontCellOverlapResults = new Collider[32];
         private readonly List<Collider> colliderDistanceBuffer = new List<Collider>(16);
         private GameObject currentHoverObject = null;
+        private bool currentPromptFromFrontCell;
         private FarmAnimal.AnimalState lastAnimalState;
         private bool lastAnimalProductReady;
         private string lastActionSignature = "";
@@ -1297,6 +1531,24 @@ namespace YWonderLand.Environment
                     }
                     break;
                 }
+                else if (ResolveBuildSurfaceCellFromHit(hit) is BuildSurfaceCell directPenCell && directPenCell != null && directPenCell.HasFence)
+                {
+                    if (directPenCell != hoverEnclosureSeed)
+                    {
+                        hoverEnclosureSeed = directPenCell;
+                        hoverEnclosure = PenEnclosure.FindPen(directPenCell);
+                    }
+                    if (hoverEnclosure != null)
+                    {
+                        var encl = hoverEnclosure;
+                        if (IsEnclosureInRange(encl, directTap))
+                        {
+                            foundObj = directPenCell.gameObject;
+                            AddEnclosureActions(encl, foundActions);
+                        }
+                    }
+                    break;
+                }
                 else if (ResolveFarmTileFromHit(hit) is FarmTile tile && tile != null)
                 {
                     if (!IsTileInRange(tile, directTap))
@@ -1387,6 +1639,7 @@ namespace YWonderLand.Environment
                 lastAnimalProductReady = currentHasProduct;
                 lastActionSignature = actionSignature;
                 currentActions = foundActions;
+                currentPromptFromFrontCell = false;
 
                 if (shouldRefreshPrompt)
                 {
@@ -1400,6 +1653,7 @@ namespace YWonderLand.Environment
                     currentHoverObject = null;
                     lastActionSignature = "";
                     currentActions.Clear();
+                    currentPromptFromFrontCell = false;
                     if (GameHUDController.Instance != null) GameHUDController.Instance.HideInteractionPrompt();
                 }
             }
@@ -1432,6 +1686,49 @@ namespace YWonderLand.Environment
         {
             var itm = IslandTravelManager.Instance;
             return itm != null && (itm.CurrentIslandId == "city" || itm.CurrentIslandId == "mine");
+        }
+
+        private void EnsureMiningDailyTurns()
+        {
+            int maxTurns = Mathf.Max(0, dailyMiningTurns);
+            string today = System.DateTime.Now.ToString("yyyy-MM-dd");
+            string lastDate = PlayerPrefs.GetString(MiningLastDateKey, "");
+
+            if (lastDate != today)
+            {
+                miningTurnsLeft = maxTurns;
+                PlayerPrefs.SetString(MiningLastDateKey, today);
+                PlayerPrefs.SetInt(MiningTurnsLeftKey, miningTurnsLeft);
+                PlayerPrefs.Save();
+                return;
+            }
+
+            if (miningTurnsLeft < 0)
+                miningTurnsLeft = Mathf.Clamp(PlayerPrefs.GetInt(MiningTurnsLeftKey, maxTurns), 0, maxTurns);
+        }
+
+        private bool HasMiningTurnsRemaining(bool showToast)
+        {
+            EnsureMiningDailyTurns();
+            if (miningTurnsLeft > 0) return true;
+
+            if (showToast && Time.unscaledTime >= nextMiningLimitToastAt)
+            {
+                ScreenToast.Show("Hết lượt đào hôm nay rồi! Mai quay lại nhé.");
+                nextMiningLimitToastAt = Time.unscaledTime + 1.5f;
+            }
+            return false;
+        }
+
+        private bool ConsumeMiningTurn()
+        {
+            EnsureMiningDailyTurns();
+            if (miningTurnsLeft <= 0) return false;
+
+            miningTurnsLeft--;
+            PlayerPrefs.SetInt(MiningTurnsLeftKey, miningTurnsLeft);
+            PlayerPrefs.Save();
+            return true;
         }
 
         private bool IsPlayerSwimming()
@@ -1467,6 +1764,7 @@ namespace YWonderLand.Environment
 
             currentHoverObject = null;
             currentActions.Clear();
+            currentPromptFromFrontCell = false;
             GameHUDController.Instance?.HideInteractionPrompt();
 
             PlayerController player = PlayerController.Instance;
@@ -1668,7 +1966,7 @@ namespace YWonderLand.Environment
                 // Vụ cuối: HarvestProduct tự huỷ con vật (làm thịt) + đã có toast "Làm thịt..." riêng.
                 // Chỉ báo thu sản phẩm khi con vật CÒN SỐNG để khỏi đè toast làm thịt.
                 if (animal != null && !string.IsNullOrEmpty(itemId) && amount > 0)
-                    ScreenToast.ShowInfo($"Thu hoạch: +{amount} {GetItemDisplayName(itemId)}");
+                    ScreenToast.ShowItemReward(itemId, amount, "Thu hoạch");
             }
         }
 
@@ -1680,6 +1978,8 @@ namespace YWonderLand.Environment
                 ScreenToast.Show("Chỉ đào đá được ở Thành phố hoặc Đảo mỏ thôi!");
                 return;
             }
+            if (resource != null && resource.type == HarvestableResource.ResourceType.Rock && !HasMiningTurnsRemaining(true))
+                return;
 
             if (GetResourceDistanceToPlayer(resource) > GetResourceActionRange(resource))
                 return;
@@ -1690,6 +1990,7 @@ namespace YWonderLand.Environment
         private void StartResourceTimedAction(HarvestableResource resource)
         {
             if (resource == null || !resource.isHarvestable) return;
+            if (resource.type == HarvestableResource.ResourceType.Rock && !HasMiningTurnsRemaining(true)) return;
 
             currentHarvestTarget = resource;
             resource.CancelHarvest();
@@ -1731,6 +2032,11 @@ namespace YWonderLand.Environment
 
             PlayerController player = PlayerController.Instance;
             if (GetResourceDistanceToPlayer(resource) > GetResourceActionRange(resource)) return; // quá xa -> khựng
+            if (resource.type == HarvestableResource.ResourceType.Rock && !HasMiningTurnsRemaining(true))
+            {
+                _buttonHeldResource = null;
+                return;
+            }
 
             _chopAnimTimer -= Time.deltaTime;
             if (_chopAnimTimer <= 0f && player != null)
@@ -1790,6 +2096,7 @@ namespace YWonderLand.Environment
                 {
                     // Đào đá chỉ ở City hoặc Mine; bỏ qua tảng đá nếu đang ở đảo khác.
                     if (resource.type == HarvestableResource.ResourceType.Rock && !IsMiningAllowedHere()) continue;
+                    if (resource.type == HarvestableResource.ResourceType.Rock && !HasMiningTurnsRemaining(true)) return;
 
                     // Quá xa thì không cho chặt/đập (đo tới điểm chạm, khớp với lúc hiện gợi ý)
                     Vector3 holdPlayerPos = PlayerController.Instance != null ? PlayerController.Instance.transform.position : transform.position;
@@ -1896,6 +2203,16 @@ namespace YWonderLand.Environment
                 if (waterSrcClick != null)
                 {
                     if (IsWaterSourceInRange(waterSrcClick)) ScoopWater(waterSrcClick);
+                    return;
+                }
+
+                // Chuồng từ HÀNG RÀO: ưu tiên trước FarmTile để collider đất bên dưới không ăn mất tap/click.
+                var penCellBeforeTile = ResolveBuildSurfaceCellFromHit(hit);
+                if (penCellBeforeTile != null && penCellBeforeTile.HasFence)
+                {
+                    var pen = PenEnclosure.FindPen(penCellBeforeTile);
+                    if (pen != null && IsEnclosureInRange(pen) && AnimalInteractionPopupController.Instance != null)
+                        AnimalInteractionPopupController.Instance.ShowEnclosure(pen);
                     return;
                 }
 
@@ -2163,14 +2480,87 @@ namespace YWonderLand.Environment
             if (pendingDemolishEnclosure != null && IsSameEnclosure(pendingDemolishEnclosure, encl))
             {
                 pendingDemolishEnclosure = null;
+                pendingDemolishTile = null;
                 demolishConfirmTimer = 0f;
                 DemolishEnclosure(encl);
                 return;
             }
 
+            pendingDemolishTile = null;
             pendingDemolishEnclosure = new List<BuildSurfaceCell>(encl);
             demolishConfirmTimer = DemolishConfirmWindow;
             ScreenToast.Show("Nhấn hủy chuồng lần nữa để xác nhận.");
+        }
+
+        private void RequestDemolishFarmTile(FarmTile tile)
+        {
+            if (tile == null) return;
+
+            GameObject building = ResolvePlacedBuildingRoot(tile);
+            if (building == null)
+            {
+                ScreenToast.Show("Ch\u1ec9 h\u1ee7y \u0111\u01b0\u1ee3c \u00f4 tr\u1ed3ng \u0111\u00e3 x\u00e2y b\u1eb1ng Build Mode.");
+                return;
+            }
+
+            if (ResolvePlacedBuildingRoot(pendingDemolishTile) == building)
+            {
+                pendingDemolishTile = null;
+                pendingDemolishEnclosure = null;
+                demolishConfirmTimer = 0f;
+                DemolishFarmTile(tile, building);
+                return;
+            }
+
+            pendingDemolishEnclosure = null;
+            pendingDemolishTile = tile;
+            demolishConfirmTimer = DemolishConfirmWindow;
+            ScreenToast.Show("Nh\u1ea5n h\u1ee7y \u00f4 tr\u1ed3ng l\u1ea7n n\u1eefa \u0111\u1ec3 x\u00e1c nh\u1eadn.");
+        }
+
+        private void DemolishFarmTile(FarmTile tile, GameObject building = null)
+        {
+            if (tile == null) return;
+            if (!IsTileInRange(tile, useDirectTapInteraction))
+            {
+                ScreenToast.Show("\u0110\u1ee9ng g\u1ea7n \u00f4 tr\u1ed3ng h\u01a1n \u0111\u1ec3 h\u1ee7y.");
+                return;
+            }
+
+            building ??= ResolvePlacedBuildingRoot(tile);
+            if (building == null) return;
+            string buildingName = building.name;
+
+            bool hadCrop = tile.currentState == FarmTile.TileState.Planted ||
+                           tile.currentState == FarmTile.TileState.Watered ||
+                           tile.currentState == FarmTile.TileState.Ripe;
+
+            if (pendingPlantTile != null && ResolvePlacedBuildingRoot(pendingPlantTile) == building)
+                pendingPlantTile = null;
+
+            pendingDemolishTile = null;
+            pendingDemolishEnclosure = null;
+            demolishConfirmTimer = 0f;
+
+            BuildSurfaceCell.ClearOccupant(building);
+            Destroy(building);
+
+            hoverEnclosureSeed = null;
+            hoverEnclosure = null;
+            pendingEnclosure = null;
+            currentHoverObject = null;
+            currentActions.Clear();
+            lastActionSignature = "";
+            currentPromptFromFrontCell = false;
+            GameHUDController.Instance?.HideInteractionPrompt();
+            if (YWonderLand.UI.ResourceInteractionUIController.Instance != null)
+                YWonderLand.UI.ResourceInteractionUIController.Instance.Hide();
+
+            var persistence = Object.FindFirstObjectByType<BuildPersistence>(FindObjectsInactive.Include);
+            persistence?.SaveBuildings();
+
+            ScreenToast.ShowInfo(hadCrop ? "\u0110\u00e3 h\u1ee7y \u00f4 tr\u1ed3ng v\u00e0 c\u00e2y tr\u00ean \u00f4." : "\u0110\u00e3 h\u1ee7y \u00f4 tr\u1ed3ng.");
+            Debug.Log($"[FarmInteraction] Huy o trong: {buildingName}, hadCrop={hadCrop}.");
         }
 
         private bool IsSameEnclosure(List<BuildSurfaceCell> a, List<BuildSurfaceCell> b)
@@ -2295,6 +2685,7 @@ namespace YWonderLand.Environment
             currentHoverObject = null;
             currentActions.Clear();
             lastActionSignature = "";
+            currentPromptFromFrontCell = false;
             if (GameHUDController.Instance != null) GameHUDController.Instance.HideInteractionPrompt();
             if (YWonderLand.UI.ResourceInteractionUIController.Instance != null)
                 YWonderLand.UI.ResourceInteractionUIController.Instance.Hide();
@@ -2386,28 +2777,31 @@ namespace YWonderLand.Environment
             // Remove seed from inventory
             var inv = YWonderLand.Managers.InventoryManager.Instance;
             bool seedConsumed = false;
+            int seedCost = GetSeedCostForPlanting(itemId);
             if (inv != null)
             {
-                if (inv.GetItemQuantity(itemId) <= 0)
+                int owned = inv.GetItemQuantity(itemId);
+                if (owned < seedCost)
                 {
-                    Debug.Log($"[FarmInteraction] No {itemId} in inventory! Auto-giving 1 for demo.");
-                    inv.AddItem(itemId, 1);
+                    ScreenToast.Show($"Cần {seedCost} {GetItemDisplayName(itemId)} để trồng.");
+                    return;
                 }
-                seedConsumed = inv.RemoveItem(itemId, 1);
+                seedConsumed = inv.RemoveItem(itemId, seedCost);
+                if (!seedConsumed) return;
             }
 
             // Đóng túi đồ, rồi MÚA động tác trồng TRƯỚC — gieo hạt SAU khi progress/clip chạy xong.
             if (inventoryPopup != null) inventoryPopup.Hide();
 
-            if (!StartPlantTimedAction(pendingPlantTile, itemId, seedConsumed) && seedConsumed && inv != null)
-                inv.AddItem(itemId, 1);
+            if (!StartPlantTimedAction(pendingPlantTile, itemId, seedConsumed, seedCost) && seedConsumed && inv != null)
+                inv.AddItem(itemId, seedCost);
 
             pendingPlantTile = null;
             pendingSeedId = null;
         }
 
         // Múa động tác Planting xong MỚI thật sự gieo hạt xuống ô đất.
-        private bool StartPlantTimedAction(FarmTile tile, string seedId, bool seedConsumed)
+        private bool StartPlantTimedAction(FarmTile tile, string seedId, bool seedConsumed, int seedConsumedAmount = 1)
         {
             if (tile == null || string.IsNullOrEmpty(seedId)) return false;
 
@@ -2425,14 +2819,23 @@ namespace YWonderLand.Environment
                     }
                     else if (seedConsumed && inv != null)
                     {
-                        inv.AddItem(seedId, 1);
+                        inv.AddItem(seedId, Mathf.Max(1, seedConsumedAmount));
                     }
                 },
                 () =>
                 {
                     if (seedConsumed && inv != null)
-                        inv.AddItem(seedId, 1);
+                        inv.AddItem(seedId, Mathf.Max(1, seedConsumedAmount));
                 });
+        }
+
+        private int GetSeedCostForPlanting(string seedId)
+        {
+            if (string.IsNullOrEmpty(seedId)) return 1;
+
+            var cropDb = Resources.Load<CropDatabase>("CropDatabase");
+            var crop = cropDb != null ? cropDb.GetCropBySeedId(seedId) : null;
+            return crop != null ? Mathf.Max(1, crop.plotSlots) : 1;
         }
 
         // Trồng cây có thể CHIẾM NHIỀU Ô (giàn): cây nhiều ô (vd chanh dây 20 ô) cần thêm ô trống gần nhất.
@@ -2528,7 +2931,7 @@ namespace YWonderLand.Environment
         {
             if (src != null && !IsWaterSourceInRange(src, useDirectTapInteraction))
             {
-                ScreenToast.Show("\u0110\u1ee9ng g\u1ea7n h\u1ed3 h\u01a1n \u0111\u1ec3 m\u00fac n\u01b0\u1edbc.");
+                ScreenToast.Show("Äá»©ng gáº§n há»“ hÆ¡n Ä‘á»ƒ mÃºc nÆ°á»›c.");
                 return;
             }
 
@@ -2537,7 +2940,7 @@ namespace YWonderLand.Environment
             int amt = src != null ? Mathf.Max(1, src.amountPerScoop) : 5;
             inv.AddItem("watering_water_01", amt);
             int total = inv.GetItemQuantity("watering_water_01");
-            ScreenToast.ShowInfo($"Múc được {amt} xô nước! (Tổng: {total})");
+            ScreenToast.ShowItemReward("watering_water_01", amt, "Múc nước", $"(Tổng: {total})");
         }
 
         private void HandleHarvest(FarmTile tile)
@@ -2556,7 +2959,7 @@ namespace YWonderLand.Environment
                 if (inv != null && !string.IsNullOrEmpty(tile.LastFinalProductId) && tile.LastFinalProductAmount > 0)
                 {
                     inv.AddItem(tile.LastFinalProductId, tile.LastFinalProductAmount);
-                    ScreenToast.ShowInfo($"Vụ cuối: +{tile.LastFinalProductAmount} {GetItemDisplayName(tile.LastFinalProductId)}");
+                    ScreenToast.ShowItemReward(tile.LastFinalProductId, tile.LastFinalProductAmount, "Vụ cuối");
                 }
 
                 // Add rewards from CropDefinition
@@ -2590,17 +2993,19 @@ namespace YWonderLand.Environment
                     if (care < 0.99f)
                     {
                         // Thiếu nước → toast đỏ kèm số % giảm (gộp với báo thu hoạch).
-                        ScreenToast.Show($"Thu hoạch: +{amount} {GetItemDisplayName(harvestId)} (thiếu nước -{Mathf.RoundToInt((1f - care) * 100f)}%)");
+                        ScreenToast.ShowInfoForItem(
+                            harvestId,
+                            $"Thu hoạch: +{amount} {GetItemDisplayName(harvestId)} (thiếu nước -{Mathf.RoundToInt((1f - care) * 100f)}%)");
                     }
                     else
                     {
-                        ScreenToast.ShowInfo($"Thu hoạch: +{amount} {GetItemDisplayName(harvestId)}");
+                        ScreenToast.ShowItemReward(harvestId, amount, "Thu hoạch");
                     }
                 }
                 else
                 {
                     // Cây không có CropDefinition (vd cây lâu năm khung tạm) — vẫn báo thu hoạch.
-                    ScreenToast.ShowInfo($"Thu hoạch: +{amount} {GetItemDisplayName(harvestId)}");
+                    ScreenToast.ShowItemReward(harvestId, amount, "Thu hoạch");
                 }
 
                 // Save farm state
