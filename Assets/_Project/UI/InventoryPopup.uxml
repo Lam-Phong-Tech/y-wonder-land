@@ -15,6 +15,9 @@
                 <!-- Header -->
                 <ui:VisualElement class="inventory-header">
                     <ui:Label text="KHO ĐỒ" class="inventory-header-title" />
+                    <ui:VisualElement class="inventory-close-shadow">
+                        <ui:Button name="BtnCloseInventory" text="X" class="inventory-close-btn" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
 
                 <!-- Body: Tabs + Grid -->
@@ -110,11 +113,6 @@
                     <ui:Label name="LblCategory" text="Dụng cụ" class="inventory-info-text" />
                 </ui:VisualElement>
 
-            </ui:VisualElement>
-
-            <!-- Close Button (AFTER panel → renders on top) -->
-            <ui:VisualElement class="inventory-close-shadow">
-                <ui:Button name="BtnCloseInventory" text="X" class="inventory-close-btn" />
             </ui:VisualElement>
 
         </ui:VisualElement>

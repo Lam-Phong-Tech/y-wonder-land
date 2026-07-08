@@ -156,23 +156,23 @@
                         </ui:VisualElement>
                         <!-- Vòng tròn quay (icon quanh vành do Controller dựng) -->
                         <ui:VisualElement name="WheelCircle" class="wheel-circle" />
-                        <!-- Ô giữa hiện quà trúng -->
-                        <ui:VisualElement name="WheelHub" class="wheel-hub wheel-icon-spin" />
+                        <!-- Tâm vòng quay -->
+                        <ui:VisualElement name="WheelHub" class="wheel-hub" />
+                        <ui:Button name="BtnSpin" class="wheel-center-spin-btn" text="" />
                     </ui:VisualElement>
 
                     <ui:Label name="LblWheelResult" class="wheel-result" text="" />
 
                     <ui:VisualElement class="wheel-footer">
                         <ui:Label name="LblSpinsLeft" class="wheel-spins-left" text="Lượt còn: 3/3" />
-                        <ui:Button name="BtnSpin" class="claim-attendance-btn wheel-spin-btn" text="QUAY" />
                     </ui:VisualElement>
                 </ui:VisualElement>
 
-            </ui:VisualElement>
+                <!-- Close Button -->
+                <ui:VisualElement class="event-close-shadow">
+                    <ui:Button name="BtnCloseEvent" text="X" class="event-close-btn" />
+                </ui:VisualElement>
 
-            <!-- Close Button -->
-            <ui:VisualElement class="event-close-shadow">
-                <ui:Button name="BtnCloseEvent" text="X" class="event-close-btn" />
             </ui:VisualElement>
 
         </ui:VisualElement>

@@ -43,7 +43,7 @@
 - `[ ]` Menu 3 lựa chọn này không được chuyển sang trang khác như hiện tại; phải là thao tác tại chỗ, icon/chữ to hơn khoảng 3 lần.
 
 #### F. UI/HUD, zoom, mobile controls
-- `[ ]` Giao diện farm khi đăng nhập phải lớn hơn hiện tại; ưu tiên kiểm tra mobile vì có máy bị lẹm nút `X`.
+- `[~]` Giao diện farm/HUD mobile lớn hơn: đã thêm class `hud-mobile` cho mobile build và tăng kích thước cụm thông tin nhân vật, quest, tiền, sidebar, joystick, sprint, build, jump, nút tương tác; đồng thời thêm safe inset/popup close guard để giảm lỗi nút `X` bị lẹm. Chờ anh build APK test trên các máy mục tiêu.
 - `[ ]` Thêm/kiểm tra chức năng thu phóng cả map/camera và UI theo nhu cầu khách.
 - `[x]` Bỏ chức năng kéo joystick mạnh/giữ lâu thì tự chạy nhanh; giữ lại nút chạy tự động để người chơi chủ động bật/tắt auto-run. Anh đã test APK và xác nhận tốt.
 - `[~]` Auto-run cancel mới: khi auto-run đang bật mà người chơi bắt đầu điều khiển joystick, `GameHUDController` sẽ tắt auto-run ngay và cập nhật lại trạng thái nút Sprint. Chờ anh build APK/EXE test.

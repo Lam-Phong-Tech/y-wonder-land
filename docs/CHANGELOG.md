@@ -5,6 +5,23 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-07-07] — HUD mobile lớn hơn, popup có vùng an toàn cho nút X
+
+### Changed
+- `GameHUDController` tự gắn class `hud-mobile` khi chạy trên mobile build, để HUD gameplay lớn hơn mà không đổi layout desktop.
+- HUD mobile đã tăng kích thước cụm thông tin nhân vật, quest prompt, tiền, sidebar, joystick, sprint, build, jump và nút tương tác trực tiếp.
+- `UISafeArea` có thêm minimum inset cho mobile build để UIDocument không áp sát bo góc/thanh điều hướng.
+- `DesignSystem.uss` thêm padding chung cho popup overlay, max-width/max-height cho panel chính, và min-size 44px cho các nút đóng X.
+- Các `close-shadow/container` của popup nay có anchor 44x44 thật để nút X lớn không bị trôi nửa ra ngoài góc phải-trên panel.
+- Các popup Event, Túi đồ, Bạn bè, Leaderboard và Hồ sơ cũng đã đặt anchor X trực tiếp trong file USS riêng để tránh bị stylesheet riêng override lại.
+- Bạn bè, Sự kiện, Leaderboard, Nhiệm vụ, Túi đồ và Hồ sơ nay đặt nút X vào trong cấu trúc panel/header, cùng hướng với popup Settings, thay vì để X nổi ngoài wrapper.
+
+### Test cần làm
+- Build APK: vào farm, kiểm HUD dễ đọc/dễ bấm hơn và không đè nhau.
+- Mở Túi đồ, Shop, Settings, Quest, Profile, Map, Mailbox/Piggy nếu có; nút X phải không bị lẹm và bấm được trên các máy test.
+- Kiểm lại compact build popup, chat bar, joystick và vùng xoay camera bên phải không bị HUD mới che sai.
+
+---
 ## [2026-07-07] — Joystick không còn ô vuông, nhân vật giữ hướng khi thả tay
 
 ### Fixed

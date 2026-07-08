@@ -70,6 +70,43 @@
    ============================================ */
 .overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(15, 15, 20, 0.7); }
 
+.inventory-overlay, .shop-overlay, .settings-overlay, .quest-overlay, .profile-overlay,
+.map-overlay, .mailbox-overlay, .piggy-overlay, .workshop-overlay, .friends-overlay,
+.leaderboard-overlay, .event-overlay, .ap-overlay, .reward-overlay, .confirm-overlay,
+.forgot-overlay {
+    padding: 18px;
+}
+
+.inventory-panel, .shop-panel, .settings-panel, .quest-panel, .profile-panel,
+.mailbox-panel, .piggy-panel, .workshop-panel, .friends-panel, .leaderboard-panel,
+.event-panel, .ap-panel, .reward-panel, .confirm-panel, .forgot-panel {
+    max-width: 96%;
+    max-height: 92%;
+}
+
+.btn-close, .inventory-close-btn, .shop-close-btn, .settings-close-btn,
+.quest-close-btn, .close-button, .profile-close-btn, .map-close-btn,
+.mailbox-close-btn, .piggy-close-btn, .workshop-close-btn, .friends-close-btn,
+.leaderboard-close-btn, .event-close-btn, .ap-close, .reward-btn-close,
+.confirm-close-btn, .forgot-close-btn {
+    min-width: 44px;
+    min-height: 44px;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+}
+
+.inventory-close-shadow, .shop-close-btn-container, .settings-close-btn-container,
+.quest-close-shadow, .profile-close-shadow, .map-close-shadow, .mailbox-close-btn-container,
+.piggy-close-btn-container, .workshop-close-shadow, .friends-close-shadow,
+.leaderboard-close-shadow, .event-close-shadow, .confirm-close-btn-container {
+    width: 44px;
+    height: 44px;
+    right: 18px;
+    top: 18px;
+    align-items: center;
+    justify-content: center;
+}
+
 .panel {
     background-color: var(--color-neutral-surface);
     border-radius: var(--radius-panel);

@@ -96,6 +96,7 @@ public class GameHUDController : MonoBehaviour
     private bool enableJoystickAutoSprint = false;
     [SerializeField, Range(0.1f, 1f)] private float joystickSprintHoldSeconds = 0.35f;
     [SerializeField, Range(0f, 1f)] private float joystickSprintForwardMin = 0.55f;
+    [SerializeField] private bool previewMobileHudScaleInEditor = false;
     private float joystickRawMagnitude = 0f;
     private float joystickRawForward = 0f;
     private float joystickSprintHoldTimer = 0f;
@@ -149,6 +150,7 @@ public class GameHUDController : MonoBehaviour
         uiDocument.sortingOrder = -10;
 
         var root = uiDocument.rootVisualElement;
+        ApplyPlatformLayoutClass(root);
         QueryElements(root);
         RegisterCallbacks();
 
@@ -259,6 +261,19 @@ public class GameHUDController : MonoBehaviour
         }
 
 
+    }
+
+    private void ApplyPlatformLayoutClass(VisualElement root)
+    {
+        VisualElement hudRoot = root.Q<VisualElement>(className: "hud-root");
+        if (hudRoot == null) return;
+
+#if UNITY_EDITOR
+        bool useMobileHud = previewMobileHudScaleInEditor || Application.isMobilePlatform;
+#else
+        bool useMobileHud = Application.isMobilePlatform;
+#endif
+        hudRoot.EnableInClassList("hud-mobile", useMobileHud);
     }
 
     private void RegisterCallbacks()

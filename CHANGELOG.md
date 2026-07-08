@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-07-07 (Mobile HUD density and popup safe inset)
+
+### Changed
+- `GameHUDController` now applies a `hud-mobile` class on mobile builds so gameplay HUD controls/text can be larger without changing desktop layout.
+- Mobile HUD density pass enlarges player info, quest prompt, currency pills, core buttons, joystick, jump/build buttons, and direct interaction prompts.
+- `UISafeArea` now applies a minimum mobile inset in builds, giving all UIDocuments extra protection from rounded corners/system bars.
+- `DesignSystem.uss` adds shared popup overlay padding, panel max bounds, and minimum 44px close buttons to reduce clipped or hard-to-tap X buttons.
+- Popup close button containers now reserve a real 44x44 anchor so the larger X button does not drift half outside the top-right panel edge.
+- Event, Inventory, Friends, Leaderboard, and Profile popups now also set their own close anchors directly in their local USS files, avoiding stylesheet order overrides.
+- Friends, Event, Leaderboard, Quest, Inventory, and Profile popups now place their X button inside the panel/header structure, matching the Settings popup corner placement instead of floating outside the panel wrapper.
+
+### Needs Test
+- In APK on farm, confirm player info, quest prompt, side buttons, currency, joystick, build, jump, sprint, and direct interaction prompts are easier to read/tap.
+- Open Inventory, Shop, Settings, Quest, Profile, Map, Mailbox/Piggy if available; every X close button should be fully visible and tappable on the target phones.
+- Check that enlarged HUD does not overlap the compact build popup, chat bar, joystick, or right-side camera/tap zones.
+
 ## [Unreleased] - 2026-07-07 (Joystick glyph and idle facing)
 
 ### Fixed

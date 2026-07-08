@@ -30,6 +30,7 @@
     padding: 24px;
     border-bottom-width: 1px; border-bottom-color: rgba(255, 255, 255, 0.05);
     flex-shrink: 0;
+    position: relative;
 }
 
 .profile-header-title {
@@ -39,11 +40,12 @@
 
 /* Close Button */
 .profile-close-shadow {
-    position: absolute; right: 12px; top: 12px; z-index: 10;
+    position: absolute; right: 22px; top: 22px; z-index: 10;
+    width: 44px; height: 44px; align-items: center; justify-content: center;
 }
 
 .profile-close-btn {
-    width: 40px; height: 40px; border-radius: var(--radius-button);
+    width: 44px; height: 44px; border-radius: var(--radius-button);
     background-color: rgba(255, 255, 255, 0.1);
     border-width: 0; padding: 0; align-items: center; justify-content: center;
     font-size: 16px; -unity-font-style: bold; color: var(--color-bright-grey);

@@ -13,6 +13,11 @@
                     <ui:Label name="TitleLabel" class="quest-header-title" text="NHIỆM VỤ" />
                 </ui:VisualElement>
 
+                <!-- Close Button -->
+                <ui:VisualElement class="quest-close-shadow">
+                    <ui:Button name="BtnClose" class="close-button" text="X" />
+                </ui:VisualElement>
+
                 <!-- Body (Two columns) -->
                 <ui:VisualElement class="quest-body">
                     <!-- Left Column: Quest List -->
@@ -66,12 +71,6 @@
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
-            
-            <!-- Close Button (Absolute on Shadow/Wrapper to overlap properly) -->
-            <ui:VisualElement class="quest-close-shadow">
-                <ui:Button name="BtnClose" class="close-button" text="X" />
-            </ui:VisualElement>
-            
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

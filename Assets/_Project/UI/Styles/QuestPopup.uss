@@ -20,7 +20,7 @@
     background-color: var(--color-primary-navy);
     border-width: 1px; border-color: rgba(255, 255, 255, 0.1);
     border-radius: var(--radius-panel);
-    flex-direction: column; overflow: hidden;
+    flex-direction: column; overflow: hidden; position: relative;
 }
 
 /* ── Header Bar ── */
@@ -38,11 +38,12 @@
 
 /* Close Button (X) */
 .quest-close-shadow {
-    position: absolute; right: 12px; top: 12px;
+    position: absolute; right: 22px; top: 22px;
+    width: 44px; height: 44px; align-items: center; justify-content: center;
 }
 
 .close-button {
-    width: 40px; height: 40px; border-radius: var(--radius-button);
+    width: 44px; height: 44px; border-radius: var(--radius-button);
     background-color: rgba(255, 255, 255, 0.1);
     border-width: 0; padding: 0; align-items: center; justify-content: center;
     font-size: 16px; -unity-font-style: bold; color: var(--color-bright-grey);
