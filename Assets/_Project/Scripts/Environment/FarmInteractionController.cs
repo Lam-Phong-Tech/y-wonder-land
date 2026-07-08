@@ -45,6 +45,10 @@ namespace YWonderLand.Environment
         [SerializeField] private float merchantInteractRange = DefaultInteractionRange;
         [Tooltip("Khoảng cách tương tác với ao nước")]
         [SerializeField] private float waterInteractRange = DefaultGroundInteractRange;
+        [Tooltip("Khoang cach diem mui chan dung de tu hien nut muc nuoc.")]
+        [SerializeField, Range(0.2f, 2f)] private float waterFootProbeForward = 0.9f;
+        [Tooltip("Ban kinh quet quanh diem mui chan de bat vung ho nuoc, khong hien vien trang.")]
+        [SerializeField, Range(0.2f, 2f)] private float waterFootProbeRadius = 0.9f;
         [Tooltip("Khoảng cách tương tác khi câu cá")]
         [SerializeField] private float fishingInteractRange = DefaultFishingInteractRange;
         [Tooltip("Flow moi: tap/click truc tiep len vat the de hien UI tuong tac, khong quet theo tam man hinh.")]
@@ -366,6 +370,7 @@ namespace YWonderLand.Environment
             currentHoverObject = null;
             currentActions.Clear();
             currentPromptFromFrontCell = false;
+            currentPromptFromFootWater = false;
             GameHUDController.Instance?.HideInteractionPrompt();
             if (YWonderLand.UI.ResourceInteractionUIController.Instance != null)
                 YWonderLand.UI.ResourceInteractionUIController.Instance.Hide();
@@ -998,7 +1003,7 @@ namespace YWonderLand.Environment
                         YWonderLand.UI.ResourceInteractionUIController.Instance.Hide();
                 }
                 if (!timedActionActive && useDirectTapInteraction)
-                    RefreshFrontCellInteractionPrompt();
+                    RefreshFacingInteractionPrompts();
                 return;
             }
 
@@ -1021,7 +1026,7 @@ namespace YWonderLand.Environment
 
             if (useDirectTapInteraction)
             {
-                RefreshFrontCellInteractionPrompt();
+                RefreshFacingInteractionPrompts();
             }
             else
             {
@@ -1136,6 +1141,7 @@ namespace YWonderLand.Environment
             currentHoverObject = null;
             currentActions.Clear();
             currentPromptFromFrontCell = false;
+            currentPromptFromFootWater = false;
             pendingDemolishEnclosure = null;
             pendingDemolishTile = null;
             demolishConfirmTimer = 0f;
@@ -1165,13 +1171,34 @@ namespace YWonderLand.Environment
                 ClearWorldInteractionState();
         }
 
+        private void RefreshFacingInteractionPrompts()
+        {
+            RefreshFrontCellInteractionPrompt();
+            if (currentPromptFromFrontCell)
+            {
+                currentPromptFromFootWater = false;
+                return;
+            }
+
+            RefreshFootWaterInteractionPrompt();
+        }
+
+        private bool HasDirectTapPrompt()
+        {
+            return !currentPromptFromFrontCell &&
+                   !currentPromptFromFootWater &&
+                   currentHoverObject != null &&
+                   currentActions != null &&
+                   currentActions.Count > 0;
+        }
+
         private void RefreshFrontCellInteractionPrompt()
         {
             if (!useDirectTapInteraction || timedActionActive)
                 return;
 
             // A direct-tapped tree/rock/NPC prompt should stay until it leaves range.
-            if (!currentPromptFromFrontCell && currentHoverObject != null && currentActions != null && currentActions.Count > 0)
+            if (HasDirectTapPrompt())
                 return;
 
             var selector = FrontBuildCellSelector.Instance;
@@ -1186,8 +1213,7 @@ namespace YWonderLand.Environment
             GameObject foundObj = null;
 
             if (!TryBuildFrontCellEnclosurePrompt(cell, foundActions, out foundObj) &&
-                !TryBuildFrontCellTilePrompt(cell, foundActions, out foundObj) &&
-                !TryBuildFrontCellWaterPrompt(cell, foundActions, out foundObj))
+                !TryBuildFrontCellTilePrompt(cell, foundActions, out foundObj))
             {
                 ClearFrontCellInteractionPrompt();
                 return;
@@ -1213,6 +1239,7 @@ namespace YWonderLand.Environment
             lastActionSignature = actionSignature;
             currentActions = foundActions;
             currentPromptFromFrontCell = true;
+            currentPromptFromFootWater = false;
 
             if (shouldRefreshPrompt && GameHUDController.Instance != null)
                 GameHUDController.Instance.ShowInteractionPrompts(foundActions);
@@ -1250,17 +1277,50 @@ namespace YWonderLand.Environment
             return actions != null && actions.Count > 0;
         }
 
-        private bool TryBuildFrontCellWaterPrompt(BuildSurfaceCell cell, List<InteractionAction> actions, out GameObject foundObj)
+        private void RefreshFootWaterInteractionPrompt()
         {
-            foundObj = null;
-            WaterSource waterSource = FindWaterSourceNearFrontCell(cell);
-            if (waterSource == null)
-                return false;
+            if (!useDirectTapInteraction || timedActionActive)
+                return;
 
-            foundObj = waterSource.gameObject;
+            if (HasDirectTapPrompt() || currentPromptFromFrontCell)
+                return;
+
+            WaterSource waterSource = FindWaterSourceNearFoot();
+            if (waterSource == null)
+            {
+                ClearFootWaterInteractionPrompt();
+                return;
+            }
+
+            var foundActions = new List<InteractionAction>();
+            AddWaterSourceAction(waterSource, foundActions);
+
+            string actionSignature = BuildActionSignature(foundActions);
+            bool hadNoCurrentActions = currentActions == null || currentActions.Count == 0;
+            bool shouldRefreshPrompt =
+                hadNoCurrentActions ||
+                !currentPromptFromFootWater ||
+                waterSource.gameObject != currentHoverObject ||
+                actionSignature != lastActionSignature;
+
+            currentHoverObject = waterSource.gameObject;
+            lastAnimalState = FarmAnimal.AnimalState.Healthy;
+            lastAnimalProductReady = false;
+            lastActionSignature = actionSignature;
+            currentActions = foundActions;
+            currentPromptFromFrontCell = false;
+            currentPromptFromFootWater = true;
+
+            if (shouldRefreshPrompt && GameHUDController.Instance != null)
+                GameHUDController.Instance.ShowInteractionPrompts(foundActions);
+        }
+
+        private void AddWaterSourceAction(WaterSource waterSource, List<InteractionAction> actions)
+        {
+            if (waterSource == null || actions == null) return;
+
             var ws = waterSource;
             actions.Add(new InteractionAction { keyName = "Click", actionName = "M\u00fac n\u01b0\u1edbc", onClick = () => ScoopWater(ws) });
-            return true;
         }
 
         private FarmTile ResolveFarmTileFromCell(BuildSurfaceCell cell)
@@ -1284,13 +1344,17 @@ namespace YWonderLand.Environment
             return cell.Occupant.GetComponentInChildren<FarmTile>();
         }
 
-        private WaterSource FindWaterSourceNearFrontCell(BuildSurfaceCell cell)
+        private WaterSource FindWaterSourceNearFoot()
         {
-            if (cell == null) return null;
+            Transform player = PlayerController.Instance != null ? PlayerController.Instance.transform : transform;
+            Vector3 forward = player.forward;
+            forward.y = 0f;
+            if (forward.sqrMagnitude < 0.0001f)
+                forward = transform.forward;
+            forward.Normalize();
 
-            Vector2 footprint = cell.FootprintSize;
-            float radius = Mathf.Max(0.85f, Mathf.Max(footprint.x, footprint.y) * 1.1f);
-            Vector3 center = cell.SurfaceCenter + Vector3.up * 0.2f;
+            Vector3 center = player.position + forward * Mathf.Max(0.1f, waterFootProbeForward) + Vector3.up * 0.2f;
+            float radius = Mathf.Max(0.2f, waterFootProbeRadius);
 
             int hitCount = Physics.OverlapSphereNonAlloc(
                 center,
@@ -1319,6 +1383,19 @@ namespace YWonderLand.Environment
             }
 
             return best;
+        }
+
+        private void ClearFootWaterInteractionPrompt()
+        {
+            if (!currentPromptFromFootWater)
+                return;
+
+            currentHoverObject = null;
+            lastActionSignature = "";
+            currentActions.Clear();
+            currentPromptFromFootWater = false;
+            if (GameHUDController.Instance != null)
+                GameHUDController.Instance.HideInteractionPrompt();
         }
 
         private void ClearFrontCellInteractionPrompt()
@@ -1388,6 +1465,7 @@ namespace YWonderLand.Environment
         private readonly List<Collider> colliderDistanceBuffer = new List<Collider>(16);
         private GameObject currentHoverObject = null;
         private bool currentPromptFromFrontCell;
+        private bool currentPromptFromFootWater;
         private FarmAnimal.AnimalState lastAnimalState;
         private bool lastAnimalProductReady;
         private string lastActionSignature = "";
@@ -1574,8 +1652,7 @@ namespace YWonderLand.Environment
                     if (IsWaterSourceInRange(waterSrc, directTap))
                     {
                         foundObj = waterSrc.gameObject;
-                        var ws = waterSrc;
-                        foundActions.Add(new InteractionAction { keyName = "Click", actionName = "Múc nước", onClick = () => ScoopWater(ws) });
+                        AddWaterSourceAction(waterSrc, foundActions);
                     }
                     break;
                 }
@@ -1640,6 +1717,7 @@ namespace YWonderLand.Environment
                 lastActionSignature = actionSignature;
                 currentActions = foundActions;
                 currentPromptFromFrontCell = false;
+                currentPromptFromFootWater = false;
 
                 if (shouldRefreshPrompt)
                 {
@@ -1654,6 +1732,7 @@ namespace YWonderLand.Environment
                     lastActionSignature = "";
                     currentActions.Clear();
                     currentPromptFromFrontCell = false;
+                    currentPromptFromFootWater = false;
                     if (GameHUDController.Instance != null) GameHUDController.Instance.HideInteractionPrompt();
                 }
             }
@@ -1765,6 +1844,7 @@ namespace YWonderLand.Environment
             currentHoverObject = null;
             currentActions.Clear();
             currentPromptFromFrontCell = false;
+            currentPromptFromFootWater = false;
             GameHUDController.Instance?.HideInteractionPrompt();
 
             PlayerController player = PlayerController.Instance;
@@ -2198,7 +2278,7 @@ namespace YWonderLand.Environment
                     return;
                 }
 
-                // Múc nước bằng TÂM NGẮM (click) — giống chặt cây/đào, chạy cả PC lẫn mobile.
+                // Fallback: vẫn cho click trực tiếp vào WaterSource nếu người chơi bấm đúng collider ao.
                 var waterSrcClick = hit.collider.GetComponentInParent<WaterSource>();
                 if (waterSrcClick != null)
                 {
@@ -2552,6 +2632,7 @@ namespace YWonderLand.Environment
             currentActions.Clear();
             lastActionSignature = "";
             currentPromptFromFrontCell = false;
+            currentPromptFromFootWater = false;
             GameHUDController.Instance?.HideInteractionPrompt();
             if (YWonderLand.UI.ResourceInteractionUIController.Instance != null)
                 YWonderLand.UI.ResourceInteractionUIController.Instance.Hide();
@@ -2686,6 +2767,7 @@ namespace YWonderLand.Environment
             currentActions.Clear();
             lastActionSignature = "";
             currentPromptFromFrontCell = false;
+            currentPromptFromFootWater = false;
             if (GameHUDController.Instance != null) GameHUDController.Instance.HideInteractionPrompt();
             if (YWonderLand.UI.ResourceInteractionUIController.Instance != null)
                 YWonderLand.UI.ResourceInteractionUIController.Instance.Hide();
@@ -2937,7 +3019,7 @@ namespace YWonderLand.Environment
 
             var inv = YWonderLand.Managers.InventoryManager.Instance;
             if (inv == null) return;
-            int amt = src != null ? Mathf.Max(1, src.amountPerScoop) : 5;
+            int amt = src != null ? Mathf.Max(10, src.amountPerScoop) : 10;
             inv.AddItem("watering_water_01", amt);
             int total = inv.GetItemQuantity("watering_water_01");
             ScreenToast.ShowItemReward("watering_water_01", amt, "Múc nước", $"(Tổng: {total})");

@@ -23,7 +23,7 @@
 - `[~]` Chanh dây rule mới từ anh: `200 USDT / 20 cây` là giá cả cụm 20 cây; một lần gieo phải tốn 20 hạt và khi thu hoạch nhận sản phẩm tương ứng với 20 hạt đã gieo. Code hiện đang là 1 seed chiếm 20 ô, chưa phải consume 20 seed; cần sửa logic/data khi triển khai cây chanh dây.
 
 #### C. Nông trại / Farm scene và cửa hàng
-- `[~]` Các cửa hàng trong game phải hiển thị vật phẩm và câu chữ to hơn khoảng 3 lần so với hiện tại, đặc biệt trên điện thoại: đã thêm layout mobile riêng cho ShopPopup theo hướng giữ khung popup gần kích thước cũ, chỉ làm card/icon/chữ/giá/nút thao tác lớn hơn để mỗi màn hình hiện ít sản phẩm hơn và scroll xem tiếp. Cập nhật 08/07: bật preview layout lớn trong Editor để anh test ngay, sửa filter theo đúng mode/shop hiện tại, bỏ `gift_box_01` khỏi Fish Shop và mở lại Farm Item Shop (`comingSoon = 0`). Chưa chốt xong cho tới khi anh test thấy ổn.
+- `[x]` Các cửa hàng trong game phải hiển thị vật phẩm và câu chữ to hơn khoảng 3 lần so với hiện tại, đặc biệt trên điện thoại: đã thêm layout mobile riêng cho ShopPopup theo hướng giữ khung popup gần kích thước cũ, chỉ làm card/icon/chữ/giá/nút thao tác lớn hơn để mỗi màn hình hiện ít sản phẩm hơn và scroll xem tiếp. Cập nhật 08/07: anh đã chốt layout shop lớn hơn/filter shop sau khi test.
 - `[x]` Sửa trigger cửa hàng ở farm và city: anh đã thu/đặt lại trigger vừa vùng mặt trước cửa hàng để chỉ đứng đúng khu vực cửa mới hiện vật phẩm/vật nuôi/shop; khi đã vào sâu hơn trong vùng cửa thì UI vẫn phải giữ, không bị mất. Cần test lại nhanh trên APK/EXE sau build.
 - `[ ]` Thêm 5 cây xanh trong trang trại để người chơi chặt cây và nhận gỗ.
 - `[ ]` Nhân vật phải có bóng người rõ ràng khi di chuyển trong scene.
@@ -34,11 +34,11 @@
 - `[ ]` Thêm dấu chấm đỏ ở các nút cần bấm để ngầm chỉ dẫn người chơi nhận quà/khám phá/chức năng mới; hiện game chưa có hệ thống red-dot guidance này.
 
 #### E. Tâm tương tác, build/farm thao tác ô đất
-- `[~]` Đổi tâm tương tác trước mũi chân nhân vật thành ô vuông kích thước 1 ô đất: bước 1 đã thêm `FrontBuildCellSelector` tự chọn `BuildSurfaceCell` ngay phía trước theo hướng mặt nhân vật và vẽ viền trắng runtime. Anh đã test và xác nhận viền sáng tốt.
-- `[~]` Workflow build mới bước 2: đã chuyển nút búa/build xuống cụm tay phải phía trên nút Jump, và mở build list cũ ở góc nhìn nhân vật hiện tại, không tự bật camera top-down/ẩn GameHUD. Cần anh build APK/EXE test lại thao tác mở menu, di chuyển/xoay camera khi menu đang mở.
-- `[~]` Workflow build mới bước 3: khi chọn Ruộng/Đường đá/Chuồng, ghost tự snap và ghim vào đúng ô đang viền trắng trước mặt; người chơi chỉ cần bấm OK để xác nhận hoặc X để hủy. Đã code, chờ anh build test.
-- `[~]` Workflow build compact popup: đã thay full HUD build bằng popup ngang gọn bên phải gần nút búa; góc popup hiện vật liệu đúng cho 3 công trình (Gỗ/Đá), bên dưới có 3 thẻ Ruộng/Đường đá/Chuồng. Chọn thẻ sẽ pin ghost vào ô trắng; nút tích xanh và X nằm ngay dưới thẻ để xác nhận/hủy. Chờ anh build APK/EXE test.
-- `[~]` Yêu cầu mới của khách: bỏ tâm/crosshair cho tương tác cây, hồ nước, tảng đá, chuồng/cửa hàng; đã code flow tap/click trực tiếp lên vật thể trong tầm khoảng 3.5m để hiện UI action, có spherecast assist nhỏ để đỡ miss collider/góc bấm, và UI tự ẩn khi nhân vật đi xa khỏi vật thể đang chọn. Chờ anh build APK/EXE test nhiều góc camera.
+- `[x]` Đổi tâm tương tác trước mũi chân nhân vật thành ô vuông kích thước 1 ô đất: đã thêm `FrontBuildCellSelector` tự chọn `BuildSurfaceCell` ngay phía trước theo hướng mặt nhân vật và vẽ viền trắng runtime. Anh đã test và xác nhận viền sáng tốt.
+- `[x]` Workflow build mới bước 2: đã chuyển nút búa/build xuống cụm tay phải phía trên nút Jump, và mở build list cũ ở góc nhìn nhân vật hiện tại, không tự bật camera top-down/ẩn GameHUD. Anh đã chốt nhóm build flow hiện tại.
+- `[x]` Workflow build mới bước 3: khi chọn Ruộng/Đường đá/Chuồng, ghost tự snap và ghim vào đúng ô đang viền trắng trước mặt; người chơi chỉ cần bấm OK để xác nhận hoặc X để hủy. Anh đã chốt nhóm build flow hiện tại.
+- `[x]` Workflow build compact popup: đã thay full HUD build bằng popup ngang gọn bên phải gần nút búa; góc popup hiện vật liệu đúng cho 3 công trình (Gỗ/Đá), bên dưới có 3 thẻ Ruộng/Đường đá/Chuồng. Chọn thẻ sẽ pin ghost vào ô trắng; nút tích xanh và X nằm ngay dưới thẻ để xác nhận/hủy. Anh đã chốt nhóm build flow hiện tại.
+- `[x]` Yêu cầu mới của khách: bỏ tâm/crosshair cho tương tác chính. Cây/tảng đá dùng tap/click trực tiếp lên vật thể trong tầm khoảng 3.5m, có spherecast assist để đỡ miss collider/góc bấm và UI tự ẩn khi nhân vật đi xa. Ruộng/nước/chuồng dùng prompt theo ô/điểm trước chân để thao tác ổn hơn trên điện thoại.
 - `[ ]` Khi đặt khung vào ô đất thì hiện biểu tượng làm nông; bấm biểu tượng mở ngay 3 lựa chọn: cuốc đất, lát đá, xây chuồng.
 - `[ ]` Menu 3 lựa chọn này không được chuyển sang trang khác như hiện tại; phải là thao tác tại chỗ, icon/chữ to hơn khoảng 3 lần.
 
@@ -46,9 +46,10 @@
 - `[~]` Giao diện farm/HUD mobile lớn hơn: đã thêm class `hud-mobile` cho mobile build và tăng kích thước cụm thông tin nhân vật, quest, tiền, sidebar, joystick, sprint, build, jump, nút tương tác; đồng thời thêm safe inset/popup close guard để giảm lỗi nút `X` bị lẹm. Chờ anh build APK test trên các máy mục tiêu.
 - `[ ]` Thêm/kiểm tra chức năng thu phóng cả map/camera và UI theo nhu cầu khách.
 - `[x]` Bỏ chức năng kéo joystick mạnh/giữ lâu thì tự chạy nhanh; giữ lại nút chạy tự động để người chơi chủ động bật/tắt auto-run. Anh đã test APK và xác nhận tốt.
-- `[~]` Auto-run cancel mới: khi auto-run đang bật mà người chơi bắt đầu điều khiển joystick, `GameHUDController` sẽ tắt auto-run ngay và cập nhật lại trạng thái nút Sprint. Chờ anh build APK/EXE test.
-- `[~]` Joystick mobile: đã bỏ các mũi tên text trang trí trong joystick để tránh lỗi mũi tên trái render thành ô vuông/missing glyph trên thiết bị. Chờ anh build APK/EXE test lại.
-- `[~]` Nhân vật đứng yên: đã bỏ nhánh tự xoay về yaw camera khi thả joystick; nhân vật sẽ giữ hướng di chuyển cuối cùng. Chờ anh build APK/EXE test kéo joystick xuống rồi thả tay.
+- `[x]` Auto-run cancel mới: khi auto-run đang bật mà người chơi bắt đầu điều khiển joystick, `GameHUDController` sẽ tắt auto-run ngay và cập nhật lại trạng thái nút Sprint. Anh đã chốt nhóm joystick/auto-run.
+- `[x]` Joystick mobile: đã bỏ các mũi tên text trang trí trong joystick để tránh lỗi mũi tên trái render thành ô vuông/missing glyph trên thiết bị. Anh đã chốt nhóm joystick/mobile.
+- `[x]` Nhân vật đứng yên: đã bỏ nhánh tự xoay về yaw camera khi thả joystick; nhân vật sẽ giữ hướng di chuyển cuối cùng. Anh đã chốt nhóm joystick/mobile.
+- `[x]` Emote vẫy tay/chỉ tay: không hiện nút X hủy hoạt ảnh; rê joystick sẽ tự hủy `Waving`/`Pointing` và cho nhân vật di chuyển.
 - `[x]` Sửa bug joystick mobile: đã tách touch khỏi action `Look`, chặn pointer joystick không đi vào vùng xoay camera, và đảo lại trục dọc touch-look để vuốt lên = camera ngẩng lên, vuốt xuống = camera cúi xuống. Anh đã test APK: joystick/camera đỡ hơn, trục dọc đúng cảm giác hơn, logic di chuyển giữ đồng bộ giữa các map.
 
 #### G. Tiết kiệm / Version 2
@@ -56,9 +57,9 @@
 - `[~]` Lãi suất yêu cầu: 30 ngày = 2%, 90 ngày = 7%, 270 ngày = 22%. Cần kiểm tra thêm cách tính lãi/cuối kỳ khi bắt đầu làm version 2.
 
 #### H. Múc nước, tưới cây
-- `[ ]` Tưới cây phải trừ 1 nước mỗi lần.
-- `[ ]` Nhân vật muốn tưới cây phải đi múc nước; mỗi thao tác múc nước được 10 thùng/nước đưa về kho.
-- `[ ]` Khi tâm ô vuông đặt xuống hồ thì hiện biểu tượng thùng múc nước; bấm biểu tượng thì tự động múc nước.
+- `[x]` Tưới cây phải trừ 1 nước mỗi lần.
+- `[x]` Nhân vật muốn tưới cây phải đi múc nước; mỗi thao tác múc nước được 10 thùng/nước đưa về kho.
+- `[x]` Khi mũi chân/điểm trước chân nhân vật tới gần hồ nước (`WaterSource`) thì tự hiện gợi ý `Múc nước`; không cần hiện viền trắng như ô đất canh tác.
 
 ## Tạm gác 06/07/2026: backend làm tại nhà, chưa cần chung mạng công ty
 
@@ -391,7 +392,7 @@
   - **Chặt cây/đào khoáng nhảy bước ngay**: `OnTreeArrived`/`OnRockArrived` auto-nhảy nếu túi đã có gỗ/đá — mà loadout test tặng sẵn `wood_01`/`stone_01` → bỏ đoạn auto-skip, bắt người chơi thực sự chặt 1 nhát (vẫn nghe `HarvestableResource.OnResourceHarvested`).
   - **Thả thú không cập nhật nhiệm vụ**: tutorial nghe `AnimalPenSpawner.OnAnimalPlaced` (hệ CŨ) nhưng hệ chăn nuôi đã viết lại (BuildSurfaceCell). Thêm `FarmAnimal.OnAnimalSpawned` (bắn trong `FarmInteractionController` lúc thả) → tutorial nghe sự kiện mới. `FarmAnimal`/`FarmInteractionController` cũng sửa.
 - `[x]` **Chức năng MÚC NƯỚC (khách yêu cầu 21/06)** — ĐÃ LÀM:
-  - `WaterSource.cs` (component đánh dấu vùng ao múc được). Item `watering_water_01` "Nước tưới". Ngắm ao + bấm **"Múc nước"** → +5 xô/lần (`amountPerScoop`). Tưới cây **TỐN 1 xô**; hết → toast "Ra ao múc nước". KHÔNG animation (khách không cần). `FarmInteractionController` (nhận diện WaterSource + ScoopWater + HandleWater trừ nước). Loadout test có sẵn 30 xô.
+  - `WaterSource.cs` (component đánh dấu vùng ao múc được). Item `watering_water_01` "Nước tưới". Mũi chân/điểm trước chân đến gần ao + bấm **"Múc nước"** → +10 xô/lần (`amountPerScoop`). Tưới cây **TỐN 1 xô**; hết → toast "Ra ao múc nước". KHÔNG animation (khách không cần). `FarmInteractionController` (nhận diện WaterSource + ScoopWater + HandleWater trừ nước). Loadout test có sẵn 30 xô.
   - **CẦN Editor**: gắn 1 Collider(IsTrigger) + `WaterSource` lên bề mặt ao giữa đảo. KHÔNG gắn lên nước biển.
 - `[x]` **#2 Tách tab túi đồ**: sản phẩm (trứng/sữa/thịt + SP cây lâu năm) tách khỏi tab "Thú nuôi" → đổi tab "Đặc biệt" thành **"Sản phẩm"** (category `products`). Live animals giữ tab "Thú nuôi". Sửa ItemDataGenerator (category) + InventoryPopup.uxml + Controller.
 - `[x]` **#1 Ẩn tab filter shop không liên quan**: `ShopPopupController.UpdateFilterVisibility()` — chỉ hiện filter (Seeds/Animals/Tools/Items) có hàng trong shop đó; còn lại ẩn, giữ "Tất cả".
