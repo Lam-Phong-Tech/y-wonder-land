@@ -159,6 +159,33 @@ namespace YWonderLand.Managers
             return new List<InventorySlot>(inventoryData.slots);
         }
 
+        public void ApplyServerState(int maxSlots, List<InventorySlot> slots, bool saveLocalCache = true)
+        {
+            inventoryData = new InventoryData
+            {
+                maxSlots = Mathf.Max(1, maxSlots),
+                slots = new List<InventorySlot>()
+            };
+
+            if (slots != null)
+            {
+                foreach (var slot in slots)
+                {
+                    if (slot == null || string.IsNullOrWhiteSpace(slot.itemId) || slot.quantity <= 0)
+                        continue;
+
+                    inventoryData.slots.Add(new InventorySlot(slot.itemId, slot.quantity));
+                }
+            }
+
+            if (inventoryData.maxSlots < inventoryData.slots.Count)
+                inventoryData.maxSlots = inventoryData.slots.Count;
+
+            if (saveLocalCache) SaveInventory();
+            Debug.Log($"[Inventory] Applied server inventory: {inventoryData.slots.Count}/{inventoryData.maxSlots} slots.");
+            OnInventoryChanged?.Invoke();
+        }
+
         public int GetItemQuantity(string itemId)
         {
             int total = 0;

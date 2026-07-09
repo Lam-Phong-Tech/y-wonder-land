@@ -20,6 +20,7 @@ namespace YWonderLand.Environment
         public int TileCount => _tiles.Count;
 
         private const string SAVE_KEY = "YW_PlacedTiles";
+        private bool loadComplete;
 
         private void Awake()
         {
@@ -66,6 +67,12 @@ namespace YWonderLand.Environment
         /// <summary>Lưu mọi ô đã lát (toạ độ + cao độ) + trạng thái cây (tái dùng FarmTile.ExportSaveOrNull).</summary>
         public void SaveTiles()
         {
+            if (!loadComplete)
+            {
+                Debug.LogWarning("[TilePlacement] Skip save before load completes to avoid overwriting existing placed tiles.");
+                return;
+            }
+
             var data = new PlacedTilesSave { tiles = new List<PlacedTileSave>() };
             foreach (var kv in _tiles)
             {
@@ -86,9 +93,17 @@ namespace YWonderLand.Environment
 
         private void LoadTiles()
         {
-            if (!PlayerPrefs.HasKey(SAVE_KEY)) return;
+            if (!PlayerPrefs.HasKey(SAVE_KEY))
+            {
+                loadComplete = true;
+                return;
+            }
             var data = JsonUtility.FromJson<PlacedTilesSave>(PlayerPrefs.GetString(SAVE_KEY));
-            if (data == null || data.tiles == null) return;
+            if (data == null || data.tiles == null)
+            {
+                loadComplete = true;
+                return;
+            }
 
             var pending = new List<PendingCrop>();
             foreach (var e in data.tiles)
@@ -104,6 +119,7 @@ namespace YWonderLand.Environment
                 }
             }
             if (pending.Count > 0) StartCoroutine(RestoreCropsNextFrame(pending));
+            else loadComplete = true;
             Debug.Log($"[TilePlacement] Recreated {data.tiles.Count} tiles ({pending.Count} có cây).");
         }
 
@@ -114,6 +130,7 @@ namespace YWonderLand.Environment
             yield return null;
             foreach (var p in pending)
                 if (p.tile != null) p.tile.RestoreSave(p.crop, db);
+            loadComplete = true;
         }
 
         private void OnApplicationPause(bool paused) { if (paused) SaveTiles(); }

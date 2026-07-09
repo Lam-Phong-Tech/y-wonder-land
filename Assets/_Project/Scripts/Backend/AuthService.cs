@@ -139,6 +139,7 @@ namespace YWonderLand.Backend
             UserId = "";
             Username = "";
             ClearCachedAuth();
+            PlayerBootstrapService.Instance?.ResetRuntimeState();
             PlayerProfileService.Instance?.ResetRuntimeProfileForAuthChange();
         }
 

@@ -51,6 +51,17 @@ create table if not exists player_farm_state (
     updated_at timestamptz not null default now()
 );
 
+create table if not exists player_daily_limits (
+    player_id text not null references game_players(id) on delete cascade,
+    limit_key text not null,
+    period_key text not null,
+    used_count integer not null default 0,
+    max_count integer not null default 10,
+    version integer not null default 1,
+    updated_at timestamptz not null default now(),
+    primary key (player_id, limit_key, period_key)
+);
+
 create table if not exists game_transactions (
     id text primary key,
     player_id text not null references game_players(id) on delete cascade,
@@ -66,4 +77,5 @@ create table if not exists game_transactions (
 
 create index if not exists idx_game_players_web_user_id on game_players(web_user_id);
 create index if not exists idx_player_inventory_player_id on player_inventory(player_id);
+create index if not exists idx_player_daily_limits_player_id on player_daily_limits(player_id);
 create index if not exists idx_game_transactions_player_id on game_transactions(player_id);

@@ -17,6 +17,7 @@ namespace YWonderLand.Environment
     public class BuildPersistence : MonoBehaviour
     {
         private const string SAVE_KEY = "YW_BuildState";
+        private bool loadComplete;
 
         private void OnEnable()  { GhostPlacementController.OnBuildingPlaced += HandleBuildingPlaced; }
         private void OnDisable() { GhostPlacementController.OnBuildingPlaced -= HandleBuildingPlaced; }
@@ -34,6 +35,12 @@ namespace YWonderLand.Environment
         // ── SAVE ──
         public void SaveBuildings()
         {
+            if (!loadComplete)
+            {
+                Debug.LogWarning("[BuildPersistence] Skip save before load completes to avoid overwriting existing build state.");
+                return;
+            }
+
             var data = new BuildSave { items = new List<BuildItem>() };
             foreach (var cell in BuildSurfaceCell.All)
             {
@@ -94,9 +101,17 @@ namespace YWonderLand.Environment
         // ── LOAD ──
         private void LoadBuildings()
         {
-            if (!PlayerPrefs.HasKey(SAVE_KEY)) return;
+            if (!PlayerPrefs.HasKey(SAVE_KEY))
+            {
+                loadComplete = true;
+                return;
+            }
             var data = JsonUtility.FromJson<BuildSave>(PlayerPrefs.GetString(SAVE_KEY));
-            if (data == null || data.items == null) return;
+            if (data == null || data.items == null)
+            {
+                loadComplete = true;
+                return;
+            }
 
             var gpc = GhostPlacementController.Instance;
             if (gpc == null)
@@ -131,6 +146,7 @@ namespace YWonderLand.Environment
                 }
             }
             if (pendingCrops.Count > 0) StartCoroutine(RestoreCropsNextFrame(pendingCrops));
+            else loadComplete = true;
 
             // ── Khôi phục CON VẬT (sau khi rào đã dựng) — re-spawn trên ô chuồng + đói-bù/chết-bù ──
             int na = 0;
@@ -195,6 +211,7 @@ namespace YWonderLand.Environment
             yield return null;
             foreach (var p in pending)
                 if (p.tile != null) p.tile.RestoreSave(p.crop, db);
+            loadComplete = true;
         }
 
         private static string PosKey(Vector3 p)

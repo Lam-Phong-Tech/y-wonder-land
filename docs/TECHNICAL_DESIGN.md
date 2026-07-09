@@ -13,6 +13,9 @@
 - **Không phá QC**: chạm file PROTECTED (GameManager, TutorialManager) tối thiểu, có khoanh vùng.
 - **Tái dùng cái có sẵn**: `UnityWebRequest` + `Newtonsoft.Json` + `Awaitable` (Unity 6) — KHÔNG cài package mới.
 
+> **Bổ sung 06/07/2026:** Hành trình rõ ràng cho phần web-account -> game-account -> backend gameplay nằm ở `docs/WEB_GAME_BACKEND_JOURNEY.md`. Tài liệu đó là nguồn đọc trước khi nối economy/inventory/shop/daily limit vào server-authoritative, vì kịch bản cũ chưa nói rõ web hiện có sẽ trở thành nguồn tài khoản game như thế nào.
+> **Bổ sung sau phỏng vấn 06/07/2026:** Yêu cầu trước mắt của sếp là khách đăng nhập bằng tài khoản web/cấp sẵn và chơi online realtime ở đảo công cộng. Realtime public chỉ gồm `city`/`mine`/đảo non-farm; farm là private state theo account. MVP sắp tới chưa làm nạp/rút; `Point`/web wallet là phase sau, còn lát gần nhất tập trung account + realtime.
+
 ## 2. Tổng quan kiến trúc
 
 ```
@@ -45,10 +48,10 @@
 | Lưu trữ | File JSON (`data.json`) | **PostgreSQL** (khuyến nghị — quan hệ rõ) hoặc MongoDB — **CHỜ CHỐT** |
 | Auth | JWT secret cứng, TTL 30d | JWT + refresh token, secret qua ENV; cân nhắc OAuth/social — **CHỜ CHỐT** (G3) |
 | Mật khẩu | bcrypt (cost 8) | bcrypt cost ≥10 |
-| Host | localhost:3000 | Cloud (Render/Railway/VPS) + HTTPS + domain — **CHỜ CHỐT** |
-| Realtime | Không | Photon/Mirror nếu cần multiplayer — **CHỜ CHỐT** có cần không |
+| Host | localhost:3000 | Máy case/VPS + HTTPS + domain; cần auto-start, backup, log, monitoring |
+| Realtime | WebSocket MVP trong `server/` | Giữ WebSocket cho chat/presence public islands; Photon/Mirror chỉ cân nhắc nếu gameplay realtime phức tạp hơn |
 
-> **Khuyến nghị của bé:** Node + Express + PostgreSQL (Prisma ORM) + host Railway/Render. Lý do: khớp stub hiện có, lên production nhanh, schema quan hệ hợp game kinh tế.
+> **Khuyến nghị của bé:** Node + Express + PostgreSQL cho MVP. Nếu sếp yêu cầu đặt server ở máy case, có thể chạy trên máy case trước nhưng phải có HTTPS, WebSocket Upgrade, backup DB hằng ngày, service auto-start và test từ điện thoại ngoài LAN. JSON store chỉ dùng dev/local.
 
 ## 4. Client — các lớp (đã code, file thật)
 | Lớp | File | Vai trò |
@@ -98,7 +101,7 @@ StartTutorial(): nếu Profile.tutorialCompleted == true → bỏ qua tutorial
 | 2 | EconomyService, InventoryService | GET/PUT /player/economy, /player/inventory | **Server-authoritative tiền** — client KHÔNG tự cộng |
 | 2 | Nối UI Login/Register thật vào REST | — | Đợt 1 đang đăng nhập ngầm |
 | 3 | FarmSyncService, AnimalSyncService | /player/farm, /player/animals | Sync khi đổi scene + theo chu kỳ |
-| 4 | Realtime (nếu khách cần) | WebSocket/Photon | Chat thế giới, bạn bè, leaderboard |
+| 4 | Realtime public islands | WebSocket `/realtime` | Chat, presence, remote player state ở `city`/`mine`; không gồm farm |
 
 ## 8. Rủi ro kỹ thuật đã biết
 - **POS đang lưu `int`** (EconomyManager) → tràn ở ~2.1 tỉ. Production nên dùng `long`/`bigint`.

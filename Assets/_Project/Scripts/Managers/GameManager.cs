@@ -518,7 +518,14 @@ public class GameManager : MonoBehaviour
             Debug.Log($"[GameManager] Using signed-in backend account: {backendUsername}");
         }
 
-        await profile.LoadProfileAsync();
+        bool bootstrapLoaded = false;
+        var bootstrap = YWonderLand.Backend.PlayerBootstrapService.Instance;
+        if (bootstrap != null)
+            bootstrapLoaded = await bootstrap.LoadBootstrapAsync();
+
+        if (!bootstrapLoaded)
+            await profile.LoadProfileAsync();
+
         profile.ApplyCharacterInfo(playerName, selectedCharacterIndex == 0 ? "male" : "female");
         ApplyDemoAccountOverrides(backendUsername, profile);
     }
@@ -582,6 +589,13 @@ public class GameManager : MonoBehaviour
 
         string seedKey = "YW_DemoLoadoutSeeded_" + username;
         if (PlayerPrefs.GetInt(seedKey, 0) == 1) return;
+
+        if (YWonderLand.Backend.PlayerBootstrapService.Instance != null
+            && YWonderLand.Backend.PlayerBootstrapService.Instance.HasServerBootstrap)
+        {
+            Debug.Log($"[GameManager] {username}: server bootstrap loaded, skip local rich demo loadout.");
+            return;
+        }
 
         YWonderLand.Managers.InventoryManager.Instance?.GiveTestLoadout();
         PlayerPrefs.SetInt(seedKey, 1);

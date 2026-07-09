@@ -66,7 +66,7 @@ namespace YWonderLand.EditorScripts
             AddItem(db, "asparagus_seed_01", "Gi\u1ED1ng m\u0103ng t\u00E2y", "Gi\u1ED1ng c\u00E2y m\u0103ng t\u00E2y.", "\ud83c\udf31", "seeds", 250, 25, true);
             AddItem(db, "red_ginseng_seed_01", "Gi\u1ED1ng h\u1ed3ng s\u00E2m", "Gi\u1ED1ng c\u00E2y h\u1ed3ng s\u00E2m qu\u00fd.", "\ud83c\udf3f", "seeds", 400, 40, true);
             AddItem(db, "royal_ginseng_seed_01", "Gi\u1ED1ng s\u00E2m ti\u1ebfn vua", "Gi\u1ED1ng s\u00E2m ti\u1ebfn vua qu\u00fd hi\u1ebfm.", "\ud83c\udf3f", "seeds", 800, 80, true);
-            AddItem(db, "passion_fruit_seed_01", "Gi\u1ED1ng chanh leo", "Gi\u1ED1ng c\u00E2y chanh leo (chanh d\u00E2y) l\u00E2u n\u0103m.", "\ud83c\udf47", "seeds", 1560, 3, true); // kh\u00e1ch ch\u1ED1t 22/06: 26 Point (20 USDT/20 c\u00E2y)
+            AddItem(db, "passion_fruit_seed_01", "Gi\u1ED1ng chanh leo", "Gi\u1ED1ng c\u00E2y chanh leo (chanh d\u00E2y) l\u00E2u n\u0103m.", "\ud83c\udf47", "seeds", 5300, 3, true); // BA chot 09/07: 200 USDT / cum 20 cay, ti gia 26.500 => 5.300 Point
             
             // Vật phẩm tiêu hao
             AddItem(db, "fertilizer_01", "Ph\u00E2n b\u00F3n", "Gi\u1EA3m 50% th\u1EDDi gian sinh tr\u01B0\u1EDFng.", "\ud83e\uddea", "items", 50, 25, true);

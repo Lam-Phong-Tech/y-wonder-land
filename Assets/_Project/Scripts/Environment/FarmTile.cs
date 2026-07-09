@@ -97,6 +97,54 @@ public class FarmTile : MonoBehaviour
         slaveTiles = null;
     }
 
+    private List<string> ExportSlaveTileKeys()
+    {
+        if (slaveTiles == null || slaveTiles.Count == 0) return null;
+
+        var keys = new List<string>();
+        foreach (var tile in slaveTiles)
+        {
+            if (tile == null) continue;
+            keys.Add(TilePosKey(tile.transform.position));
+        }
+        return keys.Count > 0 ? keys : null;
+    }
+
+    private void RestoreSlavesFromSave(List<string> slaveKeys)
+    {
+        if (currentCrop == null || currentCrop.plotSlots <= 1) return;
+
+        FreeSlaves();
+        if (slaveKeys == null || slaveKeys.Count == 0) return;
+
+        var byKey = new Dictionary<string, FarmTile>();
+        foreach (var tile in FindObjectsByType<FarmTile>(FindObjectsSortMode.None))
+        {
+            if (tile == null || tile == this || tile.masterTile != null) continue;
+            byKey[TilePosKey(tile.transform.position)] = tile;
+        }
+
+        var restored = new List<FarmTile>();
+        foreach (string key in slaveKeys)
+        {
+            if (string.IsNullOrEmpty(key)) continue;
+            if (!byKey.TryGetValue(key, out var tile) || tile == null) continue;
+
+            tile.OccupyAsSlot(this);
+            restored.Add(tile);
+        }
+
+        if (restored.Count > 0)
+            RegisterSlaves(restored);
+
+        int expected = Mathf.Max(0, currentCrop.plotSlots - 1);
+        if (restored.Count < expected)
+            Debug.LogWarning($"[FarmTile] Restore multi-slot crop '{plantedSeedId}' only found {restored.Count}/{expected} slave tiles.");
+    }
+
+    private static string TilePosKey(Vector3 p)
+        => $"{Mathf.RoundToInt(p.x * 10f)}_{Mathf.RoundToInt(p.z * 10f)}";
+
     // Thanh nước nổi trên cây — billboard ĐỘC LẬP (KHÔNG parent vào ô đất để né scale lệch của Dirt).
     private Transform waterBarRoot;
     private Transform waterFillPivot;
@@ -1102,14 +1150,14 @@ public class FarmTile : MonoBehaviour
         public double growStartUnix;
         public int harvestsRemaining;
         public bool isReGrowing;
+        public List<string> slaveTileKeys;
     }
 
-    /// <summary>Xuất trạng thái để LƯU. null nếu không cần (đất trống, ô slave của giàn, cây nhiều-ô chưa hỗ trợ).</summary>
+    /// <summary>Xuất trạng thái để LƯU. null nếu không cần (đất trống hoặc ô slave của giàn).</summary>
     public CropSave ExportSaveOrNull()
     {
         if (currentState == TileState.Soil) return null;
         if (masterTile != null) return null;                                // ô slave → master lo
-        if (currentCrop != null && currentCrop.plotSlots > 1) return null;  // cây nhiều ô (giàn): chưa hỗ trợ lưu
         return new CropSave
         {
             state = (int)currentState,
@@ -1119,6 +1167,7 @@ public class FarmTile : MonoBehaviour
             growStartUnix = growStartTime,
             harvestsRemaining = harvestsRemaining,
             isReGrowing = isReGrowing,
+            slaveTileKeys = ExportSlaveTileKeys(),
         };
     }
 
@@ -1148,6 +1197,8 @@ public class FarmTile : MonoBehaviour
         {
             currentState = TileState.Soil; plantedSeedId = ""; UpdateVisuals(); return;
         }
+
+        RestoreSlavesFromSave(s.slaveTileKeys);
 
         if (ShouldUseCustomCropModel()) SpawnCropModel();
         else if (createPrimitiveFallbackVisuals) { DestroySeedAndGrowingVisuals(); CreateCropVisuals(); }

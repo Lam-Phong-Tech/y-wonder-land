@@ -1153,7 +1153,8 @@ public class GameHUDController : MonoBehaviour
         bool busy = PlayerController.Instance != null &&
             PlayerController.Instance.IsBusy &&
             !PlayerController.Instance.IsJoystickCancelableEmote;
-        bool show = fishingCancelMode || busy;
+        bool suppressWhileBuilding = buildModeOverlay != null && buildModeOverlay.IsVisible();
+        bool show = !suppressWhileBuilding && (fishingCancelMode || busy);
         rightActionsContainer.EnableInClassList("hud-right-actions--fishing", fishingCancelMode);
         rightActionsContainer.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
     }

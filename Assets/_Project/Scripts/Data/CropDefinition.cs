@@ -68,6 +68,9 @@ namespace YWonderLand.Data
         [Tooltip("S\u1ed1 \u00f4 \u0111\u1ea5t c\u00e2y chi\u1ebfm khi tr\u1ed3ng. 1 = b\u00ecnh th\u01b0\u1eddng; Chanh d\u00e2y = 20 (c\u00e2y leo gi\u00e0n).")]
         public int plotSlots = 1;
 
+        [Tooltip("S\u1ed1 item h\u1ea1t gi\u1ed1ng b\u1ecb tr\u1eeb khi gieo. T\u00e1ch kh\u1ecfi plotSlots \u0111\u1ec3 1 g\u00f3i gi\u1ed1ng c\u00f3 th\u1ec3 chi\u1ebfm nhi\u1ec1u \u00f4.")]
+        public int seedItemCost = 1;
+
         [Tooltip("S\u1ed1 L\u1ea6N THU tr\u01b0\u1edbc khi c\u00e2y h\u1ebft \u0111\u1eddi. 1 = c\u00e2y ng\u1eafn ng\u00e0y (thu 1 l\u1ea7n r\u1ed3i m\u1ea5t). " +
                  "C\u00e2y l\u00e2u n\u0103m: Sa Chi 9, S\u1ea7u Ri\u00eang 12, Chanh d\u00e2y 2.")]
         public int maxHarvests = 1;

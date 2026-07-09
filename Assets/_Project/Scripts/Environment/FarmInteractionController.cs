@@ -2917,7 +2917,7 @@ namespace YWonderLand.Environment
 
             var cropDb = Resources.Load<CropDatabase>("CropDatabase");
             var crop = cropDb != null ? cropDb.GetCropBySeedId(seedId) : null;
-            return crop != null ? Mathf.Max(1, crop.plotSlots) : 1;
+            return crop != null ? Mathf.Max(1, crop.seedItemCost) : 1;
         }
 
         // Trồng cây có thể CHIẾM NHIỀU Ô (giàn): cây nhiều ô (vd chanh dây 20 ô) cần thêm ô trống gần nhất.

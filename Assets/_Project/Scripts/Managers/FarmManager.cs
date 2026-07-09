@@ -36,6 +36,7 @@ namespace YWonderLand.Managers
         private List<FarmTile> farmTiles = new List<FarmTile>();
 
         private const string SAVE_KEY = "YW_FarmState";
+        private bool loadComplete;
 
         void Awake()
         {
@@ -67,6 +68,7 @@ namespace YWonderLand.Managers
         {
             yield return null;
             LoadFarmState();
+            loadComplete = true;
         }
 
         /// <summary>
@@ -159,6 +161,12 @@ namespace YWonderLand.Managers
 
         public void SaveFarmState()
         {
+            if (!loadComplete)
+            {
+                Debug.LogWarning("[FarmManager] Skip save before load completes to avoid overwriting existing farm state.");
+                return;
+            }
+
             var saveData = new FarmSaveData { tiles = new List<FarmTile.CropSave>() };
 
             foreach (var tile in farmTiles)

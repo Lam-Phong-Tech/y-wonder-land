@@ -3,6 +3,7 @@
 > Lược đồ DB thật theo **REST API riêng** (thay blueprint UGS cũ trong `docs/DATA_SCHEMA.md`).
 > Phiên bản: 0.1 — 16/06/2026. **Đợt 1** (users, profiles) đã hiện thực ở server stub bằng file JSON; phần còn lại là **đề xuất** cho PostgreSQL production.
 > Quy ước: mọi bảng dữ liệu người chơi có `version` (migration) + `updated_at`. Tiền & số lượng dùng `BIGINT` (tránh tràn `int`).
+> Cập nhật 06/07/2026: account game production phải map từ tài khoản web/cấp sẵn; 1 account = 1 nhân vật; MVP sắp tới chưa làm nạp/rút, ưu tiên online + realtime. `Point` vẫn là tiền game và có thể là tiền nạp web ở phase sau; admin/sếp có thể chỉnh dữ liệu nhưng phải ghi audit log.
 
 ---
 
@@ -20,11 +21,11 @@
    │ profiles │   │  economy   │   │ inventory │   │   farm     │
    │ (1-1)    │   │  (1-1)     │   │  (1-N)    │   │  (1-N ô)   │
    └──────────┘   └────────────┘   └───────────┘   └────────────┘
-        │ 1                              │ 1             │ 1
-   ┌────▼──────┐                   ┌─────▼──────┐   ┌────▼───────┐
-   │  quests   │                   │  animals   │   │ piggy_bank │
-   │  (1-N)    │                   │  (1-N)     │   │  (1-N)     │
-   └───────────┘                   └────────────┘   └────────────┘
+        │ 1               │ 1            │ 1             │ 1
+   ┌────▼──────┐   ┌──────▼──────┐ ┌─────▼──────┐   ┌────▼───────┐
+   │  quests   │   │ daily_limits│ │  animals   │   │ piggy_bank │
+   │  (1-N)    │   │  (1-N)      │ │  (1-N)     │   │  (1-N)     │
+   └───────────┘   └─────────────┘ └────────────┘   └────────────┘
 
   (Tham chiếu danh mục TĨNH — do team/khách định nghĩa, không phải dữ liệu người chơi):
    item_catalog · crop_catalog · animal_catalog · shop_catalog
@@ -44,9 +45,12 @@
 | `username` | TEXT | username/email/phone hoặc tên web |
 | `display_name` | TEXT | tên hiển thị ban đầu |
 | `auth_source` | TEXT | `mock`, `web`, ... |
+| `account_status` | TEXT | `active`, `locked`, `soft_deleted`; mirror trạng thái từ web |
+| `locked_at` / `soft_deleted_at` | TIMESTAMP NULL | phục vụ chặn game khi web khóa/xóa mềm |
+| `last_login_at` | TIMESTAMP NULL | audit đăng nhập |
 | `created_at` / `updated_at` | TIMESTAMP | |
 
-> MVP hiện có `server/webAuthProvider.js` dạng adapter. Khi bên web có API login/verify thật, chỉ thay adapter, không đổi schema game.
+> MVP hiện có `server/webAuthProvider.js` dạng adapter. Khi bên web có API login/verify thật, chỉ thay adapter, không đổi schema game. `web_user_id` phải UNIQUE để bảo đảm 1 web account = 1 game player.
 
 ### `users` — định danh + xác thực
 | Cột | Kiểu | Ghi chú |
@@ -82,11 +86,11 @@
 | Cột | Kiểu | Ghi chú |
 |---|---|---|
 | `user_id` | FK PK | |
-| `pos` | BIGINT | tiền thường (hiện code `int` → đổi `long`) |
-| `upos` | BIGINT | tiền premium (IAP) |
+| `point` / `pos` | BIGINT | `Point`; MVP online/realtime dùng như tiền game/server demo, phase sau mới nối tiền nạp web; hiện code nội bộ còn dùng tên `pos` |
+| `upoint` / `upos` | BIGINT | `UPoint`; vai trò còn cần sếp/web team chốt |
 | `version` / `updated_at` | INT / TIMESTAMP | |
 
-> Client KHÔNG ghi trực tiếp; mọi thay đổi qua endpoint giao dịch (xem `SECURITY.md`).
+> Client KHÔNG ghi trực tiếp; mọi thay đổi qua endpoint giao dịch (xem `SECURITY.md`). MVP sắp tới chưa làm nạp/rút. Nếu phase sau web là wallet authority của `Point`, game-server phải gọi web wallet API khi cộng/trừ tiền nạp và vẫn ghi transaction mirror để đối soát.
 
 ### `inventory` — túi đồ (1-N)
 | Cột | Kiểu | Ghi chú |
@@ -108,6 +112,36 @@
 | `delta_pos` / `delta_upos` | BIGINT | |
 | `ref` | TEXT | item_id / shop_id / quest_id |
 | `idempotency_key` | TEXT UNIQUE | chống double-spend |
+| `external_ref` | TEXT NULL | mã giao dịch/web wallet ref nếu có |
+| `status` | TEXT | `pending`, `committed`, `failed`, `reversed` |
+| `created_at` | TIMESTAMP | |
+
+### `player_daily_limits` — giới hạn lượt theo ngày (1-N)
+> Đã thêm vào `server/schema.sql` ngày 06/07/2026 để đưa câu cá/đào đá 10 lượt/ngày lên server khi online.
+
+| Cột | Kiểu | Ghi chú |
+|---|---|---|
+| `player_id` | FK | |
+| `limit_key` | TEXT | ví dụ `fishing`, `mining` |
+| `period_key` | TEXT | ngày theo timezone server dạng `YYYY-MM-DD`; khuyến nghị `Asia/Saigon`, cần chốt trước production |
+| `used_count` | INT | số lượt đã dùng trong kỳ |
+| `max_count` | INT | mặc định 10 |
+| `version` / `updated_at` | INT / TIMESTAMP | |
+
+PK kép: `(player_id, limit_key, period_key)`.
+Client gửi ý định consume qua `/player/daily-limits/consume`; server kiểm còn lượt và ghi transaction với `idempotency_key`.
+
+### `admin_audit_logs` — nhật ký chỉnh sửa admin/sếp
+> Cần cho dashboard online. Không chỉnh tiền/item/farm/daily limit mà không ghi dấu vết.
+
+| Cột | Kiểu | Ghi chú |
+|---|---|---|
+| `id` | PK | |
+| `actor_admin_id` | TEXT | admin/super admin thực hiện |
+| `target_player_id` | TEXT NULL | player bị chỉnh, nếu có |
+| `action` | TEXT | ví dụ `adjust_point`, `edit_inventory`, `reset_demo_player` |
+| `reason` | TEXT | lý do bắt buộc nhập trên dashboard |
+| `before_json` / `after_json` | JSONB | snapshot phần bị chỉnh |
 | `created_at` | TIMESTAMP | |
 
 ---
@@ -170,11 +204,12 @@
 - **`updated_at`** cập nhật mỗi lần ghi; client gửi `version` để phát hiện xung đột.
 - **Migration**: mỗi đổi schema có script versioned (hiện CHƯA có — cần lập khi chuyển stub→Postgres).
 - **Index**: `users.username` (unique), `inventory(user_id)`, `farm_tiles(user_id)`, `transactions(idempotency_key)`.
-- **Tiền & lớn**: `BIGINT`; thời gian: `TIMESTAMP` UTC (ISO 8601, khớp `nowISO()` hiện tại).
+- **Tiền & lớn**: `BIGINT`; thời gian lưu DB nên là `TIMESTAMP` UTC, nhưng daily reset hiển thị/tính `period_key` theo timezone server đã chốt.
 
 ## 7. Khoảng trống cần lấp (trước khi lên production)
-1. Chốt **PostgreSQL vs MongoDB** (TDD mục 3).
+1. Chốt **PostgreSQL** cho staging/production và chỉ giữ JSON cho dev/local.
 2. **Item/crop/animal/shop catalog** chờ số liệu khách (A1/A3).
 3. **Hệ toạ độ tile** thống nhất (điểm mù mục 4).
 4. **Migration plan** từ file JSON stub → DB thật.
 5. Endpoint cho economy/inventory/farm/animal (TDD mục 7) — đợt 2–3.
+6. Phase sau MVP online/realtime: chốt web wallet API cho `Point`: balance, credit, debit/spend/reserve, transaction history, idempotency.

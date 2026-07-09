@@ -5,6 +5,59 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-07-09] — Chặn mất save khi mất focus trong lúc load
+
+### Fixed
+- `SystemsBootstrapper` bật `Application.runInBackground` cho Editor/Standalone để loading và async request không bị dừng khi người test alt-tab sang cửa sổ khác.
+- `BuildPersistence`, `TilePlacementSystem`, `FarmManager`, `AnimalManager` và `ResourceSpawner` không còn ghi PlayerPrefs khi hệ tương ứng chưa load/restore xong.
+- Riêng `BuildPersistence` và `TilePlacementSystem` chỉ mở khóa save sau khi crop restore qua frame kế tiếp đã hoàn tất, tránh ghi công trình/ô đất nhưng mất cây đã trồng.
+
+### Test cần làm
+- Tạo thay đổi farm: cuốc đất, trồng cây, đổi tiền/túi đồ nếu cần.
+- Thoát/mở lại hoặc travel vào farm; trong lúc loading, alt-tab sang Chrome 3-5 phút rồi quay lại.
+- Kết quả kỳ vọng: ô đã cuốc/cây/công trình không bị reset do save rỗng. Nếu chỉ còn tiền quay về `500.000`, cần kiểm riêng luồng `/player/bootstrap` vì server demo hiện vẫn là nguồn tiền khi bootstrap.
+
+---
+## [2026-07-09] — Ẩn nút hủy HUD khi build và rà héo cây lâu năm
+
+### Changed
+- `GameHUDController` không hiện nút X hủy hoạt ảnh HUD khi build popup đang mở, tránh nút X đỏ đè lên khu vực Jump lúc xây Ruộng/Đường đá/Chuồng.
+- `FarmTile` hỗ trợ lưu/khôi phục cây nhiều ô bằng `slaveTileKeys`, để cụm chanh dây 20 ô không bị bỏ qua khi save/load.
+- Rà dữ liệu cây lâu năm: Sa Chi, Sầu Riêng và Chanh dây đều có `noWaterDeathSec = 840` và `wateredLifeSec = 840`, nên nếu gieo xong không tưới lần đầu thì cây sẽ héo sau khoảng 840 giây demo, trừ khi đang trong tutorial.
+
+### Test cần làm
+- Build/test APK hoặc Editor: mở build popup, chọn Ruộng/Đường đá/Chuồng và xác nhận xây; không còn nút X đỏ nổi ở cạnh nút Jump.
+- Trồng thử Sa Chi/Sầu Riêng/Chanh dây, không tưới lần đầu và chờ qua 840 giây demo để xác nhận cây héo.
+- Riêng chanh dây: test thêm save/load trong lúc cây chưa héo để xác nhận cụm 20 ô vẫn được khôi phục đúng.
+
+---
+## [2026-07-09] — Chốt giá giống chanh dây
+
+### Changed
+- Cập nhật `passion_fruit_seed_01` từ `1.560 Point` lên `5.300 Point` theo phản hồi BA/khách: `200 USDT / 20 cây`, tỉ giá `26.500` quy về `5.300 Point` trong game.
+- Cập nhật `ItemDataGenerator` để khi chạy lại Generate Mock Items không trả giá giống chanh dây về số cũ.
+- Tách `seedItemCost` khỏi `plotSlots` trong `CropDefinition` để một item giống có thể là gói/cụm nhiều cây: chanh dây trừ 1 item `Giống chanh leo` nhưng vẫn chiếm 20 ô đất.
+- `task.md` ghi rõ phần giá đã chốt, nhưng rule chanh dây vẫn để `[~]` vì còn cần test runtime cây chiếm 20 ô, sản lượng cụm 20 cây và save/load cây nhiều ô.
+
+### Test cần làm
+- Mở shop hạt giống/vật nuôi, kiểm `Giống chanh leo` hiển thị giá `5.300 Point`.
+- Mua và gieo chanh dây: phải trừ đúng tiền, trừ 1 item giống/gói chanh leo khi trồng, chiếm 20 ô đất và không lỗi save/load.
+
+---
+## [2026-07-09] — Ghi nhận bàn giao hạ tầng/web auth
+
+### Changed
+- Cập nhật `task.md`, `docs/API_CONTRACTS.md`, `docs/WEB_GAME_BACKEND_JOURNEY.md` và `docs/CONTEXT_RECOVERY.md` với thông tin hạ tầng/web auth nhận từ chat 01/07.
+- Ghi rõ endpoint web auth đang dùng được là `POST https://ywonder.net/api/game/auth`; `api.ywonder.net` vẫn là target public đẹp hơn nhưng còn phụ thuộc xử lý SSL/WAF/default-server hoặc DNS-01 từ phía owner/infra.
+- Ghi rõ game-server gọi web auth server-side bằng `GAME_API_SECRET`; Unity không giữ secret.
+- Ghi nhận domain/IP/port không nhạy cảm, endpoint đọc/cộng Point cho phase sau và danh sách thông tin còn thiếu trước khi deploy game-server thật.
+- Không ghi mật khẩu VPS, mật khẩu tài khoản test, SSH key, DB password hoặc `GAME_API_SECRET` vào repo.
+
+### Test cần làm
+- Khi có quyền hạ tầng thật: test ngoài LAN bằng 4G/5G với `/health`, đăng nhập web auth qua game-server, `/player/bootstrap` và WebSocket realtime.
+- Chỉ báo production-ready sau khi xác nhận game-server public, proxy HTTPS/WebSocket, database thật, service auto-start, backup và log.
+
+---
 ## [2026-07-08] — Shop popup mobile dễ đọc hơn
 
 ### Changed

@@ -20,11 +20,12 @@
 - `[ ]` Tất cả cửa hàng trong game cần bảng hiệu chuyên nghiệp dạng model 3D gắn trước nhà; dùng tên bảng hiệu hiện tại làm nội dung hiển thị.
 - `[ ]` Nơi dịch chuyển ở thành phố đổi thành căn nhà giống bên farm nhưng cao hơn, trang trí thêm để có phong cách riêng.
 - `[x]` MiniGarden/Sa Chi/Sầu Riêng/Chanh dây: repo đã có seed/product, iconTexture và shop whitelist cho `sacha_01`, `durian_01`, `passion_fruit_01`; anh đã check phần shop/data tổng thể và chốt các sản phẩm này đủ đi tiếp. Icon sản phẩm chanh dây mới có thể đổi mapping sau nếu anh bổ sung asset mới.
-- `[~]` Chanh dây rule mới từ anh: `200 USDT / 20 cây` là giá cả cụm 20 cây. Code hiện đã dùng `plotSlots = 20`, một lần gieo cần và trừ 20 hạt, đồng thời chiếm 20 ô đất. Vẫn cần test runtime riêng và chốt/sửa sản lượng thu hoạch cho đúng ý "20 hạt -> sản phẩm tương ứng"; hiện còn rủi ro persistence cây nhiều ô khi save/load nên chưa tick x.
+- `[~]` Chanh dây rule mới từ BA/khách: `200 USDT / 20 cây` là giá cả cụm 20 cây; tỉ giá 26.500 được quy về `5.300 Point` trong game. Đã cập nhật `passion_fruit_seed_01.buyPrice = 5300` và `ItemDataGenerator` để không bị generator trả về 1560. Code đã tách `seedItemCost` khỏi `plotSlots`: `Giống chanh leo` trong shop được hiểu là 1 gói/cụm 20 cây giá 5.300 Point, khi gieo trừ 1 item giống nhưng vẫn chiếm 20 ô đất bằng `plotSlots = 20`. Đã vá persistence cây nhiều ô bằng `slaveTileKeys` để save/load lại cụm chanh dây không mất ô phụ. Vẫn cần test runtime riêng và chốt/sửa sản lượng thu hoạch cho đúng ý "cụm 20 cây -> sản phẩm tương ứng" nên chưa tick x.
 
 #### C. Nông trại / Farm scene và cửa hàng
 - `[x]` Các cửa hàng trong game phải hiển thị vật phẩm và câu chữ to hơn khoảng 3 lần so với hiện tại, đặc biệt trên điện thoại: đã thêm layout mobile riêng cho ShopPopup theo hướng giữ khung popup gần kích thước cũ, chỉ làm card/icon/chữ/giá/nút thao tác lớn hơn để mỗi màn hình hiện ít sản phẩm hơn và scroll xem tiếp. Cập nhật 08/07: anh đã chốt layout shop lớn hơn/filter shop sau khi test.
 - `[x]` Sửa trigger cửa hàng ở farm và city: anh đã thu/đặt lại trigger vừa vùng mặt trước cửa hàng để chỉ đứng đúng khu vực cửa mới hiện vật phẩm/vật nuôi/shop; khi đã vào sâu hơn trong vùng cửa thì UI vẫn phải giữ, không bị mất. Cần test lại nhanh trên APK/EXE sau build.
+- `[x]` Chặn lỗi mất tiến trình khi alt-tab/mất focus trong lúc load: các hệ save farm/build/cây nhiều ô/ô tự đặt/thú/tài nguyên nay chỉ được ghi PlayerPrefs sau khi load/restore xong, tránh ghi save rỗng hoặc crop rỗng đè lên dữ liệu cũ. Editor/EXE cũng bật chạy nền để loading/async không bị treo khi anh qua cửa sổ khác.
 - `[ ]` Thêm 5 cây xanh trong trang trại để người chơi chặt cây và nhận gỗ.
 - `[ ]` Nhân vật phải có bóng người rõ ràng khi di chuyển trong scene.
 - `[ ]` Cối xoay gió phải quay và nhìn chuyên nghiệp hơn; hiện tại khách chưa thấy đạt.
@@ -38,6 +39,7 @@
 - `[x]` Workflow build mới bước 2: đã chuyển nút búa/build xuống cụm tay phải phía trên nút Jump, và mở build list cũ ở góc nhìn nhân vật hiện tại, không tự bật camera top-down/ẩn GameHUD. Anh đã chốt nhóm build flow hiện tại.
 - `[x]` Workflow build mới bước 3: khi chọn Ruộng/Đường đá/Chuồng, ghost tự snap và ghim vào đúng ô đang viền trắng trước mặt; người chơi chỉ cần bấm OK để xác nhận hoặc X để hủy. Anh đã chốt nhóm build flow hiện tại.
 - `[x]` Workflow build compact popup: đã thay full HUD build bằng popup ngang gọn bên phải gần nút búa; góc popup hiện vật liệu đúng cho 3 công trình (Gỗ/Đá), bên dưới có 3 thẻ Ruộng/Đường đá/Chuồng. Chọn thẻ sẽ pin ghost vào ô trắng; nút tích xanh và X nằm ngay dưới thẻ để xác nhận/hủy. Anh đã chốt nhóm build flow hiện tại.
+- `[x]` Bỏ nút X hủy hoạt ảnh HUD khi đang mở build popup/xây Ruộng/Đường đá/Chuồng; build flow chỉ dùng nút tích xanh/X dưới thẻ và nút đóng popup, tránh nút X đỏ nổi đè lên khu vực Jump trên mobile.
 - `[x]` Yêu cầu mới của khách: bỏ tâm/crosshair cho tương tác chính. Cây/tảng đá dùng tap/click trực tiếp lên vật thể trong tầm khoảng 3.5m, có spherecast assist để đỡ miss collider/góc bấm và UI tự ẩn khi nhân vật đi xa. Ruộng/nước/chuồng dùng prompt theo ô/điểm trước chân để thao tác ổn hơn trên điện thoại.
 - `[ ]` Khi đặt khung vào ô đất thì hiện biểu tượng làm nông; bấm biểu tượng mở ngay 3 lựa chọn: cuốc đất, lát đá, xây chuồng.
 - `[ ]` Menu 3 lựa chọn này không được chuyển sang trang khác như hiện tại; phải là thao tác tại chỗ, icon/chữ to hơn khoảng 3 lần.
@@ -78,8 +80,8 @@
 - `[~]` Chốt DB/hạ tầng: PostgreSQL cho staging/production; JSON chỉ dev/local; server case có backup, auto-start, HTTPS, WebSocket Upgrade, firewall/router và test ngoài LAN. Tạm gác đến khi quay lại backend.
 - `[~]` Loop A kế tiếp: chuẩn hóa login web/cấp sẵn -> game JWT, map `web_user_id -> playerId`, xử lý `active/locked/soft_deleted`. Tạm gác đến khi xong nhóm chỉnh sửa game.
 - `[x]` Loop B kế tiếp: kiểm lại realtime public islands (`city`/`mine`) và bảo đảm farm không join room realtime công cộng; chat vẫn là kênh global khi client online nhưng không join room.
-- `[~]` Loop C kế tiếp: dựng/test lát online + realtime end-to-end: 2 thiết bị/tài khoản đăng nhập, vào `city`/`mine`, chat và thấy remote player đã ổn theo test của anh; cần build lại để retest chat global khi một người ở farm/no-room.
-- `[~]` Loop D sau realtime: Unity đọc `/player/bootstrap` và hydrate `EconomyManager` + `InventoryManager` từ server sau login để nhiều máy cùng account không lệch state cơ bản. Tạm gác đến khi xong nhóm chỉnh sửa game.
+- `[x]` Loop C kế tiếp: dựng/test lát online + realtime end-to-end đã pass trên build EXE + APK theo test của anh: `DemoRealtime01` và `DemoRealtime02` đăng nhập được, thấy nhau và chat được.
+- `[x]` Loop D sau realtime: `PlayerBootstrapService` đã gọi `/player/bootstrap` sau login/resume và hydrate `PlayerProfileService`, `EconomyManager`, `InventoryManager`; anh đã test `DemoRich01` đọc đúng `500.000 Point / 2.500 UPoint` từ backend demo.
 - `[~]` Loop E sau realtime/state: Shop buy/sell gọi backend transaction server-authoritative; dashboard và máy khác cùng account thấy Point/inventory đổi sau reload/bootstrap. Tạm gác đến khi xong nhóm chỉnh sửa game.
 - `[~]` Loop F sau đó: nâng `/admin` thành dashboard online cho sếp: login admin, role `super_admin`, audit log, reset demo/staging an toàn. Tạm gác đến khi xong nhóm chỉnh sửa game.
 
@@ -119,6 +121,16 @@
 - `[~]` Test điện thoại ngoài mạng công ty, test WebSocket public `wss://api.ywonder.net/realtime`.
 - `[~]` Backup DB thật trên máy case và giám sát uptime.
 - `[~]` Sửa/tái test các bug realtime chỉ xuất hiện khi 2 máy LAN cùng vào city nếu máy case đang mất mạng.
+
+### Cập nhật 09/07/2026 - thông tin hạ tầng/web auth đã nhận từ chat 01/07
+- `[x]` Đã có thông tin domain public dự kiến: `ywonder.net` và `api.ywonder.net`; DNS/web hiện liên quan IP `45.119.83.233`. IP máy vật lý/game API được trao đổi là `113.171.82.46`.
+- `[x]` Đã được báo port public cần dùng là `80` và `443`; tuy nhiên cần kiểm tra lại từ ngoài mạng vì trước đó `api.ywonder.net` bị kẹt SSL/WAF/default-server, không phải lỗi code game.
+- `[x]` Web auth endpoint dùng được ngay cho game-server: `POST https://ywonder.net/api/game/auth`, gọi server-side với `Authorization: Bearer <GAME_API_SECRET>`. Secret nằm/lưu riêng, không đưa vào Unity và không ghi vào repo.
+- `[x]` Web auth response đã được bàn giao dạng camelCase + snake_case: `userId/user_id`, `username`, `refCode/ref_code`, `fullName/full_name`, `gameToken/game_token`, `tokenType`, `expiresIn/expires_in`. `gameToken` là JWT HS256, verify bằng `GAME_API_SECRET`.
+- `[x]` Web có thêm endpoint đọc/cộng Point: `GET https://ywonder.net/api/game/balance?uid=<username>` và `POST https://ywonder.net/api/game/credit`; MVP online/realtime hiện chưa dùng nạp/rút/spend thật.
+- `[x]` Đã có tài khoản test web `gametest`; mật khẩu test lưu riêng, không ghi vào repo.
+- `[~]` `api.ywonder.net` chỉ là URL đẹp hơn cho game API; đang cần owner/infra xử lý SSL/WAF hoặc DNS-01. Trong khi chờ, game-server có thể gọi web auth qua `https://ywonder.net/api/game/auth`.
+- `[~]` Cần chốt nơi chạy game-server public: theo chat, web VPS riêng, game API dự kiến chạy ở máy vật lý/game-server port nội bộ; cần xác nhận quyền truy cập, service auto-start, domain/proxy tới game-server, DB thật và backup trước khi báo deadline production.
 
 ### Gác phase sau, chưa nên làm trong 3 ngày này
 - `[~]` Firebase push notification cho cây/vật nuôi.

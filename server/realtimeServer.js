@@ -232,7 +232,7 @@ function attachRealtimeServer(server, options) {
       userId: auth.uid || auth.userId || "",
       playerId: auth.uid || auth.userId || id,
       webUserId: auth.webUserId || "",
-      name: "Player",
+      name: safeText(auth.displayName || auth.username || auth.name, "Player", 32),
       gender: "male",
       room: "",
       position: { x: 0, y: 0, z: 0 },

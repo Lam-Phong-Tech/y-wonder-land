@@ -8,6 +8,7 @@ const jwt = require("jsonwebtoken");
 const store = require("./store");
 const webAuth = require("./webAuthProvider");
 const { attachRealtimeServer } = require("./realtimeServer");
+const { createAdminDashboardRouter } = require("./adminDashboard");
 
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || "ywonderland_dev_secret_change_me";
@@ -16,6 +17,10 @@ const TOKEN_TTL = "30d";
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+if (process.env.ADMIN_DASHBOARD_ENABLED !== "false") {
+  app.use("/admin", createAdminDashboardRouter());
+}
 
 // Mount the same routes for local dev and the public Unity baseUrl.
 const api = express.Router();
@@ -97,7 +102,7 @@ api.post("/auth/register", (req, res) => {
   store.setProfile(id, profile);
 
   console.log(`[auth] Đăng ký mới: ${username} (${id})`);
-  res.json({ token: signToken(id), userId: id });
+  res.json({ token: signToken(id, { username }), userId: id });
 });
 
 api.post("/auth/login", (req, res) => {
@@ -110,7 +115,7 @@ api.post("/auth/login", (req, res) => {
     return res.status(401).json({ error: "Sai username hoặc mật khẩu" });
 
   console.log(`[auth] Đăng nhập: ${username} (${user.id})`);
-  res.json({ token: signToken(user.id), userId: user.id });
+  res.json({ token: signToken(user.id, { username: user.username }), userId: user.id });
 });
 
 api.post("/auth/web-login", async (req, res) => {
@@ -136,6 +141,8 @@ api.post("/auth/web-login", async (req, res) => {
   const token = signToken(player.id, {
     webUserId: player.webUserId,
     authSource: player.authSource,
+    username: player.username,
+    displayName: player.displayName || profile.name,
   });
 
   console.log(`[auth] Web login mapped ${player.webUserId} -> ${player.id}`);
@@ -186,6 +193,7 @@ api.get("/player/bootstrap", auth, (req, res) => {
     economy: store.getEconomy(req.userId),
     inventory: store.getInventory(req.userId),
     farm_state: store.getFarmState(req.userId),
+    daily_limits: store.getDailyLimits(req.userId),
   });
 });
 
@@ -236,9 +244,41 @@ api.post("/player/inventory/adjust", auth, (req, res) => {
   const result = store.adjustInventoryItem(req.userId, itemId, Number(quantityDelta), {
     type: body.type || "inventory_adjust",
     ref: body.ref || itemId,
+    idempotencyKey: body.idempotency_key || body.idempotencyKey || "",
   });
 
   if (!result.ok) return res.status(409).json({ error: result.error, inventory: result.inventory });
+  res.json(result);
+});
+
+api.get("/player/daily-limits", auth, (req, res) => {
+  res.json({ daily_limits: store.getDailyLimits(req.userId) });
+});
+
+api.post("/player/daily-limits/consume", auth, (req, res) => {
+  const body = req.body || {};
+  const limitKey = body.limit_key || body.limitKey;
+  const amount = body.amount == null ? 1 : body.amount;
+  if (!limitKey) {
+    return res.status(400).json({ error: "Missing limit_key" });
+  }
+
+  const result = store.consumeDailyLimit(req.userId, limitKey, amount, {
+    maxCount: body.max_count || body.maxCount || 10,
+    periodKey: body.period_key || body.periodKey || "",
+    type: body.type || `${limitKey}_daily_limit`,
+    ref: body.ref || limitKey,
+    idempotencyKey: body.idempotency_key || body.idempotencyKey || "",
+  });
+
+  if (!result.ok) {
+    return res.status(409).json({
+      error: result.error,
+      daily_limits: result.daily_limits,
+      limit: result.limit,
+    });
+  }
+
   res.json(result);
 });
 

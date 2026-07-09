@@ -15,6 +15,7 @@ namespace YWonderLand.Managers
         [SerializeField] private CropDatabase cropDatabase; // Note: You might want a dedicated AnimalDatabase later, reusing for now if it holds AnimalDefinition
 
         private const string SAVE_KEY = "YW_AnimalState";
+        private bool loadComplete;
         
         // Lookup dictionary for animal definitions
         private Dictionary<string, AnimalDefinition> animalDefs = new Dictionary<string, AnimalDefinition>();
@@ -38,6 +39,7 @@ namespace YWonderLand.Managers
         {
             pens = FindObjectsByType<AnimalPen>(FindObjectsSortMode.None);
             LoadAnimalState();
+            loadComplete = true;
         }
 
         private void LoadDefinitions()
@@ -102,6 +104,12 @@ namespace YWonderLand.Managers
 
         public void SaveAnimalState()
         {
+            if (!loadComplete)
+            {
+                Debug.LogWarning("[AnimalManager] Skip save before load completes to avoid overwriting existing animal state.");
+                return;
+            }
+
             AnimalSaveData saveData = new AnimalSaveData();
             saveData.animals = new List<AnimalStateData>();
 

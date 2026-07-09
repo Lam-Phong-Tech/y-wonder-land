@@ -322,11 +322,22 @@ public class LoginScreenController : MonoBehaviour
         }
 
         shouldSkipCharacterSelectAfterLogin = false;
+        bool bootstrapLoaded = false;
+        var bootstrap = PlayerBootstrapService.Instance;
+        if (bootstrap != null)
+        {
+            ShowStatus(loginStatus, "Đang nạp dữ liệu nhân vật...", true);
+            bootstrapLoaded = await bootstrap.LoadBootstrapAsync();
+        }
+
         var profile = PlayerProfileService.Instance;
         if (profile != null)
         {
-            ShowStatus(loginStatus, "Đang nạp hồ sơ...", true);
-            await profile.LoadProfileAsync();
+            if (!bootstrapLoaded)
+            {
+                ShowStatus(loginStatus, "Đang nạp hồ sơ...", true);
+                await profile.LoadProfileAsync();
+            }
 
             if (GameManager.IsRichDemoAccountName(username) && !profile.HasCharacterCreated)
                 profile.ApplyCharacterInfo(username, profile.Profile != null ? profile.Profile.gender : "male");

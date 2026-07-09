@@ -5,7 +5,8 @@
   "description": "Server stub toi thieu cho YWONDERLAND (dev/test only). KHONG dung cho production.",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "test:realtime": "node realtimeSmokeTest.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

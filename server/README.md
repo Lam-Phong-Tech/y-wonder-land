@@ -21,6 +21,46 @@ npm start
 ```
 Mặc định chạy tại `http://localhost:3000` (đổi bằng biến môi trường `PORT`).
 
+Storage mặc định là JSON file để test local nhanh:
+
+```powershell
+$env:STORE_MODE="json"
+$env:YW_DATA_PATH="D:\LamGameUnity\BaChuKhuRung3D\server\data.json"
+```
+
+`STORE_MODE=postgres` đã có adapter scaffold (`server/postgresStore.js`) và schema target
+(`server/schema.sql`), nhưng chưa có query implementation/driver DB. Khi cắm DB thật,
+giữ nguyên interface trong `server/store.js` để route API không phải đổi.
+
+## Giao diện xem backend local
+
+Khi server đang chạy, mở trình duyệt:
+
+```text
+http://127.0.0.1:3000/admin
+```
+
+Dashboard này dùng để demo/dev:
+
+- Xem tổng số players, profiles, inventory slots, transactions.
+- Tạo user demo.
+- Chọn player và sửa JSON của profile, economy, inventory, daily limits, farm state.
+- Xóa player khỏi JSON store local.
+
+Đây **không phải admin production** và mặc định chỉ nên dùng trong môi trường dev/local.
+Theo roadmap 06/07/2026, dashboard cho sếp xem online phải là phase riêng: có login admin,
+role `super_admin`, HTTPS, audit log cho mọi chỉnh sửa tiền/item/farm/daily limit, và
+chỉ cho reset dữ liệu demo/staging chứ không reset nhầm production.
+Nếu muốn tắt dashboard:
+
+```powershell
+$env:ADMIN_DASHBOARD_ENABLED="false"
+```
+
+Hành trình đầy đủ từ tài khoản web -> tài khoản game -> gameplay server-authoritative nằm ở
+`../docs/WEB_GAME_BACKEND_JOURNEY.md`. Dashboard chỉ chứng minh dữ liệu backend MVP; Unity shop/economy/inventory
+chỉ đổi dashboard sau khi loop server-authoritative được nối vào gameplay.
+
 ## URL public target
 
 Khi public xong, client Unity sẽ trỏ `Assets/Resources/BackendConfig.asset` tới:
@@ -65,6 +105,43 @@ Unity KHONG goi truc tiep endpoint web nay va KHONG duoc giu `GAME_API_SECRET`.
 Unity goi `/auth/web-login` cua game-server; game-server moi goi `api.ywonder.net/api/game/auth`.
 Neu SSL cua `api.ywonder.net` dang ket ha tang, co the override tam `WEB_AUTH_LOGIN_URL=https://ywonder.net/api/game/auth`.
 
+## Test realtime khi web dang sap / chua co tai khoan web
+
+Dung `WEB_AUTH_MODE=mock` de gia lap tai khoan duoc cap san. Trong mode nay, game-server map username thanh
+`web_user_id = mock:<username>` va tra game JWT nhu flow web-login that, nen Unity/Realtime van test duoc ma khong can web.
+
+Chay server local:
+
+```powershell
+cd server
+$env:WEB_AUTH_MODE="mock"
+$env:PORT="3000"
+npm.cmd start
+```
+
+Account test de nhap trong Unity:
+
+```text
+DemoRealtime01 / demo
+DemoRealtime02 / demo
+DemoRealtime03 / demo
+```
+
+Neu test trong Unity Editor cung may chay server, dat `BackendConfig.baseUrl = http://127.0.0.1:3000`.
+Neu test dien thoai/2 may trong LAN, dat `BackendConfig.baseUrl = http://<IP-may-chay-server>:3000`.
+
+Smoke test tu dong REST + WebSocket:
+
+```powershell
+cd server
+$env:REALTIME_TEST_BASE_URL="http://127.0.0.1:3000"
+npm.cmd run test:realtime
+```
+
+Test nay login `DemoRealtime01`, `DemoRealtime02`, `DemoRealtime03`; 2 client join `city`,
+client thu ba khong join room van nhan/gui duoc chat global, kiem tra `player_state`,
+va thu join `farm` de dam bao farm khong phai realtime public room.
+
 Endpoint moi:
 
 | Method | Endpoint | Ghi chu |
@@ -74,8 +151,33 @@ Endpoint moi:
 | GET/PUT | `/player/economy` | Vi game rieng trong MVP |
 | POST | `/player/economy/apply` | Apply delta Point/UPoint game, co idempotency key |
 | GET/PUT | `/player/inventory` | Doc/ghi inventory MVP |
-| POST | `/player/inventory/adjust` | Cong/tru item |
+| POST | `/player/inventory/adjust` | Cong/tru item, co idempotency key |
+| GET | `/player/daily-limits` | Doc gioi han ngay cho fishing/mining |
+| POST | `/player/daily-limits/consume` | Tru luot server-side, mac dinh 10 luot/ngay |
 | GET/PUT | `/player/farm-state` | Doc/ghi farm-state JSON MVP |
+
+`/player/bootstrap` nay tra:
+
+```json
+{
+  "player_profile": {},
+  "economy": {},
+  "inventory": {},
+  "farm_state": {},
+  "daily_limits": {}
+}
+```
+
+Daily limit payload de tru luot:
+
+```json
+{
+  "limit_key": "mining",
+  "amount": 1,
+  "max_count": 10,
+  "idempotency_key": "uuid-or-client-action-id"
+}
+```
 
 ## Realtime MVP
 
@@ -90,7 +192,8 @@ Game-server also exposes WebSocket realtime:
 MVP scope:
 
 - shared rooms: `city`, `mine`
-- global chat across server
+- farm không join realtime room công cộng; farm là private state theo account và sync bằng REST/action log sau
+- global chat across server, including connected clients that are not currently in a shared room
 - max players per room: `REALTIME_MAX_ROOM_PLAYERS` (default `20`)
 - remote player position/yaw/`Idle`/`Walk`/`Run`
 - emotes: `Waving`, `Pointing`

@@ -54,10 +54,12 @@ namespace YWonderLand.Environment
         private List<HarvestableResource> activeResources = new List<HarvestableResource>();
         
         private string SaveKey => "ResourceSpawnerState_" + spawnerID;
+        private bool loadComplete;
 
         void Start()
         {
             LoadResourceState();
+            loadComplete = true;
         }
 
         private void LoadResourceState()
@@ -93,6 +95,7 @@ namespace YWonderLand.Environment
                     SpawnNewResource($"Rock_{i}", HarvestableResource.ResourceType.Rock, pos);
             }
             
+            loadComplete = true;
             SaveResourceState();
         }
 
@@ -275,6 +278,12 @@ namespace YWonderLand.Environment
 
         public void SaveResourceState()
         {
+            if (!loadComplete)
+            {
+                Debug.LogWarning($"[ResourceSpawner] Skip save before load completes for '{spawnerID}' to avoid overwriting existing resource state.");
+                return;
+            }
+
             ResourceSaveList list = new ResourceSaveList();
             foreach (var res in activeResources)
             {

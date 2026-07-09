@@ -37,7 +37,7 @@ namespace YWonderLand.Managers
         private void LoadBalances()
         {
             // Nếu chưa có data, tặng 5000 Point làm vốn khởi nghiệp
-            currentPOS = PlayerPrefs.GetInt(POS_KEY, 5000); 
+            currentPOS = PlayerPrefs.GetInt(POS_KEY, 5000);
             currentUPOS = PlayerPrefs.GetInt(UPOS_KEY, 0);
         }
 
@@ -50,6 +50,16 @@ namespace YWonderLand.Managers
 
         public long GetPOS() => currentPOS;
         public long GetUPOS() => currentUPOS;
+
+        public void ApplyServerState(long pos, long upos, bool saveLocalCache = true)
+        {
+            currentPOS = Math.Max(0, pos);
+            currentUPOS = Math.Max(0, upos);
+            if (saveLocalCache) SaveBalances();
+            OnPOSChanged?.Invoke(currentPOS);
+            OnUPOSChanged?.Invoke(currentUPOS);
+            Debug.Log($"[Economy] Applied server state. Point={currentPOS}, UPoint={currentUPOS}");
+        }
 
         public void AddPOS(long amount)
         {

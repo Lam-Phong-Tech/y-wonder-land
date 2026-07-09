@@ -35,16 +35,28 @@ Server stub vẫn hỗ trợ cả endpoint local (`/auth/login`) và endpoint le
 
 Muc tieu: game backend co contract on dinh truoc, web auth that se cam vao adapter sau. Hien `WEB_AUTH_MODE=mock` cho dev/test; khi ben web cung cap endpoint, doi sang `WEB_AUTH_MODE=http` va set `WEB_AUTH_LOGIN_URL`.
 
+Tài liệu hành trình product/backend đầy đủ nằm ở `docs/WEB_GAME_BACKEND_JOURNEY.md`. Quy ước chính:
+- Web là nguồn tài khoản; game backend chỉ nhận/verify account web qua adapter server-side.
+- Game backend map `web_user_id -> playerId` và là nguồn dữ liệu game state.
+- MVP chốt 1 account web = 1 game player/nhân vật. Khách phải có tài khoản trước khi chơi; không làm guest account trong backend thật.
+- Account web `locked` hoặc `soft_deleted` phải bị game-server chặn login/gameplay online.
+- Unity không gọi trực tiếp API web nội bộ và không giữ `GAME_API_SECRET`.
+- Economy/inventory/daily limit/farm-state phải chuyển dần sang server-authoritative. Hiện Unity chưa hoàn tất phần này, nên các endpoint bên dưới là contract/MVP backend trước khi nối gameplay thật.
+- MVP sắp tới chưa làm nạp/rút. `Point` có thể là game-server currency cho demo/state sync; web wallet/top-up/spend chuyển sang phase sau. Khi sang phase tiền thật, game-server phải ghi ledger/transaction rõ ràng và gọi web wallet API server-side; Unity không được tự cộng/trừ ví nạp.
+- Realtime trước mắt chỉ dành cho đảo công cộng như `city`/`mine`; farm không join room realtime công cộng. Chat là kênh toàn server cho client còn online, không phụ thuộc đang đứng cùng room.
+
 | Method | Endpoint | Body | Tra ve |
 |---|---|---|---|
 | POST | `/auth/web-login` | `{ username/email/refCode, password }` hoac `{ token }` | `{ token, playerId, webUserId, player_profile }` |
-| GET | `/player/bootstrap` | Bearer token | `{ player_profile, economy, inventory, farm_state }` |
+| GET | `/player/bootstrap` | Bearer token | `{ player_profile, economy, inventory, farm_state, daily_limits }` |
 | GET | `/player/economy` | Bearer token | `{ economy }` |
 | PUT | `/player/economy` | `{ economy }` + Bearer | `{ ok, economy }` |
 | POST | `/player/economy/apply` | `{ delta_pos, delta_upos, type, ref, idempotency_key }` + Bearer | `{ ok, economy, transaction }` |
 | GET | `/player/inventory` | Bearer token | `{ inventory }` |
 | PUT | `/player/inventory` | `{ inventory }` + Bearer | `{ ok, inventory }` |
-| POST | `/player/inventory/adjust` | `{ item_id, quantity_delta, type, ref }` + Bearer | `{ ok, inventory, transaction }` |
+| POST | `/player/inventory/adjust` | `{ item_id, quantity_delta, type, ref, idempotency_key }` + Bearer | `{ ok, inventory, transaction }` |
+| GET | `/player/daily-limits` | Bearer token | `{ daily_limits }` |
+| POST | `/player/daily-limits/consume` | `{ limit_key, amount, max_count, period_key, type, ref, idempotency_key }` + Bearer | `{ ok, daily_limits, limit, transaction }` |
 | GET | `/player/farm-state` | Bearer token | `{ farm_state }` |
 | PUT | `/player/farm-state` | `{ farm_state }` + Bearer | `{ ok, farm_state }` |
 
@@ -52,7 +64,12 @@ Quy uoc mapping:
 - `web_user_id` la ID on dinh do web tra ve.
 - `playerId` la ID noi bo game backend.
 - DB game rieng luu `web_user_id -> playerId`, khong ghi truc tiep vao DB web.
-- MVP chua dung chung Point web; endpoint economy hien la vi game rieng.
+- `web_user_id` phai unique trong `game_players` de dam bao 1 web account = 1 game player.
+- Game-server phai kiem tra account status tu web: `active`, `locked`, `soft_deleted` hoac field tuong duong.
+- MVP online/realtime chua lam nap/rut va chua can web wallet. Phase sau: tien nap tu web phai di qua web wallet API; `Point` la tien trong game va tien nap, con can chot `UPoint` dung lam gi va web hay game-server la ledger cuoi cung cua Point.
+- `STORE_MODE=json` la mac dinh dev/local; `STORE_MODE=postgres` da co adapter scaffold va schema target, nhung query PostgreSQL chua implement cho production.
+- `daily_limits` mac dinh gom `fishing` va `mining`, reset theo `period_key` ngay server dang `YYYY-MM-DD`. Can chot timezone server; khuyen nghi `Asia/Saigon` cho khach VN. Hien stub cu co the dang dung UTC nen can doi/ghi ro truoc production.
+- `idempotency_key` phai duy nhat cho moi action co retry; server tra `duplicate=true` khi nhan lai cung key va khong apply them tien/item/luot.
 
 ### Web auth contract do web team bàn giao
 
@@ -60,20 +77,35 @@ Game-server gọi web, Unity KHÔNG gọi trực tiếp và KHÔNG giữ `GAME_A
 
 | Method | Endpoint | Header | Body | Trả về |
 |---|---|---|---|---|
-| POST | `https://api.ywonder.net/api/game/auth` | `Authorization: Bearer <GAME_API_SECRET>` | `{ "username": "<username|email|refCode>", "password": "..." }` | `{ ok, userId, user_id, username, refCode, ref_code, fullName, full_name, gameToken, game_token, tokenType, expiresIn, expires_in }` |
+| POST | `https://ywonder.net/api/game/auth` | `Authorization: Bearer <GAME_API_SECRET>` | `{ "username": "<username|email|phone|refCode>", "password": "..." }` | `{ ok, userId, user_id, username, refCode, ref_code, fullName, full_name, status, locked, softDeleted, gameToken, game_token, tokenType, expiresIn, expires_in }` |
 | GET | `https://ywonder.net/api/game/balance?uid=<username>` | `Authorization: Bearer <GAME_API_SECRET>` | — | Web Point balance |
 | POST | `https://ywonder.net/api/game/credit` | `Authorization: Bearer <GAME_API_SECRET>` | `{ "uid":"<username>", "amount": number, "ref":"<event id>", "reason":"..." }` | Web credit result |
+
+Cập nhật bàn giao 09/07/2026 từ chat 01/07:
+- Endpoint web auth đang dùng được ngay qua SSL hợp lệ là `POST https://ywonder.net/api/game/auth`.
+- `api.ywonder.net` đã được cấu hình nhưng SSL/public routing đang kẹt ở lớp hạ tầng/WAF/default-server; không chặn việc nối game nếu game-server tạm gọi `ywonder.net/api/game/auth`.
+- `GAME_API_SECRET` nằm ở server/.env hoặc do owner cấp riêng; tuyệt đối không đưa vào Unity, không commit vào repo.
+- Đã có test account web `gametest`; mật khẩu lưu riêng ngoài repo.
+- `gameToken` là JWT HS256 chuẩn, payload có `{ sub, uid, username, iat, exp }`, trong đó `sub/uid = web userId`.
+
+Điểm cần xin/chốt thêm với web team:
+- MVP online/realtime chưa cần endpoint ví nạp/rút.
+- Phase sau mới cần endpoint trừ tiền/spend/debit hoặc reserve/capture để game-server mua vật phẩm bằng tiền nạp.
+- Phase sau mọi cộng/trừ ví web phải có `ref` hoặc `idempotency_key` để retry không nhân đôi.
+- Phase sau cần xác nhận `Point` là wallet chính cho cả gameplay và tiền nạp; nếu `UPoint` còn dùng, cần định nghĩa rõ loại giao dịch nào dùng `UPoint`.
+- Field trạng thái account rõ ràng để game-server chặn `locked`/`soft_deleted`.
+- Endpoint lịch sử giao dịch ví để admin/sếp đối soát.
 
 Production env for `server/webAuthProvider.js`:
 
 ```powershell
 $env:WEB_AUTH_MODE="http"
-$env:WEB_AUTH_LOGIN_URL="https://api.ywonder.net/api/game/auth"
+$env:WEB_AUTH_LOGIN_URL="https://ywonder.net/api/game/auth"
 $env:WEB_AUTH_SECRET="<GAME_API_SECRET>"
 ```
 
 `gameToken` format mới: JWT chuẩn HS256, payload includes `{ sub, uid, username, iat, exp }` (`sub`/`uid` = web `userId`). Game-server verifies with `jwt.verify(token, GAME_API_SECRET, { algorithms: ["HS256"] })`.
-Nếu hạ tầng `api.ywonder.net` chưa sẵn sàng SSL, có thể override tạm `WEB_AUTH_LOGIN_URL=https://ywonder.net/api/game/auth` mà không đổi Unity.
+Sau khi hạ tầng `api.ywonder.net` có SSL/proxy đúng, có thể đổi `WEB_AUTH_LOGIN_URL` sang `https://api.ywonder.net/api/game/auth` mà không đổi Unity.
 
 ## Realtime WebSocket MVP
 
@@ -111,7 +143,12 @@ Server -> client:
 | `chat` | `{ type, playerId, name, room, message }` |
 | `emote` | `{ type, playerId, name, room, emote, duration }` |
 
-Scope hiện tại: chat toàn server, remote player visual trong `city`/`mine`, tối đa 20 người/room. Chưa đồng bộ gameplay server-authoritative.
+Scope hiện tại: chat toàn server cho client còn kết nối WebSocket, remote player visual trong `city`/`mine`, tối đa 20 người/room. Chưa đồng bộ gameplay server-authoritative.
+
+Quy ước theo yêu cầu trước mắt của sếp:
+- Realtime public island chỉ áp dụng cho `city`, `mine`, và các đảo non-farm sau này.
+- `farm` không phải public realtime room. Farm là private state theo account, sync qua REST/action log ở phase farm-state; client rời room public nhưng vẫn giữ WebSocket cho chat global.
+- WebSocket không được dùng để quyết định tiền/item/shop. Các giao dịch nhạy cảm vẫn đi qua REST server-authoritative có `idempotency_key`.
 
 ---
 

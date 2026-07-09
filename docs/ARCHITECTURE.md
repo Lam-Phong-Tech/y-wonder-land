@@ -2,7 +2,7 @@
 # Cập nhật: 2026-06-16
 
 > **Backend = REST API riêng** (Node/Express stub → production) + DB, theo kịch bản khách. **KHÔNG dùng UGS.**
-> Chi tiết kỹ thuật xem `docs/TECHNICAL_DESIGN.md` (kiến trúc) và `docs/DB_SCHEMA.md` (ERD/DB).
+> Chi tiết kỹ thuật xem `docs/TECHNICAL_DESIGN.md` (kiến trúc), `docs/WEB_GAME_BACKEND_JOURNEY.md` (hành trình Web account -> Game account) và `docs/DB_SCHEMA.md` (ERD/DB).
 > *(Lịch sử: tài liệu này từng là blueprint UGS — đã thay thế ngày 16/06/2026.)*
 
 ## Tech Stack
@@ -12,7 +12,7 @@
 - **Async:** Awaitable (Unity 6) — đã dùng ở Backend services, IslandTravelManager, ScenePortal
 - **JSON:** Newtonsoft.Json (`com.unity.nuget.newtonsoft-json` — có sẵn)
 - **Design System:** The Tangible Playground (xem `docs/DESIGN.md`)
-- **Backend:** REST API riêng — hiện server stub **Node/Express** (`server/`); production chốt sau (Node/Go/Python + PostgreSQL/MongoDB — xem TDD). Realtime (chat/bạn bè) nếu cần: Photon/Mirror; push: Firebase FCM (chờ chốt).
+- **Backend:** REST API riêng — hiện server stub **Node/Express** (`server/`); production/staging khuyến nghị Node + PostgreSQL. Realtime MVP hiện dùng WebSocket trong `server/` cho đảo công cộng `city`/`mine`; farm không join realtime public room. Push: Firebase FCM (chờ chốt).
 - **Target Platform:** Android (MVP) — iOS/PC cân nhắc sau
 - **Version Control:** Git
 
@@ -28,7 +28,7 @@
 | EconomyService / InventoryService | (đợt 2) | tiền & túi đồ server-authoritative | ⏳ |
 | FarmSyncService / AnimalSyncService | (đợt 3) | đồng bộ nông trại/vật nuôi | ⏳ |
 
-Endpoint hiện có: `POST /auth/register`, `POST /auth/login`, `GET|PUT /player/profile`. Xem `docs/API_CONTRACTS.md`.
+Endpoint hiện có thêm nhóm backend MVP: `/auth/web-login`, `/player/bootstrap`, economy/inventory/daily-limits/farm-state và WebSocket `/realtime`. Xem `docs/API_CONTRACTS.md`.
 
 ## Cấu Trúc Thư Mục (thực tế)
 
@@ -66,8 +66,9 @@ server/                 ← REST stub (Node/Express) — NGOÀI Assets/, Unity k
                       ▼
 ┌─────────────────────────────────────────────────────┐
 │        REST Backend (stub Node/Express → prod)      │
-│  /auth/register · /auth/login · GET|PUT /player/...  │
-│  JWT (bcrypt) · Store: JSON file → PostgreSQL/Mongo  │
+│  /auth/web-login · /player/bootstrap · shop/economy  │
+│  WebSocket /realtime for public islands              │
+│  JWT · Store: JSON file → PostgreSQL                 │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -101,6 +102,7 @@ server/                 ← REST stub (Node/Express) — NGOÀI Assets/, Unity k
 
 ## Tài liệu liên quan
 - `docs/TECHNICAL_DESIGN.md` — kiến trúc backend chi tiết, stack, lộ trình đợt 2–4.
+- `docs/WEB_GAME_BACKEND_JOURNEY.md` — hành trình web account trở thành game account, loop server-authoritative và cách kiểm tra.
 - `docs/DB_SCHEMA.md` — ERD + lược đồ bảng.
 - `docs/SECURITY.md` — anti-cheat, server-authoritative.
 - `docs/BUILD_RELEASE.md` — quy trình build Android + Play Console.
