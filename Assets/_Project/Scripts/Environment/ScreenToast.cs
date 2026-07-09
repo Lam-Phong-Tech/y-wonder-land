@@ -18,6 +18,7 @@ namespace YWonderLand.Environment
         private string _iconFallbackText;
         private float _iconStartAt;
         private float _iconDuration;
+        private static YWonderLand.Data.ItemDatabase _itemDatabase;
 
         public static void Show(string message, float seconds = 2.5f)
         {
@@ -54,6 +55,56 @@ namespace YWonderLand.Environment
             _instance._iconFallbackText = fallbackText;
             _instance._iconStartAt = Time.unscaledTime;
             _instance._iconDuration = seconds;
+        }
+
+        public static void ShowInfoForItem(
+            string itemId,
+            string message,
+            float seconds = 2f,
+            string fallbackText = null)
+        {
+            var item = ResolveItem(itemId);
+            ShowInfoWithIcon(
+                message,
+                item != null ? item.iconTexture : null,
+                item != null ? item.iconSprite : null,
+                !string.IsNullOrEmpty(fallbackText) ? fallbackText : ResolveFallbackText(item),
+                seconds);
+        }
+
+        public static void ShowItemReward(
+            string itemId,
+            int quantity,
+            string prefix = "Nhận",
+            string suffix = null,
+            float seconds = 2f)
+        {
+            var item = ResolveItem(itemId);
+            string itemName = item != null && !string.IsNullOrEmpty(item.itemName) ? item.itemName : itemId;
+            string rewardText = quantity > 0 ? $"+{quantity} {itemName}" : itemName;
+            string message = string.IsNullOrEmpty(prefix) ? rewardText : $"{prefix}: {rewardText}";
+            if (!string.IsNullOrEmpty(suffix)) message += $" {suffix}";
+
+            ShowInfoWithIcon(
+                message,
+                item != null ? item.iconTexture : null,
+                item != null ? item.iconSprite : null,
+                ResolveFallbackText(item),
+                seconds);
+        }
+
+        private static YWonderLand.Data.ItemDefinition ResolveItem(string itemId)
+        {
+            if (string.IsNullOrEmpty(itemId)) return null;
+            if (_itemDatabase == null)
+                _itemDatabase = Resources.Load<YWonderLand.Data.ItemDatabase>("ItemDatabase");
+            return _itemDatabase != null ? _itemDatabase.GetItem(itemId) : null;
+        }
+
+        private static string ResolveFallbackText(YWonderLand.Data.ItemDefinition item)
+        {
+            if (item != null && !string.IsNullOrEmpty(item.iconEmoji)) return item.iconEmoji;
+            return "!";
         }
 
         void OnGUI()

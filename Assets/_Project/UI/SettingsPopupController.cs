@@ -315,7 +315,7 @@ public class SettingsPopupController : MonoBehaviour
         Hide();
         // Khách chốt: KHÔNG kill app (iOS không khuyến khích) — về Menu/Login. Save tự chạy lúc Quit/Pause.
         if (GameManager.Instance != null)
-            GameManager.Instance.SetGameState(GameManager.GameState.Login);
+            GameManager.Instance.LogoutToLogin();
         else
             Debug.LogWarning("[Settings] Không thấy GameManager để về menu.");
     }

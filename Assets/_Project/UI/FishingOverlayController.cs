@@ -473,19 +473,10 @@ public class FishingOverlayController : MonoBehaviour
         if (inv != null && !string.IsNullOrEmpty(caught.itemId))
             inv.AddItem(caught.itemId, 1);
 
-        var itemDef = itemDatabase != null ? itemDatabase.GetItem(caught.itemId) : null;
-        var fallbackDef = itemDatabase != null ? itemDatabase.GetItem("fish_01") : null;
-        Texture2D toastIconTexture = itemDef != null && itemDef.iconTexture != null
-            ? itemDef.iconTexture
-            : (fallbackDef != null ? fallbackDef.iconTexture : null);
-        Sprite toastIconSprite = itemDef != null && itemDef.iconSprite != null
-            ? itemDef.iconSprite
-            : (fallbackDef != null ? fallbackDef.iconSprite : null);
-        YWonderLand.Environment.ScreenToast.ShowInfoWithIcon(
+        YWonderLand.Environment.ScreenToast.ShowInfoForItem(
+            caught.itemId,
             $"Câu được: +1 {caught.name} ({caught.rarity})",
-            toastIconTexture,
-            toastIconSprite,
-            "Fish");
+            fallbackText: "Fish");
         Debug.Log($"[Fishing] Caught {caught.name}.");
 
         // Thu dây câu + phao về (vì StartFishing đã quăng dây ra).

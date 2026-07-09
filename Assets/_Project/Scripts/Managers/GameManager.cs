@@ -241,12 +241,14 @@ public class GameManager : MonoBehaviour
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
                 if (boatCutscene != null) boatCutscene.enabled = false;
+                SetSpawnedCharacterGameplayEnabled(false);
                 break;
 
             case GameState.Menu:
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
                 if (boatCutscene != null) boatCutscene.enabled = false;
+                SetSpawnedCharacterGameplayEnabled(false);
                 break;
 
             case GameState.Cutscene:
@@ -324,6 +326,136 @@ public class GameManager : MonoBehaviour
                 }
                 break;
         }
+    }
+
+    public void LogoutToLogin()
+    {
+        Debug.Log("[GameManager] LogoutToLogin: cleaning gameplay session before showing Login.");
+
+        HideGameplayUiForLogin();
+        ClearGameplayCameraTarget();
+        DestroyRemotePlayers();
+
+        if (boatCutscene != null)
+            boatCutscene.enabled = false;
+
+        if (spawnedCharacter == null)
+        {
+            var taggedPlayer = GameObject.FindGameObjectWithTag("Player");
+            if (taggedPlayer != null)
+                spawnedCharacter = taggedPlayer;
+        }
+
+        SetSpawnedCharacterGameplayEnabled(false);
+
+        if (spawnedCharacter != null)
+        {
+            Destroy(spawnedCharacter);
+            spawnedCharacter = null;
+        }
+
+        YWonderLand.Backend.AuthService.Instance?.SignOut();
+        ClearResumeFlag();
+        SetGameState(GameState.Login);
+    }
+
+    private void SetSpawnedCharacterGameplayEnabled(bool enabled)
+    {
+        if (spawnedCharacter == null) return;
+
+        var player = spawnedCharacter.GetComponent<PlayerController>();
+        if (player != null)
+        {
+            if (!enabled)
+            {
+                player.SetMoveInput(Vector2.zero);
+                if (player.IsBusy)
+                    player.CancelAction();
+            }
+
+            player.enabled = enabled;
+        }
+
+        var playerInput = spawnedCharacter.GetComponent<UnityEngine.InputSystem.PlayerInput>();
+        if (playerInput != null)
+            playerInput.enabled = enabled;
+
+        var characterController = spawnedCharacter.GetComponent<CharacterController>();
+        if (characterController != null)
+            characterController.enabled = enabled;
+    }
+
+    private void HideGameplayUiForLogin()
+    {
+        BuildModeOverlayController.Instance?.Hide();
+        FishingOverlayController.Instance?.Hide();
+        AnimalInteractionPopupController.Instance?.Hide();
+        YWonderLand.UI.ResourceInteractionUIController.Instance?.Hide();
+
+        HidePopupIfPresent<InventoryPopupController>();
+        HidePopupIfPresent<ShopPopupController>();
+        HidePopupIfPresent<WorkshopPopupController>();
+        HideEventPopupsForLogin();
+        HidePopupIfPresent<MapPopupController>();
+        HidePopupIfPresent<QuestPopupController>();
+        HidePopupIfPresent<MailboxPopupController>();
+        HidePopupIfPresent<ProfilePopupController>();
+        HidePopupIfPresent<FriendsPopupController>();
+        HidePopupIfPresent<LeaderboardPopupController>();
+        HidePopupIfPresent<PiggyBankPopupController>();
+        HidePopupIfPresent<RewardPopupController>();
+        HidePopupIfPresent<ConfirmDialogController>();
+        HidePopupIfPresent<LevelUpOverlayController>();
+
+        GameHUDController.Instance?.HideInteractionPrompt();
+        GameHUDController.Instance?.HideFishingCancelProgress();
+        GameHUDController.Instance?.SetHUDVisible(false);
+        ChatPanelController.Instance?.SetChatVisible(false);
+        UIPopupTracker.ClearAll();
+    }
+
+    private void HideEventPopupsForLogin()
+    {
+        foreach (var popup in FindObjectsByType<EventPopupController>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+        {
+            if (popup == null) continue;
+            popup.Hide();
+            popup.HideLuckyWheel();
+        }
+    }
+
+    private void HidePopupIfPresent<T>() where T : MonoBehaviour
+    {
+        foreach (var popup in FindObjectsByType<T>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+        {
+            if (popup == null) continue;
+            var hideMethod = typeof(T).GetMethod("Hide", System.Type.EmptyTypes);
+            hideMethod?.Invoke(popup, null);
+        }
+    }
+
+    private void ClearGameplayCameraTarget()
+    {
+        foreach (var thirdPersonCam in FindObjectsByType<ThirdPersonCamera>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+        {
+            if (thirdPersonCam != null)
+                thirdPersonCam.SetTarget(null);
+        }
+    }
+
+    private void DestroyRemotePlayers()
+    {
+        foreach (var remote in FindObjectsByType<YWonderLand.Realtime.RemotePlayerController>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+        {
+            if (remote != null)
+                Destroy(remote.gameObject);
+        }
+    }
+
+    private void ClearResumeFlag()
+    {
+        PlayerPrefs.DeleteKey(K_HasSave);
+        PlayerPrefs.Save();
     }
 
     public void SelectCharacter(int index)

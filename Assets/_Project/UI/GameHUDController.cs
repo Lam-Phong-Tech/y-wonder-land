@@ -72,6 +72,12 @@ public class GameHUDController : MonoBehaviour
     private Button btnFishing;
     private Button btnWorkshop;
     private Button btnBuild;
+    private VisualElement questRedDot;
+    private VisualElement calendarRedDot;
+    private VisualElement buildRedDot;
+    private VisualElement bagRedDot;
+    private float nextGuidanceDotRefreshTime;
+    private const float GuidanceDotRefreshInterval = 0.25f;
 
     // Action buttons
     private Button btnCancel;
@@ -152,6 +158,7 @@ public class GameHUDController : MonoBehaviour
         var root = uiDocument.rootVisualElement;
         ApplyPlatformLayoutClass(root);
         QueryElements(root);
+        SetupGuidanceDots();
         RegisterCallbacks();
 
 
@@ -272,6 +279,72 @@ public class GameHUDController : MonoBehaviour
             btnCancel.pickingMode = PickingMode.Position;
 
 
+    }
+
+    private void SetupGuidanceDots()
+    {
+        questRedDot = AttachGuidanceDot(questBubble, "hud-red-dot--quest");
+        calendarRedDot = AttachGuidanceDot(btnCalendar, "hud-red-dot--button");
+        buildRedDot = AttachGuidanceDot(btnBuild, "hud-red-dot--button");
+        bagRedDot = AttachGuidanceDot(btnBag, "hud-red-dot--button");
+        UpdateGuidanceDots(true);
+    }
+
+    private VisualElement AttachGuidanceDot(VisualElement target, string extraClass)
+    {
+        if (target == null) return null;
+
+        var dot = new VisualElement
+        {
+            pickingMode = PickingMode.Ignore
+        };
+        dot.AddToClassList("hud-red-dot");
+        if (!string.IsNullOrEmpty(extraClass))
+            dot.AddToClassList(extraClass);
+        dot.style.display = DisplayStyle.None;
+        target.Add(dot);
+        return dot;
+    }
+
+    private void SetGuidanceDot(VisualElement dot, bool visible)
+    {
+        if (dot == null) return;
+        dot.EnableInClassList("hud-red-dot--visible", visible);
+        dot.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+    }
+
+    private void UpdateGuidanceDots(bool force = false)
+    {
+        if (!force && Time.unscaledTime < nextGuidanceDotRefreshTime) return;
+        nextGuidanceDotRefreshTime = Time.unscaledTime + GuidanceDotRefreshInterval;
+
+        bool tutorialComplete = IsTutorialCompleteForGuidance();
+        var tutorial = TutorialManager.Instance;
+        bool tutorialActive = tutorial != null && tutorial.IsActive();
+        var step = tutorial != null ? tutorial.currentStep : TutorialManager.TutorialStep.WaitForStart;
+
+        bool needsBuild = tutorialActive &&
+                          (step == TutorialManager.TutorialStep.BuildFarmPlot ||
+                           step == TutorialManager.TutorialStep.BuildPen);
+        bool needsBag = tutorialActive &&
+                        (step == TutorialManager.TutorialStep.PlantSeed ||
+                         step == TutorialManager.TutorialStep.PlaceAnimal ||
+                         step == TutorialManager.TutorialStep.FeedAnimal);
+
+        SetGuidanceDot(questRedDot, !tutorialComplete);
+        SetGuidanceDot(calendarRedDot, EventPopupController.IsAttendanceReadyToClaim());
+        SetGuidanceDot(buildRedDot, needsBuild);
+        SetGuidanceDot(bagRedDot, needsBag);
+    }
+
+    private static bool IsTutorialCompleteForGuidance()
+    {
+        var prof = YWonderLand.Backend.PlayerProfileService.Instance;
+        if (prof != null && prof.Profile != null && prof.Profile.tutorialCompleted)
+            return true;
+
+        var tutorial = TutorialManager.Instance;
+        return tutorial != null && tutorial.currentStep == TutorialManager.TutorialStep.Complete;
     }
 
     private void ApplyPlatformLayoutClass(VisualElement root)
@@ -658,6 +731,7 @@ public class GameHUDController : MonoBehaviour
         UpdateCancelButton();
         UpdateJoystickSprintState();
         RefreshPlayerInfoFromSession();
+        UpdateGuidanceDots();
 
         // Chặn các phím tắt nếu người chơi đang gõ phím trong khung chat
         if (ChatPanelController.Instance != null && ChatPanelController.Instance.IsTyping())

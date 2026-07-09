@@ -17,8 +17,6 @@ MonoBehaviour:
   buyItemIds:
   - bait_01
   sellItemIds:
-  - fish_01
-  - fish_02
   - fish_ca_com_01
   - fish_ca_nuc_01
   - fish_ca_hong_01

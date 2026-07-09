@@ -10,7 +10,7 @@
 
 #### A. Nền game, ánh sáng, nước
 - `[ ]` Giữ hướng ánh sáng/màu nền hiện tại vì anh xác nhận đang đúng mẫu khách từng gửi; khi chỉnh scene phải tránh làm game tối lại.
-- `[~]` Màu nước biển hiện được xem là đúng, nhưng có lỗi khi lên điện thoại; chờ anh gửi triệu chứng/ảnh/video lỗi mobile rồi mới xử lý vật liệu/shader nước.
+- `[x]` Màu nước biển Farm/City đã chỉnh và anh đã test lại trên điện thoại: màu xanh đã cải thiện, đủ chốt cho demo hiện tại. Nếu phát sinh lỗi màu mới trên máy thật thì mở task riêng theo ảnh/video triệu chứng.
 
 #### B. Thành phố / City scene
 - `[ ]` Dời nhà MiniGarden bán sản phẩm sang bên trái nhà nâng cấp dụng cụ, giữ cửa quay ra đường chính.
@@ -19,8 +19,8 @@
 - `[ ]` Làm bãi biển thành phố có thuyền và bờ kè như bên farm; đặt vùng câu cá đúng khu bãi biển/gần bờ kè để người chơi tập trung đông vui.
 - `[ ]` Tất cả cửa hàng trong game cần bảng hiệu chuyên nghiệp dạng model 3D gắn trước nhà; dùng tên bảng hiệu hiện tại làm nội dung hiển thị.
 - `[ ]` Nơi dịch chuyển ở thành phố đổi thành căn nhà giống bên farm nhưng cao hơn, trang trí thêm để có phong cách riêng.
-- `[~]` MiniGarden/Sa Chi/Sầu Riêng/Chanh dây: repo hiện đã có seed/product, iconTexture và shop whitelist cho `sacha_01`, `durian_01`, `passion_fruit_01`; cần kiểm tra build/runtime vì khách vẫn báo thiếu chanh dây. Anh sẽ bổ sung icon sản phẩm chanh dây mới nếu muốn đổi khỏi icon `passion_box.png`.
-- `[~]` Chanh dây rule mới từ anh: `200 USDT / 20 cây` là giá cả cụm 20 cây; một lần gieo phải tốn 20 hạt và khi thu hoạch nhận sản phẩm tương ứng với 20 hạt đã gieo. Code hiện đang là 1 seed chiếm 20 ô, chưa phải consume 20 seed; cần sửa logic/data khi triển khai cây chanh dây.
+- `[x]` MiniGarden/Sa Chi/Sầu Riêng/Chanh dây: repo đã có seed/product, iconTexture và shop whitelist cho `sacha_01`, `durian_01`, `passion_fruit_01`; anh đã check phần shop/data tổng thể và chốt các sản phẩm này đủ đi tiếp. Icon sản phẩm chanh dây mới có thể đổi mapping sau nếu anh bổ sung asset mới.
+- `[~]` Chanh dây rule mới từ anh: `200 USDT / 20 cây` là giá cả cụm 20 cây. Code hiện đã dùng `plotSlots = 20`, một lần gieo cần và trừ 20 hạt, đồng thời chiếm 20 ô đất. Vẫn cần test runtime riêng và chốt/sửa sản lượng thu hoạch cho đúng ý "20 hạt -> sản phẩm tương ứng"; hiện còn rủi ro persistence cây nhiều ô khi save/load nên chưa tick x.
 
 #### C. Nông trại / Farm scene và cửa hàng
 - `[x]` Các cửa hàng trong game phải hiển thị vật phẩm và câu chữ to hơn khoảng 3 lần so với hiện tại, đặc biệt trên điện thoại: đã thêm layout mobile riêng cho ShopPopup theo hướng giữ khung popup gần kích thước cũ, chỉ làm card/icon/chữ/giá/nút thao tác lớn hơn để mỗi màn hình hiện ít sản phẩm hơn và scroll xem tiếp. Cập nhật 08/07: anh đã chốt layout shop lớn hơn/filter shop sau khi test.
@@ -30,8 +30,8 @@
 - `[ ]` Cối xoay gió phải quay và nhìn chuyên nghiệp hơn; hiện tại khách chưa thấy đạt.
 
 #### D. Tutorial, điểm danh, red-dot chỉ dẫn
-- `[ ]` Khi đăng nhập, người chơi phải làm hết hướng dẫn NPC tân thủ thì mới nhận được quà điểm danh ngày đầu trong popup.
-- `[ ]` Thêm dấu chấm đỏ ở các nút cần bấm để ngầm chỉ dẫn người chơi nhận quà/khám phá/chức năng mới; hiện game chưa có hệ thống red-dot guidance này.
+- `[x]` Khi đăng nhập, người chơi phải làm hết hướng dẫn NPC tân thủ thì mới nhận được quà điểm danh ngày đầu trong popup: đã code khóa điểm danh ngày 1 nếu `tutorialCompleted` chưa xong; anh đã check xong nhóm tutorial/điểm danh hiện tại.
+- `[x]` Thêm dấu chấm đỏ ở các nút cần bấm để ngầm chỉ dẫn người chơi nhận quà/khám phá/chức năng mới: đã thêm red-dot runtime cho nhiệm vụ/tutorial, lịch điểm danh, nút búa khi tutorial cần xây, và túi đồ khi tutorial cần dùng vật phẩm/thú/thức ăn; anh đã check xong UX hiện tại.
 
 #### E. Tâm tương tác, build/farm thao tác ô đất
 - `[x]` Đổi tâm tương tác trước mũi chân nhân vật thành ô vuông kích thước 1 ô đất: đã thêm `FrontBuildCellSelector` tự chọn `BuildSurfaceCell` ngay phía trước theo hướng mặt nhân vật và vẽ viền trắng runtime. Anh đã test và xác nhận viền sáng tốt.
@@ -43,7 +43,7 @@
 - `[ ]` Menu 3 lựa chọn này không được chuyển sang trang khác như hiện tại; phải là thao tác tại chỗ, icon/chữ to hơn khoảng 3 lần.
 
 #### F. UI/HUD, zoom, mobile controls
-- `[~]` Giao diện farm/HUD mobile lớn hơn: đã thêm class `hud-mobile` cho mobile build và tăng kích thước cụm thông tin nhân vật, quest, tiền, sidebar, joystick, sprint, build, jump, nút tương tác; đồng thời thêm safe inset/popup close guard để giảm lỗi nút `X` bị lẹm. Chờ anh build APK test trên các máy mục tiêu.
+- `[x]` Giao diện farm/HUD mobile lớn hơn: đã thêm class `hud-mobile` cho mobile build, tăng kích thước cụm thông tin nhân vật/quest/tiền/sidebar/joystick/sprint/build/jump/nút tương tác, thêm safe inset/popup close guard để giảm lỗi nút `X` bị lẹm; anh đã test/chốt nhóm HUD mobile hiện tại.
 - `[ ]` Thêm/kiểm tra chức năng thu phóng cả map/camera và UI theo nhu cầu khách.
 - `[x]` Bỏ chức năng kéo joystick mạnh/giữ lâu thì tự chạy nhanh; giữ lại nút chạy tự động để người chơi chủ động bật/tắt auto-run. Anh đã test APK và xác nhận tốt.
 - `[x]` Auto-run cancel mới: khi auto-run đang bật mà người chơi bắt đầu điều khiển joystick, `GameHUDController` sẽ tắt auto-run ngay và cập nhật lại trạng thái nút Sprint. Anh đã chốt nhóm joystick/auto-run.

@@ -117,6 +117,28 @@
 .sidebar-btn-shop-text, .sidebar-btn-map-text { font-size: 14px; -unity-font-style: bold; color: var(--color-text-white); margin-left: 6px; }
 .sidebar-btn-piggy, .sidebar-btn-fishing, .sidebar-btn-build { width: 58px; height: 58px; }
 
+.hud-red-dot {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    width: 15px;
+    height: 15px;
+    border-radius: 8px;
+    background-color: #EF4444;
+    border-width: 2px;
+    border-color: #FFF2B8;
+    display: none;
+}
+
+.hud-red-dot--visible {
+    display: flex;
+}
+
+.hud-red-dot--quest {
+    top: -5px;
+    right: -5px;
+}
+
 /* ── 5. JOYSTICK & SPRINT ── */
 /* Joystick: dịch VÀO TRONG (left 84 để KHỎI đè nút sidebar 58px mép trái) + LÊN, vẫn bên trái */
 .hud-bottom-left { position: absolute; bottom: 60px; left: 84px; }
@@ -340,6 +362,11 @@
 .hud-mobile .sidebar-btn-shop-icon,
 .hud-mobile .sidebar-btn-map-icon { width: 38px; height: 38px; }
 .hud-mobile .sidebar-btn-shadow { margin-bottom: 13px; }
+.hud-mobile .hud-red-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 9px;
+}
 
 .hud-mobile .joystick-outer { width: 212px; height: 212px; border-radius: 106px; }
 .hud-mobile .joystick-inner { width: 96px; height: 96px; border-radius: 48px; }

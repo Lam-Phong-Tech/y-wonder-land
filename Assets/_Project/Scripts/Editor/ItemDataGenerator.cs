@@ -325,6 +325,10 @@ namespace YWonderLand.EditorScripts
                 ["gift_box_01"] = "Assets/Sprites/icon/SanPham/VatPham/giftbox.png",
                 ["mine_ticket_01"] = "Assets/Sprites/icon/SanPham/VatPham/tickets.png",
 
+                ["wood_01"] = "Assets/Sprites/icon/BoSungIcon/Go.png",
+                ["stone_01"] = "Assets/Sprites/icon/BoSungIcon/Da.png",
+                ["watering_water_01"] = "Assets/Sprites/icon/BoSungIcon/NuocTuoi.png",
+
                 ["gem_kyanite_01"] = "Assets/Sprites/icon/CacLoaiDaQuy/Kyanite[1].png",
                 ["gem_orange_calcite_01"] = "Assets/Sprites/icon/CacLoaiDaQuy/OrangeCalcite[2].png",
                 ["gem_green_calcite_01"] = "Assets/Sprites/icon/CacLoaiDaQuy/GreenCalcite[3].png",

@@ -17,7 +17,7 @@ using YWonderLand.Data;
 [RequireComponent(typeof(Collider))]
 public class ShopZoneTrigger : MonoBehaviour
 {
-    public enum ServiceKind { Shop, Workshop, PiggyBank }
+    public enum ServiceKind { Shop, Workshop, PiggyBank, LuckyWheel }
 
     [Header("Loại dịch vụ khi chạm nhà")]
     [SerializeField] private ServiceKind service = ServiceKind.Shop;
@@ -70,6 +70,7 @@ public class ShopZoneTrigger : MonoBehaviour
         {
             case ServiceKind.Workshop:  return "Xưởng Nâng Cấp";
             case ServiceKind.PiggyBank: return "Heo Đất";
+            case ServiceKind.LuckyWheel: return "Vòng quay may mắn";
             default:                    return "Cửa Hàng";
         }
     }
@@ -92,6 +93,7 @@ public class ShopZoneTrigger : MonoBehaviour
             case ServiceKind.Shop:      OpenShop();      break;
             case ServiceKind.Workshop:  OpenWorkshop();  break;
             case ServiceKind.PiggyBank: OpenPiggyBank(); break;
+            case ServiceKind.LuckyWheel: OpenLuckyWheel(); break;
         }
     }
 
@@ -133,5 +135,12 @@ public class ShopZoneTrigger : MonoBehaviour
         var piggy = Object.FindFirstObjectByType<PiggyBankPopupController>(FindObjectsInactive.Include);
         if (piggy != null) piggy.Show();
         else Debug.LogWarning("[ShopZone] Không tìm thấy PiggyBankPopupController!");
+    }
+
+    private void OpenLuckyWheel()
+    {
+        var eventPopup = Object.FindFirstObjectByType<EventPopupController>(FindObjectsInactive.Include);
+        if (eventPopup != null) eventPopup.ShowLuckyWheel();
+        else Debug.LogWarning("[ShopZone] Không tìm thấy EventPopupController!");
     }
 }

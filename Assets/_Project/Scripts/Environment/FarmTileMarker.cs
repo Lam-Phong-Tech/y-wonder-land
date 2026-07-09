@@ -9,6 +9,8 @@ namespace YWonderLand.Environment
     /// </summary>
     public class FarmTileMarker : MonoBehaviour
     {
+        public static readonly bool MarkersEnabled = false;
+
         private FarmTile _tile;
         private LineRenderer _line;
         private Material _mat;
@@ -22,9 +24,23 @@ namespace YWonderLand.Environment
 
         private void Start()
         {
+            if (!MarkersEnabled)
+            {
+                RemoveExistingBorder();
+                Destroy(this);
+                return;
+            }
+
             _tile = GetComponent<FarmTile>();
             if (_tile == null) { Destroy(this); return; }
             BuildBorder();
+        }
+
+        private void RemoveExistingBorder()
+        {
+            var border = transform.Find("TileMarkerBorder");
+            if (border != null)
+                Destroy(border.gameObject);
         }
 
         private void BuildBorder()
@@ -90,6 +106,8 @@ namespace YWonderLand.Environment
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Install()
         {
+            if (!FarmTileMarker.MarkersEnabled) return;
+
             var go = new GameObject("[FarmTileMarkerInstaller]");
             DontDestroyOnLoad(go);
             go.AddComponent<FarmTileMarkerInstaller>();

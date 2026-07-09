@@ -15,7 +15,7 @@ namespace YWonderLand.Realtime
 {
     /// <summary>
     /// WebSocket client for MVP realtime: global chat plus remote players in shared islands.
-    /// Farm remains private; the client connects only while the player is in city or mine.
+    /// Farm remains private: the client keeps chat online but only joins public rooms in city or mine.
     /// </summary>
     public class RealtimeClient : MonoBehaviour
     {
@@ -109,7 +109,7 @@ namespace YWonderLand.Realtime
 
         public bool SendChat(string message)
         {
-            if (!IsConnected || string.IsNullOrEmpty(currentRoom) || string.IsNullOrWhiteSpace(message)) return false;
+            if (!IsConnected || string.IsNullOrWhiteSpace(message)) return false;
             _ = SendJsonAsync(new { type = "chat", message = message.Trim() });
             return true;
         }
@@ -123,8 +123,7 @@ namespace YWonderLand.Realtime
         private void TickConnection()
         {
             string desiredRoom = GetDesiredRoom();
-            bool shouldConnect = !string.IsNullOrEmpty(desiredRoom)
-                                 && AuthService.Instance != null
+            bool shouldConnect = AuthService.Instance != null
                                  && AuthService.Instance.IsSignedIn
                                  && PlayerController.Instance != null
                                  && IsGameplay();
@@ -141,9 +140,15 @@ namespace YWonderLand.Realtime
                 return;
             }
 
-            if (IsConnected && currentRoom != desiredRoom)
+            if (!IsConnected) return;
+
+            if (!string.IsNullOrEmpty(desiredRoom) && currentRoom != desiredRoom)
             {
                 JoinRoom(desiredRoom);
+            }
+            else if (string.IsNullOrEmpty(desiredRoom) && !string.IsNullOrEmpty(currentRoom))
+            {
+                LeaveRoom();
             }
         }
 
@@ -174,7 +179,10 @@ namespace YWonderLand.Realtime
                 await socket.ConnectAsync(uri, socketCts.Token);
 
                 Debug.Log($"[Realtime] Connected: {uri.GetLeftPart(UriPartial.Path)}");
-                JoinRoom(room);
+                if (!string.IsNullOrEmpty(room))
+                {
+                    JoinRoom(room);
+                }
                 _ = ReceiveLoopAsync(socket, socketCts.Token);
             }
             catch (Exception e)
@@ -242,6 +250,14 @@ namespace YWonderLand.Realtime
                 name = GetLocalName(),
                 gender = GetLocalGender(),
             });
+        }
+
+        private void LeaveRoom()
+        {
+            if (!IsConnected || string.IsNullOrEmpty(currentRoom)) return;
+            _ = SendJsonAsync(new { type = "leave" });
+            currentRoom = "";
+            ClearRemotePlayers();
         }
 
         private async Task SendJsonAsync(object payload)

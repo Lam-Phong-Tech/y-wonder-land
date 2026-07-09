@@ -7511,12 +7511,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: afe523a870ec2e34d8a775c949143a03, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShopZoneTrigger
-  service: 0
+  service: 3
   shopData: {fileID: 0}
   onlyDuringGameplay: 1
   comingSoon: 0
   nameTagTarget: {fileID: 1492296090}
-  shopLabel: Shop Game
+  shopLabel: "V\xF2ng quay may m\u1EAFn"
   nameTagHeight: 3
 --- !u!1 &9127658576051514508
 GameObject:

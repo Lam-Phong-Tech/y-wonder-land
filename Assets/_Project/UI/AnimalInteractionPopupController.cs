@@ -524,7 +524,7 @@ public class AnimalInteractionPopupController : MonoBehaviour
 
             int aexp = Mathf.Max(1, Mathf.RoundToInt(animalDays * 10f));
             ExperienceManager.Instance?.AddEXP(aexp);
-            ScreenToast.ShowInfo($"Thu hoạch: +{amount} {itemId}");
+            ScreenToast.ShowItemReward(itemId, amount, "Thu hoạch");
 
             if (wasEnclosureMode)
                 RefreshEnclosureUI();

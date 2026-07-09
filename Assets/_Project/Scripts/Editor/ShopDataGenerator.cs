@@ -46,7 +46,6 @@ namespace YWonderLand.EditorTools
                 buy: new List<string> { "bait_01" },
                 sell: new List<string>
                 {
-                    "fish_01", "fish_02",
                     "fish_ca_com_01", "fish_ca_nuc_01", "fish_ca_hong_01",
                     "fish_ca_su_tu_01", "fish_ca_naso_01", "fish_ca_nhong_01",
                     "fish_ca_soc_dua_01", "fish_ca_khe_01", "fish_ca_mu_01",

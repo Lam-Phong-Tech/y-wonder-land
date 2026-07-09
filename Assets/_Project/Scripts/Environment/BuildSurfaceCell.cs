@@ -84,6 +84,48 @@ namespace YWonderLand.Environment
         /// <summary>Trả ô về trống.</summary>
         public void Clear() => Occupant = null;
 
+        public static BuildSurfaceCell FindByOccupant(GameObject occupant)
+        {
+            if (occupant == null) return null;
+
+            foreach (var cell in All)
+            {
+                if (cell == null) continue;
+                if (MatchesOccupant(cell.Occupant, occupant))
+                    return cell;
+            }
+
+            return null;
+        }
+
+        public static int ClearOccupant(GameObject occupant, bool clearBuildMaterial = true)
+        {
+            if (occupant == null) return 0;
+
+            int cleared = 0;
+            foreach (var cell in All)
+            {
+                if (cell == null || !MatchesOccupant(cell.Occupant, occupant)) continue;
+
+                cell.Clear();
+                if (clearBuildMaterial)
+                    cell.SetBuildMaterial("", 0);
+                cleared++;
+            }
+
+            return cleared;
+        }
+
+        private static bool MatchesOccupant(GameObject stored, GameObject target)
+        {
+            if (stored == null || target == null) return false;
+            if (stored == target) return true;
+
+            Transform storedTransform = stored.transform;
+            Transform targetTransform = target.transform;
+            return targetTransform.IsChildOf(storedTransform) || storedTransform.IsChildOf(targetTransform);
+        }
+
         void OnEnable() { if (!All.Contains(this)) All.Add(this); }
         void OnDisable() { All.Remove(this); }
 

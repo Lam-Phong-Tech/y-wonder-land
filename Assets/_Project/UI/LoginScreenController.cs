@@ -12,6 +12,8 @@ public class LoginScreenController : MonoBehaviour
     [SerializeField] private ForgotPasswordPopupController forgotPasswordPopup;
 
     private UIDocument uiDocument;
+    private VisualElement rootElement;
+    private VisualElement loginShadow;
 
     // Tab buttons
     private Button tabLogin;
@@ -47,6 +49,8 @@ public class LoginScreenController : MonoBehaviour
     private bool isQuitRequestSent = false;
     private bool shouldSkipCharacterSelectAfterLogin = false;
     private VisualElement callbacksRoot;
+    private TextField focusedKeyboardField;
+    private float keyboardUpShift;
 
     // USS class names
     private const string TAB_ACTIVE_CLASS = "login-tab-active";
@@ -64,8 +68,8 @@ public class LoginScreenController : MonoBehaviour
             return;
         }
 
-        var root = uiDocument.rootVisualElement;
-        QueryElements(root);
+        rootElement = uiDocument.rootVisualElement;
+        QueryElements(rootElement);
         RegisterCallbacks();
         SetupPlaceholders();
         
@@ -79,8 +83,21 @@ public class LoginScreenController : MonoBehaviour
         ShowLoginTab();
     }
 
+    void Update()
+    {
+        UpdateKeyboardAvoidance();
+    }
+
+    void OnDisable()
+    {
+        ResetKeyboardAvoidance();
+    }
+
     private void QueryElements(VisualElement root)
     {
+        rootElement = root;
+        loginShadow = root.Q<VisualElement>(className: "login-shadow");
+
         // Tabs
         tabLogin = root.Q<Button>("TabLogin");
         tabRegister = root.Q<Button>("TabRegister");
@@ -159,8 +176,19 @@ public class LoginScreenController : MonoBehaviour
         var group = root.Q<VisualElement>(groupName);
         if (group == null) return;
 
-        field.RegisterCallback<FocusInEvent>(evt => group.AddToClassList(INPUT_FOCUS_CLASS));
-        field.RegisterCallback<FocusOutEvent>(evt => group.RemoveFromClassList(INPUT_FOCUS_CLASS));
+        field.RegisterCallback<FocusInEvent>(evt =>
+        {
+            group.AddToClassList(INPUT_FOCUS_CLASS);
+            focusedKeyboardField = field;
+            UpdateKeyboardAvoidance();
+        });
+
+        field.RegisterCallback<FocusOutEvent>(evt =>
+        {
+            group.RemoveFromClassList(INPUT_FOCUS_CLASS);
+            if (focusedKeyboardField == field)
+                ResetKeyboardAvoidance();
+        });
     }
 
     private void SetupPlaceholders()
@@ -186,6 +214,7 @@ public class LoginScreenController : MonoBehaviour
 
     private void ShowLoginTab()
     {
+        ResetKeyboardAvoidance();
         tabLogin?.AddToClassList(TAB_ACTIVE_CLASS);
         tabRegister?.RemoveFromClassList(TAB_ACTIVE_CLASS);
 
@@ -198,6 +227,7 @@ public class LoginScreenController : MonoBehaviour
 
     private void ShowRegisterTab()
     {
+        ResetKeyboardAvoidance();
         tabRegister?.AddToClassList(TAB_ACTIVE_CLASS);
         tabLogin?.RemoveFromClassList(TAB_ACTIVE_CLASS);
 
@@ -581,6 +611,37 @@ public class LoginScreenController : MonoBehaviour
         {
             btnRegister.SetEnabled(enabled && ValidateRegisterForm(out _));
         }
+    }
+
+    private void UpdateKeyboardAvoidance()
+    {
+        if (rootElement == null || loginShadow == null) return;
+
+        if (!MobileKeyboardAvoidance.ShouldAvoidKeyboard(focusedKeyboardField))
+        {
+            if (keyboardUpShift > 0f)
+                ResetKeyboardAvoidance();
+            return;
+        }
+
+        float newShift = MobileKeyboardAvoidance.CalculateRequiredUpShift(
+            rootElement,
+            focusedKeyboardField,
+            keyboardUpShift,
+            marginAboveKeyboard: 24f);
+
+        if (Mathf.Abs(newShift - keyboardUpShift) < 0.5f) return;
+
+        keyboardUpShift = newShift;
+        loginShadow.style.translate = new Translate(0, -keyboardUpShift, 0);
+    }
+
+    private void ResetKeyboardAvoidance()
+    {
+        focusedKeyboardField = null;
+        keyboardUpShift = 0f;
+        if (loginShadow != null)
+            loginShadow.style.translate = new Translate(0, 0, 0);
     }
 
     private void OnQuitAppClicked()

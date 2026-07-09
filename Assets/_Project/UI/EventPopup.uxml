@@ -27,7 +27,6 @@
                     <ui:Button name="TabExchange" text="Đổi quà" class="event-tab event-tab--active" />
                     <ui:Button name="TabBundle" text="Ưu đãi" class="event-tab" />
                     <ui:Button name="TabAttendance" text="Điểm danh" class="event-tab" />
-                    <ui:Button name="TabWheel" text="Vòng quay" class="event-tab" />
                 </ui:VisualElement>
 
                 <!-- TAB 1: EXCHANGE -->
@@ -144,30 +143,6 @@
 
                 </ui:VisualElement>
 
-                <!-- TAB 4: WHEEL (Vòng quay may mắn) -->
-                <ui:VisualElement name="PanelWheel" class="event-body event-wheel-panel">
-                    <ui:Label class="wheel-desc" text="Vòng quay may mắn — 3 lượt mỗi ngày!" />
-
-                    <!-- Sân khấu vòng quay -->
-                    <ui:VisualElement class="wheel-stage">
-                        <!-- Kim chỉ (tam giác chỉ xuống) -->
-                        <ui:VisualElement class="wheel-pointer-row">
-                            <ui:VisualElement class="wheel-pointer" />
-                        </ui:VisualElement>
-                        <!-- Vòng tròn quay (icon quanh vành do Controller dựng) -->
-                        <ui:VisualElement name="WheelCircle" class="wheel-circle" />
-                        <!-- Tâm vòng quay -->
-                        <ui:VisualElement name="WheelHub" class="wheel-hub" />
-                        <ui:Button name="BtnSpin" class="wheel-center-spin-btn" text="" />
-                    </ui:VisualElement>
-
-                    <ui:Label name="LblWheelResult" class="wheel-result" text="" />
-
-                    <ui:VisualElement class="wheel-footer">
-                        <ui:Label name="LblSpinsLeft" class="wheel-spins-left" text="Lượt còn: 3/3" />
-                    </ui:VisualElement>
-                </ui:VisualElement>
-
                 <!-- Close Button -->
                 <ui:VisualElement class="event-close-shadow">
                     <ui:Button name="BtnCloseEvent" text="X" class="event-close-btn" />
@@ -177,6 +152,32 @@
 
         </ui:VisualElement>
 
+    </ui:VisualElement>
+
+    <!-- NPC Lucky Wheel Popup -->
+    <ui:VisualElement name="LuckyWheelOverlay" class="event-overlay lucky-wheel-overlay">
+        <ui:VisualElement class="lucky-wheel-wrapper">
+            <ui:VisualElement class="lucky-wheel-panel">
+                <ui:VisualElement class="lucky-wheel-header">
+                    <ui:Label text="Vòng quay may mắn" class="lucky-wheel-title" />
+                    <ui:Button name="BtnCloseLuckyWheel" text="X" class="lucky-wheel-close-btn" />
+                </ui:VisualElement>
+
+                <ui:Label class="wheel-desc lucky-wheel-desc" text="3 lượt quay mỗi ngày" />
+
+                <ui:VisualElement class="wheel-stage lucky-wheel-stage">
+                    <ui:VisualElement class="wheel-pointer-row">
+                        <ui:VisualElement class="wheel-pointer" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="WheelCircle" class="wheel-circle" />
+                    <ui:VisualElement name="WheelHub" class="wheel-hub" />
+                    <ui:Button name="BtnSpin" class="wheel-center-spin-btn" text="" />
+                </ui:VisualElement>
+
+                <ui:Label name="LblWheelResult" class="wheel-result lucky-wheel-result" text="" />
+                <ui:Label name="LblSpinsLeft" class="wheel-spins-left lucky-wheel-spins" text="Lượt còn: 3/3" />
+            </ui:VisualElement>
+        </ui:VisualElement>
     </ui:VisualElement>
 
 </ui:UXML>

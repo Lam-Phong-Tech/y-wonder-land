@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 82f1076d6b1e84c44bcd7ce9b7ef985f, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Environment.HarvestableResource
   resourceId: 
   type: 0
@@ -71,8 +71,9 @@ GameObject:
   - component: {fileID: 7537608833016282325}
   - component: {fileID: 5718111330974962149}
   - component: {fileID: 1439379068073352092}
-  - component: {fileID: 6518546674630134236}
   - component: {fileID: 8728708281651729932}
+  - component: {fileID: 9164476545203416380}
+  - component: {fileID: 6080115386589971464}
   m_Layer: 0
   m_Name: Log
   m_TagString: Untagged
@@ -152,8 +153,87 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!64 &6518546674630134236
-MeshCollider:
+--- !u!114 &8728708281651729932
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8660575751522222307}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82f1076d6b1e84c44bcd7ce9b7ef985f, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Environment.HarvestableResource
+  resourceId: 
+  type: 0
+  requiredTool: 
+  yieldItemId: 
+  minYield: 1
+  maxYield: 3
+  respawnTimeSec: 3600
+  harvestDuration: 3
+  interactionRange: 2
+  leafNameContains: leaf
+  leafAttachRadius: 3
+  isHarvestable: 1
+  currentProgress: 0
+  respawnTimer: 0
+--- !u!114 &9164476545203416380
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8660575751522222307}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fac7d98278c6c1a4496c889c8235b5c0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Environment.FarmInteractionController
+  interactRange: 1
+  resourceInteractRange: 1
+  animalInteractRange: 1.35
+  enclosureInteractRange: 1.35
+  tileInteractRange: 1.75
+  merchantInteractRange: 1
+  waterInteractRange: 1.35
+  fishingInteractRange: 5
+  farmTileLayer:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  treeYield: 10
+  rockYield: 10
+  resourceExp: 5
+  mineExp: 15
+  gemstoneRewards:
+  - itemId: gem_ruby_01
+    displayName: "Ruby qu\xFD hi\u1EBFm"
+    amount: 1
+    chancePercent: 1
+  - itemId: gem_amethyst_01
+    displayName: Amethyst
+    amount: 1
+    chancePercent: 2
+  - itemId: gem_fire_quartz_01
+    displayName: Fire Quartz
+    amount: 2
+    chancePercent: 5
+  - itemId: gem_green_calcite_01
+    displayName: Green Calcite
+    amount: 3
+    chancePercent: 12
+  - itemId: gem_orange_calcite_01
+    displayName: Orange Calcite
+    amount: 4
+    chancePercent: 30
+  - itemId: gem_kyanite_01
+    displayName: Kyanite
+    amount: 4
+    chancePercent: 50
+  mainCamera: {fileID: 0}
+--- !u!65 &6080115386589971464
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -170,36 +250,9 @@ MeshCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -8888864707844107972, guid: ffef7e64fe79be9498d458937981d43d, type: 3}
---- !u!114 &8728708281651729932
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8660575751522222307}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 82f1076d6b1e84c44bcd7ce9b7ef985f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Environment.HarvestableResource
-  resourceId: 
-  type: 0
-  requiredTool: 
-  yieldItemId: 
-  minYield: 1
-  maxYield: 3
-  respawnTimeSec: 3600
-  harvestDuration: 3
-  interactionRange: 2
-  leafNameContains: leaf
-  leafAttachRadius: 3
-  isHarvestable: 1
-  currentProgress: 0
-  respawnTimer: 0
+  serializedVersion: 3
+  m_Size: {x: 0.006825713, y: 0.0057196007, z: 0.035313133}
+  m_Center: {x: 0.0007817072, y: 0.0008688432, z: -0.01}
 --- !u!1 &8690053073083304693
 GameObject:
   m_ObjectHideFlags: 0
