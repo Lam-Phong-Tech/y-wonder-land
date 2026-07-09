@@ -19,7 +19,7 @@ Server stub vẫn hỗ trợ cả endpoint local (`/auth/login`) và endpoint le
 |---|---|---|---|
 | GET  | `/` | — | `{ ok }` (health) |
 | GET  | `/health` | — | `{ ok, checkedAt }` |
-| POST | `/auth/register` | `{ username, password }` | `{ token, userId }` |
+| POST | `/auth/register` | `{ username, password, email?, phone? }` | `{ token, userId, playerId, username, email }` |
 | POST | `/auth/login` | `{ username, password }` | `{ token, userId }` |
 | GET  | `/player/profile` | header `Authorization: Bearer <token>` | `{ player_profile {...} }` |
 | PUT  | `/player/profile` | `{ player_profile {...} }` + Bearer | `{ ok, updatedAt }` |
@@ -33,7 +33,9 @@ Server stub vẫn hỗ trợ cả endpoint local (`/auth/login`) và endpoint le
 
 ## REST API - Game backend MVP bridge (lam truoc trong luc cho Web API)
 
-Muc tieu: game backend co contract on dinh truoc, web auth that se cam vao adapter sau. Hien `WEB_AUTH_MODE=mock` cho dev/test; khi ben web cung cap endpoint, doi sang `WEB_AUTH_MODE=http` va set `WEB_AUTH_LOGIN_URL`.
+Muc tieu: game backend co contract on dinh truoc, web auth that se cam vao adapter sau. Hien `WEB_AUTH_MODE=mock` chi nen dung cho test account cap san; khi cho khach dang ky tai khoan game local trong Phase 1, dung `/auth/register` + `/auth/login` va co the set `WEB_AUTH_MODE=disabled` de khong cho mock bypass password. Khi ben web cung cap endpoint on dinh, doi sang `WEB_AUTH_MODE=http` va set `WEB_AUTH_LOGIN_URL`.
+
+Unity login Phase 1 thu `/auth/login` truoc. Neu backend tra `404 USER_NOT_FOUND`, client moi fallback `/auth/web-login`; neu sai password cua local account thi `/auth/login` tra `401` va client khong fallback mock/web.
 
 Tài liệu hành trình product/backend đầy đủ nằm ở `docs/WEB_GAME_BACKEND_JOURNEY.md`. Quy ước chính:
 - Web là nguồn tài khoản; game backend chỉ nhận/verify account web qua adapter server-side.

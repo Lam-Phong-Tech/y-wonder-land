@@ -528,11 +528,12 @@ public class LoginScreenController : MonoBehaviour
         }
 
         string username = (regUsernameField?.value ?? "").Trim();
+        string email = (regEmailField?.value ?? "").Trim();
         string password = regPasswordField?.value ?? "";
 
         SetAuthControlsEnabled(false);
         ShowStatus(registerStatus, "Đang tạo tài khoản...", true);
-        bool success = await auth.RegisterAsync(username, password);
+        bool success = await auth.RegisterAsync(username, password, email);
         SetAuthControlsEnabled(true);
 
         if (!success)

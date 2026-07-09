@@ -22,7 +22,14 @@ namespace YWonderLand.Backend
         public bool IsSignedIn => !string.IsNullOrEmpty(Token);
 
         // DTOs khớp với server stub
-        [System.Serializable] private class AuthRequest { public string username; public string password; }
+        [System.Serializable]
+        private class AuthRequest
+        {
+            public string username;
+            public string password;
+            public string email;
+            public string phone;
+        }
         [System.Serializable]
         private class AuthResponse
         {
@@ -66,19 +73,24 @@ namespace YWonderLand.Backend
 
         public async Awaitable<bool> LoginAsync(string username, string password)
         {
-            var webRes = await ApiClient.PostAsync<AuthResponse>("/auth/web-login",
-                new AuthRequest { username = username, password = password });
-            if (ApplyAuth(webRes, username)) return true;
-
             var res = await ApiClient.PostAsync<AuthResponse>("/auth/login",
                 new AuthRequest { username = username, password = password });
-            return ApplyAuth(res, username);
+            if (ApplyAuth(res, username)) return true;
+
+            // Phase 1 supports self-registered game accounts first. If the
+            // account is not local, fall back to the web-auth bridge.
+            if (res.status != 404)
+                return false;
+
+            var webRes = await ApiClient.PostAsync<AuthResponse>("/auth/web-login",
+                new AuthRequest { username = username, password = password });
+            return ApplyAuth(webRes, username);
         }
 
-        public async Awaitable<bool> RegisterAsync(string username, string password)
+        public async Awaitable<bool> RegisterAsync(string username, string password, string email = "", string phone = "")
         {
             var res = await ApiClient.PostAsync<AuthResponse>("/auth/register",
-                new AuthRequest { username = username, password = password });
+                new AuthRequest { username = username, password = password, email = email, phone = phone });
             return ApplyAuth(res, username);
         }
 

@@ -5,6 +5,23 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-07-09] — Phase 1 backend account smoke test
+
+### Changed
+- `AuthService` thử `/auth/login` local trước, chỉ fallback `/auth/web-login` khi server báo `404 USER_NOT_FOUND`.
+- `LoginScreenController` gửi email khi đăng ký tài khoản.
+- `server/index.js` lưu `email/phone` cho `/auth/register`, chặn trùng email, và phân biệt `USER_NOT_FOUND` với sai mật khẩu ở `/auth/login`.
+- `server/store.js` thêm `findUserByEmail`; `server/postgresStore.js` giữ cùng interface để Phase 2 đổi PostgreSQL không vỡ route.
+- Thêm `server/phase1SmokeTest.js` và npm script `test:phase1`.
+
+### Verified
+- Đã chạy server tạm port `3101` với data file riêng trong temp và chạy `npm.cmd run test:phase1 --prefix server`.
+- Kết quả pass: register, login, bootstrap persistence, economy/inventory idempotency, farm-state persistence và realtime chat giữa 2 account đều hoạt động.
+
+### Còn lại
+- Public backend tạm hoặc máy case thật, build EXE/APK trỏ URL public, rồi test 5-20 người ngoài mạng.
+
+---
 ## [2026-07-09] — Chặn mất save khi mất focus trong lúc load
 
 ### Fixed

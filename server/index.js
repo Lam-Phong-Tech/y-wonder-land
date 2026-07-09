@@ -82,18 +82,26 @@ api.get("/health", (req, res) =>
 
 // ── Auth ──
 api.post("/auth/register", (req, res) => {
-  const { username, password } = req.body || {};
+  const username = String((req.body && req.body.username) || "").trim();
+  const password = String((req.body && req.body.password) || "");
+  const email = String((req.body && req.body.email) || "").trim().toLowerCase();
+  const phone = String((req.body && req.body.phone) || "").trim();
   if (!username || !password)
     return res.status(400).json({ error: "Thiếu username/password" });
   if (store.findUserByName(username))
-    return res.status(409).json({ error: "Username đã tồn tại" });
+    return res.status(409).json({ error: "USERNAME_EXISTS" });
+  if (email && store.findUserByEmail(email))
+    return res.status(409).json({ error: "EMAIL_EXISTS" });
 
   const id = "u_" + Date.now() + "_" + Math.floor(Math.random() * 1e6);
   store.createUser({
     id,
     username,
+    email,
+    phone,
     password_hash: bcrypt.hashSync(password, 8),
     created_at: nowISO(),
+    updated_at: nowISO(),
   });
 
   // Tạo profile mặc định gắn tên đăng nhập
@@ -102,20 +110,29 @@ api.post("/auth/register", (req, res) => {
   store.setProfile(id, profile);
 
   console.log(`[auth] Đăng ký mới: ${username} (${id})`);
-  res.json({ token: signToken(id, { username }), userId: id });
+  res.json({ token: signToken(id, { username, email, authSource: "local" }), userId: id, playerId: id, username, email });
 });
 
 api.post("/auth/login", (req, res) => {
-  const { username, password } = req.body || {};
+  const username = String((req.body && req.body.username) || "").trim();
+  const password = String((req.body && req.body.password) || "");
   if (!username || !password)
     return res.status(400).json({ error: "Thiếu username/password" });
 
   const user = store.findUserByName(username);
-  if (!user || !bcrypt.compareSync(password, user.password_hash))
+  if (!user)
+    return res.status(404).json({ error: "USER_NOT_FOUND" });
+  if (!bcrypt.compareSync(password, user.password_hash))
     return res.status(401).json({ error: "Sai username hoặc mật khẩu" });
 
   console.log(`[auth] Đăng nhập: ${username} (${user.id})`);
-  res.json({ token: signToken(user.id, { username: user.username }), userId: user.id });
+  res.json({
+    token: signToken(user.id, { username: user.username, email: user.email || "", authSource: "local" }),
+    userId: user.id,
+    playerId: user.id,
+    username: user.username,
+    email: user.email || "",
+  });
 });
 
 api.post("/auth/web-login", async (req, res) => {

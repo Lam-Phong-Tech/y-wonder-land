@@ -84,7 +84,7 @@ Khi dùng Caddy trên Windows, tham khảo `server/Caddyfile.example`. Nếu web
 |---|---|---|---|
 | GET  | `/` | — | `{ ok: true }` (health check) |
 | GET  | `/health` | — | `{ ok: true, checkedAt }` |
-| POST | `/auth/register` | `{ "username", "password" }` | `{ token, userId }` |
+| POST | `/auth/register` | `{ "username", "password", "email"?, "phone"? }` | `{ token, userId, playerId, username, email }` |
 | POST | `/auth/login` | `{ "username", "password" }` | `{ token, userId }` |
 | GET  | `/player/profile` | — (header `Authorization: Bearer <token>`) | `{ player_profile { ... } }` |
 | PUT  | `/player/profile` | `{ "player_profile": { ... } }` (Bearer token) | `{ ok: true, updatedAt }` |
@@ -104,6 +104,34 @@ $env:WEB_AUTH_SECRET="<GAME_API_SECRET from VPS .env>"
 Unity KHONG goi truc tiep endpoint web nay va KHONG duoc giu `GAME_API_SECRET`.
 Unity goi `/auth/web-login` cua game-server; game-server moi goi `api.ywonder.net/api/game/auth`.
 Neu SSL cua `api.ywonder.net` dang ket ha tang, co the override tam `WEB_AUTH_LOGIN_URL=https://ywonder.net/api/game/auth`.
+
+## Phase 1: tai khoan game local + realtime demo
+
+Khi chua can nap/rut va web account that chua on dinh, co the cho khach dang ky tai khoan game local ngay tren game.
+Khuyen nghi chay game-server voi web bridge tat de tai khoan local bat buoc dung password da dang ky:
+
+```powershell
+cd server
+$env:WEB_AUTH_MODE="disabled"
+$env:STORE_MODE="json"
+$env:PORT="3000"
+npm.cmd start
+```
+
+Unity register goi `/auth/register` va gui `username/password/email`; server luu user vao JSON store.
+Unity login se thu `/auth/login` truoc. Chi khi server tra `404 USER_NOT_FOUND` thi Unity moi fallback sang `/auth/web-login`.
+Khong nen public demo cho khach voi `WEB_AUTH_MODE=mock`, vi mock cho phep gia lap account cap san va khong phai he dang ky/password that.
+
+Smoke test Phase 1:
+
+```powershell
+cd server
+$env:PHASE1_TEST_BASE_URL="http://127.0.0.1:3000"
+npm.cmd run test:phase1
+```
+
+Test nay tu tao 2 account moi, dang nhap lai, goi `/player/bootstrap`, sua economy/inventory/farm-state,
+kiem tra idempotency, roi mo 2 WebSocket de join `city` va chat realtime.
 
 ## Test realtime khi web dang sap / chua co tai khoan web
 

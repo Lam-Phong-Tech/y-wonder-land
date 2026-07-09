@@ -67,6 +67,10 @@ function toInt(value, fallback = 0) {
   return Number.isFinite(parsed) ? Math.trunc(parsed) : fallback;
 }
 
+function normalizeIdentity(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
 function findSlot(inventory, itemId) {
   return inventory.slots.find((slot) => slot.itemId === itemId) || null;
 }
@@ -181,7 +185,15 @@ class JsonStore {
   }
 
   findUserByName(username) {
-    return this.readAll().users.find((u) => u.username === username) || null;
+    const key = normalizeIdentity(username);
+    if (!key) return null;
+    return this.readAll().users.find((u) => normalizeIdentity(u.username) === key) || null;
+  }
+
+  findUserByEmail(email) {
+    const key = normalizeIdentity(email);
+    if (!key) return null;
+    return this.readAll().users.find((u) => normalizeIdentity(u.email) === key) || null;
   }
 
   findUserById(id) {
@@ -508,6 +520,7 @@ module.exports = {
   readAll: activeStore.readAll.bind(activeStore),
   writeAll: activeStore.writeAll.bind(activeStore),
   findUserByName: activeStore.findUserByName.bind(activeStore),
+  findUserByEmail: activeStore.findUserByEmail.bind(activeStore),
   findUserById: activeStore.findUserById.bind(activeStore),
   createUser: activeStore.createUser.bind(activeStore),
   getOrCreatePlayerForWebUser: activeStore.getOrCreatePlayerForWebUser.bind(activeStore),

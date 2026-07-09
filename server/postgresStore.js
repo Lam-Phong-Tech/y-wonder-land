@@ -20,6 +20,7 @@ class PostgresStore {
   writeAll() { this.notImplemented(); }
   generateId() { this.notImplemented(); }
   findUserByName() { this.notImplemented(); }
+  findUserByEmail() { this.notImplemented(); }
   findUserById() { this.notImplemented(); }
   createUser() { this.notImplemented(); }
   getOrCreatePlayerForWebUser() { this.notImplemented(); }

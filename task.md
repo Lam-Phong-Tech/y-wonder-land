@@ -1,5 +1,19 @@
 # Danh sách công việc dự án (Task Backlog & Progress)
 
+## Ưu tiên hiện tại 09/07/2026: Phase 1 backend demo online/realtime
+
+> Backend đã quay lại sau nhóm chỉnh sửa game. Mục tiêu Phase 1: không làm nạp/rút, tập trung cho khách đăng ký/đăng nhập, lưu tài khoản + dữ liệu chơi tối thiểu, và nhiều người online realtime trên đảo công cộng.
+
+### Phase 1 - tài khoản game tự đăng ký + lưu tiến trình MVP
+- `[x]` Commit checkpoint trước khi quay lại backend: `8054205 feat: sync backend bootstrap and farm save polish`.
+- `[x]` Unity register gửi `email` lên backend; server `/auth/register` lưu `username/email/phone/password_hash` vào JSON store, chặn trùng username và email.
+- `[x]` Unity login nay thử `/auth/login` local trước; nếu server trả `USER_NOT_FOUND` mới fallback sang `/auth/web-login`. Nhờ vậy tài khoản tự đăng ký có password thật, còn web bridge vẫn dùng được khi có web account thật.
+- `[x]` Server `/auth/login` trả `404 USER_NOT_FOUND` khi chưa có tài khoản local và `401` khi sai mật khẩu, để không vô tình fallback web/mock khi nhập sai password của tài khoản đã đăng ký.
+- `[x]` Thêm `server/phase1SmokeTest.js` và npm script `test:phase1` để chứng minh register -> login -> `/player/bootstrap` -> lưu Point/inventory/farm_state -> idempotency -> realtime chat.
+- `[x]` Đã chạy test Phase 1 trên server tạm port `3101`, data file riêng trong temp: `npm.cmd run test:phase1 --prefix server` pass.
+- `[ ]` Bước tiếp theo: chọn cách public tạm cho khách test 20 người (Cloudflare Tunnel/ngrok nếu chưa có server thật, hoặc máy case nếu đã bàn giao), set `JWT_SECRET`, `WEB_AUTH_MODE=disabled` cho tài khoản game local hoặc `http` cho web thật, rồi build EXE/APK trỏ `BackendConfig.baseUrl` về URL public.
+- `[ ]` Test thực tế 5-20 người ngoài mạng: đăng ký tài khoản mới, đăng nhập, vào city/mine thấy nhau/chat được, relogin vẫn giữ Point/inventory/farm_state từ backend.
+
 ## Ưu tiên hiện tại 06/07/2026: tạm gác backend, quay lại chỉnh sửa game
 
 > Quyết định mới từ anh: tạm dừng chuỗi backend sau khi đã có nền mock/API/dashboard/realtime; giữ toàn bộ task backend bên dưới để quay lại sau khi xong nhóm chỉnh sửa game trước mắt.
@@ -143,7 +157,7 @@
 - `[x]` Ghi nhận contract web thật: `POST https://api.ywonder.net/api/game/auth` dùng `Authorization: Bearer <GAME_API_SECRET>`, trả cả camelCase/snake_case: `userId/user_id`, `refCode/ref_code`, `fullName/full_name`, `gameToken/game_token`, `expiresIn/expires_in`.
 - `[x]` Cập nhật `webAuthProvider` để game-server gọi web auth qua env `WEB_AUTH_MODE=http`, `WEB_AUTH_LOGIN_URL`, `WEB_AUTH_SECRET` hoặc `GAME_API_SECRET`; Unity không giữ secret.
 - `[x]` Verify `gameToken` JWT HS256 phía game-server theo spec `{ sub, uid, username, iat, exp }`, `sub/uid = web userId`.
-- `[x]` Unity login thử `/auth/web-login` trước, fallback `/auth/login` dev cũ nếu backend/local chưa sẵn sàng.
+- `[x]` Unity login Phase 1 thử `/auth/login` local trước; nếu server trả `USER_NOT_FOUND` mới fallback `/auth/web-login` để vẫn giữ đường nối web thật sau này.
 - `[x]` Backend thêm WebSocket realtime `/realtime` và `/game-api/realtime` cho room chung `city` và `mine`, chat toàn server, presence, state remote player, emote `Waving`/`Pointing`.
 - `[x]` Unity thêm `RealtimeClient` tự tạo runtime, giữ kết nối WebSocket khi đang gameplay để nhận/gửi chat global; chỉ join room `city`/`mine` để gửi local state và nhận remote player.
 - `[x]` Remote player dùng prefab nhân vật hiện tại nhưng disable `PlayerInput`, `PlayerController`, `CharacterController`, collider/rigidbody để không chặn input/local gameplay.

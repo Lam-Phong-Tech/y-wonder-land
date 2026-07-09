@@ -400,6 +400,40 @@ Chứng minh:
 3. Xem profile/economy/inventory/dailyLimits/farmState.
 4. Gọi `/auth/web-login` và `/player/bootstrap` để chứng minh game account load được data server.
 
+### Demo Phase 1 bằng tài khoản khách tự đăng ký
+
+Mục tiêu của Phase 1 là có bản online/realtime để khách vào chơi, chưa làm nạp/rút.
+Nếu web account thật chưa ổn định, chạy game-server bằng tài khoản game local:
+
+```powershell
+cd server
+$env:WEB_AUTH_MODE="disabled"
+$env:STORE_MODE="json"
+$env:PORT="3000"
+npm.cmd start
+```
+
+Unity register gọi `/auth/register` với `username/password/email`.
+Unity login gọi `/auth/login` trước; chỉ khi server báo `USER_NOT_FOUND` mới fallback sang web bridge.
+Không public cho khách bằng `WEB_AUTH_MODE=mock`, vì mock là chế độ giả lập account cấp sẵn, không kiểm tra password thật.
+
+Smoke test tự động:
+
+```powershell
+cd server
+$env:PHASE1_TEST_BASE_URL="http://127.0.0.1:3000"
+npm.cmd run test:phase1
+```
+
+Kết quả pass cần có:
+
+- Tạo được 2 tài khoản mới, lưu username/email/password_hash trong JSON store.
+- Sai mật khẩu bị chặn.
+- Login lại vẫn load được `/player/bootstrap`.
+- Point, inventory và farm-state đổi qua API rồi login lại vẫn còn.
+- Retry cùng `idempotency_key` không cộng/trừ đôi.
+- 2 account join `city` và chat realtime được.
+
 ### Demo realtime bằng tài khoản cấp sẵn khi web sập
 
 Account test:
