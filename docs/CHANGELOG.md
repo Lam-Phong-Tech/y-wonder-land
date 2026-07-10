@@ -5,6 +5,23 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-07-10] — Realtime action sync và audit state Phase 1
+
+### Changed
+- Realtime `player_state` gửi thêm state hoạt ảnh thật, tốc độ và dụng cụ đang cầm; remote player hỗ trợ jump, swim và các action cuốc/đào/chặt/tưới/câu/cho ăn/gieo.
+- `RemotePlayerController` tìm Animator cả ở child prefab và chỉ bật model dụng cụ ở remote, không kích hoạt gameplay component của người khác.
+- `server/realtimeServer.js` relay `animationSpeed` và `tool`; smoke test kiểm `Jump` và `Mining + Pickaxe`.
+- Thêm `docs/PHASE1_STATE_SYNC_AUDIT.md` phân loại từng nhóm dữ liệu đã đọc/ghi server hay vẫn local.
+
+### Verified
+- Backend tạm port `3107` pass auth, join, global chat, action state/tool relay, farm rejection và duplicate session 4008.
+- Unity Editor hiện tại import các script realtime không có lỗi biên dịch C#.
+
+### Còn lại
+- Build hai client để xác nhận action animation/tool ở runtime.
+- Làm shop transaction server-authoritative, cache theo playerId, farm/daily-limit sync và test 5-20 người trước khi chốt xong Giai đoạn 1.
+
+---
 ## [2026-07-09] — Phase 1 backend account smoke test
 
 ### Changed

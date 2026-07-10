@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-07-10 (Phase 1 realtime actions and state audit)
+
+### Changed
+- Realtime player state now relays the active animation, animation speed, and held tool so remote avatars can show jump, swim, and farming/mining/chopping actions.
+- Remote avatars resolve child Animators and toggle only visual equipment while gameplay components remain disabled.
+- The realtime smoke test now verifies Jump and Mining + Pickaxe relay.
+- Added `docs/PHASE1_STATE_SYNC_AUDIT.md` with the verified server/local ownership matrix and the next server-authoritative vertical slice.
+
+### Verified
+- A temporary backend on port `3107` passed auth, room join, global chat, action state/tool relay, farm rejection, and duplicate-session replacement code 4008.
+- The active Unity Editor imported the changed scripts without C# compile errors.
+
+### Needs Test
+- Build two clients and verify remote jump, swim, hoe, mining, chop, watering, fishing, feeding, and planting visuals.
+- Finish atomic shop transactions, player-scoped local cache, farm/daily-limit sync, and 5-20 player acceptance before declaring Phase 1 complete.
+
 ## [Unreleased] - 2026-07-08 (Mobile shop item readability)
 
 ### Changed
