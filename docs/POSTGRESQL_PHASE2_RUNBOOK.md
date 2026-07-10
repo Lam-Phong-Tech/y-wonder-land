@@ -76,13 +76,25 @@ Ngày 11/07 các vòng sau đã pass trên PostgreSQL thật qua SSH tunnel:
 - JSON store Phase 1 regression vẫn pass.
 - `npm audit --omit=dev`: `0 vulnerabilities`.
 
-## Chưa phải production
+## Nền PostgreSQL production trên VPS
 
-- Chưa tạo database/role production riêng cho game-server.
-- Chưa thử restart PostgreSQL service hoặc reboot VPS rồi restore dữ liệu.
-- Chưa có backup hằng ngày và restore drill.
+Hoàn tất ngày 11/07/2026:
+
+- OS service account `ywonder_game` dùng shell `nologin`; PostgreSQL role cùng tên không có `superuser`, `createdb` hoặc `createrole`.
+- Database production `ywonder_game` thuộc role này và dùng peer authentication qua Unix socket; không cần lưu DB password.
+- Migration `001_initial` đã áp dụng, gồm 10 bảng public tính cả `schema_migrations`.
+- Env production nằm ngoài repo tại `/etc/ywonder-game/game-server.env`; JWT được sinh trực tiếp trên VPS. Admin dashboard, demo account và web auth đang tắt theo mặc định an toàn.
+- `ywonder-db-backup.timer` đã `enabled/active`, chạy hằng ngày khoảng 03:15 giờ server, giữ backup 14 ngày.
+- Backup đầu tiên, checksum và restore drill vào database tạm đều pass; database restore tạm đã được xóa.
+- PostgreSQL chỉ listen `127.0.0.1:5432`; UFW không có rule public `5432`.
+- Không import `server/data.json` trong bước này; database production hiện chỉ có schema sạch.
+
+## Còn thiếu để chạy staging/production
+
+- Chưa thử reboot toàn VPS rồi xác nhận PostgreSQL/timer tự lên; thực hiện sau khi có cả Node/Caddy service để test một lần trọn bộ.
 - Chưa cài Node.js/Caddy trên VPS, chưa có `systemd` game service.
-- Chưa deploy backend, chưa đổi DNS `api.ywonder.net`, chưa bật HTTPS/WSS.
-- Chưa khóa root/password SSH; vẫn giữ làm rollback cho tới khi provisioning hoàn tất.
+- Chưa deploy backend, chưa chạy localhost REST/WebSocket smoke bằng env production.
+- Chưa mở `80/443`, chưa đổi DNS `api.ywonder.net`, chưa bật HTTPS/WSS.
+- Chưa khóa root/password SSH; vẫn giữ làm rollback cho tới khi Node/Caddy provisioning và reboot smoke hoàn tất.
 
-Production phải dùng role riêng quyền tối thiểu và secret trong file env trên VPS. Không dùng role `deploy` hoặc database `ywonder_test` làm dữ liệu thật.
+Không dùng role `deploy` hoặc database `ywonder_test` làm dữ liệu thật.

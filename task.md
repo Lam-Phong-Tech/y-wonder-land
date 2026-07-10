@@ -4,7 +4,7 @@
 
 > Backend đã quay lại sau nhóm chỉnh sửa game. Mục tiêu Phase 1: không làm nạp/rút, tập trung cho khách đăng ký/đăng nhập, lưu tài khoản + dữ liệu chơi tối thiểu, và nhiều người online realtime trên đảo công cộng.
 >
-> Trạng thái 11/07/2026: lõi **Giai đoạn 1 - Demo online nhanh** đã pass nhưng còn nghiệm thu tải 5–20 client và một số gameplay chưa server-authoritative. Source Giai đoạn 2 đã có PostgreSQL adapter/migration/import thật và pass smoke trên PostgreSQL test VPS; production DB, backup, Node/Caddy service, DNS/HTTPS/WSS vẫn chưa hoàn tất.
+> Trạng thái 11/07/2026: lõi **Giai đoạn 1 - Demo online nhanh** đã pass nhưng còn nghiệm thu tải 5–20 client và một số gameplay chưa server-authoritative. Source Giai đoạn 2 đã có PostgreSQL adapter/migration/import thật và pass smoke trên PostgreSQL test VPS. Nền PostgreSQL production (role/database/schema, env bảo mật, backup hằng ngày và restore drill) đã hoàn tất; Node/Caddy service, DNS/HTTPS/WSS và test tải vẫn chưa hoàn tất.
 
 ### Phase 1 - tài khoản game tự đăng ký + lưu tiến trình MVP
 - `[x]` Commit checkpoint trước khi quay lại backend: `8054205 feat: sync backend bootstrap and farm save polish`.
@@ -26,7 +26,8 @@
 - `[ ]` Nối `farm_state` hai chiều và nối `daily_limits` cho câu cá/đào mỏ sau khi vòng shop đã pass.
 - `[x]` Backend Phase 1 đã public thử qua Cloudflare Quick Tunnel với JWT secret ngẫu nhiên, `WEB_AUTH_MODE=disabled`, dashboard admin tắt và max 20 người/room. Public REST/WebSocket smoke test pass; EXE runtime xác nhận hai account khác nhau gặp/chat được trong City và account trùng bị thay phiên mã `4008`. URL Quick Tunnel là runtime tạm, không commit làm URL production.
 - `[x]` Audit read-only VPS game `42.96.18.14`: Ubuntu 22.04.5 LTS trên KVM, 2 vCPU, RAM 3.8 GiB + swap 3.8 GiB, disk 50 GB còn khoảng 37 GB, timezone Asia/Ho_Chi_Minh/NTP đúng; UFW deny inbound và mới chỉ mở SSH 22. Chưa có Node, PostgreSQL, Caddy/Nginx/Docker, không có service lỗi hay ứng dụng cũ cần giữ. Cấu hình đủ demo khoảng 20 người; báo cáo ở `docs/VPS_GAME_AUDIT_2026-07-10.md`. Mật khẩu giữ ngoài repo.
-- `[~]` Hạ tầng VPS: user `deploy` + ED25519 key đã pass. PostgreSQL `14.23` đã cài, `active/enabled`, chỉ listen `127.0.0.1:5432`; database `ywonder_test` + role `deploy` chỉ dùng integration test, không dùng production. Chưa hạn chế `root/password`, chưa cài Node.js/Caddy, chưa mở `80/443`. Bước kế: tạo DB/role production riêng, backup + restore drill, rồi mới deploy Node/Caddy; không public `3000/5432`.
+- `[x]` Nền PostgreSQL production trên VPS: tạo OS service account `ywonder_game` không có interactive shell, role PostgreSQL `ywonder_game` không có quyền superuser/createdb/createrole và database cùng tên dùng peer authentication qua Unix socket. Migration `001_initial` đã tạo 10 bảng public; env production nằm ngoài repo dưới `/etc/ywonder-game`; backup timer hằng ngày đã `enabled/active`, lượt backup đầu tiên thành công và restore drill vào database tạm đã pass rồi dọn sạch. PostgreSQL vẫn chỉ listen `127.0.0.1:5432`, UFW không public `5432`; chưa import `data.json`.
+- `[~]` Hạ tầng VPS còn lại: user `deploy` + ED25519 key đã pass; `root/password` vẫn giữ để rollback. Chưa cài Node.js/Caddy, chưa tạo `systemd` game-server, chưa mở `80/443`, chưa deploy source và chưa đổi DNS. Bước kế: cài Node LTS + Caddy, deploy đúng commit, chạy migration bằng env production, test REST/WebSocket qua localhost rồi mới public HTTPS/WSS; không public `3000/5432`.
 - `[ ]` Test thực tế 5-20 người ngoài mạng: đăng ký tài khoản mới, đăng nhập, vào city/mine thấy nhau/chat được, relogin vẫn giữ Point/inventory/farm_state từ backend.
 
 ## Ưu tiên hiện tại 06/07/2026: tạm gác backend, quay lại chỉnh sửa game

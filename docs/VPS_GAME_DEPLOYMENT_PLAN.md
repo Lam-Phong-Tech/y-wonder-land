@@ -118,18 +118,19 @@ Chi lam sau khi Moc A pass:
 
 - Cap nhat goi he thong va bat dong bo thoi gian.
 - `[x]` Ngay 11/07 da tao user khong dac quyen `deploy`, cai ED25519 public key va kiem tra batch login thanh cong. `.ssh` la `700`, `authorized_keys` la `600`; root/password/sshd/UFW van giu nguyen de rollback.
-- Cau hinh firewall: cho phep SSH co kiem soat, HTTP `80`, HTTPS `443`; chan public `3000` va `5432`.
-- `[~]` PostgreSQL 14.23 da cai, active/enabled va chi listen `127.0.0.1:5432`; Node.js/Caddy tren VPS chua cai.
-- `[~]` `ywonder_test` + role `deploy` chi de integration test. Production van phai tao database/role rieng quyen toi thieu.
-- Tao file env chi doc boi service account.
-- Tao `systemd` service cho Node va lich backup PostgreSQL hang ngay.
+- `[~]` Firewall van chi cho phep SSH `22`; PostgreSQL `5432` va Node `3000` khong public. HTTP `80`/HTTPS `443` chi mo sau khi Caddy va localhost smoke pass.
+- `[x]` PostgreSQL 14.23 da cai, active/enabled va chi listen `127.0.0.1:5432`; Node.js/Caddy tren VPS chua cai.
+- `[x]` `ywonder_test` + role `deploy` van chi de integration test. Da tao OS service account, PostgreSQL role quyen toi thieu va database production rieng ten `ywonder_game`; app se ket noi bang peer auth qua Unix socket, khong luu DB password.
+- `[x]` Da tao env production ngoai repo tai `/etc/ywonder-game/game-server.env`; file chi cho root va service group doc, JWT sinh truc tiep tren VPS. Admin/demo/web-auth dang tat theo default an toan.
+- `[x]` Da tao `ywonder-db-backup.service/.timer`; timer enabled/active, backup dau tien va restore drill database tam deu pass, database tam da duoc xoa.
+- `[ ]` Chua tao `systemd` service cho Node game-server.
 
 Ket qua dat:
 
 - Node/PostgreSQL/Caddy tu khoi dong lai sau reboot.
-- Database chi nghe local.
+- `[x]` Database chi nghe local.
 - Backend chi nghe `127.0.0.1:3000`.
-- Backup tao duoc va thu restore thanh cong tren database test.
+- `[x]` Backup tao duoc va thu restore thanh cong tren database test.
 
 ### Moc E - Deploy staging tren VPS
 
