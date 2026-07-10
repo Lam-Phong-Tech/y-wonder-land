@@ -22,6 +22,7 @@ namespace YWonderLand.Backend
         public bool IsSignedIn => !string.IsNullOrEmpty(Token);
         public long LastStatus { get; private set; }
         public string LastError { get; private set; }
+        public string LastErrorCode { get; private set; }
         public bool LastRequestCouldNotReachServer => LastStatus == 0 && !string.IsNullOrEmpty(LastError);
 
         // DTOs khớp với server stub
@@ -87,6 +88,15 @@ namespace YWonderLand.Backend
 
             var webRes = await ApiClient.PostAsync<AuthResponse>("/auth/web-login",
                 new AuthRequest { username = username, password = password });
+
+            // Demo/local mode intentionally disables web auth. Preserve the useful
+            // USER_NOT_FOUND result instead of replacing it with a misleading 503.
+            if (string.Equals(webRes.errorCode, "WEB_AUTH_DISABLED", System.StringComparison.OrdinalIgnoreCase))
+            {
+                RememberFailure(res);
+                return false;
+            }
+
             return ApplyAuth(webRes, username);
         }
 
@@ -101,13 +111,13 @@ namespace YWonderLand.Backend
         {
             if (!res.ok || res.data == null || string.IsNullOrEmpty(res.data.token))
             {
-                LastStatus = res.status;
-                LastError = res.error ?? "";
+                RememberFailure(res);
                 return false;
             }
 
             LastStatus = res.status;
             LastError = "";
+            LastErrorCode = "";
 
             string nextUserId = ResolveUserId(res.data);
             string nextUsername = ResolveUsername(res.data, username);
@@ -129,6 +139,13 @@ namespace YWonderLand.Backend
                 PlayerProfileService.Instance?.AcceptServerProfile(res.data.player_profile);
             Debug.Log($"[Auth] Đăng nhập thành công: {username} ({UserId})");
             return true;
+        }
+
+        private void RememberFailure(ApiResult<AuthResponse> res)
+        {
+            LastStatus = res.status;
+            LastError = res.error ?? "";
+            LastErrorCode = res.errorCode ?? "";
         }
 
         private static string ResolveUserId(AuthResponse data)

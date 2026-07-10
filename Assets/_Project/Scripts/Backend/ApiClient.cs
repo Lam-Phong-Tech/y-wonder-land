@@ -2,6 +2,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace YWonderLand.Backend
 {
@@ -12,6 +13,7 @@ namespace YWonderLand.Backend
         public T data;
         public long status;   // HTTP status code (0 nếu không kết nối được)
         public string error;
+        public string errorCode;
     }
 
     /// <summary>
@@ -73,7 +75,10 @@ namespace YWonderLand.Backend
                 }
                 else
                 {
-                    result.error = $"{req.result}: {req.error} (code {req.responseCode})";
+                    string responseBody = req.downloadHandler != null ? req.downloadHandler.text : "";
+                    result.errorCode = ExtractErrorCode(responseBody);
+                    string detail = !string.IsNullOrEmpty(result.errorCode) ? result.errorCode : req.error;
+                    result.error = $"{req.result}: {detail} (code {req.responseCode})";
                     Debug.LogWarning($"[ApiClient] {method} {path} lỗi -> {result.error}");
                 }
             }
@@ -87,6 +92,20 @@ namespace YWonderLand.Backend
                 req?.Dispose();
             }
             return result;
+        }
+
+        private static string ExtractErrorCode(string responseBody)
+        {
+            if (string.IsNullOrWhiteSpace(responseBody)) return "";
+            try
+            {
+                var payload = JObject.Parse(responseBody);
+                return payload.Value<string>("code") ?? payload.Value<string>("error") ?? "";
+            }
+            catch
+            {
+                return "";
+            }
         }
     }
 }

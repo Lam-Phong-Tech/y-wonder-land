@@ -599,10 +599,8 @@ public class LoginScreenController : MonoBehaviour
         long status = auth != null ? auth.LastStatus : 0;
         if (status == 0)
             return "Không thể kết nối máy chủ. Kiểm tra mạng hoặc chờ server được bật.";
-        if (status == 401)
+        if (status == 401 || status == 404)
             return "Sai tên tài khoản hoặc mật khẩu.";
-        if (status == 404)
-            return "Tài khoản không tồn tại.";
         if (status >= 500)
             return "Máy chủ đăng nhập đang tạm ngừng. Vui lòng thử lại sau.";
         return "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.";

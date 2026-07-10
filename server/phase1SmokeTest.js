@@ -296,6 +296,10 @@ async function main() {
   const badPassword = await login(accounts[0], "Wrong@123", [401]);
   assert(badPassword.status === 401, "Wrong password did not return 401.");
 
+  const unknownAccount = await login({ username: `Missing_${suffix}` }, password, [404]);
+  assert(unknownAccount.status === 404, "Unknown account did not return 404.");
+  assert(unknownAccount.payload.error === "USER_NOT_FOUND", "Unknown account did not return USER_NOT_FOUND.");
+
   const loggedA = await testPersistence(registered[0]);
   const loggedB = await login(registered[1]);
   await testRealtime(loggedA, loggedB);
