@@ -3,6 +3,7 @@ const WebSocket = require("ws");
 const baseUrl = (process.env.REALTIME_TEST_BASE_URL || process.env.BASE_URL || "http://127.0.0.1:3000").replace(/\/+$/, "");
 const room = process.env.REALTIME_TEST_ROOM || "city";
 const password = process.env.REALTIME_TEST_PASSWORD || "demo";
+const authPath = process.env.REALTIME_TEST_AUTH_PATH || "/auth/web-login";
 const accounts = (process.env.REALTIME_TEST_ACCOUNTS || "DemoRealtime01,DemoRealtime02,DemoRealtime03")
   .split(",")
   .map((value) => value.trim())
@@ -46,7 +47,7 @@ async function postJson(path, body) {
 }
 
 async function login(username) {
-  const payload = await postJson("/auth/web-login", { username, password });
+  const payload = await postJson(authPath, { username, password });
   if (!payload.token || !payload.playerId) {
     throw new Error(`Login response for ${username} is missing token/playerId.`);
   }
@@ -64,6 +65,8 @@ class RealtimeTestClient {
     this.account = account;
     this.messages = [];
     this.waiters = [];
+    this.closeInfo = null;
+    this.closeWaiters = [];
     this.socket = null;
   }
 
@@ -97,6 +100,14 @@ class RealtimeTestClient {
       socket.on("error", (error) => {
         clearTimeout(timer);
         reject(error);
+      });
+
+      socket.on("close", (code, reason) => {
+        this.closeInfo = { code, reason: reason.toString("utf8") };
+        for (const waiter of this.closeWaiters.splice(0)) {
+          clearTimeout(waiter.timer);
+          waiter.resolve(this.closeInfo);
+        }
       });
     });
   }
@@ -134,15 +145,51 @@ class RealtimeTestClient {
     }
   }
 
+  waitForClose(label, timeoutMs = 5000) {
+    if (this.closeInfo) return Promise.resolve(this.closeInfo);
+
+    return new Promise((resolve, reject) => {
+      const waiter = { resolve, reject };
+      waiter.timer = setTimeout(() => {
+        this.closeWaiters = this.closeWaiters.filter((item) => item !== waiter);
+        reject(new Error(`Timeout waiting for ${label} on ${this.account.username}`));
+      }, timeoutMs);
+      this.closeWaiters.push(waiter);
+    });
+  }
+
   close() {
     if (this.socket) this.socket.close();
+  }
+}
+
+async function testSingleAccountSession(account) {
+  const first = new RealtimeTestClient(account);
+  const replacement = new RealtimeTestClient(account);
+  try {
+    await first.connect();
+    await first.waitFor((msg) => msg.type === "connected", "first same-account connection");
+
+    await replacement.connect();
+    await replacement.waitFor((msg) => msg.type === "connected", "replacement same-account connection");
+    await first.waitFor(
+      (msg) => msg.type === "error" && msg.code === "SESSION_REPLACED",
+      "SESSION_REPLACED"
+    );
+    const close = await first.waitForClose("same-account close 4008");
+    if (close.code !== 4008) {
+      throw new Error(`Expected same-account close code 4008, got ${close.code}.`);
+    }
+  } finally {
+    first.close();
+    replacement.close();
   }
 }
 
 async function main() {
   console.log(`[realtime-smoke] Base URL: ${baseUrl}`);
   console.log(`[realtime-smoke] Accounts: ${accounts.join(", ")}`);
-  console.log("[realtime-smoke] Requires server WEB_AUTH_MODE=mock while web auth is unavailable.");
+  console.log(`[realtime-smoke] Auth path: ${authPath}`);
 
   const first = await login(accounts[0]);
   const second = await login(accounts[1]);
@@ -211,6 +258,9 @@ async function main() {
     clientB.close();
     if (clientC) clientC.close();
   }
+
+  await testSingleAccountSession(first);
+  console.log("[realtime-smoke] PASS: same-account replacement closes the older socket with code 4008.");
 }
 
 main().catch((error) => {

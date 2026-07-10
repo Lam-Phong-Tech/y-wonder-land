@@ -91,6 +91,30 @@ function attachRealtimeServer(server, options) {
     return players;
   }
 
+  function disconnectExistingPlayerSession(playerId, incomingWs) {
+    if (!playerId) return;
+
+    for (const [otherWs, otherClient] of clients.entries()) {
+      if (otherWs === incomingWs || !otherClient || otherClient.playerId !== playerId) {
+        continue;
+      }
+
+      send(otherWs, {
+        type: "error",
+        code: "SESSION_REPLACED",
+        message: "Tai khoan nay da dang nhap o thiet bi khac.",
+        sentAt: nowISO(),
+      });
+      leaveRoom(otherWs, true);
+      clients.delete(otherWs);
+      try {
+        otherWs.close(4008, "SESSION_REPLACED");
+      } catch (e) {
+        // Ignore close errors; the socket may already be closing.
+      }
+    }
+  }
+
   function leaveRoom(ws, notify = true) {
     const client = clients.get(ws);
     if (!client || !client.room) return;
@@ -227,10 +251,11 @@ function attachRealtimeServer(server, options) {
 
   wss.on("connection", (ws, request, auth) => {
     const id = makeId("rt");
+    const playerId = auth.uid || auth.userId || id;
     clients.set(ws, {
       connectionId: id,
       userId: auth.uid || auth.userId || "",
-      playerId: auth.uid || auth.userId || id,
+      playerId,
       webUserId: auth.webUserId || "",
       name: safeText(auth.displayName || auth.username || auth.name, "Player", 32),
       gender: "male",
@@ -241,6 +266,7 @@ function attachRealtimeServer(server, options) {
       chatTimestamps: [],
       updatedAt: nowISO(),
     });
+    disconnectExistingPlayerSession(playerId, ws);
 
     send(ws, {
       type: "connected",

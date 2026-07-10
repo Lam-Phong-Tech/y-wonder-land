@@ -20,6 +20,9 @@ namespace YWonderLand.Backend
         public string UserId { get; private set; }
         public string Username { get; private set; }
         public bool IsSignedIn => !string.IsNullOrEmpty(Token);
+        public long LastStatus { get; private set; }
+        public string LastError { get; private set; }
+        public bool LastRequestCouldNotReachServer => LastStatus == 0 && !string.IsNullOrEmpty(LastError);
 
         // DTOs khớp với server stub
         [System.Serializable]
@@ -97,7 +100,14 @@ namespace YWonderLand.Backend
         private bool ApplyAuth(ApiResult<AuthResponse> res, string username)
         {
             if (!res.ok || res.data == null || string.IsNullOrEmpty(res.data.token))
+            {
+                LastStatus = res.status;
+                LastError = res.error ?? "";
                 return false;
+            }
+
+            LastStatus = res.status;
+            LastError = "";
 
             string nextUserId = ResolveUserId(res.data);
             string nextUsername = ResolveUsername(res.data, username);

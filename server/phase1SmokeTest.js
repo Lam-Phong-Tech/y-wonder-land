@@ -86,6 +86,8 @@ class RealtimeClient {
     this.account = account;
     this.messages = [];
     this.waiters = [];
+    this.closeInfo = null;
+    this.closeWaiters = [];
     this.socket = null;
   }
 
@@ -115,6 +117,13 @@ class RealtimeClient {
       socket.on("error", (error) => {
         clearTimeout(timer);
         reject(error);
+      });
+      socket.on("close", (code, reason) => {
+        this.closeInfo = { code, reason: reason.toString("utf8") };
+        for (const waiter of this.closeWaiters.splice(0)) {
+          clearTimeout(waiter.timer);
+          waiter.resolve(this.closeInfo);
+        }
       });
     });
   }
@@ -146,6 +155,19 @@ class RealtimeClient {
       this.waiters = this.waiters.filter((item) => item !== waiter);
       waiter.resolve(match);
     }
+  }
+
+  waitForClose(label, timeoutMs = 5000) {
+    if (this.closeInfo) return Promise.resolve(this.closeInfo);
+
+    return new Promise((resolve, reject) => {
+      const waiter = { resolve, reject };
+      waiter.timer = setTimeout(() => {
+        this.closeWaiters = this.closeWaiters.filter((item) => item !== waiter);
+        reject(new Error(`Timeout waiting for ${label} on ${this.account.username}`));
+      }, timeoutMs);
+      this.closeWaiters.push(waiter);
+    });
   }
 
   close() {
@@ -232,6 +254,28 @@ async function testRealtime(a, b) {
   }
 }
 
+async function testSingleRealtimeSession(account) {
+  const first = new RealtimeClient(account);
+  const second = new RealtimeClient(account);
+  try {
+    await first.connect();
+    await first.waitFor((msg) => msg.type === "connected", "first duplicate-session connection");
+
+    await second.connect();
+    await second.waitFor((msg) => msg.type === "connected", "replacement duplicate-session connection");
+
+    await first.waitFor(
+      (msg) => msg.type === "error" && msg.code === "SESSION_REPLACED",
+      "SESSION_REPLACED error"
+    );
+    const close = await first.waitForClose("duplicate-session close 4008");
+    assert(close.code === 4008, `Expected duplicate session close 4008, got ${close.code}.`);
+  } finally {
+    first.close();
+    second.close();
+  }
+}
+
 async function main() {
   console.log(`[phase1-smoke] Base URL: ${baseUrl}`);
   const health = await getJson("/health");
@@ -255,8 +299,9 @@ async function main() {
   const loggedA = await testPersistence(registered[0]);
   const loggedB = await login(registered[1]);
   await testRealtime(loggedA, loggedB);
+  await testSingleRealtimeSession(loggedA);
 
-  console.log("[phase1-smoke] PASS: register, login, bootstrap persistence, idempotency, farm-state, and realtime chat work.");
+  console.log("[phase1-smoke] PASS: register, login, bootstrap persistence, idempotency, farm-state, realtime chat, and single-account session replacement work.");
 }
 
 main().catch((error) => {

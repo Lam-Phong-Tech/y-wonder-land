@@ -30,6 +30,7 @@ namespace YWonderLand.Realtime
         private ClientWebSocket socket;
         private CancellationTokenSource socketCts;
         private bool connectInProgress;
+        private bool sessionReplacementHandled;
         private string currentRoom = "";
         private string serverSelfId = "";
         private float nextConnectionCheck;
@@ -173,6 +174,7 @@ namespace YWonderLand.Realtime
                 string token = AuthService.Instance != null ? AuthService.Instance.Token : "";
                 if (string.IsNullOrEmpty(token)) return;
 
+                sessionReplacementHandled = false;
                 socketCts = new CancellationTokenSource();
                 socket = new ClientWebSocket();
                 Uri uri = BuildRealtimeUri(token);
@@ -304,7 +306,17 @@ namespace YWonderLand.Realtime
                     do
                     {
                         result = await activeSocket.ReceiveAsync(new ArraySegment<byte>(buffer), token);
-                        if (result.MessageType == WebSocketMessageType.Close) return;
+                        if (result.MessageType == WebSocketMessageType.Close)
+                        {
+                            int closeCode = result.CloseStatus.HasValue ? (int)result.CloseStatus.Value : 0;
+                            string closeReason = result.CloseStatusDescription ?? "";
+                            if (closeCode == 4008 ||
+                                closeReason.Equals("SESSION_REPLACED", StringComparison.OrdinalIgnoreCase))
+                            {
+                                mainThreadQueue.Enqueue(HandleSessionReplaced);
+                            }
+                            return;
+                        }
                         builder.Append(Encoding.UTF8.GetString(buffer, 0, result.Count));
                     }
                     while (!result.EndOfMessage);
@@ -396,9 +408,31 @@ namespace YWonderLand.Realtime
                     PlayRemoteEmote(msg);
                     break;
                 case "error":
-                    Debug.LogWarning($"[Realtime] Server error: {msg.Value<string>("code")} {msg.Value<string>("message")}");
+                    string errorCode = msg.Value<string>("code") ?? "";
+                    Debug.LogWarning($"[Realtime] Server error: {errorCode} {msg.Value<string>("message")}");
+                    if (errorCode.Equals("SESSION_REPLACED", StringComparison.OrdinalIgnoreCase))
+                        HandleSessionReplaced();
                     break;
             }
+        }
+
+        private void HandleSessionReplaced()
+        {
+            if (sessionReplacementHandled) return;
+            sessionReplacementHandled = true;
+            nextReconnectAt = float.PositiveInfinity;
+
+            Debug.LogWarning("[Realtime] Session replaced by a newer login. Signing out this client.");
+            _ = DisconnectAsync();
+
+            if (GameManager.Instance != null)
+                GameManager.Instance.LogoutToLogin();
+            else
+                AuthService.Instance?.SignOut();
+
+            YWonderLand.Environment.ScreenToast.Show(
+                "Tài khoản đã đăng nhập ở thiết bị khác. Phiên này đã được đăng xuất.",
+                6f);
         }
 
         private void SyncInitialPlayers(JArray players)

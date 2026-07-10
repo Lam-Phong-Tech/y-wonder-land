@@ -155,6 +155,19 @@ DemoRealtime02 / demo
 DemoRealtime03 / demo
 ```
 
+Server cung seed san cac account demo local khi khoi dong:
+
+```text
+DemoRealtime01..DemoRealtime05 / demo
+DemoRich01..DemoRich05 / demo
+```
+
+Voi cac account nay, password co the la `demo` hoac trung ten account, vi du
+`DemoRich01 / DemoRich01`. `DemoRich` duoc seed tien/tai nguyen de test shop;
+`DemoRealtime` dung de test nhieu nguoi online. Moi account chi duoc co 1 phien
+realtime dang online; neu mo cung account o cua so/may khac, phien moi se thay
+phien cu.
+
 Neu test trong Unity Editor cung may chay server, dat `BackendConfig.baseUrl = http://127.0.0.1:3000`.
 Neu test dien thoai/2 may trong LAN, dat `BackendConfig.baseUrl = http://<IP-may-chay-server>:3000`.
 
@@ -163,12 +176,16 @@ Smoke test tu dong REST + WebSocket:
 ```powershell
 cd server
 $env:REALTIME_TEST_BASE_URL="http://127.0.0.1:3000"
+$env:REALTIME_TEST_AUTH_PATH="/auth/login"
 npm.cmd run test:realtime
 ```
 
-Test nay login `DemoRealtime01`, `DemoRealtime02`, `DemoRealtime03`; 2 client join `city`,
+`REALTIME_TEST_AUTH_PATH` mac dinh la `/auth/web-login`; khi Phase 1 chay
+`WEB_AUTH_MODE=disabled`, doi sang `/auth/login` nhu tren. Test nay login
+`DemoRealtime01`, `DemoRealtime02`, `DemoRealtime03`; 2 client join `city`,
 client thu ba khong join room van nhan/gui duoc chat global, kiem tra `player_state`,
-va thu join `farm` de dam bao farm khong phai realtime public room.
+thu join `farm` de dam bao farm khong phai realtime public room, va kiem tra
+phien cu cung account bi dong ma `4008` khi phien moi ket noi.
 
 Endpoint moi:
 

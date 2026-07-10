@@ -11,6 +11,8 @@ namespace YWonderLand.Backend
 
         public bool HasServerBootstrap { get; private set; }
         public PlayerBootstrapPayload LastBootstrap { get; private set; }
+        public long LastStatus { get; private set; }
+        public string LastError { get; private set; }
 
         [Serializable]
         public class PlayerBootstrapPayload
@@ -78,11 +80,15 @@ namespace YWonderLand.Backend
             if (auth == null || string.IsNullOrEmpty(auth.Token))
             {
                 HasServerBootstrap = false;
+                LastStatus = 401;
+                LastError = "NO_AUTH_TOKEN";
                 Debug.LogWarning("[Bootstrap] Cannot load player bootstrap: no auth token.");
                 return false;
             }
 
             var res = await ApiClient.GetAsync<PlayerBootstrapPayload>("/player/bootstrap", auth.Token);
+            LastStatus = res.status;
+            LastError = res.error ?? "";
             if (!res.ok || res.data == null)
             {
                 HasServerBootstrap = false;
@@ -93,6 +99,7 @@ namespace YWonderLand.Backend
             ApplyBootstrap(res.data);
             LastBootstrap = res.data;
             HasServerBootstrap = true;
+            LastError = "";
             Debug.Log("[Bootstrap] Applied server profile, economy, and inventory.");
             return true;
         }
@@ -101,6 +108,8 @@ namespace YWonderLand.Backend
         {
             HasServerBootstrap = false;
             LastBootstrap = null;
+            LastStatus = 0;
+            LastError = "";
         }
 
         private static void ApplyBootstrap(PlayerBootstrapPayload payload)

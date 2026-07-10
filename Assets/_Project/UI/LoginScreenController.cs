@@ -313,11 +313,11 @@ public class LoginScreenController : MonoBehaviour
         SetAuthControlsEnabled(false);
         ShowStatus(loginStatus, "Đang đăng nhập...", true);
         bool success = await auth.LoginAsync(username, password);
-        SetAuthControlsEnabled(true);
 
         if (!success)
         {
-            ShowStatus(loginStatus, "Đăng nhập thất bại. Kiểm tra tài khoản/mật khẩu.", false);
+            SetAuthControlsEnabled(true);
+            ShowStatus(loginStatus, ResolveLoginFailureMessage(auth), false);
             return;
         }
 
@@ -328,6 +328,15 @@ public class LoginScreenController : MonoBehaviour
         {
             ShowStatus(loginStatus, "Đang nạp dữ liệu nhân vật...", true);
             bootstrapLoaded = await bootstrap.LoadBootstrapAsync();
+        }
+
+        if (!bootstrapLoaded && IsOnlineOnly())
+        {
+            string bootstrapError = ResolveBootstrapFailureMessage(bootstrap);
+            auth.SignOut();
+            SetAuthControlsEnabled(true);
+            ShowStatus(loginStatus, bootstrapError, false);
+            return;
         }
 
         var profile = PlayerProfileService.Instance;
@@ -348,6 +357,7 @@ public class LoginScreenController : MonoBehaviour
         if (GameManager.IsRichDemoAccountName(username))
             shouldSkipCharacterSelectAfterLogin = true;
 
+        SetAuthControlsEnabled(true);
         ShowStatus(loginStatus,
             shouldSkipCharacterSelectAfterLogin
                 ? "\u0110\u0103ng nh\u1eadp th\u00e0nh c\u00f4ng! \u0110ang v\u00e0o game..."
@@ -538,7 +548,7 @@ public class LoginScreenController : MonoBehaviour
 
         if (!success)
         {
-            ShowStatus(registerStatus, "Đăng ký thất bại. Tài khoản có thể đã tồn tại hoặc mất kết nối.", false);
+            ShowStatus(registerStatus, ResolveRegisterFailureMessage(auth), false);
             return;
         }
 
@@ -578,6 +588,47 @@ public class LoginScreenController : MonoBehaviour
     }
 
     // ── Status Message Helpers ──
+
+    private static bool IsOnlineOnly()
+    {
+        return BackendConfig.Active != null && !BackendConfig.Active.useOfflineFallback;
+    }
+
+    private static string ResolveLoginFailureMessage(AuthService auth)
+    {
+        long status = auth != null ? auth.LastStatus : 0;
+        if (status == 0)
+            return "Không thể kết nối máy chủ. Kiểm tra mạng hoặc chờ server được bật.";
+        if (status == 401)
+            return "Sai tên tài khoản hoặc mật khẩu.";
+        if (status == 404)
+            return "Tài khoản không tồn tại.";
+        if (status >= 500)
+            return "Máy chủ đăng nhập đang tạm ngừng. Vui lòng thử lại sau.";
+        return "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.";
+    }
+
+    private static string ResolveRegisterFailureMessage(AuthService auth)
+    {
+        long status = auth != null ? auth.LastStatus : 0;
+        if (status == 0)
+            return "Không thể kết nối máy chủ nên chưa thể tạo tài khoản.";
+        if (status == 409)
+            return "Tên tài khoản hoặc email này đã được sử dụng.";
+        if (status >= 500)
+            return "Máy chủ đăng ký đang tạm ngừng. Vui lòng thử lại sau.";
+        return "Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.";
+    }
+
+    private static string ResolveBootstrapFailureMessage(PlayerBootstrapService bootstrap)
+    {
+        long status = bootstrap != null ? bootstrap.LastStatus : 0;
+        if (status == 401)
+            return "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.";
+        if (status == 0)
+            return "Không thể tải dữ liệu nhân vật vì mất kết nối máy chủ.";
+        return "Máy chủ chưa tải được dữ liệu nhân vật. Vui lòng thử lại.";
+    }
 
     private void ShowStatus(Label label, string message, bool isSuccess)
     {

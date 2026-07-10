@@ -491,8 +491,8 @@ public class GameManager : MonoBehaviour
         if (auth != null && profileService != null)
             ApplyDemoAccountOverrides(auth.Username, profileService);
 
-        Debug.Log($"[GameManager] Starting from existing profile: {playerName}, gender={selectedCharacterIndex}.");
-        SetGameState(GameState.Cutscene);
+        Debug.Log($"[GameManager] Starting from existing profile without intro cutscene: {playerName}, gender={selectedCharacterIndex}.");
+        StartExistingCharacterDirectly();
     }
 
     private async Awaitable SignInAndLoadProfileAsync()
@@ -780,6 +780,54 @@ public class GameManager : MonoBehaviour
     /// <summary>Vào THẲNG game cho người chơi cũ: spawn nhân vật ở vị trí đã lưu, KHÔNG chạy cutscene.</summary>
     public void ResumeGame()
     {
+        var config = YWonderLand.Backend.BackendConfig.Active;
+        if (config != null && !config.useOfflineFallback)
+        {
+            SetGameState(GameState.Login);
+            YWonderLand.Environment.ScreenToast.ShowInfo("Đang xác nhận phiên với máy chủ...", 3f);
+            _ = ResumeGameAfterServerValidationAsync();
+            return;
+        }
+
+        ResumeGameFromLocalSave(false);
+    }
+
+    private async Awaitable ResumeGameAfterServerValidationAsync()
+    {
+        var auth = YWonderLand.Backend.AuthService.Instance;
+        var bootstrap = YWonderLand.Backend.PlayerBootstrapService.Instance;
+        if (auth == null || bootstrap == null || !auth.IsSignedIn)
+        {
+            SetGameState(GameState.Login);
+            return;
+        }
+
+        string tokenBeingValidated = auth.Token;
+        bool loaded = await bootstrap.LoadBootstrapAsync();
+
+        // A manual login may have replaced the cached token while validation was in flight.
+        if (auth.Token != tokenBeingValidated)
+            return;
+
+        if (!loaded)
+        {
+            long failedStatus = bootstrap.LastStatus;
+            if (failedStatus == 401)
+                auth.SignOut();
+
+            SetGameState(GameState.Login);
+            string message = failedStatus == 401
+                ? "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại."
+                : "Không thể kết nối máy chủ. Game chưa vào chế độ online.";
+            YWonderLand.Environment.ScreenToast.Show(message, 6f);
+            return;
+        }
+
+        ResumeGameFromLocalSave(true);
+    }
+
+    private void ResumeGameFromLocalSave(bool bootstrapAlreadyLoaded)
+    {
         selectedCharacterIndex = PlayerPrefs.GetInt(K_CharIdx, 0);
         playerName = PlayerPrefs.GetString(K_Name, "Player");
 
@@ -789,8 +837,8 @@ public class GameManager : MonoBehaviour
             PlayerPrefs.GetFloat(K_PosZ, 0f));
         float yaw = PlayerPrefs.GetFloat(K_Yaw, 0f);
 
-        // Đăng nhập + nạp hồ sơ chạy nền (offline tự fallback) — giống StartGame.
-        _ = SignInAndLoadProfileAsync();
+        if (!bootstrapAlreadyLoaded)
+            _ = SignInAndLoadProfileAsync();
 
         SpawnCharacterAt(pos, yaw);
         if (spawnedCharacter == null)
@@ -838,6 +886,56 @@ public class GameManager : MonoBehaviour
         if (controller != null) controller.enabled = false;
         CharacterController cc = spawnedCharacter.GetComponent<CharacterController>();
         if (cc != null) cc.enabled = false;
+    }
+
+    private void StartExistingCharacterDirectly()
+    {
+        FloatingNameTag.GloballyHidden = false;
+
+        Vector3 spawnPos;
+        float spawnYaw;
+        if (!TryGetDockSpawnPose(out spawnPos, out spawnYaw))
+        {
+            spawnPos = new Vector3(
+                PlayerPrefs.GetFloat(K_PosX, 0f),
+                PlayerPrefs.GetFloat(K_PosY, 2f),
+                PlayerPrefs.GetFloat(K_PosZ, 0f));
+            spawnYaw = PlayerPrefs.GetFloat(K_Yaw, 0f);
+            Debug.LogWarning($"[GameManager] Existing profile direct start could not resolve dock spawn. Falling back to saved/default position {spawnPos}.");
+        }
+
+        SpawnCharacterAt(spawnPos, spawnYaw);
+        if (spawnedCharacter == null)
+        {
+            Debug.LogWarning("[GameManager] Existing profile direct start failed to spawn player -> returning to Login.");
+            SetGameState(GameState.Login);
+            return;
+        }
+
+        SetGameState(GameState.Gameplay);
+        Debug.Log($"[GameManager] Existing profile direct start: entered gameplay at {spawnPos}.");
+    }
+
+    private bool TryGetDockSpawnPose(out Vector3 position, out float yaw)
+    {
+        position = Vector3.zero;
+        yaw = 0f;
+
+        var boat = FindFirstObjectByType<BoatCutscene>();
+        if (boat == null)
+            return false;
+
+        boatCutscene = boat;
+        boatObject = boat.gameObject;
+        boat.SnapToDock();
+
+        Transform spawnPoint = FindChildRecursive(boat.transform, "spawn");
+        if (spawnPoint == null)
+            spawnPoint = boat.transform;
+
+        position = spawnPoint.position;
+        yaw = spawnPoint.eulerAngles.y;
+        return true;
     }
 
     // Lưu vị trí + nhân vật khi thoát/chuyển nền. Chỉ lưu TOẠ ĐỘ khi đang ở Nông trại (base scene)
