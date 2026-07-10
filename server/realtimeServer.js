@@ -398,7 +398,7 @@ function attachRealtimeServer(server, options) {
     });
   }
 
-  function handleResourceHarvest(ws, msg) {
+  async function handleResourceHarvest(ws, msg) {
     const client = clients.get(ws);
     if (!client || !client.room) return;
 
@@ -438,16 +438,33 @@ function attachRealtimeServer(server, options) {
 
     const rewards = makeResourceRewards(resource.resourceType);
     const idempotencyKey = `resource:${client.room}:${resourceId}:${resource.cycle}:${client.playerId}`;
-    const storeResult = store.applyResourceHarvest(client.playerId, rewards, {
-      type: "resource_harvest",
-      ref: `${client.room}:${resourceId}`,
-      idempotencyKey,
-      dailyLimit: resource.resourceType === "rock"
-        ? { key: "mining", amount: 1, maxCount: 10 }
-        : null,
-    });
+    resource.available = false;
+    resource.claimedBy = client.playerId;
+    resource.updatedAt = nowISO();
+
+    let storeResult;
+    try {
+      storeResult = await store.applyResourceHarvest(client.playerId, rewards, {
+        type: "resource_harvest",
+        ref: `${client.room}:${resourceId}`,
+        idempotencyKey,
+        dailyLimit: resource.resourceType === "rock"
+          ? { key: "mining", amount: 1, maxCount: 10 }
+          : null,
+      });
+    } catch (error) {
+      resource.available = true;
+      resource.claimedBy = "";
+      resource.updatedAt = nowISO();
+      console.error(`[realtime] resource reward failed ${resourceId}:`, error);
+      reject("RESOURCE_REWARD_FAILED");
+      return;
+    }
 
     if (!storeResult.ok) {
+      resource.available = true;
+      resource.claimedBy = "";
+      resource.updatedAt = nowISO();
       reject(storeResult.error || "RESOURCE_REWARD_FAILED", {
         inventory: storeResult.inventory,
         daily_limits: storeResult.daily_limits,
@@ -456,9 +473,7 @@ function attachRealtimeServer(server, options) {
       return;
     }
 
-    resource.available = false;
     resource.respawnAt = Date.now() + RESOURCE_RESPAWN_SEC * 1000;
-    resource.claimedBy = client.playerId;
     resource.updatedAt = nowISO();
 
     const accepted = {
@@ -516,7 +531,7 @@ function attachRealtimeServer(server, options) {
       sentAt: nowISO(),
     });
 
-    ws.on("message", (raw) => {
+    ws.on("message", async (raw) => {
       let msg = null;
       try {
         msg = JSON.parse(raw.toString("utf8"));
@@ -545,7 +560,7 @@ function attachRealtimeServer(server, options) {
           handleResourceManifest(ws, msg);
           break;
         case "resource_harvest":
-          handleResourceHarvest(ws, msg);
+          await handleResourceHarvest(ws, msg);
           break;
         case "ping":
           send(ws, { type: "pong", sentAt: nowISO() });
@@ -562,7 +577,7 @@ function attachRealtimeServer(server, options) {
     });
   });
 
-  server.on("upgrade", (request, socket, head) => {
+  server.on("upgrade", async (request, socket, head) => {
     let url;
     try {
       url = new URL(request.url, "http://localhost");
@@ -579,7 +594,7 @@ function attachRealtimeServer(server, options) {
     const token = url.searchParams.get("token") || "";
     let auth;
     try {
-      auth = verifyToken(token);
+      auth = await verifyToken(token);
     } catch (e) {
       socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
       socket.destroy();

@@ -1,9 +1,8 @@
 // Storage facade for the game backend.
 // Default mode is a JSON-file store for local/dev. STORE_MODE=postgres selects
-// the DB adapter scaffold in postgresStore.js.
+// the PostgreSQL adapter while preserving the same API contract.
 const fs = require("fs");
 const path = require("path");
-const { createPostgresStore } = require("./postgresStore");
 
 const STORE_MODE = (process.env.STORE_MODE || "json").toLowerCase();
 const DB_PATH = process.env.YW_DATA_PATH || path.join(__dirname, "data.json");
@@ -150,6 +149,12 @@ class JsonStore {
     return generateId(prefix);
   }
 
+  close() {}
+
+  healthCheck() {
+    return { ok: true, mode: this.mode };
+  }
+
   ensurePlayerStateInDb(db, playerId) {
     if (!db.economies[playerId]) db.economies[playerId] = makeDefaultEconomy();
     if (!db.inventories[playerId]) db.inventories[playerId] = makeDefaultInventory();
@@ -203,6 +208,17 @@ class JsonStore {
   createUser(user) {
     const db = this.readAll();
     db.users.push(user);
+    if (!db.players[user.id]) {
+      db.players[user.id] = {
+        id: user.id,
+        webUserId: "",
+        username: user.username,
+        displayName: user.username || "Player",
+        authSource: "local",
+        createdAt: user.created_at || nowISO(),
+        updatedAt: user.updated_at || nowISO(),
+      };
+    }
     this.ensurePlayerStateInDb(db, user.id);
     this.writeAll(db);
     return user;
@@ -644,6 +660,22 @@ class JsonStore {
     return db.dailyLimits[playerId];
   }
 
+  setDailyLimits(playerId, dailyLimits) {
+    const db = this.readAll();
+    db.dailyLimits[playerId] = {
+      ...(db.dailyLimits[playerId] || makeDefaultDailyLimits()),
+      ...(dailyLimits || {}),
+      updatedAt: nowISO(),
+    };
+    if (!db.dailyLimits[playerId].limits || typeof db.dailyLimits[playerId].limits !== "object") {
+      db.dailyLimits[playerId].limits = {};
+    }
+    this.ensureDefaultDailyLimit(db.dailyLimits[playerId], "fishing", 10);
+    this.ensureDefaultDailyLimit(db.dailyLimits[playerId], "mining", 10);
+    this.writeAll(db);
+    return db.dailyLimits[playerId];
+  }
+
   consumeDailyLimit(playerId, limitKey, amount, options = {}) {
     const db = this.readAll();
     this.ensurePlayerStateInDb(db, playerId);
@@ -703,6 +735,24 @@ class JsonStore {
 
     return { ok: true, daily_limits: dailyLimits, limit, transaction };
   }
+
+  deletePlayer(playerId) {
+    const db = this.readAll();
+    const before = db.users.length + Object.keys(db.players).length;
+    db.users = db.users.filter((user) => user.id !== playerId);
+    delete db.profiles[playerId];
+    delete db.economies[playerId];
+    delete db.inventories[playerId];
+    delete db.farmStates[playerId];
+    delete db.dailyLimits[playerId];
+    delete db.players[playerId];
+    for (const [webUserId, mappedPlayerId] of Object.entries(db.playersByWebUserId)) {
+      if (mappedPlayerId === playerId) delete db.playersByWebUserId[webUserId];
+    }
+    db.transactions = db.transactions.filter((tx) => tx.playerId !== playerId);
+    this.writeAll(db);
+    return before !== db.users.length + Object.keys(db.players).length;
+  }
 }
 
 function createActiveStore() {
@@ -711,6 +761,7 @@ function createActiveStore() {
   }
 
   if (STORE_MODE === "postgres") {
+    const { createPostgresStore } = require("./postgresStore");
     return createPostgresStore({
       databaseUrl: process.env.DATABASE_URL || process.env.POSTGRES_URL || "",
     });
@@ -748,4 +799,8 @@ module.exports = {
   setFarmState: activeStore.setFarmState.bind(activeStore),
   getDailyLimits: activeStore.getDailyLimits.bind(activeStore),
   consumeDailyLimit: activeStore.consumeDailyLimit.bind(activeStore),
+  setDailyLimits: activeStore.setDailyLimits.bind(activeStore),
+  deletePlayer: activeStore.deletePlayer.bind(activeStore),
+  close: typeof activeStore.close === "function" ? activeStore.close.bind(activeStore) : async () => {},
+  healthCheck: activeStore.healthCheck.bind(activeStore),
 };

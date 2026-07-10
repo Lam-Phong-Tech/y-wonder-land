@@ -1,10 +1,10 @@
 # Danh sách công việc dự án (Task Backlog & Progress)
 
-## Ưu tiên hiện tại 10/07/2026: Phase 1 backend demo online/realtime
+## Ưu tiên hiện tại 11/07/2026: chuyển tiếp Phase 1 → PostgreSQL staging
 
 > Backend đã quay lại sau nhóm chỉnh sửa game. Mục tiêu Phase 1: không làm nạp/rút, tập trung cho khách đăng ký/đăng nhập, lưu tài khoản + dữ liệu chơi tối thiểu, và nhiều người online realtime trên đảo công cộng.
 >
-> Trạng thái 10/07/2026: dự án đang ở **cuối Giai đoạn 1 - Demo online nhanh**. REST/WebSocket/tài khoản local đã chạy qua Cloudflare Tunnel; chưa sang Giai đoạn 2 vì PostgreSQL thật, backup và toàn bộ gameplay server-authoritative vẫn chưa hoàn tất.
+> Trạng thái 11/07/2026: lõi **Giai đoạn 1 - Demo online nhanh** đã pass nhưng còn nghiệm thu tải 5–20 client và một số gameplay chưa server-authoritative. Source Giai đoạn 2 đã có PostgreSQL adapter/migration/import thật và pass smoke trên PostgreSQL test VPS; production DB, backup, Node/Caddy service, DNS/HTTPS/WSS vẫn chưa hoàn tất.
 
 ### Phase 1 - tài khoản game tự đăng ký + lưu tiến trình MVP
 - `[x]` Commit checkpoint trước khi quay lại backend: `8054205 feat: sync backend bootstrap and farm save polish`.
@@ -18,7 +18,7 @@
 - `[~]` Hotfix online-only: build public không còn tự resume gameplay bằng cache khi backend/tunnel chết; login/register phân biệt rõ lỗi mất kết nối, sai mật khẩu và account/email trùng. Bổ sung 10/07: `ApiClient` giữ mã lỗi JSON, tài khoản không tồn tại hoặc sai mật khẩu đều hiện đúng "Sai tên tài khoản hoặc mật khẩu" thay vì báo nhầm máy chủ tạm ngừng. Chờ build EXE/APK test lại toàn luồng trước khi tick `[x]`.
 - `[x]` Đồng bộ animation realtime ngoài walk/run: gửi đúng state hiện tại, tốc độ và dụng cụ cho `Jump`, `Swimming`, `Hoeing`, `Mining`, `TreeCuttingV4`, `Watering`, `Fishing`, `Feed`, `Planting`; remote dùng Animator nam/nữ tương ứng. Smoke test server đã pass `Jump` và `Mining + Pickaxe`, Unity compile không lỗi; anh đã build hai client và xác nhận các hoạt ảnh hoạt động tốt.
 - `[x]` Đồng bộ tài nguyên cây/đá ở room công cộng `city/mine`: server giữ trạng thái theo `resourceId`, chỉ người claim đầu tiên được cộng thưởng, ghi inventory + lượt đào nguyên tử/idempotent, broadcast biến mất, snapshot cho người vào sau và hồi sinh sau 20 giây. Unity chỉ cộng túi đồ sau khi server xác nhận; mất kết nối không tự cộng local. Smoke test backend temp/public và Unity compile đều pass; ngày 10/07 anh đã test bản build nhiều client và xác nhận vận hành rất ổn.
-- `[x]` Đã audit tài nguyên/tiền/túi đồ/shop/farm-state tại `docs/PHASE1_STATE_SYNC_AUDIT.md`: profile có đọc/ghi server; shop và khai thác cây/đá public đã server-authoritative; farm/crop/animal, câu cá và nhiều reward/chi phí khác vẫn local; PostgreSQL adapter còn là scaffold. Kết luận dự án ở cuối Giai đoạn 1 nhưng chưa hoàn tất toàn bộ vòng dữ liệu server-authoritative.
+- `[x]` Đã audit tài nguyên/tiền/túi đồ/shop/farm-state tại `docs/PHASE1_STATE_SYNC_AUDIT.md`: profile có đọc/ghi server; shop và khai thác cây/đá public đã server-authoritative; farm/crop/animal, câu cá và nhiều reward/chi phí khác vẫn local. PostgreSQL adapter đã hoàn thiện ngày 11/07 nhưng các khoảng trống gameplay ownership này vẫn còn, nên Phase 1 chưa nghiệm thu toàn bộ.
 - `[x]` P1 shop buy/sell server-authoritative: catalog server sinh từ 109 `ItemDefinition` + 8 `ShopDefinition`, API nguyên tử `POST /player/shop/transaction` kiểm shop/item/giá/số lượng/idempotency và trả cùng lúc economy + inventory. Unity khóa nút khi request đang chạy, retry bằng cùng key khi mất phản hồi, chỉ áp tiền/túi từ server và không fallback giao dịch local khi mất mạng. Smoke temp/public, C# compile và runtime EXE/APK/relogin đã pass; ngày 10/07 anh xác nhận mọi thứ hoạt động khá tốt. Reconnect đôi lúc hơi lâu nhưng không chặn demo, theo dõi riêng nếu tăng tần suất.
 - `[x]` Tách cache gameplay theo `playerId`: đã thêm `PlayerScopedPrefs`, migration legacy chỉ cho một account nhận, event lưu scope cũ/nạp scope mới và chuyển Point/inventory/tool/EXP/vị trí, farm/cây, ô lát, công trình, thú, lượt câu/đào, điểm danh/vòng quay sang key riêng. Online-only không đọc/ghi save gameplay chung khi chưa đăng nhập; setting thiết bị và auth vẫn dùng chung đúng chủ đích. C# compile pass; ngày 10/07 anh đã test A -> B -> A và đóng hẳn/mở lại EXE, xác nhận hai tài khoản không lẫn dữ liệu và khôi phục đúng.
 - `[x]` Đồng bộ mọi biến động gameplay của inventory/economy: `InventoryManager.AddItem/RemoveItem` và `EconomyManager.Add/Spend` nay xếp hàng gọi `inventory/adjust` hoặc `economy/apply`, mỗi delta có idempotency key và retry cùng key. Bootstrap, shop và logout chờ hàng đợi để không nạp đè snapshot cũ. Nhờ đó cùng một luồng bao phủ hạt, nước, nông sản, gỗ/đá/cá, thức ăn, thú, phân bón, quà, vật liệu xây và Point/UPoint ngoài shop. Unity compile, Phase 1 smoke, API relogin riêng (`+20 nước`, `+2/-1 hạt sầu riêng`, `+50/-20 Point`) và bản Unity runtime đều pass; ngày 10/07 anh xác nhận vận hành ổn.
@@ -26,7 +26,7 @@
 - `[ ]` Nối `farm_state` hai chiều và nối `daily_limits` cho câu cá/đào mỏ sau khi vòng shop đã pass.
 - `[x]` Backend Phase 1 đã public thử qua Cloudflare Quick Tunnel với JWT secret ngẫu nhiên, `WEB_AUTH_MODE=disabled`, dashboard admin tắt và max 20 người/room. Public REST/WebSocket smoke test pass; EXE runtime xác nhận hai account khác nhau gặp/chat được trong City và account trùng bị thay phiên mã `4008`. URL Quick Tunnel là runtime tạm, không commit làm URL production.
 - `[x]` Audit read-only VPS game `42.96.18.14`: Ubuntu 22.04.5 LTS trên KVM, 2 vCPU, RAM 3.8 GiB + swap 3.8 GiB, disk 50 GB còn khoảng 37 GB, timezone Asia/Ho_Chi_Minh/NTP đúng; UFW deny inbound và mới chỉ mở SSH 22. Chưa có Node, PostgreSQL, Caddy/Nginx/Docker, không có service lỗi hay ứng dụng cũ cần giữ. Cấu hình đủ demo khoảng 20 người; báo cáo ở `docs/VPS_GAME_AUDIT_2026-07-10.md`. Mật khẩu giữ ngoài repo.
-- `[~]` Hạ tầng VPS: ngày 11/07 đã tạo user không đặc quyền `deploy`, gắn ED25519 public key và xác minh batch login pass; quyền `.ssh=700`, `authorized_keys=600`. Chưa hạn chế `root/password`, chưa đổi sshd/UFW và chưa cài package để giữ rollback. Bước kế: hoàn thiện PostgreSQL adapter/migration account trong source và test local; sau đó mới cài Node.js LTS + PostgreSQL + Caddy, không public `3000/5432`, chỉ mở `80/443` khi proxy sẵn sàng.
+- `[~]` Hạ tầng VPS: user `deploy` + ED25519 key đã pass. PostgreSQL `14.23` đã cài, `active/enabled`, chỉ listen `127.0.0.1:5432`; database `ywonder_test` + role `deploy` chỉ dùng integration test, không dùng production. Chưa hạn chế `root/password`, chưa cài Node.js/Caddy, chưa mở `80/443`. Bước kế: tạo DB/role production riêng, backup + restore drill, rồi mới deploy Node/Caddy; không public `3000/5432`.
 - `[ ]` Test thực tế 5-20 người ngoài mạng: đăng ký tài khoản mới, đăng nhập, vào city/mine thấy nhau/chat được, relogin vẫn giữ Point/inventory/farm_state từ backend.
 
 ## Ưu tiên hiện tại 06/07/2026: tạm gác backend, quay lại chỉnh sửa game
@@ -122,7 +122,7 @@
 - `[x]` Thêm smoke test tự động `server/realtimeSmokeTest.js` và npm script `test:realtime` để test realtime bằng account cấp sẵn khi web đang sập (`WEB_AUTH_MODE=mock`).
 - `[x]` Smoke test local bằng data tạm đã pass: `DemoRealtime01` + `DemoRealtime02` + `DemoRealtime03` login qua `/auth/web-login`; 2 client join `city`, client thứ ba không join room vẫn nhận/gửi chat global; `player_state` hoạt động và join `farm` bị chặn `ROOM_NOT_SHARED`.
 - `[x]` Test LAN mức cơ bản đã đạt: 2 Editor trong cùng mạng công ty có thể gặp nhau/chat ở city. Bug visual remote còn kiểm lại sau khi máy case online.
-- `[x]` `server/schema.sql` đã có hướng PostgreSQL target, nhưng chưa phải DB production đang chạy.
+- `[x]` `server/schema.sql` + `server/migrations/001_initial.sql` đã thành schema PostgreSQL thật, có `game_accounts`, inventory meta và transaction snapshot/idempotency; migration `001_initial` đã pass trên PostgreSQL test VPS. Chưa phải DB production.
 
 ### Đã làm / chờ quay lại sau task game
 - `[x]` Rà và chốt schema PostgreSQL tối thiểu cho MVP: `game_players`, `player_profiles`, `player_economy`, `player_inventory`, `player_farm_state`, `player_daily_limits`, `game_transactions`.
@@ -137,13 +137,13 @@
 
 ### Cập nhật 06/07/2026 - backend storage adapter + daily limits
 - `[x]` `server/store.js` đã thành storage facade có `JsonStore` class cho dev/local, chọn mode bằng `STORE_MODE`.
-- `[x]` Thêm `server/postgresStore.js` scaffold để route API phụ thuộc vào interface store ổn định trước khi cắm PostgreSQL thật.
+- `[x]` Hoàn thiện `server/postgresStore.js` bằng driver `pg`: local account/web player, profile, economy, inventory, farm state, daily limits, transaction ledger; shop/resource/delta/limit dùng DB transaction và advisory idempotency lock.
 - `[x]` Thêm dashboard backend local tại `http://127.0.0.1:3000/admin` để xem/tạo/sửa/xóa dữ liệu demo trong JSON store.
 - `[x]` `server/schema.sql` thêm bảng `player_daily_limits`, đủ nhóm tối thiểu `game_players`, `player_profiles`, `player_economy`, `player_inventory`, `player_farm_state`, `player_daily_limits`, `game_transactions`.
 - `[x]` `/player/bootstrap` trả thêm `daily_limits`; thêm `GET /player/daily-limits` và `POST /player/daily-limits/consume`.
 - `[x]` `economy/apply`, `inventory/adjust`, `daily-limits/consume` đều nhận `idempotency_key`; retry cùng key không cộng đôi Point/item/lượt.
 - `[x]` Smoke test Node với data file tạm: đào mỏ 10 lượt còn 0, lần 11 bị `DAILY_LIMIT_EXCEEDED`, economy/inventory retry không cộng đôi.
-- `[~]` Viết query thật cho `STORE_MODE=postgres` sau khi chốt driver/DB host (`pg` hoặc ORM khác) và có `DATABASE_URL`. Tạm gác.
+- `[x]` Query thật cho `STORE_MODE=postgres`, async REST/admin/realtime, migration/import/verify scripts và `test:postgres` đã hoàn tất. JSON regression, PostgreSQL direct smoke, Phase 1 REST/WebSocket, Node restart, dashboard read đều pass; import schema tạm xác minh `36 accounts / 51 players / 82 transactions`. Runbook: `docs/POSTGRESQL_PHASE2_RUNBOOK.md`.
 - `[~]` Nối Unity client đọc `daily_limits` từ `/player/bootstrap` và chuyển câu cá/đào đá sang server-authoritative khi online. Tạm gác.
 
 ### Tạm gác đến khi có máy case/mạng công ty

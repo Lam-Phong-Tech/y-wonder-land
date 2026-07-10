@@ -94,25 +94,23 @@ Ket qua dat:
 
 ### Moc C - Hoan thien PostgreSQL trong source code
 
-Khoang trong hien tai:
+Trang thai source: **DAT ngay 11/07/2026**.
 
-- `server/postgresStore.js` moi la scaffold va moi method deu `notImplemented()`.
-- `server/schema.sql` chua co bang account local de luu `username/email/phone/password_hash` cua `/auth/register`.
+- `[x]` Them driver `pg`, migration versioned va bang `game_accounts` lien ket account -> player.
+- `[x]` Implement profile, economy, inventory, farm state, daily limits va transaction ledger.
+- `[x]` Shop/resource/economy/inventory/daily limit dung DB transaction that va idempotency lock.
+- `[x]` Them import `data.json`, dry-run, verify count va rollback toan bo khi loi.
+- `[x]` JSON Phase 1 regression va PostgreSQL direct/REST/WebSocket smoke deu pass.
+- `[x]` Node restart van giu Point, inventory va farm marker; dashboard dev doc duoc PostgreSQL.
+- `[x]` Import schema tam pass `36 accounts / 51 players / 82 transactions`, sau do schema tam da xoa.
 
-Can lam:
-
-- Them PostgreSQL driver va migration co version.
-- Bo sung bang account local, lien ket account -> `game_players`.
-- Implement day du store cho profile, economy, inventory, farm state, daily limits va transactions.
-- Dung DB transaction that cho shop va resource claim; giu idempotency key/unique constraint.
-- Viet script import `data.json` sang PostgreSQL va bao cao record loi/trung.
-- Chay cung mot bo smoke test voi `STORE_MODE=json` va `STORE_MODE=postgres`.
+Runbook: `docs/POSTGRESQL_PHASE2_RUNBOOK.md`.
 
 Ket qua dat:
 
-- Register/login/bootstrap/shop/resource/farm/daily-limit pass tren PostgreSQL.
-- Restart Node va PostgreSQL khong lam mat account, tien, item hoac farm.
-- Retry request khong cong/tru hai lan.
+- Register/login/bootstrap/shop/resource/farm/daily-limit pass tren PostgreSQL: **DAT**.
+- Restart Node khong mat account/tien/item/farm: **DAT**. Restart PostgreSQL service + restore backup: **CHUA TEST**.
+- Retry request khong cong/tru hai lan: **DAT**, ke ca hai request economy chay dong thoi.
 
 ### Moc D - Chuan bi Ubuntu va cai dich vu
 
@@ -121,8 +119,8 @@ Chi lam sau khi Moc A pass:
 - Cap nhat goi he thong va bat dong bo thoi gian.
 - `[x]` Ngay 11/07 da tao user khong dac quyen `deploy`, cai ED25519 public key va kiem tra batch login thanh cong. `.ssh` la `700`, `authorized_keys` la `600`; root/password/sshd/UFW van giu nguyen de rollback.
 - Cau hinh firewall: cho phep SSH co kiem soat, HTTP `80`, HTTPS `443`; chan public `3000` va `5432`.
-- Cai Node.js LTS phu hop, PostgreSQL, Git va Caddy.
-- Tao database/user rieng voi quyen toi thieu.
+- `[~]` PostgreSQL 14.23 da cai, active/enabled va chi listen `127.0.0.1:5432`; Node.js/Caddy tren VPS chua cai.
+- `[~]` `ywonder_test` + role `deploy` chi de integration test. Production van phai tao database/role rieng quyen toi thieu.
 - Tao file env chi doc boi service account.
 - Tao `systemd` service cho Node va lich backup PostgreSQL hang ngay.
 

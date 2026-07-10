@@ -5,15 +5,21 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
-## [2026-07-11] — Tạo lối SSH riêng cho deploy VPS
+## [2026-07-11] — SSH deploy và PostgreSQL Phase 2
 
 ### Changed
 - Đã tạo user không đặc quyền `deploy` trên VPS game và gắn ED25519 public key; không lưu password/private key trong repo.
+- Hoàn thiện `postgresStore.js`, migration versioned, bảng local account, inventory meta và transaction snapshot; REST/admin/realtime dùng async nhưng giữ nguyên API Unity.
+- Thêm `db:migrate`, `db:import-json`, `db:verify`, `test:postgres` và runbook `docs/POSTGRESQL_PHASE2_RUNBOOK.md`.
+- Cài PostgreSQL 14.23 trên VPS để integration test; service active/enabled và chỉ listen `127.0.0.1:5432`.
 
 ### Verified
 - Đăng nhập không tương tác bằng key đã pass với đúng `uid=1001(deploy)`.
 - Quyền sở hữu và mode đúng: `/home/deploy/.ssh` là `700`, `authorized_keys` là `600`, đều thuộc `deploy:deploy`.
-- Chưa đổi SSH server, chưa khóa `root/password`, chưa sửa UFW và chưa cài package nên đường rollback vẫn giữ nguyên.
+- JSON Phase 1 regression và PostgreSQL direct/REST/WebSocket smoke đều pass; dừng/mở lại Node vẫn giữ đúng Point và farm state. DB health và hai đăng ký trùng đồng thời trả đúng một `200` + một `409 USERNAME_EXISTS`.
+- Import schema tạm pass đúng `36 accounts / 51 players / 82 transactions`; dashboard dev đọc PostgreSQL pass; `npm audit --omit=dev` không có vulnerability.
+- Chưa đổi sshd/UFW, chưa khóa `root/password`; PostgreSQL không public 5432. Production DB/backup/Node/Caddy/DNS vẫn chờ bước sau.
+- Regression `/auth/web-login` mock đã pass lại với canonical `demo_*` playerId; presence/chat/action/resource/late-join/farm rejection và thay phiên account mã `4008` đều đúng.
 
 ---
 ## [2026-07-10] — Đồng bộ tài nguyên gameplay ngoài shop

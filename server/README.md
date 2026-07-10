@@ -1,15 +1,15 @@
-# YWONDERLAND — Server stub (dev/test)
+# YWONDERLAND — Game Backend
 
-> ⚠️ **CHỈ dùng để phát triển & test ở local.** Đây KHÔNG phải server production:
-> - JWT secret để cứng trong code, không có rate-limit, không HTTPS.
-> - Lưu dữ liệu bằng 1 file `data.json` (không phải DB thật).
->
-> Server production (Node/Go/Python + PostgreSQL/MongoDB theo kịch bản) sẽ thay thế sau,
-> nhưng **giữ nguyên API contract** bên dưới để client Unity không phải sửa.
+Backend hỗ trợ JSON cho dev/local và PostgreSQL cho staging. Source PostgreSQL đã
+pass integration test, nhưng deployment hiện **chưa phải production** vì chưa có
+rate-limit, HTTPS/WSS proxy, production secrets, backup/restore drill và monitoring.
 
-## Mục đích (Đợt 1)
-Chứng minh luồng **lưu thật** end-to-end cho `player_profile` + cờ `tutorialCompleted`:
-client Unity ↔ REST ↔ lưu trữ.
+Production bắt buộc đặt `JWT_SECRET`, DB credential và web-auth secret trong env trên
+VPS; không dùng fallback dev, `data.json`, role `deploy` hoặc database `ywonder_test`.
+
+## Mục đích
+Giữ một API contract ổn định cho Unity trong khi storage chuyển từ JSON sang
+PostgreSQL và từng gameplay slice chuyển sang server-authoritative.
 
 ## Cài & chạy
 Cần **Node.js LTS** (https://nodejs.org).
@@ -28,9 +28,9 @@ $env:STORE_MODE="json"
 $env:YW_DATA_PATH="D:\LamGameUnity\BaChuKhuRung3D\server\data.json"
 ```
 
-`STORE_MODE=postgres` đã có adapter scaffold (`server/postgresStore.js`) và schema target
-(`server/schema.sql`), nhưng chưa có query implementation/driver DB. Khi cắm DB thật,
-giữ nguyên interface trong `server/store.js` để route API không phải đổi.
+`STORE_MODE=postgres` dùng adapter query thật trong `server/postgresStore.js`, driver `pg`
+và migration versioned trong `server/migrations/`. Interface trong `server/store.js` giữ
+nguyên để Unity/API contract không phải đổi khi chuyển từ JSON sang PostgreSQL.
 
 Catalog giá và whitelist shop phía server được sinh từ đúng asset Unity hiện tại:
 
@@ -70,6 +70,26 @@ $env:ADMIN_DASHBOARD_ENABLED="false"
 Hành trình đầy đủ từ tài khoản web -> tài khoản game -> gameplay server-authoritative nằm ở
 `../docs/WEB_GAME_BACKEND_JOURNEY.md`. Shop và khai thác cây/đá public nay đã ghi vào backend;
 các gameplay farm/crop/animal/câu cá khác vẫn còn local cho đến khi nối từng lát tiếp theo.
+
+## PostgreSQL Phase 2 (updated 11/07/2026)
+
+`STORE_MODE=postgres` uses the implemented `pg` adapter, versioned migrations,
+atomic transactions and JSON import tooling. See
+`../docs/POSTGRESQL_PHASE2_RUNBOOK.md` for exact commands, test evidence and the
+remaining production gates.
+
+Quick command list:
+
+```powershell
+$env:DATABASE_URL="postgresql://<user>:<password>@127.0.0.1:5432/<database>"
+npm.cmd run db:migrate
+npm.cmd run test:postgres
+npm.cmd run db:import-json
+npm.cmd run db:verify
+```
+
+Do not publicize PostgreSQL port `5432`, commit a database URL, or use the VPS
+test role/database as production storage.
 
 ## URL public target
 
@@ -277,7 +297,9 @@ Shared resource state is in Node memory for Phase 1. Restarting the backend rese
 
 Nginx/Caddy must allow WebSocket Upgrade for `/realtime`, not only normal HTTP.
 
-PostgreSQL target schema nam o `server/schema.sql`; stub hien van luu JSON de dev/test nhanh.
+PostgreSQL schema snapshot nam o `server/schema.sql`; migration versioned nam o
+`server/migrations/`. JSON van la mode mac dinh de dev/test nhanh, con
+`STORE_MODE=postgres` dung query PostgreSQL that.
 
 ## Smoke test nhanh (PowerShell)
 ```powershell

@@ -81,6 +81,21 @@ async function login(account, loginPassword = password, allowedStatuses) {
   return { ...account, token: payload.token, playerId: payload.playerId || payload.userId };
 }
 
+async function testConcurrentRegisterConflict() {
+  if (process.env.PHASE1_TEST_CONCURRENT_REGISTER !== "true") return;
+  const username = `P1Race_${suffix}`;
+  const requests = ["a", "b"].map((label) => postJson("/auth/register", {
+    username,
+    email: `p1race_${label}_${suffix}@example.test`,
+    password,
+  }, null, [200, 409]));
+  const results = await Promise.all(requests);
+  const statuses = results.map((entry) => entry.status).sort((a, b) => a - b);
+  assert(statuses[0] === 200 && statuses[1] === 409, `Concurrent register expected 200/409, got ${statuses.join("/")}.`);
+  const conflict = results.find((entry) => entry.status === 409);
+  assert(conflict.payload.error === "USERNAME_EXISTS", "Concurrent register did not map DB uniqueness to USERNAME_EXISTS.");
+}
+
 function inventoryQuantity(inventory, itemId) {
   const slot = ((inventory && inventory.slots) || []).find((entry) => entry.itemId === itemId);
   return slot ? Number(slot.quantity) : 0;
@@ -382,6 +397,7 @@ async function main() {
   console.log(`[phase1-smoke] Base URL: ${baseUrl}`);
   const health = await getJson("/health");
   assert(health.payload.ok === true, "Health check failed.");
+  await testConcurrentRegisterConflict();
 
   const registered = [];
   for (const account of accounts) {

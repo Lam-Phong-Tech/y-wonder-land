@@ -1,4 +1,4 @@
-// Local developer dashboard for inspecting the JSON-backed game server.
+// Local developer dashboard for inspecting the active JSON/PostgreSQL store.
 // This is intentionally simple and dev-only. Do not expose it as a production admin panel.
 const express = require("express");
 const bcrypt = require("bcryptjs");
@@ -440,21 +440,23 @@ function buildHtml() {
 
 function createAdminDashboardRouter() {
   const router = express.Router();
+  const asyncRoute = (handler) => (req, res, next) =>
+    Promise.resolve(handler(req, res, next)).catch(next);
 
   router.get("/", (req, res) => {
     res.type("html").send(buildHtml());
   });
 
-  router.get("/api/db", (req, res) => {
+  router.get("/api/db", asyncRoute(async (req, res) => {
     try {
-      const db = store.readAll();
+      const db = await store.readAll();
       res.json({ ok: true, storeMode: store.mode, players: normalizePlayerRows(db), db });
     } catch (e) {
       res.status(500).json({ error: e.message });
     }
-  });
+  }));
 
-  router.post("/api/users", (req, res) => {
+  router.post("/api/users", asyncRoute(async (req, res) => {
     const body = req.body || {};
     const username = String(body.username || "").trim();
     const password = String(body.password || "");
@@ -462,39 +464,46 @@ function createAdminDashboardRouter() {
       return res.status(400).json({ error: "MISSING_USERNAME_OR_PASSWORD" });
     }
 
-    if (store.findUserByName(username)) {
+    if (await store.findUserByName(username)) {
       return res.status(409).json({ error: "USERNAME_EXISTS" });
     }
 
     const userId = "u_" + Date.now() + "_" + Math.floor(Math.random() * 1e6);
-    store.createUser({
+    await store.createUser({
       id: userId,
       username,
       password_hash: bcrypt.hashSync(password, 8),
       created_at: nowISO(),
     });
-    store.setProfile(userId, makeDefaultProfile(username));
+    await store.setProfile(userId, makeDefaultProfile(username));
 
     res.json({ ok: true, userId });
-  });
+  }));
 
-  router.get("/api/players/:playerId", (req, res) => {
+  router.get("/api/players/:playerId", asyncRoute(async (req, res) => {
     const playerId = req.params.playerId;
-    store.ensurePlayerState(playerId);
-    const db = store.readAll();
+    await store.ensurePlayerState(playerId);
+    const [profile, economy, inventory, dailyLimits, farmState, db] = await Promise.all([
+      store.getProfile(playerId),
+      store.getEconomy(playerId),
+      store.getInventory(playerId),
+      store.getDailyLimits(playerId),
+      store.getFarmState(playerId),
+      store.readAll(),
+    ]);
     res.json({
       ok: true,
       playerId,
-      profile: db.profiles[playerId] || null,
-      economy: db.economies[playerId] || null,
-      inventory: db.inventories[playerId] || null,
-      dailyLimits: db.dailyLimits[playerId] || null,
-      farmState: db.farmStates[playerId] || null,
+      profile: profile || null,
+      economy: economy || null,
+      inventory: inventory || null,
+      dailyLimits: dailyLimits || null,
+      farmState: farmState || null,
       transactions: (db.transactions || []).filter((tx) => tx.playerId === playerId),
     });
-  });
+  }));
 
-  router.put("/api/players/:playerId/:section", (req, res) => {
+  router.put("/api/players/:playerId/:section", asyncRoute(async (req, res) => {
     const playerId = req.params.playerId;
     const section = req.params.section;
     const value = req.body && req.body.value;
@@ -502,34 +511,36 @@ function createAdminDashboardRouter() {
       return res.status(400).json({ error: "VALUE_OBJECT_REQUIRED" });
     }
 
-    const db = store.readAll();
-    if (section === "profile") db.profiles[playerId] = { ...value, updatedAt: nowISO() };
-    else if (section === "economy") db.economies[playerId] = { ...value, updatedAt: nowISO() };
-    else if (section === "inventory") db.inventories[playerId] = { ...value, updatedAt: nowISO() };
-    else if (section === "dailyLimits") db.dailyLimits[playerId] = { ...value, updatedAt: nowISO() };
-    else if (section === "farmState") db.farmStates[playerId] = { ...value, updatedAt: nowISO() };
+    if (section === "profile") await store.setProfile(playerId, { ...value, updatedAt: nowISO() });
+    else if (section === "economy") await store.setEconomy(playerId, { ...value, updatedAt: nowISO() });
+    else if (section === "inventory") await store.setInventory(playerId, { ...value, updatedAt: nowISO() });
+    else if (section === "dailyLimits") await store.setDailyLimits(playerId, { ...value, updatedAt: nowISO() });
+    else if (section === "farmState") await store.setFarmState(playerId, { ...value, updatedAt: nowISO() });
     else return res.status(404).json({ error: "UNKNOWN_SECTION" });
 
-    store.writeAll(db);
-    const refreshed = store.readAll();
+    const [profile, economy, inventory, dailyLimits, farmState] = await Promise.all([
+      store.getProfile(playerId),
+      store.getEconomy(playerId),
+      store.getInventory(playerId),
+      store.getDailyLimits(playerId),
+      store.getFarmState(playerId),
+    ]);
     res.json({
       ok: true,
       player: {
-        profile: refreshed.profiles[playerId] || null,
-        economy: refreshed.economies[playerId] || null,
-        inventory: refreshed.inventories[playerId] || null,
-        dailyLimits: refreshed.dailyLimits[playerId] || null,
-        farmState: refreshed.farmStates[playerId] || null,
+        profile: profile || null,
+        economy: economy || null,
+        inventory: inventory || null,
+        dailyLimits: dailyLimits || null,
+        farmState: farmState || null,
       },
     });
-  });
+  }));
 
-  router.delete("/api/players/:playerId", (req, res) => {
-    const db = store.readAll();
-    deletePlayerState(db, req.params.playerId);
-    store.writeAll(db);
-    res.json({ ok: true });
-  });
+  router.delete("/api/players/:playerId", asyncRoute(async (req, res) => {
+    const deleted = await store.deletePlayer(req.params.playerId);
+    res.json({ ok: true, deleted });
+  }));
 
   return router;
 }

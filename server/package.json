@@ -7,14 +7,19 @@
   "scripts": {
     "start": "node index.js",
     "catalog:generate": "node scripts/generateShopCatalog.js",
+    "db:migrate": "node scripts/migratePostgres.js",
+    "db:import-json": "node scripts/importJsonToPostgres.js",
+    "db:verify": "node scripts/verifyPostgresData.js",
     "test:realtime": "node realtimeSmokeTest.js",
-    "test:phase1": "node phase1SmokeTest.js"
+    "test:phase1": "node phase1SmokeTest.js",
+    "test:postgres": "node postgresSmokeTest.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
+    "pg": "^8.22.0",
     "ws": "^8.21.0"
   }
 }

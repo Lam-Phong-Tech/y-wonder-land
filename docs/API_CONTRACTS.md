@@ -70,7 +70,7 @@ Quy uoc mapping:
 - `web_user_id` phai unique trong `game_players` de dam bao 1 web account = 1 game player.
 - Game-server phai kiem tra account status tu web: `active`, `locked`, `soft_deleted` hoac field tuong duong.
 - MVP online/realtime chua lam nap/rut va chua can web wallet. Phase sau: tien nap tu web phai di qua web wallet API; `Point` la tien trong game va tien nap, con can chot `UPoint` dung lam gi va web hay game-server la ledger cuoi cung cua Point.
-- `STORE_MODE=json` la mac dinh dev/local; `STORE_MODE=postgres` da co adapter scaffold va schema target, nhung query PostgreSQL chua implement cho production.
+- `STORE_MODE=json` là mặc định dev/local. Từ 11/07/2026, `STORE_MODE=postgres` đã có driver `pg`, migration versioned và query thật cho account/profile/economy/inventory/farm/daily-limit/transactions; cùng bộ Phase 1 smoke đã pass trên PostgreSQL test thật. Production DB/backup/deploy vẫn chưa hoàn tất; xem `docs/POSTGRESQL_PHASE2_RUNBOOK.md`.
 - `daily_limits` mac dinh gom `fishing` va `mining`, reset theo `period_key` ngay server dang `YYYY-MM-DD`. Can chot timezone server; khuyen nghi `Asia/Saigon` cho khach VN. Hien stub cu co the dang dung UTC nen can doi/ghi ro truoc production.
 - `idempotency_key` phai duy nhat cho moi action co retry; server tra `duplicate=true` khi nhan lai cung key va khong apply them tien/item/luot.
 - Shop transaction khong nhan/gia tin `unit_price` tu Unity. Server tra `shopCatalog.json` sinh tu `ItemDefinition` + `ShopDefinition`, kiem access mode/whitelist/canSell va doi Point + inventory trong mot lan ghi. Cung key nhung body khac tra `IDEMPOTENCY_CONFLICT`.

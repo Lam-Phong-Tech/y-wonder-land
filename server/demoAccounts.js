@@ -182,10 +182,41 @@ function upsertDemoUser(db, bcrypt, name) {
   return { user, changed };
 }
 
-function ensureDemoAccounts(store, bcrypt) {
+async function ensureDemoAccounts(store, bcrypt) {
   if (process.env.DEMO_ACCOUNTS_ENABLED === "false") return;
 
-  const db = store.readAll();
+  if (store.mode === "postgres") {
+    if (process.env.DEMO_ACCOUNTS_ENABLED !== "true") {
+      console.log("[demo] PostgreSQL mode skips demo accounts unless DEMO_ACCOUNTS_ENABLED=true");
+      return;
+    }
+
+    for (const name of DEMO_ACCOUNTS) {
+      let user = await store.findUserByName(name);
+      if (!user) {
+        user = await store.createUser({
+          id: `demo_${normalizeIdentity(name)}`,
+          username: name,
+          email: "",
+          phone: "",
+          password_hash: bcrypt.hashSync(name, 8),
+          created_at: nowISO(),
+          updated_at: nowISO(),
+        });
+      }
+      const playerId = user.player_id || user.id;
+      await store.setProfile(playerId, makeProfile(name));
+      await store.setEconomy(playerId, makeEconomy(name));
+      await store.setInventory(playerId, makeInventory(name));
+      await store.setFarmState(playerId, makeFarmState());
+      await store.setDailyLimits(playerId, makeDailyLimits());
+    }
+
+    console.log(`[demo] ensured ${DEMO_ACCOUNTS.length} PostgreSQL demo accounts`);
+    return;
+  }
+
+  const db = await store.readAll();
   if (!Array.isArray(db.users)) db.users = [];
   if (!db.profiles) db.profiles = {};
   if (!db.economies) db.economies = {};
@@ -197,27 +228,28 @@ function ensureDemoAccounts(store, bcrypt) {
     upsertDemoUser(db, bcrypt, name);
   }
 
-  store.writeAll(db);
+  await store.writeAll(db);
   console.log(`[demo] ensured ${DEMO_ACCOUNTS.length} local demo accounts`);
 }
 
-function canonicalizeDemoAuthPayload(payload, store) {
+async function canonicalizeDemoAuthPayload(payload, store) {
   const source = payload || {};
   let username = source.username || source.displayName || source.name || "";
   if (!username && (source.uid || source.userId || source.playerId)) {
-    const legacyPlayer = store.getPlayer(source.uid || source.userId || source.playerId);
+    const legacyPlayer = await store.getPlayer(source.uid || source.userId || source.playerId);
     username = (legacyPlayer && (legacyPlayer.username || legacyPlayer.displayName)) || "";
   }
   if (!isDemoAccount(username)) return source;
 
-  const user = store.findUserByName(canonicalDemoName(username));
+  const user = await store.findUserByName(canonicalDemoName(username));
   if (!user || !user.id) return source;
+  const playerId = user.player_id || user.id;
 
   return {
     ...source,
-    uid: user.id,
+    uid: playerId,
     userId: user.id,
-    playerId: user.id,
+    playerId,
     username: user.username,
     displayName: user.username,
     authSource: "local-demo",

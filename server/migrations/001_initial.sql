@@ -1,10 +1,4 @@
--- Y WONDER GREEN FARM - PostgreSQL schema snapshot.
--- Versioned migrations live in server/migrations and are the deployment source.
-
-create table if not exists schema_migrations (
-    version text primary key,
-    applied_at timestamptz not null default now()
-);
+-- Y WONDER GREEN FARM - initial PostgreSQL schema.
 
 create table if not exists game_players (
     id text primary key,

@@ -20,13 +20,19 @@
 - Recorded candidate VPS `42.96.18.14` without storing its password. TCP `22` and the SSH handshake are now reachable from the work machine; the server identifies as `OpenSSH_8.9p1 Ubuntu-3ubuntu0.15` and offers public-key/password auth. No authenticated audit, deployment, or client URL change has happened yet.
 - Completed a read-only VPS audit: Ubuntu 22.04.5 LTS, KVM, 2 vCPU, 3.8 GiB RAM plus 3.8 GiB swap, 50 GB disk with about 37 GB free, Asia/Ho_Chi_Minh with synchronized NTP. UFW denies inbound by default and only SSH 22 is open. Node, PostgreSQL, Caddy/Nginx, and Docker are not installed; no application service or failed unit needs preservation. Added `docs/VPS_GAME_AUDIT_2026-07-10.md`.
 - On 2026-07-11, created an unprivileged `deploy` account on the game VPS and installed the dedicated ED25519 public key. A non-interactive key login passed and ownership/modes were verified (`deploy:deploy`, `.ssh` `700`, `authorized_keys` `600`). Root/password login, SSH server settings, UFW and installed packages remain unchanged as rollback access.
+- Replaced the PostgreSQL scaffold with a real `pg` adapter, versioned migration, local-account table, inventory metadata, transaction result snapshots, atomic shop/resource/daily-limit operations, JSON import/verify tooling, and async-compatible REST/admin/realtime call sites. Added `docs/POSTGRESQL_PHASE2_RUNBOOK.md`.
+- Installed PostgreSQL 14.23 on the game VPS for integration testing. The service is active/enabled and listens only on `127.0.0.1:5432`; `ywonder_test` and role `deploy` are test-only, while production DB credentials, backup and application deployment remain pending.
 - The owner has now confirmed `42.96.18.14` is the dedicated game VPS, permitted for Node + PostgreSQL, expected to use Ubuntu Server 24.04 LTS, and will later receive `api.ywonder.net`. Added `docs/VPS_GAME_DEPLOYMENT_PLAN.md` with audit, hardening, PostgreSQL, deploy, DNS, acceptance and rollback gates; no credentials are stored.
 
 ### Fixed
+- Mock `/auth/web-login` now returns the canonical local demo `playerId` before issuing the response/token, so REST login identity and WebSocket presence use the same ID after the async store conversion.
 - Gameplay consumption/rewards no longer remain local-only: planting a purchased seed or scooping water now generates an authenticated server delta, preventing the next bootstrap from restoring the pre-action inventory snapshot.
 - Direct-tap interaction now allows only `0.05m` of surface tolerance after a solid collider, preventing City ground clicks from selecting water or fishing targets beneath the island while preserving the assist cast for nearby object colliders.
 
 ### Verified
+- JSON demo-account realtime regression passes again: canonical IDs, presence, chat, action/tool relay, resource ownership/late join, farm rejection and duplicate-session close `4008` all pass.
+- JSON Phase 1 regression, PostgreSQL direct transaction smoke, PostgreSQL-backed Phase 1 REST/WebSocket smoke, Node restart persistence and PostgreSQL dashboard read all pass. DB-backed health and concurrent duplicate registration also pass with one `200` and one `409 USERNAME_EXISTS`.
+- A transactional import into an isolated schema preserved `36 accounts`, `51 players` and `82 transactions`; verification passed and the temporary schema was dropped. `npm audit --omit=dev` reports zero vulnerabilities.
 - Player-scoped cache runtime acceptance completed: the user switched between two accounts, fully exited the EXE, reopened it, and confirmed each account restored its own state without leakage.
 - Runtime acceptance completed for gameplay inventory/economy deltas and saved farm pose; the user tested the updated Unity flow on 10/07 and confirmed it works correctly.
 - Unity `Assembly-CSharp` compiles with the new mutation queue; only the existing unrelated `enableStickAutoSprint` warning remains. The full local Phase 1 smoke test passes.
