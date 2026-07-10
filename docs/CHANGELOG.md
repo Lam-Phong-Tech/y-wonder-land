@@ -21,9 +21,9 @@
 - Unity Editor hiện tại import các script realtime không có lỗi biên dịch C#.
 - Anh đã xác nhận hoạt ảnh realtime chạy tốt trên hai client.
 - Backend temp port `3188` pass smoke tài nguyên nhiều client; port `3189` pass toàn bộ Phase 1 regression; cùng smoke REST/WebSocket/resource pass tiếp qua Quick Tunnel public mới. Unity build lại `Assembly-CSharp` thành công.
+- Ngày 10/07 anh đã test bản build nhiều client và xác nhận đồng bộ cây/đá, quyền nhận thưởng, biến mất và hồi sinh đều vận hành rất ổn.
 
 ### Còn lại
-- Build hai client cùng đào một viên đá: chỉ một máy nhận thưởng, cả hai cùng thấy đá biến mất và hồi lại sau 20 giây.
 - Làm shop transaction server-authoritative, cache theo playerId, farm/daily-limit sync và test 5-20 người trước khi chốt xong Giai đoạn 1.
 
 ---

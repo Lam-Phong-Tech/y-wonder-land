@@ -10,6 +10,8 @@ Phần tài khoản, đăng nhập, bootstrap và realtime đảo công cộng �
 
 Vì vậy hiện có thể chứng minh khách đăng ký, đăng nhập, gặp nhau, chat và thấy hoạt ảnh của nhau. Chưa thể cam kết mọi thay đổi tiền/túi/farm trên một thiết bị sẽ xuất hiện đúng trên thiết bị khác hoặc còn nguyên sau lần bootstrap tiếp theo.
 
+Xác nhận runtime 10/07: anh đã test bản build nhiều client và chốt lát khai thác cây/đá public vận hành ổn định; tiêu chí một người nhận thưởng, mọi máy cùng thấy depletion/respawn đã đạt. Điều này chưa đồng nghĩa toàn bộ Point/inventory/shop/farm đã server-authoritative.
+
 ## Ma trận hiện trạng
 
 | Nhóm dữ liệu | Backend hiện có | Unity đọc từ server | Unity ghi về server | Kết luận |

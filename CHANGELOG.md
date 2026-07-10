@@ -16,9 +16,9 @@
 - The active Unity Editor imported the changed scripts without C# compile errors.
 - The user confirmed remote action animations work in the two-client build.
 - Temporary backends on ports `3188` and `3189` passed the expanded realtime resource smoke and the full Phase 1 regression smoke; the same resource/WebSocket smoke then passed through the refreshed public Quick Tunnel. Unity rebuilt `Assembly-CSharp` successfully.
+- Runtime acceptance completed on 10/07: the user tested the new multi-client build and confirmed shared tree/rock depletion, reward ownership, and respawn behavior run reliably.
 
 ### Needs Test
-- Build two clients, mine the same rock, and verify only one receives rewards while both see the same depletion and 20-second respawn.
 - Finish atomic shop transactions, player-scoped local cache, farm/daily-limit sync, and 5-20 player acceptance before declaring Phase 1 complete.
 
 ## [Unreleased] - 2026-07-08 (Mobile shop item readability)
