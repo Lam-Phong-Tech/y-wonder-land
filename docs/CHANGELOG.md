@@ -5,6 +5,38 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-07-10] — Đồng bộ tài nguyên gameplay ngoài shop
+
+### Changed
+- Thêm `GameplayMutationSync`: mọi `AddItem/RemoveItem` và `Add/Spend Point/UPoint` khi đã đăng nhập được gửi tuần tự lên `inventory/adjust` hoặc `economy/apply`, mỗi thay đổi có idempotency key và retry giữ nguyên key.
+- Bootstrap, shop và logout chờ các thay đổi đang gửi xong trước khi áp snapshot server mới. Một cơ chế chung bao phủ hạt, nước, nông sản, gỗ/đá/cá, thức ăn, thú, phân bón, quà, vật liệu xây và tiền gameplay ngoài shop.
+- Logout lưu vị trí farm trước khi hủy nhân vật; đăng nhập hồ sơ cũ ưu tiên pose farm đã lưu rồi mới dùng vị trí bến.
+- VPS `42.96.18.14` đã truy cập được TCP `22` và bắt tay SSH; banner `OpenSSH_8.9p1 Ubuntu-3ubuntu0.15`, hỗ trợ password/public key. Chưa đăng nhập audit hoặc deploy và không lưu mật khẩu trong repo.
+
+### Verified
+- Unity C# compile pass; chỉ còn warning auto-sprint cũ.
+- `npm.cmd run test:phase1` pass. Test API riêng sau relog trả đúng 20 nước, 1 hạt sầu riêng sau khi mua 2/trồng 1, và 5030 Point sau +50/-20; retry cùng key không cộng nước hai lần.
+
+### Nghiệm thu runtime
+- Ngày 10/07 anh đã test bản Unity mới và xác nhận đồng bộ inventory/economy gameplay cùng khôi phục vị trí farm hoạt động ổn; hai task được chuyển `[x]`.
+- Vẫn nên regression thêm thu hoạch cây/cá/thú, cho thú ăn, vật liệu xây, quà và nâng dụng cụ khi chạy bộ test 5-20 client. Resume trực tiếp City/Mine chưa thuộc lát này.
+
+---
+## [2026-07-10] — Tách cache gameplay theo playerId
+
+### Changed
+- Thêm `PlayerScopedPrefs`: Point, inventory, tool/EXP, vị trí, farm/cây, ô lát/công trình, thú và counter ngày/event dùng key theo `playerId`; audio/camera/auth vẫn là setting chung theo thiết bị.
+- Auth phát event trước/sau khi đổi identity để save world của account cũ rồi clear/load account mới ngay trong cùng scene.
+- Legacy PlayerPrefs chỉ được migrate cho một account; online-only chưa login không còn đọc/ghi state gameplay chung.
+
+### Verified
+- Unity C# compile pass; chỉ còn warning `enableStickAutoSprint` cũ không liên quan.
+
+### Cần test runtime
+- Trên cùng PC: A tạo thay đổi tiền/túi/farm/build/thú -> logout -> B đăng nhập không thấy dữ liệu A -> sửa B -> relog A và xác nhận A được khôi phục đúng.
+- Kiểm account đầu giữ legacy save cũ, account thứ hai không nhận ké legacy save.
+
+---
 ## [2026-07-10] — Shop transaction nguyên tử phía server
 
 ### Changed

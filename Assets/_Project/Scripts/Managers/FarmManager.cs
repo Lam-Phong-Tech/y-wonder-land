@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using YWonderLand.Data;
+using YWonderLand.Backend;
 
 namespace YWonderLand.Managers
 {
@@ -55,6 +56,34 @@ namespace YWonderLand.Managers
             {
                 cropDatabase = Resources.Load<CropDatabase>("CropDatabase");
             }
+        }
+
+        private void OnEnable()
+        {
+            if (AuthService.Instance == null) return;
+            AuthService.Instance.IdentityChanging += HandleIdentityChanging;
+            AuthService.Instance.IdentityChanged += HandleIdentityChanged;
+        }
+
+        private void OnDisable()
+        {
+            if (AuthService.Instance == null) return;
+            AuthService.Instance.IdentityChanging -= HandleIdentityChanging;
+            AuthService.Instance.IdentityChanged -= HandleIdentityChanged;
+        }
+
+        private void HandleIdentityChanging(string previousScopeId, string nextScopeId)
+        {
+            SaveFarmState();
+        }
+
+        private void HandleIdentityChanged(string previousScopeId, string nextScopeId)
+        {
+            StopAllCoroutines();
+            loadComplete = false;
+            foreach (var tile in farmTiles)
+                if (tile != null) tile.ResetForPlayerState();
+            StartCoroutine(LoadAfterTilesReady());
         }
 
         void Start()
@@ -178,16 +207,16 @@ namespace YWonderLand.Managers
                 saveData.tiles.Add(cs);
             }
 
-            PlayerPrefs.SetString(SAVE_KEY, JsonUtility.ToJson(saveData));
-            PlayerPrefs.Save();
+            PlayerScopedPrefs.SetString(SAVE_KEY, JsonUtility.ToJson(saveData));
+            PlayerScopedPrefs.Save();
             Debug.Log($"[FarmManager] Saved {saveData.tiles.Count} crop tiles.");
         }
 
         public void LoadFarmState()
         {
-            if (!PlayerPrefs.HasKey(SAVE_KEY)) return;
+            if (!PlayerScopedPrefs.HasKey(SAVE_KEY)) return;
 
-            FarmSaveData saveData = JsonUtility.FromJson<FarmSaveData>(PlayerPrefs.GetString(SAVE_KEY));
+            FarmSaveData saveData = JsonUtility.FromJson<FarmSaveData>(PlayerScopedPrefs.GetString(SAVE_KEY));
             if (saveData == null || saveData.tiles == null) return;
 
             // Khớp ô theo VỊ TRÍ (ổn định hơn tileIndex — không phụ thuộc thứ tự tạo).

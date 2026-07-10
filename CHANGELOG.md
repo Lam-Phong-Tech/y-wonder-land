@@ -3,6 +3,10 @@
 ## [Unreleased] - 2026-07-10 (Phase 1 realtime actions and state audit)
 
 ### Changed
+- Added `GameplayMutationSync`, a serialized idempotent queue for all authenticated gameplay inventory and economy deltas. `InventoryManager.AddItem/RemoveItem` and `EconomyManager.Add/Spend` now persist seeds, water, harvests, materials, food, animals, rewards, Point and UPoint outside the already-atomic shop flow.
+- Bootstrap, shop transactions, and logout now flush pending gameplay mutations before reading/applying a newer server snapshot. Logout captures the current farm pose before destroying the player, and existing profiles prefer their saved farm pose over the dock fallback.
+- Added `PlayerScopedPrefs` so gameplay caches are keyed by the authenticated `playerId` instead of one device-wide key. Legacy data can be claimed by only one account, and online-only mode does not read/write shared gameplay state before login.
+- Auth identity transitions now save the previous player's world before switching, then reload economy, inventory, tools/EXP, farm crops, placed tiles/buildings, animals, fishing/mining limits, attendance and wheel state for the new player. Device settings and auth credentials remain intentionally unscoped.
 - Shop buy/sell now calls `POST /player/shop/transaction`; Node validates the shop, item, server-owned price, quantity, balance/inventory, and writes economy + inventory atomically with idempotency.
 - Added a generated server catalog from 109 Unity item assets and 8 shop assets. Client-supplied prices are ignored, and Unity applies Point/inventory only from the accepted server response.
 - Shop UI disables quantity/action controls while the request is in flight and retries transport/server failures once with the same idempotency key.
@@ -13,13 +17,18 @@
 - Login failures now preserve backend JSON error codes; unknown users and wrong passwords show the credential error instead of being overwritten by the disabled web-auth fallback's 503 response.
 - Shared `city/mine` trees and rocks now use a server-owned claim cycle: one winner, atomic inventory/mining-limit reward, depletion broadcast, late-join snapshot, and 20-second respawn. Unity does not award the item locally before server confirmation.
 - The expanded realtime smoke test covers a winning harvest, rejected second claimant, late-join depleted snapshot, respawn broadcast, and the existing duplicate-session replacement rule.
-- Recorded candidate VPS `42.96.18.14` without storing its password. SSH `22` responded on an earlier check, but the latest work-machine check cannot reach `22/80/443/3000`; `api.ywonder.net` still resolves to `45.119.83.233`, so owner/infra confirmation is required before login or deployment.
+- Recorded candidate VPS `42.96.18.14` without storing its password. TCP `22` and the SSH handshake are now reachable from the work machine; the server identifies as `OpenSSH_8.9p1 Ubuntu-3ubuntu0.15` and offers public-key/password auth. No authenticated audit, deployment, or client URL change has happened yet.
 - The owner has now confirmed `42.96.18.14` is the dedicated game VPS, permitted for Node + PostgreSQL, expected to use Ubuntu Server 24.04 LTS, and will later receive `api.ywonder.net`. Added `docs/VPS_GAME_DEPLOYMENT_PLAN.md` with audit, hardening, PostgreSQL, deploy, DNS, acceptance and rollback gates; no credentials are stored.
 
 ### Fixed
+- Gameplay consumption/rewards no longer remain local-only: planting a purchased seed or scooping water now generates an authenticated server delta, preventing the next bootstrap from restoring the pre-action inventory snapshot.
 - Direct-tap interaction now allows only `0.05m` of surface tolerance after a solid collider, preventing City ground clicks from selecting water or fishing targets beneath the island while preserving the assist cast for nearby object colliders.
 
 ### Verified
+- Runtime acceptance completed for gameplay inventory/economy deltas and saved farm pose; the user tested the updated Unity flow on 10/07 and confirmed it works correctly.
+- Unity `Assembly-CSharp` compiles with the new mutation queue; only the existing unrelated `enableStickAutoSprint` warning remains. The full local Phase 1 smoke test passes.
+- A dedicated relogin API test verified `+20` watering water, `+2/-1` durian seed, and `+50/-20` Point return as `20`, `1`, and `5030` from bootstrap; retrying the water request with the same idempotency key did not double the reward.
+- Unity `Assembly-CSharp` compiles after the player-scoped cache pass; only the existing unrelated `enableStickAutoSprint` warning remains.
 - A temporary backend on port `3190` and the active public Quick Tunnel both passed atomic shop buy/sell, catalog-price enforcement, duplicate retry, idempotency conflict, insufficient balance/item, shop whitelist, and relogin persistence. The updated Unity assembly compiled successfully with Roslyn.
 - A temporary backend on port `3107` passed auth, room join, global chat, action state/tool relay, farm rejection, and duplicate-session replacement code 4008.
 - The active Unity Editor imported the changed scripts without C# compile errors.
@@ -30,6 +39,9 @@
 - Runtime acceptance completed for the City-ground occlusion fix: ground clicks no longer trigger water/fishing interactions beneath the island, while actual water targets remain usable.
 
 ### Needs Test
+- Exercise at least one add/remove path for crop harvest, fishing, animal feed/harvest, building materials, event reward, and tool upgrade, then relog and verify inventory/Point match the last accepted state.
+- On one PC, test account A -> logout -> account B -> logout -> account A. Point, inventory, tool/EXP, farm/build/animal and daily/event counters must remain isolated and return to the correct account.
+- Verify the first existing account keeps its legacy local save, while a second account does not inherit that legacy save.
 - Finish player-scoped local cache, farm/daily-limit sync, and 5-20 player acceptance before declaring Phase 1 complete.
 
 ## [Unreleased] - 2026-07-08 (Mobile shop item readability)

@@ -23,12 +23,14 @@ namespace YWonderLand.Core
             GameObject systemsGo = new GameObject("[Persistent Systems]");
             Object.DontDestroyOnLoad(systemsGo);
 
+            // Auth must load its cached identity before gameplay managers resolve
+            // player-scoped PlayerPrefs keys.
+            systemsGo.AddComponent<AuthService>();
             systemsGo.AddComponent<EconomyManager>();
             systemsGo.AddComponent<InventoryManager>();
             systemsGo.AddComponent<ToolManager>();
 
-            // Backend (REST) — đăng nhập + hồ sơ người chơi. Offline-first.
-            systemsGo.AddComponent<AuthService>();
+            // Backend (REST) — hồ sơ + bootstrap sau khi core managers tồn tại.
             systemsGo.AddComponent<PlayerProfileService>();
             systemsGo.AddComponent<PlayerBootstrapService>();
 

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using YWonderLand.Backend;
 
 namespace YWonderLand.Environment
 {
@@ -19,8 +20,21 @@ namespace YWonderLand.Environment
         private const string SAVE_KEY = "YW_BuildState";
         private bool loadComplete;
 
-        private void OnEnable()  { GhostPlacementController.OnBuildingPlaced += HandleBuildingPlaced; }
-        private void OnDisable() { GhostPlacementController.OnBuildingPlaced -= HandleBuildingPlaced; }
+        private void OnEnable()
+        {
+            GhostPlacementController.OnBuildingPlaced += HandleBuildingPlaced;
+            if (AuthService.Instance == null) return;
+            AuthService.Instance.IdentityChanging += HandleIdentityChanging;
+            AuthService.Instance.IdentityChanged += HandleIdentityChanged;
+        }
+
+        private void OnDisable()
+        {
+            GhostPlacementController.OnBuildingPlaced -= HandleBuildingPlaced;
+            if (AuthService.Instance == null) return;
+            AuthService.Instance.IdentityChanging -= HandleIdentityChanging;
+            AuthService.Instance.IdentityChanged -= HandleIdentityChanged;
+        }
 
         private void Start() => StartCoroutine(LoadAfterCellsReady());
 
@@ -31,6 +45,46 @@ namespace YWonderLand.Environment
         }
 
         private void HandleBuildingPlaced(string itemName, int price) => SaveBuildings(); // lưu ngay khi đặt
+
+        private void HandleIdentityChanging(string previousScopeId, string nextScopeId)
+        {
+            SaveBuildings();
+        }
+
+        private void HandleIdentityChanged(string previousScopeId, string nextScopeId)
+        {
+            StopAllCoroutines();
+            loadComplete = false;
+            ClearRuntimeState();
+            StartCoroutine(ReloadAfterIdentityChange());
+        }
+
+        private IEnumerator ReloadAfterIdentityChange()
+        {
+            yield return null;
+            LoadBuildings();
+        }
+
+        private static void ClearRuntimeState()
+        {
+            var animals = new HashSet<GameObject>();
+            foreach (var cell in BuildSurfaceCell.All)
+            {
+                if (cell == null) continue;
+                if (cell.AnimalObject != null) animals.Add(cell.AnimalObject);
+                cell.ClearAnimal();
+            }
+            foreach (var animal in animals)
+                if (animal != null) Destroy(animal);
+
+            var buildings = FindObjectsByType<PlacedBuilding>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var building in buildings)
+            {
+                if (building == null) continue;
+                BuildSurfaceCell.ClearOccupant(building.gameObject);
+                Destroy(building.gameObject);
+            }
+        }
 
         // ── SAVE ──
         public void SaveBuildings()
@@ -93,20 +147,20 @@ namespace YWonderLand.Environment
                 });
             }
 
-            PlayerPrefs.SetString(SAVE_KEY, JsonUtility.ToJson(data));
-            PlayerPrefs.Save();
+            PlayerScopedPrefs.SetString(SAVE_KEY, JsonUtility.ToJson(data));
+            PlayerScopedPrefs.Save();
             Debug.Log($"[BuildPersistence] Saved {data.items.Count} buildings + {data.animals.Count} animals.");
         }
 
         // ── LOAD ──
         private void LoadBuildings()
         {
-            if (!PlayerPrefs.HasKey(SAVE_KEY))
+            if (!PlayerScopedPrefs.HasKey(SAVE_KEY))
             {
                 loadComplete = true;
                 return;
             }
-            var data = JsonUtility.FromJson<BuildSave>(PlayerPrefs.GetString(SAVE_KEY));
+            var data = JsonUtility.FromJson<BuildSave>(PlayerScopedPrefs.GetString(SAVE_KEY));
             if (data == null || data.items == null)
             {
                 loadComplete = true;

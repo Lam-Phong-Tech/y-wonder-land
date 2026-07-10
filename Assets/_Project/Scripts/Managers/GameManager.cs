@@ -1,4 +1,5 @@
 using UnityEngine;
+using YWonderLand.Backend;
 
 public class GameManager : MonoBehaviour
 {
@@ -50,6 +51,7 @@ public class GameManager : MonoBehaviour
     private const string K_PosY = "YW_PosY";
     private const string K_PosZ = "YW_PosZ";
     private const string K_Yaw = "YW_PosYaw";
+    private bool logoutInProgress;
     private static readonly string[] DemoRichAccounts = { "DemoRich01", "DemoRich02", "DemoRich03", "DemoRich04", "DemoRich05" };
     private const string DemoFreshAccount = "DemoNew01";
 
@@ -85,7 +87,7 @@ public class GameManager : MonoBehaviour
 
         // Người chơi CŨ (đã có save) -> BỎ QUA Login + Cutscene, vào thẳng game ở vị trí cũ.
         // Người chơi MỚI (hoặc bật alwaysStartFresh để test) -> chạy Login như bình thường.
-        if (!alwaysStartFresh && PlayerPrefs.GetInt(K_HasSave, 0) == 1)
+        if (!alwaysStartFresh && PlayerScopedPrefs.GetInt(K_HasSave, 0) == 1)
             ResumeGame();
         else
             SetGameState(GameState.Login);
@@ -330,7 +332,24 @@ public class GameManager : MonoBehaviour
 
     public void LogoutToLogin()
     {
-        Debug.Log("[GameManager] LogoutToLogin: cleaning gameplay session before showing Login.");
+        if (logoutInProgress) return;
+        _ = LogoutToLoginAsync();
+    }
+
+    private async Awaitable LogoutToLoginAsync()
+    {
+        logoutInProgress = true;
+        try
+        {
+            Debug.Log("[GameManager] LogoutToLogin: cleaning gameplay session before showing Login.");
+
+        // Capture the old account's pose and stop input while its final gameplay
+        // mutations are persisted with the still-valid auth token.
+        SavePlayerPosition();
+        SetSpawnedCharacterGameplayEnabled(false);
+        bool mutationsFlushed = await GameplayMutationSync.FlushAsync();
+        if (!mutationsFlushed)
+            Debug.LogWarning($"[GameManager] Logout continued with pending state sync: {GameplayMutationSync.LastError}");
 
         HideGameplayUiForLogin();
         ClearGameplayCameraTarget();
@@ -354,9 +373,14 @@ public class GameManager : MonoBehaviour
             spawnedCharacter = null;
         }
 
-        YWonderLand.Backend.AuthService.Instance?.SignOut();
         ClearResumeFlag();
-        SetGameState(GameState.Login);
+        YWonderLand.Backend.AuthService.Instance?.SignOut();
+            SetGameState(GameState.Login);
+        }
+        finally
+        {
+            logoutInProgress = false;
+        }
     }
 
     private void SetSpawnedCharacterGameplayEnabled(bool enabled)
@@ -454,8 +478,8 @@ public class GameManager : MonoBehaviour
 
     private void ClearResumeFlag()
     {
-        PlayerPrefs.DeleteKey(K_HasSave);
-        PlayerPrefs.Save();
+        PlayerScopedPrefs.DeleteKey(K_HasSave);
+        PlayerScopedPrefs.Save();
     }
 
     public void SelectCharacter(int index)
@@ -828,14 +852,14 @@ public class GameManager : MonoBehaviour
 
     private void ResumeGameFromLocalSave(bool bootstrapAlreadyLoaded)
     {
-        selectedCharacterIndex = PlayerPrefs.GetInt(K_CharIdx, 0);
-        playerName = PlayerPrefs.GetString(K_Name, "Player");
+        selectedCharacterIndex = PlayerScopedPrefs.GetInt(K_CharIdx, 0);
+        playerName = PlayerScopedPrefs.GetString(K_Name, "Player");
 
         Vector3 pos = new Vector3(
-            PlayerPrefs.GetFloat(K_PosX, 0f),
-            PlayerPrefs.GetFloat(K_PosY, 2f),
-            PlayerPrefs.GetFloat(K_PosZ, 0f));
-        float yaw = PlayerPrefs.GetFloat(K_Yaw, 0f);
+            PlayerScopedPrefs.GetFloat(K_PosX, 0f),
+            PlayerScopedPrefs.GetFloat(K_PosY, 2f),
+            PlayerScopedPrefs.GetFloat(K_PosZ, 0f));
+        float yaw = PlayerScopedPrefs.GetFloat(K_Yaw, 0f);
 
         if (!bootstrapAlreadyLoaded)
             _ = SignInAndLoadProfileAsync();
@@ -894,14 +918,12 @@ public class GameManager : MonoBehaviour
 
         Vector3 spawnPos;
         float spawnYaw;
-        if (!TryGetDockSpawnPose(out spawnPos, out spawnYaw))
+        if (!TryGetSavedFarmPose(out spawnPos, out spawnYaw)
+            && !TryGetDockSpawnPose(out spawnPos, out spawnYaw))
         {
-            spawnPos = new Vector3(
-                PlayerPrefs.GetFloat(K_PosX, 0f),
-                PlayerPrefs.GetFloat(K_PosY, 2f),
-                PlayerPrefs.GetFloat(K_PosZ, 0f));
-            spawnYaw = PlayerPrefs.GetFloat(K_Yaw, 0f);
-            Debug.LogWarning($"[GameManager] Existing profile direct start could not resolve dock spawn. Falling back to saved/default position {spawnPos}.");
+            spawnPos = new Vector3(0f, 2f, 0f);
+            spawnYaw = 0f;
+            Debug.LogWarning($"[GameManager] Existing profile direct start could not resolve saved or dock spawn. Falling back to {spawnPos}.");
         }
 
         SpawnCharacterAt(spawnPos, spawnYaw);
@@ -914,6 +936,26 @@ public class GameManager : MonoBehaviour
 
         SetGameState(GameState.Gameplay);
         Debug.Log($"[GameManager] Existing profile direct start: entered gameplay at {spawnPos}.");
+    }
+
+    private bool TryGetSavedFarmPose(out Vector3 position, out float yaw)
+    {
+        position = Vector3.zero;
+        yaw = 0f;
+        if (!PlayerScopedPrefs.HasKey(K_PosX)
+            || !PlayerScopedPrefs.HasKey(K_PosY)
+            || !PlayerScopedPrefs.HasKey(K_PosZ))
+            return false;
+
+        position = new Vector3(
+            PlayerScopedPrefs.GetFloat(K_PosX, 0f),
+            PlayerScopedPrefs.GetFloat(K_PosY, 2f),
+            PlayerScopedPrefs.GetFloat(K_PosZ, 0f));
+        yaw = PlayerScopedPrefs.GetFloat(K_Yaw, 0f);
+        return float.IsFinite(position.x)
+               && float.IsFinite(position.y)
+               && float.IsFinite(position.z)
+               && float.IsFinite(yaw);
     }
 
     private bool TryGetDockSpawnPose(out Vector3 position, out float yaw)
@@ -948,15 +990,15 @@ public class GameManager : MonoBehaviour
         if (island == "farm")
         {
             Vector3 p = spawnedCharacter.transform.position;
-            PlayerPrefs.SetFloat(K_PosX, p.x);
-            PlayerPrefs.SetFloat(K_PosY, p.y);
-            PlayerPrefs.SetFloat(K_PosZ, p.z);
-            PlayerPrefs.SetFloat(K_Yaw, spawnedCharacter.transform.eulerAngles.y);
+            PlayerScopedPrefs.SetFloat(K_PosX, p.x);
+            PlayerScopedPrefs.SetFloat(K_PosY, p.y);
+            PlayerScopedPrefs.SetFloat(K_PosZ, p.z);
+            PlayerScopedPrefs.SetFloat(K_Yaw, spawnedCharacter.transform.eulerAngles.y);
         }
-        PlayerPrefs.SetInt(K_CharIdx, selectedCharacterIndex);
-        PlayerPrefs.SetString(K_Name, playerName ?? "Player");
-        PlayerPrefs.SetInt(K_HasSave, 1);
-        PlayerPrefs.Save();
+        PlayerScopedPrefs.SetInt(K_CharIdx, selectedCharacterIndex);
+        PlayerScopedPrefs.SetString(K_Name, playerName ?? "Player");
+        PlayerScopedPrefs.SetInt(K_HasSave, 1);
+        PlayerScopedPrefs.Save();
     }
 
     void OnApplicationPause(bool paused)
@@ -974,10 +1016,10 @@ public class GameManager : MonoBehaviour
     [ContextMenu("Clear Save (test chơi lại từ đầu)")]
     public void ClearSave()
     {
-        PlayerPrefs.DeleteKey(K_HasSave);
-        PlayerPrefs.DeleteKey(K_PosX); PlayerPrefs.DeleteKey(K_PosY); PlayerPrefs.DeleteKey(K_PosZ);
-        PlayerPrefs.DeleteKey(K_Yaw); PlayerPrefs.DeleteKey(K_CharIdx); PlayerPrefs.DeleteKey(K_Name);
-        PlayerPrefs.Save();
+        PlayerScopedPrefs.DeleteKey(K_HasSave);
+        PlayerScopedPrefs.DeleteKey(K_PosX); PlayerScopedPrefs.DeleteKey(K_PosY); PlayerScopedPrefs.DeleteKey(K_PosZ);
+        PlayerScopedPrefs.DeleteKey(K_Yaw); PlayerScopedPrefs.DeleteKey(K_CharIdx); PlayerScopedPrefs.DeleteKey(K_Name);
+        PlayerScopedPrefs.Save();
         Debug.Log("[GameManager] Đã xoá save — lần tới sẽ chạy lại Login + Cutscene.");
     }
 }

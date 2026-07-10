@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEngine.InputSystem;
+using YWonderLand.Backend;
 
 /// <summary>
 /// Controller overlay Câu Cá — bản GỌN (khách 21/06).
@@ -111,19 +112,38 @@ public class FishingOverlayController : MonoBehaviour
         itemDatabase = Resources.Load<YWonderLand.Data.ItemDatabase>("ItemDatabase");
         EnsureFishRewardTiers();
 
+        LoadDailyTurns();
+        if (AuthService.Instance != null)
+            AuthService.Instance.IdentityChanged += HandleIdentityChanged;
+    }
+
+    private void OnDestroy()
+    {
+        if (AuthService.Instance != null)
+            AuthService.Instance.IdentityChanged -= HandleIdentityChanged;
+    }
+
+    private void HandleIdentityChanged(string previousScopeId, string nextScopeId)
+    {
+        LoadDailyTurns();
+        UpdateUI();
+    }
+
+    private void LoadDailyTurns()
+    {
         // Reset lượt câu miễn phí theo NGÀY thật.
-        string lastDate = PlayerPrefs.GetString("FishingLastDate", "");
+        string lastDate = PlayerScopedPrefs.GetString("FishingLastDate", "");
         string today = System.DateTime.Now.ToString("yyyy-MM-dd");
         if (lastDate != today)
         {
             freeTurns = dailyTurns;
-            PlayerPrefs.SetString("FishingLastDate", today);
-            PlayerPrefs.SetInt("FishingFreeTurns", freeTurns);
-            PlayerPrefs.Save();
+            PlayerScopedPrefs.SetString("FishingLastDate", today);
+            PlayerScopedPrefs.SetInt("FishingFreeTurns", freeTurns);
+            PlayerScopedPrefs.Save();
         }
         else
         {
-            freeTurns = PlayerPrefs.GetInt("FishingFreeTurns", dailyTurns);
+            freeTurns = PlayerScopedPrefs.GetInt("FishingFreeTurns", dailyTurns);
         }
     }
 
@@ -246,8 +266,8 @@ public class FishingOverlayController : MonoBehaviour
 
         castDuration = Mathf.Max(0.1f, durationSec);
         freeTurns--;
-        PlayerPrefs.SetInt("FishingFreeTurns", freeTurns);
-        PlayerPrefs.Save();
+        PlayerScopedPrefs.SetInt("FishingFreeTurns", freeTurns);
+        PlayerScopedPrefs.Save();
 
         if (fishingDocument != null && fishingDocument.rootVisualElement != null)
             fishingDocument.rootVisualElement.style.display = DisplayStyle.None;
@@ -347,8 +367,8 @@ public class FishingOverlayController : MonoBehaviour
         }
 
         freeTurns--;
-        PlayerPrefs.SetInt("FishingFreeTurns", freeTurns);
-        PlayerPrefs.Save();
+        PlayerScopedPrefs.SetInt("FishingFreeTurns", freeTurns);
+        PlayerScopedPrefs.Save();
 
         if (playAnim && PlayerController.Instance != null)
             PlayerController.Instance.PlayActionAnimation("Fishing", castDuration, YWonderLand.Player.ToolType.FishingRod);

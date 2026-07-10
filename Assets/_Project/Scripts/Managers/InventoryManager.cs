@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using YWonderLand.Backend;
 
 namespace YWonderLand.Managers
 {
@@ -59,6 +60,25 @@ namespace YWonderLand.Managers
                 // → Destroy(gameObject) sẽ huỷ nhầm cả GameManager! (đây là lỗi đã làm mất GameManager.)
                 Destroy(this);
             }
+        }
+
+        private void OnEnable()
+        {
+            if (AuthService.Instance != null)
+                AuthService.Instance.IdentityChanged += HandleIdentityChanged;
+        }
+
+        private void OnDisable()
+        {
+            if (AuthService.Instance != null)
+                AuthService.Instance.IdentityChanged -= HandleIdentityChanged;
+        }
+
+        private void HandleIdentityChanged(string previousScopeId, string nextScopeId)
+        {
+            LoadInventory();
+            OnInventoryChanged?.Invoke();
+            Debug.Log($"[Inventory] Reloaded local cache for '{nextScopeId}'.");
         }
 
         void Start()
@@ -123,7 +143,7 @@ namespace YWonderLand.Managers
 
         private void LoadInventory()
         {
-            string json = PlayerPrefs.GetString(INV_KEY, "");
+            string json = PlayerScopedPrefs.GetString(INV_KEY, "");
             if (string.IsNullOrEmpty(json))
             {
                 inventoryData = new InventoryData();
@@ -148,8 +168,8 @@ namespace YWonderLand.Managers
         private void SaveInventory()
         {
             string json = JsonUtility.ToJson(inventoryData);
-            PlayerPrefs.SetString(INV_KEY, json);
-            PlayerPrefs.Save();
+            PlayerScopedPrefs.SetString(INV_KEY, json);
+            PlayerScopedPrefs.Save();
         }
 
         public int GetMaxSlots() => inventoryData.maxSlots;
@@ -197,7 +217,7 @@ namespace YWonderLand.Managers
             return total;
         }
 
-        public void AddItem(string itemId, int quantity)
+        public void AddItem(string itemId, int quantity, string syncReason = "gameplay_inventory_add")
         {
             if (quantity <= 0) return;
 
@@ -224,11 +244,12 @@ namespace YWonderLand.Managers
             }
 
             SaveInventory();
+            GameplayMutationSync.QueueInventoryDelta(itemId, quantity, syncReason);
             Debug.Log($"[Inventory] Added {quantity}x {itemId}");
             OnInventoryChanged?.Invoke();
         }
 
-        public bool RemoveItem(string itemId, int quantity)
+        public bool RemoveItem(string itemId, int quantity, string syncReason = "gameplay_inventory_remove")
         {
             if (quantity <= 0) return true;
             if (GetItemQuantity(itemId) < quantity) return false;
@@ -254,6 +275,7 @@ namespace YWonderLand.Managers
             }
 
             SaveInventory();
+            GameplayMutationSync.QueueInventoryDelta(itemId, -quantity, syncReason);
             Debug.Log($"[Inventory] Removed {quantity}x {itemId}");
             OnInventoryChanged?.Invoke();
             return true;

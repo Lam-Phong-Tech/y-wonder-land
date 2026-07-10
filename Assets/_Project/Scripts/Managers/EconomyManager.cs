@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using YWonderLand.Backend;
 
 namespace YWonderLand.Managers
 {
@@ -34,18 +35,38 @@ namespace YWonderLand.Managers
             }
         }
 
+        private void OnEnable()
+        {
+            if (AuthService.Instance != null)
+                AuthService.Instance.IdentityChanged += HandleIdentityChanged;
+        }
+
+        private void OnDisable()
+        {
+            if (AuthService.Instance != null)
+                AuthService.Instance.IdentityChanged -= HandleIdentityChanged;
+        }
+
+        private void HandleIdentityChanged(string previousScopeId, string nextScopeId)
+        {
+            LoadBalances();
+            OnPOSChanged?.Invoke(currentPOS);
+            OnUPOSChanged?.Invoke(currentUPOS);
+            Debug.Log($"[Economy] Reloaded local cache for '{nextScopeId}'.");
+        }
+
         private void LoadBalances()
         {
             // Nếu chưa có data, tặng 5000 Point làm vốn khởi nghiệp
-            currentPOS = PlayerPrefs.GetInt(POS_KEY, 5000);
-            currentUPOS = PlayerPrefs.GetInt(UPOS_KEY, 0);
+            currentPOS = PlayerScopedPrefs.GetInt(POS_KEY, 5000);
+            currentUPOS = PlayerScopedPrefs.GetInt(UPOS_KEY, 0);
         }
 
         private void SaveBalances()
         {
-            PlayerPrefs.SetInt(POS_KEY, (int)currentPOS);
-            PlayerPrefs.SetInt(UPOS_KEY, (int)currentUPOS);
-            PlayerPrefs.Save();
+            PlayerScopedPrefs.SetInt(POS_KEY, (int)currentPOS);
+            PlayerScopedPrefs.SetInt(UPOS_KEY, (int)currentUPOS);
+            PlayerScopedPrefs.Save();
         }
 
         public long GetPOS() => currentPOS;
@@ -61,22 +82,24 @@ namespace YWonderLand.Managers
             Debug.Log($"[Economy] Applied server state. Point={currentPOS}, UPoint={currentUPOS}");
         }
 
-        public void AddPOS(long amount)
+        public void AddPOS(long amount, string syncReason = "gameplay_point_add")
         {
             if (amount <= 0) return;
             currentPOS += amount;
             SaveBalances();
+            GameplayMutationSync.QueueEconomyDelta(amount, 0, syncReason);
             OnPOSChanged?.Invoke(currentPOS);
             Debug.Log($"[Economy] Add {amount} Point. Balance: {currentPOS}");
         }
 
-        public bool SpendPOS(long amount)
+        public bool SpendPOS(long amount, string syncReason = "gameplay_point_spend")
         {
             if (amount <= 0) return true;
             if (currentPOS >= amount)
             {
                 currentPOS -= amount;
                 SaveBalances();
+                GameplayMutationSync.QueueEconomyDelta(-amount, 0, syncReason);
                 OnPOSChanged?.Invoke(currentPOS);
                 Debug.Log($"[Economy] Spend {amount} Point. Balance: {currentPOS}");
                 return true;
@@ -85,22 +108,24 @@ namespace YWonderLand.Managers
             return false;
         }
 
-        public void AddUPOS(long amount)
+        public void AddUPOS(long amount, string syncReason = "gameplay_upoint_add")
         {
             if (amount <= 0) return;
             currentUPOS += amount;
             SaveBalances();
+            GameplayMutationSync.QueueEconomyDelta(0, amount, syncReason);
             OnUPOSChanged?.Invoke(currentUPOS);
             Debug.Log($"[Economy] Add {amount} UPoint. Balance: {currentUPOS}");
         }
 
-        public bool SpendUPOS(long amount)
+        public bool SpendUPOS(long amount, string syncReason = "gameplay_upoint_spend")
         {
             if (amount <= 0) return true;
             if (currentUPOS >= amount)
             {
                 currentUPOS -= amount;
                 SaveBalances();
+                GameplayMutationSync.QueueEconomyDelta(0, -amount, syncReason);
                 OnUPOSChanged?.Invoke(currentUPOS);
                 Debug.Log($"[Economy] Spend {amount} UPoint. Balance: {currentUPOS}");
                 return true;

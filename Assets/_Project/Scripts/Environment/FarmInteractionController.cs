@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using YWonderLand.Data;
+using YWonderLand.Backend;
 using System.Collections.Generic;
 
 namespace YWonderLand.Environment
@@ -140,6 +141,9 @@ namespace YWonderLand.Environment
             if (fishingInteractRange <= 0f) fishingInteractRange = DefaultFishingInteractRange;
             EnsureMiningDailyTurns();
 
+            if (AuthService.Instance != null)
+                AuthService.Instance.IdentityChanged += HandleIdentityChanged;
+
             if (mainCamera == null)
                 mainCamera = Camera.main;
 
@@ -157,10 +161,19 @@ namespace YWonderLand.Environment
             CancelTimedAction(null);
             if (Instance == this) Instance = null;
 
+            if (AuthService.Instance != null)
+                AuthService.Instance.IdentityChanged -= HandleIdentityChanged;
+
             if (inventoryPopup != null)
             {
                 inventoryPopup.OnItemUsed -= OnInventoryItemSelected;
             }
+        }
+
+        private void HandleIdentityChanged(string previousScopeId, string nextScopeId)
+        {
+            miningTurnsLeft = -1;
+            EnsureMiningDailyTurns();
         }
 
         // Chặt/đào 1 nhịp rồi TỰ bắn toast khi HOÀN TẤT. Gọi trực tiếp (không qua event tĩnh
@@ -302,9 +315,9 @@ namespace YWonderLand.Environment
         private void SetServerMiningTurns(int remaining)
         {
             miningTurnsLeft = Mathf.Clamp(remaining, 0, Mathf.Max(0, dailyMiningTurns));
-            PlayerPrefs.SetString(MiningLastDateKey, System.DateTime.Now.ToString("yyyy-MM-dd"));
-            PlayerPrefs.SetInt(MiningTurnsLeftKey, miningTurnsLeft);
-            PlayerPrefs.Save();
+            PlayerScopedPrefs.SetString(MiningLastDateKey, System.DateTime.Now.ToString("yyyy-MM-dd"));
+            PlayerScopedPrefs.SetInt(MiningTurnsLeftKey, miningTurnsLeft);
+            PlayerScopedPrefs.Save();
         }
 
         private static bool RequiresServerResourceSync()
@@ -1895,19 +1908,19 @@ namespace YWonderLand.Environment
         {
             int maxTurns = Mathf.Max(0, dailyMiningTurns);
             string today = System.DateTime.Now.ToString("yyyy-MM-dd");
-            string lastDate = PlayerPrefs.GetString(MiningLastDateKey, "");
+            string lastDate = PlayerScopedPrefs.GetString(MiningLastDateKey, "");
 
             if (lastDate != today)
             {
                 miningTurnsLeft = maxTurns;
-                PlayerPrefs.SetString(MiningLastDateKey, today);
-                PlayerPrefs.SetInt(MiningTurnsLeftKey, miningTurnsLeft);
-                PlayerPrefs.Save();
+                PlayerScopedPrefs.SetString(MiningLastDateKey, today);
+                PlayerScopedPrefs.SetInt(MiningTurnsLeftKey, miningTurnsLeft);
+                PlayerScopedPrefs.Save();
                 return;
             }
 
             if (miningTurnsLeft < 0)
-                miningTurnsLeft = Mathf.Clamp(PlayerPrefs.GetInt(MiningTurnsLeftKey, maxTurns), 0, maxTurns);
+                miningTurnsLeft = Mathf.Clamp(PlayerScopedPrefs.GetInt(MiningTurnsLeftKey, maxTurns), 0, maxTurns);
         }
 
         private bool HasMiningTurnsRemaining(bool showToast)
@@ -1929,8 +1942,8 @@ namespace YWonderLand.Environment
             if (miningTurnsLeft <= 0) return false;
 
             miningTurnsLeft--;
-            PlayerPrefs.SetInt(MiningTurnsLeftKey, miningTurnsLeft);
-            PlayerPrefs.Save();
+            PlayerScopedPrefs.SetInt(MiningTurnsLeftKey, miningTurnsLeft);
+            PlayerScopedPrefs.Save();
             return true;
         }
 

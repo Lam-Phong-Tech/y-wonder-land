@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using YWonderLand.Data;
 using YWonderLand.Environment;
 using System.Linq;
+using YWonderLand.Backend;
 
 namespace YWonderLand.Managers
 {
@@ -33,6 +34,36 @@ namespace YWonderLand.Managers
             }
 
             LoadDefinitions();
+        }
+
+        private void OnEnable()
+        {
+            if (AuthService.Instance == null) return;
+            AuthService.Instance.IdentityChanging += HandleIdentityChanging;
+            AuthService.Instance.IdentityChanged += HandleIdentityChanged;
+        }
+
+        private void OnDisable()
+        {
+            if (AuthService.Instance == null) return;
+            AuthService.Instance.IdentityChanging -= HandleIdentityChanging;
+            AuthService.Instance.IdentityChanged -= HandleIdentityChanged;
+        }
+
+        private void HandleIdentityChanging(string previousScopeId, string nextScopeId)
+        {
+            SaveAnimalState();
+        }
+
+        private void HandleIdentityChanged(string previousScopeId, string nextScopeId)
+        {
+            if (pens == null || pens.Length == 0)
+                pens = FindObjectsByType<AnimalPen>(FindObjectsSortMode.None);
+
+            ClearRuntimeAnimals();
+            loadComplete = false;
+            LoadAnimalState();
+            loadComplete = true;
         }
 
         void Start()
@@ -136,28 +167,20 @@ namespace YWonderLand.Managers
             }
 
             string json = JsonUtility.ToJson(saveData);
-            PlayerPrefs.SetString(SAVE_KEY, json);
-            PlayerPrefs.Save();
+            PlayerScopedPrefs.SetString(SAVE_KEY, json);
+            PlayerScopedPrefs.Save();
         }
 
         public void LoadAnimalState()
         {
-            if (!PlayerPrefs.HasKey(SAVE_KEY)) return;
+            if (!PlayerScopedPrefs.HasKey(SAVE_KEY)) return;
 
-            string json = PlayerPrefs.GetString(SAVE_KEY);
+            string json = PlayerScopedPrefs.GetString(SAVE_KEY);
             AnimalSaveData saveData = JsonUtility.FromJson<AnimalSaveData>(json);
 
             if (saveData == null || saveData.animals == null) return;
 
-            // Clear existing animals in pens
-            foreach (var pen in pens)
-            {
-                foreach(var a in pen.GetAnimals().ToArray())
-                {
-                    Destroy(a.gameObject);
-                }
-                pen.GetAnimals().Clear();
-            }
+            ClearRuntimeAnimals();
 
             foreach (var aData in saveData.animals)
             {
@@ -177,6 +200,18 @@ namespace YWonderLand.Managers
                 animal.LoadState((FarmAnimal.AnimalState)aData.state, aData.feedTimer, aData.produceTimer, aData.harvests, aData.hasProduct, aData.vaccinated);
                 
                 pen.AddAnimal(animal);
+            }
+        }
+
+        private void ClearRuntimeAnimals()
+        {
+            if (pens == null) return;
+            foreach (var pen in pens)
+            {
+                if (pen == null) continue;
+                foreach (var animal in pen.GetAnimals().ToArray())
+                    if (animal != null) Destroy(animal.gameObject);
+                pen.GetAnimals().Clear();
             }
         }
 

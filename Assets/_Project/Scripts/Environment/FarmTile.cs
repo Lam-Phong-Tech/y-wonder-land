@@ -1171,6 +1171,42 @@ public class FarmTile : MonoBehaviour
         };
     }
 
+    /// <summary>Clears runtime crop state before loading another signed-in player.</summary>
+    public void ResetForPlayerState()
+    {
+        FreeSlaves();
+        masterTile = null;
+        currentState = TileState.Soil;
+        plantedSeedId = "";
+        currentCrop = null;
+        cropColor = Color.green;
+        growStartTime = 0.0;
+        plantedTime = 0.0;
+        lastWaterTime = 0.0;
+        isGrowing = false;
+        isReGrowing = false;
+        harvestsRemaining = 1;
+        dryAccumSec = 0f;
+        LastHarvestWasFinal = false;
+        LastFinalProductId = "";
+        LastFinalProductAmount = 0;
+        DestroyWaterBar();
+        if (cropInfoRoot != null)
+        {
+            Destroy(cropInfoRoot.gameObject);
+            cropInfoRoot = null;
+            cropInfoTM = null;
+            cropInfoMF = null;
+        }
+        if (cropModelInstance != null)
+        {
+            Destroy(cropModelInstance);
+            cropModelInstance = null;
+        }
+        DestroySeedAndGrowingVisuals();
+        UpdateVisuals();
+    }
+
     /// <summary>Khôi phục trạng thái cây từ save + GIẢI QUYẾT thời gian offline đã trôi (lớn-bù / chết-bù).
     /// Dùng mốc thực nên đóng app vài tiếng/ngày → mở lại cây tự chín hoặc đã héo chết đúng.</summary>
     public void RestoreSave(CropSave s, CropDatabase db)

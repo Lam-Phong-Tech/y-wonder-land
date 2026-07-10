@@ -14,11 +14,12 @@ Ngay lap: 10/07/2026
 
 Trang thai truy cap hien tai:
 
-- Lan kiem tra dau, cong SSH `22` tung phan hoi.
-- Lan kiem tra gan nhat tu may lam viec khong toi duoc `22/80/443/3000`.
+- TCP `22` da toi duoc tu may lam viec; SSH handshake thanh cong.
+- Banner xac nhan `OpenSSH_8.9p1 Ubuntu-3ubuntu0.15`, fingerprint ED25519 `SHA256:dpAuiUAA7K0h3iDDGxys6XOpHv1uVRGUSW4y23qYgZk`, ho tro `publickey,password`.
+- Chua dang nhap nen chua chot `/etc/os-release`, CPU/RAM/disk/firewall/service; `80/443/3000` cung chua duoc cau hinh cho game-server.
 - `api.ywonder.net` hien van phan giai ve `45.119.83.233`, chua tro sang VPS game moi.
 
-Day khong phai loi code game. Owner/infra can dam bao VPS dang bat va cho phep SSH truoc khi trien khai.
+Moc mo cong SSH da dat; buoc ke tiep la audit read-only truoc khi cai dat.
 
 ## 2. So do dich vu muc tieu
 
@@ -181,9 +182,9 @@ Ket qua dat:
 
 ## 5. Thu tu cong viec ngay tiep theo
 
-1. Xin owner mo SSH/kiem tra whitelist cho `42.96.18.14`.
-2. Audit chi doc VPS; khong can cung cap password cho den khi bat dau buoc nay.
-3. Trong luc cho SSH, bat dau tach cache theo `playerId` trong Unity.
+1. Audit chi doc VPS qua SSH; khong cai dat/xoa/sua dich vu trong luot dau.
+2. Hoan tat runtime test cache theo `playerId` va gameplay inventory/economy delta trong Unity.
+3. Tao deploy user + SSH key chi sau khi audit va anh dong y hardening.
 4. Sau audit, hoan thien PostgreSQL adapter va bang account local tren may phat trien truoc.
 5. Chi deploy len VPS sau khi bo test PostgreSQL local pass.
 

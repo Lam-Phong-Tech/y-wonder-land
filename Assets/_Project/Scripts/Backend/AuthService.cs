@@ -11,6 +11,9 @@ namespace YWonderLand.Backend
     {
         public static AuthService Instance { get; private set; }
 
+        public event System.Action<string, string> IdentityChanging;
+        public event System.Action<string, string> IdentityChanged;
+
         private const string KEY_TOKEN = "YW_Auth_Token";
         private const string KEY_USERID = "YW_Auth_UserId";
         private const string KEY_USERNAME = "YW_Auth_Username";
@@ -119,10 +122,15 @@ namespace YWonderLand.Backend
             LastError = "";
             LastErrorCode = "";
 
+            string previousScopeId = GetScopeId(UserId, Username);
             string nextUserId = ResolveUserId(res.data);
             string nextUsername = ResolveUsername(res.data, username);
+            string nextScopeId = GetScopeId(nextUserId, nextUsername);
             bool identityChanged = !string.Equals(UserId, nextUserId, System.StringComparison.Ordinal)
                                    || !string.Equals(Username, nextUsername, System.StringComparison.OrdinalIgnoreCase);
+
+            if (identityChanged)
+                InvokeIdentityHandlers(IdentityChanging, previousScopeId, nextScopeId, "changing");
 
             Token = res.data.token;
             UserId = nextUserId;
@@ -133,7 +141,10 @@ namespace YWonderLand.Backend
             PlayerPrefs.SetString(KEY_BACKEND_URL, GetActiveBackendUrl());
             PlayerPrefs.Save();
             if (identityChanged)
+            {
                 PlayerProfileService.Instance?.ResetRuntimeProfileForAuthChange();
+                InvokeIdentityHandlers(IdentityChanged, previousScopeId, nextScopeId, "changed");
+            }
 
             if (res.data.player_profile != null)
                 PlayerProfileService.Instance?.AcceptServerProfile(res.data.player_profile);
@@ -174,12 +185,53 @@ namespace YWonderLand.Backend
 
         public void SignOut()
         {
+            string previousScopeId = GetScopeId(UserId, Username);
+            if (!string.IsNullOrEmpty(previousScopeId))
+                InvokeIdentityHandlers(IdentityChanging, previousScopeId, "", "changing");
+
             Token = "";
             UserId = "";
             Username = "";
             ClearCachedAuth();
             PlayerBootstrapService.Instance?.ResetRuntimeState();
             PlayerProfileService.Instance?.ResetRuntimeProfileForAuthChange();
+            if (!string.IsNullOrEmpty(previousScopeId))
+                InvokeIdentityHandlers(IdentityChanged, previousScopeId, "", "changed");
+        }
+
+        public static string GetCurrentPlayerScopeId()
+        {
+            if (Instance != null)
+                return GetScopeId(Instance.UserId, Instance.Username);
+
+            return GetScopeId(
+                PlayerPrefs.GetString(KEY_USERID, ""),
+                PlayerPrefs.GetString(KEY_USERNAME, ""));
+        }
+
+        private static string GetScopeId(string userId, string username)
+        {
+            if (!string.IsNullOrEmpty(userId)) return "id:" + userId;
+            if (!string.IsNullOrEmpty(username)) return "name:" + username.ToLowerInvariant();
+            return "";
+        }
+
+        private static void InvokeIdentityHandlers(
+            System.Action<string, string> handlers,
+            string previousScopeId,
+            string nextScopeId,
+            string phase)
+        {
+            if (handlers == null) return;
+            foreach (System.Action<string, string> handler in handlers.GetInvocationList())
+            {
+                try { handler(previousScopeId, nextScopeId); }
+                catch (System.Exception ex)
+                {
+                    Debug.LogError($"[Auth] Player scope {phase} handler failed: {handler.Method.DeclaringType?.Name}.{handler.Method.Name}");
+                    Debug.LogException(ex);
+                }
+            }
         }
 
         private static string GetActiveBackendUrl()

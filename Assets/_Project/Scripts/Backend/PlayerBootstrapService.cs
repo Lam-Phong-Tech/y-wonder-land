@@ -86,6 +86,26 @@ namespace YWonderLand.Backend
                 return false;
             }
 
+            // A previous gameplay action may still be writing a seed, water,
+            // reward, or currency delta. Flush first so bootstrap cannot restore
+            // the older server snapshot over that local action.
+            bool mutationsFlushed = await GameplayMutationSync.FlushAsync();
+            if (!mutationsFlushed)
+            {
+                if (GameplayMutationSync.PendingCount > 0)
+                {
+                    HasServerBootstrap = false;
+                    LastStatus = 503;
+                    LastError = !string.IsNullOrWhiteSpace(GameplayMutationSync.LastError)
+                        ? GameplayMutationSync.LastError
+                        : "PENDING_STATE_SYNC_FAILED";
+                    Debug.LogWarning("[Bootstrap] Refusing to load a stale snapshot while gameplay mutations are still pending.");
+                    return false;
+                }
+
+                Debug.LogWarning("[Bootstrap] A gameplay mutation was rejected; loading the authoritative snapshot for reconciliation.");
+            }
+
             var res = await ApiClient.GetAsync<PlayerBootstrapPayload>("/player/bootstrap", auth.Token);
             LastStatus = res.status;
             LastError = res.error ?? "";
@@ -97,6 +117,7 @@ namespace YWonderLand.Backend
             }
 
             ApplyBootstrap(res.data);
+            GameplayMutationSync.MarkAuthoritativeSnapshotApplied();
             LastBootstrap = res.data;
             HasServerBootstrap = true;
             LastError = "";

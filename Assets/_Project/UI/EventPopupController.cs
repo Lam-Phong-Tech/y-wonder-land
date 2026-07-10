@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
+using YWonderLand.Backend;
 
 /// <summary>
 /// Controller for the Event / Rewards Hub Popup.
@@ -150,7 +151,7 @@ public class EventPopupController : MonoBehaviour
 
     public static bool IsAttendanceReadyToClaim()
     {
-        int days = PlayerPrefs.GetInt(AttDaysKey, 0);
+        int days = PlayerScopedPrefs.GetInt(AttDaysKey, 0);
         if (days >= AttendanceTotalDays) return false;
         if (IsAttendanceClaimedToday()) return false;
         return !IsAttendanceTutorialLocked(days);
@@ -158,13 +159,13 @@ public class EventPopupController : MonoBehaviour
 
     public static bool IsAttendanceLockedByTutorial()
     {
-        int days = PlayerPrefs.GetInt(AttDaysKey, 0);
+        int days = PlayerScopedPrefs.GetInt(AttDaysKey, 0);
         return IsAttendanceTutorialLocked(days);
     }
 
     private static bool IsAttendanceClaimedToday()
     {
-        return PlayerPrefs.GetString(AttDateKey, "") == System.DateTime.Now.ToString("yyyyMMdd");
+        return PlayerScopedPrefs.GetString(AttDateKey, "") == System.DateTime.Now.ToString("yyyyMMdd");
     }
 
     private static bool IsAttendanceTutorialLocked(int currentClaimedDays)
@@ -519,7 +520,7 @@ public class EventPopupController : MonoBehaviour
     // Đọc tiến độ điểm danh + xem hôm nay đã điểm danh chưa (theo NGÀY THẬT).
     private void LoadAttendance()
     {
-        claimedDays = PlayerPrefs.GetInt(AttDaysKey, 0);
+        claimedDays = PlayerScopedPrefs.GetInt(AttDaysKey, 0);
         hasClaimedToday = IsAttendanceClaimedToday();
     }
 
@@ -649,9 +650,9 @@ public class EventPopupController : MonoBehaviour
                 YWonderLand.Managers.InventoryManager.Instance?.AddItem(r.itemId, r.qty);
         }
 
-        PlayerPrefs.SetInt(AttDaysKey, claimedDays);
-        PlayerPrefs.SetString(AttDateKey, System.DateTime.Now.ToString("yyyyMMdd"));
-        PlayerPrefs.Save();
+        PlayerScopedPrefs.SetInt(AttDaysKey, claimedDays);
+        PlayerScopedPrefs.SetString(AttDateKey, System.DateTime.Now.ToString("yyyyMMdd"));
+        PlayerScopedPrefs.Save();
         hasClaimedToday = true;
 
         string msg = r.isNothing
@@ -864,15 +865,15 @@ public class EventPopupController : MonoBehaviour
     private void LoadSpins()
     {
         string today = System.DateTime.Now.ToString("yyyyMMdd");
-        if (PlayerPrefs.GetString(SpinDateKey, "") != today)
+        if (PlayerScopedPrefs.GetString(SpinDateKey, "") != today)
         {
-            PlayerPrefs.SetString(SpinDateKey, today);
-            PlayerPrefs.SetInt(SpinCountKey, 0);
+            PlayerScopedPrefs.SetString(SpinDateKey, today);
+            PlayerScopedPrefs.SetInt(SpinCountKey, 0);
             spinsUsedToday = 0;
         }
         else
         {
-            spinsUsedToday = PlayerPrefs.GetInt(SpinCountKey, 0);
+            spinsUsedToday = PlayerScopedPrefs.GetInt(SpinCountKey, 0);
         }
     }
 
@@ -909,8 +910,8 @@ public class EventPopupController : MonoBehaviour
 
         // Trừ lượt (lưu ngay).
         spinsUsedToday++;
-        PlayerPrefs.SetInt(SpinCountKey, spinsUsedToday);
-        PlayerPrefs.Save();
+        PlayerScopedPrefs.SetInt(SpinCountKey, spinsUsedToday);
+        PlayerScopedPrefs.Save();
 
         isSpinning = true;
         if (btnSpin != null) { btnSpin.SetEnabled(false); btnSpin.text = string.Empty; }

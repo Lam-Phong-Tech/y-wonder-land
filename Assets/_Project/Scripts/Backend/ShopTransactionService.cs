@@ -63,6 +63,11 @@ namespace YWonderLand.Backend
                 return Failure(400, "INVALID_SHOP_REQUEST");
             }
 
+            // Keep shop's atomic economy+inventory snapshot ordered after any
+            // gameplay deltas (planting, water, harvest, build, rewards).
+            if (!await GameplayMutationSync.FlushAsync())
+                return Failure(503, "PENDING_STATE_SYNC_FAILED");
+
             var request = new ShopTransactionRequest
             {
                 shop_id = shopId,

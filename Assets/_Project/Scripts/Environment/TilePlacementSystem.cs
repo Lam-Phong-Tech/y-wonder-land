@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using YWonderLand.Backend;
 
 namespace YWonderLand.Environment
 {
@@ -26,6 +27,41 @@ namespace YWonderLand.Environment
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
+        }
+
+        private void OnEnable()
+        {
+            if (AuthService.Instance == null) return;
+            AuthService.Instance.IdentityChanging += HandleIdentityChanging;
+            AuthService.Instance.IdentityChanged += HandleIdentityChanged;
+        }
+
+        private void OnDisable()
+        {
+            if (AuthService.Instance == null) return;
+            AuthService.Instance.IdentityChanging -= HandleIdentityChanging;
+            AuthService.Instance.IdentityChanged -= HandleIdentityChanged;
+        }
+
+        private void HandleIdentityChanging(string previousScopeId, string nextScopeId)
+        {
+            SaveTiles();
+        }
+
+        private void HandleIdentityChanged(string previousScopeId, string nextScopeId)
+        {
+            StopAllCoroutines();
+            loadComplete = false;
+            foreach (var tile in _tiles.Values)
+                if (tile != null) Destroy(tile);
+            _tiles.Clear();
+            StartCoroutine(ReloadAfterIdentityChange());
+        }
+
+        private System.Collections.IEnumerator ReloadAfterIdentityChange()
+        {
+            yield return null;
+            LoadTiles();
         }
 
         private void Start()
@@ -86,19 +122,19 @@ namespace YWonderLand.Environment
                     crop = ft != null ? ft.ExportSaveOrNull() : null   // null nếu ô trống
                 });
             }
-            PlayerPrefs.SetString(SAVE_KEY, JsonUtility.ToJson(data));
-            PlayerPrefs.Save();
+            PlayerScopedPrefs.SetString(SAVE_KEY, JsonUtility.ToJson(data));
+            PlayerScopedPrefs.Save();
             Debug.Log($"[TilePlacement] Saved {data.tiles.Count} placed tiles.");
         }
 
         private void LoadTiles()
         {
-            if (!PlayerPrefs.HasKey(SAVE_KEY))
+            if (!PlayerScopedPrefs.HasKey(SAVE_KEY))
             {
                 loadComplete = true;
                 return;
             }
-            var data = JsonUtility.FromJson<PlacedTilesSave>(PlayerPrefs.GetString(SAVE_KEY));
+            var data = JsonUtility.FromJson<PlacedTilesSave>(PlayerScopedPrefs.GetString(SAVE_KEY));
             if (data == null || data.tiles == null)
             {
                 loadComplete = true;
