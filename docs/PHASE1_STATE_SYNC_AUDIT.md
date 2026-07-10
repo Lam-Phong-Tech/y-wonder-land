@@ -14,7 +14,7 @@ Xác nhận runtime 10/07: anh đã test bản build nhiều client và chốt l
 
 Cập nhật shop 10/07: code backend/client, smoke test temp + Quick Tunnel và nghiệm thu EXE/APK/relogin của anh đều đạt; shop được chốt hoàn thành. Reconnect đôi lúc hơi lâu nhưng hiện là vấn đề nhẹ, không chặn demo.
 
-Cập nhật cache 10/07: đã thêm lớp key theo `playerId` và reload state khi đổi identity cho các nhóm gameplay local chính. Code compile pass nhưng chưa có test runtime A -> B -> A, nên mục này vẫn `[~]`.
+Cập nhật cache 10/07: lớp key theo `playerId` và reload state khi đổi identity đã pass runtime. Anh test A -> B -> A, đóng hẳn/mở lại EXE và xác nhận hai tài khoản không lẫn state, dữ liệu khôi phục đúng; mục này được chốt `[x]`.
 
 Cập nhật gameplay delta 10/07: runtime của anh xác nhận crop/time và Point shop giữ đúng, đồng thời phát hiện hạt đã gieo quay lại túi và nước đã múc biến mất sau relog. Nguyên nhân là shop/claim public ghi server nhưng các `AddItem/RemoveItem` gameplay khác chỉ ghi local. Đã thêm hàng đợi `GameplayMutationSync` cho toàn bộ inventory/economy mutation có idempotency; bootstrap, shop và logout flush trước khi áp snapshot mới. C# compile, full Phase 1 smoke, API relog riêng cho nước/hạt/Point và bản Unity runtime đều pass; anh xác nhận ổn nên lát gameplay delta được chốt `[x]`.
 
@@ -44,7 +44,7 @@ Cập nhật gameplay delta 10/07: runtime của anh xác nhận crop/time và P
 
 ## Rủi ro cần xử lý trước khi gọi Phase 1 hoàn tất
 
-1. Code key theo `playerId` đã có cho Point, inventory, tool/EXP, vị trí, farm/build/animal và counter ngày; còn phải test runtime đổi A -> B -> A để loại trừ state trong RAM/scene bị giữ hoặc save nhầm scope.
+1. Code key theo `playerId` cho Point, inventory, tool/EXP, vị trí, farm/build/animal và counter ngày đã pass A -> B -> A cùng full EXE restart; không còn blocker cache isolation đã biết.
 2. Shop đã giải quyết lệch tiền/item và đã nghiệm thu runtime; cần theo dõi reconnect chậm nhưng chưa phải blocker.
 3. Gameplay delta queue đã được runtime chốt cho lỗi hạt/nước/tài nguyên quay lại sau bootstrap; vẫn cần regression rộng các nhóm thu hoạch, câu cá, chăn nuôi, build, event và tool upgrade khi chạy bộ test nhiều client. Farm/build/animal world state vẫn là local cache, chưa phải cross-device/server farm state.
 4. JSON store phù hợp demo ngắn hạn nhưng chưa có backup, migration, khóa dữ liệu và độ bền vận hành như PostgreSQL.
@@ -52,11 +52,10 @@ Cập nhật gameplay delta 10/07: runtime của anh xác nhận crop/time và P
 
 ## Thứ tự triển khai tiếp theo
 
-1. **Nghiệm thu cache theo playerId:** gameplay delta hạt/nước/tài nguyên/Point đã pass; còn test vòng A -> B -> A trên cùng PC, gồm cả world state trong scene.
-2. **Farm state hai chiều:** mở rộng DTO Unity cho buildings/tiles/crops/animals/resources, load trước khi khôi phục world và save về server theo checkpoint.
-3. **Daily limits:** đọc đầy đủ `limits` từ bootstrap; giữ đào đá public theo transaction hiện tại và chuyển câu cá sang server-authoritative theo giờ server.
-4. **Kiểm thử Phase 1:** test tự động 20 kết nối, sau đó test thật 5-20 EXE/APK ngoài mạng; kiểm đăng ký, relogin, shop, inventory, farm, chat, presence và action animation.
-5. Khi các tiêu chí trên đạt mới chuyển **Giai đoạn 2**: cài PostgreSQL, triển khai query thật trong `postgresStore`, bổ sung nơi lưu account local nếu còn giữ `/auth/register`, migration và backup.
+1. **Farm state hai chiều:** mở rộng DTO Unity cho buildings/tiles/crops/animals/resources, load trước khi khôi phục world và save về server theo checkpoint.
+2. **Daily limits:** đọc đầy đủ `limits` từ bootstrap; giữ đào đá public theo transaction hiện tại và chuyển câu cá sang server-authoritative theo giờ server.
+3. **Kiểm thử Phase 1:** test tự động 20 kết nối, sau đó test thật 5-20 EXE/APK ngoài mạng; kiểm đăng ký, relogin, shop, inventory, farm, chat, presence và action animation.
+4. Khi các tiêu chí trên đạt mới chuyển **Giai đoạn 2**: cài PostgreSQL, triển khai query thật trong `postgresStore`, bổ sung nơi lưu account local nếu còn giữ `/auth/register`, migration và backup.
 
 ## Tiêu chí nghiệm thu ngắn
 

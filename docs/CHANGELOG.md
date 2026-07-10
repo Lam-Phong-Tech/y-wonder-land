@@ -32,9 +32,8 @@
 ### Verified
 - Unity C# compile pass; chỉ còn warning `enableStickAutoSprint` cũ không liên quan.
 
-### Cần test runtime
-- Trên cùng PC: A tạo thay đổi tiền/túi/farm/build/thú -> logout -> B đăng nhập không thấy dữ liệu A -> sửa B -> relog A và xác nhận A được khôi phục đúng.
-- Kiểm account đầu giữ legacy save cũ, account thứ hai không nhận ké legacy save.
+### Nghiệm thu runtime
+- Ngày 10/07 anh đã đổi A -> B -> A, sau đó đóng hẳn và mở lại EXE; hai tài khoản giữ đúng state riêng, không nhận dữ liệu của nhau và khôi phục đúng sau restart. Task cache theo `playerId` được chuyển `[x]`.
 
 ---
 ## [2026-07-10] — Shop transaction nguyên tử phía server
@@ -77,7 +76,7 @@
 - Ngày 10/07 anh đã test bản build nhiều client và xác nhận đồng bộ cây/đá, quyền nhận thưởng, biến mất và hồi sinh đều vận hành rất ổn.
 
 ### Còn lại
-- Shop transaction đã được chốt ở mục mới phía trên; tiếp theo là cache theo playerId, farm/daily-limit sync và test 5-20 người trước khi chốt xong Giai đoạn 1.
+- Shop transaction và cache theo `playerId` đã được chốt ở các mục mới phía trên; tiếp theo là farm/daily-limit sync và test 5-20 người trước khi chốt xong Giai đoạn 1.
 
 ---
 ## [2026-07-09] — Phase 1 backend account smoke test

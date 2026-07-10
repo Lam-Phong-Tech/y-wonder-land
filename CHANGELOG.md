@@ -25,6 +25,7 @@
 - Direct-tap interaction now allows only `0.05m` of surface tolerance after a solid collider, preventing City ground clicks from selecting water or fishing targets beneath the island while preserving the assist cast for nearby object colliders.
 
 ### Verified
+- Player-scoped cache runtime acceptance completed: the user switched between two accounts, fully exited the EXE, reopened it, and confirmed each account restored its own state without leakage.
 - Runtime acceptance completed for gameplay inventory/economy deltas and saved farm pose; the user tested the updated Unity flow on 10/07 and confirmed it works correctly.
 - Unity `Assembly-CSharp` compiles with the new mutation queue; only the existing unrelated `enableStickAutoSprint` warning remains. The full local Phase 1 smoke test passes.
 - A dedicated relogin API test verified `+20` watering water, `+2/-1` durian seed, and `+50/-20` Point return as `20`, `1`, and `5030` from bootstrap; retrying the water request with the same idempotency key did not double the reward.
@@ -40,9 +41,8 @@
 
 ### Needs Test
 - Exercise at least one add/remove path for crop harvest, fishing, animal feed/harvest, building materials, event reward, and tool upgrade, then relog and verify inventory/Point match the last accepted state.
-- On one PC, test account A -> logout -> account B -> logout -> account A. Point, inventory, tool/EXP, farm/build/animal and daily/event counters must remain isolated and return to the correct account.
 - Verify the first existing account keeps its legacy local save, while a second account does not inherit that legacy save.
-- Finish player-scoped local cache, farm/daily-limit sync, and 5-20 player acceptance before declaring Phase 1 complete.
+- Finish farm/daily-limit sync and 5-20 player acceptance before declaring Phase 1 complete.
 
 ## [Unreleased] - 2026-07-08 (Mobile shop item readability)
 
