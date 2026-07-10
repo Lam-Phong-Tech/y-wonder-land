@@ -14,6 +14,7 @@
 - Shared `city/mine` trees and rocks now use a server-owned claim cycle: one winner, atomic inventory/mining-limit reward, depletion broadcast, late-join snapshot, and 20-second respawn. Unity does not award the item locally before server confirmation.
 - The expanded realtime smoke test covers a winning harvest, rejected second claimant, late-join depleted snapshot, respawn broadcast, and the existing duplicate-session replacement rule.
 - Recorded candidate VPS `42.96.18.14` without storing its password. SSH `22` responded on an earlier check, but the latest work-machine check cannot reach `22/80/443/3000`; `api.ywonder.net` still resolves to `45.119.83.233`, so owner/infra confirmation is required before login or deployment.
+- The owner has now confirmed `42.96.18.14` is the dedicated game VPS, permitted for Node + PostgreSQL, expected to use Ubuntu Server 24.04 LTS, and will later receive `api.ywonder.net`. Added `docs/VPS_GAME_DEPLOYMENT_PLAN.md` with audit, hardening, PostgreSQL, deploy, DNS, acceptance and rollback gates; no credentials are stored.
 
 ### Fixed
 - Direct-tap interaction now allows only `0.05m` of surface tolerance after a solid collider, preventing City ground clicks from selecting water or fishing targets beneath the island while preserving the assist cast for nearby object colliders.
