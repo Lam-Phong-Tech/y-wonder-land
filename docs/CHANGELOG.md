@@ -11,7 +11,7 @@
 - Thêm `GameplayMutationSync`: mọi `AddItem/RemoveItem` và `Add/Spend Point/UPoint` khi đã đăng nhập được gửi tuần tự lên `inventory/adjust` hoặc `economy/apply`, mỗi thay đổi có idempotency key và retry giữ nguyên key.
 - Bootstrap, shop và logout chờ các thay đổi đang gửi xong trước khi áp snapshot server mới. Một cơ chế chung bao phủ hạt, nước, nông sản, gỗ/đá/cá, thức ăn, thú, phân bón, quà, vật liệu xây và tiền gameplay ngoài shop.
 - Logout lưu vị trí farm trước khi hủy nhân vật; đăng nhập hồ sơ cũ ưu tiên pose farm đã lưu rồi mới dùng vị trí bến.
-- VPS `42.96.18.14` đã truy cập được TCP `22` và bắt tay SSH; banner `OpenSSH_8.9p1 Ubuntu-3ubuntu0.15`, hỗ trợ password/public key. Chưa đăng nhập audit hoặc deploy và không lưu mật khẩu trong repo.
+- VPS `42.96.18.14` đã audit read-only: Ubuntu 22.04.5 LTS, KVM, 2 vCPU, RAM 3.8 GiB + swap 3.8 GiB, disk 50 GB còn khoảng 37 GB, timezone/NTP đúng. UFW deny inbound, chỉ SSH 22 mở; chưa có Node/PostgreSQL/Caddy/Nginx/Docker và không có app cũ cần giữ. Cấu hình đủ demo khoảng 20 người. Chi tiết tại `docs/VPS_GAME_AUDIT_2026-07-10.md`; chưa deploy và không lưu credential trong repo.
 
 ### Verified
 - Unity C# compile pass; chỉ còn warning auto-sprint cũ.

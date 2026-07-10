@@ -6,7 +6,7 @@ Ngay lap: 10/07/2026
 
 - VPS game rieng: `42.96.18.14`.
 - Tai khoan ban giao ban dau: `root`; mat khau phai giu ngoai Git, tai lieu va source code.
-- Anh da yeu cau Ubuntu Server 24.04 LTS. He dieu hanh thuc te chi duoc chot sau khi SSH va doc `/etc/os-release`.
+- Anh da yeu cau Ubuntu Server 24.04 LTS; audit thuc te xac nhan may dang chay Ubuntu 22.04.5 LTS (Jammy). Khuyen nghi giu 22.04 cho deadline demo, chi rebuild neu cong ty bat buoc 24.04.
 - Theo xac nhan cua anh, VPS chua co dich vu can giu lai va duoc phep cai game-server cung PostgreSQL.
 - Sau khi nghiem thu, `api.ywonder.net` se tro ve `42.96.18.14`.
 - Website `ywonder.net` va Web Account API van la he thong rieng; game-server se goi Web API theo ket noi server-to-server khi bat lai web auth.
@@ -16,10 +16,12 @@ Trang thai truy cap hien tai:
 
 - TCP `22` da toi duoc tu may lam viec; SSH handshake thanh cong.
 - Banner xac nhan `OpenSSH_8.9p1 Ubuntu-3ubuntu0.15`, fingerprint ED25519 `SHA256:dpAuiUAA7K0h3iDDGxys6XOpHv1uVRGUSW4y23qYgZk`, ho tro `publickey,password`.
-- Chua dang nhap nen chua chot `/etc/os-release`, CPU/RAM/disk/firewall/service; `80/443/3000` cung chua duoc cau hinh cho game-server.
+- Audit read-only da dat: KVM, 2 vCPU, RAM 3.8 GiB + swap 3.8 GiB, disk 50 GB con khoang 37 GB, timezone Asia/Ho_Chi_Minh va NTP active.
+- UFW active, deny incoming mac dinh; chi `22/tcp` dang listen/duoc allow. `80/443/3000/5432` chua public.
+- Chua co Node/npm, PostgreSQL, Caddy/Nginx hoac Docker; khong co failed service hay ung dung cu can bao ton.
 - `api.ywonder.net` hien van phan giai ve `45.119.83.233`, chua tro sang VPS game moi.
 
-Moc mo cong SSH da dat; buoc ke tiep la audit read-only truoc khi cai dat.
+Moc A audit read-only da dat. Bao cao: `docs/VPS_GAME_AUDIT_2026-07-10.md`.
 
 ## 2. So do dich vu muc tieu
 
@@ -60,12 +62,14 @@ Khong mo truc tiep cong `3000` hoac `5432` ra Internet. Unity chi ket noi qua HT
 
 ### Moc A - Khoi phuc truy cap va audit chi doc
 
+Trang thai: **DAT ngay 10/07/2026**.
+
 Can lam:
 
 - Owner xac nhan VPS dang bat va mo SSH `22` cho may lam viec, hoac cung cap co che whitelist/VPN neu co.
 - SSH vao bang `root` mot lan de kiem tra, chua cai dat hay xoa gi.
 - Ghi lai: OS/version, CPU, RAM, disk, timezone, public IP, hostname, cac cong dang nghe, firewall va cac service dang chay.
-- Xac nhan dung Ubuntu 24.04 LTS; neu khac, bao lai anh truoc khi quyet dinh cai tiep hay rebuild VPS.
+- OS thuc te la Ubuntu 22.04.5 LTS; da bao cao va khuyen nghi giu de phuc vu deadline demo.
 
 Ket qua dat:
 
@@ -77,7 +81,7 @@ Ket qua dat:
 
 Lam song song trong repo, khong phu thuoc VPS:
 
-- Tach PlayerPrefs/cache theo `playerId` de tai khoan A khong doc du lieu cua tai khoan B tren cung may.
+- `[x]` Tach PlayerPrefs/cache theo `playerId`; A -> B -> A va full EXE restart da pass.
 - Noi `farm_state` hai chieu cho build/tile/crop/animal.
 - Doc va ghi `daily_limits` theo gio server, uu tien cau ca va dao mo.
 - Chay test tu dong 20 ket noi va test that 5-20 EXE/APK.

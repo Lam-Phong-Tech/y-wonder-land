@@ -18,6 +18,7 @@
 - Shared `city/mine` trees and rocks now use a server-owned claim cycle: one winner, atomic inventory/mining-limit reward, depletion broadcast, late-join snapshot, and 20-second respawn. Unity does not award the item locally before server confirmation.
 - The expanded realtime smoke test covers a winning harvest, rejected second claimant, late-join depleted snapshot, respawn broadcast, and the existing duplicate-session replacement rule.
 - Recorded candidate VPS `42.96.18.14` without storing its password. TCP `22` and the SSH handshake are now reachable from the work machine; the server identifies as `OpenSSH_8.9p1 Ubuntu-3ubuntu0.15` and offers public-key/password auth. No authenticated audit, deployment, or client URL change has happened yet.
+- Completed a read-only VPS audit: Ubuntu 22.04.5 LTS, KVM, 2 vCPU, 3.8 GiB RAM plus 3.8 GiB swap, 50 GB disk with about 37 GB free, Asia/Ho_Chi_Minh with synchronized NTP. UFW denies inbound by default and only SSH 22 is open. Node, PostgreSQL, Caddy/Nginx, and Docker are not installed; no application service or failed unit needs preservation. Added `docs/VPS_GAME_AUDIT_2026-07-10.md`.
 - The owner has now confirmed `42.96.18.14` is the dedicated game VPS, permitted for Node + PostgreSQL, expected to use Ubuntu Server 24.04 LTS, and will later receive `api.ywonder.net`. Added `docs/VPS_GAME_DEPLOYMENT_PLAN.md` with audit, hardening, PostgreSQL, deploy, DNS, acceptance and rollback gates; no credentials are stored.
 
 ### Fixed
