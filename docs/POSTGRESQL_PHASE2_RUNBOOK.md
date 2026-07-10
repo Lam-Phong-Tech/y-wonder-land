@@ -91,10 +91,11 @@ Hoàn tất ngày 11/07/2026:
 
 ## Còn thiếu để chạy staging/production
 
-- Chưa thử reboot toàn VPS rồi xác nhận PostgreSQL/timer tự lên; thực hiện sau khi có cả Node/Caddy service để test một lần trọn bộ.
-- Chưa cài Node.js/Caddy trên VPS, chưa có `systemd` game service.
-- Chưa deploy backend, chưa chạy localhost REST/WebSocket smoke bằng env production.
+- Private staging đã deploy commit `ebc9982` với Node 24.18.0 LTS, Caddy 2.11.4 và `ywonder-game-server.service`; health PostgreSQL cùng full Phase 1 REST/WebSocket smoke qua Caddy đều pass.
+- Node chỉ listen `127.0.0.1:3000`; Caddy staging chỉ listen `127.0.0.1:8080`. Từ ngoài VPS các cổng này đều đóng.
+- Chưa thử reboot toàn VPS rồi xác nhận PostgreSQL/backup timer/Node/Caddy tự lên.
+- Chưa hardening auth/rate-limit/log cho public traffic.
 - Chưa mở `80/443`, chưa đổi DNS `api.ywonder.net`, chưa bật HTTPS/WSS.
-- Chưa khóa root/password SSH; vẫn giữ làm rollback cho tới khi Node/Caddy provisioning và reboot smoke hoàn tất.
+- Chưa khóa root/password SSH; vẫn giữ làm rollback cho tới khi public cutover và reboot smoke hoàn tất.
 
 Không dùng role `deploy` hoặc database `ywonder_test` làm dữ liệu thật.

@@ -1,0 +1,34 @@
+[Unit]
+Description=Y Wonder Green Farm game backend
+Wants=network-online.target
+After=network-online.target postgresql.service
+Requires=postgresql.service
+
+[Service]
+Type=simple
+User=ywonder_game
+Group=ywonder_game
+WorkingDirectory=/opt/ywonder-game/current
+EnvironmentFile=/etc/ywonder-game/game-server.env
+ExecStart=/usr/local/bin/node /opt/ywonder-game/current/index.js
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=20
+KillSignal=SIGTERM
+UMask=0027
+LimitNOFILE=65536
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+[Install]
+WantedBy=multi-user.target

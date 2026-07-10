@@ -1,0 +1,10 @@
+{
+    admin off
+}
+
+# Private staging proxy. Keep both this listener and Node on loopback until
+# api.ywonder.net is ready for the public HTTPS cutover.
+http://127.0.0.1:8080 {
+    bind 127.0.0.1
+    reverse_proxy 127.0.0.1:3000
+}

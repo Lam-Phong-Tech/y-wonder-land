@@ -118,35 +118,37 @@ Chi lam sau khi Moc A pass:
 
 - Cap nhat goi he thong va bat dong bo thoi gian.
 - `[x]` Ngay 11/07 da tao user khong dac quyen `deploy`, cai ED25519 public key va kiem tra batch login thanh cong. `.ssh` la `700`, `authorized_keys` la `600`; root/password/sshd/UFW van giu nguyen de rollback.
-- `[~]` Firewall van chi cho phep SSH `22`; PostgreSQL `5432` va Node `3000` khong public. HTTP `80`/HTTPS `443` chi mo sau khi Caddy va localhost smoke pass.
-- `[x]` PostgreSQL 14.23 da cai, active/enabled va chi listen `127.0.0.1:5432`; Node.js/Caddy tren VPS chua cai.
+- `[~]` Firewall van chi cho phep SSH `22`; PostgreSQL `5432`, Node `3000` va Caddy staging `8080` khong public. HTTP `80`/HTTPS `443` chi mo o Moc F sau hardening va xac nhan DNS.
+- `[x]` PostgreSQL 14.23, Node 24.18.0 LTS va Caddy 2.11.4 da cai. PostgreSQL active/enabled va chi listen `127.0.0.1:5432`.
 - `[x]` `ywonder_test` + role `deploy` van chi de integration test. Da tao OS service account, PostgreSQL role quyen toi thieu va database production rieng ten `ywonder_game`; app se ket noi bang peer auth qua Unix socket, khong luu DB password.
 - `[x]` Da tao env production ngoai repo tai `/etc/ywonder-game/game-server.env`; file chi cho root va service group doc, JWT sinh truc tiep tren VPS. Admin/demo/web-auth dang tat theo default an toan.
 - `[x]` Da tao `ywonder-db-backup.service/.timer`; timer enabled/active, backup dau tien va restore drill database tam deu pass, database tam da duoc xoa.
-- `[ ]` Chua tao `systemd` service cho Node game-server.
+- `[x]` Da deploy commit `ebc9982` va tao `ywonder-game-server.service`; game-server va Caddy deu enabled/active.
 
 Ket qua dat:
 
-- Node/PostgreSQL/Caddy tu khoi dong lai sau reboot.
+- `[~]` Node/PostgreSQL/Caddy deu enabled; chua reboot VPS de nghiem thu auto-start tron bo.
 - `[x]` Database chi nghe local.
-- Backend chi nghe `127.0.0.1:3000`.
+- `[x]` Backend chi nghe `127.0.0.1:3000`; Caddy staging co `bind 127.0.0.1` va chi nghe `127.0.0.1:8080`.
 - `[x]` Backup tao duoc va thu restore thanh cong tren database test.
 
 ### Moc E - Deploy staging tren VPS
 
-Can lam:
+Trang thai:
 
-- Deploy dung commit da nghiem thu, chay migration va import data demo neu can giu tai khoan cu.
+- `[x]` Da deploy commit `ebc9982`; migration `001_initial` skip dung vi da ap dung. Khong import JSON cu.
 - Cau hinh toi thieu:
   - `STORE_MODE=postgres`
-  - `DATABASE_URL=<secret tren VPS>`
+  - `DATABASE_URL=postgresql:///ywonder_game?host=/var/run/postgresql`
   - `JWT_SECRET=<secret dai tren VPS>`
   - `WEB_AUTH_MODE=disabled` cho tai khoan game local trong dot demo dau
   - `WEB_AUTH_LOGIN_URL=https://ywonder.net/api/game/auth` khi bat web auth
   - `REALTIME_MAX_ROOM_PLAYERS=20`
   - `ADMIN_DASHBOARD_ENABLED=false`
+  - `HOST=127.0.0.1`
   - `PORT=3000`
-- Test `/health`, register, login, bootstrap, shop va WebSocket ngay tren VPS truoc khi doi DNS.
+- `[x]` `/health`, register, login, bootstrap, shop, idempotency va WebSocket da pass qua Caddy staging noi bo.
+- `[ ]` Them hardening auth/rate-limit/log toi thieu truoc khi public.
 
 Luu y domain:
 
