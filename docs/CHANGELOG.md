@@ -5,6 +5,17 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-07-11] — Tạo lối SSH riêng cho deploy VPS
+
+### Changed
+- Đã tạo user không đặc quyền `deploy` trên VPS game và gắn ED25519 public key; không lưu password/private key trong repo.
+
+### Verified
+- Đăng nhập không tương tác bằng key đã pass với đúng `uid=1001(deploy)`.
+- Quyền sở hữu và mode đúng: `/home/deploy/.ssh` là `700`, `authorized_keys` là `600`, đều thuộc `deploy:deploy`.
+- Chưa đổi SSH server, chưa khóa `root/password`, chưa sửa UFW và chưa cài package nên đường rollback vẫn giữ nguyên.
+
+---
 ## [2026-07-10] — Đồng bộ tài nguyên gameplay ngoài shop
 
 ### Changed

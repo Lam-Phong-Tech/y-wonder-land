@@ -119,7 +119,7 @@ Ket qua dat:
 Chi lam sau khi Moc A pass:
 
 - Cap nhat goi he thong va bat dong bo thoi gian.
-- Tao user deploy rieng, cai SSH key, kiem tra dang nhap lai thanh cong.
+- `[x]` Ngay 11/07 da tao user khong dac quyen `deploy`, cai ED25519 public key va kiem tra batch login thanh cong. `.ssh` la `700`, `authorized_keys` la `600`; root/password/sshd/UFW van giu nguyen de rollback.
 - Cau hinh firewall: cho phep SSH co kiem soat, HTTP `80`, HTTPS `443`; chan public `3000` va `5432`.
 - Cai Node.js LTS phu hop, PostgreSQL, Git va Caddy.
 - Tao database/user rieng voi quyen toi thieu.
