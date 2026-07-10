@@ -275,10 +275,92 @@ async function main() {
       "mining player_state from second client"
     );
 
+    const resourceId = `smoke-rock-${Date.now()}`;
+    clientB.send({
+      type: "resource_manifest",
+      resources: [{
+        resourceId,
+        resourceType: "rock",
+        position: { x: 1, y: 2, z: 3 },
+      }],
+    });
+    await clientB.waitFor(
+      (msg) => msg.type === "resource_snapshot"
+        && Array.isArray(msg.resources)
+        && msg.resources.some((resource) => resource.resourceId === resourceId && resource.available === true),
+      "resource manifest snapshot"
+    );
+
+    const harvestRequestId = `harvest-${Date.now()}`;
+    clientB.send({ type: "resource_harvest", requestId: harvestRequestId, resourceId });
+    const harvestResult = await clientB.waitFor(
+      (msg) => msg.type === "resource_harvest_result"
+        && msg.requestId === harvestRequestId
+        && msg.accepted === true,
+      "accepted resource harvest"
+    );
+    if (!Array.isArray(harvestResult.rewards)
+        || !harvestResult.rewards.some((reward) => reward.itemId === "stone_01" && reward.quantity === 10)
+        || !harvestResult.inventory
+        || !Array.isArray(harvestResult.inventory.slots)) {
+      throw new Error("Accepted resource harvest is missing the authoritative stone reward/inventory snapshot.");
+    }
+
+    await Promise.all([
+      clientA.waitFor(
+        (msg) => msg.type === "resource_state"
+          && msg.resource
+          && msg.resource.resourceId === resourceId
+          && msg.resource.available === false,
+        "depleted resource broadcast on first client"
+      ),
+      clientB.waitFor(
+        (msg) => msg.type === "resource_state"
+          && msg.resource
+          && msg.resource.resourceId === resourceId
+          && msg.resource.available === false,
+        "depleted resource broadcast on harvester"
+      ),
+    ]);
+
+    const losingRequestId = `harvest-loser-${Date.now()}`;
+    clientA.send({ type: "resource_harvest", requestId: losingRequestId, resourceId });
+    await clientA.waitFor(
+      (msg) => msg.type === "resource_harvest_result"
+        && msg.requestId === losingRequestId
+        && msg.accepted === false
+        && msg.code === "RESOURCE_UNAVAILABLE",
+      "second harvester rejected"
+    );
+
+    if (clientC) {
+      clientC.send({ type: "join", room, name: third.username, gender: "male" });
+      const welcomeC = await clientC.waitFor(
+        (msg) => msg.type === "welcome" && msg.room === room,
+        `late join welcome ${room}`
+      );
+      if (!Array.isArray(welcomeC.resources)
+          || !welcomeC.resources.some((resource) => resource.resourceId === resourceId && resource.available === false)) {
+        throw new Error("Late join welcome does not include the depleted shared resource.");
+      }
+    }
+
+    const expectedRespawnMs = Number(process.env.REALTIME_TEST_EXPECT_RESPAWN_MS || 0);
+    if (expectedRespawnMs > 0) {
+      await clientA.waitFor(
+        (msg) => msg.type === "resource_state"
+          && msg.resource
+          && msg.resource.resourceId === resourceId
+          && msg.resource.available === true,
+        "resource respawn broadcast",
+        expectedRespawnMs
+      );
+    }
+
     clientA.send({ type: "join", room: "farm", name: first.username, gender: "male" });
     await clientA.waitFor((msg) => msg.type === "error" && msg.code === "ROOM_NOT_SHARED" && msg.room === "farm", "farm rejected");
 
-    console.log("[realtime-smoke] PASS: auth, join, welcome, global chat, action state/tool relay, and farm rejection all work.");
+    console.log("[realtime-smoke] PASS: auth, players/chat/actions, single-winner resource harvest, late-join snapshot, and farm rejection all work.");
   } finally {
     clientA.close();
     clientB.close();

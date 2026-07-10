@@ -128,9 +128,11 @@ Client -> server:
 | Type | Payload |
 |---|---|
 | `join` | `{ type, room: "city"|"mine", name, gender }` |
-| `player_state` | `{ type, position:{x,y,z}, yaw, animation:"Idle"|"Walk"|"Run" }` |
+| `player_state` | `{ type, position:{x,y,z}, yaw, animation, animationSpeed, tool }` |
 | `chat` | `{ type, message }` |
 | `emote` | `{ type, emote:"Waving"|"Pointing", duration }` |
+| `resource_manifest` | `{ type, resources:[{ resourceId, resourceType:"tree"|"rock", position }] }` |
+| `resource_harvest` | `{ type, requestId, resourceId }` |
 | `leave` | `{ type }` |
 
 Server -> client:
@@ -138,19 +140,22 @@ Server -> client:
 | Type | Payload |
 |---|---|
 | `connected` | `{ type, connectionId, sharedRooms, maxPlayers }` |
-| `welcome` | `{ type, selfId, room, players }` |
+| `welcome` | `{ type, selfId, room, players, resources }` |
 | `player_joined` | `{ type, player }` |
 | `player_left` | `{ type, playerId, room }` |
-| `player_state` | `{ type, playerId, name, room, gender, position, yaw, animation }` |
+| `player_state` | `{ type, playerId, name, room, gender, position, yaw, animation, animationSpeed, tool }` |
 | `chat` | `{ type, playerId, name, room, message }` |
 | `emote` | `{ type, playerId, name, room, emote, duration }` |
+| `resource_snapshot` | `{ type, room, resources:[{ resourceId, resourceType, position, available, respawnInSec, cycle }] }` |
+| `resource_state` | `{ type, resource:{ resourceId, resourceType, position, available, respawnInSec, cycle }, harvestedBy? }` |
+| `resource_harvest_result` | `{ type, requestId, resourceId, accepted, code, rewards, inventory, daily_limits, limit }` |
 
-Scope hiện tại: chat toàn server cho client còn kết nối WebSocket, remote player visual trong `city`/`mine`, tối đa 20 người/room. Chưa đồng bộ gameplay server-authoritative.
+Scope hiện tại: chat toàn server cho client còn kết nối WebSocket, remote player visual trong `city`/`mine`, tối đa 20 người/room. Cây/đá public là lát gameplay server-authoritative đầu tiên: server chỉ cho một claim thắng, ghi inventory + lượt đào nguyên tử/idempotent, broadcast depletion và hồi sinh sau 20 giây. Registry tài nguyên hiện nằm trong RAM Node nên reset khi backend restart.
 
 Quy ước theo yêu cầu trước mắt của sếp:
 - Realtime public island chỉ áp dụng cho `city`, `mine`, và các đảo non-farm sau này.
 - `farm` không phải public realtime room. Farm là private state theo account, sync qua REST/action log ở phase farm-state; client rời room public nhưng vẫn giữ WebSocket cho chat global.
-- WebSocket không được dùng để quyết định tiền/item/shop. Các giao dịch nhạy cảm vẫn đi qua REST server-authoritative có `idempotency_key`.
+- Shop/Point vẫn phải dùng transaction server-authoritative có `idempotency_key`; không cộng/trừ trực tiếp ở Unity. Riêng claim cây/đá đi qua WebSocket nhưng server vẫn ghi transaction inventory/daily-limit trước khi trả kết quả và broadcast world state.
 
 ---
 

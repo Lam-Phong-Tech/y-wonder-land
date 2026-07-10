@@ -2,6 +2,8 @@
 
 # Dùng khi bắt đầu conversation MỚI với AI
 
+- **Cập nhật 10/07/2026 - sửa login sai và đồng bộ cây/đá public:** commit `a40882f` đã giữ mã lỗi JSON từ backend để tài khoản không tồn tại/sai mật khẩu hiện đúng lỗi, không còn báo nhầm máy chủ tạm ngừng. Lát resource mới đang chờ commit: Node là nguồn quyết định cây/đá ở `city/mine`, chỉ claim đầu tiên nhận thưởng; inventory + lượt đào ghi nguyên tử/idempotent; mọi client nhận trạng thái biến mất, người vào sau nhận snapshot, tài nguyên hồi sau 20 giây. `phase1SmokeTest.js` và `realtimeSmokeTest.js` mở rộng đều pass trên backend temp, sau đó cùng smoke REST/WebSocket/resource pass qua Quick Tunnel public mới; Unity compile `Assembly-CSharp` thành công. **Cần test runtime trước khi tick x:** build hai client, cùng đào một viên đá, chỉ một máy nhận thưởng, cả hai cùng thấy đá biến mất/hồi lại. Giới hạn Phase 1: state viên đá đang chờ hồi nằm trong RAM Node và reset khi backend restart.
+
 ## Cách dùng
 
 Copy đoạn prompt bên dưới → paste vào chat mới → AI sẽ tự đọc và hiểu dự án.

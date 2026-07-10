@@ -34,6 +34,7 @@ class PostgresStore {
   getInventory() { this.notImplemented(); }
   setInventory() { this.notImplemented(); }
   adjustInventoryItem() { this.notImplemented(); }
+  applyResourceHarvest() { this.notImplemented(); }
   getFarmState() { this.notImplemented(); }
   setFarmState() { this.notImplemented(); }
   getDailyLimits() { this.notImplemented(); }

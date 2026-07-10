@@ -7,13 +7,18 @@
 - Remote avatars resolve child Animators and toggle only visual equipment while gameplay components remain disabled.
 - The realtime smoke test now verifies Jump and Mining + Pickaxe relay.
 - Added `docs/PHASE1_STATE_SYNC_AUDIT.md` with the verified server/local ownership matrix and the next server-authoritative vertical slice.
+- Login failures now preserve backend JSON error codes; unknown users and wrong passwords show the credential error instead of being overwritten by the disabled web-auth fallback's 503 response.
+- Shared `city/mine` trees and rocks now use a server-owned claim cycle: one winner, atomic inventory/mining-limit reward, depletion broadcast, late-join snapshot, and 20-second respawn. Unity does not award the item locally before server confirmation.
+- The expanded realtime smoke test covers a winning harvest, rejected second claimant, late-join depleted snapshot, respawn broadcast, and the existing duplicate-session replacement rule.
 
 ### Verified
 - A temporary backend on port `3107` passed auth, room join, global chat, action state/tool relay, farm rejection, and duplicate-session replacement code 4008.
 - The active Unity Editor imported the changed scripts without C# compile errors.
+- The user confirmed remote action animations work in the two-client build.
+- Temporary backends on ports `3188` and `3189` passed the expanded realtime resource smoke and the full Phase 1 regression smoke; the same resource/WebSocket smoke then passed through the refreshed public Quick Tunnel. Unity rebuilt `Assembly-CSharp` successfully.
 
 ### Needs Test
-- Build two clients and verify remote jump, swim, hoe, mining, chop, watering, fishing, feeding, and planting visuals.
+- Build two clients, mine the same rock, and verify only one receives rewards while both see the same depletion and 20-second respawn.
 - Finish atomic shop transactions, player-scoped local cache, farm/daily-limit sync, and 5-20 player acceptance before declaring Phase 1 complete.
 
 ## [Unreleased] - 2026-07-08 (Mobile shop item readability)

@@ -183,6 +183,9 @@ namespace YWonderLand.Environment
             if (string.IsNullOrEmpty(resource.yieldItemId))
                 resource.yieldItemId = resource.type == HarvestableResource.ResourceType.Tree ? "wood_01" : "stone_01";
 
+            if (RequiresServerResourceSync())
+                return HarvestSharedResourceTick(resource, delta);
+
             string yieldId = resource.yieldItemId;
             var inv = YWonderLand.Managers.InventoryManager.Instance;
             int before = (inv != null && !string.IsNullOrEmpty(yieldId)) ? inv.GetItemQuantity(yieldId) : 0;
@@ -214,6 +217,126 @@ namespace YWonderLand.Environment
                 YWonderLand.Managers.AudioManager.Instance?.PlaySFX("chop");
             }
             return done;
+        }
+
+        private bool HarvestSharedResourceTick(HarvestableResource resource, float delta)
+        {
+            if (resource == null || !resource.isHarvestable) return false;
+
+            resource.currentProgress += Mathf.Max(0f, delta);
+            if (resource.currentProgress < Mathf.Max(0.1f, resource.harvestDuration)) return false;
+
+            resource.currentProgress = 0f;
+            var realtime = YWonderLand.Realtime.RealtimeClient.Instance;
+            bool queued = realtime != null && realtime.TryRequestResourceHarvest(
+                resource,
+                result => HandleSharedResourceHarvestResult(resource, result));
+            if (!queued)
+                ScreenToast.Show("Mất kết nối máy chủ. Chưa thể khai thác tài nguyên.");
+            return true;
+        }
+
+        private void HandleSharedResourceHarvestResult(
+            HarvestableResource resource,
+            YWonderLand.Realtime.RealtimeClient.ResourceHarvestResult result)
+        {
+            if (result == null || !result.accepted)
+            {
+                string code = result != null ? result.code : "RESOURCE_REWARD_FAILED";
+                if (code == "RESOURCE_UNAVAILABLE")
+                    ScreenToast.Show("Tài nguyên vừa được người chơi khác khai thác.");
+                else if (code == "DAILY_LIMIT_EXCEEDED")
+                {
+                    SetServerMiningTurns(0);
+                    ScreenToast.Show("Hết lượt đào hôm nay rồi! Mai quay lại nhé.");
+                }
+                else if (code == "RESOURCE_TOO_FAR")
+                    ScreenToast.Show("Hãy đứng gần tài nguyên hơn để khai thác.");
+                else
+                    ScreenToast.Show("Mất kết nối máy chủ. Chưa nhận tài nguyên.");
+                return;
+            }
+
+            bool minedRock = resource != null
+                ? resource.type == HarvestableResource.ResourceType.Rock
+                : result.resourceType == "rock";
+            var resourceType = minedRock
+                ? HarvestableResource.ResourceType.Rock
+                : HarvestableResource.ResourceType.Tree;
+            string yieldId = minedRock ? "stone_01" : "wood_01";
+            int gained = 0;
+            GemstoneMiningReward gemstoneReward = null;
+
+            foreach (var reward in result.rewards)
+            {
+                if (reward == null || reward.quantity <= 0) continue;
+                if (reward.kind == "bonus")
+                {
+                    gemstoneReward = new GemstoneMiningReward(
+                        reward.itemId,
+                        reward.displayName,
+                        reward.quantity,
+                        1f);
+                }
+                else
+                {
+                    yieldId = reward.itemId;
+                    gained += reward.quantity;
+                }
+            }
+
+            if (minedRock && result.miningTurnsRemaining >= 0)
+                SetServerMiningTurns(result.miningTurnsRemaining);
+
+            ShowResourceHarvestToast(
+                resourceType,
+                yieldId,
+                gained,
+                gemstoneReward,
+                minedRock ? result.miningTurnsRemaining : -1);
+            YWonderLand.Managers.ExperienceManager.Instance?.AddEXP(minedRock ? mineExp : resourceExp);
+            YWonderLand.Managers.AudioManager.Instance?.PlaySFX("chop");
+        }
+
+        private void SetServerMiningTurns(int remaining)
+        {
+            miningTurnsLeft = Mathf.Clamp(remaining, 0, Mathf.Max(0, dailyMiningTurns));
+            PlayerPrefs.SetString(MiningLastDateKey, System.DateTime.Now.ToString("yyyy-MM-dd"));
+            PlayerPrefs.SetInt(MiningTurnsLeftKey, miningTurnsLeft);
+            PlayerPrefs.Save();
+        }
+
+        private static bool RequiresServerResourceSync()
+        {
+            var realtime = YWonderLand.Realtime.RealtimeClient.Instance;
+            return realtime != null && realtime.RequiresServerResourceSync;
+        }
+
+        private static bool IsServerResourceSyncReady(bool showToast)
+        {
+            var realtime = YWonderLand.Realtime.RealtimeClient.Instance;
+            if (realtime == null || !realtime.RequiresServerResourceSync) return true;
+            if (realtime.CanUseServerResourceSync) return true;
+
+            if (showToast)
+                ScreenToast.Show("Đang kết nối máy chủ. Vui lòng thử lại sau.");
+            return false;
+        }
+
+        public void OnSharedResourceUnavailable(HarvestableResource resource)
+        {
+            if (resource == null) return;
+
+            bool wasCurrent = currentHarvestTarget == resource;
+            bool wasHeld = _buttonHeldResource == resource;
+            if (wasCurrent)
+            {
+                currentHarvestTarget = null;
+                CancelTimedAction(null);
+            }
+            if (wasHeld) _buttonHeldResource = null;
+            if (wasCurrent || wasHeld)
+                YWonderLand.UI.ResourceInteractionUIController.Instance?.Hide();
         }
 
         private GemstoneMiningReward RollGemstoneReward()
@@ -2058,7 +2181,11 @@ namespace YWonderLand.Environment
                 ScreenToast.Show("Chỉ đào đá được ở Thành phố hoặc Đảo mỏ thôi!");
                 return;
             }
-            if (resource != null && resource.type == HarvestableResource.ResourceType.Rock && !HasMiningTurnsRemaining(true))
+            if (!IsServerResourceSyncReady(true)) return;
+            if (resource != null
+                && resource.type == HarvestableResource.ResourceType.Rock
+                && !RequiresServerResourceSync()
+                && !HasMiningTurnsRemaining(true))
                 return;
 
             if (GetResourceDistanceToPlayer(resource) > GetResourceActionRange(resource))
@@ -2070,7 +2197,10 @@ namespace YWonderLand.Environment
         private void StartResourceTimedAction(HarvestableResource resource)
         {
             if (resource == null || !resource.isHarvestable) return;
-            if (resource.type == HarvestableResource.ResourceType.Rock && !HasMiningTurnsRemaining(true)) return;
+            if (!IsServerResourceSyncReady(true)) return;
+            if (resource.type == HarvestableResource.ResourceType.Rock
+                && !RequiresServerResourceSync()
+                && !HasMiningTurnsRemaining(true)) return;
 
             currentHarvestTarget = resource;
             resource.CancelHarvest();
@@ -2109,10 +2239,13 @@ namespace YWonderLand.Environment
         private void HoldChopResource(HarvestableResource resource)
         {
             if (resource == null || !resource.isHarvestable) { _buttonHeldResource = null; return; }
+            if (!IsServerResourceSyncReady(true)) { _buttonHeldResource = null; return; }
 
             PlayerController player = PlayerController.Instance;
             if (GetResourceDistanceToPlayer(resource) > GetResourceActionRange(resource)) return; // quá xa -> khựng
-            if (resource.type == HarvestableResource.ResourceType.Rock && !HasMiningTurnsRemaining(true))
+            if (resource.type == HarvestableResource.ResourceType.Rock
+                && !RequiresServerResourceSync()
+                && !HasMiningTurnsRemaining(true))
             {
                 _buttonHeldResource = null;
                 return;
@@ -2176,7 +2309,10 @@ namespace YWonderLand.Environment
                 {
                     // Đào đá chỉ ở City hoặc Mine; bỏ qua tảng đá nếu đang ở đảo khác.
                     if (resource.type == HarvestableResource.ResourceType.Rock && !IsMiningAllowedHere()) continue;
-                    if (resource.type == HarvestableResource.ResourceType.Rock && !HasMiningTurnsRemaining(true)) return;
+                    if (!IsServerResourceSyncReady(true)) return;
+                    if (resource.type == HarvestableResource.ResourceType.Rock
+                        && !RequiresServerResourceSync()
+                        && !HasMiningTurnsRemaining(true)) return;
 
                     // Quá xa thì không cho chặt/đập (đo tới điểm chạm, khớp với lúc hiện gợi ý)
                     Vector3 holdPlayerPos = PlayerController.Instance != null ? PlayerController.Instance.transform.position : transform.position;

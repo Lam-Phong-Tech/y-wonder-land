@@ -19,6 +19,43 @@ namespace YWonderLand.Realtime
     /// </summary>
     public class RealtimeClient : MonoBehaviour
     {
+        [Serializable]
+        public sealed class ResourceReward
+        {
+            public string itemId;
+            public string displayName;
+            public string kind;
+            public int quantity;
+        }
+
+        public sealed class ResourceHarvestResult
+        {
+            public bool accepted;
+            public string code;
+            public string resourceId;
+            public string resourceType;
+            public int miningTurnsRemaining = -1;
+            public readonly List<ResourceReward> rewards = new List<ResourceReward>();
+        }
+
+        private sealed class PendingResourceHarvest
+        {
+            public string resourceId;
+            public float expiresAt;
+            public Action<ResourceHarvestResult> callback;
+        }
+
+        private sealed class SharedResourceState
+        {
+            public string resourceId;
+            public string resourceType;
+            public Vector3 position;
+            public bool available;
+            public float respawnInSec;
+            public int cycle;
+            public string updatedAt;
+        }
+
         public static RealtimeClient Instance { get; private set; }
 
         private static readonly HashSet<string> SharedRooms = new HashSet<string> { "city", "mine" };
@@ -26,6 +63,9 @@ namespace YWonderLand.Realtime
         [Header("Connection")]
         [SerializeField] private float reconnectDelaySec = 5f;
         [SerializeField] private float stateSendIntervalSec = 0.15f;
+        [SerializeField] private float resourceManifestIntervalSec = 1.5f;
+        [SerializeField] private float resourceManifestRadius = 250f;
+        [SerializeField] private float resourceRequestTimeoutSec = 8f;
 
         private ClientWebSocket socket;
         private CancellationTokenSource socketCts;
@@ -36,12 +76,22 @@ namespace YWonderLand.Realtime
         private float nextConnectionCheck;
         private float nextReconnectAt;
         private float nextStateSendAt;
+        private float nextResourceManifestAt;
         private Vector3 lastSamplePosition;
         private float lastSampleTime;
         private readonly SemaphoreSlim sendLock = new SemaphoreSlim(1, 1);
 
         private readonly ConcurrentQueue<Action> mainThreadQueue = new ConcurrentQueue<Action>();
         private readonly Dictionary<string, RemotePlayerController> remotePlayers = new Dictionary<string, RemotePlayerController>();
+        private readonly Dictionary<string, YWonderLand.Environment.HarvestableResource> sharedResources =
+            new Dictionary<string, YWonderLand.Environment.HarvestableResource>();
+        private readonly Dictionary<int, string> resourceIdsByInstance = new Dictionary<int, string>();
+        private readonly Dictionary<string, SharedResourceState> sharedResourceStates =
+            new Dictionary<string, SharedResourceState>();
+        private readonly Dictionary<int, string> appliedResourceVersions = new Dictionary<int, string>();
+        private readonly Dictionary<string, PendingResourceHarvest> pendingResourceHarvests =
+            new Dictionary<string, PendingResourceHarvest>();
+        private readonly Dictionary<string, string> pendingRequestByResource = new Dictionary<string, string>();
         private static readonly HashSet<string> RemoteToolObjectNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
             "Axe",
@@ -59,6 +109,17 @@ namespace YWonderLand.Realtime
         };
 
         public bool IsConnected => socket != null && socket.State == WebSocketState.Open;
+        public bool RequiresServerResourceSync
+        {
+            get
+            {
+                string desiredRoom = GetDesiredRoom();
+                return !string.IsNullOrEmpty(desiredRoom)
+                    && AuthService.Instance != null
+                    && AuthService.Instance.IsSignedIn;
+            }
+        }
+        public bool CanUseServerResourceSync => RequiresServerResourceSync && IsConnected && !string.IsNullOrEmpty(currentRoom);
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Bootstrap()
@@ -100,6 +161,14 @@ namespace YWonderLand.Realtime
                 nextStateSendAt = Time.unscaledTime + stateSendIntervalSec;
                 SendLocalState();
             }
+
+            if (CanUseServerResourceSync && Time.unscaledTime >= nextResourceManifestAt)
+            {
+                nextResourceManifestAt = Time.unscaledTime + Mathf.Max(0.5f, resourceManifestIntervalSec);
+                SendResourceManifest();
+            }
+
+            TickPendingResourceHarvests();
         }
 
         private void OnDestroy()
@@ -119,6 +188,45 @@ namespace YWonderLand.Realtime
         {
             if (!IsConnected || string.IsNullOrEmpty(currentRoom)) return;
             _ = SendJsonAsync(new { type = "emote", emote, duration });
+        }
+
+        public bool TryRequestResourceHarvest(
+            YWonderLand.Environment.HarvestableResource resource,
+            Action<ResourceHarvestResult> callback)
+        {
+            if (resource == null || !CanUseServerResourceSync)
+            {
+                callback?.Invoke(new ResourceHarvestResult
+                {
+                    accepted = false,
+                    code = "REALTIME_DISCONNECTED",
+                });
+                return false;
+            }
+
+            string resourceId = RegisterSharedResource(resource);
+            if (string.IsNullOrEmpty(resourceId))
+            {
+                callback?.Invoke(new ResourceHarvestResult
+                {
+                    accepted = false,
+                    code = "RESOURCE_ID_MISSING",
+                });
+                return false;
+            }
+
+            if (pendingRequestByResource.ContainsKey(resourceId)) return true;
+
+            string requestId = Guid.NewGuid().ToString("N");
+            pendingResourceHarvests[requestId] = new PendingResourceHarvest
+            {
+                resourceId = resourceId,
+                expiresAt = Time.unscaledTime + Mathf.Max(2f, resourceRequestTimeoutSec),
+                callback = callback,
+            };
+            pendingRequestByResource[resourceId] = requestId;
+            _ = SendResourceHarvestAsync(resource, resourceId, requestId);
+            return true;
         }
 
         private void TickConnection()
@@ -204,6 +312,7 @@ namespace YWonderLand.Realtime
             currentRoom = "";
             serverSelfId = "";
             ClearRemotePlayers();
+            ClearSharedResourceSession();
 
             try
             {
@@ -260,6 +369,7 @@ namespace YWonderLand.Realtime
             _ = SendJsonAsync(new { type = "leave" });
             currentRoom = "";
             ClearRemotePlayers();
+            ClearSharedResourceSession();
         }
 
         private async Task SendJsonAsync(object payload)
@@ -393,6 +503,8 @@ namespace YWonderLand.Realtime
                     serverSelfId = msg.Value<string>("selfId") ?? serverSelfId;
                     Debug.Log($"[Realtime] Joined {currentRoom}: selfId={serverSelfId}, authUserId={AuthService.Instance?.UserId}");
                     SyncInitialPlayers(msg["players"] as JArray);
+                    SyncResourceSnapshot(msg["resources"] as JArray);
+                    nextResourceManifestAt = 0f;
                     break;
                 case "player_joined":
                     SpawnOrUpdateRemote(msg["player"] as JObject);
@@ -409,6 +521,15 @@ namespace YWonderLand.Realtime
                 case "emote":
                     PlayRemoteEmote(msg);
                     break;
+                case "resource_snapshot":
+                    SyncResourceSnapshot(msg["resources"] as JArray);
+                    break;
+                case "resource_state":
+                    ReceiveResourceState(msg["resource"] as JObject);
+                    break;
+                case "resource_harvest_result":
+                    ReceiveResourceHarvestResult(msg);
+                    break;
                 case "error":
                     string errorCode = msg.Value<string>("code") ?? "";
                     Debug.LogWarning($"[Realtime] Server error: {errorCode} {msg.Value<string>("message")}");
@@ -416,6 +537,277 @@ namespace YWonderLand.Realtime
                         HandleSessionReplaced();
                     break;
             }
+        }
+
+        private void SendResourceManifest()
+        {
+            if (!CanUseServerResourceSync) return;
+
+            PlayerController player = ResolveLocalPlayerForState();
+            if (player == null) return;
+
+            float maxDistance = Mathf.Max(25f, resourceManifestRadius);
+            float maxDistanceSqr = maxDistance * maxDistance;
+            var manifest = new List<object>();
+            foreach (var resource in FindObjectsByType<YWonderLand.Environment.HarvestableResource>(
+                         FindObjectsInactive.Include,
+                         FindObjectsSortMode.None))
+            {
+                if (resource == null || !resource.gameObject.scene.IsValid()) continue;
+                if ((resource.transform.position - player.transform.position).sqrMagnitude > maxDistanceSqr) continue;
+
+                string resourceId = RegisterSharedResource(resource);
+                if (string.IsNullOrEmpty(resourceId)) continue;
+                Vector3 pos = resource.transform.position;
+                manifest.Add(new
+                {
+                    resourceId,
+                    resourceType = resource.type == YWonderLand.Environment.HarvestableResource.ResourceType.Tree ? "tree" : "rock",
+                    position = new { x = pos.x, y = pos.y, z = pos.z },
+                });
+            }
+
+            if (manifest.Count > 0)
+                _ = SendJsonAsync(new { type = "resource_manifest", resources = manifest });
+        }
+
+        private async Task SendResourceHarvestAsync(
+            YWonderLand.Environment.HarvestableResource resource,
+            string resourceId,
+            string requestId)
+        {
+            Vector3 pos = resource != null ? resource.transform.position : Vector3.zero;
+            string resourceType = resource != null && resource.type == YWonderLand.Environment.HarvestableResource.ResourceType.Tree
+                ? "tree"
+                : "rock";
+
+            await SendJsonAsync(new
+            {
+                type = "resource_manifest",
+                resources = new[]
+                {
+                    new
+                    {
+                        resourceId,
+                        resourceType,
+                        position = new { x = pos.x, y = pos.y, z = pos.z },
+                    }
+                },
+            });
+            await SendJsonAsync(new { type = "resource_harvest", requestId, resourceId });
+        }
+
+        private string RegisterSharedResource(YWonderLand.Environment.HarvestableResource resource)
+        {
+            if (resource == null) return "";
+
+            int instanceId = resource.GetInstanceID();
+            if (resourceIdsByInstance.TryGetValue(instanceId, out string cachedId))
+            {
+                sharedResources[cachedId] = resource;
+                if (sharedResourceStates.TryGetValue(cachedId, out var cachedState))
+                    ApplyResourceState(resource, cachedState);
+                return cachedId;
+            }
+
+            var spawner = resource.GetComponentInParent<YWonderLand.Environment.ResourceSpawner>();
+            string owner = spawner != null && !string.IsNullOrWhiteSpace(spawner.spawnerID)
+                ? spawner.spawnerID.Trim()
+                : resource.gameObject.scene.name;
+            string localId = !string.IsNullOrWhiteSpace(resource.resourceId)
+                ? resource.resourceId.Trim()
+                : BuildHierarchyPath(resource.transform);
+            string type = resource.type == YWonderLand.Environment.HarvestableResource.ResourceType.Tree ? "tree" : "rock";
+            string networkId = $"{owner}:{type}:{localId}";
+
+            if (sharedResources.TryGetValue(networkId, out var existing) && existing != null && existing != resource)
+                networkId = $"{networkId}:{BuildHierarchyPath(resource.transform)}";
+
+            resourceIdsByInstance[instanceId] = networkId;
+            sharedResources[networkId] = resource;
+            if (sharedResourceStates.TryGetValue(networkId, out var state))
+                ApplyResourceState(resource, state);
+            return networkId;
+        }
+
+        private static string BuildHierarchyPath(Transform target)
+        {
+            if (target == null) return "resource";
+
+            var parts = new List<string>();
+            Transform current = target;
+            while (current != null)
+            {
+                parts.Add($"{current.name}[{current.GetSiblingIndex()}]");
+                current = current.parent;
+            }
+            parts.Reverse();
+            return string.Join("/", parts);
+        }
+
+        private void SyncResourceSnapshot(JArray resources)
+        {
+            if (resources == null) return;
+            foreach (JToken token in resources)
+            {
+                ReceiveResourceState(token as JObject);
+            }
+        }
+
+        private void ReceiveResourceState(JObject data)
+        {
+            if (data == null) return;
+
+            string resourceId = data.Value<string>("resourceId") ?? "";
+            if (string.IsNullOrEmpty(resourceId)) return;
+
+            var state = new SharedResourceState
+            {
+                resourceId = resourceId,
+                resourceType = data.Value<string>("resourceType") ?? "rock",
+                position = ParsePosition(data["position"] as JObject),
+                available = data.Value<bool?>("available") ?? true,
+                respawnInSec = data.Value<float?>("respawnInSec") ?? 0f,
+                cycle = data.Value<int?>("cycle") ?? 0,
+                updatedAt = data.Value<string>("updatedAt") ?? "",
+            };
+            sharedResourceStates[resourceId] = state;
+
+            if (sharedResources.TryGetValue(resourceId, out var resource) && resource != null)
+                ApplyResourceState(resource, state);
+        }
+
+        private void ApplyResourceState(
+            YWonderLand.Environment.HarvestableResource resource,
+            SharedResourceState state)
+        {
+            if (resource == null || state == null) return;
+
+            int instanceId = resource.GetInstanceID();
+            string version = $"{currentRoom}|{state.cycle}|{state.available}|{state.updatedAt}";
+            if (appliedResourceVersions.TryGetValue(instanceId, out string applied) && applied == version) return;
+            appliedResourceVersions[instanceId] = version;
+
+            resource.transform.position = state.position;
+            if (state.available)
+            {
+                resource.RestoreState(0f, 0.0);
+                return;
+            }
+
+            resource.CancelHarvest();
+            resource.RestoreState(Mathf.Max(0.1f, state.respawnInSec), 0.0);
+            resource.respawnTimer = 0f;
+            YWonderLand.Environment.FarmInteractionController.Instance?.OnSharedResourceUnavailable(resource);
+        }
+
+        private void ReceiveResourceHarvestResult(JObject data)
+        {
+            if (data == null) return;
+
+            ApplyServerInventory(data["inventory"] as JObject);
+            if (data["resource"] is JObject resourceState)
+                ReceiveResourceState(resourceState);
+
+            string requestId = data.Value<string>("requestId") ?? "";
+            if (string.IsNullOrEmpty(requestId) || !pendingResourceHarvests.TryGetValue(requestId, out var pending))
+                return;
+
+            var result = new ResourceHarvestResult
+            {
+                accepted = data.Value<bool?>("accepted") ?? false,
+                code = data.Value<string>("code") ?? "RESOURCE_REWARD_FAILED",
+                resourceId = data.Value<string>("resourceId") ?? pending.resourceId,
+                resourceType = data.Value<string>("resourceType") ?? "",
+                miningTurnsRemaining = data["limit"]?.Value<int?>("remaining") ?? -1,
+            };
+            if (data["rewards"] is JArray rewards)
+            {
+                foreach (JObject reward in rewards)
+                {
+                    result.rewards.Add(new ResourceReward
+                    {
+                        itemId = reward.Value<string>("itemId") ?? "",
+                        displayName = reward.Value<string>("displayName") ?? "",
+                        kind = reward.Value<string>("kind") ?? "resource",
+                        quantity = reward.Value<int?>("quantity") ?? 0,
+                    });
+                }
+            }
+
+            CompletePendingResourceHarvest(requestId, pending, result);
+        }
+
+        private static void ApplyServerInventory(JObject inventory)
+        {
+            if (inventory == null || YWonderLand.Managers.InventoryManager.Instance == null) return;
+
+            int maxSlots = inventory.Value<int?>("maxSlots") ?? 50;
+            var slots = new List<YWonderLand.Managers.InventorySlot>();
+            if (inventory["slots"] is JArray incomingSlots)
+            {
+                foreach (JObject slot in incomingSlots)
+                {
+                    string itemId = slot.Value<string>("itemId") ?? "";
+                    int quantity = slot.Value<int?>("quantity") ?? 0;
+                    if (!string.IsNullOrWhiteSpace(itemId) && quantity > 0)
+                        slots.Add(new YWonderLand.Managers.InventorySlot(itemId, quantity));
+                }
+            }
+            YWonderLand.Managers.InventoryManager.Instance.ApplyServerState(maxSlots, slots);
+        }
+
+        private void TickPendingResourceHarvests()
+        {
+            if (pendingResourceHarvests.Count == 0) return;
+
+            var expired = new List<string>();
+            foreach (var pair in pendingResourceHarvests)
+            {
+                if (Time.unscaledTime >= pair.Value.expiresAt) expired.Add(pair.Key);
+            }
+
+            foreach (string requestId in expired)
+            {
+                if (!pendingResourceHarvests.TryGetValue(requestId, out var pending)) continue;
+                CompletePendingResourceHarvest(requestId, pending, new ResourceHarvestResult
+                {
+                    accepted = false,
+                    code = "RESOURCE_REQUEST_TIMEOUT",
+                    resourceId = pending.resourceId,
+                });
+            }
+        }
+
+        private void CompletePendingResourceHarvest(
+            string requestId,
+            PendingResourceHarvest pending,
+            ResourceHarvestResult result)
+        {
+            pendingResourceHarvests.Remove(requestId);
+            if (pending != null && !string.IsNullOrEmpty(pending.resourceId))
+                pendingRequestByResource.Remove(pending.resourceId);
+
+            try { pending?.callback?.Invoke(result); }
+            catch (Exception e) { Debug.LogWarning($"[Realtime] Resource result callback failed: {e.Message}"); }
+        }
+
+        private void ClearSharedResourceSession()
+        {
+            foreach (var pair in new List<KeyValuePair<string, PendingResourceHarvest>>(pendingResourceHarvests))
+            {
+                CompletePendingResourceHarvest(pair.Key, pair.Value, new ResourceHarvestResult
+                {
+                    accepted = false,
+                    code = "REALTIME_DISCONNECTED",
+                    resourceId = pair.Value.resourceId,
+                });
+            }
+            sharedResources.Clear();
+            resourceIdsByInstance.Clear();
+            sharedResourceStates.Clear();
+            appliedResourceVersions.Clear();
+            pendingRequestByResource.Clear();
         }
 
         private void HandleSessionReplaced()

@@ -12,13 +12,18 @@
 - `RemotePlayerController` tìm Animator cả ở child prefab và chỉ bật model dụng cụ ở remote, không kích hoạt gameplay component của người khác.
 - `server/realtimeServer.js` relay `animationSpeed` và `tool`; smoke test kiểm `Jump` và `Mining + Pickaxe`.
 - Thêm `docs/PHASE1_STATE_SYNC_AUDIT.md` phân loại từng nhóm dữ liệu đã đọc/ghi server hay vẫn local.
+- Sửa phân loại lỗi đăng nhập: `ApiClient` giữ mã lỗi JSON, nên tài khoản không tồn tại/sai mật khẩu không còn bị fallback web-auth 503 ghi đè thành thông báo máy chủ tạm ngừng.
+- Đồng bộ cây/đá public `city/mine` theo server: một người claim thắng, inventory + lượt đào ghi nguyên tử/idempotent, broadcast biến mất, snapshot cho người vào sau và hồi lại sau 20 giây. Unity chỉ cập nhật túi khi server xác nhận.
+- Mở rộng realtime smoke test để kiểm người thắng nhận thưởng, người thứ hai bị từ chối, late join thấy tài nguyên đã biến mất, respawn broadcast và session replacement 4008 vẫn hoạt động.
 
 ### Verified
 - Backend tạm port `3107` pass auth, join, global chat, action state/tool relay, farm rejection và duplicate session 4008.
 - Unity Editor hiện tại import các script realtime không có lỗi biên dịch C#.
+- Anh đã xác nhận hoạt ảnh realtime chạy tốt trên hai client.
+- Backend temp port `3188` pass smoke tài nguyên nhiều client; port `3189` pass toàn bộ Phase 1 regression; cùng smoke REST/WebSocket/resource pass tiếp qua Quick Tunnel public mới. Unity build lại `Assembly-CSharp` thành công.
 
 ### Còn lại
-- Build hai client để xác nhận action animation/tool ở runtime.
+- Build hai client cùng đào một viên đá: chỉ một máy nhận thưởng, cả hai cùng thấy đá biến mất và hồi lại sau 20 giây.
 - Làm shop transaction server-authoritative, cache theo playerId, farm/daily-limit sync và test 5-20 người trước khi chốt xong Giai đoạn 1.
 
 ---

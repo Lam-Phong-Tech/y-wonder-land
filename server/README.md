@@ -240,8 +240,13 @@ MVP scope:
 - farm không join realtime room công cộng; farm là private state theo account và sync bằng REST/action log sau
 - global chat across server, including connected clients that are not currently in a shared room
 - max players per room: `REALTIME_MAX_ROOM_PLAYERS` (default `20`)
-- remote player position/yaw/`Idle`/`Walk`/`Run`
+- remote player position/yaw, active animation, animation speed and held tool
 - emotes: `Waving`, `Pointing`
+- shared tree/rock manifest and snapshot per room
+- server-authoritative resource claim: first claimant wins; reward inventory and the mining daily limit are written atomically
+- resource depletion is broadcast to all clients, included for late joiners, and respawns after `REALTIME_RESOURCE_RESPAWN_SEC` (default `20`)
+
+Shared resource state is in Node memory for Phase 1. Restarting the backend resets the room resource registry; PostgreSQL persistence is deferred to Phase 2.
 
 Nginx/Caddy must allow WebSocket Upgrade for `/realtime`, not only normal HTTP.
 

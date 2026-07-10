@@ -323,7 +323,7 @@ app.use("/game-api", api);
 app.use("/", api);
 
 const server = http.createServer(app);
-attachRealtimeServer(server, { verifyToken: verifyTokenPayload });
+attachRealtimeServer(server, { verifyToken: verifyTokenPayload, store });
 
 server.listen(PORT, () => {
   console.log(`[ywonderland-stub] listening on :${PORT}`);

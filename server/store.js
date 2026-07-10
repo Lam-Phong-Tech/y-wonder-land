@@ -411,6 +411,113 @@ class JsonStore {
     return { ok: true, inventory, transaction };
   }
 
+  applyResourceHarvest(playerId, rewards, options = {}) {
+    const db = this.readAll();
+    this.ensurePlayerStateInDb(db, playerId);
+
+    const idempotencyKey = String(options.idempotencyKey || "").trim();
+    const existing = findTransactionByIdempotency(db, idempotencyKey);
+    if (existing) {
+      return {
+        ok: true,
+        inventory: existing.inventoryAfter || db.inventories[playerId],
+        daily_limits: existing.dailyLimitsAfter || db.dailyLimits[playerId],
+        limit: existing.limitAfter || null,
+        rewards: existing.rewards || [],
+        transaction: existing,
+        duplicate: true,
+      };
+    }
+
+    const normalizedRewards = (Array.isArray(rewards) ? rewards : [])
+      .map((reward) => ({
+        itemId: String(reward && reward.itemId || "").trim(),
+        quantity: Math.max(0, toInt(reward && reward.quantity, 0)),
+        displayName: String(reward && reward.displayName || "").trim(),
+        kind: String(reward && reward.kind || "resource").trim(),
+      }))
+      .filter((reward) => reward.itemId && reward.quantity > 0);
+
+    if (normalizedRewards.length === 0) {
+      return {
+        ok: false,
+        error: "MISSING_REWARDS",
+        inventory: db.inventories[playerId],
+        daily_limits: db.dailyLimits[playerId],
+      };
+    }
+
+    const dailyLimits = db.dailyLimits[playerId];
+    let limit = null;
+    const limitOptions = options.dailyLimit;
+    if (limitOptions) {
+      const key = String(limitOptions.key || "").trim();
+      if (!key) {
+        return {
+          ok: false,
+          error: "MISSING_LIMIT_KEY",
+          inventory: db.inventories[playerId],
+          daily_limits: dailyLimits,
+        };
+      }
+
+      const amount = Math.max(1, toInt(limitOptions.amount, 1));
+      const maxCount = Math.max(1, toInt(limitOptions.maxCount, 10));
+      const periodKey = String(limitOptions.periodKey || todayKey());
+      limit = this.ensureDefaultDailyLimit(dailyLimits, key, maxCount, periodKey);
+      if (limit.used + amount > limit.maxCount) {
+        return {
+          ok: false,
+          error: "DAILY_LIMIT_EXCEEDED",
+          inventory: db.inventories[playerId],
+          daily_limits: dailyLimits,
+          limit,
+        };
+      }
+
+      limit.used += amount;
+      limit.remaining = Math.max(0, limit.maxCount - limit.used);
+      limit.updatedAt = nowISO();
+      dailyLimits.updatedAt = nowISO();
+    }
+
+    const inventory = db.inventories[playerId];
+    for (const reward of normalizedRewards) {
+      let slot = findSlot(inventory, reward.itemId);
+      if (!slot) {
+        if (inventory.slots.length >= inventory.maxSlots) inventory.maxSlots += 1;
+        slot = { itemId: reward.itemId, quantity: 0 };
+        inventory.slots.push(slot);
+      }
+      slot.quantity += reward.quantity;
+    }
+    inventory.updatedAt = nowISO();
+
+    const transaction = {
+      id: generateId("rtx"),
+      playerId,
+      type: String(options.type || "resource_harvest"),
+      ref: String(options.ref || ""),
+      idempotencyKey,
+      rewards: normalizedRewards,
+      inventoryAfter: JSON.parse(JSON.stringify(inventory)),
+      dailyLimitsAfter: JSON.parse(JSON.stringify(dailyLimits)),
+      limitAfter: limit ? { ...limit } : null,
+      createdAt: nowISO(),
+    };
+    db.transactions.push(transaction);
+    this.writeAll(db);
+
+    return {
+      ok: true,
+      inventory,
+      daily_limits: dailyLimits,
+      limit,
+      rewards: normalizedRewards,
+      transaction,
+    };
+  }
+
   getFarmState(playerId) {
     const db = this.readAll();
     this.ensurePlayerStateInDb(db, playerId);
@@ -534,6 +641,7 @@ module.exports = {
   getInventory: activeStore.getInventory.bind(activeStore),
   setInventory: activeStore.setInventory.bind(activeStore),
   adjustInventoryItem: activeStore.adjustInventoryItem.bind(activeStore),
+  applyResourceHarvest: activeStore.applyResourceHarvest.bind(activeStore),
   getFarmState: activeStore.getFarmState.bind(activeStore),
   setFarmState: activeStore.setFarmState.bind(activeStore),
   getDailyLimits: activeStore.getDailyLimits.bind(activeStore),
