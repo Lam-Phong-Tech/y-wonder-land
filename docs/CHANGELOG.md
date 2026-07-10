@@ -11,7 +11,7 @@
 - Thêm catalog server sinh từ 109 `ItemDefinition` và 8 `ShopDefinition`; Node tự kiểm giá, mode và whitelist của từng quầy, không tin giá Unity gửi lên.
 - Thêm `POST /player/shop/transaction`: mua/bán đổi Point và inventory trong cùng một lần ghi JSON, có idempotency và chặn cùng key nhưng body khác.
 - `ShopPopupController` không còn gọi `SpendPOS/AddPOS/AddItem/RemoveItem` khi mua bán. Unity khóa nút trong lúc chờ, retry cùng key khi mất phản hồi và chỉ áp economy + inventory từ response server; mất mạng không giao dịch local.
-- Ghi nhận VPS ứng viên mới `42.96.18.14`; cổng SSH `22` đã kiểm tra và đang mở. Credential quản trị giữ riêng, chưa đăng nhập/deploy/chuyển build trước khi audit OS/tài nguyên/bảo mật.
+- Ghi nhận VPS ứng viên mới `42.96.18.14`. Cổng SSH `22` từng phản hồi ở lần kiểm tra đầu, nhưng lần kiểm tra lại từ máy làm việc không tới được `22/80/443/3000`; DNS `api.ywonder.net` hiện vẫn về `45.119.83.233`. Credential quản trị giữ riêng, chưa đăng nhập/deploy/chuyển build trước khi owner xác nhận IP và firewall.
 
 ### Verified
 - Catalog generator kiểm đủ các ID và tạo 109 items/8 shops.
