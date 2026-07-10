@@ -1,5 +1,5 @@
 ﻿# API Contracts — Y WONDER GREEN FARM
-# Cập nhật: 2026-06-16
+# Cập nhật: 2026-07-10
 # Backend: REST API riêng (Node/Go/Python) + DB (theo kịch bản khách)
 
 > ⚠️ **ĐỔI HƯỚNG (16/06/2026):** Dự án dùng **REST API riêng**, KHÔNG dùng UGS.
@@ -43,7 +43,7 @@ Tài liệu hành trình product/backend đầy đủ nằm ở `docs/WEB_GAME_B
 - MVP chốt 1 account web = 1 game player/nhân vật. Khách phải có tài khoản trước khi chơi; không làm guest account trong backend thật.
 - Account web `locked` hoặc `soft_deleted` phải bị game-server chặn login/gameplay online.
 - Unity không gọi trực tiếp API web nội bộ và không giữ `GAME_API_SECRET`.
-- Economy/inventory/daily limit/farm-state phải chuyển dần sang server-authoritative. Hiện Unity chưa hoàn tất phần này, nên các endpoint bên dưới là contract/MVP backend trước khi nối gameplay thật.
+- Economy/inventory/daily limit/farm-state phải chuyển dần sang server-authoritative. Shop và khai thác cây/đá public đã nối lát đầu tiên; farm/crop/animal/câu cá và các reward/chi phí khác vẫn chưa hoàn tất.
 - MVP sắp tới chưa làm nạp/rút. `Point` có thể là game-server currency cho demo/state sync; web wallet/top-up/spend chuyển sang phase sau. Khi sang phase tiền thật, game-server phải ghi ledger/transaction rõ ràng và gọi web wallet API server-side; Unity không được tự cộng/trừ ví nạp.
 - Realtime trước mắt chỉ dành cho đảo công cộng như `city`/`mine`; farm không join room realtime công cộng. Chat là kênh toàn server cho client còn online, không phụ thuộc đang đứng cùng room.
 
@@ -57,6 +57,7 @@ Tài liệu hành trình product/backend đầy đủ nằm ở `docs/WEB_GAME_B
 | GET | `/player/inventory` | Bearer token | `{ inventory }` |
 | PUT | `/player/inventory` | `{ inventory }` + Bearer | `{ ok, inventory }` |
 | POST | `/player/inventory/adjust` | `{ item_id, quantity_delta, type, ref, idempotency_key }` + Bearer | `{ ok, inventory, transaction }` |
+| POST | `/player/shop/transaction` | `{ shop_id, mode:"buy"|"sell", item_id, quantity, idempotency_key }` + Bearer | `{ ok, economy, inventory, transaction, duplicate }` |
 | GET | `/player/daily-limits` | Bearer token | `{ daily_limits }` |
 | POST | `/player/daily-limits/consume` | `{ limit_key, amount, max_count, period_key, type, ref, idempotency_key }` + Bearer | `{ ok, daily_limits, limit, transaction }` |
 | GET | `/player/farm-state` | Bearer token | `{ farm_state }` |
@@ -72,6 +73,8 @@ Quy uoc mapping:
 - `STORE_MODE=json` la mac dinh dev/local; `STORE_MODE=postgres` da co adapter scaffold va schema target, nhung query PostgreSQL chua implement cho production.
 - `daily_limits` mac dinh gom `fishing` va `mining`, reset theo `period_key` ngay server dang `YYYY-MM-DD`. Can chot timezone server; khuyen nghi `Asia/Saigon` cho khach VN. Hien stub cu co the dang dung UTC nen can doi/ghi ro truoc production.
 - `idempotency_key` phai duy nhat cho moi action co retry; server tra `duplicate=true` khi nhan lai cung key va khong apply them tien/item/luot.
+- Shop transaction khong nhan/gia tin `unit_price` tu Unity. Server tra `shopCatalog.json` sinh tu `ItemDefinition` + `ShopDefinition`, kiem access mode/whitelist/canSell va doi Point + inventory trong mot lan ghi. Cung key nhung body khac tra `IDEMPOTENCY_CONFLICT`.
+- Moi khi sua gia hoac danh sach shop trong Unity, chay `npm.cmd run catalog:generate --prefix server` va commit `server/shopCatalog.json` cung thay doi data.
 
 ### Web auth contract do web team bàn giao
 

@@ -1,0 +1,820 @@
+{
+  "version": 1,
+  "source": "Unity ItemDefinition and ShopDefinition assets",
+  "items": {
+    "apple_01": {
+      "category": "food",
+      "buyPrice": 10,
+      "sellPrice": 2,
+      "canSell": true
+    },
+    "areca_01": {
+      "category": "products",
+      "buyPrice": 0,
+      "sellPrice": 100,
+      "canSell": true
+    },
+    "areca_seed_01": {
+      "category": "seeds",
+      "buyPrice": 200,
+      "sellPrice": 20,
+      "canSell": true
+    },
+    "asparagus_01": {
+      "category": "products",
+      "buyPrice": 0,
+      "sellPrice": 300,
+      "canSell": true
+    },
+    "asparagus_seed_01": {
+      "category": "seeds",
+      "buyPrice": 250,
+      "sellPrice": 25,
+      "canSell": true
+    },
+    "axe_01": {
+      "category": "tools",
+      "buyPrice": 100,
+      "sellPrice": 50,
+      "canSell": true
+    },
+    "bait_01": {
+      "category": "items",
+      "buyPrice": 20,
+      "sellPrice": 10,
+      "canSell": true
+    },
+    "banana_01": {
+      "category": "products",
+      "buyPrice": 0,
+      "sellPrice": 80,
+      "canSell": true
+    },
+    "banana_seed_01": {
+      "category": "seeds",
+      "buyPrice": 200,
+      "sellPrice": 20,
+      "canSell": true
+    },
+    "beef_01": {
+      "category": "products",
+      "buyPrice": 0,
+      "sellPrice": 325,
+      "canSell": true
+    },
+    "bread_01": {
+      "category": "food",
+      "buyPrice": 20,
+      "sellPrice": 5,
+      "canSell": true
+    },
+    "brick_01": {
+      "category": "materials",
+      "buyPrice": 0,
+      "sellPrice": 10,
+      "canSell": true
+    },
+    "cabbage_01": {
+      "category": "food",
+      "buyPrice": 0,
+      "sellPrice": 0,
+      "canSell": false
+    },
+    "cabbage_seed_01": {
+      "category": "seeds",
+      "buyPrice": 3,
+      "sellPrice": 7,
+      "canSell": true
+    },
+    "carrot_01": {
+      "category": "food",
+      "buyPrice": 0,
+      "sellPrice": 0,
+      "canSell": false
+    },
+    "carrot_seed_01": {
+      "category": "seeds",
+      "buyPrice": 3,
+      "sellPrice": 5,
+      "canSell": true
+    },
+    "chicken_01": {
+      "category": "animals",
+      "buyPrice": 156,
+      "sellPrice": 0,
+      "canSell": false
+    },
+    "chicken_meat_01": {
+      "category": "products",
+      "buyPrice": 0,
+      "sellPrice": 310,
+      "canSell": true
+    },
+    "coconut_01": {
+      "category": "products",
+      "buyPrice": 0,
+      "sellPrice": 120,
+      "canSell": true
+    },
+    "coconut_seed_01": {
+      "category": "seeds",
+      "buyPrice": 200,
+      "sellPrice": 20,
+      "canSell": true
+    },
+    "corn_01": {
+      "category": "food",
+      "buyPrice": 0,
+      "sellPrice": 0,
+      "canSell": false
+    },
+    "corn_seed_01": {
+      "category": "seeds",
+      "buyPrice": 8,
+      "sellPrice": 10,
+      "canSell": true
+    },
+    "cow_01": {
+      "category": "animals",
+      "buyPrice": 7800,
+      "sellPrice": 0,
+      "canSell": false
+    },
+    "date_01": {
+      "category": "products",
+      "buyPrice": 0,
+      "sellPrice": 600,
+      "canSell": true
+    },
+    "date_seed_01": {
+      "category": "seeds",
+      "buyPrice": 300,
+      "sellPrice": 30,
+      "canSell": true
+    },
+    "deer_01": {
+      "category": "animals",
+      "buyPrice": 10400,
+      "sellPrice": 0,
+      "canSell": false
+    },
+    "deer_meat_01": {
+      "category": "products",
+      "buyPrice": 0,
+      "sellPrice": 933,
+      "canSell": true
+    },
+    "deer_velvet_01": {
+      "category": "products",
+      "buyPrice": 0,
+      "sellPrice": 12368,
+      "canSell": true
+    },
+    "duck_01": {
+      "category": "animals",
+      "buyPrice": 208,
+      "sellPrice": 0,
+      "canSell": false
+    },
+    "duck_egg_01": {
+      "category": "products",
+      "buyPrice": 0,
+      "sellPrice": 5,
+      "canSell": true
+    },
+    "duck_meat_01": {
+      "category": "products",
+      "buyPrice": 0,
+      "sellPrice": 332,
+      "canSell": true
+    },
+    "durian_01": {
+      "category": "products",
+      "buyPrice": 0,
+      "sellPrice": 619,
+      "canSell": true
+    },
+    "durian_seed_01": {
+      "category": "seeds",
+      "buyPrice": 18200,
+      "sellPrice": 50,
+      "canSell": true
+    },
+    "egg_01": {
+      "category": "products",
+      "buyPrice": 0,
+      "sellPrice": 11,
+      "canSell": true
+    },
+    "fertilizer_01": {
+      "category": "items",
+      "buyPrice": 50,
+      "sellPrice": 25,
+      "canSell": true
+    },
+    "fish_01": {
+      "category": "food",
+      "buyPrice": 0,
+      "sellPrice": 50,
+      "canSell": true
+    },
+    "fish_02": {
+      "category": "food",
+      "buyPrice": 0,
+      "sellPrice": 200,
+      "canSell": true
+    },
+    "fish_ca_com_01": {
+      "category": "food",
+      "buyPrice": 0,
+      "sellPrice": 2,
+      "canSell": true
+    },
+    "fish_ca_heo_bien_01": {
+      "category": "food",
+      "buyPrice": 0,
+      "sellPrice": 10,
+      "canSell": true
+    },
+    "fish_ca_hoang_de_01": {
+      "category": "food",
+      "buyPrice": 0,
+      "sellPrice": 15,
+      "canSell": true
+    },
+    "fish_ca_hong_01": {
+      "category": "food",
+      "buyPrice": 0,
+      "sellPrice": 2,
+      "canSell": true
+    },
+    "fish_ca_khe_01": {
+      "category": "food",
+      "buyPrice": 0,
+      "sellPrice": 6,
+      "canSell": true
+    },
+    "fish_ca_mat_quy_01": {
+      "category": "food",
+      "buyPrice": 0,
+      "sellPrice": 10,
+      "canSell": true
+    },
+    "fish_ca_mu_01": {
+      "category": "food",
+      "buyPrice": 0,
+      "sellPrice": 6,
+      "canSell": true
+    },
+    "fish_ca_naso_01": {
+      "category": "food",
+      "buyPrice": 0,
+      "sellPrice": 4,
+      "canSell": true
+    },
+    "fish_ca_ngu_hoang_kim_01": {
+      "category": "food",
+      "buyPrice": 0,
+      "sellPrice": 15,
+      "canSell": true
+    },
+    "fish_ca_nhong_01": {
+      "category": "food",
+      "buyPrice": 0,
+      "sellPrice": 4,
+      "canSell": true
+    },
+    "fish_ca_nuc_01": {
+      "category": "food",
+      "buyPrice": 0,
+      "sellPrice": 2,
+      "canSell": true
+    },
+    "fish_ca_rong_do_01": {
+      "category": "food",
+      "buyPrice": 0,
+      "sellPrice": 25,
+      "canSell": true
+    },
+    "fish_ca_soc_dua_01": {
+      "category": "food",
+      "buyPrice": 0,
+      "sellPrice": 6,
+      "canSell": true
+    },
+    "fish_ca_su_tu_01": {
+      "category": "food",
+      "buyPrice": 0,
+      "sellPrice": 4,
+      "canSell": true
+    },
+    "fishing_rod_01": {
+      "category": "tools",
+      "buyPrice": 100,
+      "sellPrice": 50,
+      "canSell": true
+    },
+    "gem_amethyst_01": {
+      "category": "materials",
+      "buyPrice": 0,
+      "sellPrice": 500,
+      "canSell": true
+    },
+    "gem_fire_quartz_01": {
+      "category": "materials",
+      "buyPrice": 0,
+      "sellPrice": 12,
+      "canSell": true
+    },
+    "gem_green_calcite_01": {
+      "category": "materials",
+      "buyPrice": 0,
+      "sellPrice": 6,
+      "canSell": true
+    },
+    "gem_kyanite_01": {
+      "category": "materials",
+      "buyPrice": 0,
+      "sellPrice": 2,
+      "canSell": true
+    },
+    "gem_orange_calcite_01": {
+      "category": "materials",
+      "buyPrice": 0,
+      "sellPrice": 3,
+      "canSell": true
+    },
+    "gem_ruby_01": {
+      "category": "materials",
+      "buyPrice": 0,
+      "sellPrice": 3000,
+      "canSell": true
+    },
+    "gift_box_01": {
+      "category": "items",
+      "buyPrice": 0,
+      "sellPrice": 500,
+      "canSell": true
+    },
+    "goat_01": {
+      "category": "animals",
+      "buyPrice": 1300,
+      "sellPrice": 0,
+      "canSell": false
+    },
+    "goat_meat_01": {
+      "category": "products",
+      "buyPrice": 0,
+      "sellPrice": 118,
+      "canSell": true
+    },
+    "goat_milk_01": {
+      "category": "products",
+      "buyPrice": 0,
+      "sellPrice": 12,
+      "canSell": true
+    },
+    "goose_01": {
+      "category": "animals",
+      "buyPrice": 260,
+      "sellPrice": 0,
+      "canSell": false
+    },
+    "goose_egg_01": {
+      "category": "products",
+      "buyPrice": 0,
+      "sellPrice": 14,
+      "canSell": true
+    },
+    "goose_meat_01": {
+      "category": "products",
+      "buyPrice": 0,
+      "sellPrice": 665,
+      "canSell": true
+    },
+    "grass_01": {
+      "category": "food",
+      "buyPrice": 0,
+      "sellPrice": 0,
+      "canSell": false
+    },
+    "grass_seed_01": {
+      "category": "seeds",
+      "buyPrice": 12,
+      "sellPrice": 2,
+      "canSell": true
+    },
+    "hoe_01": {
+      "category": "tools",
+      "buyPrice": 100,
+      "sellPrice": 50,
+      "canSell": true
+    },
+    "iron_01": {
+      "category": "materials",
+      "buyPrice": 0,
+      "sellPrice": 50,
+      "canSell": true
+    },
+    "medicine_01": {
+      "category": "items",
+      "buyPrice": 70,
+      "sellPrice": 35,
+      "canSell": true
+    },
+    "milk_01": {
+      "category": "products",
+      "buyPrice": 0,
+      "sellPrice": 50,
+      "canSell": true
+    },
+    "mine_ticket_01": {
+      "category": "items",
+      "buyPrice": 100,
+      "sellPrice": 0,
+      "canSell": false
+    },
+    "morning_glory_01": {
+      "category": "food",
+      "buyPrice": 0,
+      "sellPrice": 0,
+      "canSell": false
+    },
+    "morning_glory_seed_01": {
+      "category": "seeds",
+      "buyPrice": 4,
+      "sellPrice": 4,
+      "canSell": true
+    },
+    "ore_01": {
+      "category": "materials",
+      "buyPrice": 0,
+      "sellPrice": 30,
+      "canSell": true
+    },
+    "ostrich_01": {
+      "category": "animals",
+      "buyPrice": 4420,
+      "sellPrice": 0,
+      "canSell": false
+    },
+    "ostrich_egg_01": {
+      "category": "products",
+      "buyPrice": 0,
+      "sellPrice": 409,
+      "canSell": true
+    },
+    "ostrich_meat_01": {
+      "category": "products",
+      "buyPrice": 0,
+      "sellPrice": 1050,
+      "canSell": true
+    },
+    "passion_fruit_01": {
+      "category": "products",
+      "buyPrice": 0,
+      "sellPrice": 57,
+      "canSell": true
+    },
+    "passion_fruit_seed_01": {
+      "category": "seeds",
+      "buyPrice": 5300,
+      "sellPrice": 3,
+      "canSell": true
+    },
+    "pickaxe_01": {
+      "category": "tools",
+      "buyPrice": 100,
+      "sellPrice": 50,
+      "canSell": true
+    },
+    "pig_01": {
+      "category": "animals",
+      "buyPrice": 2600,
+      "sellPrice": 0,
+      "canSell": false
+    },
+    "pigskin_01": {
+      "category": "products",
+      "buyPrice": 0,
+      "sellPrice": 7042,
+      "canSell": true
+    },
+    "pork_01": {
+      "category": "products",
+      "buyPrice": 0,
+      "sellPrice": 292,
+      "canSell": true
+    },
+    "pumpkin_01": {
+      "category": "food",
+      "buyPrice": 0,
+      "sellPrice": 0,
+      "canSell": false
+    },
+    "pumpkin_seed_01": {
+      "category": "seeds",
+      "buyPrice": 7,
+      "sellPrice": 12,
+      "canSell": true
+    },
+    "rabbit_01": {
+      "category": "animals",
+      "buyPrice": 130,
+      "sellPrice": 0,
+      "canSell": false
+    },
+    "rabbit_fur_01": {
+      "category": "products",
+      "buyPrice": 0,
+      "sellPrice": 21,
+      "canSell": true
+    },
+    "rabbit_meat_01": {
+      "category": "products",
+      "buyPrice": 0,
+      "sellPrice": 289,
+      "canSell": true
+    },
+    "red_ginseng_01": {
+      "category": "products",
+      "buyPrice": 0,
+      "sellPrice": 2000,
+      "canSell": true
+    },
+    "red_ginseng_seed_01": {
+      "category": "seeds",
+      "buyPrice": 400,
+      "sellPrice": 40,
+      "canSell": true
+    },
+    "royal_ginseng_01": {
+      "category": "products",
+      "buyPrice": 0,
+      "sellPrice": 5000,
+      "canSell": true
+    },
+    "royal_ginseng_seed_01": {
+      "category": "seeds",
+      "buyPrice": 800,
+      "sellPrice": 80,
+      "canSell": true
+    },
+    "sacha_01": {
+      "category": "products",
+      "buyPrice": 0,
+      "sellPrice": 194,
+      "canSell": true
+    },
+    "sacha_seed_01": {
+      "category": "seeds",
+      "buyPrice": 7020,
+      "sellPrice": 30,
+      "canSell": true
+    },
+    "stone_01": {
+      "category": "materials",
+      "buyPrice": 0,
+      "sellPrice": 12,
+      "canSell": true
+    },
+    "sweet_potato_01": {
+      "category": "food",
+      "buyPrice": 0,
+      "sellPrice": 0,
+      "canSell": false
+    },
+    "sweet_potato_seed_01": {
+      "category": "seeds",
+      "buyPrice": 7,
+      "sellPrice": 6,
+      "canSell": true
+    },
+    "tea_01": {
+      "category": "products",
+      "buyPrice": 0,
+      "sellPrice": 400,
+      "canSell": true
+    },
+    "tea_seed_01": {
+      "category": "seeds",
+      "buyPrice": 250,
+      "sellPrice": 25,
+      "canSell": true
+    },
+    "turtle_01": {
+      "category": "animals",
+      "buyPrice": 2340,
+      "sellPrice": 0,
+      "canSell": false
+    },
+    "turtle_meat_01": {
+      "category": "products",
+      "buyPrice": 0,
+      "sellPrice": 1084,
+      "canSell": true
+    },
+    "turtle_shell_01": {
+      "category": "products",
+      "buyPrice": 0,
+      "sellPrice": 11893,
+      "canSell": true
+    },
+    "vaccine_01": {
+      "category": "items",
+      "buyPrice": 30,
+      "sellPrice": 15,
+      "canSell": true
+    },
+    "watering_can_01": {
+      "category": "tools",
+      "buyPrice": 100,
+      "sellPrice": 50,
+      "canSell": true
+    },
+    "watering_water_01": {
+      "category": "materials",
+      "buyPrice": 0,
+      "sellPrice": 0,
+      "canSell": false
+    },
+    "watermelon_01": {
+      "category": "food",
+      "buyPrice": 0,
+      "sellPrice": 0,
+      "canSell": false
+    },
+    "watermelon_seed_01": {
+      "category": "seeds",
+      "buyPrice": 3,
+      "sellPrice": 15,
+      "canSell": true
+    },
+    "wood_01": {
+      "category": "materials",
+      "buyPrice": 0,
+      "sellPrice": 8,
+      "canSell": true
+    }
+  },
+  "shops": {
+    "Shop_FarmShop": {
+      "accessMode": "buy_only",
+      "buyItemIds": [
+        "carrot_seed_01",
+        "cabbage_seed_01",
+        "watermelon_seed_01",
+        "corn_seed_01",
+        "pumpkin_seed_01",
+        "grass_seed_01",
+        "morning_glory_seed_01",
+        "sweet_potato_seed_01",
+        "banana_seed_01",
+        "coconut_seed_01",
+        "areca_seed_01",
+        "date_seed_01",
+        "sacha_seed_01",
+        "tea_seed_01",
+        "durian_seed_01",
+        "asparagus_seed_01",
+        "red_ginseng_seed_01",
+        "royal_ginseng_seed_01",
+        "passion_fruit_seed_01",
+        "chicken_01",
+        "rabbit_01",
+        "ostrich_01",
+        "goat_01",
+        "cow_01",
+        "deer_01",
+        "pig_01",
+        "duck_01",
+        "goose_01",
+        "turtle_01"
+      ],
+      "sellItemIds": []
+    },
+    "Shop_FishShop": {
+      "accessMode": "both",
+      "buyItemIds": [
+        "bait_01"
+      ],
+      "sellItemIds": [
+        "fish_ca_com_01",
+        "fish_ca_nuc_01",
+        "fish_ca_hong_01",
+        "fish_ca_su_tu_01",
+        "fish_ca_naso_01",
+        "fish_ca_nhong_01",
+        "fish_ca_soc_dua_01",
+        "fish_ca_khe_01",
+        "fish_ca_mu_01",
+        "fish_ca_mat_quy_01",
+        "fish_ca_heo_bien_01",
+        "fish_ca_hoang_de_01",
+        "fish_ca_ngu_hoang_kim_01",
+        "fish_ca_rong_do_01"
+      ]
+    },
+    "Shop_GemShop": {
+      "accessMode": "sell_only",
+      "buyItemIds": [],
+      "sellItemIds": [
+        "gem_kyanite_01",
+        "gem_orange_calcite_01",
+        "gem_green_calcite_01",
+        "gem_fire_quartz_01",
+        "gem_amethyst_01",
+        "gem_ruby_01"
+      ]
+    },
+    "Shop_HaiLua": {
+      "accessMode": "buy_only",
+      "buyItemIds": [
+        "fertilizer_01",
+        "vaccine_01",
+        "medicine_01"
+      ],
+      "sellItemIds": []
+    },
+    "Shop_ItemShop": {
+      "accessMode": "buy_only",
+      "buyItemIds": [
+        "fertilizer_01",
+        "vaccine_01",
+        "medicine_01",
+        "bait_01",
+        "mine_ticket_01"
+      ],
+      "sellItemIds": []
+    },
+    "Shop_MiniGarden": {
+      "accessMode": "sell_only",
+      "buyItemIds": [],
+      "sellItemIds": [
+        "carrot_01",
+        "cabbage_01",
+        "watermelon_01",
+        "corn_01",
+        "pumpkin_01",
+        "morning_glory_01",
+        "sweet_potato_01",
+        "grass_01",
+        "banana_01",
+        "coconut_01",
+        "areca_01",
+        "date_01",
+        "sacha_01",
+        "tea_01",
+        "durian_01",
+        "asparagus_01",
+        "red_ginseng_01",
+        "royal_ginseng_01",
+        "passion_fruit_01",
+        "egg_01",
+        "milk_01",
+        "pigskin_01",
+        "ostrich_egg_01",
+        "deer_velvet_01",
+        "goat_milk_01",
+        "rabbit_fur_01",
+        "goose_egg_01",
+        "duck_egg_01",
+        "turtle_shell_01",
+        "pork_01",
+        "chicken_meat_01",
+        "beef_01",
+        "ostrich_meat_01",
+        "deer_meat_01",
+        "goat_meat_01",
+        "rabbit_meat_01",
+        "goose_meat_01",
+        "duck_meat_01",
+        "turtle_meat_01"
+      ]
+    },
+    "Shop_ThuY": {
+      "accessMode": "buy_only",
+      "buyItemIds": [
+        "vaccine_01",
+        "medicine_01"
+      ],
+      "sellItemIds": []
+    },
+    "Shop_Verdant": {
+      "accessMode": "both",
+      "buyItemIds": [
+        "bread_01",
+        "apple_01"
+      ],
+      "sellItemIds": [
+        "carrot_01",
+        "cabbage_01",
+        "watermelon_01",
+        "corn_01",
+        "pumpkin_01",
+        "morning_glory_01",
+        "sweet_potato_01"
+      ]
+    }
+  }
+}

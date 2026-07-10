@@ -411,6 +411,107 @@ class JsonStore {
     return { ok: true, inventory, transaction };
   }
 
+  transactShop(playerId, offer, quantity, options = {}) {
+    const db = this.readAll();
+    this.ensurePlayerStateInDb(db, playerId);
+
+    const idempotencyKey = String(options.idempotencyKey || "").trim();
+    if (!idempotencyKey) {
+      return { ok: false, error: "MISSING_IDEMPOTENCY_KEY" };
+    }
+
+    const normalizedQuantity = toInt(quantity, 0);
+    const shopId = String(offer && offer.shopId || "").trim();
+    const mode = String(offer && offer.mode || "").trim();
+    const itemId = String(offer && offer.itemId || "").trim();
+    const unitPrice = Number(offer && offer.unitPrice);
+    if (!shopId || !itemId || !["buy", "sell"].includes(mode)) {
+      return { ok: false, error: "INVALID_SHOP_REQUEST" };
+    }
+    if (normalizedQuantity < 1 || normalizedQuantity > 999) {
+      return { ok: false, error: "INVALID_QUANTITY" };
+    }
+    if (!Number.isSafeInteger(unitPrice) || unitPrice < 0) {
+      return { ok: false, error: "INVALID_ITEM_PRICE" };
+    }
+
+    const requestSignature = `${shopId}|${mode}|${itemId}|${normalizedQuantity}|${unitPrice}`;
+    const existing = findTransactionByIdempotency(db, idempotencyKey);
+    if (existing) {
+      if (existing.playerId !== playerId || existing.requestSignature !== requestSignature) {
+        return { ok: false, error: "IDEMPOTENCY_CONFLICT" };
+      }
+      return {
+        ok: true,
+        economy: existing.economyAfter || db.economies[playerId],
+        inventory: existing.inventoryAfter || db.inventories[playerId],
+        transaction: existing,
+        duplicate: true,
+      };
+    }
+
+    const totalPrice = unitPrice * normalizedQuantity;
+    if (!Number.isSafeInteger(totalPrice)) {
+      return { ok: false, error: "INVALID_ITEM_PRICE" };
+    }
+
+    const economy = db.economies[playerId];
+    const inventory = db.inventories[playerId];
+    let slot = findSlot(inventory, itemId);
+    let deltaPos;
+    let quantityDelta;
+
+    if (mode === "buy") {
+      if (economy.pos < totalPrice) {
+        return { ok: false, error: "INSUFFICIENT_BALANCE", economy, inventory };
+      }
+
+      if (!slot) {
+        if (inventory.slots.length >= inventory.maxSlots) inventory.maxSlots += 1;
+        slot = { itemId, quantity: 0 };
+        inventory.slots.push(slot);
+      }
+      deltaPos = -totalPrice;
+      quantityDelta = normalizedQuantity;
+    } else {
+      if (!slot || slot.quantity < normalizedQuantity) {
+        return { ok: false, error: "INSUFFICIENT_ITEM", economy, inventory };
+      }
+      deltaPos = totalPrice;
+      quantityDelta = -normalizedQuantity;
+    }
+
+    economy.pos += deltaPos;
+    economy.updatedAt = nowISO();
+    slot.quantity += quantityDelta;
+    inventory.slots = inventory.slots.filter((entry) => entry.quantity > 0);
+    inventory.updatedAt = nowISO();
+
+    const transaction = {
+      id: generateId("stx"),
+      playerId,
+      type: mode === "buy" ? "shop_buy" : "shop_sell",
+      ref: `${shopId}:${itemId}`,
+      idempotencyKey,
+      requestSignature,
+      shopId,
+      mode,
+      itemId,
+      quantity: normalizedQuantity,
+      unitPrice,
+      totalPrice,
+      deltaPos,
+      quantityDelta,
+      economyAfter: JSON.parse(JSON.stringify(economy)),
+      inventoryAfter: JSON.parse(JSON.stringify(inventory)),
+      createdAt: nowISO(),
+    };
+    db.transactions.push(transaction);
+    this.writeAll(db);
+
+    return { ok: true, economy, inventory, transaction, duplicate: false };
+  }
+
   applyResourceHarvest(playerId, rewards, options = {}) {
     const db = this.readAll();
     this.ensurePlayerStateInDb(db, playerId);
@@ -641,6 +742,7 @@ module.exports = {
   getInventory: activeStore.getInventory.bind(activeStore),
   setInventory: activeStore.setInventory.bind(activeStore),
   adjustInventoryItem: activeStore.adjustInventoryItem.bind(activeStore),
+  transactShop: activeStore.transactShop.bind(activeStore),
   applyResourceHarvest: activeStore.applyResourceHarvest.bind(activeStore),
   getFarmState: activeStore.getFarmState.bind(activeStore),
   setFarmState: activeStore.setFarmState.bind(activeStore),

@@ -32,6 +32,16 @@ $env:YW_DATA_PATH="D:\LamGameUnity\BaChuKhuRung3D\server\data.json"
 (`server/schema.sql`), nhưng chưa có query implementation/driver DB. Khi cắm DB thật,
 giữ nguyên interface trong `server/store.js` để route API không phải đổi.
 
+Catalog giá và whitelist shop phía server được sinh từ đúng asset Unity hiện tại:
+
+```powershell
+npm.cmd run catalog:generate
+```
+
+Lệnh này đọc `Assets/Resources/Items/*.asset` và `Assets/_Project/Data/Shops/*.asset`,
+kiểm mọi ID rồi ghi `server/shopCatalog.json`. Chạy lại và commit catalog mỗi khi sửa
+giá hoặc danh sách hàng shop; server không tin giá do Unity/client gửi lên.
+
 ## Giao diện xem backend local
 
 Khi server đang chạy, mở trình duyệt:
@@ -58,8 +68,8 @@ $env:ADMIN_DASHBOARD_ENABLED="false"
 ```
 
 Hành trình đầy đủ từ tài khoản web -> tài khoản game -> gameplay server-authoritative nằm ở
-`../docs/WEB_GAME_BACKEND_JOURNEY.md`. Dashboard chỉ chứng minh dữ liệu backend MVP; Unity shop/economy/inventory
-chỉ đổi dashboard sau khi loop server-authoritative được nối vào gameplay.
+`../docs/WEB_GAME_BACKEND_JOURNEY.md`. Shop và khai thác cây/đá public nay đã ghi vào backend;
+các gameplay farm/crop/animal/câu cá khác vẫn còn local cho đến khi nối từng lát tiếp theo.
 
 ## URL public target
 
@@ -197,6 +207,7 @@ Endpoint moi:
 | POST | `/player/economy/apply` | Apply delta Point/UPoint game, co idempotency key |
 | GET/PUT | `/player/inventory` | Doc/ghi inventory MVP |
 | POST | `/player/inventory/adjust` | Cong/tru item, co idempotency key |
+| POST | `/player/shop/transaction` | Mua/ban nguyen tu; server tu tra catalog gia + whitelist shop |
 | GET | `/player/daily-limits` | Doc gioi han ngay cho fishing/mining |
 | POST | `/player/daily-limits/consume` | Tru luot server-side, mac dinh 10 luot/ngay |
 | GET/PUT | `/player/farm-state` | Doc/ghi farm-state JSON MVP |
@@ -223,6 +234,22 @@ Daily limit payload de tru luot:
   "idempotency_key": "uuid-or-client-action-id"
 }
 ```
+
+Shop transaction payload:
+
+```json
+{
+  "shop_id": "Shop_ItemShop",
+  "mode": "buy",
+  "item_id": "fertilizer_01",
+  "quantity": 2,
+  "idempotency_key": "uuid-or-client-action-id"
+}
+```
+
+Response thành công trả cùng lúc `{ economy, inventory, transaction, duplicate }`.
+Point và item được đổi trong một lần ghi store. Retry cùng key trả `duplicate=true`
+và không áp lại; cùng key nhưng body khác bị từ chối `IDEMPOTENCY_CONFLICT`.
 
 ## Realtime MVP
 

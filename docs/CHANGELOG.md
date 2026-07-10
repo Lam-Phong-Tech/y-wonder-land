@@ -5,6 +5,27 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-07-10] — Shop transaction nguyên tử phía server
+
+### Changed
+- Thêm catalog server sinh từ 109 `ItemDefinition` và 8 `ShopDefinition`; Node tự kiểm giá, mode và whitelist của từng quầy, không tin giá Unity gửi lên.
+- Thêm `POST /player/shop/transaction`: mua/bán đổi Point và inventory trong cùng một lần ghi JSON, có idempotency và chặn cùng key nhưng body khác.
+- `ShopPopupController` không còn gọi `SpendPOS/AddPOS/AddItem/RemoveItem` khi mua bán. Unity khóa nút trong lúc chờ, retry cùng key khi mất phản hồi và chỉ áp economy + inventory từ response server; mất mạng không giao dịch local.
+- Ghi nhận VPS ứng viên mới `42.96.18.14`; cổng SSH `22` đã kiểm tra và đang mở. Credential quản trị giữ riêng, chưa đăng nhập/deploy/chuyển build trước khi audit OS/tài nguyên/bảo mật.
+
+### Verified
+- Catalog generator kiểm đủ các ID và tạo 109 items/8 shops.
+- Backend tạm port `3190` và Quick Tunnel public hiện tại đều pass mua, bán, giá client giả bị bỏ qua, retry không nhân đôi, thiếu tiền/đồ, sai whitelist, conflict key và relogin còn dữ liệu.
+- Assembly C# mới compile thành công bằng Roslyn của Unity; chỉ còn warning cũ không liên quan.
+- Anh đã test runtime và xác nhận mua/bán + relogin hoạt động khá tốt; task shop được chốt `[x]`. Kết nối lại đôi lúc hơi lâu nhưng hiện không chặn demo.
+
+### Fixed sau nghiệm thu
+- Direct tap tại Thành phố không còn cho phép đi tiếp gần `1.7m` sau collider đặc. Sai số bề mặt nay là `0.05m`, để nền đất chặn WaterSource/FishingSpot nằm dưới đảo nhưng spherecast assist vẫn hỗ trợ vật thể ở sát bề mặt.
+
+### Nghiệm thu runtime
+- Anh đã test và xác nhận click nền Thành phố không còn bật nhầm UI nước/câu cá bên dưới, còn click trực tiếp mặt biển/điểm câu hợp lệ vẫn hoạt động.
+
+---
 ## [2026-07-10] — Realtime action sync và audit state Phase 1
 
 ### Changed
@@ -24,7 +45,7 @@
 - Ngày 10/07 anh đã test bản build nhiều client và xác nhận đồng bộ cây/đá, quyền nhận thưởng, biến mất và hồi sinh đều vận hành rất ổn.
 
 ### Còn lại
-- Làm shop transaction server-authoritative, cache theo playerId, farm/daily-limit sync và test 5-20 người trước khi chốt xong Giai đoạn 1.
+- Shop transaction đã được chốt ở mục mới phía trên; tiếp theo là cache theo playerId, farm/daily-limit sync và test 5-20 người trước khi chốt xong Giai đoạn 1.
 
 ---
 ## [2026-07-09] — Phase 1 backend account smoke test

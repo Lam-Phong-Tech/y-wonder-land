@@ -9,6 +9,7 @@ const store = require("./store");
 const webAuth = require("./webAuthProvider");
 const { attachRealtimeServer } = require("./realtimeServer");
 const { createAdminDashboardRouter } = require("./adminDashboard");
+const { resolveShopOffer } = require("./shopCatalog");
 const {
   ensureDemoAccounts,
   isAllowedDemoPassword,
@@ -275,6 +276,44 @@ api.post("/player/inventory/adjust", auth, (req, res) => {
   });
 
   if (!result.ok) return res.status(409).json({ error: result.error, inventory: result.inventory });
+  res.json(result);
+});
+
+api.post("/player/shop/transaction", auth, (req, res) => {
+  const body = req.body || {};
+  const shopId = body.shop_id || body.shopId;
+  const itemId = body.item_id || body.itemId;
+  const mode = body.mode;
+  const quantity = Number(body.quantity);
+  const idempotencyKey = String(body.idempotency_key || body.idempotencyKey || "").trim();
+
+  if (!Number.isInteger(quantity) || quantity < 1 || quantity > 999) {
+    return res.status(400).json({ error: "INVALID_QUANTITY" });
+  }
+  if (!idempotencyKey) {
+    return res.status(400).json({ error: "MISSING_IDEMPOTENCY_KEY" });
+  }
+
+  const offer = resolveShopOffer(shopId, mode, itemId);
+  if (!offer.ok) {
+    const status = ["SHOP_NOT_FOUND", "ITEM_NOT_FOUND"].includes(offer.error) ? 404
+      : offer.error === "SHOP_ITEM_NOT_ALLOWED" ? 403
+        : 400;
+    return res.status(status).json({ error: offer.error });
+  }
+
+  const result = store.transactShop(req.userId, offer, quantity, { idempotencyKey });
+  if (!result.ok) {
+    const status = ["INSUFFICIENT_BALANCE", "INSUFFICIENT_ITEM", "IDEMPOTENCY_CONFLICT"].includes(result.error)
+      ? 409
+      : 400;
+    return res.status(status).json({
+      error: result.error,
+      economy: result.economy,
+      inventory: result.inventory,
+    });
+  }
+
   res.json(result);
 });
 

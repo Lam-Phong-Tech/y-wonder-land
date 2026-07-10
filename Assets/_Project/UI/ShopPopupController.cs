@@ -66,6 +66,8 @@ public class ShopPopupController : MonoBehaviour
     // Current shop data
     private ShopData currentShop;
     private string currentShopSourceName = "";
+    private string currentShopId = "";
+    private bool actionInFlight;
 
     // Whitelist ID hàng shop chấp nhận THU MUA (null/rỗng = thu mua mọi thứ bán được trong túi).
     private List<string> sellFilterIds;
@@ -258,6 +260,7 @@ public class ShopPopupController : MonoBehaviour
 
         currentShop = data;
         currentShopSourceName = data.shopName ?? "";
+        currentShopId = "";
         isSellMode = false;
         selectedQty = 1;
         selectedItem = null;
@@ -342,6 +345,7 @@ public class ShopPopupController : MonoBehaviour
 
         Show(BuildShopDataFrom(def));      // set currentShop + title + tab + về chế độ Mua
         currentShopSourceName = $"{def.name} {def.shopName}";
+        currentShopId = def.name;
         ApplyAccessMode(MapAccessMode(def.accessMode));
 
         // Giữ TÊN RIÊNG của shop trên tiêu đề (ApplyAccessMode vừa ghi đè thành "CỬA HÀNG"/"BÁN ĐỒ"
@@ -748,10 +752,10 @@ public class ShopPopupController : MonoBehaviour
 
         UpdateQtyDisplay(unitPrice);
         bool canActOnSelectedItem = !isSellMode || item.maxAvailable > 0;
-        btnAction?.SetEnabled(canActOnSelectedItem);
-        btnQtyMinus?.SetEnabled(canActOnSelectedItem);
-        btnQtyPlus?.SetEnabled(canActOnSelectedItem);
-        txtQty?.SetEnabled(canActOnSelectedItem);
+        btnAction?.SetEnabled(canActOnSelectedItem && !actionInFlight);
+        btnQtyMinus?.SetEnabled(canActOnSelectedItem && !actionInFlight);
+        btnQtyPlus?.SetEnabled(canActOnSelectedItem && !actionInFlight);
+        txtQty?.SetEnabled(canActOnSelectedItem && !actionInFlight);
 
         if (btnAction != null)
         {
@@ -868,122 +872,95 @@ public class ShopPopupController : MonoBehaviour
 
     // ── Action (Buy / Sell) ──
 
-    private void OnActionClicked()
+    private async void OnActionClicked()
     {
-        if (!selectedItem.HasValue) return;
+        if (actionInFlight || !selectedItem.HasValue) return;
 
         var item = selectedItem.Value;
-        int unitPrice = isSellMode ? item.sellPrice : item.price;
-        int totalCost = unitPrice * selectedQty;
+        int quantity = selectedQty;
+        bool sellMode = isSellMode;
+        string requestedShopId = currentShopId;
 
-        if (!isSellMode)
+        if (quantity <= 0)
         {
-            // Special handling for Animals
-            if (item.category == "animals")
-            {
-                // Current demo flow: buy animal tokens into inventory, then place them into
-                // build-mode enclosures. Pen capacity is validated when placing, not buying.
-                if (!YWonderLand.Managers.EconomyManager.Instance.SpendPOS(totalCost))
-                {
-                    Debug.Log($"[Shop] Không đủ Point để mua thú!");
-                    YWonderLand.Environment.ScreenToast.Show("Không đủ Point để mua thú!");
-                    return;
-                }
-
-                YWonderLand.Managers.InventoryManager.Instance.AddItem(item.id, selectedQty);
-                Debug.Log($"[Shop] Mua {selectedQty}x {item.name} vào túi đồ. Trừ {totalCost} Point.");
-                YWonderLand.Environment.ScreenToast.ShowInfoForItem(
-                    item.id,
-                    $"Đã mua: {selectedQty}x {item.name}  (-{totalCost} Point)");
-                YWonderLand.Managers.AudioManager.Instance?.PlaySFX("coin");
-                UpdateBalance();
-                ShowEmptyDetails();
-                return;
-
-                /*
-                // Pre-check Point balance for the FULL selected quantity. If they want 3, they must afford 3.
-                if (!YWonderLand.Managers.EconomyManager.Instance.SpendPOS(totalCost))
-                {
-                    Debug.Log($"[Shop] Không đủ Point để mua thú!");
-                    YWonderLand.Environment.ScreenToast.Show("Không đủ Point để mua thú!");
-                    return;
-                }
-
-                int spawnedCount = 0;
-                for (int i = 0; i < selectedQty; i++)
-                {
-                    if (YWonderLand.Managers.AnimalManager.Instance != null && 
-                        YWonderLand.Managers.AnimalManager.Instance.BuyAndSpawnAnimal(item.id))
-                    {
-                        spawnedCount++;
-                    }
-                    else
-                    {
-                        Debug.LogWarning($"[Shop] Không đủ chỗ trong chuồng để chứa con thứ {i+1}!");
-                        break;
-                    }
-                }
-
-                if (spawnedCount == 0)
-                {
-                    // Mua thú nhưng chuồng đã đầy/chưa có chuồng → báo người chơi.
-                    YWonderLand.Environment.ScreenToast.Show("Chuồng đã đầy! Xây thêm chuồng trước khi mua thú.");
-                    return;
-                }
-
-                int actualCost = unitPrice * spawnedCount;
-                YWonderLand.Managers.EconomyManager.Instance.SpendPOS(actualCost);
-                Debug.Log($"[Shop] Mua {spawnedCount}x {item.name} — Trừ {actualCost} Point.");
-                YWonderLand.Environment.ScreenToast.ShowInfo($"Đã mua: {spawnedCount}x {item.name}  (-{actualCost} Point)");
-                YWonderLand.Managers.AudioManager.Instance?.PlaySFX("coin");
-                */
-            }
-            else
-            {
-                // Standard items go to inventory
-                if (!YWonderLand.Managers.EconomyManager.Instance.SpendPOS(totalCost))
-                {
-                    Debug.Log($"[Shop] Không đủ Point!");
-                    YWonderLand.Environment.ScreenToast.Show("Không đủ Point để mua!");
-                    return;
-                }
-                YWonderLand.Managers.InventoryManager.Instance.AddItem(item.id, selectedQty);
-                Debug.Log($"[Shop] Mua {selectedQty}x {item.name} — Trừ {totalCost} Point.");
-                YWonderLand.Environment.ScreenToast.ShowInfoForItem(
-                    item.id,
-                    $"Đã mua: {selectedQty}x {item.name}  (-{totalCost} Point)");
-                YWonderLand.Managers.AudioManager.Instance?.PlaySFX("coin");
-            }
+            YWonderLand.Environment.ScreenToast.Show("Số lượng giao dịch không hợp lệ.");
+            return;
         }
-        else
+
+        if (string.IsNullOrWhiteSpace(currentShopId))
         {
-            // Sell
-            if (selectedQty <= 0 || item.maxAvailable <= 0)
-            {
-                YWonderLand.Environment.ScreenToast.Show("Chưa có vật phẩm này để bán!");
-                return;
-            }
+            Debug.LogWarning("[Shop] ShopDefinition is required for server-authoritative transactions.");
+            YWonderLand.Environment.ScreenToast.Show("Cửa hàng này chưa được cấu hình trên máy chủ.");
+            return;
+        }
 
-            if (!YWonderLand.Managers.InventoryManager.Instance.RemoveItem(item.id, selectedQty))
-            {
-                Debug.Log($"[Shop] Không đủ item để bán!");
-                YWonderLand.Environment.ScreenToast.Show("Không đủ vật phẩm để bán!");
-                return;
-            }
-
-            YWonderLand.Managers.EconomyManager.Instance.AddPOS(totalCost);
-            Debug.Log($"[Shop] Bán {selectedQty}x {item.name} — Nhận {totalCost} Point.");
-            YWonderLand.Environment.ScreenToast.ShowInfoForItem(
+        actionInFlight = true;
+        btnAction?.SetEnabled(false);
+        btnQtyMinus?.SetEnabled(false);
+        btnQtyPlus?.SetEnabled(false);
+        txtQty?.SetEnabled(false);
+        try
+        {
+            var result = await YWonderLand.Backend.ShopTransactionService.TransactAsync(
+                requestedShopId,
+                sellMode,
                 item.id,
-                $"Đã bán: {selectedQty}x {item.name}  (+{totalCost} Point)");
-            YWonderLand.Managers.AudioManager.Instance?.PlaySFX("coin");
-            
-            OnItemSold?.Invoke(item.id, selectedQty);
-            
-            RefreshGrid();
-        }
+                quantity);
 
-        ShowEmptyDetails();
+            if (!result.ok)
+            {
+                Debug.LogWarning($"[Shop] Server transaction failed: {result.errorCode} ({result.status}).");
+                YWonderLand.Environment.ScreenToast.Show(ResolveShopError(result.errorCode));
+                return;
+            }
+
+            long totalPrice = result.totalPrice;
+            string message = sellMode
+                ? $"Đã bán: {quantity}x {item.name}  (+{totalPrice:N0} Point)"
+                : $"Đã mua: {quantity}x {item.name}  (-{totalPrice:N0} Point)";
+            YWonderLand.Environment.ScreenToast.ShowInfoForItem(item.id, message);
+            YWonderLand.Managers.AudioManager.Instance?.PlaySFX("coin");
+
+            if (sellMode)
+                OnItemSold?.Invoke(item.id, quantity);
+
+            UpdateBalance();
+            if (currentShopId == requestedShopId)
+            {
+                RefreshGrid();
+                ShowEmptyDetails();
+            }
+        }
+        catch (System.Exception exception)
+        {
+            Debug.LogException(exception);
+            YWonderLand.Environment.ScreenToast.Show("Không thể hoàn tất giao dịch. Vui lòng thử lại.");
+        }
+        finally
+        {
+            actionInFlight = false;
+            if (selectedItem.HasValue)
+                ShowItemDetails(selectedItem.Value);
+            else
+                btnAction?.SetEnabled(false);
+        }
+    }
+
+    private static string ResolveShopError(string errorCode)
+    {
+        switch (errorCode)
+        {
+            case "INSUFFICIENT_BALANCE": return "Không đủ Point để mua.";
+            case "INSUFFICIENT_ITEM": return "Không đủ vật phẩm để bán.";
+            case "SHOP_ITEM_NOT_ALLOWED": return "Cửa hàng này không giao dịch vật phẩm đã chọn.";
+            case "SHOP_NOT_FOUND": return "Cửa hàng chưa được cấu hình trên máy chủ.";
+            case "ITEM_NOT_FOUND": return "Vật phẩm chưa có trong dữ liệu máy chủ.";
+            case "INVALID_QUANTITY": return "Số lượng giao dịch không hợp lệ.";
+            case "NO_AUTH_TOKEN": return "Cần đăng nhập lại trước khi mua bán.";
+            case "AUTH_EXPIRED": return "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.";
+            case "IDEMPOTENCY_CONFLICT": return "Giao dịch bị trùng dữ liệu. Vui lòng thử lại.";
+            default: return "Không thể kết nối máy chủ để mua bán. Vui lòng thử lại.";
+        }
     }
 
     private void UpdateBalance()

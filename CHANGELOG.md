@@ -3,6 +3,9 @@
 ## [Unreleased] - 2026-07-10 (Phase 1 realtime actions and state audit)
 
 ### Changed
+- Shop buy/sell now calls `POST /player/shop/transaction`; Node validates the shop, item, server-owned price, quantity, balance/inventory, and writes economy + inventory atomically with idempotency.
+- Added a generated server catalog from 109 Unity item assets and 8 shop assets. Client-supplied prices are ignored, and Unity applies Point/inventory only from the accepted server response.
+- Shop UI disables quantity/action controls while the request is in flight and retries transport/server failures once with the same idempotency key.
 - Realtime player state now relays the active animation, animation speed, and held tool so remote avatars can show jump, swim, and farming/mining/chopping actions.
 - Remote avatars resolve child Animators and toggle only visual equipment while gameplay components remain disabled.
 - The realtime smoke test now verifies Jump and Mining + Pickaxe relay.
@@ -11,15 +14,21 @@
 - Shared `city/mine` trees and rocks now use a server-owned claim cycle: one winner, atomic inventory/mining-limit reward, depletion broadcast, late-join snapshot, and 20-second respawn. Unity does not award the item locally before server confirmation.
 - The expanded realtime smoke test covers a winning harvest, rejected second claimant, late-join depleted snapshot, respawn broadcast, and the existing duplicate-session replacement rule.
 
+### Fixed
+- Direct-tap interaction now allows only `0.05m` of surface tolerance after a solid collider, preventing City ground clicks from selecting water or fishing targets beneath the island while preserving the assist cast for nearby object colliders.
+
 ### Verified
+- A temporary backend on port `3190` and the active public Quick Tunnel both passed atomic shop buy/sell, catalog-price enforcement, duplicate retry, idempotency conflict, insufficient balance/item, shop whitelist, and relogin persistence. The updated Unity assembly compiled successfully with Roslyn.
 - A temporary backend on port `3107` passed auth, room join, global chat, action state/tool relay, farm rejection, and duplicate-session replacement code 4008.
 - The active Unity Editor imported the changed scripts without C# compile errors.
 - The user confirmed remote action animations work in the two-client build.
 - Temporary backends on ports `3188` and `3189` passed the expanded realtime resource smoke and the full Phase 1 regression smoke; the same resource/WebSocket smoke then passed through the refreshed public Quick Tunnel. Unity rebuilt `Assembly-CSharp` successfully.
 - Runtime acceptance completed on 10/07: the user tested the new multi-client build and confirmed shared tree/rock depletion, reward ownership, and respawn behavior run reliably.
+- Runtime acceptance completed for atomic shop buy/sell and relogin persistence; the user reported the flow works well. Reconnect can occasionally take longer than expected, but it is currently non-blocking.
+- Runtime acceptance completed for the City-ground occlusion fix: ground clicks no longer trigger water/fishing interactions beneath the island, while actual water targets remain usable.
 
 ### Needs Test
-- Finish atomic shop transactions, player-scoped local cache, farm/daily-limit sync, and 5-20 player acceptance before declaring Phase 1 complete.
+- Finish player-scoped local cache, farm/daily-limit sync, and 5-20 player acceptance before declaring Phase 1 complete.
 
 ## [Unreleased] - 2026-07-08 (Mobile shop item readability)
 

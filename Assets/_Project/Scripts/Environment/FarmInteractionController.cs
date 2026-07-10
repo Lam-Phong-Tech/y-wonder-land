@@ -20,6 +20,7 @@ namespace YWonderLand.Environment
         private const float DefaultFishingInteractRange = 5f;
         private const float MaxFishingInteractRange = 5f;
         private const float SolidHitPassthroughTolerance = 0.75f;
+        private const float DirectTapSurfaceTolerance = 0.05f;
         private const float ResourceExecuteRangePadding = 0.25f;
         private const float FarmTileAimFallbackRadius = 0.45f;
         private const float TreeCuttingClipDuration = 2.26f;
@@ -1639,7 +1640,7 @@ namespace YWonderLand.Environment
             Vector3 playerPos = PlayerController.Instance != null ? PlayerController.Instance.transform.position : transform.position;
             float solidPassthroughLimit = float.PositiveInfinity;
             float passthroughTolerance = directTap
-                ? Mathf.Max(SolidHitPassthroughTolerance, directTapAssistWorldRadius + 1.25f)
+                ? DirectTapSurfaceTolerance
                 : SolidHitPassthroughTolerance;
 
             List<InteractionAction> foundActions = new List<InteractionAction>();
@@ -1809,8 +1810,8 @@ namespace YWonderLand.Environment
                 }
                 else if (!hit.collider.isTrigger)
                 {
-                    // Cho phép nhìn xuyên thêm một đoạn rất ngắn sau mặt đất/collider mỏng
-                    // để bắt các object sát nền mà vẫn không quét xuyên quá sâu.
+                    // Direct tap chỉ chừa sai số bề mặt rất nhỏ: nền đất phải che nước/điểm câu bên dưới.
+                    // Luồng aim cũ vẫn giữ tolerance lớn hơn để tương thích collider mỏng.
                     solidPassthroughLimit = Mathf.Min(solidPassthroughLimit, hit.distance + passthroughTolerance);
                     continue;
                 }

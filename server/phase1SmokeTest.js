@@ -81,6 +81,11 @@ async function login(account, loginPassword = password, allowedStatuses) {
   return { ...account, token: payload.token, playerId: payload.playerId || payload.userId };
 }
 
+function inventoryQuantity(inventory, itemId) {
+  const slot = ((inventory && inventory.slots) || []).find((entry) => entry.itemId === itemId);
+  return slot ? Number(slot.quantity) : 0;
+}
+
 class RealtimeClient {
   constructor(account) {
     this.account = account;
@@ -229,6 +234,103 @@ async function testPersistence(account) {
   return relogged;
 }
 
+async function testShopTransactions(account) {
+  const start = await getJson("/player/bootstrap", account.token);
+  const startPos = Number(start.payload.economy.pos);
+  const startFertilizer = inventoryQuantity(start.payload.inventory, "fertilizer_01");
+  const startFish = inventoryQuantity(start.payload.inventory, "fish_ca_com_01");
+
+  const buyKey = `phase1-shop-buy-${suffix}`;
+  const buyBody = {
+    shop_id: "Shop_ItemShop",
+    mode: "buy",
+    item_id: "fertilizer_01",
+    quantity: 2,
+    unit_price: 1,
+    idempotency_key: buyKey,
+  };
+  const bought = await postJson("/player/shop/transaction", buyBody, account.token);
+  const duplicateBuy = await postJson("/player/shop/transaction", buyBody, account.token);
+  assert(duplicateBuy.payload.duplicate === true, "Shop buy retry was not idempotent.");
+  assert(bought.payload.transaction.unitPrice === 50, "Shop trusted the client price instead of catalog price.");
+  assert(bought.payload.transaction.totalPrice === 100, "Shop buy total is incorrect.");
+  assert(Number(bought.payload.economy.pos) === startPos - 100, "Shop buy did not deduct Point once.");
+  assert(
+    inventoryQuantity(bought.payload.inventory, "fertilizer_01") === startFertilizer + 2,
+    "Shop buy did not add inventory once."
+  );
+
+  const conflict = await postJson("/player/shop/transaction", {
+    ...buyBody,
+    quantity: 3,
+  }, account.token, [409]);
+  assert(conflict.payload.error === "IDEMPOTENCY_CONFLICT", "Changed idempotent request was not rejected.");
+
+  const insufficientBalance = await postJson("/player/shop/transaction", {
+    shop_id: "Shop_ItemShop",
+    mode: "buy",
+    item_id: "fertilizer_01",
+    quantity: 999,
+    idempotency_key: `phase1-shop-expensive-${suffix}`,
+  }, account.token, [409]);
+  assert(insufficientBalance.payload.error === "INSUFFICIENT_BALANCE", "Insufficient shop balance was not rejected.");
+
+  await postJson("/player/inventory/adjust", {
+    item_id: "fish_ca_com_01",
+    quantity_delta: 3,
+    type: "phase1_shop_fixture",
+    idempotency_key: `phase1-shop-fixture-${suffix}`,
+  }, account.token);
+
+  const sellKey = `phase1-shop-sell-${suffix}`;
+  const sellBody = {
+    shop_id: "Shop_FishShop",
+    mode: "sell",
+    item_id: "fish_ca_com_01",
+    quantity: 2,
+    idempotency_key: sellKey,
+  };
+  const sold = await postJson("/player/shop/transaction", sellBody, account.token);
+  const duplicateSell = await postJson("/player/shop/transaction", sellBody, account.token);
+  assert(duplicateSell.payload.duplicate === true, "Shop sell retry was not idempotent.");
+  assert(Number(sold.payload.economy.pos) === startPos - 96, "Shop sell Point result is incorrect.");
+  assert(
+    inventoryQuantity(sold.payload.inventory, "fish_ca_com_01") === startFish + 1,
+    "Shop sell did not remove inventory once."
+  );
+
+  const wrongShop = await postJson("/player/shop/transaction", {
+    shop_id: "Shop_FishShop",
+    mode: "sell",
+    item_id: "fertilizer_01",
+    quantity: 1,
+    idempotency_key: `phase1-shop-wrong-${suffix}`,
+  }, account.token, [403]);
+  assert(wrongShop.payload.error === "SHOP_ITEM_NOT_ALLOWED", "Shop whitelist was not enforced.");
+
+  const insufficientItem = await postJson("/player/shop/transaction", {
+    shop_id: "Shop_FishShop",
+    mode: "sell",
+    item_id: "fish_ca_com_01",
+    quantity: 999,
+    idempotency_key: `phase1-shop-empty-${suffix}`,
+  }, account.token, [409]);
+  assert(insufficientItem.payload.error === "INSUFFICIENT_ITEM", "Insufficient shop item was not rejected.");
+
+  const relogged = await login(account);
+  const boot = await getJson("/player/bootstrap", relogged.token);
+  assert(Number(boot.payload.economy.pos) === startPos - 96, "Relogin lost the shop economy result.");
+  assert(
+    inventoryQuantity(boot.payload.inventory, "fertilizer_01") === startFertilizer + 2,
+    "Relogin lost the bought item."
+  );
+  assert(
+    inventoryQuantity(boot.payload.inventory, "fish_ca_com_01") === startFish + 1,
+    "Relogin lost the sold-item result."
+  );
+  return relogged;
+}
+
 async function testRealtime(a, b) {
   const clientA = new RealtimeClient(a);
   const clientB = new RealtimeClient(b);
@@ -300,12 +402,13 @@ async function main() {
   assert(unknownAccount.status === 404, "Unknown account did not return 404.");
   assert(unknownAccount.payload.error === "USER_NOT_FOUND", "Unknown account did not return USER_NOT_FOUND.");
 
-  const loggedA = await testPersistence(registered[0]);
+  const shopLoggedA = await testShopTransactions(registered[0]);
+  const loggedA = await testPersistence(shopLoggedA);
   const loggedB = await login(registered[1]);
   await testRealtime(loggedA, loggedB);
   await testSingleRealtimeSession(loggedA);
 
-  console.log("[phase1-smoke] PASS: register, login, bootstrap persistence, idempotency, farm-state, realtime chat, and single-account session replacement work.");
+  console.log("[phase1-smoke] PASS: register, login, atomic shop buy/sell, bootstrap persistence, idempotency, farm-state, realtime chat, and single-account session replacement work.");
 }
 
 main().catch((error) => {

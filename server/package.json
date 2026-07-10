@@ -6,6 +6,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "catalog:generate": "node scripts/generateShopCatalog.js",
     "test:realtime": "node realtimeSmokeTest.js",
     "test:phase1": "node phase1SmokeTest.js"
   },
