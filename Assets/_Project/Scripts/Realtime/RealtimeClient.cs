@@ -358,13 +358,15 @@ namespace YWonderLand.Realtime
             lastSamplePosition = pos;
             lastSampleTime = now;
 
-            string animationName = GetLocalLocomotionAnimation(player, speed);
+            string animationName = GetLocalAnimation(player, speed);
             _ = SendJsonAsync(new
             {
                 type = "player_state",
                 position = new { x = pos.x, y = pos.y, z = pos.z },
                 yaw = player.transform.eulerAngles.y,
                 animation = animationName,
+                animationSpeed = player.CurrentAnimationSpeed,
+                tool = player.CurrentActionTool.ToString(),
             });
         }
 
@@ -456,6 +458,8 @@ namespace YWonderLand.Realtime
             Vector3 position = ParsePosition(data["position"] as JObject);
             float yaw = data.Value<float?>("yaw") ?? 0f;
             string animation = data.Value<string>("animation") ?? "Idle";
+            float animationSpeed = data.Value<float?>("animationSpeed") ?? 1f;
+            string tool = data.Value<string>("tool") ?? "None";
 
             if (!remotePlayers.TryGetValue(playerId, out var remote) || remote == null)
             {
@@ -465,7 +469,7 @@ namespace YWonderLand.Realtime
                 remotePlayers[playerId] = remote;
             }
 
-            remote.ApplySnapshot(position, yaw, animation);
+            remote.ApplySnapshot(position, yaw, animation, animationSpeed, tool);
         }
 
         private GameObject CreateRemotePlayerObject(string playerId, string name, string gender, Vector3 position, float yaw)
@@ -562,9 +566,13 @@ namespace YWonderLand.Realtime
             return player.CompareTag("Player") || player.GetComponent<PlayerInput>() != null;
         }
 
-        private static string GetLocalLocomotionAnimation(PlayerController player, float speed)
+        private static string GetLocalAnimation(PlayerController player, float speed)
         {
             if (player == null) return "Idle";
+
+            string currentState = player.CurrentAnimationState;
+            if (!string.IsNullOrWhiteSpace(currentState)) return currentState;
+
             if (speed <= 0.15f) return string.IsNullOrWhiteSpace(player.animIdle) ? "Idle" : player.animIdle;
             if (player.IsSprintActive()) return string.IsNullOrWhiteSpace(player.animRun) ? "Run" : player.animRun;
             return string.IsNullOrWhiteSpace(player.animWalk) ? "Walk" : player.animWalk;

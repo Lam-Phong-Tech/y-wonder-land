@@ -1,6 +1,6 @@
 # Danh sách công việc dự án (Task Backlog & Progress)
 
-## Ưu tiên hiện tại 09/07/2026: Phase 1 backend demo online/realtime
+## Ưu tiên hiện tại 10/07/2026: Phase 1 backend demo online/realtime
 
 > Backend đã quay lại sau nhóm chỉnh sửa game. Mục tiêu Phase 1: không làm nạp/rút, tập trung cho khách đăng ký/đăng nhập, lưu tài khoản + dữ liệu chơi tối thiểu, và nhiều người online realtime trên đảo công cộng.
 >
@@ -16,7 +16,7 @@
 - `[x]` Hotfix backend demo account: seed sẵn `DemoRealtime01..05` và `DemoRich01..05`, cho phép password `demo` hoặc trùng tên account; token demo cũ được map về player local chuẩn để tránh máy cache cũ/máy fresh login nhìn sai tiền hoặc sai nhân vật.
 - `[x]` Hotfix realtime duplicate session: server chỉ giữ 1 phiên/account, gửi `SESSION_REPLACED` và đóng phiên cũ mã `4008`; Unity phiên cũ dừng reconnect, đăng xuất và quay về Login. Public smoke test và EXE runtime với `Nhien0001` đã được anh xác nhận: phiên mới thay phiên cũ đúng yêu cầu.
 - `[~]` Hotfix online-only: build public không còn tự resume gameplay bằng cache khi backend/tunnel chết; login/register phân biệt rõ lỗi mất kết nối, sai mật khẩu và account/email trùng. Chờ backend URL mới + build EXE/APK test.
-- `[ ]` Bug còn lại sau test online: đồng bộ thêm animation realtime ngoài walk/run như jump, swim, hoe/mining/chop để máy khác không thấy đi bộ trên không hoặc chạy dưới nước.
+- `[~]` Đồng bộ animation realtime ngoài walk/run đã nối xong ở mức code/protocol: gửi đúng state hiện tại, tốc độ và dụng cụ cho `Jump`, `Swimming`, `Hoeing`, `Mining`, `TreeCuttingV4`, `Watering`, `Fishing`, `Feed`, `Planting`; remote dùng Animator nam/nữ tương ứng. Smoke test server đã pass `Jump` và `Mining + Pickaxe`, Unity import không có lỗi C#. Chờ build 2 client xác nhận runtime rồi mới tick `[x]`.
 - `[ ]` Bug còn lại sau test online: rà tài nguyên/tiền/túi đồ/shop/farm-state đã sync server đến đâu; các gameplay còn local/cache cần chuyển dần sang API backend hoặc ghi rõ giới hạn MVP.
 - `[x]` Backend Phase 1 đã public thử qua Cloudflare Quick Tunnel với JWT secret ngẫu nhiên, `WEB_AUTH_MODE=disabled`, dashboard admin tắt và max 20 người/room. Public REST/WebSocket smoke test pass; EXE runtime xác nhận hai account khác nhau gặp/chat được trong City và account trùng bị thay phiên mã `4008`. URL Quick Tunnel là runtime tạm, không commit làm URL production.
 - `[ ]` Test thực tế 5-20 người ngoài mạng: đăng ký tài khoản mới, đăng nhập, vào city/mine thấy nhau/chat được, relogin vẫn giữ Point/inventory/farm_state từ backend.

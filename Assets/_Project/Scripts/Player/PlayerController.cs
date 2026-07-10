@@ -51,6 +51,7 @@ public class PlayerController : MonoBehaviour
     private const float JoystickEmoteCancelThreshold = 0.08f;
     private float actionLockTimer = 0f;
     private float _actionSpeed = 1f;
+    private YWonderLand.Player.ToolType currentActionTool = YWonderLand.Player.ToolType.None;
 
     [Header("Animation State Names")]
     public string animIdle = "Idle";
@@ -173,6 +174,8 @@ public class PlayerController : MonoBehaviour
             if (actionLockTimer <= 0)
             {
                 if (animator != null) animator.speed = 1f;
+                _actionSpeed = 1f;
+                currentActionTool = YWonderLand.Player.ToolType.None;
                 if (YWonderLand.Player.EquipmentManager.Instance != null)
                 {
                     YWonderLand.Player.EquipmentManager.Instance.HideAllTools();
@@ -408,6 +411,11 @@ public class PlayerController : MonoBehaviour
     /// <summary>Nhân vật đang khóa trong một hoạt ảnh hành động (chặt/đào/cuốc/tưới/câu...).</summary>
     public bool IsBusy => actionLockTimer > 0f;
     public bool IsJoystickCancelableEmote => actionLockTimer > 0f && IsJoystickCancelableEmoteState(currentAnimState);
+    public string CurrentAnimationState => string.IsNullOrWhiteSpace(currentAnimState) ? animIdle : currentAnimState;
+    public float CurrentAnimationSpeed => actionLockTimer > 0f ? Mathf.Max(0.1f, _actionSpeed) : 1f;
+    public YWonderLand.Player.ToolType CurrentActionTool => actionLockTimer > 0f
+        ? currentActionTool
+        : YWonderLand.Player.ToolType.None;
 
     private static bool IsJoystickCancelableEmoteState(string stateName)
     {
@@ -426,6 +434,8 @@ public class PlayerController : MonoBehaviour
     {
         if (actionLockTimer <= 0f) return;
         actionLockTimer = 0f;
+        _actionSpeed = 1f;
+        currentActionTool = YWonderLand.Player.ToolType.None;
         if (animator != null)
         {
             animator.speed = 1f;
@@ -466,6 +476,7 @@ public class PlayerController : MonoBehaviour
 
         speed = Mathf.Max(0.1f, speed);
         _actionSpeed = speed;
+        currentActionTool = tool;
         animator.speed = speed;        // tăng/giảm tốc phát animation (2 = nhanh gấp đôi)
 
         CrossFadeAnim(animName, 0.1f); // phát animation trước

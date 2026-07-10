@@ -75,6 +75,8 @@ function attachRealtimeServer(server, options) {
       position: client.position,
       yaw: client.yaw,
       animation: client.animation,
+      animationSpeed: client.animationSpeed,
+      tool: client.tool,
       updatedAt: client.updatedAt,
     };
   }
@@ -191,6 +193,8 @@ function attachRealtimeServer(server, options) {
     };
     client.yaw = numberOr(msg.yaw, client.yaw);
     client.animation = safeText(msg.animation || msg.anim, client.animation, 32);
+    client.animationSpeed = Math.min(4, Math.max(0.1, numberOr(msg.animationSpeed, client.animationSpeed)));
+    client.tool = safeText(msg.tool, client.tool, 32);
     client.updatedAt = nowISO();
 
     broadcastRoom(client.room, {
@@ -202,6 +206,8 @@ function attachRealtimeServer(server, options) {
       position: client.position,
       yaw: client.yaw,
       animation: client.animation,
+      animationSpeed: client.animationSpeed,
+      tool: client.tool,
       sentAt: client.updatedAt,
     }, ws);
   }
@@ -263,6 +269,8 @@ function attachRealtimeServer(server, options) {
       position: { x: 0, y: 0, z: 0 },
       yaw: 0,
       animation: "Idle",
+      animationSpeed: 1,
+      tool: "None",
       chatTimestamps: [],
       updatedAt: nowISO(),
     });

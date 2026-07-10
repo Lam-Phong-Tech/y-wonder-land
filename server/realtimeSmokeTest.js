@@ -245,14 +245,40 @@ async function main() {
       type: "player_state",
       position: { x: 1, y: 2, z: 3 },
       yaw: 45,
-      animation: "Walk",
+      animation: "Jump",
+      animationSpeed: 1.25,
+      tool: "None",
     });
-    await clientA.waitFor((msg) => msg.type === "player_state" && msg.playerId === second.playerId && msg.animation === "Walk", "player_state from second client");
+    await clientA.waitFor(
+      (msg) => msg.type === "player_state"
+        && msg.playerId === second.playerId
+        && msg.animation === "Jump"
+        && msg.animationSpeed === 1.25
+        && msg.tool === "None",
+      "jump player_state from second client"
+    );
+
+    clientB.send({
+      type: "player_state",
+      position: { x: 1, y: 2, z: 3 },
+      yaw: 45,
+      animation: "Mining",
+      animationSpeed: 1.6,
+      tool: "Pickaxe",
+    });
+    await clientA.waitFor(
+      (msg) => msg.type === "player_state"
+        && msg.playerId === second.playerId
+        && msg.animation === "Mining"
+        && msg.animationSpeed === 1.6
+        && msg.tool === "Pickaxe",
+      "mining player_state from second client"
+    );
 
     clientA.send({ type: "join", room: "farm", name: first.username, gender: "male" });
     await clientA.waitFor((msg) => msg.type === "error" && msg.code === "ROOM_NOT_SHARED" && msg.room === "farm", "farm rejected");
 
-    console.log("[realtime-smoke] PASS: auth, join, welcome, global chat, player_state, and farm rejection all work.");
+    console.log("[realtime-smoke] PASS: auth, join, welcome, global chat, action state/tool relay, and farm rejection all work.");
   } finally {
     clientA.close();
     clientB.close();

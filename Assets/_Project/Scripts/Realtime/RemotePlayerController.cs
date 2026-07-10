@@ -4,7 +4,7 @@ namespace YWonderLand.Realtime
 {
     /// <summary>
     /// Lightweight visual controller for another player in shared islands.
-    /// It only interpolates transform and plays simple locomotion/emote animations.
+    /// It interpolates transform and mirrors the local player's visual animation/tool state.
     /// </summary>
     public class RemotePlayerController : MonoBehaviour
     {
@@ -17,9 +17,11 @@ namespace YWonderLand.Realtime
         [SerializeField] private float rotationLerp = 12f;
 
         private Animator animator;
+        private YWonderLand.Player.EquipmentManager equipment;
         private Vector3 targetPosition;
         private Quaternion targetRotation;
         private string currentAnimation = "";
+        private YWonderLand.Player.ToolType currentTool = YWonderLand.Player.ToolType.None;
         private float emoteTimer = 0f;
 
         public string PlayerId => playerId;
@@ -27,6 +29,8 @@ namespace YWonderLand.Realtime
         private void Awake()
         {
             animator = GetComponent<Animator>();
+            if (animator == null) animator = GetComponentInChildren<Animator>(true);
+            equipment = GetComponentInChildren<YWonderLand.Player.EquipmentManager>(true);
             targetPosition = transform.position;
             targetRotation = transform.rotation;
         }
@@ -43,10 +47,12 @@ namespace YWonderLand.Realtime
             tag.tmpFontSize = 2.3f;
         }
 
-        public void ApplySnapshot(Vector3 position, float yaw, string animationName)
+        public void ApplySnapshot(Vector3 position, float yaw, string animationName, float animationSpeed, string toolName)
         {
             targetPosition = position;
             targetRotation = Quaternion.Euler(0f, yaw, 0f);
+            if (animator != null) animator.speed = Mathf.Clamp(animationSpeed, 0.1f, 4f);
+            ApplyTool(toolName);
 
             if (emoteTimer <= 0f)
             {
@@ -83,6 +89,21 @@ namespace YWonderLand.Realtime
 
             animator.CrossFadeInFixedTime(stateHash, 0.15f, baseLayer);
             currentAnimation = animationName;
+        }
+
+        private void ApplyTool(string toolName)
+        {
+            if (!System.Enum.TryParse(toolName, true, out YWonderLand.Player.ToolType requestedTool))
+                requestedTool = YWonderLand.Player.ToolType.None;
+            if (requestedTool == currentTool) return;
+
+            currentTool = requestedTool;
+            if (equipment == null) return;
+
+            if (currentTool == YWonderLand.Player.ToolType.None)
+                equipment.HideAllTools();
+            else
+                equipment.ShowTool(currentTool);
         }
     }
 }
