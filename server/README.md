@@ -19,7 +19,7 @@ cd server
 npm install
 npm start
 ```
-Mặc định chạy tại `http://localhost:3000` (đổi bằng biến môi trường `PORT`).
+Mặc định chạy tại `http://localhost:3000`. Có thể đổi bằng biến môi trường `HOST` và `PORT`; production đặt `HOST=127.0.0.1` để chỉ reverse proxy nội bộ truy cập trực tiếp Node.
 
 Storage mặc định là JSON file để test local nhanh:
 

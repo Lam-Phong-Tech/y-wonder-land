@@ -17,6 +17,7 @@ const {
 } = require("./demoAccounts");
 
 const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || "0.0.0.0";
 const JWT_SECRET = process.env.JWT_SECRET || "ywonderland_dev_secret_change_me";
 const TOKEN_TTL = "30d";
 
@@ -397,9 +398,9 @@ async function startServer() {
   await ensureDemoAccounts(store, bcrypt);
   await new Promise((resolve, reject) => {
     server.once("error", reject);
-    server.listen(PORT, () => {
+    server.listen(PORT, HOST, () => {
       server.off("error", reject);
-      console.log(`[ywonderland-stub] listening on :${PORT} store=${store.mode}`);
+      console.log(`[ywonderland-stub] listening on ${HOST}:${PORT} store=${store.mode}`);
       resolve();
     });
   });
