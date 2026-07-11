@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## [Unreleased] - 2026-07-10 (Phase 1 realtime actions and state audit)
+## [Unreleased] - 2026-07-11 (Production backend hardening and private VPS staging)
 
 ### Changed
 - Added `GameplayMutationSync`, a serialized idempotent queue for all authenticated gameplay inventory and economy deltas. `InventoryManager.AddItem/RemoveItem` and `EconomyManager.Add/Spend` now persist seeds, water, harvests, materials, food, animals, rewards, Point and UPoint outside the already-atomic shop flow.
@@ -24,9 +24,13 @@
 - Installed PostgreSQL 14.23 on the game VPS for integration testing. The service is active/enabled and listens only on `127.0.0.1:5432`; `ywonder_test` and role `deploy` remain test-only and are not used by the production database.
 - Provisioned the production PostgreSQL foundation on the game VPS: isolated `ywonder_game` OS/DB identities, peer authentication over the local Unix socket, a least-privilege owned database, the `001_initial` schema, a root-owned production env outside the repository, and an enabled daily systemd backup timer. No JSON data was imported and no game-server was deployed.
 - Installed verified Node.js `24.18.0` LTS and Caddy `2.11.4`, deployed backend commit `ebc9982`, and enabled a hardened `ywonder-game-server.service`. Added reproducible staging Caddy/systemd examples under `server/deploy/`; no credentials are included.
+- Hardened backend commit `09433bff` with a production startup gate, async bcrypt, auth/register rate limits, request-size/CORS/security-header/request-ID guards, non-sensitive structured logs, HTTP timeouts, WebSocket connection/payload/message limits, and graceful shutdown. Added `test:security` without introducing a new npm dependency.
+- Added `server/deploy/deploy-private-release.sh`: verifies archive SHA-256, installs the lockfile, validates production env, runs migration as `ywonder_game`, applies the sandboxed unit, switches the immutable release, checks Node+Caddy health, and rolls back the symlink/unit on failure.
+- Redeployed private VPS staging to release `09433bff1e739bd2573c8068ffa58f445cd01bb6`; DNS, Unity URL and public firewall rules remain unchanged.
 - The owner has now confirmed `42.96.18.14` is the dedicated game VPS, permitted for Node + PostgreSQL, expected to use Ubuntu Server 24.04 LTS, and will later receive `api.ywonder.net`. Added `docs/VPS_GAME_DEPLOYMENT_PLAN.md` with audit, hardening, PostgreSQL, deploy, DNS, acceptance and rollback gates; no credentials are stored.
 
 ### Fixed
+- The first root deployment attempt stopped before switching releases because preserved environment variables made the migration request PostgreSQL peer auth as `root`. The deployment script now explicitly sets `USER`, `LOGNAME` and `PGUSER` to `ywonder_game`; the old release stayed active throughout and the corrected run passed.
 - Mock `/auth/web-login` now returns the canonical local demo `playerId` before issuing the response/token, so REST login identity and WebSocket presence use the same ID after the async store conversion.
 - Gameplay consumption/rewards no longer remain local-only: planting a purchased seed or scooping water now generates an authenticated server delta, preventing the next bootstrap from restoring the pre-action inventory snapshot.
 - Direct-tap interaction now allows only `0.05m` of surface tolerance after a solid collider, preventing City ground clicks from selecting water or fishing targets beneath the island while preserving the assist cast for nearby object colliders.
@@ -37,6 +41,7 @@
 - A transactional import into an isolated schema preserved `36 accounts`, `51 players` and `82 transactions`; verification passed and the temporary schema was dropped. `npm audit --omit=dev` reports zero vulnerabilities.
 - VPS production DB verification passed with 10 public tables, a successful first backup, checksum verification, restore into an isolated temporary database, and cleanup of that database. The backup timer is enabled/active with its next run scheduled for 03:15 server time; PostgreSQL remains bound only to `127.0.0.1:5432` and UFW has no public 5432 rule.
 - Private VPS staging verification passed: PostgreSQL health and the full Phase 1 REST/WebSocket smoke work through Caddy. Node is bound to `127.0.0.1:3000`; an initial wildcard Caddy socket was caught by the deployment gate, corrected with explicit `bind 127.0.0.1`, and reverified at `127.0.0.1:8080`. External TCP checks confirm only SSH 22 is open while 80/443/3000/5432/8080 remain closed.
+- Hardened release verification passed: local security smoke, full local Phase 1 regression and `npm audit --omit=dev` (`0 vulnerabilities`); then full Phase 1 passed again through an SSH tunnel to private Caddy and production PostgreSQL. Wrong password returned `401` with identity limit `15`, `/admin` returned `404`, systemd sandbox fields and DB backup timer were active, and all service/database/proxy listeners remained loopback-only. `api.ywonder.net` still resolved to `45.119.83.233` during this checkpoint.
 - Player-scoped cache runtime acceptance completed: the user switched between two accounts, fully exited the EXE, reopened it, and confirmed each account restored its own state without leakage.
 - Runtime acceptance completed for gameplay inventory/economy deltas and saved farm pose; the user tested the updated Unity flow on 10/07 and confirmed it works correctly.
 - Unity `Assembly-CSharp` compiles with the new mutation queue; only the existing unrelated `enableStickAutoSprint` warning remains. The full local Phase 1 smoke test passes.

@@ -197,6 +197,24 @@ Các giá trị có thể override bằng env theo `.env.example`. Không tắt 
 public server. Unity native client không cần CORS; production mặc định không cấp CORS
 cho browser origin nào nếu `CORS_ALLOWED_ORIGINS` để trống.
 
+## Private immutable deploy
+
+`deploy/deploy-private-release.sh` chạy bằng root sau khi archive đã được upload vào
+`/tmp`. Script không chứa credential và không đọc password từ command line:
+
+```bash
+bash /tmp/deploy-private-release.sh \
+  /tmp/ywonder-game-<short-commit>.tar.gz \
+  <full-commit-sha> \
+  <archive-sha256>
+```
+
+Script xác minh checksum, tạo release mới, chạy `npm ci`, ép migration peer auth bằng
+đúng OS/DB identity `ywonder_game`, kiểm production config, cài unit systemd, đổi symlink,
+restart và kiểm health trực tiếp lẫn qua Caddy. Nếu lỗi sau khi switch, symlink và unit cũ
+được khôi phục. Mỗi lần phải dùng release ID chưa tồn tại; không xóa release cũ trước khi
+nghiệm thu rollback.
+
 ## Test realtime khi web dang sap / chua co tai khoan web
 
 Dung `WEB_AUTH_MODE=mock` de gia lap tai khoan duoc cap san. Trong mode nay, game-server map username thanh

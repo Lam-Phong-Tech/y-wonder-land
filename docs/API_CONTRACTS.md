@@ -25,7 +25,8 @@ Server stub vẫn hỗ trợ cả endpoint local (`/auth/login`) và endpoint le
 | PUT  | `/player/profile` | `{ player_profile {...} }` + Bearer | `{ ok, updatedAt }` |
 
 `player_profile`: theo `docs/DB_SCHEMA.md` + field `characterCreated` (bool, đã tạo nhân vật) và `tutorialCompleted` (bool).
-**Token đợt 1:** JWT đơn giản (stub, KHÔNG production). Auth đợt 1 dùng username = tên nhân vật, mật khẩu sinh & lưu local (chưa nối UI Login — để đợt 2).
+**Token MVP:** game-server phát JWT HS256 bằng secret chỉ nằm trong env VPS; production
+startup gate từ chối secret ngắn/fallback. Unity lưu game token, không giữ DB/web secret.
 
 Quy tắc account local hiện tại:
 - `username`: 9-20 ký tự, chỉ chữ Latin, số và `_`, khớp validation của Unity.

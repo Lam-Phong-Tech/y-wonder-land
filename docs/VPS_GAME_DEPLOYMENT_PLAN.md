@@ -136,7 +136,7 @@ Ket qua dat:
 
 Trang thai:
 
-- `[x]` Da deploy commit `ebc9982`; migration `001_initial` skip dung vi da ap dung. Khong import JSON cu.
+- `[x]` Baseline `ebc9982` da duoc thay boi hardened release `09433bff1e739bd2573c8068ffa58f445cd01bb6`; migration `001_initial` skip dung vi da ap dung. Khong import JSON cu.
 - Cau hinh toi thieu:
   - `STORE_MODE=postgres`
   - `DATABASE_URL=postgresql:///ywonder_game?host=/var/run/postgresql`
@@ -148,7 +148,8 @@ Trang thai:
   - `HOST=127.0.0.1`
   - `PORT=3000`
 - `[x]` `/health`, register, login, bootstrap, shop, idempotency va WebSocket da pass qua Caddy staging noi bo.
-- `[~]` Source hardening auth/rate-limit/log/HTTP-WebSocket guard va graceful shutdown da pass local; con redeploy immutable va smoke qua Caddy private tren VPS truoc khi chuyen `[x]`.
+- `[x]` Hardening auth/rate-limit/log/HTTP-WebSocket guard, production config gate, graceful shutdown va systemd sandbox da pass local + private VPS. Full Phase 1 qua SSH tunnel/Caddy/PostgreSQL pass; `/admin=404`, rate-limit header hoat dong, backup timer active.
+- `[x]` Script `server/deploy/deploy-private-release.sh` kiem checksum, npm lockfile, config/migration, systemd, health va rollback. Luu y bat buoc ep `USER/LOGNAME/PGUSER=ywonder_game` khi migration dung peer auth; neu giu `USER=root`, deploy se dung truoc switch.
 
 Luu y domain:
 
@@ -187,11 +188,10 @@ Ket qua dat:
 
 ## 5. Thu tu cong viec ngay tiep theo
 
-1. Audit chi doc VPS qua SSH; khong cai dat/xoa/sua dich vu trong luot dau.
-2. Hoan tat runtime test cache theo `playerId` va gameplay inventory/economy delta trong Unity.
-3. Tao deploy user + SSH key chi sau khi audit va anh dong y hardening.
-4. Sau audit, hoan thien PostgreSQL adapter va bang account local tren may phat trien truoc.
-5. Chi deploy len VPS sau khi bo test PostgreSQL local pass.
+1. Xac nhan owner co quyen doi DNS `api.ywonder.net` va khong co he thong web cu dang phu thuoc cac path tren subdomain nay.
+2. Doi Caddy tu private staging sang `api.ywonder.net`, mo dung `80/443`, cap TLS; van khoa `3000/5432/8080`.
+3. Test REST + WSS tu ngoai mang, reboot VPS va lap lai health/register/login/bootstrap/shop/realtime.
+4. Chi sau khi Moc F pass moi doi Unity `BackendConfig.baseUrl`, build EXE/APK va test 5-20 client.
 
 ## 6. Thong tin tuyet doi khong ghi vao repo
 

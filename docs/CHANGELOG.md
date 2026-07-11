@@ -5,6 +5,22 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-07-11] — Gia cố backend và private redeploy
+
+### Changed
+- Commit `09433bff` thêm production startup gate, bcrypt bất đồng bộ, rate limit đăng nhập/đăng ký, body/CORS/security header/request ID, log không ghi body/token, HTTP timeout, WebSocket connection/payload/message guard và graceful shutdown.
+- Thêm `server/security.js`, `server/securitySmokeTest.js` và script deploy immutable có checksum, migration, systemd verify, health gate và rollback.
+- Private VPS đã chuyển sang release `09433bff1e739bd2573c8068ffa58f445cd01bb6`; chưa đổi DNS, Unity URL hoặc firewall public.
+
+### Fixed
+- Lượt deploy root đầu dừng trước khi switch vì migration kế thừa `USER=root` nên PostgreSQL peer auth từ chối. Script nay ép `USER/LOGNAME/PGUSER=ywonder_game`; release cũ vẫn active trong lúc lỗi và lượt chạy lại pass.
+
+### Verified
+- `test:security`, full Phase 1 local và `npm audit --omit=dev` pass với `0 vulnerabilities`.
+- Full Phase 1 qua SSH tunnel -> Caddy private -> PostgreSQL production pass; sai mật khẩu trả `401` và header rate limit `15`, `/admin` trả `404`.
+- Systemd chạy bằng `ywonder_game` với sandbox bổ sung; backup timer active/enabled. `3000/5432/8080` chỉ nghe loopback; từ Internet chỉ `22` mở, còn `80/443/3000/5432/8080` đóng. `api.ywonder.net` vẫn phân giải về `45.119.83.233`.
+
+---
 ## [2026-07-11] — SSH deploy và PostgreSQL Phase 2
 
 ### Changed
