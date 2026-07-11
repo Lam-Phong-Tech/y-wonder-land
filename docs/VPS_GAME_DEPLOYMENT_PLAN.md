@@ -109,7 +109,7 @@ Runbook: `docs/POSTGRESQL_PHASE2_RUNBOOK.md`.
 Ket qua dat:
 
 - Register/login/bootstrap/shop/resource/farm/daily-limit pass tren PostgreSQL: **DAT**.
-- Restart Node khong mat account/tien/item/farm: **DAT**. Restart PostgreSQL service + restore backup: **CHUA TEST**.
+- Restart Node khong mat account/tien/item/farm: **DAT**. Controlled restart PostgreSQL service + backend tren production va so sanh fingerprint 3 account P1: **DAT**. Backup restore drill: **DAT**.
 - Retry request khong cong/tru hai lan: **DAT**, ke ca hai request economy chay dong thoi.
 
 ### Moc D - Chuan bi Ubuntu va cai dich vu
@@ -131,6 +131,7 @@ Ket qua dat:
 - `[x]` Database chi nghe local.
 - `[x]` Backend chi nghe `127.0.0.1:3000`; Caddy staging co `bind 127.0.0.1` va chi nghe `127.0.0.1:8080`.
 - `[x]` Backup tao duoc va thu restore thanh cong tren database test.
+- `[x]` Controlled restart PostgreSQL + backend ngay 11/07 giu nguyen fingerprint profile/economy/inventory/farm/daily-limit/transaction cua 3 account P1; health truc tiep va qua Caddy deu tro lai `storage.mode=postgres`.
 
 ### Moc E - Deploy staging tren VPS
 

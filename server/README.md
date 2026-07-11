@@ -215,6 +215,17 @@ restart và kiểm health trực tiếp lẫn qua Caddy. Nếu lỗi sau khi swi
 được khôi phục. Mỗi lần phải dùng release ID chưa tồn tại; không xóa release cũ trước khi
 nghiệm thu rollback.
 
+Controlled restart PostgreSQL/backend và kiểm tra fingerprint các account P1:
+
+```bash
+sudo bash deploy/restart-private-services-verify.sh
+```
+
+Script chỉ đọc snapshot dữ liệu trước/sau, restart PostgreSQL và game-server,
+chờ Node/Caddy health rồi fail nếu bất kỳ profile/economy/inventory/farm/
+daily-limit/transaction fingerprint nào thay đổi. Log nằm ngoài release tại
+`/var/lib/ywonder-game/restart-verify.log`; script không ghi password hoặc token.
+
 ## Test realtime khi web dang sap / chua co tai khoan web
 
 Dung `WEB_AUTH_MODE=mock` de gia lap tai khoan duoc cap san. Trong mode nay, game-server map username thanh

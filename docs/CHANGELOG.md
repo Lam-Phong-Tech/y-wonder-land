@@ -5,6 +5,17 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-07-11] — Controlled restart PostgreSQL/backend
+
+### Added
+- Thêm `server/deploy/restart-private-services-verify.sh`: chụp fingerprint dữ liệu P1 trước/sau, restart PostgreSQL rồi game-server, chờ health trực tiếp/Caddy và fail nếu profile/economy/inventory/farm/daily-limit/transaction thay đổi. Script không chứa credential và không ghi password/token.
+
+### Verified
+- PostgreSQL và `ywonder-game-server` restart lúc `11:35:58 +07`; Node/Caddy health trở lại với `storage.mode=postgres`, PostgreSQL/Node/Caddy/backup timer đều `active/enabled`.
+- Fingerprint của `P1A_h09433`, `P1B_h09433`, `P1Race_h09433` khớp hoàn toàn trước/sau. Kiểm tra login/bootstrap độc lập qua SSH tunnel giữ đúng Point, inventory và farm state của cả ba account.
+- Full VPS reboot để nghiệm thu auto-start vẫn còn chờ; public DNS/HTTPS/WSS và Unity URL chưa thay đổi.
+
+---
 ## [2026-07-11] — Gia cố backend và private redeploy
 
 ### Changed

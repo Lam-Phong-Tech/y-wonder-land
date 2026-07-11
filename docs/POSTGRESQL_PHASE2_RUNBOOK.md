@@ -86,6 +86,7 @@ Hoàn tất ngày 11/07/2026:
 - Env production nằm ngoài repo tại `/etc/ywonder-game/game-server.env`; JWT được sinh trực tiếp trên VPS. Admin dashboard, demo account và web auth đang tắt theo mặc định an toàn.
 - `ywonder-db-backup.timer` đã `enabled/active`, chạy hằng ngày khoảng 03:15 giờ server, giữ backup 14 ngày.
 - Backup đầu tiên, checksum và restore drill vào database tạm đều pass; database restore tạm đã được xóa.
+- Controlled restart PostgreSQL service rồi game-server ngày 11/07 đã pass: fingerprint profile/economy/inventory/farm/daily-limit/transaction của ba account `P1A_h09433`, `P1B_h09433`, `P1Race_h09433` không đổi; cả ba login/bootstrap lại được qua SSH tunnel và private Caddy.
 - PostgreSQL chỉ listen `127.0.0.1:5432`; UFW không có rule public `5432`.
 - Không import `server/data.json` trong bước này; database production hiện chỉ có schema sạch.
 
