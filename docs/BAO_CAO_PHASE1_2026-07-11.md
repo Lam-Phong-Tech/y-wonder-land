@@ -26,7 +26,7 @@ Game đã đạt mức **demo online có server thật** và có thể gửi s�
 - Full Phase 1 pass: shop, idempotency, farm state API, đăng nhập lại, chat và thay phiên trùng tài khoản.
 - Một EXE ở mạng A và một APK ở mạng B đã gặp nhau, chat và khai thác đồng bộ thành công.
 - Unity C# compile không có lỗi; backend security smoke và Phase 1 smoke đều pass ở lần audit repo cuối.
-- Nhánh `codex/backend-mvp` đã được push đầy đủ lên GitHub tại commit `d7f75adf`.
+- Checkpoint hotfix runtime `d7f75adf` đã được push đầy đủ lên nhánh GitHub `codex/backend-mvp`.
 
 ## Giới hạn cần nói rõ
 
