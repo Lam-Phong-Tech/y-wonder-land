@@ -5,6 +5,15 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-07-11] — Public Nginx read-only audit
+
+### Verified
+- DNS `api.ywonder.net` đã về `42.96.18.14`; Nginx active/enabled giữ `80/443`, HTTP chuyển HTTPS, certificate hợp lệ; `3000/5432/8080` vẫn đóng public.
+- Web API cũ vẫn được giữ: `/api/game/* -> 127.0.0.1:3033`; mọi path khác của subdomain hiện tới `ywonderland-main-game-api` trên `3036`.
+- Backend PostgreSQL của game vẫn healthy tại `127.0.0.1:3000` và qua Caddy private `127.0.0.1:8080`, nhưng public `/player/bootstrap` và `/realtime` đang `404` vì Nginx chưa route tới backend này.
+- Chốt phương án ít rủi ro: giữ nguyên route cũ, chỉ thêm `/game-api/*` và `/game-api/realtime -> 127.0.0.1:3000`; Unity sau acceptance sẽ dùng `https://api.ywonder.net/game-api`. Xem `docs/NGINX_PUBLIC_AUDIT_2026-07-11.md`.
+
+---
 ## [2026-07-11] — Private VPS automated 20-client acceptance
 
 ### Added

@@ -164,18 +164,19 @@ Luu y domain:
 
 Can lam:
 
-- Ha DNS TTL truoc cutover neu owner cho phep.
-- Doi duy nhat ban ghi `api.ywonder.net` sang `42.96.18.14`; khong doi `ywonder.net`.
-- Caddy cap TLS va proxy ca REST lan WebSocket ve Node.
+- `[x]` DNS `api.ywonder.net` da ve `42.96.18.14`; khong doi `ywonder.net`.
+- `[x]` Nginx da giu public `80/443`, HTTP redirect HTTPS va certificate hop le; `3000/5432/8080` van dong public.
+- `[x]` Audit read-only xac nhan `/api/game/* -> 3033` va root `-> 3036`; game backend PostgreSQL van private tren `3000/8080`.
+- `[ ]` Backup Nginx va them namespace rieng `/game-api/*` + WebSocket `/game-api/realtime -> 3000`; khong thay the route web cu va khong public Caddy.
 - Test tu mang ngoai:
-  - `https://api.ywonder.net/health`
+  - `https://api.ywonder.net/game-api/health`
   - dang ky/dang nhap
   - relogin giu du lieu
   - shop mua/ban
   - 20 WebSocket
   - chat/presence/action/resource
   - duplicate session ma `4008`
-- Sau khi doi Caddy sang domain public, reload service va lap lai test toi thieu tu mang ngoai; full VPS auto-start baseline da pass o private checkpoint.
+- Sau khi them Nginx route, chay `nginx -t`, reload va lap lai test toi thieu tu mang ngoai; full VPS auto-start baseline da pass o private checkpoint.
 
 Ket qua dat:
 
@@ -193,9 +194,9 @@ Ket qua dat:
 ## 5. Thu tu cong viec ngay tiep theo
 
 1. Xac nhan owner co quyen doi DNS `api.ywonder.net` va khong co he thong web cu dang phu thuoc cac path tren subdomain nay.
-2. Doi Caddy tu private staging sang `api.ywonder.net`, mo dung `80/443`, cap TLS; van khoa `3000/5432/8080`.
-3. Test REST + WSS tu ngoai mang va lap lai health/register/login/bootstrap/shop/realtime sau khi reload Caddy; full VPS reboot baseline da pass.
-4. Chi sau khi Moc F pass moi doi Unity `BackendConfig.baseUrl`, build EXE/APK va test 5-20 client.
+2. Backup Nginx, them `/game-api/*` va WebSocket `/game-api/realtime` toi `127.0.0.1:3000`; giu nguyen `/api/game/* -> 3033` va root `-> 3036`.
+3. Test REST + WSS tu ngoai mang va lap lai health/register/login/bootstrap/shop/realtime sau khi reload Nginx; full VPS reboot baseline da pass.
+4. Chi sau khi Moc F pass moi doi Unity `BackendConfig.baseUrl = https://api.ywonder.net/game-api`, build EXE/APK va test 5-20 client.
 
 ## 6. Thong tin tuyet doi khong ghi vao repo
 
