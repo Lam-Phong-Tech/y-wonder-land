@@ -4,7 +4,7 @@
 
 > Backend đã quay lại sau nhóm chỉnh sửa game. Mục tiêu Phase 1: không làm nạp/rút, tập trung cho khách đăng ký/đăng nhập, lưu tài khoản + dữ liệu chơi tối thiểu, và nhiều người online realtime trên đảo công cộng.
 >
-> Trạng thái 11/07/2026: lõi **Giai đoạn 1 - Demo online nhanh** và bài tải tự động 20 client trên private VPS đã pass; kiểm thử thật 5–20 EXE/APK ngoài mạng và một số gameplay server-authoritative vẫn còn. PostgreSQL production, backup/restore, private Node/Caddy staging, hardening API, full VPS reboot, DNS/HTTPS và audit Nginx đã hoàn tất. Phần còn lại là thêm proxy cô lập `/game-api` vào Nginx, nghiệm thu REST/WSS ngoài mạng, đổi Unity URL và test thiết bị thật.
+> Trạng thái 11/07/2026: lõi **Giai đoạn 1 - Demo online nhanh**, PostgreSQL production, hardening/reboot, Nginx `/game-api`, HTTPS/WSS, full Phase 1 và bài tải tự động 20 client từ mạng ngoài đều đã pass. Unity đã chuyển sang public URL; phần còn lại là build EXE/APK và nghiệm thu thật 4–5 máy khác mạng, cùng xử lý certbot renewal và các gameplay chưa server-authoritative.
 
 ### Phase 1 - tài khoản game tự đăng ký + lưu tiến trình MVP
 - `[x]` Commit checkpoint trước khi quay lại backend: `8054205 feat: sync backend bootstrap and farm save polish`.
@@ -34,7 +34,10 @@
 - `[x]` Full VPS reboot acceptance: VPS boot lại lúc `13:13:19 +07`, `boot_id` đổi sang `ee8dfd96-8d69-43c0-a0ab-5ddcccd109f9`; PostgreSQL, `ywonder-game-server`, Caddy và backup timer đều tự lên ở trạng thái `active/enabled`. Health qua private Caddy trả `storage.mode=postgres`; ba account P1 login/bootstrap lại được và canonical fingerprint trước/sau reboot khớp `a003b888ed68b5ee95e43efae2ee0873fafd291dac66aac0ffceeaf7c649bf6e`.
 - `[x]` Private automated 20-client acceptance: thêm `server/phase1LoadTest.js` + `npm run test:load`, tạo/reuse 20 account theo prefix riêng, bootstrap đủ profile/economy/inventory/farm/daily limits, mở 20 WebSocket cùng room `city`, nhận đủ roster 19 peer, relay state/chat/ping và giữ kết nối. Lượt chạy thật qua Caddy private + PostgreSQL pass; p95 auth `1532.4 ms`, bootstrap `31.9 ms`, WebSocket connect `36.6 ms`. Backup pre-cutover `/var/backups/ywonder-game/ywonder_game_20260711T072715Z.dump` có SHA-256 `04dda7ac1048d0de493a25f91ab98116f784494460c1cbfa390479d646679a7e`; hậu kiểm xác nhận account tải còn `0`, không OOM và PostgreSQL/Node/Caddy/backup timer vẫn active.
 - `[x]` Public Nginx audit read-only: DNS đã trỏ `api.ywonder.net -> 42.96.18.14`; Nginx giữ `80/443`, HTTP -> HTTPS và certificate hợp lệ; `3000/5432/8080` vẫn đóng public. Nginx hiện giữ `/api/game/* -> 3033` cho web API cũ và mọi path còn lại `-> 3036`, nên `/player/bootstrap` và `/realtime` đang `404`; backend PostgreSQL của ta vẫn khỏe tại loopback `3000/8080`. Báo cáo: `docs/NGINX_PUBLIC_AUDIT_2026-07-11.md`.
-- `[~]` Public cutover còn lại: giữ nguyên `/api/game/*` và service cũ; backup Nginx rồi thêm namespace cô lập `/game-api/*` + WebSocket `/game-api/realtime` trỏ `127.0.0.1:3000`, chạy `nginx -t`, reload có rollback và test ngoài mạng. Chỉ sau khi REST/WSS pass mới đổi Unity sang `https://api.ywonder.net/game-api`; tuyệt đối không public `3000/5432/8080`.
+- `[x]` Public Nginx cutover: đã backup `/etc/nginx/sites-available/ywonder.net.conf`, thêm đúng `/game-api/*` và WebSocket `/game-api/realtime -> 127.0.0.1:3000`, giữ nguyên `/api/game/* -> 3033` và root `-> 3036`. `nginx -t`/reload pass; Nginx, game-server, PostgreSQL và Caddy đều active/enabled. Backup SHA-256 `87c987eb81767be2e121a4a3fc035600329cc95b73595ca4ddb192650c55a878`, config mới `b7b6cc5b28d89b37e35b94ac26099e992efef25d199cd6489e97d8248b5185d8`.
+- `[x]` External REST/WSS acceptance: từ máy Windows, `https://api.ywonder.net/game-api/health` trả PostgreSQL; automated 20-client pass với p95 auth/bootstrap/WSS `1666.4/64.9/173.7 ms`; full Phase 1 pass register/login/shop/idempotency/farm-state/relogin/chat/session replacement. Account test đã dọn về `0`, ba account P1 gốc còn đủ; `80/443` mở và `3000/5432/8080` vẫn đóng public.
+- `[x]` Unity `Assets/Resources/BackendConfig.asset` đã chuyển `baseUrl = https://api.ywonder.net/game-api`, giữ `useOfflineFallback = 0`; chờ build EXE/APK và test thiết bị thật.
+- `[~]` `certbot.timer` hiện `enabled` nhưng `inactive`; certificate hiện vẫn hợp lệ nhưng cần xác minh/bật lịch renewal trước nghiệm thu production dài hạn.
 - `[ ]` Test thực tế 5-20 người ngoài mạng: đăng ký tài khoản mới, đăng nhập, vào city/mine thấy nhau/chat được, relogin vẫn giữ Point/inventory/farm_state từ backend.
 
 ## Ưu tiên hiện tại 06/07/2026: tạm gác backend, quay lại chỉnh sửa game
@@ -156,7 +159,7 @@
 
 ### Tạm gác đến khi có máy case/mạng công ty
 - `[~]` Public `api.ywonder.net`, Caddy/Nginx thật, SSL, firewall/router, service auto-start trên Windows server.
-- `[~]` Test điện thoại ngoài mạng công ty, test WebSocket public `wss://api.ywonder.net/realtime`.
+- `[~]` Test điện thoại ngoài mạng công ty, test WebSocket public `wss://api.ywonder.net/game-api/realtime`.
 - `[~]` Backup DB thật trên máy case và giám sát uptime.
 - `[~]` Sửa/tái test các bug realtime chỉ xuất hiện khi 2 máy LAN cùng vào city nếu máy case đang mất mạng.
 

@@ -366,7 +366,7 @@ Quyết định 06/07/2026 từ anh: mất mạng thì không cho mua/bán. Vì 
 | `UPoint` còn vai trò gì không? | Tránh dùng nhầm ví premium/khuyến mãi/điểm sự kiện | Đưa sang phase sau MVP online/realtime |
 | Web đã có API trừ tiền/spend/reserve chưa? | Mua vật phẩm bằng tiền nạp cần trừ ví an toàn | Chưa cần cho MVP sắp tới; hỏi để chuẩn bị phase nạp/rút sau |
 | Web hay game-server là ledger cuối cùng của `Point`? | Quyết định nơi tính số dư chính thức | MVP online/realtime chưa cần chốt đến mức block; nếu test shop thì game-server làm ledger demo trước |
-| Tên miền API public là gì? | Unity cần base URL ổn định | Khuyến nghị `https://api.ywonder.net` cho REST và `wss://api.ywonder.net/realtime` cho realtime |
+| Tên miền API public là gì? | Unity cần base URL ổn định | Đã chốt `https://api.ywonder.net/game-api` cho REST và `wss://api.ywonder.net/game-api/realtime` cho realtime; `/api/game/*` vẫn dành cho web API cũ |
 | Server đặt máy case có chạy production thật không? | Máy case có rủi ro điện/mạng/IP/backup | Có thể dùng cho staging/MVP; production lâu dài nên cân nhắc VPS/cloud hoặc tối thiểu backup + UPS + domain + monitoring |
 | Backup DB như nào? | Mất DB là mất tiền/túi đồ/farm | PostgreSQL dump hằng ngày, giữ nhiều bản, có test restore |
 | Dev/staging/prod phân thế nào? | Tránh demo reset nhầm dữ liệu thật | Tối thiểu có local/dev và staging; production chỉ mở khi domain/backup/admin/audit sẵn sàng |
@@ -549,7 +549,7 @@ Kiểm tra:
 
 Việc làm:
 
-- Dùng WebSocket `wss://api.ywonder.net/realtime?token=<game-jwt>`.
+- Dùng WebSocket `wss://api.ywonder.net/game-api/realtime?token=<game-jwt>`.
 - Room realtime chỉ cho các đảo công cộng: `city`, `mine`, và đảo non-farm sau này.
 - Đồng bộ presence, join/leave, vị trí/yaw/animation, emote và tương tác nhẹ theo room public; chat là kênh toàn server cho client còn online.
 - Farm không join room công cộng; farm là private instance theo account. Vào farm thì rời shared room, không thấy remote player, nhưng vẫn giữ chat global.
@@ -637,7 +637,7 @@ Việc làm:
 - Chạy Node game-server bằng service auto-start trên máy case hoặc VPS.
 - Chạy PostgreSQL cho staging/production; JSON store chỉ dùng dev.
 - Cấu hình HTTPS và WebSocket Upgrade qua Caddy/Nginx.
-- Domain khuyến nghị: `https://api.ywonder.net` cho REST, `wss://api.ywonder.net/realtime` cho realtime.
+- Domain production đã nghiệm thu: `https://api.ywonder.net/game-api` cho REST, `wss://api.ywonder.net/game-api/realtime` cho realtime.
 - Thiết lập firewall/router port 80/443, static IP hoặc DNS ổn định.
 - Thiết lập backup DB tự động, log lỗi, giám sát uptime và kế hoạch restore.
 

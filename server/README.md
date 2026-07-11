@@ -104,7 +104,7 @@ test role/database as production storage.
 Khi public xong, client Unity sẽ trỏ `Assets/Resources/BackendConfig.asset` tới:
 
 ```text
-https://api.ywonder.net
+https://api.ywonder.net/game-api
 ```
 
 Trong lúc test nội bộ/local, asset này có thể tạm trỏ `http://127.0.0.1:3000` hoặc IP LAN của máy chạy backend. Không commit secret hay URL tạm nếu không cần.
@@ -112,7 +112,7 @@ Trong lúc test nội bộ/local, asset này có thể tạm trỏ `http://127.0
 Server stub hỗ trợ cả 2 dạng route:
 
 - Local/dev: `http://localhost:3000/auth/login`
-- Public qua reverse proxy: `https://api.ywonder.net/auth/login`
+- Public qua reverse proxy: `https://api.ywonder.net/game-api/auth/login`
 - Legacy nếu cần đi qua web domain: `https://ywonder.net/game-api/auth/login`
 
 Khi dùng Caddy trên Windows, tham khảo `server/Caddyfile.example`. Nếu website chính cũng chạy trên cùng máy, giữ cấu hình website hiện có và chỉ proxy path `/game-api*` vào Node server port `3000`.
@@ -360,7 +360,7 @@ Game-server also exposes WebSocket realtime:
 | Endpoint | Purpose |
 |---|---|
 | `ws://localhost:3000/realtime?token=<game-server-jwt>` | Local dev realtime |
-| `wss://api.ywonder.net/realtime?token=<game-server-jwt>` | Public realtime when SSL/proxy is ready |
+| `wss://api.ywonder.net/game-api/realtime?token=<game-server-jwt>` | Public realtime through the isolated Nginx namespace |
 | `wss://ywonder.net/game-api/realtime?token=<game-server-jwt>` | Legacy path if proxying under `/game-api` |
 
 MVP scope:

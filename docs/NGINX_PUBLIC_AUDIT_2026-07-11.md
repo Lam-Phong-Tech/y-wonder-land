@@ -79,3 +79,24 @@ This keeps the existing public routes unchanged:
   production sign-off.
 - Unity URL and EXE/APK builds must not change until external REST/WSS acceptance
   passes through the new namespace.
+
+## Implemented result
+
+The controlled change completed at `2026-07-11T10:45:09Z`:
+
+- Nginx backup SHA-256:
+  `87c987eb81767be2e121a4a3fc035600329cc95b73595ca4ddb192650c55a878`.
+- Active config SHA-256:
+  `b7b6cc5b28d89b37e35b94ac26099e992efef25d199cd6489e97d8248b5185d8`.
+- `nginx -t` and reload passed; all four backend/proxy/database services stayed
+  active.
+- Public automated 20-client REST/WSS acceptance passed from the Windows work
+  machine. P95 auth/bootstrap/WebSocket connect was `1666.4/64.9/173.7 ms`.
+- Public full Phase 1 passed registration, login, atomic shop, persistence,
+  idempotency, farm-state, realtime chat and duplicate-session replacement.
+- All public test accounts were removed; the three P1 baseline accounts remain.
+- External checks reconfirmed only `80/443` are public, while
+  `3000/5432/8080` remain closed.
+
+Unity may now use `https://api.ywonder.net/game-api`; real EXE/APK device
+acceptance remains pending.

@@ -12,7 +12,7 @@
 Server stub dev: `server/` (Node/Express, lưu `data.json`), mặc định `http://localhost:3000`.
 Client: `Assets/_Project/Scripts/Backend/` (`ApiClient`, `AuthService`, `PlayerProfileService`). Offline-first: lỗi mạng -> fallback cache `PlayerPrefs`.
 
-Public demo target cho Unity: `https://api.ywonder.net`. Trong lúc test local/LAN, `BackendConfig.asset` có thể tạm trỏ `http://127.0.0.1:3000` hoặc IP LAN của máy chạy backend.
+Public demo target cho Unity: `https://api.ywonder.net/game-api`. Namespace này đi qua Nginx tới game backend PostgreSQL; `/api/game/*` vẫn thuộc web API cũ. Trong lúc test local/LAN, `BackendConfig.asset` có thể tạm trỏ `http://127.0.0.1:3000` hoặc IP LAN của máy chạy backend.
 Server stub vẫn hỗ trợ cả endpoint local (`/auth/login`) và endpoint legacy có prefix (`/game-api/auth/login`) để tránh vỡ nếu sau này cần proxy qua `ywonder.net/game-api`.
 
 | Method | Endpoint | Body | Trả về |
@@ -130,7 +130,7 @@ Sau khi hạ tầng `api.ywonder.net` có SSL/proxy đúng, có thể đổi `WE
 Unity connects to game-server after login:
 
 ```text
-wss://api.ywonder.net/realtime?token=<game-server-jwt>
+wss://api.ywonder.net/game-api/realtime?token=<game-server-jwt>
 ```
 
 Legacy path if needed:

@@ -5,6 +5,18 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-07-11] — Public Nginx `/game-api` cutover
+
+### Added
+- Thêm `server/deploy/configure-public-nginx.sh`: resolve đúng symlink site, backup root-only, chèn namespace có marker, `nginx -t`, reload, health gate và rollback tự động. WebSocket location tắt access log để không ghi JWT query.
+
+### Verified
+- Nginx route `/game-api/*` và `/game-api/realtime -> 127.0.0.1:3000` đã active; `/api/game/* -> 3033` và root `-> 3036` giữ nguyên. Backup/config SHA lần lượt `87c987...a878` và `b7b6cc...185d8`.
+- Automated 20-client từ Windows qua HTTPS/WSS public pass, p95 auth/bootstrap/WSS `1666.4/64.9/173.7 ms`; full Phase 1 public cũng pass shop, persistence, idempotency, farm-state, chat và session replacement.
+- Test accounts đã dọn về `0`, ba P1 baseline còn đủ; Nginx/game-server/PostgreSQL/Caddy active. `80/443` mở, `3000/5432/8080` vẫn đóng public. Malformed JSON trả `INVALID_JSON` không lộ stack.
+- Unity config chuyển sang `https://api.ywonder.net/game-api`, giữ online-only; chờ build EXE/APK và test thật 4–5 máy.
+
+---
 ## [2026-07-11] — Public Nginx read-only audit
 
 ### Verified

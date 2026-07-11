@@ -53,7 +53,7 @@ Khong mo truc tiep cong `3000` hoac `5432` ra Internet. Unity chi ket noi qua HT
 ## 3. Nguyen tac trien khai
 
 1. Khong tat Cloudflare Tunnel/backend demo dang hoat dong truoc khi VPS moi pass test.
-2. Khong doi `BackendConfig.asset` sang IP tho. Chi doi sang `https://api.ywonder.net` sau khi health, HTTPS va WebSocket deu pass tu ngoai mang.
+2. Khong doi `BackendConfig.asset` sang IP tho. Public URL da chot la `https://api.ywonder.net/game-api` sau khi health, HTTPS va WebSocket pass tu ngoai mang.
 3. Khong dung `root` de chay game lau dai. Tao user deploy rieng va test SSH key thanh cong truoc khi han che root/password.
 4. Khong luu JWT secret, DB password, root password hoac `GAME_API_SECRET` vao Git.
 5. Moi moc phai co backup va cach quay lui truoc khi sang moc tiep theo.
@@ -167,7 +167,7 @@ Can lam:
 - `[x]` DNS `api.ywonder.net` da ve `42.96.18.14`; khong doi `ywonder.net`.
 - `[x]` Nginx da giu public `80/443`, HTTP redirect HTTPS va certificate hop le; `3000/5432/8080` van dong public.
 - `[x]` Audit read-only xac nhan `/api/game/* -> 3033` va root `-> 3036`; game backend PostgreSQL van private tren `3000/8080`.
-- `[ ]` Backup Nginx va them namespace rieng `/game-api/*` + WebSocket `/game-api/realtime -> 3000`; khong thay the route web cu va khong public Caddy.
+- `[x]` Da backup Nginx va them namespace rieng `/game-api/*` + WebSocket `/game-api/realtime -> 3000`; route web cu giu nguyen, Caddy khong public.
 - Test tu mang ngoai:
   - `https://api.ywonder.net/game-api/health`
   - dang ky/dang nhap
@@ -180,13 +180,13 @@ Can lam:
 
 Ket qua dat:
 
-- HTTPS hop le, WSS ket noi on dinh.
+- `[x]` HTTPS hop le, WSS ket noi on dinh; automated 20-client va full Phase 1 tu mang ngoai deu pass.
 - Node/PostgreSQL/Caddy tu khoi dong sau reboot.
 - Khong public dashboard admin, DB hay port Node.
 
 ### Moc G - Chuyen build Unity va rollback
 
-- Chi sau Moc F moi dat Unity `baseUrl = https://api.ywonder.net` va build EXE/APK moi.
+- Moc F da pass; Unity dat `baseUrl = https://api.ywonder.net/game-api`, tiep theo build EXE/APK moi.
 - Giu backend Windows + Cloudflare Tunnel cu trong thoi gian nghiem thu de co duong quay lai.
 - Neu VPS loi: dung phat build moi, khoi phuc DNS/base URL cu va khong ghi tiep vao hai database cung luc.
 - Sau khi khach nghiem thu, dong tunnel tam va luu snapshot JSON cu lam archive read-only.
@@ -194,9 +194,9 @@ Ket qua dat:
 ## 5. Thu tu cong viec ngay tiep theo
 
 1. Xac nhan owner co quyen doi DNS `api.ywonder.net` va khong co he thong web cu dang phu thuoc cac path tren subdomain nay.
-2. Backup Nginx, them `/game-api/*` va WebSocket `/game-api/realtime` toi `127.0.0.1:3000`; giu nguyen `/api/game/* -> 3033` va root `-> 3036`.
-3. Test REST + WSS tu ngoai mang va lap lai health/register/login/bootstrap/shop/realtime sau khi reload Nginx; full VPS reboot baseline da pass.
-4. Chi sau khi Moc F pass moi doi Unity `BackendConfig.baseUrl = https://api.ywonder.net/game-api`, build EXE/APK va test 5-20 client.
+2. `[x]` Backup Nginx, them `/game-api/*` va WebSocket `/game-api/realtime` toi `127.0.0.1:3000`; giu nguyen `/api/game/* -> 3033` va root `-> 3036`.
+3. `[x]` Test REST + WSS tu ngoai mang, automated 20-client va full Phase 1 sau reload Nginx; reboot baseline van giu.
+4. `[~]` Unity da doi `BackendConfig.baseUrl = https://api.ywonder.net/game-api`; cho build EXE/APK va test that 4-5 client.
 
 ## 6. Thong tin tuyet doi khong ghi vao repo
 

@@ -101,5 +101,6 @@ Hoàn tất ngày 11/07/2026:
 - Chưa mở `80/443`, chưa đổi DNS `api.ywonder.net`, chưa bật HTTPS/WSS.
 - Chưa khóa root/password SSH; vẫn giữ làm rollback cho tới khi public cutover và external acceptance hoàn tất.
 - Test tự động private 20 client đã xong; test thật 5–20 EXE/APK ngoài mạng vẫn là gate riêng sau HTTPS/WSS.
+- Public Nginx `/game-api` đã nghiệm thu: external automated 20-client và full Phase 1 đều pass qua HTTPS/WSS; test accounts đã xóa, P1 baseline còn đủ. Nginx/game-server/PostgreSQL/Caddy active; `3000/5432/8080` vẫn chỉ nội bộ.
 
 Không dùng role `deploy` hoặc database `ywonder_test` làm dữ liệu thật.
