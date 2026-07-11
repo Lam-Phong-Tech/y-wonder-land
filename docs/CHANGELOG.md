@@ -5,6 +5,15 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-07-11] — Full VPS reboot acceptance
+
+### Verified
+- VPS reboot thật lúc `13:13:19 +07`; `boot_id` đổi thành `ee8dfd96-8d69-43c0-a0ab-5ddcccd109f9`.
+- PostgreSQL, `ywonder-game-server`, Caddy và `ywonder-db-backup.timer` đều tự khởi động lại ở trạng thái `active/enabled`; private health trả `storage.mode=postgres`.
+- `P1A_h09433`, `P1B_h09433`, `P1Race_h09433` login/bootstrap lại được. Canonical fingerprint dữ liệu trước/sau reboot khớp `a003b888ed68b5ee95e43efae2ee0873fafd291dac66aac0ffceeaf7c649bf6e`.
+- Public DNS/HTTPS/WSS và Unity URL vẫn chưa thay đổi; từ ngoài hiện chỉ SSH `22` được mở.
+
+---
 ## [2026-07-11] — Controlled restart PostgreSQL/backend
 
 ### Added
@@ -13,7 +22,7 @@
 ### Verified
 - PostgreSQL và `ywonder-game-server` restart lúc `11:35:58 +07`; Node/Caddy health trở lại với `storage.mode=postgres`, PostgreSQL/Node/Caddy/backup timer đều `active/enabled`.
 - Fingerprint của `P1A_h09433`, `P1B_h09433`, `P1Race_h09433` khớp hoàn toàn trước/sau. Kiểm tra login/bootstrap độc lập qua SSH tunnel giữ đúng Point, inventory và farm state của cả ba account.
-- Full VPS reboot để nghiệm thu auto-start vẫn còn chờ; public DNS/HTTPS/WSS và Unity URL chưa thay đổi.
+- Full VPS reboot acceptance đã hoàn tất ở checkpoint mới hơn phía trên; public DNS/HTTPS/WSS và Unity URL chưa thay đổi.
 
 ---
 ## [2026-07-11] — Gia cố backend và private redeploy

@@ -109,7 +109,7 @@ Runbook: `docs/POSTGRESQL_PHASE2_RUNBOOK.md`.
 Ket qua dat:
 
 - Register/login/bootstrap/shop/resource/farm/daily-limit pass tren PostgreSQL: **DAT**.
-- Restart Node khong mat account/tien/item/farm: **DAT**. Controlled restart PostgreSQL service + backend tren production va so sanh fingerprint 3 account P1: **DAT**. Backup restore drill: **DAT**.
+- Restart Node khong mat account/tien/item/farm: **DAT**. Controlled restart PostgreSQL service + backend tren production va so sanh fingerprint 3 account P1: **DAT**. Full VPS reboot + auto-start + P1 persistence: **DAT**. Backup restore drill: **DAT**.
 - Retry request khong cong/tru hai lan: **DAT**, ke ca hai request economy chay dong thoi.
 
 ### Moc D - Chuan bi Ubuntu va cai dich vu
@@ -127,11 +127,12 @@ Chi lam sau khi Moc A pass:
 
 Ket qua dat:
 
-- `[~]` Node/PostgreSQL/Caddy deu enabled; chua reboot VPS de nghiem thu auto-start tron bo.
+- `[x]` Full VPS reboot luc `13:13:19 +07` da pass; Node/PostgreSQL/Caddy/backup timer tu khoi dong `active/enabled`, private health tro lai PostgreSQL mode.
 - `[x]` Database chi nghe local.
 - `[x]` Backend chi nghe `127.0.0.1:3000`; Caddy staging co `bind 127.0.0.1` va chi nghe `127.0.0.1:8080`.
 - `[x]` Backup tao duoc va thu restore thanh cong tren database test.
 - `[x]` Controlled restart PostgreSQL + backend ngay 11/07 giu nguyen fingerprint profile/economy/inventory/farm/daily-limit/transaction cua 3 account P1; health truc tiep va qua Caddy deu tro lai `storage.mode=postgres`.
+- `[x]` Sau full VPS reboot, ca ba account P1 login/bootstrap lai thanh cong; canonical fingerprint truoc/sau khop `a003b888ed68b5ee95e43efae2ee0873fafd291dac66aac0ffceeaf7c649bf6e`.
 
 ### Moc E - Deploy staging tren VPS
 
@@ -172,7 +173,7 @@ Can lam:
   - 20 WebSocket
   - chat/presence/action/resource
   - duplicate session ma `4008`
-- Reboot VPS va lap lai test toi thieu.
+- Sau khi doi Caddy sang domain public, reload service va lap lai test toi thieu tu mang ngoai; full VPS auto-start baseline da pass o private checkpoint.
 
 Ket qua dat:
 
@@ -191,7 +192,7 @@ Ket qua dat:
 
 1. Xac nhan owner co quyen doi DNS `api.ywonder.net` va khong co he thong web cu dang phu thuoc cac path tren subdomain nay.
 2. Doi Caddy tu private staging sang `api.ywonder.net`, mo dung `80/443`, cap TLS; van khoa `3000/5432/8080`.
-3. Test REST + WSS tu ngoai mang, reboot VPS va lap lai health/register/login/bootstrap/shop/realtime.
+3. Test REST + WSS tu ngoai mang va lap lai health/register/login/bootstrap/shop/realtime sau khi reload Caddy; full VPS reboot baseline da pass.
 4. Chi sau khi Moc F pass moi doi Unity `BackendConfig.baseUrl`, build EXE/APK va test 5-20 client.
 
 ## 6. Thong tin tuyet doi khong ghi vao repo
