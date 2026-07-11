@@ -1,7 +1,8 @@
-// index.js — Server stub REST cho YWONDERLAND (Đợt 1: Profile + Tutorial).
-// CHỈ dùng cho dev/test ở local. KHÔNG bảo mật cho production (JWT secret cứng, không rate-limit).
+// REST and realtime game backend for Y WONDER GREEN FARM.
+// Production runs behind a loopback reverse proxy with PostgreSQL storage.
 const express = require("express");
 const http = require("http");
+const crypto = require("crypto");
 const cors = require("cors");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -15,15 +16,32 @@ const {
   isAllowedDemoPassword,
   canonicalizeDemoAuthPayload,
 } = require("./demoAccounts");
+const {
+  DEVELOPMENT_JWT_SECRET,
+  authIdentityKey,
+  buildSecurityConfig,
+  createCorsOptions,
+  createRateLimiter,
+  createRequestSecurityMiddleware,
+  validateLoginBody,
+  validateProductionConfig,
+  validateRegistrationBody,
+} = require("./security");
 
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || "0.0.0.0";
-const JWT_SECRET = process.env.JWT_SECRET || "ywonderland_dev_secret_change_me";
-const TOKEN_TTL = "30d";
+const JWT_SECRET = process.env.JWT_SECRET || DEVELOPMENT_JWT_SECRET;
+const TOKEN_TTL = process.env.JWT_TOKEN_TTL || "30d";
+const securityConfig = buildSecurityConfig();
+
+validateProductionConfig();
 
 const app = express();
-app.use(cors());
-app.use(express.json());
+app.disable("x-powered-by");
+if (securityConfig.trustProxy) app.set("trust proxy", securityConfig.trustProxy);
+app.use(createRequestSecurityMiddleware({ accessLogEnabled: securityConfig.accessLogEnabled }));
+app.use(cors(createCorsOptions(securityConfig.corsAllowedOrigins)));
+app.use(express.json({ limit: securityConfig.jsonBodyLimit, strict: true }));
 
 function asyncRoute(handler) {
   return (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
@@ -35,6 +53,28 @@ if (process.env.ADMIN_DASHBOARD_ENABLED !== "false") {
 
 // Mount the same routes for local dev and the public Unity baseUrl.
 const api = express.Router();
+
+const authIpLimiter = createRateLimiter({
+  name: "auth_ip",
+  windowMs: securityConfig.authIpWindowMs,
+  max: securityConfig.authIpMax,
+  enabled: securityConfig.rateLimitEnabled,
+});
+const authIdentityLimiter = createRateLimiter({
+  name: "auth_identity",
+  windowMs: securityConfig.authIdentityWindowMs,
+  max: securityConfig.authIdentityMax,
+  enabled: securityConfig.rateLimitEnabled,
+  keyGenerator: authIdentityKey,
+});
+const registerLimiter = createRateLimiter({
+  name: "auth_register",
+  windowMs: securityConfig.registerWindowMs,
+  max: securityConfig.registerMax,
+  enabled: securityConfig.rateLimitEnabled,
+});
+
+api.use("/auth", authIpLimiter);
 
 // ── Helpers ──
 function nowISO() {
@@ -63,11 +103,11 @@ function makeDefaultProfileForName(name) {
 }
 
 function signToken(userId, extra = {}) {
-  return jwt.sign({ uid: userId, ...extra }, JWT_SECRET, { expiresIn: TOKEN_TTL });
+  return jwt.sign({ uid: userId, ...extra }, JWT_SECRET, { algorithm: "HS256", expiresIn: TOKEN_TTL });
 }
 
 async function verifyTokenPayload(token) {
-  return canonicalizeDemoAuthPayload(jwt.verify(token, JWT_SECRET), store);
+  return canonicalizeDemoAuthPayload(jwt.verify(token, JWT_SECRET, { algorithms: ["HS256"] }), store);
 }
 
 // Middleware: xác thực Bearer token -> gắn req.userId
@@ -93,26 +133,24 @@ api.get("/health", asyncRoute(async (req, res) => {
 }));
 
 // ── Auth ──
-api.post("/auth/register", asyncRoute(async (req, res) => {
-  const username = String((req.body && req.body.username) || "").trim();
-  const password = String((req.body && req.body.password) || "");
-  const email = String((req.body && req.body.email) || "").trim().toLowerCase();
-  const phone = String((req.body && req.body.phone) || "").trim();
-  if (!username || !password)
-    return res.status(400).json({ error: "Thiếu username/password" });
+api.post("/auth/register", registerLimiter, asyncRoute(async (req, res) => {
+  const validated = validateRegistrationBody(req.body);
+  if (!validated.ok) return res.status(400).json({ error: validated.error });
+  const { username, password, email, phone } = validated;
+
   if (await store.findUserByName(username))
     return res.status(409).json({ error: "USERNAME_EXISTS" });
   if (email && await store.findUserByEmail(email))
     return res.status(409).json({ error: "EMAIL_EXISTS" });
 
-  const id = "u_" + Date.now() + "_" + Math.floor(Math.random() * 1e6);
+  const id = `u_${crypto.randomUUID()}`;
   try {
     await store.createUser({
       id,
       username,
       email,
       phone,
-      password_hash: bcrypt.hashSync(password, 8),
+      password_hash: await bcrypt.hash(password, securityConfig.bcryptRounds),
       created_at: nowISO(),
       updated_at: nowISO(),
     });
@@ -129,26 +167,35 @@ api.post("/auth/register", asyncRoute(async (req, res) => {
   profile.name = username;
   await store.setProfile(id, profile);
 
-  console.log(`[auth] Đăng ký mới: ${username} (${id})`);
+  console.log(JSON.stringify({ event: "auth_register_succeeded", requestId: req.requestId, userId: id }));
   res.json({ token: signToken(id, { username, email, authSource: "local" }), userId: id, playerId: id, username, email });
 }));
 
-api.post("/auth/login", asyncRoute(async (req, res) => {
-  const username = String((req.body && req.body.username) || "").trim();
-  const password = String((req.body && req.body.password) || "");
-  if (!username || !password)
-    return res.status(400).json({ error: "Thiếu username/password" });
+api.post("/auth/login", authIdentityLimiter, asyncRoute(async (req, res) => {
+  const validated = validateLoginBody(req.body);
+  if (!validated.ok) return res.status(400).json({ error: validated.error });
+  const { username, password } = validated;
 
   const user = await store.findUserByName(username);
   if (!user)
     return res.status(404).json({ error: "USER_NOT_FOUND" });
-  const passwordOk =
-    bcrypt.compareSync(password, user.password_hash) ||
-    isAllowedDemoPassword(user.username, password);
+  let passwordOk = false;
+  try {
+    passwordOk = Boolean(user.password_hash) && await bcrypt.compare(password, user.password_hash);
+  } catch (error) {
+    console.warn(JSON.stringify({
+      event: "auth_password_hash_invalid",
+      requestId: req.requestId,
+      userId: user.id,
+    }));
+  }
+  passwordOk = passwordOk ||
+    (!securityConfig.production && process.env.DEMO_ACCOUNTS_ENABLED !== "false" &&
+      isAllowedDemoPassword(user.username, password));
   if (!passwordOk)
     return res.status(401).json({ error: "Sai username hoặc mật khẩu" });
 
-  console.log(`[auth] Đăng nhập: ${username} (${user.id})`);
+  console.log(JSON.stringify({ event: "auth_login_succeeded", requestId: req.requestId, userId: user.id }));
   const playerId = user.player_id || user.id;
   res.json({
     token: signToken(playerId, { username: user.username, email: user.email || "", authSource: "local" }),
@@ -159,7 +206,7 @@ api.post("/auth/login", asyncRoute(async (req, res) => {
   });
 }));
 
-api.post("/auth/web-login", asyncRoute(async (req, res) => {
+api.post("/auth/web-login", authIdentityLimiter, asyncRoute(async (req, res) => {
   let authResult;
   try {
     authResult = await webAuth.verifyLogin(req.body || {});
@@ -197,7 +244,12 @@ api.post("/auth/web-login", asyncRoute(async (req, res) => {
     displayName: player.displayName || profile.name,
   });
 
-  console.log(`[auth] Web login mapped ${player.webUserId} -> ${player.id}`);
+  console.log(JSON.stringify({
+    event: "web_auth_login_succeeded",
+    requestId: req.requestId,
+    webUserId: player.webUserId,
+    playerId: player.id,
+  }));
   res.json({
     token,
     userId: player.id,
@@ -386,13 +438,66 @@ app.use("/game-api", api);
 app.use("/", api);
 
 app.use((error, req, res, next) => {
-  console.error(`[api] ${req.method} ${req.originalUrl} failed:`, error);
   if (res.headersSent) return next(error);
-  return res.status(500).json({ error: "INTERNAL_SERVER_ERROR" });
+
+  if (error && error.type === "entity.too.large") {
+    return res.status(413).json({ error: "PAYLOAD_TOO_LARGE", requestId: req.requestId });
+  }
+  if (error instanceof SyntaxError && error.status === 400 && Object.prototype.hasOwnProperty.call(error, "body")) {
+    return res.status(400).json({ error: "INVALID_JSON", requestId: req.requestId });
+  }
+
+  console.error(JSON.stringify({
+    event: "api_error",
+    requestId: req.requestId || "",
+    method: req.method,
+    path: req.path,
+    errorCode: error && (error.code || error.name) || "UNKNOWN_ERROR",
+  }));
+  return res.status(500).json({ error: "INTERNAL_SERVER_ERROR", requestId: req.requestId });
 });
 
 const server = http.createServer(app);
-attachRealtimeServer(server, { verifyToken: verifyTokenPayload, store });
+server.requestTimeout = securityConfig.requestTimeoutMs;
+server.headersTimeout = securityConfig.headersTimeoutMs;
+server.keepAliveTimeout = securityConfig.keepAliveTimeoutMs;
+server.maxHeadersCount = 100;
+
+const realtime = attachRealtimeServer(server, { verifyToken: verifyTokenPayload, store });
+let shuttingDown = false;
+
+async function shutdown(signal) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  console.log(JSON.stringify({ event: "shutdown_started", signal }));
+
+  const forceExit = setTimeout(() => {
+    console.error(JSON.stringify({ event: "shutdown_forced", signal }));
+    process.exit(1);
+  }, 15_000);
+  forceExit.unref();
+
+  realtime.close(1012, "Server restarting");
+  server.close(async (serverError) => {
+    try {
+      await store.close();
+      clearTimeout(forceExit);
+      if (serverError) throw serverError;
+      console.log(JSON.stringify({ event: "shutdown_completed", signal }));
+      process.exit(0);
+    } catch (error) {
+      console.error(JSON.stringify({
+        event: "shutdown_failed",
+        signal,
+        errorCode: error && (error.code || error.name) || "UNKNOWN_ERROR",
+      }));
+      process.exit(1);
+    }
+  });
+}
+
+process.once("SIGTERM", () => shutdown("SIGTERM"));
+process.once("SIGINT", () => shutdown("SIGINT"));
 
 async function startServer() {
   await ensureDemoAccounts(store, bcrypt);
@@ -400,7 +505,7 @@ async function startServer() {
     server.once("error", reject);
     server.listen(PORT, HOST, () => {
       server.off("error", reject);
-      console.log(`[ywonderland-stub] listening on ${HOST}:${PORT} store=${store.mode}`);
+      console.log(`[ywonderland-stub] listening on ${HOST}:${PORT} store=${store.mode} security=enabled`);
       resolve();
     });
   });

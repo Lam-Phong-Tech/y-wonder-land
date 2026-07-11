@@ -6,6 +6,11 @@ const MAX_ROOM_PLAYERS = Number(process.env.REALTIME_MAX_ROOM_PLAYERS || 20);
 const RESOURCE_RESPAWN_SEC = Math.max(0.1, Number(process.env.REALTIME_RESOURCE_RESPAWN_SEC || 20));
 const RESOURCE_MAX_DISTANCE = Math.max(1, Number(process.env.REALTIME_RESOURCE_MAX_DISTANCE || 6));
 const MAX_RESOURCES_PER_ROOM = Math.max(1, Number(process.env.REALTIME_MAX_RESOURCES_PER_ROOM || 250));
+const MAX_CONNECTIONS = Math.max(20, Number(process.env.REALTIME_MAX_CONNECTIONS || 100));
+const MAX_PAYLOAD_BYTES = Math.max(1024, Number(process.env.REALTIME_MAX_PAYLOAD_BYTES || 65536));
+const MESSAGE_RATE_WINDOW_MS = Math.max(1000, Number(process.env.REALTIME_MESSAGE_RATE_WINDOW_MS || 10000));
+const MESSAGE_RATE_MAX = Math.max(30, Number(process.env.REALTIME_MESSAGE_RATE_MAX || 300));
+const MAX_BAD_MESSAGES = Math.max(1, Number(process.env.REALTIME_MAX_BAD_MESSAGES || 3));
 const GEMSTONE_REWARDS = [
   { itemId: "gem_ruby_01", displayName: "Ruby", quantity: 1, weight: 1 },
   { itemId: "gem_amethyst_01", displayName: "Amethyst", quantity: 1, weight: 2 },
@@ -55,7 +60,7 @@ function attachRealtimeServer(server, options) {
     throw new Error("attachRealtimeServer requires store.applyResourceHarvest(...)");
   }
 
-  const wss = new WebSocket.Server({ noServer: true });
+  const wss = new WebSocket.Server({ noServer: true, maxPayload: MAX_PAYLOAD_BYTES });
   const clients = new Map();
   const rooms = new Map();
   const resourcesByRoom = new Map();
@@ -108,7 +113,7 @@ function attachRealtimeServer(server, options) {
   function scheduleResourceRespawn(room, resource) {
     const expectedCycle = resource.cycle;
     const delayMs = Math.max(1, resource.respawnAt - Date.now());
-    setTimeout(() => {
+    const respawnTimer = setTimeout(() => {
       const current = resourcesByRoom.get(room)?.get(resource.resourceId);
       if (!current || current.available || current.cycle !== expectedCycle) return;
 
@@ -124,6 +129,7 @@ function attachRealtimeServer(server, options) {
         sentAt: nowISO(),
       });
     }, delayMs);
+    respawnTimer.unref();
   }
 
   function rollGemstoneReward() {
@@ -519,6 +525,8 @@ function attachRealtimeServer(server, options) {
       tool: "None",
       hasPosition: false,
       chatTimestamps: [],
+      messageTimestamps: [],
+      badMessageCount: 0,
       updatedAt: nowISO(),
     });
     disconnectExistingPlayerSession(playerId, ws);
@@ -531,12 +539,35 @@ function attachRealtimeServer(server, options) {
       sentAt: nowISO(),
     });
 
-    ws.on("message", async (raw) => {
+    async function processMessage(raw) {
+      const client = clients.get(ws);
+      if (!client) return;
+
+      const messageNow = Date.now();
+      client.messageTimestamps = client.messageTimestamps.filter(
+        (timestamp) => messageNow - timestamp < MESSAGE_RATE_WINDOW_MS
+      );
+      if (client.messageTimestamps.length >= MESSAGE_RATE_MAX) {
+        send(ws, { type: "error", code: "MESSAGE_RATE_LIMIT" });
+        ws.close(1008, "Message rate exceeded");
+        return;
+      }
+      client.messageTimestamps.push(messageNow);
+
       let msg = null;
       try {
         msg = JSON.parse(raw.toString("utf8"));
       } catch (e) {
+        client.badMessageCount += 1;
         send(ws, { type: "error", code: "BAD_JSON" });
+        if (client.badMessageCount >= MAX_BAD_MESSAGES) ws.close(1008, "Invalid messages");
+        return;
+      }
+
+      if (!msg || typeof msg !== "object" || Array.isArray(msg)) {
+        client.badMessageCount += 1;
+        send(ws, { type: "error", code: "BAD_MESSAGE" });
+        if (client.badMessageCount >= MAX_BAD_MESSAGES) ws.close(1008, "Invalid messages");
         return;
       }
 
@@ -569,6 +600,27 @@ function attachRealtimeServer(server, options) {
           send(ws, { type: "error", code: "UNKNOWN_MESSAGE_TYPE", messageType: msg.type || "" });
           break;
       }
+    }
+
+    ws.on("message", (raw) => {
+      processMessage(raw).catch((error) => {
+        console.error(JSON.stringify({
+          event: "realtime_message_error",
+          connectionId: id,
+          playerId,
+          errorCode: error && (error.code || error.name) || "UNKNOWN_ERROR",
+        }));
+        send(ws, { type: "error", code: "MESSAGE_PROCESSING_FAILED" });
+      });
+    });
+
+    ws.on("error", (error) => {
+      console.warn(JSON.stringify({
+        event: "realtime_socket_error",
+        connectionId: id,
+        playerId,
+        errorCode: error && (error.code || error.name) || "UNKNOWN_ERROR",
+      }));
     });
 
     ws.on("close", () => {
@@ -578,6 +630,12 @@ function attachRealtimeServer(server, options) {
   });
 
   server.on("upgrade", async (request, socket, head) => {
+    if (clients.size >= MAX_CONNECTIONS) {
+      socket.write("HTTP/1.1 503 Service Unavailable\r\nConnection: close\r\n\r\n");
+      socket.destroy();
+      return;
+    }
+
     let url;
     try {
       url = new URL(request.url, "http://localhost");
@@ -592,11 +650,17 @@ function attachRealtimeServer(server, options) {
     }
 
     const token = url.searchParams.get("token") || "";
+    if (!token || token.length > 4096) {
+      socket.write("HTTP/1.1 401 Unauthorized\r\nConnection: close\r\n\r\n");
+      socket.destroy();
+      return;
+    }
+
     let auth;
     try {
       auth = await verifyToken(token);
     } catch (e) {
-      socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
+      socket.write("HTTP/1.1 401 Unauthorized\r\nConnection: close\r\n\r\n");
       socket.destroy();
       return;
     }
@@ -607,10 +671,26 @@ function attachRealtimeServer(server, options) {
   });
 
   console.log(
-    `[realtime] enabled rooms=${Array.from(SHARED_ROOMS).join(",")} maxPlayers=${MAX_ROOM_PLAYERS}`
+    `[realtime] enabled rooms=${Array.from(SHARED_ROOMS).join(",")} maxPlayers=${MAX_ROOM_PLAYERS} maxConnections=${MAX_CONNECTIONS}`
   );
 
-  return { wss, clients, rooms, resourcesByRoom };
+  function close(code = 1012, reason = "Server restarting") {
+    for (const ws of clients.keys()) {
+      try {
+        ws.close(code, reason);
+      } catch (error) {
+        ws.terminate();
+      }
+    }
+
+    const terminateTimer = setTimeout(() => {
+      for (const ws of clients.keys()) ws.terminate();
+    }, 1000);
+    terminateTimer.unref();
+    wss.close();
+  }
+
+  return { wss, clients, rooms, resourcesByRoom, close };
 }
 
 module.exports = { attachRealtimeServer };

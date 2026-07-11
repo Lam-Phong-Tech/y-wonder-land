@@ -27,6 +27,14 @@ Server stub vẫn hỗ trợ cả endpoint local (`/auth/login`) và endpoint le
 `player_profile`: theo `docs/DB_SCHEMA.md` + field `characterCreated` (bool, đã tạo nhân vật) và `tutorialCompleted` (bool).
 **Token đợt 1:** JWT đơn giản (stub, KHÔNG production). Auth đợt 1 dùng username = tên nhân vật, mật khẩu sinh & lưu local (chưa nối UI Login — để đợt 2).
 
+Quy tắc account local hiện tại:
+- `username`: 9-20 ký tự, chỉ chữ Latin, số và `_`, khớp validation của Unity.
+- `password`: 9-20 ký tự, có chữ hoa, chữ thường, số và ký tự đặc biệt.
+- `email`: UI đăng ký yêu cầu và gửi lên; API vẫn để optional cho legacy/offline bridge,
+  nhưng nếu có thì phải đúng định dạng và không trùng account khác.
+- Auth endpoint có rate limit theo IP/tài khoản. Khi vượt giới hạn trả HTTP `429`
+  với `{ error:"RATE_LIMITED", retryAfterSec }` và header `Retry-After`.
+
 > **Lộ trình:** Đợt 2 nối UI Login/Register + Economy + Inventory; Đợt 3 Farm/Animal/Resource; Đợt 4 realtime (Photon) + Firebase push.
 
 ---
@@ -71,6 +79,10 @@ Quy uoc mapping:
 - Game-server phai kiem tra account status tu web: `active`, `locked`, `soft_deleted` hoac field tuong duong.
 - MVP online/realtime chua lam nap/rut va chua can web wallet. Phase sau: tien nap tu web phai di qua web wallet API; `Point` la tien trong game va tien nap, con can chot `UPoint` dung lam gi va web hay game-server la ledger cuoi cung cua Point.
 - `STORE_MODE=json` là mặc định dev/local. Từ 11/07/2026, `STORE_MODE=postgres` đã có driver `pg`, migration versioned và query thật cho account/profile/economy/inventory/farm/daily-limit/transactions; cùng bộ Phase 1 smoke đã pass trên PostgreSQL test thật. Production DB/backup/deploy vẫn chưa hoàn tất; xem `docs/POSTGRESQL_PHASE2_RUNBOOK.md`.
+- Production startup gate bắt buộc loopback bind, PostgreSQL, secret JWT dài, tắt
+  dashboard/demo seed và cấm `WEB_AUTH_MODE=mock`. HTTP có request ID, body limit,
+  security headers và structured access log không chứa body/token. Realtime giới hạn
+  tổng connection, payload và message rate; các ngưỡng được cấu hình bằng env.
 - `daily_limits` mac dinh gom `fishing` va `mining`, reset theo `period_key` ngay server dang `YYYY-MM-DD`. Can chot timezone server; khuyen nghi `Asia/Saigon` cho khach VN. Hien stub cu co the dang dung UTC nen can doi/ghi ro truoc production.
 - `idempotency_key` phai duy nhat cho moi action co retry; server tra `duplicate=true` khi nhan lai cung key va khong apply them tien/item/luot.
 - Shop transaction khong nhan/gia tin `unit_price` tu Unity. Server tra `shopCatalog.json` sinh tu `ItemDefinition` + `ShopDefinition`, kiem access mode/whitelist/canSell va doi Point + inventory trong mot lan ghi. Cung key nhung body khac tra `IDEMPOTENCY_CONFLICT`.

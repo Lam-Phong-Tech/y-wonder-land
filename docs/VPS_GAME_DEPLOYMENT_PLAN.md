@@ -148,7 +148,7 @@ Trang thai:
   - `HOST=127.0.0.1`
   - `PORT=3000`
 - `[x]` `/health`, register, login, bootstrap, shop, idempotency va WebSocket da pass qua Caddy staging noi bo.
-- `[ ]` Them hardening auth/rate-limit/log toi thieu truoc khi public.
+- `[~]` Source hardening auth/rate-limit/log/HTTP-WebSocket guard va graceful shutdown da pass local; con redeploy immutable va smoke qua Caddy private tren VPS truoc khi chuyen `[x]`.
 
 Luu y domain:
 

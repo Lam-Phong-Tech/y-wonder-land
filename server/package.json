@@ -12,7 +12,8 @@
     "db:verify": "node scripts/verifyPostgresData.js",
     "test:realtime": "node realtimeSmokeTest.js",
     "test:phase1": "node phase1SmokeTest.js",
-    "test:postgres": "node postgresSmokeTest.js"
+    "test:postgres": "node postgresSmokeTest.js",
+    "test:security": "node securitySmokeTest.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

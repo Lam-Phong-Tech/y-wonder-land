@@ -1,8 +1,10 @@
 # YWONDERLAND — Game Backend
 
-Backend hỗ trợ JSON cho dev/local và PostgreSQL cho staging. Source PostgreSQL đã
-pass integration test, nhưng deployment hiện **chưa phải production** vì chưa có
-rate-limit, HTTPS/WSS proxy, production secrets, backup/restore drill và monitoring.
+Backend hỗ trợ JSON cho dev/local và PostgreSQL cho staging/production. PostgreSQL,
+backup/restore và private VPS staging đã pass. Source hiện có production startup gate,
+auth rate limit, request/realtime payload guard, security headers, access log không ghi
+body/token và graceful shutdown. Public HTTPS/WSS, DNS và monitoring alert vẫn là gate
+trước khi phát hành cho khách.
 
 Production bắt buộc đặt `JWT_SECRET`, DB credential và web-auth secret trong env trên
 VPS; không dùng fallback dev, `data.json`, role `deploy` hoặc database `ywonder_test`.
@@ -20,6 +22,10 @@ npm install
 npm start
 ```
 Mặc định chạy tại `http://localhost:3000`. Có thể đổi bằng biến môi trường `HOST` và `PORT`; production đặt `HOST=127.0.0.1` để chỉ reverse proxy nội bộ truy cập trực tiếp Node.
+
+Khi `NODE_ENV=production`, server từ chối khởi động nếu dùng secret yếu, JSON store,
+`WEB_AUTH_MODE=mock`, dashboard/demo account đang bật hoặc Node bind ra interface public.
+Mẫu biến môi trường đầy đủ nằm ở `.env.example`.
 
 Storage mặc định là JSON file để test local nhanh:
 
@@ -66,6 +72,8 @@ Nếu muốn tắt dashboard:
 ```powershell
 $env:ADMIN_DASHBOARD_ENABLED="false"
 ```
+
+Production bắt buộc đặt giá trị này thành `false`; startup gate sẽ chặn cấu hình khác.
 
 Hành trình đầy đủ từ tài khoản web -> tài khoản game -> gameplay server-authoritative nằm ở
 `../docs/WEB_GAME_BACKEND_JOURNEY.md`. Shop và khai thác cây/đá public nay đã ghi vào backend;
@@ -162,6 +170,32 @@ npm.cmd run test:phase1
 
 Test nay tu tao 2 account moi, dang nhap lai, goi `/player/bootstrap`, sua economy/inventory/farm-state,
 kiem tra idempotency, roi mo 2 WebSocket de join `city` va chat realtime.
+
+Smoke test hardening tự khởi động một server JSON tạm, không chạm dữ liệu thật:
+
+```powershell
+cd server
+npm.cmd run test:security
+```
+
+Test này kiểm tra production config gate, quy tắc đăng ký, security headers, CORS,
+body-size limit, rate limit đăng nhập/đăng ký, WebSocket payload và message-rate guard.
+
+## Production security defaults
+
+- `TRUST_PROXY=loopback`: chỉ tin `X-Forwarded-For` từ Caddy nội bộ.
+- `JSON_BODY_LIMIT=512kb`: chặn request body bất thường nhưng vẫn đủ farm-state MVP.
+- `AUTH_IP_RATE_LIMIT_MAX=120/10 phút`: đủ cho nhóm test chung NAT.
+- `AUTH_IDENTITY_RATE_LIMIT_MAX=15/15 phút`: hạn chế brute-force theo tài khoản.
+- `AUTH_REGISTER_RATE_LIMIT_MAX=30/giờ/IP`: vẫn cho 20 khách cùng Wi-Fi đăng ký.
+- `BCRYPT_ROUNDS=12`: áp dụng cho account đăng ký mới; hash cũ vẫn login được.
+- `REALTIME_MAX_CONNECTIONS=100`, payload `64 KiB`, tối đa `300 message/10 giây/client`.
+- HTTP log chỉ ghi request ID, method, path, status, duration và IP; không ghi body,
+  password, bearer token hay query string chứa WebSocket token.
+
+Các giá trị có thể override bằng env theo `.env.example`. Không tắt rate limit trên
+public server. Unity native client không cần CORS; production mặc định không cấp CORS
+cho browser origin nào nếu `CORS_ALLOWED_ORIGINS` để trống.
 
 ## Test realtime khi web dang sap / chua co tai khoan web
 
@@ -304,7 +338,7 @@ PostgreSQL schema snapshot nam o `server/schema.sql`; migration versioned nam o
 ## Smoke test nhanh (PowerShell)
 ```powershell
 # Đăng ký
-$r = irm http://localhost:3000/auth/register -Method Post -ContentType application/json -Body '{"username":"test","password":"12345678"}'
+$r = irm http://localhost:3000/auth/register -Method Post -ContentType application/json -Body '{"username":"Security01","email":"security01@example.test","password":"Strong@123"}'
 $tok = $r.token
 # Lấy profile
 irm http://localhost:3000/player/profile -Headers @{ Authorization = "Bearer $tok" }
