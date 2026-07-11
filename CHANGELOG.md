@@ -34,12 +34,17 @@
 - The owner has now confirmed `42.96.18.14` is the dedicated game VPS, permitted for Node + PostgreSQL, expected to use Ubuntu Server 24.04 LTS, and will later receive `api.ywonder.net`. Added `docs/VPS_GAME_DEPLOYMENT_PLAN.md` with audit, hardening, PostgreSQL, deploy, DNS, acceptance and rollback gates; no credentials are stored.
 
 ### Fixed
+- Local tree/rock prefabs and runtime-spawned resources now use the same 20-second demo respawn time; stale saved timers longer than the configured duration are clamped on load.
+- Tutorial onboarding no longer creates or visits the legacy mining node. Its 11-step runtime route now ends after tree chopping, farm construction/cultivation and pen construction; placing or feeding an animal is no longer required.
+- `StartTutorial()` is idempotent within one authenticated session and resets on identity changes. `GuideNPC` clears stale node/coroutine state, while the tutorial reuses or removes duplicate `NPC_ExclamationMark` children and removes the marker after completion.
+- Registration validation now trims username/email, describes the server rule as a minimum of 9 characters, and avoids showing length errors continuously while mobile users are still filling the form. Existing-account login remains compatible and does not gain a new minimum-length rule.
 - The first root deployment attempt stopped before switching releases because preserved environment variables made the migration request PostgreSQL peer auth as `root`. The deployment script now explicitly sets `USER`, `LOGNAME` and `PGUSER` to `ywonder_game`; the old release stayed active throughout and the corrected run passed.
 - Mock `/auth/web-login` now returns the canonical local demo `playerId` before issuing the response/token, so REST login identity and WebSocket presence use the same ID after the async store conversion.
 - Gameplay consumption/rewards no longer remain local-only: planting a purchased seed or scooping water now generates an authenticated server delta, preventing the next bootstrap from restoring the pre-action inventory snapshot.
 - Direct-tap interaction now allows only `0.05m` of surface tolerance after a solid collider, preventing City ground clicks from selecting water or fishing targets beneath the island while preserving the assist cast for nearby object colliders.
 
 ### Verified
+- Partial real-device public acceptance passed with one Windows EXE on network A and one Android APK on network B: realtime chat and shared mining worked correctly. The new tutorial/marker/mobile-registration hotfix compiles with Unity's generated `Assembly-CSharp.rsp`; the rebuilt client runtime retest passed for the revised tutorial, repeated login marker cleanup and mobile registration feedback.
 - JSON demo-account realtime regression passes again: canonical IDs, presence, chat, action/tool relay, resource ownership/late join, farm rejection and duplicate-session close `4008` all pass.
 - JSON Phase 1 regression, PostgreSQL direct transaction smoke, PostgreSQL-backed Phase 1 REST/WebSocket smoke, Node restart persistence and PostgreSQL dashboard read all pass. DB-backed health and concurrent duplicate registration also pass with one `200` and one `409 USERNAME_EXISTS`.
 - A transactional import into an isolated schema preserved `36 accounts`, `51 players` and `82 transactions`; verification passed and the temporary schema was dropped. `npm audit --omit=dev` reports zero vulnerabilities.

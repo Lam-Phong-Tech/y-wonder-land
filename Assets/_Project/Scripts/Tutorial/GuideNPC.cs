@@ -95,7 +95,7 @@ public class GuideNPC : MonoBehaviour
 
     public void StartNode(int index)
     {
-        if (tutorialNodes == null || tutorialNodes.Length == 0 || index >= tutorialNodes.Length)
+        if (tutorialNodes == null || tutorialNodes.Length == 0 || index < 0 || index >= tutorialNodes.Length)
         {
             Debug.Log("[GuideNPC] Đã hoàn thành toàn bộ tuyến hướng dẫn!");
             OnSequenceCompleted?.Invoke();
@@ -115,6 +115,40 @@ public class GuideNPC : MonoBehaviour
         PlayAnimation(runAnimName);
 
         TriggerDialogue(GetRandomString(node.walkDialogues));
+    }
+
+    public void ResetSequenceState()
+    {
+        StopAllCoroutines();
+
+        currentNodeIndex = 0;
+        isWalkingToNode = false;
+        isWaitingForPlayerToReachNode = false;
+        isWaitingForPlayerTask = false;
+        playerIdleTimer = 0f;
+        isPlayerIdleWarningTriggered = false;
+        chatSpamTimer = 0f;
+
+        if (tutorialNodes != null)
+        {
+            foreach (TutorialNode node in tutorialNodes)
+            {
+                if (node != null)
+                    node.isTaskCompleted = false;
+            }
+        }
+
+        if (agent == null)
+            agent = GetComponent<NavMeshAgent>();
+
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.isStopped = true;
+            agent.ResetPath();
+        }
+
+        enabled = true;
+        PlayAnimation(idleAnimName);
     }
 
     public void StartGreetingSequence(int firstNodeIndex = 0)
@@ -172,6 +206,10 @@ public class GuideNPC : MonoBehaviour
 
     void Update()
     {
+        if (tutorialNodes == null || tutorialNodes.Length == 0 ||
+            currentNodeIndex < 0 || currentNodeIndex >= tutorialNodes.Length)
+            return;
+
         if (playerTransform == null)
         {
             GameObject player = GameObject.FindWithTag("Player");

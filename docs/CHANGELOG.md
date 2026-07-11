@@ -5,6 +5,19 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-07-11] — Test thật 2 thiết bị + hotfix tutorial/login mobile
+
+### Fixed
+- Đồng bộ prefab cây/đá và tài nguyên sinh runtime về thời gian hồi 20 giây cho demo; save cũ có bộ đếm dài hơn cấu hình mới được chặn về đúng giới hạn khi load.
+- Bỏ hoàn toàn node đào khoáng khỏi tuyến NPC Tân Thủ; flow 11 bước kết thúc sau `chặt cây -> xây ruộng/trồng trọt -> xây chuồng`, không còn bắt thả thú/cho ăn.
+- Chặn `StartTutorial()` chạy hai lần trong cùng phiên, reset GuideNPC khi đổi/logout tài khoản, gom dấu `!` về đúng một instance và dọn dấu khi tutorial hoàn tất.
+- Form đăng ký mobile không hiện lỗi độ dài liên tục khi người chơi còn nhập; câu báo đổi thành username/password mới cần ít nhất 9 ký tự, đúng rule backend. Form đăng nhập tài khoản cũ không bị áp minimum mới.
+
+### Verified
+- Anh đã test bản public trước hotfix bằng 1 EXE mạng A và 1 APK mạng B: chat realtime và đào khoáng đồng bộ hoạt động rất tốt.
+- Các file C# hotfix compile pass bằng response file Unity; chỉ còn warning cũ không liên quan `enableStickAutoSprint`. Ngày 11/07 anh đã build/test lại và xác nhận tutorial mới, đăng nhập lặp không nhân dấu `!`, cùng phản hồi độ dài form đăng ký mobile đều hoạt động đúng.
+
+---
 ## [2026-07-11] — Public Nginx `/game-api` cutover
 
 ### Added

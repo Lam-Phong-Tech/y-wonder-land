@@ -58,6 +58,8 @@ public class LoginScreenController : MonoBehaviour
     private const string INPUT_FOCUS_CLASS = "login-input-group-focus";
     private const string STATUS_SUCCESS = "status-success";
     private const string STATUS_ERROR = "status-error";
+    private const int REGISTER_MIN_LENGTH = 9;
+    private const int REGISTER_MAX_LENGTH = 20;
 
     void OnEnable()
     {
@@ -414,15 +416,15 @@ public class LoginScreenController : MonoBehaviour
             btnRegister.SetEnabled(isValid);
         }
 
-        // Show real-time error helper only if at least one field has been edited
-        bool anyFieldFilled = !string.IsNullOrEmpty(regUsernameField?.value) ||
-                              !string.IsNullOrEmpty(regEmailField?.value) ||
-                              !string.IsNullOrEmpty(regPasswordField?.value) ||
-                              !string.IsNullOrEmpty(regConfirmField?.value);
+        // Trên mobile, không hiện lỗi độ dài liên tục khi người chơi vẫn đang gõ.
+        bool allFieldsFilled = !string.IsNullOrWhiteSpace(regUsernameField?.value) &&
+                               !string.IsNullOrWhiteSpace(regEmailField?.value) &&
+                               !string.IsNullOrEmpty(regPasswordField?.value) &&
+                               !string.IsNullOrEmpty(regConfirmField?.value);
 
         if (!isValid)
         {
-            if (anyFieldFilled)
+            if (allFieldsFilled)
             {
                 ShowStatus(registerStatus, errMsg, false);
             }
@@ -440,8 +442,8 @@ public class LoginScreenController : MonoBehaviour
     private bool ValidateRegisterForm(out string errorMessage)
     {
         errorMessage = "";
-        string username = regUsernameField?.value ?? "";
-        string email = regEmailField?.value ?? "";
+        string username = (regUsernameField?.value ?? "").Trim();
+        string email = (regEmailField?.value ?? "").Trim();
         string password = regPasswordField?.value ?? "";
         string confirm = regConfirmField?.value ?? "";
 
@@ -453,13 +455,13 @@ public class LoginScreenController : MonoBehaviour
             return false;
         }
 
-        // 2. Validate Username (> 8 chars, alphanumeric & underscore only)
-        if (username.Length <= 8)
+        // 2. Validate Username (9-20 chars, alphanumeric & underscore only)
+        if (username.Length < REGISTER_MIN_LENGTH)
         {
-            errorMessage = "Tên đăng nhập phải dài hơn 8 ký tự";
+            errorMessage = "Tên đăng nhập mới cần ít nhất 9 ký tự";
             return false;
         }
-        if (username.Length > 20)
+        if (username.Length > REGISTER_MAX_LENGTH)
         {
             errorMessage = "Tên đăng nhập không được quá 20 ký tự";
             return false;
@@ -477,13 +479,13 @@ public class LoginScreenController : MonoBehaviour
             return false;
         }
 
-        // 4. Validate Password (> 8 chars, 1 uppercase, 1 lowercase, 1 digit, 1 special char)
-        if (password.Length <= 8)
+        // 4. Validate Password (9-20 chars, 1 uppercase, 1 lowercase, 1 digit, 1 special char)
+        if (password.Length < REGISTER_MIN_LENGTH)
         {
-            errorMessage = "Mật khẩu phải dài hơn 8 ký tự";
+            errorMessage = "Mật khẩu mới cần ít nhất 9 ký tự";
             return false;
         }
-        if (password.Length > 20)
+        if (password.Length > REGISTER_MAX_LENGTH)
         {
             errorMessage = "Mật khẩu không được quá 20 ký tự";
             return false;
