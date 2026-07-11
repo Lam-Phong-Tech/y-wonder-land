@@ -88,6 +88,8 @@ Hoàn tất ngày 11/07/2026:
 - Backup đầu tiên, checksum và restore drill vào database tạm đều pass; database restore tạm đã được xóa.
 - Controlled restart PostgreSQL service rồi game-server ngày 11/07 đã pass: fingerprint profile/economy/inventory/farm/daily-limit/transaction của ba account `P1A_h09433`, `P1B_h09433`, `P1Race_h09433` không đổi; cả ba login/bootstrap lại được qua SSH tunnel và private Caddy.
 - Full VPS reboot ngày 11/07 đã pass: PostgreSQL, game-server, Caddy và backup timer tự lên `active/enabled`; private health trả PostgreSQL mode và canonical P1 fingerprint trước/sau reboot khớp hoàn toàn.
+- Private 20-client load ngày 11/07 đã pass qua Caddy + PostgreSQL: 20 account bootstrap đủ dữ liệu, 20 WebSocket vào `city`, roster/state/chat/ping đúng và không rớt kết nối. P95 auth/bootstrap/WebSocket lần lượt `1532.4/31.9/36.6 ms`; không OOM và account tải đã được dọn sạch.
+- Backup ngay trước load test là `/var/backups/ywonder-game/ywonder_game_20260711T072715Z.dump`, `25242` bytes, SHA-256 `04dda7ac1048d0de493a25f91ab98116f784494460c1cbfa390479d646679a7e`.
 - Backend public hardening đã hoàn tất ở commit `09433bff`; private release hiện tại là `09433bff1e739bd2573c8068ffa58f445cd01bb6`.
 - PostgreSQL chỉ listen `127.0.0.1:5432`; UFW không có rule public `5432`.
 - Không import `server/data.json`; database production hiện chứa schema production và các account P1 smoke test đã ghi nhận trong checklist.
@@ -98,5 +100,6 @@ Hoàn tất ngày 11/07/2026:
 - Node chỉ listen `127.0.0.1:3000`; Caddy staging chỉ listen `127.0.0.1:8080`. Từ ngoài VPS các cổng này đều đóng.
 - Chưa mở `80/443`, chưa đổi DNS `api.ywonder.net`, chưa bật HTTPS/WSS.
 - Chưa khóa root/password SSH; vẫn giữ làm rollback cho tới khi public cutover và external acceptance hoàn tất.
+- Test tự động private 20 client đã xong; test thật 5–20 EXE/APK ngoài mạng vẫn là gate riêng sau HTTPS/WSS.
 
 Không dùng role `deploy` hoặc database `ywonder_test` làm dữ liệu thật.

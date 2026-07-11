@@ -27,6 +27,7 @@
 - Hardened backend commit `09433bff` with a production startup gate, async bcrypt, auth/register rate limits, request-size/CORS/security-header/request-ID guards, non-sensitive structured logs, HTTP timeouts, WebSocket connection/payload/message limits, and graceful shutdown. Added `test:security` without introducing a new npm dependency.
 - Added `server/deploy/deploy-private-release.sh`: verifies archive SHA-256, installs the lockfile, validates production env, runs migration as `ywonder_game`, applies the sandboxed unit, switches the immutable release, checks Node+Caddy health, and rolls back the symlink/unit on failure.
 - Added `server/deploy/restart-private-services-verify.sh`: fingerprints P1 profile/economy/inventory/farm/daily-limit/transaction state, restarts PostgreSQL followed by the game server, waits for direct Node and private Caddy health, and fails if the before/after snapshots differ.
+- Added `server/phase1LoadTest.js`, `npm run test:load`, and `server/deploy/run-private-load-test.sh` for a bounded 20-client private acceptance run. The VPS runner creates a PostgreSQL backup first, tests registration/bootstrap/room capacity/state/chat/ping through private Caddy, checks health/OOM, and deletes only the run-specific load accounts.
 - Redeployed private VPS staging to release `09433bff1e739bd2573c8068ffa58f445cd01bb6`; DNS, Unity URL and public firewall rules remain unchanged.
 - The owner has now confirmed `42.96.18.14` is the dedicated game VPS, permitted for Node + PostgreSQL, expected to use Ubuntu Server 24.04 LTS, and will later receive `api.ywonder.net`. Added `docs/VPS_GAME_DEPLOYMENT_PLAN.md` with audit, hardening, PostgreSQL, deploy, DNS, acceptance and rollback gates; no credentials are stored.
 
@@ -45,6 +46,7 @@
 - Hardened release verification passed: local security smoke, full local Phase 1 regression and `npm audit --omit=dev` (`0 vulnerabilities`); then full Phase 1 passed again through an SSH tunnel to private Caddy and production PostgreSQL. Wrong password returned `401` with identity limit `15`, `/admin` returned `404`, systemd sandbox fields and DB backup timer were active, and all service/database/proxy listeners remained loopback-only. `api.ywonder.net` still resolved to `45.119.83.233` during this checkpoint.
 - Controlled PostgreSQL/backend restart acceptance passed at `11:35:58 +07`: before/after fingerprints for `P1A_h09433`, `P1B_h09433`, and `P1Race_h09433` were identical. All three accounts logged in and bootstrapped again through an SSH tunnel and private Caddy with their Point, inventory and farm state intact; PostgreSQL, Node, Caddy and the backup timer remain active/enabled.
 - Full VPS reboot acceptance passed at `13:13:19 +07`: the boot ID changed to `ee8dfd96-8d69-43c0-a0ab-5ddcccd109f9`, PostgreSQL/game-server/Caddy/backup timer all recovered active+enabled, private health returned PostgreSQL mode, and the three P1 login/bootstrap snapshots matched the pre-reboot canonical fingerprint `a003b888ed68b5ee95e43efae2ee0873fafd291dac66aac0ffceeaf7c649bf6e`.
+- Private automated 20-client acceptance passed through Caddy and production PostgreSQL: all accounts authenticated and bootstrapped, 20 WebSockets joined `city`, received the complete 19-peer roster, relayed state/global chat/ping and remained connected. P95 latency was 1532.4 ms for bcrypt-backed auth, 31.9 ms for bootstrap and 36.6 ms for WebSocket connect. A fresh pre-cutover backup was created with SHA-256 `04dda7ac1048d0de493a25f91ab98116f784494460c1cbfa390479d646679a7e`; post-test verification found zero load accounts, no OOM and all four services active.
 - Player-scoped cache runtime acceptance completed: the user switched between two accounts, fully exited the EXE, reopened it, and confirmed each account restored its own state without leakage.
 - Runtime acceptance completed for gameplay inventory/economy deltas and saved farm pose; the user tested the updated Unity flow on 10/07 and confirmed it works correctly.
 - Unity `Assembly-CSharp` compiles with the new mutation queue; only the existing unrelated `enableStickAutoSprint` warning remains. The full local Phase 1 smoke test passes.
@@ -62,7 +64,7 @@
 ### Needs Test
 - Exercise at least one add/remove path for crop harvest, fishing, animal feed/harvest, building materials, event reward, and tool upgrade, then relog and verify inventory/Point match the last accepted state.
 - Verify the first existing account keeps its legacy local save, while a second account does not inherit that legacy save.
-- Finish farm/daily-limit sync and 5-20 player acceptance before declaring Phase 1 complete.
+- Finish farm/daily-limit sync and real 5-20 EXE/APK external acceptance before declaring Phase 1 complete; the synthetic private 20-client gate is complete.
 
 ## [Unreleased] - 2026-07-08 (Mobile shop item readability)
 

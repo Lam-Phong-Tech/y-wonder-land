@@ -5,6 +5,18 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-07-11] — Private VPS automated 20-client acceptance
+
+### Added
+- Thêm `server/phase1LoadTest.js`, npm script `test:load` và `server/deploy/run-private-load-test.sh`. Bài test giới hạn đúng 20 client, kiểm đăng ký/login, bootstrap đủ 5 nhóm dữ liệu, 20 WebSocket cùng room, roster, state, chat và ping; runner VPS backup trước khi chạy và dọn account đúng prefix sau test.
+
+### Verified
+- Chạy qua private Caddy `127.0.0.1:8080` + PostgreSQL production pass: 20 client vào `city`, client cuối thấy đủ 19 peer, tất cả giữ kết nối. P95 auth `1532.4 ms`, bootstrap `31.9 ms`, WebSocket connect `36.6 ms`.
+- Backup pre-cutover mới: `/var/backups/ywonder-game/ywonder_game_20260711T072715Z.dump`, `25242` bytes, SHA-256 `04dda7ac1048d0de493a25f91ab98116f784494460c1cbfa390479d646679a7e`.
+- Hậu kiểm xác nhận account tiền tố tải còn `0`, không có OOM; PostgreSQL, `ywonder-game-server`, Caddy và backup timer đều active, health trả `storage.mode=postgres`.
+- Đây là test tự động kín, chưa thay thế test thật 5–20 EXE/APK ngoài mạng sau khi HTTPS/WSS public.
+
+---
 ## [2026-07-11] — Full VPS reboot acceptance
 
 ### Verified

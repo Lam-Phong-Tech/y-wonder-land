@@ -84,7 +84,8 @@ Lam song song trong repo, khong phu thuoc VPS:
 - `[x]` Tach PlayerPrefs/cache theo `playerId`; A -> B -> A va full EXE restart da pass.
 - Noi `farm_state` hai chieu cho build/tile/crop/animal.
 - Doc va ghi `daily_limits` theo gio server, uu tien cau ca va dao mo.
-- Chay test tu dong 20 ket noi va test that 5-20 EXE/APK.
+- `[x]` Chay test tu dong 20 ket noi qua private Caddy/PostgreSQL; roster/state/chat/ping, health, cleanup va OOM gate deu pass.
+- `[ ]` Test that 5-20 EXE/APK ngoai mang sau khi HTTPS/WSS public.
 
 Ket qua dat:
 
@@ -151,6 +152,7 @@ Trang thai:
   - `PORT=3000`
 - `[x]` `/health`, register, login, bootstrap, shop, idempotency va WebSocket da pass qua Caddy staging noi bo.
 - `[x]` Hardening auth/rate-limit/log/HTTP-WebSocket guard, production config gate, graceful shutdown va systemd sandbox da pass local + private VPS. Full Phase 1 qua SSH tunnel/Caddy/PostgreSQL pass; `/admin=404`, rate-limit header hoat dong, backup timer active.
+- `[x]` Automated 20-client private acceptance pass: 20 account bootstrap, 20 WebSocket vao `city`, day du 19 peer, state/chat/ping va hold connection. Backup pre-cutover co SHA-256 `04dda7ac1048d0de493a25f91ab98116f784494460c1cbfa390479d646679a7e`; account test da don ve 0, khong OOM, cac service van active.
 - `[x]` Script `server/deploy/deploy-private-release.sh` kiem checksum, npm lockfile, config/migration, systemd, health va rollback. Luu y bat buoc ep `USER/LOGNAME/PGUSER=ywonder_game` khi migration dung peer auth; neu giu `USER=root`, deploy se dung truoc switch.
 
 Luu y domain:

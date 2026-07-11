@@ -181,6 +181,25 @@ npm.cmd run test:security
 Test này kiểm tra production config gate, quy tắc đăng ký, security headers, CORS,
 body-size limit, rate limit đăng nhập/đăng ký, WebSocket payload và message-rate guard.
 
+Automated 20-client load test:
+
+```powershell
+cd server
+$env:PHASE1_LOAD_BASE_URL="http://127.0.0.1:3000"
+$env:PHASE1_LOAD_SUFFIX="local0711"
+npm.cmd run test:load
+```
+
+Test tạo hoặc reuse đúng 20 account có prefix `Load<suffix>`, bootstrap profile/economy/
+inventory/farm/daily limits, mở 20 WebSocket vào `city`, kiểm roster đủ 19 peer,
+state broadcast, global chat, ping/pong và thời gian giữ kết nối. Khi chạy với database thật,
+dùng `deploy/run-private-load-test.sh` bằng root: runner tạo backup trước test, kiểm health/OOM
+và xóa đúng account của suffix sau test. Không dùng script cleanup với suffix tự nhập không rõ nguồn.
+
+Ngày 11/07/2026, bài test này đã pass qua private Caddy + PostgreSQL production với p95
+auth/bootstrap/WebSocket lần lượt `1532.4/31.9/36.6 ms`. Đây là gate tự động, không thay thế
+nghiệm thu thật 5–20 EXE/APK ngoài mạng sau khi public HTTPS/WSS.
+
 ## Production security defaults
 
 - `TRUST_PROXY=loopback`: chỉ tin `X-Forwarded-For` từ Caddy nội bộ.

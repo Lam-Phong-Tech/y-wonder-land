@@ -12,6 +12,7 @@
     "db:verify": "node scripts/verifyPostgresData.js",
     "test:realtime": "node realtimeSmokeTest.js",
     "test:phase1": "node phase1SmokeTest.js",
+    "test:load": "node phase1LoadTest.js",
     "test:postgres": "node postgresSmokeTest.js",
     "test:security": "node securitySmokeTest.js"
   },
