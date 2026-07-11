@@ -253,6 +253,7 @@ namespace YWonderLand.Environment
 
             string toolId = type == HarvestableResource.ResourceType.Tree ? "axe_01" : "pickaxe_01";
             string yieldId = type == HarvestableResource.ResourceType.Tree ? "wood_01" : "stone_01";
+            res.respawnTimeSec = HarvestableResource.DefaultRespawnTimeSec;
 
             if (prefab == null)
             {
@@ -294,7 +295,7 @@ namespace YWonderLand.Environment
                         id = res.resourceId,
                         type = res.type,
                         position = res.transform.position,
-                        respawnTimer = res.respawnTimer,
+                        respawnTimer = res.isHarvestable ? 0f : res.respawnTimer,
                         respawnEndUnix = res.RespawnEndUnix
                     });
                 }

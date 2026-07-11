@@ -52,14 +52,14 @@ MonoBehaviour:
   yieldItemId: wood_01
   minYield: 1
   maxYield: 3
-  respawnTimeSec: 3600
+  respawnTimeSec: 20
   harvestDuration: 3
   interactionRange: 2
   leafNameContains: Leaf
   leafAttachRadius: 5
   isHarvestable: 1
   currentProgress: 0
-  respawnTimer: 3600
+  respawnTimer: 0
 --- !u!1 &8660575751522222307
 GameObject:
   m_ObjectHideFlags: 0
@@ -171,7 +171,7 @@ MonoBehaviour:
   yieldItemId: 
   minYield: 1
   maxYield: 3
-  respawnTimeSec: 3600
+  respawnTimeSec: 20
   harvestDuration: 3
   interactionRange: 2
   leafNameContains: leaf

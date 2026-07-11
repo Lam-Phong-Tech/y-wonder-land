@@ -23,9 +23,11 @@ namespace YWonderLand.Environment
         public int minYield = 1;
         public int maxYield = 3;
 
+        public const float DefaultRespawnTimeSec = 20f;
+
         [Header("Tái sinh (respawn) — tùy chỉnh dễ dàng")]
-        [Tooltip("Bao lâu (GIÂY) cây/đá MỌC LẠI sau khi chặt/đào xong. Demo nên để NGẮN (vd 60). 3600 = 1 giờ.\nMẹo: chọn NHIỀU prefab/đối tượng trong Hierarchy rồi sửa 1 lần là áp cho hết.")]
-        public float respawnTimeSec = 60f;
+        [Tooltip("Bao lâu (giây) cây/đá mọc lại sau khi chặt/đào xong. Demo hiện chốt 20 giây.")]
+        public float respawnTimeSec = DefaultRespawnTimeSec;
 
         [Tooltip("Thời gian (giây) phải GIỮ để chặt/đào xong 1 lần.")]
         public float harvestDuration = 3f;
@@ -206,6 +208,12 @@ namespace YWonderLand.Environment
             float remaining = savedRespawnEndUnix > 0.0
                 ? Mathf.Max(0f, (float)(savedRespawnEndUnix - RealNow()))
                 : Mathf.Max(0f, timer);
+            float maxRespawn = Mathf.Max(0f, respawnTimeSec);
+            if (maxRespawn > 0f && remaining > maxRespawn)
+            {
+                remaining = maxRespawn;
+                endUnix = RealNow() + remaining;
+            }
 
             if (remaining > 0f)
             {

@@ -127,11 +127,11 @@ MonoBehaviour:
   yieldItemId: 
   minYield: 1
   maxYield: 3
-  respawnTimeSec: 3600
+  respawnTimeSec: 20
   harvestDuration: 3
   interactionRange: 2
   leafNameContains: 
   leafAttachRadius: 3
   isHarvestable: 1
   currentProgress: 0
-  respawnTimer: 3600
+  respawnTimer: 0
