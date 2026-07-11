@@ -2,7 +2,7 @@
   "name": "ywonderland-server-stub",
   "version": "0.1.0",
   "private": true,
-  "description": "Server stub toi thieu cho YWONDERLAND (dev/test only). KHONG dung cho production.",
+  "description": "YWONDERLAND game backend with JSON local mode and PostgreSQL production mode.",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",

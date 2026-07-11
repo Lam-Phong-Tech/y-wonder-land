@@ -1,10 +1,11 @@
 # YWONDERLAND — Game Backend
 
 Backend hỗ trợ JSON cho dev/local và PostgreSQL cho staging/production. PostgreSQL,
-backup/restore và private VPS staging đã pass. Source hiện có production startup gate,
-auth rate limit, request/realtime payload guard, security headers, access log không ghi
-body/token và graceful shutdown. Public HTTPS/WSS, DNS và monitoring alert vẫn là gate
-trước khi phát hành cho khách.
+backup/restore, reboot recovery và public VPS đã pass. Source hiện có production startup
+gate, auth rate limit, request/realtime payload guard, security headers, access log không
+ghi body/token và graceful shutdown. Public REST/WSS đang hoạt động tại
+`https://api.ywonder.net/game-api`; phần còn lại trước sign-off dài hạn là xác minh lịch
+gia hạn certificate, bổ sung monitoring alert và mở rộng test thật từ 2 lên 4-5 thiết bị.
 
 Production bắt buộc đặt `JWT_SECRET`, DB credential và web-auth secret trong env trên
 VPS; không dùng fallback dev, `data.json`, role `deploy` hoặc database `ywonder_test`.
