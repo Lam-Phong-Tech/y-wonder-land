@@ -12,6 +12,8 @@
 - Web Next.js giữ `callbackUrl` xuyên login/register/OTP và có `/api/game/browser/callback`; APK được đánh thức bằng `ywondergreenfarm://auth/complete`, còn EXE nhận kết quả qua polling.
 
 ### Verified
+- Hotfix release `fc23f1652a8e484b42e348150d3a5a038825a2e0` tách polling exchange khỏi quota thử mật khẩu. Probe public `125` lần pending đều pass và phiên Browser SSO thứ hai vẫn start `201`; Unity cũng biết chờ `Retry-After` thay vì dừng ngay khi gặp `429`.
+- Current release `f75a7d6b3c5c267fbdf17f58af7d02bdecf8d5b9` mở thẳng callback: session web đã ghi nhớ được approve ngay, còn session chưa login tự đi qua `/vi/login` rồi quay lại callback. Hai lần nghiệm thu liên tiếp trả cùng `PLAYER=p_1783873094`, profile `TRAN TUNG LAM`, Point `5000`.
 - Web build `hp9br9UtY4p9PcC214CmF` deploy thành công; service active, login `200`, callback chưa login `302`. Backup rollback: `/var/backups/ywonder-web/browser-sso-20260712T185239Z`.
 - Game release `67ff2565517875fcc48ea515f1fedbbf98f24b8a` deploy versioned, migration `002_browser_auth_requests` và backup DB/env/unit pass; vẫn giữ `WEB_AUTH_MODE=http`, `AUTH_TRANSITION_MODE=parallel`, local registration bật.
 - Public acceptance account web thật pass `start -> callback -> approve -> exchange -> bootstrap PostgreSQL`; profile `TRAN TUNG LAM`, Point `5000`. Không in/lưu password hoặc token.

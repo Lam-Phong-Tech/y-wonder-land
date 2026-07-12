@@ -168,16 +168,18 @@ không phải UX bàn giao mong muốn.
    có dữ liệu tách biệt. Không sửa/restart web service hoặc Nginx. Unity source
    giữ form local và thêm nút web; Editor compile sạch, runtime EXE/APK còn chờ.
 4. `[x]` **Nấc B - browser SSO backend:** release
-   `67ff2565517875fcc48ea515f1fedbbf98f24b8a` đã apply migration,
-   start/approve/exchange, PKCE, expiry/replay guard và bật production mà vẫn giữ
-   mode `parallel`.
+   `67ff2565517875fcc48ea515f1fedbbf98f24b8a` đã apply migration; hotfix
+   `fc23f1652a8e484b42e348150d3a5a038825a2e0` tách polling limiter và current
+   release `f75a7d6b3c5c267fbdf17f58af7d02bdecf8d5b9` mở thẳng callback cho cả session
+   mới lẫn session đã ghi nhớ. Mode `parallel` vẫn được giữ.
 5. `[x]` Web build `hp9br9UtY4p9PcC214CmF` đã preserve `callbackUrl` xuyên
    login/register/OTP và thêm callback Next.js. Backup source + `.next` ở
    `/var/backups/ywonder-web/browser-sso-20260712T185239Z`; health pass.
 6. `[x]` Audit chốt không cần sửa Nginx vì callback nằm trong Next.js
    `/api/game/browser/callback`; port 3000/5432 vẫn không public.
-7. `[~]` Public runner bằng web session thật đã pass callback -> exchange ->
-   bootstrap PostgreSQL; còn test trực tiếp trên Editor, EXE và APK.
+7. `[x]` Public runner bằng web session thật đã pass hai lần liên tiếp callback ->
+   exchange -> bootstrap PostgreSQL với cùng playerId; probe `125` polling cũng
+   pass và không khóa start tiếp theo. Test client được tách ở bước 8.
 8. `[~]` Feature flag Unity đã bật; chờ compile/import Android manifest và build.
 9. Test cross-device, restart backend/PostgreSQL, account khóa/xóa, replay code và
    hai phiên trùng account.
