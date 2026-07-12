@@ -18,6 +18,7 @@ namespace YWonderLand.Backend
         private const string KEY_USERID = "YW_Auth_UserId";
         private const string KEY_USERNAME = "YW_Auth_Username";
         private const string KEY_BACKEND_URL = "YW_Auth_BackendUrl";
+        private int browserAuthAttempt;
 
         public string Token { get; private set; }
         public string UserId { get; private set; }
@@ -50,7 +51,31 @@ namespace YWonderLand.Backend
             public string username;
             public string refCode;
             public string ref_code;
+            public string status;
             public PlayerProfile player_profile;
+        }
+
+        [System.Serializable]
+        private class BrowserAuthStartRequest
+        {
+            public string code_challenge;
+            public string intent;
+        }
+
+        [System.Serializable]
+        private class BrowserAuthStartResponse
+        {
+            public string requestId;
+            public string authUrl;
+            public int expiresInSec;
+            public int pollIntervalMs;
+        }
+
+        [System.Serializable]
+        private class BrowserAuthExchangeRequest
+        {
+            public string requestId;
+            public string code_verifier;
         }
 
         private void Awake()
@@ -103,6 +128,107 @@ namespace YWonderLand.Backend
             return ApplyAuth(webRes, username);
         }
 
+        public async Awaitable<bool> LoginLocalAsync(string username, string password)
+        {
+            var res = await ApiClient.PostAsync<AuthResponse>("/auth/login",
+                new AuthRequest { username = username, password = password });
+            return ApplyAuth(res, username);
+        }
+
+        public async Awaitable<bool> LoginWebAsync(string username, string password)
+        {
+            var res = await ApiClient.PostAsync<AuthResponse>("/auth/web-login",
+                new AuthRequest { username = username, password = password });
+            return ApplyAuth(res, username);
+        }
+
+        public async Awaitable<bool> LoginWithBrowserAsync(string intent, System.Action<string> onStatus = null)
+        {
+            var config = BackendConfig.Active;
+            if (config == null || !config.browserAuthEnabled)
+            {
+                SetFailure(0, "Browser auth is disabled.", "BROWSER_AUTH_DISABLED");
+                return false;
+            }
+
+            string verifier = CreateBrowserCodeVerifier();
+            string challenge = CreateBrowserCodeChallenge(verifier);
+            int attempt = ++browserAuthAttempt;
+            var started = await ApiClient.PostAsync<BrowserAuthStartResponse>("/auth/browser/start",
+                new BrowserAuthStartRequest
+                {
+                    code_challenge = challenge,
+                    intent = string.Equals(intent, "register", System.StringComparison.OrdinalIgnoreCase)
+                        ? "register"
+                        : "login",
+                });
+            if (!started.ok || started.data == null || string.IsNullOrEmpty(started.data.requestId))
+            {
+                RememberFailure(started);
+                return false;
+            }
+            bool hasTrustedWebOrigin = System.Uri.TryCreate(
+                config.registrationUrl,
+                System.UriKind.Absolute,
+                out var trustedWebUri);
+            if (!System.Uri.TryCreate(started.data.authUrl, System.UriKind.Absolute, out var authUri) ||
+                !string.Equals(authUri.Scheme, System.Uri.UriSchemeHttps, System.StringComparison.OrdinalIgnoreCase) ||
+                !hasTrustedWebOrigin ||
+                !string.Equals(authUri.Scheme, trustedWebUri.Scheme, System.StringComparison.OrdinalIgnoreCase) ||
+                !string.Equals(authUri.Host, trustedWebUri.Host, System.StringComparison.OrdinalIgnoreCase))
+            {
+                SetFailure(0, "Browser auth URL is invalid.", "BROWSER_AUTH_INVALID_URL");
+                return false;
+            }
+
+            onStatus?.Invoke("Đã mở website. Hoàn tất xác thực để quay lại game...");
+            Application.OpenURL(authUri.AbsoluteUri);
+
+            int timeoutSec = Mathf.Clamp(
+                config.browserAuthTimeoutSec > 0 ? config.browserAuthTimeoutSec : started.data.expiresInSec,
+                30,
+                900);
+            float pollSeconds = Mathf.Clamp(started.data.pollIntervalMs / 1000f, 0.5f, 5f);
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            while (attempt == browserAuthAttempt && stopwatch.Elapsed.TotalSeconds < timeoutSec)
+            {
+                var exchanged = await ApiClient.PostAsync<AuthResponse>("/auth/browser/exchange",
+                    new BrowserAuthExchangeRequest
+                    {
+                        requestId = started.data.requestId,
+                        code_verifier = verifier,
+                    });
+
+                if (exchanged.ok && exchanged.data != null && !string.IsNullOrEmpty(exchanged.data.token))
+                {
+                    onStatus?.Invoke("Website đã xác thực. Đang nạp dữ liệu nhân vật...");
+                    return ApplyAuth(exchanged, exchanged.data.username);
+                }
+                if (exchanged.status != 202)
+                {
+                    RememberFailure(exchanged);
+                    return false;
+                }
+
+                await Awaitable.WaitForSecondsAsync(pollSeconds);
+            }
+
+            if (attempt != browserAuthAttempt)
+            {
+                SetFailure(0, "Browser auth was cancelled.", "BROWSER_AUTH_CANCELLED");
+            }
+            else
+            {
+                SetFailure(410, "Browser auth timed out.", "BROWSER_AUTH_EXPIRED");
+            }
+            return false;
+        }
+
+        public void CancelBrowserLogin()
+        {
+            browserAuthAttempt++;
+        }
+
         public async Awaitable<bool> RegisterAsync(string username, string password, string email = "", string phone = "")
         {
             var res = await ApiClient.PostAsync<AuthResponse>("/auth/register",
@@ -152,11 +278,39 @@ namespace YWonderLand.Backend
             return true;
         }
 
-        private void RememberFailure(ApiResult<AuthResponse> res)
+        private void RememberFailure<T>(ApiResult<T> res)
         {
-            LastStatus = res.status;
-            LastError = res.error ?? "";
-            LastErrorCode = res.errorCode ?? "";
+            SetFailure(res.status, res.error, res.errorCode);
+        }
+
+        private void SetFailure(long status, string error, string errorCode)
+        {
+            LastStatus = status;
+            LastError = error ?? "";
+            LastErrorCode = errorCode ?? "";
+        }
+
+        private static string CreateBrowserCodeVerifier()
+        {
+            var bytes = new byte[32];
+            using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
+                rng.GetBytes(bytes);
+            return Base64Url(bytes);
+        }
+
+        private static string CreateBrowserCodeChallenge(string verifier)
+        {
+            byte[] input = System.Text.Encoding.ASCII.GetBytes(verifier);
+            using (var sha = System.Security.Cryptography.SHA256.Create())
+                return Base64Url(sha.ComputeHash(input));
+        }
+
+        private static string Base64Url(byte[] bytes)
+        {
+            return System.Convert.ToBase64String(bytes)
+                .TrimEnd('=')
+                .Replace('+', '-')
+                .Replace('/', '_');
         }
 
         private static string ResolveUserId(AuthResponse data)
@@ -185,6 +339,7 @@ namespace YWonderLand.Backend
 
         public void SignOut()
         {
+            CancelBrowserLogin();
             string previousScopeId = GetScopeId(UserId, Username);
             if (!string.IsNullOrEmpty(previousScopeId))
                 InvokeIdentityHandlers(IdentityChanging, previousScopeId, "", "changing");

@@ -163,6 +163,22 @@ function transactionFromRow(row) {
   };
 }
 
+function browserAuthRequestFromRow(row) {
+  if (!row) return null;
+  return {
+    requestIdHash: row.request_id_hash,
+    pkceChallenge: row.pkce_challenge,
+    intent: row.intent,
+    status: row.status,
+    webUserId: row.web_user_id || "",
+    webUser: clone(row.web_user_json) || {},
+    expiresAt: new Date(row.expires_at).toISOString(),
+    approvedAt: row.approved_at ? new Date(row.approved_at).toISOString() : null,
+    consumedAt: row.consumed_at ? new Date(row.consumed_at).toISOString() : null,
+    createdAt: new Date(row.created_at).toISOString(),
+  };
+}
+
 class PostgresStore {
   constructor(options = {}) {
     this.mode = "postgres";
@@ -494,6 +510,98 @@ class PostgresStore {
       }
       await this.ensurePlayerStateWithClient(client, row.id);
       return playerFromRow(row);
+    });
+  }
+
+  async createBrowserAuthRequest(record) {
+    await this.pool.query(
+      "delete from browser_auth_requests where expires_at < now() - interval '1 hour'"
+    );
+    try {
+      await this.pool.query(
+        `insert into browser_auth_requests
+         (request_id_hash, pkce_challenge, intent, status, expires_at, created_at)
+         values ($1,$2,$3,'pending',$4,$5)`,
+        [
+          record.requestIdHash,
+          record.pkceChallenge,
+          record.intent || "login",
+          record.expiresAt,
+          record.createdAt || nowISO(),
+        ]
+      );
+      return { ok: true };
+    } catch (error) {
+      if (error && error.code === "23505") {
+        return { ok: false, error: "BROWSER_AUTH_REQUEST_EXISTS" };
+      }
+      throw error;
+    }
+  }
+
+  async approveBrowserAuthRequest(requestIdHash, webUser) {
+    return this.withTransaction(async (client) => {
+      const result = await client.query(
+        "select * from browser_auth_requests where request_id_hash=$1 for update",
+        [requestIdHash]
+      );
+      if (result.rowCount === 0) return { ok: false, error: "BROWSER_AUTH_REQUEST_NOT_FOUND" };
+      const record = browserAuthRequestFromRow(result.rows[0]);
+
+      if (Date.parse(record.expiresAt) <= Date.now()) {
+        await client.query(
+          "update browser_auth_requests set status='expired' where request_id_hash=$1",
+          [requestIdHash]
+        );
+        return { ok: false, error: "BROWSER_AUTH_EXPIRED" };
+      }
+      if (record.status === "consumed") return { ok: false, error: "BROWSER_AUTH_CONSUMED" };
+      if (record.status === "approved") {
+        return record.webUserId === webUser.id
+          ? { ok: true, duplicate: true }
+          : { ok: false, error: "BROWSER_AUTH_ALREADY_APPROVED" };
+      }
+      if (record.status !== "pending") return { ok: false, error: "BROWSER_AUTH_INVALID_STATE" };
+
+      await client.query(
+        `update browser_auth_requests
+         set status='approved', web_user_id=$2, web_user_json=$3::jsonb, approved_at=now()
+         where request_id_hash=$1`,
+        [requestIdHash, webUser.id, JSON.stringify(webUser)]
+      );
+      return { ok: true, duplicate: false };
+    });
+  }
+
+  async exchangeBrowserAuthRequest(requestIdHash, presentedChallenge) {
+    return this.withTransaction(async (client) => {
+      const result = await client.query(
+        "select * from browser_auth_requests where request_id_hash=$1 for update",
+        [requestIdHash]
+      );
+      if (result.rowCount === 0) return { ok: false, error: "BROWSER_AUTH_REQUEST_NOT_FOUND" };
+      const record = browserAuthRequestFromRow(result.rows[0]);
+
+      if (Date.parse(record.expiresAt) <= Date.now()) {
+        await client.query(
+          "update browser_auth_requests set status='expired' where request_id_hash=$1",
+          [requestIdHash]
+        );
+        return { ok: false, error: "BROWSER_AUTH_EXPIRED" };
+      }
+      if (record.status === "pending") return { ok: false, error: "BROWSER_AUTH_PENDING" };
+      if (record.status === "consumed") return { ok: false, error: "BROWSER_AUTH_CONSUMED" };
+      if (record.status !== "approved") return { ok: false, error: "BROWSER_AUTH_INVALID_STATE" };
+      if (record.pkceChallenge !== presentedChallenge) {
+        return { ok: false, error: "BROWSER_AUTH_PKCE_MISMATCH" };
+      }
+
+      const consumed = await client.query(
+        `update browser_auth_requests set status='consumed', consumed_at=now()
+         where request_id_hash=$1 returning *`,
+        [requestIdHash]
+      );
+      return { ok: true, request: browserAuthRequestFromRow(consumed.rows[0]) };
     });
   }
 

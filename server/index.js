@@ -12,6 +12,18 @@ const { attachRealtimeServer } = require("./realtimeServer");
 const { createAdminDashboardRouter } = require("./adminDashboard");
 const { resolveShopOffer } = require("./shopCatalog");
 const {
+  bearerToken,
+  buildBrowserLoginUrl,
+  createPkceChallenge,
+  createRequestId,
+  hashRequestId,
+  isValidPkceChallenge,
+  isValidPkceVerifier,
+  isValidRequestId,
+  normalizeIntent,
+  safeSecretEqual,
+} = require("./browserAuth");
+const {
   ensureDemoAccounts,
   isAllowedDemoPassword,
   canonicalizeDemoAuthPayload,
@@ -33,6 +45,9 @@ const HOST = process.env.HOST || "0.0.0.0";
 const JWT_SECRET = process.env.JWT_SECRET || DEVELOPMENT_JWT_SECRET;
 const TOKEN_TTL = process.env.JWT_TOKEN_TTL || "30d";
 const securityConfig = buildSecurityConfig();
+const BROWSER_AUTH_LOGIN_URL = process.env.BROWSER_AUTH_LOGIN_URL || "https://ywonder.net/vi/login";
+const BROWSER_AUTH_CALLBACK_URL = process.env.BROWSER_AUTH_CALLBACK_URL || "https://ywonder.net/api/game/browser/callback";
+const BROWSER_AUTH_APPROVAL_SECRET = process.env.WEB_AUTH_SECRET || process.env.GAME_API_SECRET || "";
 
 validateProductionConfig();
 
@@ -73,6 +88,12 @@ const registerLimiter = createRateLimiter({
   max: securityConfig.registerMax,
   enabled: securityConfig.rateLimitEnabled,
 });
+const browserAuthStartLimiter = createRateLimiter({
+  name: "browser_auth_start",
+  windowMs: securityConfig.browserAuthStartWindowMs,
+  max: securityConfig.browserAuthStartMax,
+  enabled: securityConfig.rateLimitEnabled,
+});
 
 api.use("/auth", authIpLimiter);
 
@@ -104,6 +125,54 @@ function makeDefaultProfileForName(name) {
 
 function signToken(userId, extra = {}) {
   return jwt.sign({ uid: userId, ...extra }, JWT_SECRET, { algorithm: "HS256", expiresIn: TOKEN_TTL });
+}
+
+async function issueWebPlayerSession(webUser) {
+  const demoCandidate = await canonicalizeDemoAuthPayload({
+    username: webUser.username || webUser.displayName || "",
+  }, store);
+  const player = demoCandidate.authSource === "local-demo" && demoCandidate.uid
+    ? {
+      id: demoCandidate.uid,
+      webUserId: webUser.id,
+      authSource: "local-demo",
+      username: demoCandidate.username,
+      displayName: demoCandidate.displayName || demoCandidate.username,
+    }
+    : await store.getOrCreatePlayerForWebUser(webUser);
+  let profile = await store.getProfile(player.id);
+  if (!profile) {
+    profile = makeDefaultProfileForName(player.displayName);
+    await store.setProfile(player.id, profile);
+  }
+
+  return {
+    token: signToken(player.id, {
+      webUserId: player.webUserId,
+      authSource: player.authSource,
+      username: player.username,
+      displayName: player.displayName || profile.name,
+    }),
+    userId: player.id,
+    playerId: player.id,
+    webUserId: player.webUserId,
+    authSource: player.authSource,
+    username: player.username,
+    player_profile: profile,
+  };
+}
+
+function browserAuthErrorStatus(error) {
+  switch (error) {
+    case "BROWSER_AUTH_PENDING": return 202;
+    case "BROWSER_AUTH_REQUEST_NOT_FOUND": return 404;
+    case "BROWSER_AUTH_EXPIRED": return 410;
+    case "BROWSER_AUTH_PKCE_MISMATCH": return 401;
+    case "BROWSER_AUTH_CONSUMED":
+    case "BROWSER_AUTH_ALREADY_APPROVED":
+    case "BROWSER_AUTH_INVALID_STATE": return 409;
+    default: return 400;
+  }
 }
 
 async function verifyTokenPayload(token) {
@@ -223,45 +292,112 @@ api.post("/auth/web-login", authIdentityLimiter, asyncRoute(async (req, res) => 
     return res.status(authResult.status || 401).json({ error: authResult.error || "WEB_AUTH_FAILED" });
   }
 
-  const demoCandidate = await canonicalizeDemoAuthPayload({
-    username: authResult.webUser.username || authResult.webUser.displayName || "",
-  }, store);
-  const player = demoCandidate.authSource === "local-demo" && demoCandidate.uid
-    ? {
-      id: demoCandidate.uid,
-      webUserId: authResult.webUser.id,
-      authSource: "local-demo",
-      username: demoCandidate.username,
-      displayName: demoCandidate.displayName || demoCandidate.username,
-    }
-    : await store.getOrCreatePlayerForWebUser(authResult.webUser);
-  let profile = await store.getProfile(player.id);
-  if (!profile) {
-    profile = makeDefaultProfileForName(player.displayName);
-    await store.setProfile(player.id, profile);
-  }
-
-  const token = signToken(player.id, {
-    webUserId: player.webUserId,
-    authSource: player.authSource,
-    username: player.username,
-    displayName: player.displayName || profile.name,
-  });
+  const session = await issueWebPlayerSession(authResult.webUser);
 
   console.log(JSON.stringify({
     event: "web_auth_login_succeeded",
     requestId: req.requestId,
-    webUserId: player.webUserId,
-    playerId: player.id,
+    webUserId: session.webUserId,
+    playerId: session.playerId,
   }));
-  res.json({
-    token,
-    userId: player.id,
-    playerId: player.id,
-    webUserId: player.webUserId,
-    authSource: player.authSource,
-    player_profile: profile,
+  res.json(session);
+}));
+
+api.post("/auth/browser/start", browserAuthStartLimiter, asyncRoute(async (req, res) => {
+  if (!securityConfig.browserAuthEnabled) {
+    return res.status(503).json({ error: "BROWSER_AUTH_DISABLED" });
+  }
+  const body = req.body || {};
+  const codeChallenge = String(body.code_challenge || body.codeChallenge || "").trim();
+  if (!isValidPkceChallenge(codeChallenge)) {
+    return res.status(400).json({ error: "BROWSER_AUTH_INVALID_CHALLENGE" });
+  }
+
+  const requestId = createRequestId();
+  const requestIdHash = hashRequestId(requestId);
+  const intent = normalizeIntent(body.intent);
+  const createdAt = nowISO();
+  const expiresAt = new Date(Date.now() + securityConfig.browserAuthTtlMs).toISOString();
+  const created = await store.createBrowserAuthRequest({
+    requestIdHash,
+    pkceChallenge: codeChallenge,
+    intent,
+    createdAt,
+    expiresAt,
   });
+  if (!created.ok) return res.status(409).json({ error: created.error });
+
+  res.status(201).json({
+    requestId,
+    authUrl: buildBrowserLoginUrl(
+      BROWSER_AUTH_LOGIN_URL,
+      BROWSER_AUTH_CALLBACK_URL,
+      requestId,
+      intent
+    ),
+    expiresInSec: Math.floor(securityConfig.browserAuthTtlMs / 1000),
+    pollIntervalMs: securityConfig.browserAuthPollIntervalMs,
+  });
+}));
+
+api.post("/auth/browser/approve", asyncRoute(async (req, res) => {
+  if (!securityConfig.browserAuthEnabled) {
+    return res.status(503).json({ error: "BROWSER_AUTH_DISABLED" });
+  }
+  const suppliedSecret = bearerToken(req.headers.authorization);
+  if (!safeSecretEqual(suppliedSecret, BROWSER_AUTH_APPROVAL_SECRET)) {
+    return res.status(401).json({ error: "BROWSER_AUTH_APPROVAL_UNAUTHORIZED" });
+  }
+
+  const body = req.body || {};
+  const requestId = String(body.requestId || body.request_id || "").trim();
+  if (!isValidRequestId(requestId)) {
+    return res.status(400).json({ error: "BROWSER_AUTH_INVALID_REQUEST_ID" });
+  }
+  const identity = webAuth.verifyTrustedIdentity(body.webUser || body.web_user || body.user || {});
+  if (!identity.ok) return res.status(identity.status || 400).json({ error: identity.error });
+
+  const approved = await store.approveBrowserAuthRequest(hashRequestId(requestId), identity.webUser);
+  if (!approved.ok) {
+    return res.status(browserAuthErrorStatus(approved.error)).json({ error: approved.error });
+  }
+  res.json({ ok: true, duplicate: Boolean(approved.duplicate) });
+}));
+
+api.post("/auth/browser/exchange", asyncRoute(async (req, res) => {
+  if (!securityConfig.browserAuthEnabled) {
+    return res.status(503).json({ error: "BROWSER_AUTH_DISABLED" });
+  }
+  const body = req.body || {};
+  const requestId = String(body.requestId || body.request_id || "").trim();
+  const verifier = String(body.code_verifier || body.codeVerifier || "").trim();
+  if (!isValidRequestId(requestId)) {
+    return res.status(400).json({ error: "BROWSER_AUTH_INVALID_REQUEST_ID" });
+  }
+  if (!isValidPkceVerifier(verifier)) {
+    return res.status(400).json({ error: "BROWSER_AUTH_INVALID_VERIFIER" });
+  }
+
+  const exchanged = await store.exchangeBrowserAuthRequest(
+    hashRequestId(requestId),
+    createPkceChallenge(verifier)
+  );
+  if (!exchanged.ok) {
+    const status = browserAuthErrorStatus(exchanged.error);
+    return res.status(status).json({
+      error: exchanged.error,
+      status: exchanged.error === "BROWSER_AUTH_PENDING" ? "pending" : "failed",
+    });
+  }
+
+  const session = await issueWebPlayerSession(exchanged.request.webUser);
+  console.log(JSON.stringify({
+    event: "browser_auth_exchange_succeeded",
+    requestId: req.requestId,
+    webUserId: session.webUserId,
+    playerId: session.playerId,
+  }));
+  res.json({ ...session, status: "complete" });
 }));
 
 // ── Player profile ──

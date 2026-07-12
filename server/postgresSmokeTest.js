@@ -1,4 +1,5 @@
 const fs = require("fs");
+const crypto = require("crypto");
 const path = require("path");
 const { Pool } = require("pg");
 const { PostgresStore } = require("./postgresStore");
@@ -30,7 +31,9 @@ async function main() {
 
   const suffix = `${Date.now()}_${Math.floor(Math.random() * 1e6)}`;
   const schema = `ywtest_${suffix}`;
-  const migrationSql = fs.readFileSync(path.join(__dirname, "migrations", "001_initial.sql"), "utf8");
+  const migrationSql = ["001_initial.sql", "002_browser_auth_requests.sql"]
+    .map((file) => fs.readFileSync(path.join(__dirname, "migrations", file), "utf8"))
+    .join("\n");
   const adminPool = makePool(connectionString, "public");
   let pool;
   let store;
@@ -96,6 +99,30 @@ async function main() {
     assert(daily.ok && dailyDuplicate.duplicate === true, "Daily limit retry was not idempotent.");
 
     await store.setFarmState(userId, { version: 2, marker: suffix, tiles: [{ id: "tile-1" }] });
+
+    const browserRequestHash = crypto.createHash("sha256").update(`browser-${suffix}`).digest("hex");
+    const browserChallenge = crypto.createHash("sha256").update(`verifier-${suffix}`).digest("base64url");
+    const browserCreated = await store.createBrowserAuthRequest({
+      requestIdHash: browserRequestHash,
+      pkceChallenge: browserChallenge,
+      intent: "login",
+      expiresAt: new Date(Date.now() + 60_000).toISOString(),
+      createdAt: new Date().toISOString(),
+    });
+    assert(browserCreated.ok, "PostgreSQL browser auth request was not created.");
+    const browserApproved = await store.approveBrowserAuthRequest(browserRequestHash, {
+      id: `web-${suffix}`,
+      username: `browser-${suffix}`,
+      displayName: "Browser Postgres Smoke",
+      authSource: "web-browser",
+    });
+    assert(browserApproved.ok, "PostgreSQL browser auth request was not approved.");
+    const wrongBrowserExchange = await store.exchangeBrowserAuthRequest(browserRequestHash, "wrong-challenge");
+    assert(wrongBrowserExchange.error === "BROWSER_AUTH_PKCE_MISMATCH",
+      "PostgreSQL browser auth accepted a wrong PKCE challenge.");
+    const browserExchanged = await store.exchangeBrowserAuthRequest(browserRequestHash, browserChallenge);
+    assert(browserExchanged.ok && browserExchanged.request.webUserId === `web-${suffix}`,
+      "PostgreSQL browser auth exchange failed.");
     const beforeRestartInventory = await store.getInventory(userId);
     assert(itemQuantity(beforeRestartInventory, "pg_test_item") === 3, "Inventory quantity is incorrect before restart.");
     assert(itemQuantity(beforeRestartInventory, "fertilizer_01") === 2, "Atomic shop item is missing.");
@@ -109,12 +136,15 @@ async function main() {
     const restoredInventory = await store.getInventory(userId);
     const restoredFarm = await store.getFarmState(userId);
     const restoredLimits = await store.getDailyLimits(userId);
+    const browserReplay = await store.exchangeBrowserAuthRequest(browserRequestHash, browserChallenge);
     assert(restoredProfile.customMarker === suffix, "Profile JSON did not survive pool restart.");
     assert(restoredEconomy.pos === startEconomy.pos + 25, "Economy did not preserve delta plus shop cost.");
     assert(itemQuantity(restoredInventory, "pg_test_item") === 3, "Inventory did not survive pool restart.");
     assert(restoredFarm.marker === suffix, "Farm state did not survive pool restart.");
     assert(restoredLimits.limits.mining.used === 1, "Mining daily limit did not survive pool restart.");
     assert(restoredLimits.limits.fishing.used === 1, "Fishing daily limit did not survive pool restart.");
+    assert(browserReplay.error === "BROWSER_AUTH_CONSUMED",
+      "Consumed browser auth request did not survive pool restart.");
 
     const db = await store.readAll();
     assert(db.users.length === 1, "PostgreSQL admin snapshot is missing the local account.");

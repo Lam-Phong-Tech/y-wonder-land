@@ -100,6 +100,50 @@ function testConfigurationGate() {
     JWT_SECRET: "security-smoke-secret-with-more-than-32-characters",
   });
 
+  validateProductionConfig({
+    NODE_ENV: "production",
+    HOST: "127.0.0.1",
+    STORE_MODE: "postgres",
+    WEB_AUTH_MODE: "http",
+    AUTH_TRANSITION_MODE: "parallel",
+    WEB_AUTH_LOGIN_URL: "https://ywonder.net/api/game/auth",
+    WEB_AUTH_SECRET: "security-smoke-web-auth-secret",
+    BROWSER_AUTH_ENABLED: "true",
+    BROWSER_AUTH_LOGIN_URL: "https://ywonder.net/vi/login",
+    BROWSER_AUTH_CALLBACK_URL: "https://ywonder.net/api/game/browser/callback",
+    LOCAL_REGISTRATION_ENABLED: "true",
+    ADMIN_DASHBOARD_ENABLED: "false",
+    DEMO_ACCOUNTS_ENABLED: "false",
+    JWT_SECRET: "security-smoke-secret-with-more-than-32-characters",
+  });
+
+  let unsafeBrowserAuthAccepted = false;
+  try {
+    validateProductionConfig({
+      NODE_ENV: "production",
+      HOST: "127.0.0.1",
+      STORE_MODE: "postgres",
+      WEB_AUTH_MODE: "http",
+      AUTH_TRANSITION_MODE: "parallel",
+      WEB_AUTH_LOGIN_URL: "https://ywonder.net/api/game/auth",
+      WEB_AUTH_SECRET: "security-smoke-web-auth-secret",
+      BROWSER_AUTH_ENABLED: "true",
+      BROWSER_AUTH_LOGIN_URL: "https://ywonder.net/vi/login",
+      BROWSER_AUTH_CALLBACK_URL: "https://evil.example.test/callback",
+      LOCAL_REGISTRATION_ENABLED: "true",
+      ADMIN_DASHBOARD_ENABLED: "false",
+      DEMO_ACCOUNTS_ENABLED: "false",
+      JWT_SECRET: "security-smoke-secret-with-more-than-32-characters",
+    });
+    unsafeBrowserAuthAccepted = true;
+  } catch (error) {
+    assert(String(error.message).includes("same origin"),
+      "Cross-origin browser callback returned the wrong error.");
+    assert(String(error.message).includes("/api/game/browser/callback"),
+      "Unexpected browser callback path was not reported.");
+  }
+  assert(!unsafeBrowserAuthAccepted, "Unsafe browser-auth callback was accepted.");
+
   let incompleteParallelAccepted = false;
   try {
     validateProductionConfig({

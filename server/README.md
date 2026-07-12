@@ -125,6 +125,9 @@ Khi dùng Caddy trên Windows, tham khảo `server/Caddyfile.example`. Nếu web
 | GET  | `/health` | — | `{ ok: true, checkedAt }` |
 | POST | `/auth/register` | `{ "username", "password", "email"?, "phone"? }` | `{ token, userId, playerId, username, email }` |
 | POST | `/auth/login` | `{ "username", "password" }` | `{ token, userId }` |
+| POST | `/auth/web-login` | `{ "username", "password" }` | Game session mapped from the web account |
+| POST | `/auth/browser/start` | `{ "code_challenge", "intent" }` | One-time request ID, web URL, expiry and poll interval |
+| POST | `/auth/browser/exchange` | `{ "requestId", "code_verifier" }` | Game session after the website approves the request |
 | GET  | `/player/profile` | — (header `Authorization: Bearer <token>`) | `{ player_profile { ... } }` |
 | PUT  | `/player/profile` | `{ "player_profile": { ... } }` (Bearer token) | `{ ok: true, updatedAt }` |
 
@@ -132,7 +135,9 @@ Khi dùng Caddy trên Windows, tham khảo `server/Caddyfile.example`. Nếu web
 
 ## Game API MVP trong luc cho Web API
 
-Production hiện giữ `WEB_AUTH_MODE=disabled` cho tới khi cầu web-auth được nghiệm thu.
+Production đã nghiệm thu Nấc A với `WEB_AUTH_MODE=http` và
+`AUTH_TRANSITION_MODE=parallel`: account web và account game local cùng hoạt động,
+nhưng password web vẫn đi qua form Unity trong luồng cũ.
 
 Trong giai đoạn chuyển tiếp an toàn, bật web account song song với đăng nhập/đăng ký local:
 
@@ -151,11 +156,31 @@ Khi `AUTH_TRANSITION_MODE=parallel`, production startup gate bắt buộc `WEB_A
 Nếu sau này chuyển web thành luồng chính, đổi sang `AUTH_TRANSITION_MODE=web-primary` và `LOCAL_REGISTRATION_ENABLED=false`. Không thực hiện cutover này trong đợt tích hợp song song.
 Account web có `locked`, `softDeleted`, `active=false` hoặc status khóa/xóa/inactive bị từ chối trước khi tạo `playerId`.
 
+Nấc B không đưa password/cookie web vào Unity. Game tạo PKCE challenge qua
+`/auth/browser/start`, mở `https://ywonder.net/vi/login`, rồi poll
+`/auth/browser/exchange`. Callback `https://ywonder.net/api/game/browser/callback`
+đọc NextAuth session ngay trong web và gọi nội bộ `/auth/browser/approve` bằng
+`GAME_API_SECRET`; endpoint approve không dành cho Unity/public client.
+
+```text
+BROWSER_AUTH_ENABLED=true
+BROWSER_AUTH_LOGIN_URL=https://ywonder.net/vi/login
+BROWSER_AUTH_CALLBACK_URL=https://ywonder.net/api/game/browser/callback
+BROWSER_AUTH_TTL_MS=600000
+BROWSER_AUTH_POLL_INTERVAL_MS=1000
+```
+
+Request ID chỉ lưu dạng SHA-256, hết hạn sau 10 phút, exchange bắt buộc PKCE và
+chỉ dùng một lần. Custom URI `ywondergreenfarm://auth/complete` chỉ đánh thức APK;
+không mang token hay mã xác thực. EXE portable vẫn hoàn tất bằng polling nên không
+cần ghi protocol handler vào Windows Registry.
+
 Smoke test tích hợp web-auth dùng web API giả lập cục bộ, không cần và không ghi credential thật:
 
 ```powershell
 cd server
 npm.cmd run test:web-auth
+npm.cmd run test:browser-auth
 ```
 
 ## Phase 1: tai khoan game local + realtime demo

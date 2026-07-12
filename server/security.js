@@ -71,6 +71,11 @@ function buildSecurityConfig(env = process.env) {
     authIdentityMax: envInteger("AUTH_IDENTITY_RATE_LIMIT_MAX", 15, { min: 1 }, env),
     registerWindowMs: envInteger("AUTH_REGISTER_RATE_LIMIT_WINDOW_MS", 60 * 60 * 1000, { min: 1000 }, env),
     registerMax: envInteger("AUTH_REGISTER_RATE_LIMIT_MAX", 30, { min: 1 }, env),
+    browserAuthEnabled: envBoolean("BROWSER_AUTH_ENABLED", false, env),
+    browserAuthTtlMs: envInteger("BROWSER_AUTH_TTL_MS", 10 * 60 * 1000, { min: 60_000, max: 15 * 60 * 1000 }, env),
+    browserAuthPollIntervalMs: envInteger("BROWSER_AUTH_POLL_INTERVAL_MS", 1000, { min: 500, max: 5000 }, env),
+    browserAuthStartWindowMs: envInteger("BROWSER_AUTH_START_RATE_LIMIT_WINDOW_MS", 10 * 60 * 1000, { min: 1000 }, env),
+    browserAuthStartMax: envInteger("BROWSER_AUTH_START_RATE_LIMIT_MAX", 30, { min: 1 }, env),
     rateLimitEnabled: envBoolean("RATE_LIMIT_ENABLED", true, env),
     requestTimeoutMs: envInteger("HTTP_REQUEST_TIMEOUT_MS", 30_000, { min: 1000 }, env),
     headersTimeoutMs: envInteger("HTTP_HEADERS_TIMEOUT_MS", 15_000, { min: 1000 }, env),
@@ -130,6 +135,34 @@ function validateProductionConfig(env = process.env) {
     }
     if (authTransitionMode === "web-primary" && localRegistrationEnabled) {
       errors.push("AUTH_TRANSITION_MODE=web-primary requires LOCAL_REGISTRATION_ENABLED=false");
+    }
+  }
+  if (envBoolean("BROWSER_AUTH_ENABLED", false, env)) {
+    const loginUrl = String(env.BROWSER_AUTH_LOGIN_URL || "");
+    const callbackUrl = String(env.BROWSER_AUTH_CALLBACK_URL || "");
+    const authSecret = String(env.WEB_AUTH_SECRET || env.GAME_API_SECRET || "");
+    let parsedLoginUrl = null;
+    let parsedCallbackUrl = null;
+    try { parsedLoginUrl = new URL(loginUrl); } catch (error) { parsedLoginUrl = null; }
+    try { parsedCallbackUrl = new URL(callbackUrl); } catch (error) { parsedCallbackUrl = null; }
+
+    if (webAuthMode !== "http") {
+      errors.push("BROWSER_AUTH_ENABLED=true requires WEB_AUTH_MODE=http");
+    }
+    if (!parsedLoginUrl || parsedLoginUrl.protocol !== "https:") {
+      errors.push("BROWSER_AUTH_LOGIN_URL must be a valid HTTPS URL");
+    }
+    if (!parsedCallbackUrl || parsedCallbackUrl.protocol !== "https:") {
+      errors.push("BROWSER_AUTH_CALLBACK_URL must be a valid HTTPS URL");
+    }
+    if (parsedLoginUrl && parsedCallbackUrl && parsedLoginUrl.origin !== parsedCallbackUrl.origin) {
+      errors.push("BROWSER_AUTH_LOGIN_URL and BROWSER_AUTH_CALLBACK_URL must use the same origin");
+    }
+    if (parsedCallbackUrl && parsedCallbackUrl.pathname !== "/api/game/browser/callback") {
+      errors.push("BROWSER_AUTH_CALLBACK_URL must use /api/game/browser/callback");
+    }
+    if (authSecret.length < 16) {
+      errors.push("Browser auth approval requires WEB_AUTH_SECRET or GAME_API_SECRET");
     }
   }
   if (String(env.ADMIN_DASHBOARD_ENABLED || "").toLowerCase() !== "false") {

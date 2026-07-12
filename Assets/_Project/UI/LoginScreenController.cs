@@ -30,6 +30,7 @@ public class LoginScreenController : MonoBehaviour
     private Toggle rememberToggle;
     private Label forgotPassword;
     private Button btnLogin;
+    private Button btnLoginWeb;
     private Button btnQuitApp;
     private Label loginStatus;
 
@@ -118,6 +119,7 @@ public class LoginScreenController : MonoBehaviour
         rememberToggle = root.Q<Toggle>("RememberToggle");
         forgotPassword = root.Q<Label>("ForgotPassword");
         btnLogin = root.Q<Button>("BtnLogin");
+        btnLoginWeb = root.Q<Button>("BtnLoginWeb");
         btnQuitApp = root.Q<Button>("BtnQuitApp");
         loginStatus = root.Q<Label>("LoginStatus");
 
@@ -142,7 +144,8 @@ public class LoginScreenController : MonoBehaviour
         tabRegister?.RegisterCallback<ClickEvent>(evt => ShowRegisterTab());
 
         // Login actions
-        btnLogin?.RegisterCallback<ClickEvent>(evt => OnLoginClicked());
+        btnLogin?.RegisterCallback<ClickEvent>(evt => OnLoginClicked(false));
+        btnLoginWeb?.RegisterCallback<ClickEvent>(evt => OnWebsiteAuthClicked("login"));
         if (btnQuitApp != null)
         {
             btnQuitApp.pickingMode = PickingMode.Position;
@@ -154,7 +157,7 @@ public class LoginScreenController : MonoBehaviour
 
         // Register actions
         btnRegister?.RegisterCallback<ClickEvent>(evt => OnRegisterClicked());
-        btnOpenWebRegistration?.RegisterCallback<ClickEvent>(evt => OpenRegistrationPage());
+        btnOpenWebRegistration?.RegisterCallback<ClickEvent>(evt => OnWebsiteAuthClicked("register"));
         btnToggleRegPassword?.RegisterCallback<ClickEvent>(evt => ToggleRegPasswordVisibility());
 
         // Register real-time validation callbacks
@@ -298,14 +301,14 @@ public class LoginScreenController : MonoBehaviour
 
     // ── Login ──
 
-    private async void OnLoginClicked()
+    private async void OnLoginClicked(bool useWebAccount)
     {
         if (isAuthRequestInProgress) return;
 
         string username = (usernameField?.value ?? "").Trim();
         string password = passwordField?.value ?? "";
 
-        Debug.Log("[LoginScreen] Login clicked.");
+        Debug.Log($"[LoginScreen] {(useWebAccount ? "Web" : "Local")} login clicked.");
 
         // Validation
         if (string.IsNullOrWhiteSpace(username))
@@ -339,8 +342,12 @@ public class LoginScreenController : MonoBehaviour
         }
 
         SetAuthControlsEnabled(false);
-        ShowStatus(loginStatus, "Đang đăng nhập...", true);
-        bool success = await auth.LoginAsync(username, password);
+        ShowStatus(loginStatus,
+            useWebAccount ? "Đang đăng nhập tài khoản website..." : "Đang đăng nhập tài khoản trong game...",
+            true);
+        bool success = useWebAccount
+            ? await auth.LoginWebAsync(username, password)
+            : await auth.LoginLocalAsync(username, password);
 
         if (!success)
         {
@@ -349,6 +356,49 @@ public class LoginScreenController : MonoBehaviour
             return;
         }
 
+        await CompleteAuthenticatedLoginAsync(auth.Username);
+    }
+
+    private async void OnWebsiteAuthClicked(string intent)
+    {
+        if (isAuthRequestInProgress) return;
+
+        var config = BackendConfig.Active;
+        if (config == null || !config.browserAuthEnabled)
+        {
+            if (string.Equals(intent, "register", System.StringComparison.OrdinalIgnoreCase))
+                OpenRegistrationPage();
+            else
+                OnLoginClicked(true);
+            return;
+        }
+
+        var auth = AuthService.Instance;
+        if (auth == null)
+        {
+            ShowStatus(loginStatus, "Hệ thống đăng nhập chưa sẵn sàng. Thử lại sau.", false);
+            return;
+        }
+
+        SetAuthControlsEnabled(false);
+        ShowStatus(loginStatus, "Đang tạo phiên xác thực website...", true);
+        bool success = await auth.LoginWithBrowserAsync(intent, message =>
+        {
+            if (loginStatus != null) ShowStatus(loginStatus, message, true);
+        });
+        if (!success)
+        {
+            SetAuthControlsEnabled(true);
+            ShowStatus(loginStatus, ResolveBrowserAuthFailureMessage(auth), false);
+            return;
+        }
+
+        await CompleteAuthenticatedLoginAsync(auth.Username);
+    }
+
+    private async Awaitable CompleteAuthenticatedLoginAsync(string username)
+    {
+        var auth = AuthService.Instance;
         shouldSkipCharacterSelectAfterLogin = false;
         bool bootstrapLoaded = false;
         var bootstrap = PlayerBootstrapService.Instance;
@@ -643,6 +693,22 @@ public class LoginScreenController : MonoBehaviour
         return "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.";
     }
 
+    private static string ResolveBrowserAuthFailureMessage(AuthService auth)
+    {
+        string errorCode = auth != null ? auth.LastErrorCode : "";
+        if (string.Equals(errorCode, "BROWSER_AUTH_CANCELLED", System.StringComparison.OrdinalIgnoreCase))
+            return "Đã hủy đăng nhập website.";
+        if (string.Equals(errorCode, "BROWSER_AUTH_EXPIRED", System.StringComparison.OrdinalIgnoreCase))
+            return "Phiên đăng nhập website đã hết hạn. Vui lòng thử lại.";
+        if (string.Equals(errorCode, "BROWSER_AUTH_DISABLED", System.StringComparison.OrdinalIgnoreCase))
+            return "Đăng nhập website chưa được bật trên phiên bản này.";
+        if (string.Equals(errorCode, "WEB_ACCOUNT_LOCKED", System.StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(errorCode, "WEB_ACCOUNT_DELETED", System.StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(errorCode, "WEB_ACCOUNT_INACTIVE", System.StringComparison.OrdinalIgnoreCase))
+            return "Tài khoản website đã bị khóa hoặc ngừng hoạt động.";
+        return ResolveLoginFailureMessage(auth);
+    }
+
     private static string ResolveRegisterFailureMessage(AuthService auth)
     {
         long status = auth != null ? auth.LastStatus : 0;
@@ -699,6 +765,7 @@ public class LoginScreenController : MonoBehaviour
         rememberToggle?.SetEnabled(enabled);
         forgotPassword?.SetEnabled(enabled);
         btnLogin?.SetEnabled(enabled);
+        btnLoginWeb?.SetEnabled(enabled);
         regUsernameField?.SetEnabled(enabled);
         regEmailField?.SetEnabled(enabled);
         regPasswordField?.SetEnabled(enabled);

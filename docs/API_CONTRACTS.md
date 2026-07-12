@@ -59,6 +59,9 @@ Tài liệu hành trình product/backend đầy đủ nằm ở `docs/WEB_GAME_B
 | Method | Endpoint | Body | Tra ve |
 |---|---|---|---|
 | POST | `/auth/web-login` | `{ username/email/refCode, password }` hoac `{ token }` | `{ token, playerId, webUserId, player_profile }` |
+| POST | `/auth/browser/start` | `{ code_challenge, intent:"login"|"register" }` | `{ requestId, authUrl, expiresInSec, pollIntervalMs }` |
+| POST | `/auth/browser/approve` | `{ requestId, webUser }` + server Bearer secret | `{ ok, duplicate }`; chỉ callback web gọi qua loopback |
+| POST | `/auth/browser/exchange` | `{ requestId, code_verifier }` | `{ token, playerId, webUserId, player_profile, status:"complete" }` hoặc `202 pending` |
 | GET | `/player/bootstrap` | Bearer token | `{ player_profile, economy, inventory, farm_state, daily_limits }` |
 | GET | `/player/economy` | Bearer token | `{ economy }` |
 | PUT | `/player/economy` | `{ economy }` + Bearer | `{ ok, economy }` |
@@ -84,12 +87,17 @@ Quy uoc mapping:
   dashboard/demo seed và cấm `WEB_AUTH_MODE=mock`. HTTP có request ID, body limit,
   security headers và structured access log không chứa body/token. Realtime giới hạn
   tổng connection, payload và message rate; các ngưỡng được cấu hình bằng env.
-- Khi `WEB_AUTH_MODE=http`, startup gate còn bắt buộc `WEB_AUTH_LOGIN_URL` dùng HTTPS,
-  có `WEB_AUTH_SECRET`/`GAME_API_SECRET` tối thiểu 16 ký tự và
-  `LOCAL_REGISTRATION_ENABLED=false`. `/auth/register` trả `403
-  LOCAL_REGISTRATION_DISABLED`; account web khóa/xóa mềm/inactive bị từ chối trước
-  khi mapping player. Lỗi upstream được chuẩn hóa, không chuyển message nội bộ của web
+- Khi `WEB_AUTH_MODE=http`, startup gate còn bắt buộc `WEB_AUTH_LOGIN_URL` dùng HTTPS
+  và có `WEB_AUTH_SECRET`/`GAME_API_SECRET` tối thiểu 16 ký tự. Giai đoạn
+  `AUTH_TRANSITION_MODE=parallel` bắt buộc `LOCAL_REGISTRATION_ENABLED=true`; chỉ
+  khi cutover `web-primary` mới bắt buộc false và `/auth/register` trả `403
+  LOCAL_REGISTRATION_DISABLED`. Account web khóa/xóa mềm/inactive bị từ chối trước
+  khi mapping player; lỗi upstream được chuẩn hóa, không chuyển message nội bộ của web
   về Unity.
+- Khi bật `BROWSER_AUTH_ENABLED`, login/callback phải là HTTPS cùng origin,
+  callback cố định `/api/game/browser/callback`; request ID lưu hash SHA-256, hạn 10
+  phút, exchange bắt buộc PKCE và chỉ dùng một lần. Callback Next.js đọc session web
+  rồi approve qua `127.0.0.1`; Unity không nhận cookie/password/secret web.
 - `daily_limits` mac dinh gom `fishing` va `mining`, reset theo `period_key` ngay server dang `YYYY-MM-DD`. Can chot timezone server; khuyen nghi `Asia/Saigon` cho khach VN. Hien stub cu co the dang dung UTC nen can doi/ghi ro truoc production.
 - `idempotency_key` phai duy nhat cho moi action co retry; server tra `duplicate=true` khi nhan lai cung key va khong apply them tien/item/luot.
 - Shop transaction khong nhan/gia tin `unit_price` tu Unity. Server tra `shopCatalog.json` sinh tu `ItemDefinition` + `ShopDefinition`, kiem access mode/whitelist/canSell va doi Point + inventory trong mot lan ghi. Cung key nhung body khac tra `IDEMPOTENCY_CONFLICT`.

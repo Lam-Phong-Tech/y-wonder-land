@@ -283,9 +283,37 @@ async function verifyToken(token) {
   return { ok: false, status: 503, error: "WEB_TOKEN_VERIFY_UNAVAILABLE" };
 }
 
+function verifyTrustedIdentity(input) {
+  const normalized = normalizeWebUser(input || {});
+  const accessError = webAccountAccessError(normalized);
+  if (accessError) {
+    return { ok: false, status: accessError === "WEB_AUTH_RESPONSE_MISSING_USER_ID" ? 400 : 403, error: accessError };
+  }
+
+  return {
+    ok: true,
+    status: 200,
+    webUser: {
+      id: normalized.id,
+      username: normalized.username,
+      email: normalized.email,
+      phone: normalized.phone,
+      refCode: normalized.refCode,
+      fullName: normalized.fullName,
+      displayName: normalized.displayName,
+      status: normalized.status,
+      locked: normalized.locked,
+      softDeleted: normalized.softDeleted,
+      active: normalized.active,
+      authSource: "web-browser",
+    },
+  };
+}
+
 module.exports = {
   mode: MODE,
   verifyLogin,
   verifyToken,
   verifyGameToken,
+  verifyTrustedIdentity,
 };

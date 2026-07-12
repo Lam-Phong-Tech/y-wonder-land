@@ -16,6 +16,12 @@ namespace YWonderLand.Backend
         [Tooltip("Trang đăng ký tài khoản web mở bằng trình duyệt ngoài. Chỉ chấp nhận HTTPS ở màn Login.")]
         public string registrationUrl = "";
 
+        [Tooltip("Bật browser SSO: game mở website, chờ callback một lần và không nhận mật khẩu web.")]
+        public bool browserAuthEnabled = false;
+
+        [Tooltip("Thời gian tối đa chờ người dùng hoàn tất đăng nhập/đăng ký trên website.")]
+        public int browserAuthTimeoutSec = 600;
+
         [Tooltip("Thời gian chờ tối đa cho 1 request (giây). Hết giờ -> coi như offline.")]
         public int requestTimeoutSec = 5;
 

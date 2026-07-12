@@ -27,6 +27,7 @@ function emptyDb() {
     dailyLimits: {},
     transactions: [],
     sessions: [],
+    browserAuthRequests: {},
   };
 }
 
@@ -49,6 +50,7 @@ function normalizeDb(db) {
     dailyLimits: normalizeObject(source.dailyLimits),
     transactions: Array.isArray(source.transactions) ? source.transactions : [],
     sessions: Array.isArray(source.sessions) ? source.sessions : [],
+    browserAuthRequests: normalizeObject(source.browserAuthRequests),
   };
 }
 
@@ -258,6 +260,88 @@ class JsonStore {
     this.ensurePlayerStateInDb(db, playerId);
     this.writeAll(db);
     return db.players[playerId];
+  }
+
+  createBrowserAuthRequest(record) {
+    const db = this.readAll();
+    if (db.browserAuthRequests[record.requestIdHash]) {
+      return { ok: false, error: "BROWSER_AUTH_REQUEST_EXISTS" };
+    }
+
+    const now = Date.now();
+    for (const [key, current] of Object.entries(db.browserAuthRequests)) {
+      const expiresAt = Date.parse(current.expiresAt || "");
+      if (Number.isFinite(expiresAt) && expiresAt + 60 * 60 * 1000 < now) {
+        delete db.browserAuthRequests[key];
+      }
+    }
+
+    db.browserAuthRequests[record.requestIdHash] = {
+      requestIdHash: record.requestIdHash,
+      pkceChallenge: record.pkceChallenge,
+      intent: record.intent || "login",
+      status: "pending",
+      webUserId: "",
+      webUser: {},
+      expiresAt: record.expiresAt,
+      approvedAt: null,
+      consumedAt: null,
+      createdAt: record.createdAt || nowISO(),
+    };
+    this.writeAll(db);
+    return { ok: true };
+  }
+
+  approveBrowserAuthRequest(requestIdHash, webUser) {
+    const db = this.readAll();
+    const record = db.browserAuthRequests[requestIdHash];
+    if (!record) return { ok: false, error: "BROWSER_AUTH_REQUEST_NOT_FOUND" };
+
+    if (Date.parse(record.expiresAt) <= Date.now()) {
+      record.status = "expired";
+      this.writeAll(db);
+      return { ok: false, error: "BROWSER_AUTH_EXPIRED" };
+    }
+    if (record.status === "consumed") return { ok: false, error: "BROWSER_AUTH_CONSUMED" };
+    if (record.status === "approved") {
+      return record.webUserId === webUser.id
+        ? { ok: true, duplicate: true }
+        : { ok: false, error: "BROWSER_AUTH_ALREADY_APPROVED" };
+    }
+    if (record.status !== "pending") return { ok: false, error: "BROWSER_AUTH_INVALID_STATE" };
+
+    record.status = "approved";
+    record.webUserId = webUser.id;
+    record.webUser = JSON.parse(JSON.stringify(webUser));
+    record.approvedAt = nowISO();
+    this.writeAll(db);
+    return { ok: true, duplicate: false };
+  }
+
+  exchangeBrowserAuthRequest(requestIdHash, presentedChallenge) {
+    const db = this.readAll();
+    const record = db.browserAuthRequests[requestIdHash];
+    if (!record) return { ok: false, error: "BROWSER_AUTH_REQUEST_NOT_FOUND" };
+
+    if (Date.parse(record.expiresAt) <= Date.now()) {
+      record.status = "expired";
+      this.writeAll(db);
+      return { ok: false, error: "BROWSER_AUTH_EXPIRED" };
+    }
+    if (record.status === "pending") return { ok: false, error: "BROWSER_AUTH_PENDING" };
+    if (record.status === "consumed") return { ok: false, error: "BROWSER_AUTH_CONSUMED" };
+    if (record.status !== "approved") return { ok: false, error: "BROWSER_AUTH_INVALID_STATE" };
+    if (record.pkceChallenge !== presentedChallenge) {
+      return { ok: false, error: "BROWSER_AUTH_PKCE_MISMATCH" };
+    }
+
+    record.status = "consumed";
+    record.consumedAt = nowISO();
+    this.writeAll(db);
+    return {
+      ok: true,
+      request: JSON.parse(JSON.stringify(record)),
+    };
   }
 
   getPlayer(playerId) {
@@ -783,6 +867,9 @@ module.exports = {
   findUserById: activeStore.findUserById.bind(activeStore),
   createUser: activeStore.createUser.bind(activeStore),
   getOrCreatePlayerForWebUser: activeStore.getOrCreatePlayerForWebUser.bind(activeStore),
+  createBrowserAuthRequest: activeStore.createBrowserAuthRequest.bind(activeStore),
+  approveBrowserAuthRequest: activeStore.approveBrowserAuthRequest.bind(activeStore),
+  exchangeBrowserAuthRequest: activeStore.exchangeBrowserAuthRequest.bind(activeStore),
   getPlayer: activeStore.getPlayer.bind(activeStore),
   getProfile: activeStore.getProfile.bind(activeStore),
   setProfile: activeStore.setProfile.bind(activeStore),

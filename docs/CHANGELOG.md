@@ -11,7 +11,7 @@
 - Audit chỉ đọc cùng VPS xác nhận web Next.js chạy cổng `3033`, source `/var/www/ywonder`, API `/api/game/auth`, stable `session.user.id` và secret 64 ký tự đã có trong env nhưng không bị in/ghi vào repo.
 - Thêm `AUTH_TRANSITION_MODE=parallel` cho game-server. Chỉ cấu hình tường minh này mới cho phép web auth HTTP hoạt động cùng đăng ký local; cấu hình thiếu/sai bị production gate từ chối.
 - Mở rộng integration test để chứng minh account local vẫn đăng ký/đăng nhập và giữ playerId, trong khi account web nhận player riêng, bootstrap/relogin và account-status guards vẫn đúng.
-- Giữ nguyên form đăng ký local trong Unity và thêm nút riêng `ĐĂNG KÝ TRÊN WEB`, mở `https://ywonder.net/vi/login`. Ô đăng nhập hiện tại vẫn thử local trước và chỉ fallback web khi local trả `USER_NOT_FOUND`.
+- Tách rõ bốn lệnh trong Unity: `ĐĂNG NHẬP TRONG GAME`, `ĐĂNG NHẬP WEBSITE`, `ĐĂNG KÝ TRONG GAME`, `ĐĂNG KÝ TRONG WEBSITE`. Hai nút đăng nhập gọi đúng route local/web riêng; đăng ký website mở `https://ywonder.net/vi/login` trong khi form local vẫn được giữ.
 
 ### Verified
 - `test:security` pass.

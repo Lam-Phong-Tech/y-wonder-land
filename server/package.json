@@ -15,7 +15,8 @@
     "test:load": "node phase1LoadTest.js",
     "test:postgres": "node postgresSmokeTest.js",
     "test:security": "node securitySmokeTest.js",
-    "test:web-auth": "node webAuthIntegrationTest.js"
+    "test:web-auth": "node webAuthIntegrationTest.js",
+    "test:browser-auth": "node browserAuthIntegrationTest.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

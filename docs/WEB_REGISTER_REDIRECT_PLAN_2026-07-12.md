@@ -27,8 +27,10 @@ không biết tài khoản web nào vừa đăng nhập.
 Vì web và game-server đang ở cùng VPS, có thể làm luồng browser login an toàn mà
 không đưa mật khẩu web hoặc secret vào Unity. Phương án phù hợp cho cả EXE và APK
 là **callback cùng domain + yêu cầu đăng nhập một lần + polling/PKCE**. Polling
-được ưu tiên hơn custom deep link vì EXE portable không cần cài protocol vào
-Windows.
+là đường nhận kết quả chính cho cả EXE/APK. Custom URI chỉ đánh thức APK sau khi
+web hoàn tất; URI này không mang token/request ID nên không làm lộ quyền đăng
+nhập. EXE portable không đăng ký protocol vào Windows và vẫn hoàn tất khi người
+dùng quay lại cửa sổ game.
 
 Không thay callback của hai nút local hiện tại. Web SSO được thêm bằng control và
 feature flag riêng, mặc định tắt cho bản khách cho đến khi callback và exchange
@@ -85,28 +87,34 @@ tài khoản mới** sẽ mất callback nếu web không sửa phần register.
 4. Unity mở URL đó bằng trình duyệt và giữ màn hình chờ đăng nhập.
 5. Người đã có tài khoản đăng nhập. Người mới bấm Tạo trang trại mới và đăng ký.
 6. Sau khi web xác thực, trình duyệt vào callback cùng host
-   `ywonder.net/game-api/auth/browser/callback` nên gửi kèm cookie web an toàn.
-7. Game-server xác minh web session qua dịch vụ web nội bộ, lấy `web_user_id`
-   ổn định và đánh dấu `requestId` đã được chấp nhận.
+   `ywonder.net/api/game/browser/callback`; Next.js tự đọc cookie NextAuth HttpOnly.
+7. Callback web lấy `session.user.id`, kiểm tra account `ACTIVE`, rồi gọi nội bộ
+   `127.0.0.1:3000/auth/browser/approve` bằng `GAME_API_SECRET`. Cookie/secret
+   không đi qua Unity hoặc Internet.
 8. Unity gọi `POST /auth/browser/exchange` với `requestId + code_verifier`.
    Server kiểm tra PKCE, chỉ cho dùng một lần, map `web_user_id -> playerId`, rồi
    trả game JWT và bootstrap.
-9. Unity vào game; mật khẩu web, cookie web và secret server không đi qua client.
+9. Unity vào game; callback thử mở `ywondergreenfarm://auth/complete` để đánh
+   thức APK, còn mật khẩu web, cookie web và secret server không đi qua client.
 
 Nếu Android tạm dừng app khi mở browser, exchange tiếp tục khi app được focus lại.
 EXE có thể polling trong lúc cửa sổ browser đang mở.
 
 ## 4. Phần cần sửa ở web
 
-Hai thay đổi nhỏ nhưng bắt buộc cho tài khoản mới:
+Ba thay đổi nhỏ nhưng bắt buộc:
 
 1. Link `Tạo trang trại mới` trên login phải giữ tham số `callbackUrl` khi sang
    register.
 2. Register phải đọc và validate `callbackUrl`; sau khi đăng ký/xác thực thành
    công, điều hướng về callback thay vì luôn vào `/vi/dashboard`.
+3. Thêm route Next.js `/api/game/browser/callback`: đọc session web hiện tại,
+   kiểm tra account rồi approve request qua loopback game-server. Route trả trang
+   thành công, thử mở APK và hướng dẫn người dùng EXE quay lại cửa sổ game.
 
-Chỉ chấp nhận callback nội bộ đã whitelist, ví dụ bắt đầu bằng
-`/game-api/auth/browser/callback`. Không cho callback tùy ý để tránh open redirect.
+Chỉ chấp nhận callback tương đối an toàn hoặc HTTPS thuộc allowlist
+`ywonder.net`, `www`, `agent`, `admin`; từ chối protocol/host/port lạ để tránh
+open redirect.
 
 Nếu không có source web để sửa ngay, phương án tạm là: đăng ký xong quay lại game,
 bấm Đăng nhập lần nữa và đăng nhập web. Phương án này dùng được để test, nhưng
@@ -118,15 +126,15 @@ không phải UX bàn giao mong muốn.
   `request_id_hash`, `pkce_challenge`, `status`, `web_user_id`, `expires_at`,
   `consumed_at`.
 - Thêm `POST /auth/browser/start` có rate limit.
-- Thêm `GET /auth/browser/callback` chỉ nhận request hợp lệ, forward cookie tới
-  web session API và không log cookie/token.
+- Thêm `POST /auth/browser/approve` chỉ nhận secret server-to-server và identity
+  web đã được route Next.js xác thực; không log secret/request thô/token.
 - Thêm `POST /auth/browser/exchange`; request một lần, hết hạn 2-5 phút, PKCE bắt
   buộc.
 - Dùng mapping duy nhất `web_user_id -> playerId`, sau đó dùng lại game JWT,
   `/player/bootstrap` và realtime rule `4008` hiện tại.
-- Thêm cleanup request hết hạn và test replay/CSRF/open redirect/rate limit.
-- Nginx trên host `ywonder.net` proxy chính xác callback `/game-api/auth/browser/*`
-  vào `127.0.0.1:3000`; vẫn không public port 3000/5432.
+- Thêm cleanup request hết hạn và test replay/PKCE/rate limit/account guard.
+- Không cần đổi Nginx: callback thuộc namespace Next.js `/api/game/*`; game-server
+  vẫn chỉ public dưới `api.ywonder.net/game-api` và port 3000/5432 tiếp tục đóng.
 
 ## 6. Phần cần sửa ở Unity
 
@@ -138,6 +146,9 @@ không phải UX bàn giao mong muốn.
 - Không gửi username/password web từ Unity trong luồng mới.
 - Lưu `requestId` và `code_verifier` chỉ trong bộ nhớ trong phiên đăng nhập.
 - Poll/exchange khi app active lại; cho phép hủy và thử lại.
+- Android manifest nhận `ywondergreenfarm://auth/complete` vào
+  `UnityPlayerGameActivity` ở chế độ `singleTask`; URI chỉ wake app, polling mới
+  thực hiện exchange.
 - Hiện trạng thái rõ: đang mở trình duyệt, đang chờ xác thực, hết hạn, bị khóa,
   web tạm lỗi.
 - Giữ account local/QARich và API local trong toàn bộ giai đoạn chuyển tiếp.
@@ -156,12 +167,13 @@ không phải UX bàn giao mong muốn.
    bootstrap, relogin thành công; cùng web account giữ playerId, còn web/local
    có dữ liệu tách biệt. Không sửa/restart web service hoặc Nginx. Unity source
    giữ form local và thêm nút web; Editor compile sạch, runtime EXE/APK còn chờ.
-4. **Nấc B - browser SSO:** backup toàn bộ web source/build/service/Nginx trước;
-   thêm callback preservation vào login/register web và test nội bộ.
-5. Implement migration + browser auth start/callback/exchange trên game-server,
-   kèm PKCE, request một lần, expiry và integration test giả lập web session.
-6. Thêm exact Nginx callback route trên host `ywonder.net`, kiểm tra cấu hình rồi
-   reload; không mở port 3000/5432.
+4. `[~]` **Nấc B - browser SSO:** game-server đã có migration +
+   start/approve/exchange, PKCE, expiry, replay guard và integration test; Unity
+   đã có browser flow/feature flag cùng Android wake URI. Chưa bật production.
+5. `[~]` Web callback/preserve `callbackUrl` đã đóng gói với build staging,
+   backup source + `.next`, health check và rollback; đang triển khai/nghiệm thu.
+6. `[x]` Audit chốt không cần sửa Nginx vì callback nằm trong Next.js
+   `/api/game/browser/callback`; port 3000/5432 vẫn không public.
 7. Test browser flow bằng account web thật trên EXE và APK, chưa đổi luồng local.
 8. Bật hai nút web song song bằng feature flag, compile và build; local vẫn là
    đường dự phòng.
@@ -187,10 +199,12 @@ không phải UX bàn giao mong muốn.
 | WEBSSO-011 | Hai thiết bị cùng account | Phiên mới thay phiên cũ bằng `4008` |
 | WEBSSO-012 | Restart backend/PostgreSQL | Dữ liệu player còn nguyên; auth request cũ hết hạn an toàn |
 
-## 9. Điều kiện còn thiếu trước khi code web
+## 9. Điều kiện còn thiếu trước khi bật cho bản khách
 
-- Đã có quyền root và xác nhận source/artifact deploy của web trên VPS.
-- Đã xác nhận NextAuth session trả stable `session.user.id`.
-- Cần tạo và kiểm tra gói backup/rollback web vì deploy hiện không có Git metadata.
-- Cần thêm exact Nginx callback route trên host `ywonder.net` ở Nấc B.
-- Chốt cách giữ QARich/local account cho tester trong bản chuyển tiếp.
+- Build/deploy web callback phải pass và ghi lại đường dẫn backup rollback.
+- Migration/browser API phải deploy versioned lên game-server rồi restart
+  PostgreSQL/backend để chứng minh request còn hoạt động đúng.
+- Test account web thật trên EXE và APK: login, register + OTP, callback, bootstrap,
+  relogin, cùng playerId và dữ liệu tách biệt account local.
+- Sau khi pass mới bật `browserAuthEnabled` trong build; QARich/local account vẫn
+  giữ nguyên cho tester trong toàn bộ giai đoạn song song.
