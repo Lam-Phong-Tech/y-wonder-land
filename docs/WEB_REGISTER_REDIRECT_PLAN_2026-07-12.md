@@ -2,8 +2,9 @@
 
 Ngày phân tích: 12/07/2026
 Yêu cầu gốc: khi vào game, nút **Đăng Ký** mở `https://ywonder.net/vi/register`.
-Trạng thái: **backend hardening và test tích hợp cục bộ đã triển khai; chưa deploy
-web-auth lên VPS và chưa sửa nút/form Unity**.
+Trạng thái: **release hardening `316a75c3` đã deploy lên VPS; Unity đã sửa và compile
+không lỗi. Web-auth vẫn giữ disabled vì VPS chưa có `WEB_AUTH_SECRET`; chưa nghiệm
+thu tài khoản web thật và chưa phát hành EXE/APK mới**.
 
 ## 1. Kết luận ngắn
 

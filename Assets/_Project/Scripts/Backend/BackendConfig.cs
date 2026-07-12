@@ -13,6 +13,9 @@ namespace YWonderLand.Backend
         [Tooltip("Địa chỉ gốc của server REST (không có dấu / ở cuối). Dev mặc định: http://localhost:3000")]
         public string baseUrl = "http://localhost:3000";
 
+        [Tooltip("Trang đăng ký tài khoản web mở bằng trình duyệt ngoài. Chỉ chấp nhận HTTPS ở màn Login.")]
+        public string registrationUrl = "";
+
         [Tooltip("Thời gian chờ tối đa cho 1 request (giây). Hết giờ -> coi như offline.")]
         public int requestTimeoutSec = 5;
 

@@ -58,6 +58,8 @@ public class LoginScreenController : MonoBehaviour
     private const string INPUT_FOCUS_CLASS = "login-input-group-focus";
     private const string STATUS_SUCCESS = "status-success";
     private const string STATUS_ERROR = "status-error";
+    private const int LOGIN_IDENTITY_MAX_LENGTH = 254;
+    private const int LOGIN_PASSWORD_MAX_LENGTH = 128;
     private const int REGISTER_MIN_LENGTH = 9;
     private const int REGISTER_MAX_LENGTH = 20;
 
@@ -135,7 +137,7 @@ public class LoginScreenController : MonoBehaviour
 
         // Tab switching
         tabLogin?.RegisterCallback<ClickEvent>(evt => ShowLoginTab());
-        tabRegister?.RegisterCallback<ClickEvent>(evt => ShowRegisterTab());
+        tabRegister?.RegisterCallback<ClickEvent>(evt => OpenRegistrationPage());
 
         // Login actions
         btnLogin?.RegisterCallback<ClickEvent>(evt => OnLoginClicked());
@@ -196,7 +198,7 @@ public class LoginScreenController : MonoBehaviour
     private void SetupPlaceholders()
     {
         // Set placeholder text via textEdition (Unity 2022.2+)
-        SetPlaceholder(usernameField, "Tên đăng nhập");
+        SetPlaceholder(usernameField, "Email / SĐT / ID đăng nhập");
         SetPlaceholder(passwordField, "Mật khẩu");
         SetPlaceholder(regUsernameField, "Tên đăng nhập");
         SetPlaceholder(regEmailField, "Email");
@@ -240,6 +242,27 @@ public class LoginScreenController : MonoBehaviour
         Debug.Log("[LoginScreen] Switched to Register tab");
     }
 
+    private void OpenRegistrationPage()
+    {
+        ResetKeyboardAvoidance();
+        ShowLoginTab();
+
+        var config = BackendConfig.Active;
+        string configuredUrl = config != null ? config.registrationUrl?.Trim() : "";
+        if (!System.Uri.TryCreate(configuredUrl, System.UriKind.Absolute, out var registrationUri) ||
+            !string.Equals(registrationUri.Scheme, System.Uri.UriSchemeHttps, System.StringComparison.OrdinalIgnoreCase))
+        {
+            ShowStatus(loginStatus, "Trang đăng ký chưa được cấu hình. Vui lòng thử lại sau.", false);
+            Debug.LogWarning("[LoginScreen] Registration URL is missing or is not HTTPS.");
+            return;
+        }
+
+        ShowStatus(loginStatus,
+            "Đã mở trang đăng ký. Hoàn tất trên web rồi quay lại game để đăng nhập.",
+            true);
+        Application.OpenURL(registrationUri.AbsoluteUri);
+    }
+
     // ── Password Toggle ──
 
     private void TogglePasswordVisibility()
@@ -279,17 +302,17 @@ public class LoginScreenController : MonoBehaviour
         string username = (usernameField?.value ?? "").Trim();
         string password = passwordField?.value ?? "";
 
-        Debug.Log($"[LoginScreen] Login clicked — Username: '{username}'");
+        Debug.Log("[LoginScreen] Login clicked.");
 
         // Validation
         if (string.IsNullOrWhiteSpace(username))
         {
-            ShowStatus(loginStatus, "Vui lòng nhập tên đăng nhập", false);
+            ShowStatus(loginStatus, "Vui lòng nhập Email, SĐT hoặc ID đăng nhập", false);
             return;
         }
-        if (username.Length > 20)
+        if (username.Length > LOGIN_IDENTITY_MAX_LENGTH)
         {
-            ShowStatus(loginStatus, "Tên đăng nhập không được quá 20 ký tự", false);
+            ShowStatus(loginStatus, "Email, SĐT hoặc ID đăng nhập quá dài", false);
             return;
         }
 
@@ -298,9 +321,9 @@ public class LoginScreenController : MonoBehaviour
             ShowStatus(loginStatus, "Vui lòng nhập mật khẩu", false);
             return;
         }
-        if (password.Length > 20)
+        if (password.Length > LOGIN_PASSWORD_MAX_LENGTH)
         {
-            ShowStatus(loginStatus, "Mật khẩu không được quá 20 ký tự", false);
+            ShowStatus(loginStatus, "Mật khẩu không được quá 128 ký tự", false);
             return;
         }
 
@@ -599,10 +622,19 @@ public class LoginScreenController : MonoBehaviour
     private static string ResolveLoginFailureMessage(AuthService auth)
     {
         long status = auth != null ? auth.LastStatus : 0;
+        string errorCode = auth != null ? auth.LastErrorCode : "";
         if (status == 0)
             return "Không thể kết nối máy chủ. Kiểm tra mạng hoặc chờ server được bật.";
         if (status == 401 || status == 404)
             return "Sai tên tài khoản hoặc mật khẩu.";
+        if (status == 403 &&
+            (string.Equals(errorCode, "WEB_ACCOUNT_LOCKED", System.StringComparison.OrdinalIgnoreCase) ||
+             string.Equals(errorCode, "WEB_ACCOUNT_DELETED", System.StringComparison.OrdinalIgnoreCase) ||
+             string.Equals(errorCode, "WEB_ACCOUNT_INACTIVE", System.StringComparison.OrdinalIgnoreCase) ||
+             string.Equals(errorCode, "WEB_AUTH_FORBIDDEN", System.StringComparison.OrdinalIgnoreCase)))
+            return "Tài khoản đã bị khóa hoặc ngừng hoạt động. Vui lòng liên hệ hỗ trợ.";
+        if (status == 429)
+            return "Bạn đã thử đăng nhập quá nhiều lần. Vui lòng chờ rồi thử lại.";
         if (status >= 500)
             return "Máy chủ đăng nhập đang tạm ngừng. Vui lòng thử lại sau.";
         return "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.";
