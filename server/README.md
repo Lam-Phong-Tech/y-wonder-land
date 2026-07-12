@@ -168,10 +168,14 @@ BROWSER_AUTH_LOGIN_URL=https://ywonder.net/vi/login
 BROWSER_AUTH_CALLBACK_URL=https://ywonder.net/api/game/browser/callback
 BROWSER_AUTH_TTL_MS=600000
 BROWSER_AUTH_POLL_INTERVAL_MS=1000
+BROWSER_AUTH_EXCHANGE_RATE_LIMIT_WINDOW_MS=600000
+BROWSER_AUTH_EXCHANGE_RATE_LIMIT_MAX=1500
 ```
 
 Request ID chỉ lưu dạng SHA-256, hết hạn sau 10 phút, exchange bắt buộc PKCE và
-chỉ dùng một lần. Custom URI `ywondergreenfarm://auth/complete` chỉ đánh thức APK;
+chỉ dùng một lần. Polling exchange dùng limiter riêng theo request ID, không tiêu
+hao quota chống dò mật khẩu của `/auth/login`. Custom URI
+`ywondergreenfarm://auth/complete` chỉ đánh thức APK;
 không mang token hay mã xác thực. EXE portable vẫn hoàn tất bằng polling nên không
 cần ghi protocol handler vào Windows Registry.
 

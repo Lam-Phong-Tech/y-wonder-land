@@ -35,6 +35,7 @@ const {
   createCorsOptions,
   createRateLimiter,
   createRequestSecurityMiddleware,
+  getRequestIp,
   validateLoginBody,
   validateProductionConfig,
   validateRegistrationBody,
@@ -94,8 +95,18 @@ const browserAuthStartLimiter = createRateLimiter({
   max: securityConfig.browserAuthStartMax,
   enabled: securityConfig.rateLimitEnabled,
 });
-
-api.use("/auth", authIpLimiter);
+const browserAuthExchangeLimiter = createRateLimiter({
+  name: "browser_auth_exchange",
+  windowMs: securityConfig.browserAuthExchangeWindowMs,
+  max: securityConfig.browserAuthExchangeMax,
+  enabled: securityConfig.rateLimitEnabled,
+  keyGenerator: (req) => {
+    const body = req.body || {};
+    const requestId = String(body.requestId || body.request_id || "").trim();
+    if (isValidRequestId(requestId)) return `request:${hashRequestId(requestId)}`;
+    return `ip:${getRequestIp(req)}`;
+  },
+});
 
 // ── Helpers ──
 function nowISO() {
@@ -202,7 +213,7 @@ api.get("/health", asyncRoute(async (req, res) => {
 }));
 
 // ── Auth ──
-api.post("/auth/register", registerLimiter, asyncRoute(async (req, res) => {
+api.post("/auth/register", authIpLimiter, registerLimiter, asyncRoute(async (req, res) => {
   if (!securityConfig.localRegistrationEnabled) {
     return res.status(403).json({ error: "LOCAL_REGISTRATION_DISABLED" });
   }
@@ -244,7 +255,7 @@ api.post("/auth/register", registerLimiter, asyncRoute(async (req, res) => {
   res.json({ token: signToken(id, { username, email, authSource: "local" }), userId: id, playerId: id, username, email });
 }));
 
-api.post("/auth/login", authIdentityLimiter, asyncRoute(async (req, res) => {
+api.post("/auth/login", authIpLimiter, authIdentityLimiter, asyncRoute(async (req, res) => {
   const validated = validateLoginBody(req.body);
   if (!validated.ok) return res.status(400).json({ error: validated.error });
   const { username, password } = validated;
@@ -279,7 +290,7 @@ api.post("/auth/login", authIdentityLimiter, asyncRoute(async (req, res) => {
   });
 }));
 
-api.post("/auth/web-login", authIdentityLimiter, asyncRoute(async (req, res) => {
+api.post("/auth/web-login", authIpLimiter, authIdentityLimiter, asyncRoute(async (req, res) => {
   let authResult;
   try {
     authResult = await webAuth.verifyLogin(req.body || {});
@@ -303,7 +314,7 @@ api.post("/auth/web-login", authIdentityLimiter, asyncRoute(async (req, res) => 
   res.json(session);
 }));
 
-api.post("/auth/browser/start", browserAuthStartLimiter, asyncRoute(async (req, res) => {
+api.post("/auth/browser/start", authIpLimiter, browserAuthStartLimiter, asyncRoute(async (req, res) => {
   if (!securityConfig.browserAuthEnabled) {
     return res.status(503).json({ error: "BROWSER_AUTH_DISABLED" });
   }
@@ -340,7 +351,7 @@ api.post("/auth/browser/start", browserAuthStartLimiter, asyncRoute(async (req, 
   });
 }));
 
-api.post("/auth/browser/approve", asyncRoute(async (req, res) => {
+api.post("/auth/browser/approve", authIpLimiter, asyncRoute(async (req, res) => {
   if (!securityConfig.browserAuthEnabled) {
     return res.status(503).json({ error: "BROWSER_AUTH_DISABLED" });
   }
@@ -364,7 +375,7 @@ api.post("/auth/browser/approve", asyncRoute(async (req, res) => {
   res.json({ ok: true, duplicate: Boolean(approved.duplicate) });
 }));
 
-api.post("/auth/browser/exchange", asyncRoute(async (req, res) => {
+api.post("/auth/browser/exchange", browserAuthExchangeLimiter, asyncRoute(async (req, res) => {
   if (!securityConfig.browserAuthEnabled) {
     return res.status(503).json({ error: "BROWSER_AUTH_DISABLED" });
   }

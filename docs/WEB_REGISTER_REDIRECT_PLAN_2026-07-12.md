@@ -167,16 +167,18 @@ không phải UX bàn giao mong muốn.
    bootstrap, relogin thành công; cùng web account giữ playerId, còn web/local
    có dữ liệu tách biệt. Không sửa/restart web service hoặc Nginx. Unity source
    giữ form local và thêm nút web; Editor compile sạch, runtime EXE/APK còn chờ.
-4. `[~]` **Nấc B - browser SSO:** game-server đã có migration +
-   start/approve/exchange, PKCE, expiry, replay guard và integration test; Unity
-   đã có browser flow/feature flag cùng Android wake URI. Chưa bật production.
-5. `[~]` Web callback/preserve `callbackUrl` đã đóng gói với build staging,
-   backup source + `.next`, health check và rollback; đang triển khai/nghiệm thu.
+4. `[x]` **Nấc B - browser SSO backend:** release
+   `67ff2565517875fcc48ea515f1fedbbf98f24b8a` đã apply migration,
+   start/approve/exchange, PKCE, expiry/replay guard và bật production mà vẫn giữ
+   mode `parallel`.
+5. `[x]` Web build `hp9br9UtY4p9PcC214CmF` đã preserve `callbackUrl` xuyên
+   login/register/OTP và thêm callback Next.js. Backup source + `.next` ở
+   `/var/backups/ywonder-web/browser-sso-20260712T185239Z`; health pass.
 6. `[x]` Audit chốt không cần sửa Nginx vì callback nằm trong Next.js
    `/api/game/browser/callback`; port 3000/5432 vẫn không public.
-7. Test browser flow bằng account web thật trên EXE và APK, chưa đổi luồng local.
-8. Bật hai nút web song song bằng feature flag, compile và build; local vẫn là
-   đường dự phòng.
+7. `[~]` Public runner bằng web session thật đã pass callback -> exchange ->
+   bootstrap PostgreSQL; còn test trực tiếp trên Editor, EXE và APK.
+8. `[~]` Feature flag Unity đã bật; chờ compile/import Android manifest và build.
 9. Test cross-device, restart backend/PostgreSQL, account khóa/xóa, replay code và
    hai phiên trùng account.
 10. Sau khi chạy song song ổn định mới lập kế hoạch cutover riêng; không tự động

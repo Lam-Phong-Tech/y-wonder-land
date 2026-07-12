@@ -121,7 +121,13 @@ async function run() {
       ADMIN_DASHBOARD_ENABLED: "false",
       DEMO_ACCOUNTS_ENABLED: "false",
       HTTP_ACCESS_LOG: "false",
-      RATE_LIMIT_ENABLED: "false",
+      RATE_LIMIT_ENABLED: "true",
+      AUTH_IP_RATE_LIMIT_MAX: "12",
+      AUTH_IP_RATE_LIMIT_WINDOW_MS: "60000",
+      BROWSER_AUTH_START_RATE_LIMIT_MAX: "12",
+      BROWSER_AUTH_START_RATE_LIMIT_WINDOW_MS: "60000",
+      BROWSER_AUTH_EXCHANGE_RATE_LIMIT_MAX: "25",
+      BROWSER_AUTH_EXCHANGE_RATE_LIMIT_WINDOW_MS: "60000",
     },
     stdio: ["ignore", "pipe", "pipe"],
   });
@@ -153,6 +159,11 @@ async function run() {
     const pending = await exchange(baseUrl, started.payload.requestId, verifier);
     assert(pending.response.status === 202 && pending.payload.status === "pending",
       "Pending browser exchange did not return 202.");
+    for (let poll = 0; poll < 20; poll += 1) {
+      const repeatedPending = await exchange(baseUrl, started.payload.requestId, verifier);
+      assert(repeatedPending.response.status === 202,
+        `Browser exchange poll ${poll + 2} consumed the shared auth quota.`);
+    }
 
     const noSecret = await approve(baseUrl, "", started.payload.requestId, { userId: "web-browser-1" });
     assert(noSecret.response.status === 401, "Browser approval accepted a missing secret.");
@@ -220,6 +231,19 @@ async function run() {
     const expiredExchange = await exchange(baseUrl, expired.payload.requestId, expiredVerifier);
     assert(expiredExchange.response.status === 410 && expiredExchange.payload.error === "BROWSER_AUTH_EXPIRED",
       "Expired browser request was not rejected.");
+
+    const limitedVerifier = base64Url(crypto.randomBytes(32));
+    const limited = await startRequest(baseUrl, limitedVerifier);
+    assert(limited.response.status === 201,
+      "Browser polling consumed the password/start IP limiter.");
+    for (let poll = 0; poll < 25; poll += 1) {
+      const allowed = await exchange(baseUrl, limited.payload.requestId, limitedVerifier);
+      assert(allowed.response.status === 202,
+        `Dedicated browser exchange limiter blocked poll ${poll + 1} too early.`);
+    }
+    const exchangeBlocked = await exchange(baseUrl, limited.payload.requestId, limitedVerifier);
+    assert(exchangeBlocked.response.status === 429 && exchangeBlocked.payload.error === "RATE_LIMITED",
+      "Dedicated browser exchange limiter did not return 429 at its configured boundary.");
 
     assert(!output.value.includes(approvalSecret), "Server logs exposed browser approval secret.");
     assert(!output.value.includes(verifier), "Server logs exposed PKCE verifier.");

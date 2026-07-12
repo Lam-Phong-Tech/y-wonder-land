@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   baseUrl: https://api.ywonder.net/game-api
   registrationUrl: https://ywonder.net/vi/login
-  browserAuthEnabled: 0
+  browserAuthEnabled: 1
   browserAuthTimeoutSec: 600
   requestTimeoutSec: 8
   useOfflineFallback: 0

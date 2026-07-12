@@ -204,6 +204,16 @@ namespace YWonderLand.Backend
                     onStatus?.Invoke("Website đã xác thực. Đang nạp dữ liệu nhân vật...");
                     return ApplyAuth(exchanged, exchanged.data.username);
                 }
+                if (exchanged.status == 429)
+                {
+                    float retrySeconds = Mathf.Clamp(
+                        exchanged.retryAfterSec > 0 ? exchanged.retryAfterSec : Mathf.Max(2f, pollSeconds * 2f),
+                        1f,
+                        30f);
+                    onStatus?.Invoke("Máy chủ đang điều tiết kết nối. Đang chờ thử lại...");
+                    await Awaitable.WaitForSecondsAsync(retrySeconds);
+                    continue;
+                }
                 if (exchanged.status != 202)
                 {
                     RememberFailure(exchanged);

@@ -76,6 +76,8 @@ function buildSecurityConfig(env = process.env) {
     browserAuthPollIntervalMs: envInteger("BROWSER_AUTH_POLL_INTERVAL_MS", 1000, { min: 500, max: 5000 }, env),
     browserAuthStartWindowMs: envInteger("BROWSER_AUTH_START_RATE_LIMIT_WINDOW_MS", 10 * 60 * 1000, { min: 1000 }, env),
     browserAuthStartMax: envInteger("BROWSER_AUTH_START_RATE_LIMIT_MAX", 30, { min: 1 }, env),
+    browserAuthExchangeWindowMs: envInteger("BROWSER_AUTH_EXCHANGE_RATE_LIMIT_WINDOW_MS", 10 * 60 * 1000, { min: 1000 }, env),
+    browserAuthExchangeMax: envInteger("BROWSER_AUTH_EXCHANGE_RATE_LIMIT_MAX", 1500, { min: 1 }, env),
     rateLimitEnabled: envBoolean("RATE_LIMIT_ENABLED", true, env),
     requestTimeoutMs: envInteger("HTTP_REQUEST_TIMEOUT_MS", 30_000, { min: 1000 }, env),
     headersTimeoutMs: envInteger("HTTP_HEADERS_TIMEOUT_MS", 15_000, { min: 1000 }, env),

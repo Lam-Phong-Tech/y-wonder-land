@@ -5,6 +5,19 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-07-13] — Nấc B Browser SSO public backend/web accepted
+
+### Added
+- Game-server có request Browser SSO lưu PostgreSQL, PKCE, expiry 10 phút, approve nội bộ bằng server secret và exchange dùng một lần; không đưa password/cookie/secret web vào Unity.
+- Web Next.js giữ `callbackUrl` xuyên login/register/OTP và có `/api/game/browser/callback`; APK được đánh thức bằng `ywondergreenfarm://auth/complete`, còn EXE nhận kết quả qua polling.
+
+### Verified
+- Web build `hp9br9UtY4p9PcC214CmF` deploy thành công; service active, login `200`, callback chưa login `302`. Backup rollback: `/var/backups/ywonder-web/browser-sso-20260712T185239Z`.
+- Game release `67ff2565517875fcc48ea515f1fedbbf98f24b8a` deploy versioned, migration `002_browser_auth_requests` và backup DB/env/unit pass; vẫn giữ `WEB_AUTH_MODE=http`, `AUTH_TRANSITION_MODE=parallel`, local registration bật.
+- Public acceptance account web thật pass `start -> callback -> approve -> exchange -> bootstrap PostgreSQL`; profile `TRAN TUNG LAM`, Point `5000`. Không in/lưu password hoặc token.
+- Unity đã bật feature flag Browser SSO cho bản build tiếp theo. Chờ runtime Editor, EXE/APK và flow đăng ký mới + OTP trên thiết bị thật.
+
+---
 ## [2026-07-12] — Nấc A web-auth chạy song song (production accepted)
 
 ### Added
