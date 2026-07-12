@@ -40,6 +40,7 @@ public class LoginScreenController : MonoBehaviour
     private TextField regConfirmField;
     private Button btnToggleRegPassword;
     private Button btnRegister;
+    private Button btnOpenWebRegistration;
     private Label registerStatus;
 
     // State
@@ -127,6 +128,7 @@ public class LoginScreenController : MonoBehaviour
         regConfirmField = root.Q<TextField>("RegConfirmField");
         btnToggleRegPassword = root.Q<Button>("BtnToggleRegPassword");
         btnRegister = root.Q<Button>("BtnRegister");
+        btnOpenWebRegistration = root.Q<Button>("BtnOpenWebRegistration");
         registerStatus = root.Q<Label>("RegisterStatus");
     }
 
@@ -152,6 +154,7 @@ public class LoginScreenController : MonoBehaviour
 
         // Register actions
         btnRegister?.RegisterCallback<ClickEvent>(evt => OnRegisterClicked());
+        btnOpenWebRegistration?.RegisterCallback<ClickEvent>(evt => OpenRegistrationPage());
         btnToggleRegPassword?.RegisterCallback<ClickEvent>(evt => ToggleRegPasswordVisibility());
 
         // Register real-time validation callbacks
@@ -701,6 +704,7 @@ public class LoginScreenController : MonoBehaviour
         regPasswordField?.SetEnabled(enabled);
         regConfirmField?.SetEnabled(enabled);
         btnToggleRegPassword?.SetEnabled(enabled);
+        btnOpenWebRegistration?.SetEnabled(enabled);
 
         if (btnRegister != null)
         {

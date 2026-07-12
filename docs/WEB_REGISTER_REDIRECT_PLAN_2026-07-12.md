@@ -147,14 +147,15 @@ không phải UX bàn giao mong muốn.
 
 1. `[x]` Audit source/service web, stable session user ID, secret presence và
    Nginx route; không đọc giá trị secret và không thay đổi VPS.
-2. `[~]` **Nấc A - cầu web credential song song:** source local đã thêm transition
-   flag cho phép `WEB_AUTH_MODE=http` cùng `LOCAL_REGISTRATION_ENABLED=true`, giữ
-   `/auth/login` và `/auth/register` local; security/web-auth/full Phase 1 đều
-   pass. Còn commit/deploy versioned và copy secret nội bộ giữa env trên cùng VPS,
-   không qua client/chat.
-3. Deploy versioned game-server rồi test: account local/QARich vẫn vào được,
-   account web thật đăng nhập qua `/auth/web-login`, bootstrap đúng và cùng một
-   web account luôn map về cùng player. Chưa sửa/restart web service.
+2. `[x]` **Nấc A - cầu web credential song song:** release
+   `5db92436a7974b38866fa3291f5f3e3577a2f30f` đã deploy versioned với
+   `WEB_AUTH_MODE=http`, `AUTH_TRANSITION_MODE=parallel` và đăng ký local bật.
+   PostgreSQL/env/unit đã backup, previous release còn để rollback; secret chỉ
+   được copy nội bộ trong VPS, không qua client/chat.
+3. `[x]` Nghiệm thu public: account game local và account web thật đều login,
+   bootstrap, relogin thành công; cùng web account giữ playerId, còn web/local
+   có dữ liệu tách biệt. Không sửa/restart web service hoặc Nginx. Unity source
+   giữ form local và thêm nút web; Editor compile sạch, runtime EXE/APK còn chờ.
 4. **Nấc B - browser SSO:** backup toàn bộ web source/build/service/Nginx trước;
    thêm callback preservation vào login/register web và test nội bộ.
 5. Implement migration + browser auth start/callback/exchange trên game-server,

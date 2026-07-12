@@ -197,6 +197,58 @@
     opacity: 1;
 }
 
+.btn-web-auth {
+    border-width: 2px;
+    border-color: var(--color-brand-blue);
+    border-radius: var(--radius-button);
+    background-color: transparent;
+    color: var(--color-text-white);
+    font-size: 15px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    transition-property: background-color, scale;
+    transition-duration: 0.1s;
+}
+
+.btn-web-auth:hover {
+    background-color: rgba(37, 150, 190, 0.2);
+    scale: 1.02;
+}
+
+.btn-web-auth:active {
+    background-color: rgba(37, 150, 190, 0.35);
+    scale: 0.98;
+}
+
+.btn-web-auth:disabled, .btn-web-auth.unity-disabled {
+    border-color: var(--color-overcast-grey);
+    color: var(--color-overcast-grey);
+}
+
+.register-actions-row {
+    height: 52px;
+    margin-top: 8px;
+    flex-direction: row;
+    align-items: stretch;
+}
+
+.register-action-btn {
+    height: 52px;
+    margin: 0;
+    padding: 0 8px;
+    flex-grow: 1;
+    flex-basis: 0;
+    font-size: 14px;
+}
+
+.register-action-local {
+    margin-right: 6px;
+}
+
+.register-action-web {
+    margin-left: 6px;
+}
+
 /* -- Status Message -- */
 .status-message { font-size: 14px; -unity-text-align: middle-center; margin-top: 16px; padding: 12px; border-radius: 12px; display: none; }
 .status-success { color: var(--color-mystic-black); background-color: var(--color-success); display: flex; }

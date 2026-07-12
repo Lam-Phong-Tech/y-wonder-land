@@ -46,3 +46,16 @@ map `web_user_id -> playerId`.
    callback một lần + PKCE.
 4. Không chuyển hoàn toàn sang web cho tới khi cross-device, restart, rollback và
    duplicate-session `4008` đều đạt.
+
+## Kết quả chuyển tiếp Nấc A
+
+- Release game-server `5db92436a7974b38866fa3291f5f3e3577a2f30f` đã được deploy
+  versioned sau khi backup PostgreSQL, env và systemd unit; previous release vẫn
+  được giữ để rollback.
+- Production đang chạy `WEB_AUTH_MODE=http`, `AUTH_TRANSITION_MODE=parallel` và
+  giữ đăng ký local. Secret chỉ được chuyển nội bộ giữa env trên VPS, không in ra
+  terminal/chat và không lưu trong repository.
+- Public acceptance bằng một account web thật và một account game local đã pass
+  login, `/player/bootstrap`, relogin, stable player mapping và data isolation.
+- Nấc A không sửa web source hoặc Nginx. Browser callback/exchange + PKCE vẫn là
+  Nấc B và chưa được phép dùng thay hoàn toàn luồng local.

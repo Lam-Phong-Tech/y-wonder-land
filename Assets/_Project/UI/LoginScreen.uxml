@@ -109,9 +109,9 @@
                         <ui:TextField name="RegConfirmField" password="true" class="login-textfield" text="" max-length="20" />
                     </ui:VisualElement>
 
-                    <!-- Register Button with Retro Shadow -->
-                    <ui:VisualElement class="login-btn-shadow">
-                        <ui:Button name="BtnRegister" text="ĐĂNG KÝ" class="btn-login" />
+                    <ui:VisualElement class="register-actions-row">
+                        <ui:Button name="BtnRegister" text="ĐĂNG KÝ GAME" class="btn-login register-action-btn register-action-local" />
+                        <ui:Button name="BtnOpenWebRegistration" text="ĐĂNG KÝ WEB" class="btn-web-auth register-action-btn register-action-web" />
                     </ui:VisualElement>
 
                     <!-- Status Message -->

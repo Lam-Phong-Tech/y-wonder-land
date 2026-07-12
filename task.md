@@ -1,12 +1,46 @@
 # Danh sách công việc dự án (Task Backlog & Progress)
 
-## Ưu tiên hiện tại 11/07/2026: chuyển tiếp Phase 1 → PostgreSQL staging
+## Ưu tiên hiện tại 12/07/2026: đóng MVP Online RC và kiểm thử bàn giao
 
 > Backend đã quay lại sau nhóm chỉnh sửa game. Mục tiêu Phase 1: không làm nạp/rút, tập trung cho khách đăng ký/đăng nhập, lưu tài khoản + dữ liệu chơi tối thiểu, và nhiều người online realtime trên đảo công cộng.
 >
-> Trạng thái 11/07/2026: lõi **Giai đoạn 1 - Demo online nhanh**, PostgreSQL production, hardening/reboot, Nginx `/game-api`, HTTPS/WSS, full Phase 1 và bài tải tự động 20 client từ mạng ngoài đều đã pass. Unity đã chuyển sang public URL; phần còn lại là build EXE/APK và nghiệm thu thật 4–5 máy khác mạng, cùng xử lý certbot renewal và các gameplay chưa server-authoritative.
+> Trạng thái 12/07/2026: PostgreSQL production, hardening/reboot, Nginx `/game-api`, HTTPS/WSS, full Phase 1 và bài tải tự động 20 client từ mạng ngoài đều đã pass. Unity đã chuyển sang public URL; 1 EXE mạng A + 1 APK mạng B đã gặp/chat/khai thác đồng bộ. Có thể đóng bản **MVP Online RC** cho khách trải nghiệm sau smoke test chính artifact; chưa gọi là production hoàn chỉnh cho tới khi xử lý các khoảng trống bên dưới.
+
+### Nhiệm vụ mới từ sếp 12/07/2026
+
+- `[x]` **Đóng gói tài liệu tester gameplay + lợi nhuận chăn nuôi:** đã tạo bộ `outputs/019f354a-e7f6-7af1-8408-d11408550cb3/YWonder_Tester_Handoff_RC1_2026-07-12.zip`, gồm workbook gameplay RC1, workbook chăn nuôi/lợi nhuận 10 loài, hướng dẫn đọc trước và hai file nguồn `VatNuoi2.xlsx` + `SuaLai4VatNuoi.xlsx`. Không chứa mật khẩu/token/secret.
+- `[~]` **Chênh lệch dữ liệu chăn nuôi cần BA/test lead chốt:** tổng thức ăn Thỏ trong file là `90` nhưng tính từ `80 ngày / 1 ngày x 1` là `80`; Vịt trong file là `180` nhưng tính từ `45 ngày / 0,5 ngày x 1` là `90`; giá trứng Vịt trong `VatNuoi2` là `4,5 Point` nhưng runtime generator hiện là `5 Point`. Đã ghi thành điểm chờ xác nhận, chưa tự sửa dữ liệu/game.
+- `[x]` **Phân tích cổng Đăng nhập/Đăng ký web:** yêu cầu mới đã chốt cả hai nút cùng mở `https://ywonder.net/vi/login`; người mới dùng link `Tạo trang trại mới` trên web. Audit xác nhận login có `callbackUrl` nhưng register chưa giữ callback và luôn về dashboard, nên chỉ `Application.OpenURL` chưa thể đưa phiên web về game. Thiết kế polling + PKCE/callback cùng domain đã ghi tại `docs/WEB_REGISTER_REDIRECT_PLAN_2026-07-12.md`.
+- `[x]` **Nấc A web credential chạy song song, không thay luồng cũ:** release `5db92436a7974b38866fa3291f5f3e3577a2f30f` đã deploy versioned sau backup PostgreSQL/env/unit; production chạy `WEB_AUTH_MODE=http`, `AUTH_TRANSITION_MODE=parallel`, giữ đăng nhập/đăng ký local. Secret chỉ được copy nội bộ trong VPS, không in/lưu. Public acceptance bằng một account web thật và một account game local đã pass login -> bootstrap -> relogin, stable playerId và tách dữ liệu. Unity giữ form local, thêm nút `ĐĂNG KÝ TRÊN WEB` mở `https://ywonder.net/vi/login`; Editor compile sạch. Chưa build/runtime-test nút mới. **Browser callback/PKCE SSO là Nấc B riêng, chưa sửa web/Nginx và chưa cutover khỏi local.**
+
+### Khoảng trống trước nghiệm thu production
+
+#### P0 - bắt buộc trước khi tuyên bố đồng bộ tài khoản hoàn chỉnh
+- `[ ]` **Đồng bộ farm xuyên thiết bị hai chiều:** đưa trạng thái ô đất, cây đang trồng, mốc gieo/tưới/chín/héo, công trình, chuồng và vật nuôi lên `farm_state` server; thiết bị mới phải tải và dựng lại đúng nông trại. Hiện Point/túi đã theo server nhưng farm vẫn còn cache theo `playerId` trên từng máy, nên có rủi ro hạt đã bị trừ trên server mà cây không xuất hiện khi đổi thiết bị hoặc cài lại game.
+- `[ ]` **Chống ghi đè farm giữa client/server:** thêm version/revision và quy tắc conflict cho `farm_state`; chỉ đánh dấu save thành công sau khi server xác nhận, tránh client cũ hoặc phiên load chưa xong ghi snapshot rỗng/đã cũ lên dữ liệu mới.
+- `[ ]` **Nghiệm thu đổi thiết bị/cài lại:** trên máy A mua -> cuốc -> gieo -> tưới -> xây chuồng/thả thú -> thoát; đăng nhập cùng account trên máy B hoặc sau khi xóa cache/cài lại phải thấy đúng tiền, túi, farm và bù thời gian. Một account chỉ online một phiên; máy B thay máy A theo rule `4008` đã hoàn thành.
+- `[ ]` **Tách cấu hình thời gian Demo/Production:** RC hiện dùng `GameTimeConfig.SecondsPerGameDay = 60f` để khách xem nhanh vòng chơi. Trước bản vận hành phải có cấu hình Production `1 ngày game = 24 giờ thật`, áp đúng `CayTrong2`, `CayTrongLauNam2`, `VatNuoi2`, các cập nhật BA mới hơn và test bằng đồng hồ mô phỏng/server time; không ngồi chờ thực tế hàng tháng.
+- `[~]` **Chốt số liệu thời gian còn mơ hồ:** cây ngắn ngày mới được BA xác nhận miệng 24 giờ; cây lâu năm có chu kỳ tưới/thu hoạch trong file nhưng phải đối chiếu các cập nhật sau file (đặc biệt chanh dây 5.300 Point/cụm 20 cây và rule gieo/thu cụm) trước khi khóa Production Time.
+
+#### P1 - bắt buộc cho sign-off vận hành ổn định
+- `[~]` **Nghiệm thu đúng bản RC trên 4–5 thiết bị thật khác mạng:** hiện mới pass 1 EXE mạng A + 1 APK mạng B; bài 20 client còn lại là tự động, chưa phải 20 người cầm máy chơi. Chạy P0 trong `YWonder_Phase1_TestCases_2026-07-11.xlsx` trên chính EXE/APK bàn giao.
+- `[~]` **Xác minh gia hạn HTTPS tự động:** certificate hiện hợp lệ nhưng `certbot.timer` từng ở trạng thái `enabled/inactive`; phải chạy renewal dry-run và xác nhận timer trước sign-off dài hạn.
+- `[~]` **Theo dõi reconnect chậm:** người chơi có thể phải chờ lâu khi nối lại realtime. Đo thời gian reconnect trên Wi-Fi/4G, chặn sinh player trùng và thêm thông báo rõ nếu vượt ngưỡng; hiện chưa chặn bản trải nghiệm.
+- `[ ]` **Lưu trạng thái cây/đá realtime qua restart:** claim/depleted/respawn của tài nguyên công cộng hiện còn nằm trong RAM Node; backend restart sẽ làm mới trạng thái khai thác. Chuyển snapshot tài nguyên và `respawnAt` vào PostgreSQL hoặc khôi phục theo timestamp server để người chơi không thấy cây/đá hồi sai sau deploy/restart.
+- `[ ]` **Hoàn thiện server-authoritative cho gameplay còn lại:** rà câu cá, đào mỏ/daily limits, phần thưởng/chi phí ngoài shop, cây trồng, thú nuôi và xây dựng; server phải kiểm tra điều kiện, idempotency và là nguồn dữ liệu cuối cùng thay vì chỉ nhận delta từ client.
+- `[ ]` **Đồng bộ vị trí ngoài farm:** vị trí farm đã lưu theo account; City/Mine hiện chưa khôi phục trực tiếp từ server vì scene cần load trước. Chốt quy tắc spawn an toàn theo đảo và lưu island/pose hợp lệ.
+- `[ ]` **Bổ sung vận hành production:** dashboard/admin có xác thực, phân quyền và audit log để khóa account, xem/chỉnh dữ liệu có kiểm soát; monitoring/alert khi Node/PostgreSQL/Nginx/WebSocket chết, backup lỗi hoặc ổ đĩa gần đầy. Dashboard dev `/admin` vẫn phải đóng public.
+- `[ ]` **Dọn account P1 cũ:** PostgreSQL còn `P1A_h09433`, `P1B_h09433`, `P1Race_h09433` dùng cho restart/reboot acceptance. Sau khi chốt không cần regression nữa, backup rồi xóa/vô hiệu hóa; không gửi các account này cho tester thay cho `QARich`.
+- `[ ]` **Ngừng hạ tầng demo cũ sau nghiệm thu VPS:** xác nhận không build nào còn trỏ Cloudflare Quick Tunnel hoặc backend Windows/local, sau đó tắt tiến trình/service cũ và lưu tài liệu rollback cần thiết; chỉ giữ `https://api.ywonder.net/game-api` làm endpoint RC/production.
+- `[ ]` **Vòng đời account QA:** sau đợt test phải đổi mật khẩu hoặc vô hiệu hóa `QARich0001..QARich0005`; không bật `DEMO_ACCOUNTS_ENABLED=true` trên production vì demo seeding có thể ghi lại economy/inventory lúc restart.
+
+#### Ngoài phạm vi MVP Online RC hiện tại
+- `[~]` **Nấc B browser SSO và nghiệm thu trước cutover:** credential bridge đã chạy song song và account web thật luôn map về cùng player qua hai lần đăng nhập. Còn callback/exchange một lần + PKCE, giữ callback qua trang đăng ký, test EXE/APK cross-device, restart/rollback, account khóa/xóa và rule phiên trùng `4008`. Production tiếp tục giữ account game local/QARich; chưa tắt local và chưa dùng nạp/rút hoặc tiền thật trong RC.
+- `[~]` **Hệ web cũ chung domain cần bên web xử lý:** các vấn đề CORS/header/stack trace của route web nằm ngoài namespace `/game-api`; game backend không được sửa chồng lên route web cũ. Ghi nhận bằng chứng, giao owner web khắc phục và regression test để bảo đảm Nginx vẫn tách biệt hai hệ thống.
+- `[~]` **Mở rộng tải sau 20 người:** bài tự động 20 client đã pass; chỉ nâng room/server, load test dài và scale ngang khi khách chốt số CCU mục tiêu lớn hơn.
 
 ### Phase 1 - tài khoản game tự đăng ký + lưu tiến trình MVP
+- `[x]` Tạo 5 tài khoản QA production `QARich0001..QARich0005` qua API đăng ký bình thường, không bật lại demo seeding. Mỗi account đã fresh-login và `/player/bootstrap` xác nhận `500.000 Point / 2.500 UPoint`, profile đã tạo nhân vật + hoàn tất tutorial, 80 ô kho và 31 loại item phục vụ test shop/farm/xây dựng/chăn nuôi. Mật khẩu ngẫu nhiên lưu ngoài repo; phải đổi mật khẩu hoặc vô hiệu hóa account sau đợt test.
 - `[x]` Commit checkpoint trước khi quay lại backend: `8054205 feat: sync backend bootstrap and farm save polish`.
 - `[x]` Unity register gửi `email` lên backend; server `/auth/register` lưu `username/email/phone/password_hash` vào JSON store, chặn trùng username và email.
 - `[x]` Unity login nay thử `/auth/login` local trước; nếu server trả `USER_NOT_FOUND` mới fallback sang `/auth/web-login`. Nhờ vậy tài khoản tự đăng ký có password thật, còn web bridge vẫn dùng được khi có web account thật.

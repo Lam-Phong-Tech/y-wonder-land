@@ -5,6 +5,40 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-07-12] — Nấc A web-auth chạy song song (production accepted)
+
+### Added
+- Audit chỉ đọc cùng VPS xác nhận web Next.js chạy cổng `3033`, source `/var/www/ywonder`, API `/api/game/auth`, stable `session.user.id` và secret 64 ký tự đã có trong env nhưng không bị in/ghi vào repo.
+- Thêm `AUTH_TRANSITION_MODE=parallel` cho game-server. Chỉ cấu hình tường minh này mới cho phép web auth HTTP hoạt động cùng đăng ký local; cấu hình thiếu/sai bị production gate từ chối.
+- Mở rộng integration test để chứng minh account local vẫn đăng ký/đăng nhập và giữ playerId, trong khi account web nhận player riêng, bootstrap/relogin và account-status guards vẫn đúng.
+- Giữ nguyên form đăng ký local trong Unity và thêm nút riêng `ĐĂNG KÝ TRÊN WEB`, mở `https://ywonder.net/vi/login`. Ô đăng nhập hiện tại vẫn thử local trước và chỉ fallback web khi local trả `USER_NOT_FOUND`.
+
+### Verified
+- `test:security` pass.
+- `test:web-auth` pass.
+- Full Phase 1 isolated pass: register/login, shop nguyên tử, bootstrap persistence, idempotency, farm-state, realtime chat và thay phiên account `4008`.
+- Release `5db92436a7974b38866fa3291f5f3e3577a2f30f` đã deploy versioned lên VPS; backup PostgreSQL/env/unit và previous release đều còn để rollback. Production xác nhận `WEB_AUTH_MODE=http`, `AUTH_TRANSITION_MODE=parallel`, local registration bật và public health dùng PostgreSQL.
+- Nghiệm thu tài khoản thật pass: một account web và một account game local đều login -> bootstrap -> relogin thành công, giữ playerId ổn định và không dùng chung dữ liệu. Không ghi mật khẩu/token vào file hoặc log.
+- Unity Editor tự compile thay đổi UI, toàn bộ log không có `error CS` hoặc `Compilation failed`. Chưa build/runtime-test nút web trên EXE/APK.
+- Browser SSO callback/exchange + PKCE vẫn là Nấc B; chưa sửa web source hoặc Nginx.
+
+---
+## [2026-07-12] — Bộ bàn giao tester + kế hoạch đăng ký web
+
+### Added
+- Đóng gói `YWonder_Tester_Handoff_RC1_2026-07-12.zip`: workbook gameplay 75 test case, workbook chăn nuôi/lợi nhuận 10 loài có công thức, hướng dẫn tester và hai file nguồn `VatNuoi2.xlsx` + `SuaLai4VatNuoi.xlsx`; không chứa mật khẩu/token/secret.
+- Thêm `docs/WEB_REGISTER_REDIRECT_PLAN_2026-07-12.md` cho yêu cầu web auth song song. URL đã chốt là `https://ywonder.net/vi/login`; source Unity hiện có nút web riêng nhưng vẫn giữ form local.
+
+### Notes
+- Ghi rõ ba điểm chờ BA/test lead xác nhận thay vì tự đổi số khách: tổng thức ăn Thỏ `90` so với phép tính `80`, tổng thức ăn Vịt `180` so với phép tính `90`, và giá trứng Vịt `4,5 Point` trong file so với `5 Point` ở runtime generator.
+- Cầu web credential và mapping `web_user_id -> playerId` đã nghiệm thu ở Nấc A. Chỉ mở trình duyệt vẫn chưa phải SSO; callback một lần, PKCE, account-status/cross-device và quyết định tắt local chỉ được làm ở Nấc B sau nghiệm thu riêng.
+
+---
+## [2026-07-12] — Tài khoản QA Rich production
+
+### Added
+- Tạo `QARich0001..QARich0005` bằng luồng đăng ký production bình thường, giữ demo seeding tắt. Fresh login/bootstrap xác nhận mỗi account có 500.000 Point, 2.500 UPoint, profile đã qua tạo nhân vật/tutorial, 80 ô kho và 31 loại item; mật khẩu ngẫu nhiên lưu ngoài repo và phải đổi hoặc vô hiệu hóa sau đợt test.
+
 ## [2026-07-11] — Test thật 2 thiết bị + hotfix tutorial/login mobile
 
 ### Fixed
