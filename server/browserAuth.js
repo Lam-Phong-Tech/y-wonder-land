@@ -41,13 +41,11 @@ function normalizeIntent(value) {
   return String(value || "").trim().toLowerCase() === "register" ? "register" : "login";
 }
 
-function buildBrowserLoginUrl(loginUrl, callbackUrl, requestId, intent) {
-  const login = new URL(loginUrl);
+function buildBrowserEntryUrl(callbackUrl, requestId, intent) {
   const callback = new URL(callbackUrl);
   callback.searchParams.set("request", requestId);
   callback.searchParams.set("intent", normalizeIntent(intent));
-  login.searchParams.set("callbackUrl", callback.toString());
-  return login.toString();
+  return callback.toString();
 }
 
 function safeSecretEqual(actual, expected) {
@@ -64,7 +62,7 @@ function bearerToken(header) {
 
 module.exports = {
   bearerToken,
-  buildBrowserLoginUrl,
+  buildBrowserEntryUrl,
   createPkceChallenge,
   createRequestId,
   hashRequestId,

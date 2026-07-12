@@ -13,7 +13,7 @@ const { createAdminDashboardRouter } = require("./adminDashboard");
 const { resolveShopOffer } = require("./shopCatalog");
 const {
   bearerToken,
-  buildBrowserLoginUrl,
+  buildBrowserEntryUrl,
   createPkceChallenge,
   createRequestId,
   hashRequestId,
@@ -46,7 +46,6 @@ const HOST = process.env.HOST || "0.0.0.0";
 const JWT_SECRET = process.env.JWT_SECRET || DEVELOPMENT_JWT_SECRET;
 const TOKEN_TTL = process.env.JWT_TOKEN_TTL || "30d";
 const securityConfig = buildSecurityConfig();
-const BROWSER_AUTH_LOGIN_URL = process.env.BROWSER_AUTH_LOGIN_URL || "https://ywonder.net/vi/login";
 const BROWSER_AUTH_CALLBACK_URL = process.env.BROWSER_AUTH_CALLBACK_URL || "https://ywonder.net/api/game/browser/callback";
 const BROWSER_AUTH_APPROVAL_SECRET = process.env.WEB_AUTH_SECRET || process.env.GAME_API_SECRET || "";
 
@@ -340,12 +339,7 @@ api.post("/auth/browser/start", authIpLimiter, browserAuthStartLimiter, asyncRou
 
   res.status(201).json({
     requestId,
-    authUrl: buildBrowserLoginUrl(
-      BROWSER_AUTH_LOGIN_URL,
-      BROWSER_AUTH_CALLBACK_URL,
-      requestId,
-      intent
-    ),
+    authUrl: buildBrowserEntryUrl(BROWSER_AUTH_CALLBACK_URL, requestId, intent),
     expiresInSec: Math.floor(securityConfig.browserAuthTtlMs / 1000),
     pollIntervalMs: securityConfig.browserAuthPollIntervalMs,
   });

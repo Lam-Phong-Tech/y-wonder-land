@@ -150,10 +150,8 @@ async function run() {
     assert(started.payload.pollIntervalMs === 500, "Browser poll interval is incorrect.");
     const authUrl = new URL(started.payload.authUrl);
     assert(authUrl.origin === "https://ywonder.net", "Browser auth URL origin is incorrect.");
-    assert(authUrl.pathname === "/vi/login", "Browser auth URL path is incorrect.");
-    const callbackUrl = new URL(authUrl.searchParams.get("callbackUrl"));
-    assert(callbackUrl.pathname === "/api/game/browser/callback", "Browser callback path is incorrect.");
-    assert(callbackUrl.searchParams.get("request") === started.payload.requestId, "Callback lost requestId.");
+    assert(authUrl.pathname === "/api/game/browser/callback", "Browser entry URL path is incorrect.");
+    assert(authUrl.searchParams.get("request") === started.payload.requestId, "Browser entry lost requestId.");
     assert(!started.payload.authUrl.includes(verifier), "Browser auth URL leaked PKCE verifier.");
 
     const pending = await exchange(baseUrl, started.payload.requestId, verifier);
@@ -207,8 +205,9 @@ async function run() {
     const secondVerifier = base64Url(crypto.randomBytes(32));
     const second = await startRequest(baseUrl, secondVerifier, "register");
     assert(second.response.status === 201, "Register-intent browser start failed.");
-    const secondCallback = new URL(new URL(second.payload.authUrl).searchParams.get("callbackUrl"));
-    assert(secondCallback.searchParams.get("intent") === "register", "Register intent was not preserved.");
+    const secondEntry = new URL(second.payload.authUrl);
+    assert(secondEntry.pathname === "/api/game/browser/callback", "Register entry path is incorrect.");
+    assert(secondEntry.searchParams.get("intent") === "register", "Register intent was not preserved.");
     await approve(baseUrl, approvalSecret, second.payload.requestId, webUser);
     const secondCompleted = await exchange(baseUrl, second.payload.requestId, secondVerifier);
     assert(secondCompleted.response.status === 200, "Second browser login failed.");

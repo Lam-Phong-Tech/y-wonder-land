@@ -157,10 +157,13 @@ Nếu sau này chuyển web thành luồng chính, đổi sang `AUTH_TRANSITION_
 Account web có `locked`, `softDeleted`, `active=false` hoặc status khóa/xóa/inactive bị từ chối trước khi tạo `playerId`.
 
 Nấc B không đưa password/cookie web vào Unity. Game tạo PKCE challenge qua
-`/auth/browser/start`, mở `https://ywonder.net/vi/login`, rồi poll
-`/auth/browser/exchange`. Callback `https://ywonder.net/api/game/browser/callback`
-đọc NextAuth session ngay trong web và gọi nội bộ `/auth/browser/approve` bằng
-`GAME_API_SECRET`; endpoint approve không dành cho Unity/public client.
+`/auth/browser/start`, mở thẳng callback
+`https://ywonder.net/api/game/browser/callback`, rồi poll
+`/auth/browser/exchange`. Callback đọc NextAuth session ngay trong web: nếu đã
+ghi nhớ đăng nhập thì approve ngay, nếu chưa có session thì chuyển sang
+`/vi/login` và quay lại callback sau khi đăng nhập. Callback gọi nội bộ
+`/auth/browser/approve` bằng `GAME_API_SECRET`; endpoint approve không dành cho
+Unity/public client.
 
 ```text
 BROWSER_AUTH_ENABLED=true
