@@ -9,6 +9,48 @@ const VERIFY_URL = process.env.WEB_AUTH_VERIFY_URL || "";
 const WEB_AUTH_SECRET = process.env.WEB_AUTH_SECRET || process.env.GAME_API_SECRET || "";
 const WEB_AUTH_TIMEOUT_MS = Number(process.env.WEB_AUTH_TIMEOUT_MS || 8000);
 
+function optionalBoolean(value) {
+  if (value == null || value === "") return null;
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number") return value !== 0;
+  const normalized = String(value).trim().toLowerCase();
+  if (["true", "1", "yes", "on"].includes(normalized)) return true;
+  if (["false", "0", "no", "off"].includes(normalized)) return false;
+  return null;
+}
+
+function webAccountAccessError(webUser) {
+  if (!webUser) return "WEB_AUTH_RESPONSE_MISSING_USER_ID";
+  if (webUser.locked === true) return "WEB_ACCOUNT_LOCKED";
+  if (webUser.softDeleted === true) return "WEB_ACCOUNT_DELETED";
+  if (webUser.active === false) return "WEB_ACCOUNT_INACTIVE";
+
+  const status = String(webUser.status || "").trim().toLowerCase();
+  if (["locked", "blocked", "suspended"].includes(status)) return "WEB_ACCOUNT_LOCKED";
+  if (["deleted", "soft_deleted", "soft-deleted"].includes(status)) return "WEB_ACCOUNT_DELETED";
+  if (["inactive", "disabled", "deactivated"].includes(status)) return "WEB_ACCOUNT_INACTIVE";
+  return "";
+}
+
+function normalizeUpstreamError(status, payload) {
+  const upstreamCode = String(payload && (payload.error || payload.code) || "").trim().toUpperCase();
+  if (["ACCOUNT_LOCKED", "USER_LOCKED", "WEB_ACCOUNT_LOCKED"].includes(upstreamCode)) {
+    return { status: 403, error: "WEB_ACCOUNT_LOCKED" };
+  }
+  if (["ACCOUNT_DELETED", "USER_DELETED", "SOFT_DELETED", "WEB_ACCOUNT_DELETED"].includes(upstreamCode)) {
+    return { status: 403, error: "WEB_ACCOUNT_DELETED" };
+  }
+  if (["ACCOUNT_INACTIVE", "USER_INACTIVE", "WEB_ACCOUNT_INACTIVE"].includes(upstreamCode)) {
+    return { status: 403, error: "WEB_ACCOUNT_INACTIVE" };
+  }
+  if (status === 400 || status === 401 || status === 404) {
+    return { status: 401, error: "WEB_AUTH_INVALID_CREDENTIALS" };
+  }
+  if (status === 403) return { status: 403, error: "WEB_AUTH_FORBIDDEN" };
+  if (status === 429) return { status: 429, error: "WEB_AUTH_RATE_LIMITED" };
+  return { status: status === 504 ? 504 : 502, error: "WEB_AUTH_UNAVAILABLE" };
+}
+
 function makeMockWebUser(input) {
   const raw = (input.username || input.email || input.phone || input.token || "").trim();
   const safe = raw || "demo";
@@ -36,6 +78,10 @@ function normalizeWebUser(payload) {
     displayName: data.fullName || data.full_name || data.display_name || data.displayName || data.name || data.username || "Player",
     gameToken: data.gameToken || data.game_token || "",
     expiresIn: data.expiresIn || data.expires_in || 0,
+    status: data.status || "",
+    locked: optionalBoolean(data.locked ?? data.isLocked ?? data.is_locked),
+    softDeleted: optionalBoolean(data.softDeleted ?? data.soft_deleted ?? data.isDeleted ?? data.is_deleted),
+    active: optionalBoolean(data.active ?? data.isActive ?? data.is_active),
     authSource: "web",
     raw: data,
   };
@@ -146,17 +192,22 @@ async function postJson(url, body, secret) {
   }
 
   if (!response.ok) {
+    const normalizedError = normalizeUpstreamError(response.status, payload);
     return {
       ok: false,
-      status: response.status,
-      error: (payload && (payload.error || payload.message)) || "WEB_AUTH_FAILED",
-      payload,
+      status: normalizedError.status,
+      error: normalizedError.error,
     };
   }
 
   const webUser = normalizeWebUser(payload);
   if (!webUser) {
     return { ok: false, status: 502, error: "WEB_AUTH_RESPONSE_MISSING_USER_ID", payload };
+  }
+
+  const accessError = webAccountAccessError(webUser);
+  if (accessError) {
+    return { ok: false, status: 403, error: accessError };
   }
 
   if (webUser.gameToken) {

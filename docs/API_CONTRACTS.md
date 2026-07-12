@@ -84,6 +84,12 @@ Quy uoc mapping:
   dashboard/demo seed và cấm `WEB_AUTH_MODE=mock`. HTTP có request ID, body limit,
   security headers và structured access log không chứa body/token. Realtime giới hạn
   tổng connection, payload và message rate; các ngưỡng được cấu hình bằng env.
+- Khi `WEB_AUTH_MODE=http`, startup gate còn bắt buộc `WEB_AUTH_LOGIN_URL` dùng HTTPS,
+  có `WEB_AUTH_SECRET`/`GAME_API_SECRET` tối thiểu 16 ký tự và
+  `LOCAL_REGISTRATION_ENABLED=false`. `/auth/register` trả `403
+  LOCAL_REGISTRATION_DISABLED`; account web khóa/xóa mềm/inactive bị từ chối trước
+  khi mapping player. Lỗi upstream được chuẩn hóa, không chuyển message nội bộ của web
+  về Unity.
 - `daily_limits` mac dinh gom `fishing` va `mining`, reset theo `period_key` ngay server dang `YYYY-MM-DD`. Can chot timezone server; khuyen nghi `Asia/Saigon` cho khach VN. Hien stub cu co the dang dung UTC nen can doi/ghi ro truoc production.
 - `idempotency_key` phai duy nhat cho moi action co retry; server tra `duplicate=true` khi nhan lai cung key va khong apply them tien/item/luot.
 - Shop transaction khong nhan/gia tin `unit_price` tu Unity. Server tra `shopCatalog.json` sinh tu `ItemDefinition` + `ShopDefinition`, kiem access mode/whitelist/canSell va doi Point + inventory trong mot lan ghi. Cung key nhung body khac tra `IDEMPOTENCY_CONFLICT`.
@@ -112,6 +118,9 @@ Cập nhật bàn giao 09/07/2026 từ chat 01/07:
 - Phase sau mọi cộng/trừ ví web phải có `ref` hoặc `idempotency_key` để retry không nhân đôi.
 - Phase sau cần xác nhận `Point` là wallet chính cho cả gameplay và tiền nạp; nếu `UPoint` còn dùng, cần định nghĩa rõ loại giao dịch nào dùng `UPoint`.
 - Field trạng thái account rõ ràng để game-server chặn `locked`/`soft_deleted`.
+- Trang đăng ký hiện bắt nhập mã giới thiệu nhưng chưa kiểm tra mã có tồn tại. Trước
+  khi public cần BA/web chốt một mã chính thức cho người chơi đến từ game hoặc sửa web
+  thành mã tùy chọn; không hướng dẫn khách điền ngẫu nhiên vì có thể sai attribution.
 - Endpoint lịch sử giao dịch ví để admin/sếp đối soát.
 
 Production env for `server/webAuthProvider.js`:

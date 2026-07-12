@@ -58,6 +58,7 @@ function buildSecurityConfig(env = process.env) {
       : production ? [] : ["*"],
     accessLogEnabled: envBoolean("HTTP_ACCESS_LOG", production, env),
     bcryptRounds: envInteger("BCRYPT_ROUNDS", production ? 12 : 10, { min: 8, max: 14 }, env),
+    localRegistrationEnabled: envBoolean("LOCAL_REGISTRATION_ENABLED", true, env),
     authIpWindowMs: envInteger("AUTH_IP_RATE_LIMIT_WINDOW_MS", 10 * 60 * 1000, { min: 1000 }, env),
     authIpMax: envInteger("AUTH_IP_RATE_LIMIT_MAX", 120, { min: 1 }, env),
     authIdentityWindowMs: envInteger("AUTH_IDENTITY_RATE_LIMIT_WINDOW_MS", 15 * 60 * 1000, { min: 1000 }, env),
@@ -79,6 +80,7 @@ function validateProductionConfig(env = process.env) {
   const host = String(env.HOST || "");
   const storeMode = String(env.STORE_MODE || "").toLowerCase();
   const webAuthMode = String(env.WEB_AUTH_MODE || "").toLowerCase();
+  const localRegistrationEnabled = envBoolean("LOCAL_REGISTRATION_ENABLED", true, env);
 
   if (jwtSecret.length < 32 || jwtSecret === DEVELOPMENT_JWT_SECRET) {
     errors.push("JWT_SECRET must be a unique secret with at least 32 characters");
@@ -89,8 +91,27 @@ function validateProductionConfig(env = process.env) {
   if (storeMode !== "postgres") {
     errors.push("STORE_MODE must be postgres");
   }
-  if (webAuthMode === "mock") {
-    errors.push("WEB_AUTH_MODE=mock is not allowed");
+  if (webAuthMode !== "disabled" && webAuthMode !== "http") {
+    errors.push("WEB_AUTH_MODE must be disabled or http");
+  }
+  if (webAuthMode === "http") {
+    const loginUrl = String(env.WEB_AUTH_LOGIN_URL || "");
+    const authSecret = String(env.WEB_AUTH_SECRET || env.GAME_API_SECRET || "");
+    let parsedLoginUrl = null;
+    try {
+      parsedLoginUrl = new URL(loginUrl);
+    } catch (error) {
+      parsedLoginUrl = null;
+    }
+    if (!parsedLoginUrl || parsedLoginUrl.protocol !== "https:") {
+      errors.push("WEB_AUTH_LOGIN_URL must be a valid HTTPS URL");
+    }
+    if (authSecret.length < 16) {
+      errors.push("WEB_AUTH_SECRET or GAME_API_SECRET must contain at least 16 characters");
+    }
+    if (localRegistrationEnabled) {
+      errors.push("LOCAL_REGISTRATION_ENABLED must be false when WEB_AUTH_MODE=http");
+    }
   }
   if (String(env.ADMIN_DASHBOARD_ENABLED || "").toLowerCase() !== "false") {
     errors.push("ADMIN_DASHBOARD_ENABLED must be false");

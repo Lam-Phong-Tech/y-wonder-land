@@ -134,6 +134,10 @@ api.get("/health", asyncRoute(async (req, res) => {
 
 // ── Auth ──
 api.post("/auth/register", registerLimiter, asyncRoute(async (req, res) => {
+  if (!securityConfig.localRegistrationEnabled) {
+    return res.status(403).json({ error: "LOCAL_REGISTRATION_DISABLED" });
+  }
+
   const validated = validateRegistrationBody(req.body);
   if (!validated.ok) return res.status(400).json({ error: validated.error });
   const { username, password, email, phone } = validated;

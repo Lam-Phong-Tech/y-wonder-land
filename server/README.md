@@ -132,17 +132,27 @@ Khi dùng Caddy trên Windows, tham khảo `server/Caddyfile.example`. Nếu web
 
 ## Game API MVP trong luc cho Web API
 
-`WEB_AUTH_MODE=mock` la mac dinh hien tai de game backend chay duoc truoc khi ben web giao endpoint login/verify. Khi co API web that:
+Production hiện giữ `WEB_AUTH_MODE=disabled` cho tới khi cầu web-auth được nghiệm thu. Khi cutover sang tài khoản web thật:
 
 ```powershell
 $env:WEB_AUTH_MODE="http"
-$env:WEB_AUTH_LOGIN_URL="https://api.ywonder.net/api/game/auth"
+$env:WEB_AUTH_LOGIN_URL="https://ywonder.net/api/game/auth"
 $env:WEB_AUTH_SECRET="<GAME_API_SECRET from VPS .env>"
+$env:LOCAL_REGISTRATION_ENABLED="false"
 ```
 
 Unity KHONG goi truc tiep endpoint web nay va KHONG duoc giu `GAME_API_SECRET`.
-Unity goi `/auth/web-login` cua game-server; game-server moi goi `api.ywonder.net/api/game/auth`.
-Neu SSL cua `api.ywonder.net` dang ket ha tang, co the override tam `WEB_AUTH_LOGIN_URL=https://ywonder.net/api/game/auth`.
+Unity goi `/auth/web-login` cua game-server; game-server moi goi `ywonder.net/api/game/auth`.
+Không dùng `api.ywonder.net/api/game/auth` làm upstream web-auth vì subdomain này hiện thuộc VPS game; namespace public của game là `/game-api`.
+Khi `WEB_AUTH_MODE=http`, production startup gate bắt buộc URL HTTPS, secret tối thiểu 16 ký tự và `LOCAL_REGISTRATION_ENABLED=false`.
+Account web có `locked`, `softDeleted`, `active=false` hoặc status khóa/xóa/inactive bị từ chối trước khi tạo `playerId`.
+
+Smoke test tích hợp web-auth dùng web API giả lập cục bộ, không cần và không ghi credential thật:
+
+```powershell
+cd server
+npm.cmd run test:web-auth
+```
 
 ## Phase 1: tai khoan game local + realtime demo
 

@@ -50,6 +50,41 @@ function testConfigurationGate() {
     DEMO_ACCOUNTS_ENABLED: "false",
     JWT_SECRET: "security-smoke-secret-with-more-than-32-characters",
   });
+
+  let unsafeWebAuthAccepted = false;
+  try {
+    validateProductionConfig({
+      NODE_ENV: "production",
+      HOST: "127.0.0.1",
+      STORE_MODE: "postgres",
+      WEB_AUTH_MODE: "http",
+      WEB_AUTH_LOGIN_URL: "http://web-auth.example.test/login",
+      WEB_AUTH_SECRET: "short",
+      LOCAL_REGISTRATION_ENABLED: "true",
+      ADMIN_DASHBOARD_ENABLED: "false",
+      DEMO_ACCOUNTS_ENABLED: "false",
+      JWT_SECRET: "security-smoke-secret-with-more-than-32-characters",
+    });
+    unsafeWebAuthAccepted = true;
+  } catch (error) {
+    assert(String(error.message).includes("WEB_AUTH_LOGIN_URL"), "Unsafe web-auth URL was not reported.");
+    assert(String(error.message).includes("WEB_AUTH_SECRET"), "Short web-auth secret was not reported.");
+    assert(String(error.message).includes("LOCAL_REGISTRATION_ENABLED"), "Local registration gate was not reported.");
+  }
+  assert(!unsafeWebAuthAccepted, "Unsafe production web-auth configuration was accepted.");
+
+  validateProductionConfig({
+    NODE_ENV: "production",
+    HOST: "127.0.0.1",
+    STORE_MODE: "postgres",
+    WEB_AUTH_MODE: "http",
+    WEB_AUTH_LOGIN_URL: "https://web-auth.example.test/login",
+    WEB_AUTH_SECRET: "security-smoke-web-auth-secret",
+    LOCAL_REGISTRATION_ENABLED: "false",
+    ADMIN_DASHBOARD_ENABLED: "false",
+    DEMO_ACCOUNTS_ENABLED: "false",
+    JWT_SECRET: "security-smoke-secret-with-more-than-32-characters",
+  });
 }
 
 function testRegistrationValidation() {
