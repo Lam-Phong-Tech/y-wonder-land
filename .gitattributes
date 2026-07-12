@@ -47,3 +47,6 @@
 /ios/**/*.resS filter=lfs diff=lfs merge=lfs -text
 /ios/usymtool filter=lfs diff=lfs merge=lfs -text
 /ios/usymtoolarm64 filter=lfs diff=lfs merge=lfs -text
+
+# VPS scripts must stay LF so Ubuntu can execute archives created on Windows.
+/server/**/*.sh text eol=lf
