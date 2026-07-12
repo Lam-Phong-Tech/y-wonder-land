@@ -85,6 +85,62 @@ function testConfigurationGate() {
     DEMO_ACCOUNTS_ENABLED: "false",
     JWT_SECRET: "security-smoke-secret-with-more-than-32-characters",
   });
+
+  validateProductionConfig({
+    NODE_ENV: "production",
+    HOST: "127.0.0.1",
+    STORE_MODE: "postgres",
+    WEB_AUTH_MODE: "http",
+    AUTH_TRANSITION_MODE: "parallel",
+    WEB_AUTH_LOGIN_URL: "https://web-auth.example.test/login",
+    WEB_AUTH_SECRET: "security-smoke-web-auth-secret",
+    LOCAL_REGISTRATION_ENABLED: "true",
+    ADMIN_DASHBOARD_ENABLED: "false",
+    DEMO_ACCOUNTS_ENABLED: "false",
+    JWT_SECRET: "security-smoke-secret-with-more-than-32-characters",
+  });
+
+  let incompleteParallelAccepted = false;
+  try {
+    validateProductionConfig({
+      NODE_ENV: "production",
+      HOST: "127.0.0.1",
+      STORE_MODE: "postgres",
+      WEB_AUTH_MODE: "http",
+      AUTH_TRANSITION_MODE: "parallel",
+      WEB_AUTH_LOGIN_URL: "https://web-auth.example.test/login",
+      WEB_AUTH_SECRET: "security-smoke-web-auth-secret",
+      LOCAL_REGISTRATION_ENABLED: "false",
+      ADMIN_DASHBOARD_ENABLED: "false",
+      DEMO_ACCOUNTS_ENABLED: "false",
+      JWT_SECRET: "security-smoke-secret-with-more-than-32-characters",
+    });
+    incompleteParallelAccepted = true;
+  } catch (error) {
+    assert(String(error.message).includes("AUTH_TRANSITION_MODE=parallel"),
+      "Incomplete parallel auth configuration returned the wrong error.");
+  }
+  assert(!incompleteParallelAccepted, "Parallel auth without local registration was accepted.");
+
+  let parallelWithoutWebAccepted = false;
+  try {
+    validateProductionConfig({
+      NODE_ENV: "production",
+      HOST: "127.0.0.1",
+      STORE_MODE: "postgres",
+      WEB_AUTH_MODE: "disabled",
+      AUTH_TRANSITION_MODE: "parallel",
+      LOCAL_REGISTRATION_ENABLED: "true",
+      ADMIN_DASHBOARD_ENABLED: "false",
+      DEMO_ACCOUNTS_ENABLED: "false",
+      JWT_SECRET: "security-smoke-secret-with-more-than-32-characters",
+    });
+    parallelWithoutWebAccepted = true;
+  } catch (error) {
+    assert(String(error.message).includes("WEB_AUTH_MODE=disabled"),
+      "Parallel auth without web auth returned the wrong error.");
+  }
+  assert(!parallelWithoutWebAccepted, "Parallel auth with disabled web auth was accepted.");
 }
 
 function testRegistrationValidation() {

@@ -187,9 +187,10 @@ async function run() {
       YW_DATA_PATH: dataPath,
       JWT_SECRET: "web-auth-integration-jwt-secret-with-32-chars",
       WEB_AUTH_MODE: "http",
+      AUTH_TRANSITION_MODE: "parallel",
       WEB_AUTH_LOGIN_URL: `http://127.0.0.1:${webPort}/login`,
       WEB_AUTH_SECRET: secret,
-      LOCAL_REGISTRATION_ENABLED: "false",
+      LOCAL_REGISTRATION_ENABLED: "true",
       ADMIN_DASHBOARD_ENABLED: "false",
       DEMO_ACCOUNTS_ENABLED: "false",
       HTTP_ACCESS_LOG: "false",
@@ -203,18 +204,29 @@ async function run() {
     const baseUrl = `http://127.0.0.1:${gamePort}`;
 
     const registration = await postJson(baseUrl, "/auth/register", {
-      username: "BlockedRegister01",
-      email: "blocked-register@example.test",
+      username: "ParallelLocal01",
+      email: "parallel-local@example.test",
       password: "Strong@123",
     });
-    assert(registration.response.status === 403, "Local registration was not disabled.");
-    assert(registration.payload.error === "LOCAL_REGISTRATION_DISABLED",
-      "Local registration returned the wrong error code.");
+    assert(registration.response.status === 200 && registration.payload.token,
+      "Parallel mode did not preserve local registration.");
+    assert(registration.payload.playerId, "Parallel local account did not receive a playerId.");
+
+    const localLogin = await postJson(baseUrl, "/auth/login", {
+      username: "ParallelLocal01",
+      password: "Strong@123",
+    });
+    assert(localLogin.response.status === 200 && localLogin.payload.token,
+      "Parallel mode did not preserve local login.");
+    assert(localLogin.payload.playerId === registration.payload.playerId,
+      "Parallel local account mapped to a different player after login.");
 
     const active = await login(baseUrl, "active@example.test");
     assert(active.response.status === 200 && active.payload.token, "Active web account could not log in.");
     assert(active.payload.webUserId === "web-active-1", "Active account webUserId is incorrect.");
     assert(active.payload.playerId, "Active account did not receive a playerId.");
+    assert(active.payload.playerId !== registration.payload.playerId,
+      "Local and web accounts unexpectedly shared a playerId.");
     const gameTokenPayload = jwt.verify(
       active.payload.token,
       "web-auth-integration-jwt-secret-with-32-chars",
@@ -260,7 +272,7 @@ async function run() {
 }
 
 run()
-  .then(() => console.log("[web-auth-integration] PASS: registration gate, web mapping, bootstrap, stable errors, and account-status guards work."))
+  .then(() => console.log("[web-auth-integration] PASS: parallel local auth, web mapping, bootstrap, stable errors, and account-status guards work."))
   .catch((error) => {
     console.error(`[web-auth-integration] FAIL: ${error.message}`);
     process.exitCode = 1;

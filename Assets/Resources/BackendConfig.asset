@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: BackendConfig
   m_EditorClassIdentifier:
   baseUrl: https://api.ywonder.net/game-api
-  registrationUrl: https://ywonder.net/vi/register
+  registrationUrl: https://ywonder.net/vi/login
   requestTimeoutSec: 8
   useOfflineFallback: 0

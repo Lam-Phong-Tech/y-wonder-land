@@ -132,19 +132,23 @@ Khi dùng Caddy trên Windows, tham khảo `server/Caddyfile.example`. Nếu web
 
 ## Game API MVP trong luc cho Web API
 
-Production hiện giữ `WEB_AUTH_MODE=disabled` cho tới khi cầu web-auth được nghiệm thu. Khi cutover sang tài khoản web thật:
+Production hiện giữ `WEB_AUTH_MODE=disabled` cho tới khi cầu web-auth được nghiệm thu.
+
+Trong giai đoạn chuyển tiếp an toàn, bật web account song song với đăng nhập/đăng ký local:
 
 ```powershell
 $env:WEB_AUTH_MODE="http"
+$env:AUTH_TRANSITION_MODE="parallel"
 $env:WEB_AUTH_LOGIN_URL="https://ywonder.net/api/game/auth"
 $env:WEB_AUTH_SECRET="<GAME_API_SECRET from VPS .env>"
-$env:LOCAL_REGISTRATION_ENABLED="false"
+$env:LOCAL_REGISTRATION_ENABLED="true"
 ```
 
 Unity KHONG goi truc tiep endpoint web nay va KHONG duoc giu `GAME_API_SECRET`.
 Unity goi `/auth/web-login` cua game-server; game-server moi goi `ywonder.net/api/game/auth`.
 Không dùng `api.ywonder.net/api/game/auth` làm upstream web-auth vì subdomain này hiện thuộc VPS game; namespace public của game là `/game-api`.
-Khi `WEB_AUTH_MODE=http`, production startup gate bắt buộc URL HTTPS, secret tối thiểu 16 ký tự và `LOCAL_REGISTRATION_ENABLED=false`.
+Khi `AUTH_TRANSITION_MODE=parallel`, production startup gate bắt buộc `WEB_AUTH_MODE=http`, URL HTTPS, secret tối thiểu 16 ký tự và `LOCAL_REGISTRATION_ENABLED=true`.
+Nếu sau này chuyển web thành luồng chính, đổi sang `AUTH_TRANSITION_MODE=web-primary` và `LOCAL_REGISTRATION_ENABLED=false`. Không thực hiện cutover này trong đợt tích hợp song song.
 Account web có `locked`, `softDeleted`, `active=false` hoặc status khóa/xóa/inactive bị từ chối trước khi tạo `playerId`.
 
 Smoke test tích hợp web-auth dùng web API giả lập cục bộ, không cần và không ghi credential thật:

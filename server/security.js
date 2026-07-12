@@ -16,6 +16,12 @@ function envInteger(name, fallback, options = {}, env = process.env) {
   return Math.min(max, Math.max(min, parsed));
 }
 
+function resolveAuthTransitionMode(webAuthMode, env = process.env) {
+  const configured = String(env.AUTH_TRANSITION_MODE || "").trim().toLowerCase();
+  if (configured) return configured;
+  return webAuthMode === "http" ? "web-primary" : "local-primary";
+}
+
 function normalizeIp(value) {
   const ip = String(value || "unknown").trim();
   return ip.startsWith("::ffff:") ? ip.slice(7) : ip;
@@ -80,6 +86,7 @@ function validateProductionConfig(env = process.env) {
   const host = String(env.HOST || "");
   const storeMode = String(env.STORE_MODE || "").toLowerCase();
   const webAuthMode = String(env.WEB_AUTH_MODE || "").toLowerCase();
+  const authTransitionMode = resolveAuthTransitionMode(webAuthMode, env);
   const localRegistrationEnabled = envBoolean("LOCAL_REGISTRATION_ENABLED", true, env);
 
   if (jwtSecret.length < 32 || jwtSecret === DEVELOPMENT_JWT_SECRET) {
@@ -93,6 +100,12 @@ function validateProductionConfig(env = process.env) {
   }
   if (webAuthMode !== "disabled" && webAuthMode !== "http") {
     errors.push("WEB_AUTH_MODE must be disabled or http");
+  }
+  if (!["local-primary", "parallel", "web-primary"].includes(authTransitionMode)) {
+    errors.push("AUTH_TRANSITION_MODE must be local-primary, parallel, or web-primary");
+  }
+  if (webAuthMode === "disabled" && authTransitionMode !== "local-primary") {
+    errors.push("WEB_AUTH_MODE=disabled requires AUTH_TRANSITION_MODE=local-primary");
   }
   if (webAuthMode === "http") {
     const loginUrl = String(env.WEB_AUTH_LOGIN_URL || "");
@@ -109,8 +122,14 @@ function validateProductionConfig(env = process.env) {
     if (authSecret.length < 16) {
       errors.push("WEB_AUTH_SECRET or GAME_API_SECRET must contain at least 16 characters");
     }
-    if (localRegistrationEnabled) {
-      errors.push("LOCAL_REGISTRATION_ENABLED must be false when WEB_AUTH_MODE=http");
+    if (authTransitionMode === "local-primary") {
+      errors.push("WEB_AUTH_MODE=http requires AUTH_TRANSITION_MODE=parallel or web-primary");
+    }
+    if (authTransitionMode === "parallel" && !localRegistrationEnabled) {
+      errors.push("AUTH_TRANSITION_MODE=parallel requires LOCAL_REGISTRATION_ENABLED=true");
+    }
+    if (authTransitionMode === "web-primary" && localRegistrationEnabled) {
+      errors.push("AUTH_TRANSITION_MODE=web-primary requires LOCAL_REGISTRATION_ENABLED=false");
     }
   }
   if (String(env.ADMIN_DASHBOARD_ENABLED || "").toLowerCase() !== "false") {

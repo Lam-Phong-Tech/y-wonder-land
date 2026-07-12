@@ -1,148 +1,195 @@
-# Kế hoạch: nút Đăng ký trong game mở trang đăng ký YWonder
+# Kế hoạch: đăng nhập và đăng ký game qua cổng web YWonder
 
-Ngày phân tích: 12/07/2026
-Yêu cầu gốc: khi vào game, nút **Đăng Ký** mở `https://ywonder.net/vi/register`.
-Trạng thái: **release hardening `316a75c3` đã deploy lên VPS; Unity đã sửa và compile
-không lỗi. Web-auth vẫn giữ disabled vì VPS chưa có `WEB_AUTH_SECRET`; chưa nghiệm
-thu tài khoản web thật và chưa phát hành EXE/APK mới**.
+Ngày cập nhật: 12/07/2026
 
-## 1. Kết luận ngắn
+Yêu cầu đã chốt:
 
-Không nên chỉ thay callback của nút bằng `Application.OpenURL()` rồi bàn giao ngay. Phần mở trình duyệt là đơn giản, nhưng tài khoản vừa tạo trên web chỉ dùng được trong game khi đồng thời hoàn thành cầu xác thực web ở game-server.
+- Giữ nguyên luồng **Đăng nhập local** và **Đăng ký local** đang hoạt động để người
+  chơi vẫn có thể tạo tài khoản và vào game trong thời gian tích hợp.
+- Bổ sung **Đăng nhập bằng web** và **Đăng ký trên web** như hai lựa chọn chạy
+  song song; cả hai lựa chọn web đều mở `https://ywonder.net/vi/login`.
+- Người chưa có tài khoản bấm **Tạo trang trại mới** ngay trên trang login.
+- Sau khi xác thực trên web, game phải nhận đúng tài khoản web, tạo/nạp đúng một
+  player và bootstrap dữ liệu chơi.
+- Chỉ chuyển hoàn toàn sang web sau khi Web SSO, lưu dữ liệu, cross-device,
+  restart và rollback đều đã nghiệm thu.
 
-Luồng đích:
+Trang đăng ký hiện ghi **Mã giới thiệu (tùy chọn)** nhưng source runtime vẫn đặt
+thuộc tính HTML `required` cho ô này. Vì vậy hành vi thực tế hiện tại là bắt buộc;
+không tự sửa cho tới khi BA/web chốt lại quy tắc.
 
-1. Người chơi bấm **Đăng Ký** trong game.
-2. Game mở trình duyệt mặc định tới trang đăng ký YWonder bằng HTTPS.
-3. Người chơi đăng ký trên web rồi quay lại game.
-4. Người chơi nhập Email/SĐT/ID đăng nhập và mật khẩu vào game.
-5. Unity gọi game-server; game-server gọi API xác thực web bằng secret chỉ lưu trên VPS.
-6. Game-server map duy nhất `web_user_id -> playerId`, trả game JWT và bootstrap dữ liệu người chơi.
+## 1. Kết luận
 
-## 2. Hiện trạng đã có
+Chỉ gọi `Application.OpenURL("https://ywonder.net/vi/login")` là chưa đủ. Cách đó
+chỉ tạo phiên đăng nhập trong trình duyệt; Unity không đọc được cookie HttpOnly và
+không biết tài khoản web nào vừa đăng nhập.
 
-- Trang `https://ywonder.net/vi/register` đang phản hồi HTTPS `200`.
-- Unity đã có `AuthService.LoginAsync()`:
-  - thử `/auth/login` cho account game local;
-  - nếu trả `404 USER_NOT_FOUND` thì thử `/auth/web-login`.
-- Node game-server đã có `/auth/web-login`, `webAuthProvider` và mapping web user sang một player.
-- Secret web auth đã được thiết kế để chỉ nằm trong env game-server; Unity không giữ secret.
-- Production RC hiện ưu tiên account đăng ký trực tiếp trong game và web auth đang được vận hành theo hướng tắt cho tới khi cutover.
-- Trang đăng ký bắt nhập mã giới thiệu nhưng hiện chấp nhận chuỗi bất kỳ; đây là rủi
-  ro attribution/hoa hồng phía web, không phải lỗi game-server.
+Vì web và game-server đang ở cùng VPS, có thể làm luồng browser login an toàn mà
+không đưa mật khẩu web hoặc secret vào Unity. Phương án phù hợp cho cả EXE và APK
+là **callback cùng domain + yêu cầu đăng nhập một lần + polling/PKCE**. Polling
+được ưu tiên hơn custom deep link vì EXE portable không cần cài protocol vào
+Windows.
 
-## 3. Các vấn đề nếu chỉ đổi nút
+Không thay callback của hai nút local hiện tại. Web SSO được thêm bằng control và
+feature flag riêng, mặc định tắt cho bản khách cho đến khi callback và exchange
+token hoạt động end-to-end. Nếu đổi luồng mặc định trước, người chơi có thể đăng
+nhập web thành công nhưng bị kẹt ở ngoài game.
 
-### 3.1. Đăng ký được nhưng có thể không đăng nhập được
+## 2. Kết quả audit trang web công khai
 
-Nếu game-server vẫn để `WEB_AUTH_MODE=disabled`, tài khoản mới trên web không qua được `/auth/web-login`.
+Đã kiểm tra trực tiếp bản đang chạy ngày 12/07/2026:
 
-### 3.2. Ô đăng nhập hiện không phù hợp web account
+- `https://ywonder.net/vi/login` trả HTTPS `200`.
+- Form login nhận **Email hoặc ID đăng nhập** và mật khẩu.
+- Trang login có tham số `callbackUrl`; đăng nhập thành công sẽ điều hướng tới
+  giá trị này, mặc định là `/vi/dashboard`.
+- Liên kết **Tạo trang trại mới** hiện trỏ tới `/register` nhưng không mang theo
+  `callbackUrl`.
+- Trang register không đọc `callbackUrl`; đăng ký và đăng nhập thành công sẽ đưa
+  thẳng tới `/vi/dashboard`.
+- `/api/auth/session`, `/api/auth/providers` và `/api/auth/csrf` đang hoạt động
+  theo Auth.js/NextAuth. Cookie phiên là HttpOnly + Secure và không được đưa vào
+  Unity.
+- Chưa thấy one-time code, game callback hoặc deep link sẵn có.
 
-- `UsernameField` đang giới hạn 20 ký tự và báo lỗi nếu dài hơn 20.
-- `PasswordField` cũng đang giới hạn 20 ký tự.
-- Placeholder hiện là `Tên đăng nhập`.
+Do đó luồng **tài khoản đã có** có thể tận dụng `callbackUrl`, nhưng luồng **tạo
+tài khoản mới** sẽ mất callback nếu web không sửa phần register.
 
-Email thường dài hơn 20 ký tự. Web cũng có thể cho đăng nhập bằng SĐT hoặc ID, nên phải đổi nhãn và giới hạn trước khi nghiệm thu.
+### 2.1. Audit source/VPS ngày 12/07/2026
 
-### 3.3. Endpoint đăng ký local vẫn còn public
+- Web Next.js chạy bằng `greenxland.service`, cổng nội bộ `3033`, source tại
+  `/var/www/ywonder`.
+- Thư mục deploy web không có Git metadata khả dụng. Trước mọi thay đổi phải tạo
+  backup timestamp cho source/build, service và Nginx; rollback không thể dựa vào
+  `git checkout` ngay trên VPS.
+- `GAME_API_SECRET` đã có trong tiến trình web, dài 64 ký tự. Không in/copy secret
+  qua chat hoặc đưa vào Unity; game-server có thể nhận nội bộ qua env trên VPS.
+- `POST /api/game/auth` đã hoàn chỉnh: nhận username/email/refCode + password,
+  bcrypt, rate limit 10 lần/phút/định danh, chỉ nhận account `ACTIVE`, trả stable
+  web user ID và game token 12 giờ.
+- NextAuth session gắn stable `session.user.id`; đủ làm khóa canonical
+  `web_user_id -> playerId` cho browser SSO.
+- Login đã đọc `callbackUrl`; register chưa giữ callback và luôn chuyển về
+  `/{locale}/dashboard` sau đăng ký/OTP.
+- Nginx hiện proxy `/game-api/*` sang game-server trên host `api.ywonder.net`.
+  Host `ywonder.net` chưa có exact callback route sang game-server.
 
-Nếu UI đã yêu cầu đăng ký trên web nhưng `POST /auth/register` vẫn mở trên production, người dùng kỹ thuật vẫn có thể tạo account local ngoài luồng web. Cần có env gate để tắt đăng ký local ở production nhưng vẫn cho phép ở local/staging khi cần.
+## 3. Luồng đích
 
-### 3.4. Account khóa/xóa mềm
+1. Người chơi bấm Đăng nhập hoặc Đăng ký trong game.
+2. Unity tạo `code_verifier`, tính PKCE challenge và gọi
+   `POST /auth/browser/start` tới game-server.
+3. Game-server tạo `requestId` ngẫu nhiên, hạn sử dụng ngắn và trả về URL đăng
+   nhập dạng:
+   `https://ywonder.net/vi/login?callbackUrl=<callback-cùng-domain>`.
+4. Unity mở URL đó bằng trình duyệt và giữ màn hình chờ đăng nhập.
+5. Người đã có tài khoản đăng nhập. Người mới bấm Tạo trang trại mới và đăng ký.
+6. Sau khi web xác thực, trình duyệt vào callback cùng host
+   `ywonder.net/game-api/auth/browser/callback` nên gửi kèm cookie web an toàn.
+7. Game-server xác minh web session qua dịch vụ web nội bộ, lấy `web_user_id`
+   ổn định và đánh dấu `requestId` đã được chấp nhận.
+8. Unity gọi `POST /auth/browser/exchange` với `requestId + code_verifier`.
+   Server kiểm tra PKCE, chỉ cho dùng một lần, map `web_user_id -> playerId`, rồi
+   trả game JWT và bootstrap.
+9. Unity vào game; mật khẩu web, cookie web và secret server không đi qua client.
 
-Game-server hiện chủ yếu tin kết quả API web. Khi cutover phải test rõ account `locked`, `inactive` hoặc `softDeleted` bị từ chối và không tạo/khôi phục phiên game.
+Nếu Android tạm dừng app khi mở browser, exchange tiếp tục khi app được focus lại.
+EXE có thể polling trong lúc cửa sổ browser đang mở.
 
-### 3.5. Trùng định danh local và web
+## 4. Phần cần sửa ở web
 
-Client hiện thử account local trước. Nếu một ID web trùng username local, kết quả `401` local sẽ không fallback sang web. Cần chốt quy tắc account cũ trước khi mở rộng cho khách.
+Hai thay đổi nhỏ nhưng bắt buộc cho tài khoản mới:
 
-### 3.6. Mã giới thiệu bắt buộc nhưng chưa được xác thực
+1. Link `Tạo trang trại mới` trên login phải giữ tham số `callbackUrl` khi sang
+   register.
+2. Register phải đọc và validate `callbackUrl`; sau khi đăng ký/xác thực thành
+   công, điều hướng về callback thay vì luôn vào `/vi/dashboard`.
 
-Không nên hướng dẫn người chơi nhập mã ngẫu nhiên. BA/web cần cấp một mã chính thức
-cho nguồn người chơi từ game, hoặc hỗ trợ query parameter/prefill như `?ref=YGAME`,
-hoặc đổi field thành tùy chọn. Đây là quyết định nghiệp vụ web; Unity chỉ mở URL đã
-được chốt.
+Chỉ chấp nhận callback nội bộ đã whitelist, ví dụ bắt đầu bằng
+`/game-api/auth/browser/callback`. Không cho callback tùy ý để tránh open redirect.
 
-## 4. Thiết kế triển khai đề xuất
+Nếu không có source web để sửa ngay, phương án tạm là: đăng ký xong quay lại game,
+bấm Đăng nhập lần nữa và đăng nhập web. Phương án này dùng được để test, nhưng
+không phải UX bàn giao mong muốn.
 
-### 4.1. Unity UI
+## 5. Phần cần sửa ở game-server
 
-Phương án ít rủi ro cho bản đầu:
+- Thêm bảng/record `browser_auth_requests` trong PostgreSQL:
+  `request_id_hash`, `pkce_challenge`, `status`, `web_user_id`, `expires_at`,
+  `consumed_at`.
+- Thêm `POST /auth/browser/start` có rate limit.
+- Thêm `GET /auth/browser/callback` chỉ nhận request hợp lệ, forward cookie tới
+  web session API và không log cookie/token.
+- Thêm `POST /auth/browser/exchange`; request một lần, hết hạn 2-5 phút, PKCE bắt
+  buộc.
+- Dùng mapping duy nhất `web_user_id -> playerId`, sau đó dùng lại game JWT,
+  `/player/bootstrap` và realtime rule `4008` hiện tại.
+- Thêm cleanup request hết hạn và test replay/CSRF/open redirect/rate limit.
+- Nginx trên host `ywonder.net` proxy chính xác callback `/game-api/auth/browser/*`
+  vào `127.0.0.1:3000`; vẫn không public port 3000/5432.
 
-- Giữ hình thức tab/nút **Đăng Ký** hiện tại.
-- Bấm nút sẽ mở trình duyệt ngoài bằng `Application.OpenURL()` và giữ game ở màn Login.
-- Hiện thông báo: `Đã mở trang đăng ký. Sau khi hoàn tất, hãy quay lại game để đăng nhập.`
-- Form đăng ký nội bộ giữ ở trạng thái ẩn trong một bản để rollback; không còn đường UI gọi `AuthService.RegisterAsync()`.
-- Không cài WebView/package mới.
+## 6. Phần cần sửa ở Unity
 
-URL không hardcode trong controller. Thêm trường `registrationUrl` vào `BackendConfig` và đặt giá trị trong `Assets/Resources/BackendConfig.asset`.
+- Đổi URL cổng web trong `BackendConfig` thành `https://ywonder.net/vi/login`.
+- Giữ nguyên tab/nút Đăng nhập local và Đăng ký local.
+- Thêm hai nút phụ `Đăng nhập bằng web` và `Đăng ký trên web`; cả hai gọi cùng
+  một `StartWebLoginAsync()`.
+- Thêm feature flag cấu hình; khi flag tắt, UI và hành vi local không thay đổi.
+- Không gửi username/password web từ Unity trong luồng mới.
+- Lưu `requestId` và `code_verifier` chỉ trong bộ nhớ trong phiên đăng nhập.
+- Poll/exchange khi app active lại; cho phép hủy và thử lại.
+- Hiện trạng thái rõ: đang mở trình duyệt, đang chờ xác thực, hết hạn, bị khóa,
+  web tạm lỗi.
+- Giữ account local/QARich và API local trong toàn bộ giai đoạn chuyển tiếp.
+  Chỉ tắt sau khi có quyết định cutover riêng và backup/rollback đã kiểm tra.
 
-### 4.2. Ô đăng nhập
+## 7. Thứ tự triển khai
 
-- Đổi placeholder thành `Email / SĐT / ID đăng nhập`.
-- Tăng giới hạn định danh lên tối thiểu 128 ký tự, hoặc chốt theo contract web.
-- Tăng giới hạn mật khẩu lên tối thiểu 128 ký tự, không áp rule đăng ký local lên form login.
-- Không log mật khẩu; log định danh phải được cân nhắc giảm/che khi production.
+1. `[x]` Audit source/service web, stable session user ID, secret presence và
+   Nginx route; không đọc giá trị secret và không thay đổi VPS.
+2. `[~]` **Nấc A - cầu web credential song song:** source local đã thêm transition
+   flag cho phép `WEB_AUTH_MODE=http` cùng `LOCAL_REGISTRATION_ENABLED=true`, giữ
+   `/auth/login` và `/auth/register` local; security/web-auth/full Phase 1 đều
+   pass. Còn commit/deploy versioned và copy secret nội bộ giữa env trên cùng VPS,
+   không qua client/chat.
+3. Deploy versioned game-server rồi test: account local/QARich vẫn vào được,
+   account web thật đăng nhập qua `/auth/web-login`, bootstrap đúng và cùng một
+   web account luôn map về cùng player. Chưa sửa/restart web service.
+4. **Nấc B - browser SSO:** backup toàn bộ web source/build/service/Nginx trước;
+   thêm callback preservation vào login/register web và test nội bộ.
+5. Implement migration + browser auth start/callback/exchange trên game-server,
+   kèm PKCE, request một lần, expiry và integration test giả lập web session.
+6. Thêm exact Nginx callback route trên host `ywonder.net`, kiểm tra cấu hình rồi
+   reload; không mở port 3000/5432.
+7. Test browser flow bằng account web thật trên EXE và APK, chưa đổi luồng local.
+8. Bật hai nút web song song bằng feature flag, compile và build; local vẫn là
+   đường dự phòng.
+9. Test cross-device, restart backend/PostgreSQL, account khóa/xóa, replay code và
+   hai phiên trùng account.
+10. Sau khi chạy song song ổn định mới lập kế hoạch cutover riêng; không tự động
+    tắt đăng ký/login local trong đợt tích hợp này.
 
-### 4.3. Game-server
-
-- Set trên VPS:
-  - `WEB_AUTH_MODE=http`
-  - `WEB_AUTH_LOGIN_URL=https://ywonder.net/api/game/auth`
-  - `WEB_AUTH_SECRET=<secret lưu ngoài repo>`
-- Thêm `LOCAL_REGISTRATION_ENABLED=false` cho production; `/auth/register` trả lỗi rõ khi bị tắt.
-- Giữ đăng nhập account local cũ/QARich trong giai đoạn chuyển tiếp, nhưng không cho tạo local account mới từ public API.
-- Từ chối account web khóa/xóa mềm/inactive bằng error code ổn định.
-- Giữ mapping duy nhất `web_user_id -> playerId` và rule một account chỉ có một phiên realtime (`4008`).
-
-## 5. Thứ tự làm an toàn
-
-1. **Xác nhận contract web:** định danh đăng nhập chính, giới hạn mật khẩu, response account khóa/xóa mềm và secret production.
-2. **Test cầu web-auth trên VPS trước:** dùng một account web mới gọi `/auth/web-login`, rồi `/player/bootstrap`; chưa đổi Unity.
-3. **Gia cố backend:** tắt đăng ký local bằng env, xử lý trạng thái account web và collision/migration.
-4. **Sửa Unity:** thêm URL vào config, đổi callback Đăng Ký, nới ô login và đổi placeholder.
-5. **Compile + smoke Editor:** nút mở đúng URL, quay lại game không mất màn Login, account local cũ vẫn đăng nhập.
-6. **Build EXE/APK:** test mở browser trên Windows và Android, quay lại app, đăng nhập account web vừa tạo.
-7. **Nghiệm thu dữ liệu:** cùng web account đăng nhập lại sau restart vẫn đúng player, Point, túi và profile; phiên trùng bị thay bằng `4008`.
-8. **Rollout:** deploy backend trước, sau đó phát build Unity; giữ cách rollback về build cũ và `WEB_AUTH_MODE=disabled` nếu web auth lỗi.
-
-## 6. Test case bắt buộc
+## 8. Test case bắt buộc
 
 | ID | Nội dung | Kết quả mong đợi |
 |---|---|---|
-| WEBREG-001 | Bấm Đăng Ký trên EXE | Mở đúng `https://ywonder.net/vi/register`; game không thoát |
-| WEBREG-002 | Bấm Đăng Ký trên APK | Mở trình duyệt; quay lại app vẫn ở Login |
-| WEBREG-003 | Đăng ký web rồi login bằng định danh được cấp | Vào đúng một player và tạo bootstrap mặc định |
-| WEBREG-004 | Email dài hơn 20 ký tự | Nhập và đăng nhập được |
-| WEBREG-005 | Password dài hơn 20 ký tự | Nhập và đăng nhập được nếu web cho phép |
-| WEBREG-006 | Sai mật khẩu web | Báo sai thông tin, không báo server ngừng |
-| WEBREG-007 | Account web bị khóa/xóa mềm | Game từ chối đăng nhập, không tạo player mới |
-| WEBREG-008 | Đăng nhập lại cùng account | Giữ đúng profile, Point, túi và playerId |
-| WEBREG-009 | Hai thiết bị cùng account | Phiên mới thay phiên cũ bằng mã `4008` |
-| WEBREG-010 | Account QARich/local cũ | Vẫn login trong giai đoạn chuyển tiếp |
-| WEBREG-011 | Gọi `/auth/register` production trực tiếp | Bị chặn khi `LOCAL_REGISTRATION_ENABLED=false` |
-| WEBREG-012 | Web auth tạm lỗi/timeout | Báo lỗi rõ, không tạo account local thay thế |
+| WEBSSO-001 | Bấm Đăng nhập trên EXE | Mở đúng `/vi/login`, game chờ xác thực |
+| WEBSSO-002 | Bấm Đăng ký trên APK | Cũng mở `/vi/login`, link Tạo trang trại mới dùng được |
+| WEBSSO-003 | Login web account có sẵn | Game nhận đúng player và bootstrap |
+| WEBSSO-004 | Tạo account mới từ link trong login | Sau đăng ký quay về callback, game vào đúng player |
+| WEBSSO-005 | Hủy browser/không đăng nhập | Game không tạo player, có thể thử lại |
+| WEBSSO-006 | Request hết hạn | Exchange bị từ chối, không tạo session |
+| WEBSSO-007 | Dùng lại request/code | Bị từ chối vì đã consumed |
+| WEBSSO-008 | Giả mạo verifier/state | Bị từ chối |
+| WEBSSO-009 | Account web khóa/xóa/inactive | Game từ chối, không tạo player mới |
+| WEBSSO-010 | Đăng nhập lại/cross-device | Giữ playerId, Point, túi và farm |
+| WEBSSO-011 | Hai thiết bị cùng account | Phiên mới thay phiên cũ bằng `4008` |
+| WEBSSO-012 | Restart backend/PostgreSQL | Dữ liệu player còn nguyên; auth request cũ hết hạn an toàn |
 
-## 7. Các câu cần sếp/bên web chốt trước khi code
+## 9. Điều kiện còn thiếu trước khi code web
 
-1. Sau đăng ký, người dùng sẽ đăng nhập game bằng Email, SĐT, refCode hay một ID riêng?
-2. Giới hạn mật khẩu web là bao nhiêu ký tự và có hỗ trợ ký tự Unicode không?
-3. `GAME_API_SECRET` hiện tại còn đúng cho endpoint production không?
-4. Có tắt hoàn toàn việc tự đăng ký account local ở production không? Khuyến nghị: **có**.
-5. Account game local cũ sẽ giữ riêng, link sang web account hay chỉ dùng làm QA?
-6. Mã giới thiệu chính thức dành cho người chơi đến từ game là gì, và web có hỗ trợ
-   điền sẵn bằng query parameter hay không?
-
-## 8. File dự kiến sửa sau khi kế hoạch được duyệt
-
-- `Assets/_Project/Scripts/Backend/BackendConfig.cs`
-- `Assets/Resources/BackendConfig.asset`
-- `Assets/_Project/UI/LoginScreenController.cs`
-- `Assets/_Project/UI/LoginScreen.uxml`
-- `server/index.js`
-- `server/security.js` hoặc module config tương đương
-- `server/.env.example`
-- Test backend/Unity và tài liệu QA tương ứng
-
-`LoginScreenController.cs` và `LoginScreen.uxml` thuộc module QC cần sửa có chủ đích, compile/test đầy đủ và không refactor ngoài phạm vi.
+- Đã có quyền root và xác nhận source/artifact deploy của web trên VPS.
+- Đã xác nhận NextAuth session trả stable `session.user.id`.
+- Cần tạo và kiểm tra gói backup/rollback web vì deploy hiện không có Git metadata.
+- Cần thêm exact Nginx callback route trên host `ywonder.net` ở Nấc B.
+- Chốt cách giữ QARich/local account cho tester trong bản chuyển tiếp.

@@ -137,7 +137,7 @@ public class LoginScreenController : MonoBehaviour
 
         // Tab switching
         tabLogin?.RegisterCallback<ClickEvent>(evt => ShowLoginTab());
-        tabRegister?.RegisterCallback<ClickEvent>(evt => OpenRegistrationPage());
+        tabRegister?.RegisterCallback<ClickEvent>(evt => ShowRegisterTab());
 
         // Login actions
         btnLogin?.RegisterCallback<ClickEvent>(evt => OnLoginClicked());
