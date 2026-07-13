@@ -8,6 +8,7 @@ const REQUEST_ID_RE = /^[A-Za-z0-9_-]{43}$/;
 const GAME_APPROVAL_URL = "http://127.0.0.1:3000/auth/browser/approve";
 const PUBLIC_WEB_ORIGIN = "https://ywonder.net";
 const GAME_DEEP_LINK = "ywondergreenfarm://auth/complete";
+const REGISTER_COMPLETED_PARAM = "registration_completed";
 
 function htmlResponse(title: string, message: string, status: number, returnToGame = false): Response {
   const deepLinkJson = JSON.stringify(GAME_DEEP_LINK).replace(/</g, "\\u003c");
@@ -65,11 +66,26 @@ function loginRedirect(requestUrl: URL): Response {
   return Response.redirect(loginUrl, 302);
 }
 
+function registrationRedirect(requestUrl: URL): Response {
+  const publicCallback = new URL(`${requestUrl.pathname}${requestUrl.search}`, PUBLIC_WEB_ORIGIN);
+  publicCallback.searchParams.set(REGISTER_COMPLETED_PARAM, "1");
+
+  const registrationUrl = new URL("/vi/register", PUBLIC_WEB_ORIGIN);
+  registrationUrl.searchParams.set("callbackUrl", publicCallback.toString());
+  return Response.redirect(registrationUrl, 302);
+}
+
 export async function GET(request: Request): Promise<Response> {
   const requestUrl = new URL(request.url);
   const requestId = String(requestUrl.searchParams.get("request") || "").trim();
   if (!REQUEST_ID_RE.test(requestId)) {
     return htmlResponse("Liên kết không hợp lệ", "Phiên xác thực game không đúng định dạng. Hãy bắt đầu lại từ trong game.", 400);
+  }
+
+  const intent = requestUrl.searchParams.get("intent") === "register" ? "register" : "login";
+  const registrationCompleted = requestUrl.searchParams.get(REGISTER_COMPLETED_PARAM) === "1";
+  if (intent === "register" && !registrationCompleted) {
+    return registrationRedirect(requestUrl);
   }
 
   const session = await auth();

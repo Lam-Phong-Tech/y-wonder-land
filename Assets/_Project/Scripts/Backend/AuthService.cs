@@ -202,7 +202,9 @@ namespace YWonderLand.Backend
                 if (exchanged.ok && exchanged.data != null && !string.IsNullOrEmpty(exchanged.data.token))
                 {
                     onStatus?.Invoke("Website đã xác thực. Đang nạp dữ liệu nhân vật...");
-                    return ApplyAuth(exchanged, exchanged.data.username);
+                    bool applied = ApplyAuth(exchanged, exchanged.data.username);
+                    if (applied) RestoreWindowsGameWindow();
+                    return applied;
                 }
                 if (exchanged.status == 429)
                 {
@@ -237,6 +239,13 @@ namespace YWonderLand.Backend
         public void CancelBrowserLogin()
         {
             browserAuthAttempt++;
+        }
+
+        private static void RestoreWindowsGameWindow()
+        {
+#if UNITY_STANDALONE_WIN && !UNITY_EDITOR
+            WindowsWindowFocus.TryRestoreCurrentProcessWindow();
+#endif
         }
 
         public async Awaitable<bool> RegisterAsync(string username, string password, string email = "", string phone = "")
@@ -416,4 +425,79 @@ namespace YWonderLand.Backend
             PlayerPrefs.Save();
         }
     }
+
+#if UNITY_STANDALONE_WIN && !UNITY_EDITOR
+    internal static class WindowsWindowFocus
+    {
+        private const int SW_RESTORE = 9;
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern System.IntPtr GetForegroundWindow();
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern uint GetWindowThreadProcessId(System.IntPtr window, System.IntPtr processId);
+
+        [System.Runtime.InteropServices.DllImport("kernel32.dll")]
+        private static extern uint GetCurrentThreadId();
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool AttachThreadInput(uint attachThread, uint attachToThread, bool attach);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool ShowWindowAsync(System.IntPtr window, int command);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool BringWindowToTop(System.IntPtr window);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool SetForegroundWindow(System.IntPtr window);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern System.IntPtr SetFocus(System.IntPtr window);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool FlashWindow(System.IntPtr window, bool invert);
+
+        internal static void TryRestoreCurrentProcessWindow()
+        {
+            try
+            {
+                System.IntPtr gameWindow;
+                using (var process = System.Diagnostics.Process.GetCurrentProcess())
+                {
+                    gameWindow = process.MainWindowHandle;
+                }
+                if (gameWindow == System.IntPtr.Zero) return;
+
+                ShowWindowAsync(gameWindow, SW_RESTORE);
+
+                System.IntPtr foregroundWindow = GetForegroundWindow();
+                uint foregroundThread = foregroundWindow == System.IntPtr.Zero
+                    ? 0
+                    : GetWindowThreadProcessId(foregroundWindow, System.IntPtr.Zero);
+                uint currentThread = GetCurrentThreadId();
+                bool attached = foregroundThread != 0 && foregroundThread != currentThread &&
+                                AttachThreadInput(currentThread, foregroundThread, true);
+
+                bool focused;
+                try
+                {
+                    BringWindowToTop(gameWindow);
+                    focused = SetForegroundWindow(gameWindow);
+                    SetFocus(gameWindow);
+                }
+                finally
+                {
+                    if (attached) AttachThreadInput(currentThread, foregroundThread, false);
+                }
+
+                if (!focused) FlashWindow(gameWindow, true);
+            }
+            catch (System.Exception exception)
+            {
+                Debug.LogWarning($"[Auth] Could not restore the Windows game window: {exception.Message}");
+            }
+        }
+    }
+#endif
 }
