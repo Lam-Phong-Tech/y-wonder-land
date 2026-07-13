@@ -5,6 +5,14 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-07-13] — Hotfix đăng ký website và quay lại EXE
+
+### Changed
+- Editor Browser SSO đã tạo nhân vật và relogin đúng cùng web account; EXE đầu tiên vẫn polling đúng nhưng không tự đưa cửa sổ game lên trước.
+- Commit `c002dfa0` thêm Windows foreground restore sau browser exchange; thao tác click taskbar vẫn là fallback nếu Windows chặn focus.
+- Callback web đã deploy bản chỉ sửa callback, có backup/rollback. `intent=register` lần đầu luôn trả `302` sang `/vi/register`, sau đăng ký/OTP mới quay về callback có `registration_completed=1`, tránh tự duyệt session cũ.
+- Public redirect probe đã pass. Còn build lại EXE, test account web mới bằng mã giới thiệu hợp lệ, APK deep link và relogin/cross-device.
+
 ## [2026-07-13] — Nấc B Browser SSO public backend/web accepted
 
 ### Added
