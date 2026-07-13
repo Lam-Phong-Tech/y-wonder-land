@@ -147,7 +147,7 @@ function sessionCookieNames(request: Request): string[] {
     const name = (separator >= 0 ? part.slice(0, separator) : part).trim();
     if (/(?:^|[-_.])(?:authjs|next-auth)\.session-token(?:\.\d+)?$/i.test(name)) names.add(name);
   }
-  return [...names];
+  return Array.from(names);
 }
 
 function expiredSessionCookies(request: Request): string[] {
