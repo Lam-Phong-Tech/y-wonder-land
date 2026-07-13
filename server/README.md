@@ -159,11 +159,15 @@ Account web có `locked`, `softDeleted`, `active=false` hoặc status khóa/xóa
 Nấc B không đưa password/cookie web vào Unity. Game tạo PKCE challenge qua
 `/auth/browser/start`, mở thẳng callback
 `https://ywonder.net/api/game/browser/callback`, rồi poll
-`/auth/browser/exchange`. Callback đọc NextAuth session ngay trong web: nếu đã
-ghi nhớ đăng nhập thì approve ngay, nếu chưa có session thì chuyển sang
-`/vi/login` và quay lại callback sau khi đăng nhập. Callback gọi nội bộ
-`/auth/browser/approve` bằng `GAME_API_SECRET`; endpoint approve không dành cho
-Unity/public client.
+`/auth/browser/exchange`. Callback đọc NextAuth session ngay trong web. Nếu chưa
+có session, callback chuyển sang `/vi/login` rồi quay lại sau khi đăng nhập. Nếu
+trình duyệt đã nhớ session, callback phải hiển thị tài khoản đang nhớ và yêu cầu
+người dùng chọn `Tiếp tục với tài khoản này` hoặc `Đăng nhập tài khoản khác`;
+không được approve chỉ vì cookie còn tồn tại. Luồng đổi account chỉ expire các
+cookie session-token của Auth.js/NextAuth, giữ nguyên callback và quay về login.
+Các response callback/redirect dùng `Cache-Control: no-store`. Chỉ sau thao tác
+xác nhận, callback mới gọi nội bộ `/auth/browser/approve` bằng
+`GAME_API_SECRET`; endpoint approve không dành cho Unity/public client.
 
 ```text
 BROWSER_AUTH_ENABLED=true

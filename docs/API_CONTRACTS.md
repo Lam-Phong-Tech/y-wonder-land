@@ -97,7 +97,11 @@ Quy uoc mapping:
 - Khi bật `BROWSER_AUTH_ENABLED`, login/callback phải là HTTPS cùng origin,
   callback cố định `/api/game/browser/callback`; request ID lưu hash SHA-256, hạn 10
   phút, exchange bắt buộc PKCE và chỉ dùng một lần. Callback Next.js đọc session web
-  rồi approve qua `127.0.0.1`; Unity không nhận cookie/password/secret web.
+  nhưng không được auto-approve session đã ghi nhớ. Người dùng phải xác nhận tài
+  khoản hiện tại hoặc chọn đăng nhập account khác; lựa chọn đổi account chỉ expire
+  cookie session-token Auth.js/NextAuth và giữ callback qua `/vi/login`. Chỉ thao
+  tác xác nhận mới approve qua `127.0.0.1`; callback/redirect phải `no-store` và
+  Unity không nhận cookie/password/secret web.
 - `daily_limits` mac dinh gom `fishing` va `mining`, reset theo `period_key` ngay server dang `YYYY-MM-DD`. Can chot timezone server; khuyen nghi `Asia/Saigon` cho khach VN. Hien stub cu co the dang dung UTC nen can doi/ghi ro truoc production.
 - `idempotency_key` phai duy nhat cho moi action co retry; server tra `duplicate=true` khi nhan lai cung key va khong apply them tien/item/luot.
 - Shop transaction khong nhan/gia tin `unit_price` tu Unity. Server tra `shopCatalog.json` sinh tu `ItemDefinition` + `ShopDefinition`, kiem access mode/whitelist/canSell va doi Point + inventory trong mot lan ghi. Cung key nhung body khac tra `IDEMPOTENCY_CONFLICT`.

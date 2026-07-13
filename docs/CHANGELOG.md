@@ -5,6 +5,18 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-07-13] — Hotfix chọn tài khoản website trước khi vào game
+
+### Fixed
+- Logout trong game chỉ xóa phiên game, còn trình duyệt có thể vẫn giữ phiên NextAuth/Auth.js. Callback cũ tự approve phiên web đã nhớ nên người chơi bị đăng nhập lại tài khoản gần nhất dù muốn đổi account.
+- Callback website nay luôn yêu cầu thao tác tường minh khi đã có session: `Tiếp tục với tài khoản này` hoặc `Đăng nhập tài khoản khác`. Chỉ nút tiếp tục mới approve request và cấp game session.
+- Luồng đổi tài khoản chỉ hết hạn các cookie session-token của Auth.js/NextAuth rồi quay về `/vi/login` với callback cũ; đã bỏ query `locked=1` từng làm web hiện sai cảnh báo “Tài khoản đã bị khóa”. Các trang callback/redirect dùng `no-store` để tránh tái sử dụng kết quả xác thực cũ.
+
+### Verified
+- Web callback commit `cac56e0f` đã deploy có backup/rollback; build production `Q_dfxErFS68Q3YBChCShT`, backup `/var/backups/ywonder-web/browser-callback-cac56e0f1e1258e3f7a0cc269e78c7b9dc9d740e-20260713T072713Z` và service đều khỏe.
+- Probe production xác nhận không còn cờ khóa giả, có 8 cookie session được expire và response `no-store`. Nghiệm thu trình duyệt thật đã pass `callback -> approve -> PKCE exchange -> bootstrap PostgreSQL`, trả `PLAYER=p_1783873094`, profile `Lam`, Point `5000`.
+- Local/web credential vẫn chạy song song; không sửa DB, Nginx hay Unity trong hotfix này. Còn smoke test cùng luồng trên chính EXE/APK bàn giao trước khi đóng client artifact.
+
 ## [2026-07-13] — Hotfix đăng ký website và quay lại EXE
 
 ### Changed
@@ -21,7 +33,7 @@
 
 ### Verified
 - Hotfix release `fc23f1652a8e484b42e348150d3a5a038825a2e0` tách polling exchange khỏi quota thử mật khẩu. Probe public `125` lần pending đều pass và phiên Browser SSO thứ hai vẫn start `201`; Unity cũng biết chờ `Retry-After` thay vì dừng ngay khi gặp `429`.
-- Current release `f75a7d6b3c5c267fbdf17f58af7d02bdecf8d5b9` mở thẳng callback: session web đã ghi nhớ được approve ngay, còn session chưa login tự đi qua `/vi/login` rồi quay lại callback. Hai lần nghiệm thu liên tiếp trả cùng `PLAYER=p_1783873094`, profile `TRAN TUNG LAM`, Point `5000`.
+- Game release `f75a7d6b3c5c267fbdf17f58af7d02bdecf8d5b9` mở thẳng callback, còn session chưa login tự đi qua `/vi/login` rồi quay lại callback. Hành vi approve ngay session đã ghi nhớ ở checkpoint này đã được thay bằng bộ chọn tài khoản tường minh của commit `cac56e0f` phía trên.
 - Web build `hp9br9UtY4p9PcC214CmF` deploy thành công; service active, login `200`, callback chưa login `302`. Backup rollback: `/var/backups/ywonder-web/browser-sso-20260712T185239Z`.
 - Game release `67ff2565517875fcc48ea515f1fedbbf98f24b8a` deploy versioned, migration `002_browser_auth_requests` và backup DB/env/unit pass; vẫn giữ `WEB_AUTH_MODE=http`, `AUTH_TRANSITION_MODE=parallel`, local registration bật.
 - Public acceptance account web thật pass `start -> callback -> approve -> exchange -> bootstrap PostgreSQL`; profile `TRAN TUNG LAM`, Point `5000`. Không in/lưu password hoặc token.
