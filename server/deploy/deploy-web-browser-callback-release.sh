@@ -135,7 +135,7 @@ grep -Eiq '^set-cookie: (__Secure-)?authjs\.session-token=' "${switch_headers}"
   if (register.origin !== "https://ywonder.net" || register.pathname !== "/vi/register") process.exit(3);
   if (switching.origin !== "https://ywonder.net" ||
       switching.pathname !== "/vi/login" ||
-      switching.searchParams.get("locked") !== "1") process.exit(5);
+      switching.searchParams.has("locked")) process.exit(5);
   const loginCallback = new URL(login.searchParams.get("callbackUrl") || "https://invalid/");
   const callback = new URL(register.searchParams.get("callbackUrl") || "https://invalid/");
   const switchCallback = new URL(switching.searchParams.get("callbackUrl") || "https://invalid/");

@@ -166,7 +166,6 @@ function switchAccountRedirect(request: Request, requestUrl: URL): Response {
   publicCallback.searchParams.set(CONFIRMED_PARAM, "1");
 
   const loginUrl = new URL("/vi/login", PUBLIC_WEB_ORIGIN);
-  loginUrl.searchParams.set("locked", "1");
   loginUrl.searchParams.set("callbackUrl", publicCallback.toString());
   return redirectResponse(loginUrl, expiredSessionCookies(request));
 }

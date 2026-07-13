@@ -119,7 +119,7 @@ async function run() {
   assert.equal(response.status, 302, "Switch account must return to the login page.");
   redirect = callbackFromRedirect(response);
   assert.equal(redirect.location.pathname, "/vi/login");
-  assert.equal(redirect.location.searchParams.get("locked"), "1");
+  assert.equal(redirect.location.searchParams.has("locked"), false, "Switch account must not show a false locked-account warning.");
   assert.equal(redirect.callback.searchParams.get("account_confirmed"), "1");
   assert.equal(redirect.callback.searchParams.has("account_action"), false);
   const setCookie = response.headers.get("set-cookie") || "";
