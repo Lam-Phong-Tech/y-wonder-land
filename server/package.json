@@ -16,7 +16,8 @@
     "test:postgres": "node postgresSmokeTest.js",
     "test:security": "node securitySmokeTest.js",
     "test:web-auth": "node webAuthIntegrationTest.js",
-    "test:browser-auth": "node browserAuthIntegrationTest.js"
+    "test:browser-auth": "node browserAuthIntegrationTest.js",
+    "test:web-browser-callback": "node webBrowserCallbackRouteTest.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

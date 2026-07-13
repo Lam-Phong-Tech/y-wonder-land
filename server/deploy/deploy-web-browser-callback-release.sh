@@ -119,19 +119,37 @@ login_redirect="$(curl --silent --show-error --output /dev/null --write-out '%{r
   --max-time 5 "http://127.0.0.1:3033/api/game/browser/callback?request=${probe_request}&intent=login")"
 register_redirect="$(curl --silent --show-error --output /dev/null --write-out '%{redirect_url}' \
   --max-time 5 "http://127.0.0.1:3033/api/game/browser/callback?request=${probe_request}&intent=register")"
+switch_headers="${stage}/switch-account.headers"
+switch_redirect="$(curl --silent --show-error --dump-header "${switch_headers}" --output /dev/null --write-out '%{redirect_url}' \
+  --max-time 5 "http://127.0.0.1:3033/api/game/browser/callback?request=${probe_request}&intent=login&account_action=switch")"
+
+grep -Eiq '^cache-control:.*no-store' "${switch_headers}"
+grep -Eiq '^set-cookie: (__Secure-)?authjs\.session-token=' "${switch_headers}"
 
 /usr/local/bin/node -e '
-  const [loginValue, registerValue] = process.argv.slice(1);
+  const [loginValue, registerValue, switchValue] = process.argv.slice(1);
   const login = new URL(loginValue);
   const register = new URL(registerValue);
+  const switching = new URL(switchValue);
   if (login.origin !== "https://ywonder.net" || login.pathname !== "/vi/login") process.exit(2);
   if (register.origin !== "https://ywonder.net" || register.pathname !== "/vi/register") process.exit(3);
+  if (switching.origin !== "https://ywonder.net" ||
+      switching.pathname !== "/vi/login" ||
+      switching.searchParams.get("locked") !== "1") process.exit(5);
+  const loginCallback = new URL(login.searchParams.get("callbackUrl") || "https://invalid/");
   const callback = new URL(register.searchParams.get("callbackUrl") || "https://invalid/");
+  const switchCallback = new URL(switching.searchParams.get("callbackUrl") || "https://invalid/");
+  if (loginCallback.searchParams.get("account_confirmed") !== "1") process.exit(6);
   if (callback.origin !== "https://ywonder.net" ||
       callback.pathname !== "/api/game/browser/callback" ||
       callback.searchParams.get("intent") !== "register" ||
-      callback.searchParams.get("registration_completed") !== "1") process.exit(4);
-' "${login_redirect}" "${register_redirect}"
+      callback.searchParams.get("registration_completed") !== "1" ||
+      callback.searchParams.get("account_confirmed") !== "1") process.exit(4);
+  if (switchCallback.origin !== "https://ywonder.net" ||
+      switchCallback.pathname !== "/api/game/browser/callback" ||
+      switchCallback.searchParams.get("account_confirmed") !== "1" ||
+      switchCallback.searchParams.has("account_action")) process.exit(7);
+' "${login_redirect}" "${register_redirect}" "${switch_redirect}"
 
 completed=1
 echo "WEB_BROWSER_CALLBACK_DEPLOY=success"
@@ -140,3 +158,4 @@ echo "WEB_BACKUP=${backup}"
 echo "WEB_SERVICE=$(systemctl is-active "${service}")"
 echo "LOGIN_REDIRECT=pass"
 echo "REGISTER_REDIRECT=pass"
+echo "SWITCH_ACCOUNT_REDIRECT=pass"
