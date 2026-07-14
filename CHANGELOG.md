@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-07-14 (Farm action cancel and live lifecycle)
+
+### Fixed
+- Prevented the legacy `FarmInteractionController` component on `Tree.prefab` instances from replacing the `FarmManager` singleton that owns timed-action coroutines. HUD cancel now reaches the active feed coroutine, restores cursor/player control and invokes the reserved-food refund instead of allowing feed completion after animation cancel.
+- Crops and animals now die immediately in the active session when water/hunger reaches zero, including during tutorial. Crop/pen occupancy is released first and the resulting farm snapshot is saved immediately so a later device or relogin cannot restore the dead object.
+
+### Verified
+- Unity `Assembly-CSharp` compiles successfully with the generated response file. Only the pre-existing unrelated `enableStickAutoSprint` warning remains. Runtime Editor/EXE/APK acceptance is still pending.
+
 ## [Unreleased] - 2026-07-14 (Single-session and farm conflict P0)
 
 ### Changed

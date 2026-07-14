@@ -5,6 +5,15 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-07-14] — Hotfix hủy cho thú ăn và vòng đời trực tiếp
+
+### Fixed
+- Chặn component `FarmInteractionController` legacy trên các instance `Tree.prefab` chiếm singleton của controller thật trên `FarmManager`. Nút hủy HUD nay đi đúng timed coroutine: dừng thao tác cho ăn, mở khóa nhân vật/cursor và hoàn thức ăn đã giữ, không còn hủy animation nhưng vẫn cho thú ăn.
+- Cây và thú nay chết/héo ngay trong phiên đang chơi khi thanh nước/đói về `0%`, kể cả tutorial. Trước khi xóa, code giải phóng ô cây/chuồng và lưu snapshot farm ngay để relog hoặc thiết bị khác không phục hồi vật thể đã chết.
+
+### Verified
+- `Assembly-CSharp` compile pass bằng response file do Unity sinh; chỉ còn warning cũ không liên quan `enableStickAutoSprint`. Còn chờ Editor/EXE/APK runtime acceptance trước khi chốt `[x]`.
+
 ## [2026-07-14] — P0 phiên đơn và chống ghi đè farm đã deploy production
 
 ### Fixed

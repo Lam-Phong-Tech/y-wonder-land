@@ -126,6 +126,20 @@ namespace YWonderLand.Environment
 
         void Awake()
         {
+            // Tree.prefab still carries a legacy copy of this controller. It must not
+            // replace the FarmManager controller that owns timed-action coroutines.
+            if (GetComponent<HarvestableResource>() != null)
+            {
+                enabled = false;
+                return;
+            }
+
+            if (Instance != null && Instance != this)
+            {
+                enabled = false;
+                return;
+            }
+
             Instance = this;
         }
 
@@ -438,7 +452,7 @@ namespace YWonderLand.Environment
 
         public bool CancelTimedActionFromHUD()
         {
-            if (!timedActionActive) return false;
+            if (!timedActionActive && timedActionRoutine == null) return false;
             CancelTimedAction("Đã hủy thao tác.");
             return true;
         }
@@ -498,6 +512,8 @@ namespace YWonderLand.Environment
                 return false;
             }
 
+            // The controller that starts the coroutine must receive the HUD cancel.
+            Instance = this;
             timedActionToken++;
             int token = timedActionToken;
             timedActionActive = true;

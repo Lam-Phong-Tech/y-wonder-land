@@ -1,6 +1,7 @@
 using UnityEngine;
 using System;
 using YWonderLand.Data;
+using YWonderLand.Backend;
 
 namespace YWonderLand.Environment
 {
@@ -134,7 +135,7 @@ namespace YWonderLand.Environment
             feedTimer = (float)(now - feedRefTime); // cache cho save cũ
 
             // ── CHẾT ĐÓI khi thanh máu cạn (khách chốt thanh-máu). 'Bệnh' nay là hệ RIÊNG, KHÔNG set từ đói. ──
-            if (window > 0f && (now - feedRefTime) >= window && !IsTutorialActive())
+            if (window > 0f && (now - feedRefTime) >= window)
             {
                 DieFromHunger(); // khách chốt: chết là BIẾN MẤT + trả ô chuồng, không để xác
                 return;
@@ -298,6 +299,12 @@ namespace YWonderLand.Environment
             if (data != null)
                 ScreenToast.Show($"{data.animalName} đã chết đói! Nhớ cho ăn đúng giờ.");
 
+            if (currentPen != null)
+            {
+                currentPen.RemoveAnimal(this);
+                currentPen = null;
+            }
+
             // Trả ô chuồng về trống (rào vẫn còn) để thả con mới — không để xác kẹt ô.
             if (occupiedCells != null)
             {
@@ -308,6 +315,7 @@ namespace YWonderLand.Environment
 
             currentState = AnimalState.Dead;
             OnAnimalStateChanged?.Invoke(this); // báo popup/listener cập nhật trước khi xoá
+            FarmStateSync.SaveRuntimeState();
             Destroy(gameObject);
         }
 
