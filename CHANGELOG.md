@@ -11,12 +11,17 @@
 
 ### Verified
 - Node syntax checks, full JSON Phase 1, standalone realtime, security, Browser SSO, and web-auth test suites pass locally. Coverage includes stale REST token `401`, old socket `4008`, logout revocation, and stale farm write `409` without overwrite.
-- The final Unity Editor compile produced no new C# errors. A real PostgreSQL smoke run is still pending because the workstation does not have `POSTGRES_TEST_DATABASE_URL`.
+- The final Unity Editor compile produced no new C# errors. The workstation did not have `POSTGRES_TEST_DATABASE_URL`; the isolated PostgreSQL store smoke later passed during the controlled production deployment.
 - User runtime acceptance passed on the rebuilt EXE/APK test artifacts: a newly issued session replaces the still-open older session without requiring an app restart, and sequential EXE -> APK login no longer restores the stale farm/crop/watering snapshot. Accepted code checkpoint: `21cc20d2`.
 
-### Needs Deployment Test
-- Back up production, apply migration `003`, run PostgreSQL smoke, and deploy as a versioned VPS release with rollback. Existing cached JWTs do not have `sid` and must log in again after cutover.
-- Rebuild EXE/APK and pass sequential A -> B -> A farm acceptance, immediate duplicate-session replacement while the old app remains open, and abrupt-close outbox recovery before marking cross-device sync complete.
+### Production Deployment
+- Deployed versioned release `21cc20d2a827e5327429cf5f0ecf67a6b67fdf79` after successful PostgreSQL, environment and systemd-unit backups. Migration `003_active_player_sessions` applied successfully; the previous versioned release remains the rollback target.
+- Isolated PostgreSQL smoke and the public Phase 1 REST/WSS smoke passed, including session rotation/revocation, stale REST `401`, old socket `4008`, farm compare-and-set conflict `409`, persistence and relogin. Temporary smoke accounts were removed after the test.
+- Independent Windows verification confirmed public health with `storage.mode=postgres`; ports `80/443` are reachable while internal `3000/5432/8080` remain closed.
+
+### Remaining Device Acceptance
+- Cached JWTs issued before this release do not have `sid`; users must log in again.
+- Reuse the EXE/APK containing checkpoint `21cc20d2` and pass sequential A -> B -> A farm acceptance, immediate duplicate-session replacement while the old app remains open, and abrupt-close outbox recovery before marking the complete client flow accepted.
 
 ## [Unreleased] - 2026-07-11 (Production backend hardening and private VPS staging)
 
