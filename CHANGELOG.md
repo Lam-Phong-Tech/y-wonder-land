@@ -19,9 +19,10 @@
 - Isolated PostgreSQL smoke and the public Phase 1 REST/WSS smoke passed, including session rotation/revocation, stale REST `401`, old socket `4008`, farm compare-and-set conflict `409`, persistence and relogin. Temporary smoke accounts were removed after the test.
 - Independent Windows verification confirmed public health with `storage.mode=postgres`; ports `80/443` are reachable while internal `3000/5432/8080` remain closed.
 
-### Remaining Device Acceptance
-- Cached JWTs issued before this release do not have `sid`; users must log in again.
-- Reuse the EXE/APK containing checkpoint `21cc20d2` and pass sequential A -> B -> A farm acceptance, immediate duplicate-session replacement while the old app remains open, and abrupt-close outbox recovery before marking the complete client flow accepted.
+### Post-deploy Device Acceptance
+- Cached JWTs issued before this release did not have `sid`, so the acceptance run began with fresh login on both devices.
+- The EXE/APK containing checkpoint `21cc20d2` passed sequential A -> B -> A synchronization for farm layout, plowed plots, crops/watering, construction, inventory, pens/animals and elapsed-time recovery. The newer login immediately replaced the older still-open session.
+- Abrupt-close recovery also passed: the player-scoped outbox retried the pending state after relogin and the server retained the correct authoritative snapshot. The P0 account/farm synchronization gate is accepted on production.
 
 ## [Unreleased] - 2026-07-11 (Production backend hardening and private VPS staging)
 

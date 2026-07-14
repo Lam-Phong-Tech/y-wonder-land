@@ -24,8 +24,10 @@
 - PostgreSQL smoke trong schema tạm và public Phase 1 REST/WSS smoke đều pass: rotate/revoke session, token cũ `401`, socket cũ `4008`, farm stale write `409`, persistence/relogin. Account smoke đã được dọn khỏi DB.
 - Kiểm tra độc lập từ Windows xác nhận health `storage.mode=postgres`; chỉ `80/443` public, còn `3000/5432/8080` đóng.
 
-### Pending client acceptance
-- JWT cũ thiếu `sid` phải đăng nhập lại. Dùng EXE/APK chứa checkpoint `21cc20d2` để lặp A → B → A, thay phiên ngay khi app cũ vẫn mở, xác nhận farm/cây/nước/túi không rollback và kiểm tra đóng app đột ngột rồi retry outbox trước khi tick hoàn tất toàn luồng.
+### Nghiệm thu client sau deploy
+- Đã đăng nhập mới trên EXE/APK chứa checkpoint `21cc20d2` và pass thay phiên ngay khi app cũ vẫn mở.
+- Ca A → B → A giữ đúng bố cục farm, đất đã cuốc, cây/nước, xây dựng, túi đồ, chuồng/thú và thời gian bù; không còn rollback về cache cũ.
+- Ca đóng app đột ngột cũng pass: outbox retry đúng khi đăng nhập lại và server giữ snapshot authoritative. Cổng P0 đồng bộ tài khoản/farm trên production được chốt `[x]`.
 
 ## [2026-07-13] — Hotfix đồng bộ nông trại xuyên thiết bị
 

@@ -2,6 +2,8 @@
 
 # Dùng khi bắt đầu conversation MỚI với AI
 
+- **Cập nhật 14/07/2026 - nghiệm thu client post-deploy P0 đã đạt `[x]`:** EXE/APK chứa checkpoint `21cc20d2` đã pass thay phiên tức thì khi app cũ vẫn mở; A → B → A giữ đúng bố cục farm, đất đã cuốc, cây/nước, xây dựng, túi đồ, chuồng/thú và thời gian bù. Ca đóng app đột ngột cũng xác nhận outbox gửi bù chính xác sau relogin mà không phục hồi snapshot cũ. Cổng bàn giao tiếp theo là smoke Browser SSO trên đúng artifact bàn giao (tiếp tục/đổi account, đăng ký mới + OTP/mã giới thiệu, Android quay lại app và relogin xuyên thiết bị), sau đó giao RC cho tester. Tiếp tục giữ local/web auth song song cho tới khi cổng này pass.
+
 - **Cập nhật 14/07/2026 - deploy production P0 đã đạt `[x]`:** đã backup PostgreSQL/env/systemd unit và deploy versioned release `21cc20d2a827e5327429cf5f0ecf67a6b67fdf79`. Migration `003_active_player_sessions`, PostgreSQL smoke trong schema tạm và public Phase 1 REST/WSS smoke đều pass, gồm rotate/revoke session, token cũ `401`, socket cũ `4008`, stale farm `409`, persistence/relogin và dọn account smoke. Kiểm tra độc lập từ Windows xác nhận health PostgreSQL; chỉ `80/443` mở, `3000/5432/8080` đóng. JWT cũ thiếu `sid` phải đăng nhập lại. Cổng tiếp theo là dùng đúng EXE/APK chứa `21cc20d2` để lặp thay phiên A/B, A -> B -> A farm/cây/nước/túi và abrupt-close retry outbox.
 
 - **Cập nhật 14/07/2026 - runtime retest P0 đã đạt `[x]`:** anh đã build/test checkpoint `21cc20d2` trên artifact EXE/APK trước deploy và xác nhận phiên mới thay phiên cũ khi app cũ vẫn mở, còn đổi tuần tự EXE -> APK không phục hồi snapshot farm/cây/tưới cũ. Code và backend production đều đã qua cổng; còn đăng nhập lại trên artifact đó sau deploy và lặp ca thiết bị thật để chốt toàn luồng.
