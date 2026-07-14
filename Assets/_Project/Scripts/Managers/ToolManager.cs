@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using YWonderLand.Backend;
 
 namespace YWonderLand.Managers
 {
@@ -45,12 +46,32 @@ namespace YWonderLand.Managers
             }
         }
 
+        private void OnEnable()
+        {
+            if (AuthService.Instance != null)
+                AuthService.Instance.IdentityChanged += HandleIdentityChanged;
+        }
+
+        private void OnDisable()
+        {
+            if (AuthService.Instance != null)
+                AuthService.Instance.IdentityChanged -= HandleIdentityChanged;
+        }
+
+        private void HandleIdentityChanged(string previousScopeId, string nextScopeId)
+        {
+            LoadToolLevels();
+            OnToolUpgraded?.Invoke();
+            Debug.Log($"[ToolManager] Reloaded local cache for '{nextScopeId}'.");
+        }
+
         private void LoadToolLevels()
         {
+            toolLevels.Clear();
             foreach (var toolId in BaseTools)
             {
                 // Mặc định cấp 1
-                int level = PlayerPrefs.GetInt($"YW_ToolLevel_{toolId}", 1);
+                int level = PlayerScopedPrefs.GetInt($"YW_ToolLevel_{toolId}", 1);
                 toolLevels[toolId] = level;
             }
         }
@@ -59,9 +80,9 @@ namespace YWonderLand.Managers
         {
             foreach (var kvp in toolLevels)
             {
-                PlayerPrefs.SetInt($"YW_ToolLevel_{kvp.Key}", kvp.Value);
+                PlayerScopedPrefs.SetInt($"YW_ToolLevel_{kvp.Key}", kvp.Value);
             }
-            PlayerPrefs.Save();
+            PlayerScopedPrefs.Save();
         }
 
         public int GetToolLevel(string toolId)

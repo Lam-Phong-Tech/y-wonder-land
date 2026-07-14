@@ -330,7 +330,7 @@ public class AnimalInteractionPopupController : MonoBehaviour
     private void PopulateInfo(FarmAnimal animal)
     {
         AnimalDefinition d = animal != null ? animal.data : null;
-        if (lblPrice != null) lblPrice.text = d != null ? $"{d.buyPrice} POS" : "—";
+        if (lblPrice != null) lblPrice.text = d != null ? $"{d.buyPrice} Point" : "—";
         if (lblSlots != null) lblSlots.text = d != null ? $"{d.penSlots} ô" : "—";
         if (lblFoodMain != null) lblFoodMain.text = d != null ? FoodText(d.foodMainName, d.foodMainAmount) : "—";
         if (lblFoodAlt != null) lblFoodAlt.text = d != null ? FoodText(d.foodAltName, d.foodAltAmount) : "—";
@@ -524,7 +524,7 @@ public class AnimalInteractionPopupController : MonoBehaviour
 
             int aexp = Mathf.Max(1, Mathf.RoundToInt(animalDays * 10f));
             ExperienceManager.Instance?.AddEXP(aexp);
-            ScreenToast.ShowInfo($"Thu hoạch: +{amount} {itemId}");
+            ScreenToast.ShowItemReward(itemId, amount, "Thu hoạch");
 
             if (wasEnclosureMode)
                 RefreshEnclosureUI();

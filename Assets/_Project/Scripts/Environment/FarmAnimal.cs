@@ -273,8 +273,12 @@ namespace YWonderLand.Environment
             {
                 var inv = YWonderLand.Managers.InventoryManager.Instance;
                 if (inv != null) inv.AddItem(data.meatItemId, data.meatAmount);
+
                 string meatName = !string.IsNullOrEmpty(data.productAltName) ? data.productAltName : "thịt";
-                ScreenToast.ShowInfo($"Làm thịt {data.animalName}: +{data.meatAmount} {meatName}");
+                ScreenToast.ShowInfoForItem(
+                    data.meatItemId,
+                    $"Làm thịt {data.animalName}: +{data.meatAmount} {meatName}",
+                    fallbackText: "Meat");
             }
 
             // Trả ô chuồng về trống (rào vẫn còn) để thả con mới.

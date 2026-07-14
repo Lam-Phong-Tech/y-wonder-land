@@ -9,17 +9,17 @@ public class TutorialManager : MonoBehaviour
     public static TutorialManager Instance { get; private set; }
 
     // FLOW MỚI (Giai đoạn 1 — đảo nông trại):
-    // Lên đảo (chào) -> tới Cây -> chặt cây -> tới Mỏ -> đào khoáng -> tới Bãi ruộng
+    // Lên đảo (chào) -> tới Cây -> chặt cây -> tới Bãi ruộng
     // -> xây ruộng -> cuốc -> trồng -> tưới -> thu hoạch -> tới Bãi chuồng
-    // -> xây chuồng -> thả thú -> cho ăn -> hoàn thành.
+    // -> xây chuồng -> hoàn thành.
     // (Câu cá + sang đảo thành phố = Giai đoạn 2, làm sau.)
     public enum TutorialStep
     {
         WaitForStart,       // 0: chờ cutscene
         FollowToTree,       // 1: theo NPC tới cây
         ChopTree,           // 2: chặt cây (lấy gỗ)
-        FollowToRock,       // 3: theo NPC tới mỏ
-        MineRock,           // 4: đào khoáng (lấy đá)
+        FollowToRock,       // Legacy: giữ giá trị enum để không làm lệch scene cũ
+        MineRock,           // Legacy: không còn dùng trong tutorial hiện tại
         FollowToFarmPlot,   // 5: theo NPC tới bãi ruộng
         BuildFarmPlot,      // 6: xây ô ruộng (phím B)
         PlowTile,           // 7: cuốc đất
@@ -28,8 +28,8 @@ public class TutorialManager : MonoBehaviour
         WaitHarvest,        // 10: chờ chín + thu hoạch
         FollowToPenArea,    // 11: theo NPC tới bãi chuồng
         BuildPen,           // 12: xây chuồng
-        PlaceAnimal,        // 13: thả thú vào chuồng
-        FeedAnimal,         // 14: cho thú ăn
+        PlaceAnimal,        // Legacy: không còn bắt buộc trong tutorial hiện tại
+        FeedAnimal,         // Legacy: không còn bắt buộc trong tutorial hiện tại
         Complete            // 15: hoàn thành (Giai đoạn 2: câu cá)
     }
 
@@ -50,7 +50,7 @@ public class TutorialManager : MonoBehaviour
     [Header("Điểm mốc NPC dẫn tới (kéo Empty vào)")]
     [Tooltip("Điểm gần CÂY để chặt")]
     public Transform targetTreeArea;
-    [Tooltip("Điểm gần MỎ/ĐÁ để đào")]
+    [Tooltip("Legacy: tutorial hiện tại không còn dẫn người chơi đi đào khoáng")]
     public Transform targetRockArea;
     [Tooltip("Điểm BÃI ĐẤT để xây ruộng")]
     public Transform targetFarmPlotArea;
@@ -82,6 +82,11 @@ public class TutorialManager : MonoBehaviour
 
     // NPC exclamation mark
     private GameObject exclamationMark;
+    private Coroutine exclamationBobCoroutine;
+
+    private string activeTutorialScopeId = "";
+    private bool tutorialRunStarted;
+    private bool authEventsSubscribed;
 
     private float harvestCountdown = 5f;
     private Coroutine countdownCoroutine;
@@ -132,6 +137,8 @@ public class TutorialManager : MonoBehaviour
 
     void Start()
     {
+        SubscribeAuthEvents();
+
         if (guideNPC != null)
         {
             guideNPC.OnDialogueTriggered += ShowSubtitle;
@@ -146,26 +153,18 @@ public class TutorialManager : MonoBehaviour
                 idle: new[] { "Cậu đứng đực ra đó làm gì? Tay chân để làm cảnh à?", "Cây nó không tự đổ đâu, vung rìu lên!" },
                 OnTreeArrived));
 
-            // Node 1: MỎ (đào khoáng)
-            nodes.Add(BuildNode("TutorialNode_Rock", targetRockArea, new Vector3(16f, 0.5f, 12f),
-                walk: new[] { "Có gỗ rồi. Giờ theo tôi đi kiếm đá.", "Đi nào, mỏ đá ngay gần đây thôi." },
-                wait: new[] { "Lề mề vừa thôi cậu ơi!", "Tôi già rồi mà còn nhanh hơn cậu đấy." },
-                action: new[] { "Cầm cúp đập mấy tảng đá kia ra cho tôi. Cần đá để xây dựng đấy." },
-                idle: new[] { "Đá nó cứng chứ có cắn cậu đâu mà sợ? Đập đi!", "Còn chờ gì nữa, đập đá lên!" },
-                OnRockArrived));
-
-            // Node 2: BÃI RUỘNG (xây ruộng + canh tác)
+            // Node 1: BÃI RUỘNG (xây ruộng + canh tác)
             nodes.Add(BuildNode("TutorialNode_FarmPlot", targetFarmPlotArea, new Vector3(8f, 0.5f, 8f),
-                walk: new[] { "Đủ nguyên liệu rồi. Theo tôi ra bãi đất trống.", "Đi nào, tới lúc làm nông thật sự." },
+                walk: new[] { "Có gỗ rồi. Theo tôi ra bãi đất trống.", "Đi nào, tới lúc làm nông thật sự." },
                 wait: new[] { "Nhanh lên, đất đang chờ cậu kìa!", "Lại đây, tôi chỉ cho cách trồng trọt." },
                 action: new[] { "Giờ mở Xây Dựng (phím B), chọn Ruộng và đặt một ô đất xuống đây cho tôi." },
                 idle: new[] { "Mở phím B lên đi cậu, đứng đó hoài!", "Ruộng không tự mọc ra đâu, xây đi!" },
                 OnFarmPlotArrived));
 
-            // Node 3: BÃI CHUỒNG (xây chuồng + nuôi thú)
+            // Node 2: BÃI CHUỒNG (chỉ hướng dẫn xây chuồng)
             nodes.Add(BuildNode("TutorialNode_Pen", targetPenArea, new Vector3(5f, 0.5f, 14f),
                 walk: new[] { "Trồng trọt xong rồi, giờ tới chăn nuôi. Theo tôi!", "Đi nào, qua khu chuồng trại." },
-                wait: new[] { "Lẹ chân lên, lũ thú đói rồi kìa!", "Cậu lại la cà nữa à?" },
+                wait: new[] { "Lẹ chân lên, khu chuồng trại ở ngay đây!", "Cậu lại la cà nữa à?" },
                 action: new[] { "Mở Xây Dựng, chọn một cái Chuồng và đặt xuống đây nhé." },
                 idle: new[] { "Chuồng đâu? Xây đi cậu!", "Đứng nhìn tôi làm gì, mở phím B xây chuồng đi!" },
                 OnPenArrived));
@@ -174,6 +173,43 @@ public class TutorialManager : MonoBehaviour
         }
 
         StartCoroutine(SetupHUDReferences());
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance != this) return;
+
+        UnsubscribeAuthEvents();
+        UnsubscribeTutorialEvents();
+        RemoveNPCExclamationMark();
+
+        if (guideNPC != null)
+            guideNPC.OnDialogueTriggered -= ShowSubtitle;
+
+        Instance = null;
+    }
+
+    private void SubscribeAuthEvents()
+    {
+        var auth = YWonderLand.Backend.AuthService.Instance;
+        if (auth == null || authEventsSubscribed) return;
+
+        auth.IdentityChanging += OnAuthIdentityChanging;
+        authEventsSubscribed = true;
+    }
+
+    private void UnsubscribeAuthEvents()
+    {
+        var auth = YWonderLand.Backend.AuthService.Instance;
+        if (auth != null && authEventsSubscribed)
+            auth.IdentityChanging -= OnAuthIdentityChanging;
+
+        authEventsSubscribed = false;
+    }
+
+    private void OnAuthIdentityChanging(string previousScopeId, string nextScopeId)
+    {
+        ResetTutorialRuntime();
     }
 
     // Helper tạo 1 TutorialNode động tại điểm mốc (hoặc vị trí mặc định nếu chưa đặt).
@@ -218,8 +254,8 @@ public class TutorialManager : MonoBehaviour
                 break;
             case TutorialStep.FollowToRock:
                 hasAutoAdvanced = true;
-                Debug.Log("[Tutorial] Auto-nhảy: FollowToRock quá lâu -> tự tới Mỏ.");
-                OnRockArrived();
+                Debug.Log("[Tutorial] Bỏ bước đào khoáng cũ -> chuyển tới bãi ruộng.");
+                ContinueToFarmPlot();
                 break;
             case TutorialStep.FollowToFarmPlot:
                 hasAutoAdvanced = true;
@@ -250,7 +286,6 @@ public class TutorialManager : MonoBehaviour
         switch (currentStep)
         {
             case TutorialStep.FollowToTree:
-            case TutorialStep.FollowToRock:
             case TutorialStep.FollowToFarmPlot:
             case TutorialStep.FollowToPenArea:
                 hintTitle = "Đi theo NPC!";
@@ -259,10 +294,6 @@ public class TutorialManager : MonoBehaviour
             case TutorialStep.ChopTree:
                 hintTitle = "Chặt cây!";
                 hintDesc = "Nhấn giữ chuột vào cây để đốn lấy gỗ.";
-                break;
-            case TutorialStep.MineRock:
-                hintTitle = "Đào khoáng!";
-                hintDesc = "Nhấn giữ chuột vào tảng đá để đập lấy đá.";
                 break;
             case TutorialStep.BuildFarmPlot:
                 hintTitle = "Xây ruộng!";
@@ -283,14 +314,6 @@ public class TutorialManager : MonoBehaviour
             case TutorialStep.BuildPen:
                 hintTitle = "Xây chuồng!";
                 hintDesc = "Mở Xây Dựng (B), chọn Chuồng và đặt xuống.";
-                break;
-            case TutorialStep.PlaceAnimal:
-                hintTitle = "Thả thú!";
-                hintDesc = "Bấm vào chuồng, chọn con vật trong túi để thả.";
-                break;
-            case TutorialStep.FeedAnimal:
-                hintTitle = "Cho ăn!";
-                hintDesc = "Bấm vào con thú đói, chọn thức ăn để cho ăn.";
                 break;
         }
 
@@ -338,16 +361,30 @@ public class TutorialManager : MonoBehaviour
 
     public void StartTutorial()
     {
+        SubscribeAuthEvents();
+
+        string scopeId = YWonderLand.Backend.AuthService.GetCurrentPlayerScopeId();
+        if (tutorialRunStarted && string.Equals(activeTutorialScopeId, scopeId, System.StringComparison.Ordinal))
+        {
+            Debug.Log("[TutorialManager] Bỏ qua StartTutorial lặp trong cùng phiên đăng nhập.");
+            return;
+        }
+
+        ResetTutorialRuntime();
+        activeTutorialScopeId = scopeId;
+        tutorialRunStarted = true;
+
         var prof = YWonderLand.Backend.PlayerProfileService.Instance;
         if (!forceRunTutorialForTesting && prof != null && prof.Profile != null && prof.Profile.tutorialCompleted)
         {
             currentStep = TutorialStep.Complete;
+            RemoveNPCExclamationMark();
             Debug.Log("[TutorialManager] Bỏ qua tutorial — hồ sơ đã hoàn thành trước đó. (Bật 'Force Run Tutorial For Testing' để chạy lại)");
             return;
         }
 
         SetStep(TutorialStep.FollowToTree);
-        UpdateQuestHUD("[1/13] Đi theo NPC Tân Thủ tới chỗ cái cây");
+        UpdateQuestHUD("[1/11] Đi theo NPC Tân Thủ tới chỗ cái cây");
         Debug.Log("[TutorialManager] Onboarding Tutorial (flow mới) bắt đầu.");
 
         // Lời chào của ông lão khi người chơi mới lên đảo, rồi dẫn tới node 0 (Cây).
@@ -366,7 +403,7 @@ public class TutorialManager : MonoBehaviour
     {
         if (currentStep != TutorialStep.FollowToTree) return;
         SetStep(TutorialStep.ChopTree);
-        UpdateQuestHUD("[2/13] Chặt cây để lấy gỗ");
+        UpdateQuestHUD("[2/11] Chặt cây để lấy gỗ");
         ShowInstructionBanner("Chặt cây!", "Nhấn giữ chuột vào cây để đốn gỗ.");
 
         // KHÔNG auto-nhảy bước dù túi đã có gỗ sẵn (vd loadout test) — bắt người chơi THỰC SỰ chặt 1 nhát.
@@ -374,21 +411,14 @@ public class TutorialManager : MonoBehaviour
         YWonderLand.Environment.HarvestableResource.OnResourceHarvested += OnResourceHarvested;
     }
 
-    // --- Trạm 2: MỎ ---
+    // Legacy safety: mọi lời gọi từ flow cũ đều chuyển thẳng tới khu trồng trọt.
     private void OnRockArrived()
     {
         if (currentStep != TutorialStep.FollowToRock) return;
-        SetStep(TutorialStep.MineRock);
-        UpdateQuestHUD("[4/14] Đào khoáng để lấy đá");
-        ShowInstructionBanner("Đào khoáng!", "Nhấn giữ chuột vào tảng đá để đập lấy đá.");
-
-        // KHÔNG auto-nhảy bước dù túi đã có đá sẵn (vd loadout test) — bắt người chơi THỰC SỰ đập 1 nhát.
-        YWonderLand.Environment.HarvestableResource.OnResourceHarvested -= OnResourceHarvested;
-        YWonderLand.Environment.HarvestableResource.OnResourceHarvested += OnResourceHarvested;
+        ContinueToFarmPlot();
     }
 
-    // Dùng chung cho chặt cây (ChopTree) và đào đá (MineRock).
-    // Chấp nhận BẤT KỲ tài nguyên ở đúng bước (tránh kẹt do yieldItemId không khớp "wood"/"stone").
+    // Chấp nhận tài nguyên ở đúng bước chặt cây để tránh kẹt do yieldItemId không khớp "wood".
     private void OnResourceHarvested(string yieldId, int qty)
     {
         Debug.Log($"[Tutorial] OnResourceHarvested: yield='{yieldId}' | step={currentStep}");
@@ -397,21 +427,16 @@ public class TutorialManager : MonoBehaviour
         {
             YWonderLand.Environment.HarvestableResource.OnResourceHarvested -= OnResourceHarvested;
             CompleteNode(0);
-            // BỎ bước đào đá (đào đá chỉ ở Thành phố) → sang thẳng bãi ruộng (node FarmPlot = node 2).
-            SetStep(TutorialStep.FollowToFarmPlot);
-            UpdateQuestHUD("[3/13] Đi theo NPC tới bãi đất trống");
-            ShowSubtitleDelayed("Được đấy, có gỗ rồi! Giờ theo tôi ra bãi đất, tôi dạy cậu trồng trọt.");
-            StartNode(2);
+            ContinueToFarmPlot();
         }
-        else if (currentStep == TutorialStep.MineRock)
-        {
-            YWonderLand.Environment.HarvestableResource.OnResourceHarvested -= OnResourceHarvested;
-            CompleteNode(1);
-            SetStep(TutorialStep.FollowToFarmPlot);
-            UpdateQuestHUD("[5/14] Đi theo NPC tới bãi đất trống");
-            ShowSubtitleDelayed("Tốt! Đủ gỗ đá rồi. Theo tôi ra bãi đất, tôi dạy cậu trồng trọt.");
-            StartNode(2);
-        }
+    }
+
+    private void ContinueToFarmPlot()
+    {
+        SetStep(TutorialStep.FollowToFarmPlot);
+        UpdateQuestHUD("[3/11] Đi theo NPC tới bãi đất trống");
+        ShowSubtitleDelayed("Được đấy, có gỗ rồi! Giờ theo tôi ra bãi đất, tôi dạy cậu trồng trọt.");
+        StartNode(1);
     }
 
     // --- Trạm 3: BÃI RUỘNG ---
@@ -419,7 +444,7 @@ public class TutorialManager : MonoBehaviour
     {
         if (currentStep != TutorialStep.FollowToFarmPlot) return;
         SetStep(TutorialStep.BuildFarmPlot);
-        UpdateQuestHUD("[4/13] Mở Xây Dựng (B), chọn Ruộng và đặt xuống");
+        UpdateQuestHUD("[4/11] Mở Xây Dựng (B), chọn Ruộng và đặt xuống");
         ShowInstructionBanner("Xây ruộng!", "Mở phím B, chọn Ruộng, đặt 1 ô đất xuống.");
 
         // Ghi nhớ các ô đất hiện có để phát hiện ô MỚI người chơi vừa xây.
@@ -451,23 +476,17 @@ public class TutorialManager : MonoBehaviour
             }
 
             SetStep(TutorialStep.PlowTile);
-            UpdateQuestHUD("[5/13] Cầm cuốc, nhấp vào ô đất vừa xây để cuốc");
+            UpdateQuestHUD("[5/11] Cầm cuốc, nhấp vào ô đất vừa xây để cuốc");
             ShowSubtitleDelayed("Ngon! Giờ cầm cuốc nhấp vào ô đất đó để xới lên nào.");
             ShowInstructionBanner("Cuốc đất!", "Nhấp chuột vào ô đất vừa xây.");
-            SetNodeDialogues(2, "Cầm cuốc xới ô đất đó lên cho tôi!", "Cuốc đất đi cậu, đứng nhìn hoài vậy!");
+            SetNodeDialogues(1, "Cầm cuốc xới ô đất đó lên cho tôi!", "Cuốc đất đi cậu, đứng nhìn hoài vậy!");
         }
         else if (currentStep == TutorialStep.BuildPen && lower.Contains("chuồng"))
         {
             GhostPlacementController.OnBuildingPlaced -= OnBuildingPlaced;
-            SetStep(TutorialStep.PlaceAnimal);
-            UpdateQuestHUD("[12/13] Bấm vào chuồng, chọn con vật trong túi để thả");
-            ShowSubtitleDelayed("Chuồng xong rồi! Giờ bấm vào chuồng, chọn con vật trong túi mà thả vào.");
-            ShowInstructionBanner("Thả thú!", "Bấm vào chuồng → chọn con vật phù hợp.");
-            SetNodeDialogues(3, "Bấm vào chuồng, chọn con vật mà thả vào!", "Thả con vật vào chuồng đi cậu, đứng đó hoài!");
-
-            // Flow MỚI: nghe sự kiện thả thú từ FarmAnimal (hệ chuồng BuildSurfaceCell), KHÔNG dùng AnimalPenSpawner cũ.
-            YWonderLand.Environment.FarmAnimal.OnAnimalSpawned -= OnAnimalSpawned;
-            YWonderLand.Environment.FarmAnimal.OnAnimalSpawned += OnAnimalSpawned;
+            CompleteNode(2);
+            ShowSubtitleDelayed("Chuồng xong rồi! Vậy là cậu đã biết những việc cơ bản trên nông trại.", 0.5f, 4f);
+            CompleteTutorial();
         }
     }
 
@@ -484,20 +503,20 @@ public class TutorialManager : MonoBehaviour
     {
         if (currentStep != TutorialStep.PlowTile) return;
         SetStep(TutorialStep.PlantSeed);
-        UpdateQuestHUD("[6/13] Mở túi, chọn hạt rồi nhấp vào ô đất để gieo");
+        UpdateQuestHUD("[6/11] Mở túi, chọn hạt rồi nhấp vào ô đất để gieo");
         ShowSubtitleDelayed("Khá đấy! Giờ mở túi chọn hạt giống, rồi gieo xuống ô đất.");
         ShowInstructionBanner("Gieo hạt!", "Mở túi chọn hạt → nhấp ô đất để gieo.");
-        SetNodeDialogues(2, "Mở túi chọn hạt rồi gieo xuống ô đó!", "Gieo hạt đi cậu, đất xới sẵn rồi đấy!");
+        SetNodeDialogues(1, "Mở túi chọn hạt rồi gieo xuống ô đó!", "Gieo hạt đi cậu, đất xới sẵn rồi đấy!");
     }
 
     private void OnTilePlanted(FarmTile tile)
     {
         if (currentStep != TutorialStep.PlantSeed && currentStep != TutorialStep.BuildFarmPlot) return;
         SetStep(TutorialStep.WaterTile);
-        UpdateQuestHUD("[7/13] Nhấp vào ô đất để tưới nước");
+        UpdateQuestHUD("[7/11] Nhấp vào ô đất để tưới nước");
         ShowSubtitleDelayed("Gieo xong rồi. Cây không có nước thì sao lớn? Tưới đi cậu!");
         ShowInstructionBanner("Tưới nước!", "Nhấp chuột vào ô đất để tưới.");
-        SetNodeDialogues(2, "Tưới nước cho cây mau lớn đi!", "Cây khát khô rồi, tưới nước đi cậu!");
+        SetNodeDialogues(1, "Tưới nước cho cây mau lớn đi!", "Cây khát khô rồi, tưới nước đi cậu!");
     }
 
     private void OnTileWatered(FarmTile tile)
@@ -509,10 +528,10 @@ public class TutorialManager : MonoBehaviour
         if (countdownCoroutine != null) StopCoroutine(countdownCoroutine);
         countdownCoroutine = StartCoroutine(HarvestCountdownSequence());
 
-        UpdateQuestHUD("[8/13] Chờ cây lớn...");
+        UpdateQuestHUD("[8/11] Chờ cây lớn...");
         ShowSubtitleDelayed("Tưới rồi đấy. Chờ xíu cho cây lớn, nôn nóng cũng chẳng nhanh hơn đâu.");
         ShowInstructionBanner("Đợi cây lớn!", "Cây đang phát triển, chờ vài giây để thu hoạch.");
-        SetNodeDialogues(2, "Chờ cây lớn xíu, đừng nôn.", "Kiên nhẫn nào cậu, cây sắp lớn rồi.");
+        SetNodeDialogues(1, "Chờ cây lớn xíu, đừng nôn.", "Kiên nhẫn nào cậu, cây sắp lớn rồi.");
         ShowCountdownTimer();
     }
 
@@ -520,7 +539,7 @@ public class TutorialManager : MonoBehaviour
     {
         while (harvestCountdown > 0f)
         {
-            UpdateQuestHUD($"[8/13] Chờ cây chín (còn {Mathf.CeilToInt(harvestCountdown)}s)");
+            UpdateQuestHUD($"[8/11] Chờ cây chín (còn {Mathf.CeilToInt(harvestCountdown)}s)");
             if (countdownNumber != null)
             {
                 countdownNumber.text = Mathf.CeilToInt(harvestCountdown).ToString();
@@ -533,22 +552,22 @@ public class TutorialManager : MonoBehaviour
         }
 
         HideCountdownTimer();
-        UpdateQuestHUD("[9/13] Nhấp vào ô đất để thu hoạch!");
+        UpdateQuestHUD("[9/11] Nhấp vào ô đất để thu hoạch!");
         ShowSubtitle("Chín rồi kìa! Mau nhấp vào thu hoạch đi cậu.");
         ShowInstructionBanner("Đã chín!", "Nhấp chuột vào ô đất để thu hoạch.");
-        SetNodeDialogues(2, "Chín rồi, nhấp vào nhổ lên đi cậu!", "Cây chín rục rồi kìa, còn chờ gì nữa!");
+        SetNodeDialogues(1, "Chín rồi, nhấp vào nhổ lên đi cậu!", "Cây chín rục rồi kìa, còn chờ gì nữa!");
     }
 
     private void OnTileHarvested(FarmTile tile)
     {
         if (currentStep != TutorialStep.WaitHarvest && currentStep != TutorialStep.PlantSeed) return;
 
-        CompleteNode(2);
+        CompleteNode(1);
         SetStep(TutorialStep.FollowToPenArea);
-        UpdateQuestHUD("[10/13] Đi theo NPC tới bãi chuồng trại");
+        UpdateQuestHUD("[10/11] Đi theo NPC tới bãi chuồng trại");
         ShowSubtitleDelayed("Xuất sắc! Thu hoạch xong rồi. Giờ qua chuyện chăn nuôi — theo tôi!");
         ShowInstructionBanner("Đã thu hoạch!", "Đi theo NPC tới bãi xây chuồng.");
-        StartNode(3);
+        StartNode(2);
     }
 
     // --- Trạm 4: BÃI CHUỒNG ---
@@ -556,33 +575,11 @@ public class TutorialManager : MonoBehaviour
     {
         if (currentStep != TutorialStep.FollowToPenArea) return;
         SetStep(TutorialStep.BuildPen);
-        UpdateQuestHUD("[11/13] Mở Xây Dựng (B), chọn Chuồng và đặt xuống");
+        UpdateQuestHUD("[11/11] Mở Xây Dựng (B), chọn Chuồng và đặt xuống");
         ShowInstructionBanner("Xây chuồng!", "Mở phím B, chọn Chuồng, đặt xuống.");
 
         GhostPlacementController.OnBuildingPlaced -= OnBuildingPlaced;
         GhostPlacementController.OnBuildingPlaced += OnBuildingPlaced;
-    }
-
-    private void OnAnimalSpawned(YWonderLand.Environment.FarmAnimal animal)
-    {
-        if (currentStep != TutorialStep.PlaceAnimal) return;
-        YWonderLand.Environment.FarmAnimal.OnAnimalSpawned -= OnAnimalSpawned;
-        SetStep(TutorialStep.FeedAnimal);
-        UpdateQuestHUD("[13/13] Bấm vào con thú đói, chọn thức ăn cho ăn");
-        ShowSubtitleDelayed("Có thú rồi! Mà nó đang đói meo kìa — bấm vào nó, chọn ngô trong túi cho ăn ngay đi!");
-        ShowInstructionBanner("Cho ăn!", "Bấm vào con thú → chọn thức ăn trong túi.");
-        SetNodeDialogues(3, "Bấm vào con thú, chọn thức ăn cho nó ăn!", "Con vật đói kìa, cho nó ăn đi cậu!");
-
-        YWonderLand.Environment.FarmAnimal.OnAnimalFed -= OnAnimalFed;
-        YWonderLand.Environment.FarmAnimal.OnAnimalFed += OnAnimalFed;
-    }
-
-    private void OnAnimalFed(YWonderLand.Environment.FarmAnimal animal)
-    {
-        if (currentStep != TutorialStep.FeedAnimal) return;
-        YWonderLand.Environment.FarmAnimal.OnAnimalFed -= OnAnimalFed;
-        CompleteNode(3);
-        CompleteTutorial();
     }
 
     private void CompleteTutorial()
@@ -596,6 +593,8 @@ public class TutorialManager : MonoBehaviour
 
         if (YWonderLand.Backend.PlayerProfileService.Instance != null)
             YWonderLand.Backend.PlayerProfileService.Instance.SetTutorialCompleted(true);
+
+        RemoveNPCExclamationMark();
 
         CancelInvoke(nameof(HideSubtitle));
         Invoke(nameof(HideSubtitle), 5f);
@@ -815,7 +814,7 @@ public class TutorialManager : MonoBehaviour
 
     private void GiveTutorialRewards()
     {
-        Debug.Log("[TutorialManager] Giving Rewards: +50 POS, +20 EXP + starter items.");
+        Debug.Log("[TutorialManager] Giving Rewards: +50 Point, +20 EXP + starter items.");
 
         if (YWonderLand.Managers.EconomyManager.Instance != null)
             YWonderLand.Managers.EconomyManager.Instance.AddPOS(50);
@@ -834,10 +833,73 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    private void ResetTutorialRuntime()
+    {
+        tutorialRunStarted = false;
+        activeTutorialScopeId = "";
+        currentStep = TutorialStep.WaitForStart;
+        hasShownHint = false;
+        hasAutoAdvanced = false;
+
+        CancelInvoke();
+        if (countdownCoroutine != null)
+        {
+            StopCoroutine(countdownCoroutine);
+            countdownCoroutine = null;
+        }
+
+        UnsubscribeTutorialEvents();
+        knownTilesBeforeBuild.Clear();
+        guideNPC?.ResetSequenceState();
+        RemoveNPCExclamationMark();
+        HideSubtitle();
+        HideInstructionBanner();
+        HideCountdownTimer();
+    }
+
+    private void UnsubscribeTutorialEvents()
+    {
+        YWonderLand.Environment.HarvestableResource.OnResourceHarvested -= OnResourceHarvested;
+        GhostPlacementController.OnBuildingPlaced -= OnBuildingPlaced;
+        if (targetFarmTile != null)
+        {
+            targetFarmTile.OnTilePlowed -= OnTilePlowed;
+            targetFarmTile.OnTilePlanted -= OnTilePlanted;
+            targetFarmTile.OnTileWatered -= OnTileWatered;
+            targetFarmTile.OnTileHarvested -= OnTileHarvested;
+            targetFarmTile = null;
+        }
+    }
+
     // ── NPC Exclamation Mark ──
     private void CreateNPCExclamationMark()
     {
         if (guideNPC == null) return;
+
+        GameObject existingMark = null;
+        for (int i = guideNPC.transform.childCount - 1; i >= 0; i--)
+        {
+            Transform child = guideNPC.transform.GetChild(i);
+            if (child.name != "NPC_ExclamationMark") continue;
+
+            if (existingMark == null)
+                existingMark = child.gameObject;
+            else
+            {
+                child.gameObject.SetActive(false);
+                Destroy(child.gameObject);
+            }
+        }
+
+        if (existingMark != null)
+        {
+            exclamationMark = existingMark;
+            exclamationMark.SetActive(true);
+            exclamationMark.transform.localPosition = new Vector3(0, 3.2f, 0);
+            exclamationMark.transform.localRotation = Quaternion.identity;
+            StartExclamationBob();
+            return;
+        }
 
         if (exclamationMarkPrefab != null)
         {
@@ -850,7 +912,7 @@ public class TutorialManager : MonoBehaviour
             foreach (Collider c in exclamationMark.GetComponentsInChildren<Collider>(true))
                 Destroy(c);
 
-            StartCoroutine(BobExclamationMark());
+            StartExclamationBob();
             return;
         }
 
@@ -886,7 +948,37 @@ public class TutorialManager : MonoBehaviour
             dr.material.EnableKeyword("_EMISSION");
         }
 
-        StartCoroutine(BobExclamationMark());
+        StartExclamationBob();
+    }
+
+    private void StartExclamationBob()
+    {
+        if (exclamationBobCoroutine != null)
+            StopCoroutine(exclamationBobCoroutine);
+
+        exclamationBobCoroutine = StartCoroutine(BobExclamationMark());
+    }
+
+    private void RemoveNPCExclamationMark()
+    {
+        if (exclamationBobCoroutine != null)
+        {
+            StopCoroutine(exclamationBobCoroutine);
+            exclamationBobCoroutine = null;
+        }
+
+        if (guideNPC != null)
+        {
+            for (int i = guideNPC.transform.childCount - 1; i >= 0; i--)
+            {
+                Transform child = guideNPC.transform.GetChild(i);
+                if (child.name != "NPC_ExclamationMark") continue;
+                child.gameObject.SetActive(false);
+                Destroy(child.gameObject);
+            }
+        }
+
+        exclamationMark = null;
     }
 
     private IEnumerator BobExclamationMark()

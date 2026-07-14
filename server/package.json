@@ -2,15 +2,29 @@
   "name": "ywonderland-server-stub",
   "version": "0.1.0",
   "private": true,
-  "description": "Server stub toi thieu cho YWONDERLAND (dev/test only). KHONG dung cho production.",
+  "description": "YWONDERLAND game backend with JSON local mode and PostgreSQL production mode.",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "catalog:generate": "node scripts/generateShopCatalog.js",
+    "db:migrate": "node scripts/migratePostgres.js",
+    "db:import-json": "node scripts/importJsonToPostgres.js",
+    "db:verify": "node scripts/verifyPostgresData.js",
+    "test:realtime": "node realtimeSmokeTest.js",
+    "test:phase1": "node phase1SmokeTest.js",
+    "test:load": "node phase1LoadTest.js",
+    "test:postgres": "node postgresSmokeTest.js",
+    "test:security": "node securitySmokeTest.js",
+    "test:web-auth": "node webAuthIntegrationTest.js",
+    "test:browser-auth": "node browserAuthIntegrationTest.js",
+    "test:web-browser-callback": "node webBrowserCallbackRouteTest.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "express": "^4.19.2",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.22.0",
+    "ws": "^8.21.0"
   }
 }

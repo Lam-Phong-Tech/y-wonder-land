@@ -51,11 +51,11 @@
 
                 </ui:VisualElement>
 
-            </ui:VisualElement>
+                <!-- Close Button -->
+                <ui:VisualElement class="leaderboard-close-shadow">
+                    <ui:Button name="BtnCloseLeaderboard" text="X" class="leaderboard-close-btn" />
+                </ui:VisualElement>
 
-            <!-- Close Button (AFTER panel -> renders on top) -->
-            <ui:VisualElement class="leaderboard-close-shadow">
-                <ui:Button name="BtnCloseLeaderboard" text="X" class="leaderboard-close-btn" />
             </ui:VisualElement>
 
             <!-- My Rank Card -->

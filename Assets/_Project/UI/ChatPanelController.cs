@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEngine.InputSystem;
+using YWonderLand.Realtime;
 
 /// <summary>
 /// Controller for the Collapsible Bottom-Center Chat UI.
@@ -33,8 +34,6 @@ public class ChatPanelController : MonoBehaviour
     private VisualElement emotePopup;
     private Button btnEmoteWave;
     private Button btnEmotePoint;
-    private Button btnEmoteLaugh;
-    private Button btnEmoteDance;
 
     // State Variables
     private bool isExpanded = false;
@@ -94,8 +93,6 @@ public class ChatPanelController : MonoBehaviour
         emotePopup = root.Q<VisualElement>("EmotePopup");
         btnEmoteWave = root.Q<Button>("BtnEmoteWave");
         btnEmotePoint = root.Q<Button>("BtnEmotePoint");
-        btnEmoteLaugh = root.Q<Button>("BtnEmoteLaugh");
-        btnEmoteDance = root.Q<Button>("BtnEmoteDance");
 
         RegisterCallbacks();
         
@@ -129,8 +126,6 @@ public class ChatPanelController : MonoBehaviour
         // Emote actions
         btnEmoteWave?.RegisterCallback<ClickEvent>(evt => PlayEmote("Waving", 2.0f));
         btnEmotePoint?.RegisterCallback<ClickEvent>(evt => PlayEmote("Pointing", 2.0f));
-        btnEmoteLaugh?.RegisterCallback<ClickEvent>(evt => PlayEmote("Laughing", 2.0f));
-        btnEmoteDance?.RegisterCallback<ClickEvent>(evt => PlayEmote("Dancing", 2.0f));
 
         // Text field enter key submit callback (UI Toolkit standard)
         inputMessage?.RegisterCallback<KeyDownEvent>(evt =>
@@ -273,7 +268,17 @@ public class ChatPanelController : MonoBehaviour
         // 2. Profanity Filter
         string cleanText = ApplyProfanityFilter(rawText);
 
-        // 3. Post Message
+        // 3. Online chat first. If realtime is not connected, keep the old local/mock behavior.
+        if (RealtimeClient.Instance != null && RealtimeClient.Instance.SendChat(cleanText))
+        {
+            ReceiveMessage("Bạn", cleanText, "#E5A93C");
+            if (lblLastMessage != null)
+            {
+                lblLastMessage.text = $"Bạn: {cleanText}";
+            }
+            return;
+        }
+
         ReceiveMessage("Bạn", cleanText, "#E5A93C");
         
         // 4. Update collapsed preview
@@ -329,6 +334,7 @@ public class ChatPanelController : MonoBehaviour
         if (PlayerController.Instance != null)
         {
             PlayerController.Instance.PlayActionAnimation(animName, duration);
+            RealtimeClient.Instance?.SendEmote(animName, duration);
         }
         else
         {
@@ -479,22 +485,17 @@ public class ChatPanelController : MonoBehaviour
     }
 
     // Mobile: khi focus ô chat, bàn phím mềm bật lên che ô nhập → đẩy panel chat LÊN trên bàn phím.
-    // PC không có bàn phím mềm nên không kích hoạt. CẦN TEST TRÊN MÁY THẬT: TouchScreenKeyboard.area
-    // chỉ có giá trị trên thiết bị (Editor/Simulator luôn = 0 → fallback ước lượng 45% chiều cao màn).
+    // PC không có bàn phím mềm nên không kích hoạt. TouchScreenKeyboard.area có thể trả 0 trong vài frame đầu,
+    // nên dùng MobileKeyboardAvoidance để fallback an toàn theo chiều cao màn hình.
     private void UpdateKeyboardAvoidance()
     {
         if (root == null) return;
 
-        bool typing = IsTyping();
-        bool softKeyboard = TouchScreenKeyboard.visible || Application.isMobilePlatform;
-
-        if (typing && softKeyboard)
+        if (MobileKeyboardAvoidance.ShouldAvoidKeyboard(inputMessage))
         {
-            float panelH = (root.panel != null) ? root.panel.visualTree.layout.height : 720f;
-            float kbScreenH = TouchScreenKeyboard.area.height;
-            if (kbScreenH < 1f) kbScreenH = Screen.height * 0.45f; // .area chưa trả → ước lượng ~45% màn
-            float kbPanel = kbScreenH / Mathf.Max(1f, Screen.height) * panelH;
-            root.style.bottom = kbPanel + 16f; // ngồi ngay trên bàn phím + lề
+            float baseBottom = buildModeBottom ?? 16f;
+            float keyboardBottom = MobileKeyboardAvoidance.GetKeyboardHeightInPanel(root) + 16f;
+            root.style.bottom = Mathf.Max(baseBottom, keyboardBottom);
             keyboardShifted = true;
         }
         else if (keyboardShifted)

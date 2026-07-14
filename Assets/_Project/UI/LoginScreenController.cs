@@ -12,6 +12,8 @@ public class LoginScreenController : MonoBehaviour
     [SerializeField] private ForgotPasswordPopupController forgotPasswordPopup;
 
     private UIDocument uiDocument;
+    private VisualElement rootElement;
+    private VisualElement loginShadow;
 
     // Tab buttons
     private Button tabLogin;
@@ -28,6 +30,7 @@ public class LoginScreenController : MonoBehaviour
     private Toggle rememberToggle;
     private Label forgotPassword;
     private Button btnLogin;
+    private Button btnLoginWeb;
     private Button btnQuitApp;
     private Label loginStatus;
 
@@ -38,6 +41,7 @@ public class LoginScreenController : MonoBehaviour
     private TextField regConfirmField;
     private Button btnToggleRegPassword;
     private Button btnRegister;
+    private Button btnOpenWebRegistration;
     private Label registerStatus;
 
     // State
@@ -47,6 +51,8 @@ public class LoginScreenController : MonoBehaviour
     private bool isQuitRequestSent = false;
     private bool shouldSkipCharacterSelectAfterLogin = false;
     private VisualElement callbacksRoot;
+    private TextField focusedKeyboardField;
+    private float keyboardUpShift;
 
     // USS class names
     private const string TAB_ACTIVE_CLASS = "login-tab-active";
@@ -54,6 +60,10 @@ public class LoginScreenController : MonoBehaviour
     private const string INPUT_FOCUS_CLASS = "login-input-group-focus";
     private const string STATUS_SUCCESS = "status-success";
     private const string STATUS_ERROR = "status-error";
+    private const int LOGIN_IDENTITY_MAX_LENGTH = 254;
+    private const int LOGIN_PASSWORD_MAX_LENGTH = 128;
+    private const int REGISTER_MIN_LENGTH = 9;
+    private const int REGISTER_MAX_LENGTH = 20;
 
     void OnEnable()
     {
@@ -64,8 +74,8 @@ public class LoginScreenController : MonoBehaviour
             return;
         }
 
-        var root = uiDocument.rootVisualElement;
-        QueryElements(root);
+        rootElement = uiDocument.rootVisualElement;
+        QueryElements(rootElement);
         RegisterCallbacks();
         SetupPlaceholders();
         
@@ -79,8 +89,21 @@ public class LoginScreenController : MonoBehaviour
         ShowLoginTab();
     }
 
+    void Update()
+    {
+        UpdateKeyboardAvoidance();
+    }
+
+    void OnDisable()
+    {
+        ResetKeyboardAvoidance();
+    }
+
     private void QueryElements(VisualElement root)
     {
+        rootElement = root;
+        loginShadow = root.Q<VisualElement>(className: "login-shadow");
+
         // Tabs
         tabLogin = root.Q<Button>("TabLogin");
         tabRegister = root.Q<Button>("TabRegister");
@@ -96,6 +119,7 @@ public class LoginScreenController : MonoBehaviour
         rememberToggle = root.Q<Toggle>("RememberToggle");
         forgotPassword = root.Q<Label>("ForgotPassword");
         btnLogin = root.Q<Button>("BtnLogin");
+        btnLoginWeb = root.Q<Button>("BtnLoginWeb");
         btnQuitApp = root.Q<Button>("BtnQuitApp");
         loginStatus = root.Q<Label>("LoginStatus");
 
@@ -106,6 +130,7 @@ public class LoginScreenController : MonoBehaviour
         regConfirmField = root.Q<TextField>("RegConfirmField");
         btnToggleRegPassword = root.Q<Button>("BtnToggleRegPassword");
         btnRegister = root.Q<Button>("BtnRegister");
+        btnOpenWebRegistration = root.Q<Button>("BtnOpenWebRegistration");
         registerStatus = root.Q<Label>("RegisterStatus");
     }
 
@@ -119,7 +144,8 @@ public class LoginScreenController : MonoBehaviour
         tabRegister?.RegisterCallback<ClickEvent>(evt => ShowRegisterTab());
 
         // Login actions
-        btnLogin?.RegisterCallback<ClickEvent>(evt => OnLoginClicked());
+        btnLogin?.RegisterCallback<ClickEvent>(evt => OnLoginClicked(false));
+        btnLoginWeb?.RegisterCallback<ClickEvent>(evt => OnWebsiteAuthClicked("login"));
         if (btnQuitApp != null)
         {
             btnQuitApp.pickingMode = PickingMode.Position;
@@ -131,6 +157,7 @@ public class LoginScreenController : MonoBehaviour
 
         // Register actions
         btnRegister?.RegisterCallback<ClickEvent>(evt => OnRegisterClicked());
+        btnOpenWebRegistration?.RegisterCallback<ClickEvent>(evt => OnWebsiteAuthClicked("register"));
         btnToggleRegPassword?.RegisterCallback<ClickEvent>(evt => ToggleRegPasswordVisibility());
 
         // Register real-time validation callbacks
@@ -159,14 +186,25 @@ public class LoginScreenController : MonoBehaviour
         var group = root.Q<VisualElement>(groupName);
         if (group == null) return;
 
-        field.RegisterCallback<FocusInEvent>(evt => group.AddToClassList(INPUT_FOCUS_CLASS));
-        field.RegisterCallback<FocusOutEvent>(evt => group.RemoveFromClassList(INPUT_FOCUS_CLASS));
+        field.RegisterCallback<FocusInEvent>(evt =>
+        {
+            group.AddToClassList(INPUT_FOCUS_CLASS);
+            focusedKeyboardField = field;
+            UpdateKeyboardAvoidance();
+        });
+
+        field.RegisterCallback<FocusOutEvent>(evt =>
+        {
+            group.RemoveFromClassList(INPUT_FOCUS_CLASS);
+            if (focusedKeyboardField == field)
+                ResetKeyboardAvoidance();
+        });
     }
 
     private void SetupPlaceholders()
     {
         // Set placeholder text via textEdition (Unity 2022.2+)
-        SetPlaceholder(usernameField, "Tên đăng nhập");
+        SetPlaceholder(usernameField, "Email / SĐT / ID đăng nhập");
         SetPlaceholder(passwordField, "Mật khẩu");
         SetPlaceholder(regUsernameField, "Tên đăng nhập");
         SetPlaceholder(regEmailField, "Email");
@@ -186,6 +224,7 @@ public class LoginScreenController : MonoBehaviour
 
     private void ShowLoginTab()
     {
+        ResetKeyboardAvoidance();
         tabLogin?.AddToClassList(TAB_ACTIVE_CLASS);
         tabRegister?.RemoveFromClassList(TAB_ACTIVE_CLASS);
 
@@ -198,6 +237,7 @@ public class LoginScreenController : MonoBehaviour
 
     private void ShowRegisterTab()
     {
+        ResetKeyboardAvoidance();
         tabRegister?.AddToClassList(TAB_ACTIVE_CLASS);
         tabLogin?.RemoveFromClassList(TAB_ACTIVE_CLASS);
 
@@ -206,6 +246,27 @@ public class LoginScreenController : MonoBehaviour
 
         ClearStatus(registerStatus);
         Debug.Log("[LoginScreen] Switched to Register tab");
+    }
+
+    private void OpenRegistrationPage()
+    {
+        ResetKeyboardAvoidance();
+        ShowLoginTab();
+
+        var config = BackendConfig.Active;
+        string configuredUrl = config != null ? config.registrationUrl?.Trim() : "";
+        if (!System.Uri.TryCreate(configuredUrl, System.UriKind.Absolute, out var registrationUri) ||
+            !string.Equals(registrationUri.Scheme, System.Uri.UriSchemeHttps, System.StringComparison.OrdinalIgnoreCase))
+        {
+            ShowStatus(loginStatus, "Trang đăng ký chưa được cấu hình. Vui lòng thử lại sau.", false);
+            Debug.LogWarning("[LoginScreen] Registration URL is missing or is not HTTPS.");
+            return;
+        }
+
+        ShowStatus(loginStatus,
+            "Đã mở trang đăng ký. Hoàn tất trên web rồi quay lại game để đăng nhập.",
+            true);
+        Application.OpenURL(registrationUri.AbsoluteUri);
     }
 
     // ── Password Toggle ──
@@ -240,24 +301,24 @@ public class LoginScreenController : MonoBehaviour
 
     // ── Login ──
 
-    private async void OnLoginClicked()
+    private async void OnLoginClicked(bool useWebAccount)
     {
         if (isAuthRequestInProgress) return;
 
         string username = (usernameField?.value ?? "").Trim();
         string password = passwordField?.value ?? "";
 
-        Debug.Log($"[LoginScreen] Login clicked — Username: '{username}'");
+        Debug.Log($"[LoginScreen] {(useWebAccount ? "Web" : "Local")} login clicked.");
 
         // Validation
         if (string.IsNullOrWhiteSpace(username))
         {
-            ShowStatus(loginStatus, "Vui lòng nhập tên đăng nhập", false);
+            ShowStatus(loginStatus, "Vui lòng nhập Email, SĐT hoặc ID đăng nhập", false);
             return;
         }
-        if (username.Length > 20)
+        if (username.Length > LOGIN_IDENTITY_MAX_LENGTH)
         {
-            ShowStatus(loginStatus, "Tên đăng nhập không được quá 20 ký tự", false);
+            ShowStatus(loginStatus, "Email, SĐT hoặc ID đăng nhập quá dài", false);
             return;
         }
 
@@ -266,9 +327,9 @@ public class LoginScreenController : MonoBehaviour
             ShowStatus(loginStatus, "Vui lòng nhập mật khẩu", false);
             return;
         }
-        if (password.Length > 20)
+        if (password.Length > LOGIN_PASSWORD_MAX_LENGTH)
         {
-            ShowStatus(loginStatus, "Mật khẩu không được quá 20 ký tự", false);
+            ShowStatus(loginStatus, "Mật khẩu không được quá 128 ký tự", false);
             return;
         }
 
@@ -281,22 +342,89 @@ public class LoginScreenController : MonoBehaviour
         }
 
         SetAuthControlsEnabled(false);
-        ShowStatus(loginStatus, "Đang đăng nhập...", true);
-        bool success = await auth.LoginAsync(username, password);
-        SetAuthControlsEnabled(true);
+        ShowStatus(loginStatus,
+            useWebAccount ? "Đang đăng nhập tài khoản website..." : "Đang đăng nhập tài khoản trong game...",
+            true);
+        bool success = useWebAccount
+            ? await auth.LoginWebAsync(username, password)
+            : await auth.LoginLocalAsync(username, password);
 
         if (!success)
         {
-            ShowStatus(loginStatus, "Đăng nhập thất bại. Kiểm tra tài khoản/mật khẩu.", false);
+            SetAuthControlsEnabled(true);
+            ShowStatus(loginStatus, ResolveLoginFailureMessage(auth), false);
             return;
         }
 
+        await CompleteAuthenticatedLoginAsync(auth.Username);
+    }
+
+    private async void OnWebsiteAuthClicked(string intent)
+    {
+        if (isAuthRequestInProgress) return;
+
+        var config = BackendConfig.Active;
+        if (config == null || !config.browserAuthEnabled)
+        {
+            if (string.Equals(intent, "register", System.StringComparison.OrdinalIgnoreCase))
+                OpenRegistrationPage();
+            else
+                OnLoginClicked(true);
+            return;
+        }
+
+        var auth = AuthService.Instance;
+        if (auth == null)
+        {
+            ShowStatus(loginStatus, "Hệ thống đăng nhập chưa sẵn sàng. Thử lại sau.", false);
+            return;
+        }
+
+        SetAuthControlsEnabled(false);
+        ShowStatus(loginStatus, "Đang tạo phiên xác thực website...", true);
+        bool success = await auth.LoginWithBrowserAsync(intent, message =>
+        {
+            if (loginStatus != null) ShowStatus(loginStatus, message, true);
+        });
+        if (!success)
+        {
+            SetAuthControlsEnabled(true);
+            ShowStatus(loginStatus, ResolveBrowserAuthFailureMessage(auth), false);
+            return;
+        }
+
+        await CompleteAuthenticatedLoginAsync(auth.Username);
+    }
+
+    private async Awaitable CompleteAuthenticatedLoginAsync(string username)
+    {
+        var auth = AuthService.Instance;
         shouldSkipCharacterSelectAfterLogin = false;
+        bool bootstrapLoaded = false;
+        var bootstrap = PlayerBootstrapService.Instance;
+        if (bootstrap != null)
+        {
+            ShowStatus(loginStatus, "Đang nạp dữ liệu nhân vật...", true);
+            bootstrapLoaded = await bootstrap.LoadBootstrapAsync();
+        }
+
+        if (!bootstrapLoaded && IsOnlineOnly())
+        {
+            string bootstrapError = ResolveBootstrapFailureMessage(bootstrap);
+            auth.SignOut();
+            SetAuthControlsEnabled(true);
+            ShowStatus(loginStatus, bootstrapError, false);
+            return;
+        }
+
         var profile = PlayerProfileService.Instance;
         if (profile != null)
         {
-            ShowStatus(loginStatus, "Đang nạp hồ sơ...", true);
-            await profile.LoadProfileAsync();
+            if (!bootstrapLoaded)
+            {
+                ShowStatus(loginStatus, "Đang nạp hồ sơ...", true);
+                await profile.LoadProfileAsync();
+            }
 
             if (GameManager.IsRichDemoAccountName(username) && !profile.HasCharacterCreated)
                 profile.ApplyCharacterInfo(username, profile.Profile != null ? profile.Profile.gender : "male");
@@ -307,6 +435,7 @@ public class LoginScreenController : MonoBehaviour
         if (GameManager.IsRichDemoAccountName(username))
             shouldSkipCharacterSelectAfterLogin = true;
 
+        SetAuthControlsEnabled(true);
         ShowStatus(loginStatus,
             shouldSkipCharacterSelectAfterLogin
                 ? "\u0110\u0103ng nh\u1eadp th\u00e0nh c\u00f4ng! \u0110ang v\u00e0o game..."
@@ -363,15 +492,15 @@ public class LoginScreenController : MonoBehaviour
             btnRegister.SetEnabled(isValid);
         }
 
-        // Show real-time error helper only if at least one field has been edited
-        bool anyFieldFilled = !string.IsNullOrEmpty(regUsernameField?.value) ||
-                              !string.IsNullOrEmpty(regEmailField?.value) ||
-                              !string.IsNullOrEmpty(regPasswordField?.value) ||
-                              !string.IsNullOrEmpty(regConfirmField?.value);
+        // Trên mobile, không hiện lỗi độ dài liên tục khi người chơi vẫn đang gõ.
+        bool allFieldsFilled = !string.IsNullOrWhiteSpace(regUsernameField?.value) &&
+                               !string.IsNullOrWhiteSpace(regEmailField?.value) &&
+                               !string.IsNullOrEmpty(regPasswordField?.value) &&
+                               !string.IsNullOrEmpty(regConfirmField?.value);
 
         if (!isValid)
         {
-            if (anyFieldFilled)
+            if (allFieldsFilled)
             {
                 ShowStatus(registerStatus, errMsg, false);
             }
@@ -389,8 +518,8 @@ public class LoginScreenController : MonoBehaviour
     private bool ValidateRegisterForm(out string errorMessage)
     {
         errorMessage = "";
-        string username = regUsernameField?.value ?? "";
-        string email = regEmailField?.value ?? "";
+        string username = (regUsernameField?.value ?? "").Trim();
+        string email = (regEmailField?.value ?? "").Trim();
         string password = regPasswordField?.value ?? "";
         string confirm = regConfirmField?.value ?? "";
 
@@ -402,13 +531,13 @@ public class LoginScreenController : MonoBehaviour
             return false;
         }
 
-        // 2. Validate Username (> 8 chars, alphanumeric & underscore only)
-        if (username.Length <= 8)
+        // 2. Validate Username (9-20 chars, alphanumeric & underscore only)
+        if (username.Length < REGISTER_MIN_LENGTH)
         {
-            errorMessage = "Tên đăng nhập phải dài hơn 8 ký tự";
+            errorMessage = "Tên đăng nhập mới cần ít nhất 9 ký tự";
             return false;
         }
-        if (username.Length > 20)
+        if (username.Length > REGISTER_MAX_LENGTH)
         {
             errorMessage = "Tên đăng nhập không được quá 20 ký tự";
             return false;
@@ -426,13 +555,13 @@ public class LoginScreenController : MonoBehaviour
             return false;
         }
 
-        // 4. Validate Password (> 8 chars, 1 uppercase, 1 lowercase, 1 digit, 1 special char)
-        if (password.Length <= 8)
+        // 4. Validate Password (9-20 chars, 1 uppercase, 1 lowercase, 1 digit, 1 special char)
+        if (password.Length < REGISTER_MIN_LENGTH)
         {
-            errorMessage = "Mật khẩu phải dài hơn 8 ký tự";
+            errorMessage = "Mật khẩu mới cần ít nhất 9 ký tự";
             return false;
         }
-        if (password.Length > 20)
+        if (password.Length > REGISTER_MAX_LENGTH)
         {
             errorMessage = "Mật khẩu không được quá 20 ký tự";
             return false;
@@ -487,16 +616,17 @@ public class LoginScreenController : MonoBehaviour
         }
 
         string username = (regUsernameField?.value ?? "").Trim();
+        string email = (regEmailField?.value ?? "").Trim();
         string password = regPasswordField?.value ?? "";
 
         SetAuthControlsEnabled(false);
         ShowStatus(registerStatus, "Đang tạo tài khoản...", true);
-        bool success = await auth.RegisterAsync(username, password);
+        bool success = await auth.RegisterAsync(username, password, email);
         SetAuthControlsEnabled(true);
 
         if (!success)
         {
-            ShowStatus(registerStatus, "Đăng ký thất bại. Tài khoản có thể đã tồn tại hoặc mất kết nối.", false);
+            ShowStatus(registerStatus, ResolveRegisterFailureMessage(auth), false);
             return;
         }
 
@@ -537,6 +667,70 @@ public class LoginScreenController : MonoBehaviour
 
     // ── Status Message Helpers ──
 
+    private static bool IsOnlineOnly()
+    {
+        return BackendConfig.Active != null && !BackendConfig.Active.useOfflineFallback;
+    }
+
+    private static string ResolveLoginFailureMessage(AuthService auth)
+    {
+        long status = auth != null ? auth.LastStatus : 0;
+        string errorCode = auth != null ? auth.LastErrorCode : "";
+        if (status == 0)
+            return "Không thể kết nối máy chủ. Kiểm tra mạng hoặc chờ server được bật.";
+        if (status == 401 || status == 404)
+            return "Sai tên tài khoản hoặc mật khẩu.";
+        if (status == 403 &&
+            (string.Equals(errorCode, "WEB_ACCOUNT_LOCKED", System.StringComparison.OrdinalIgnoreCase) ||
+             string.Equals(errorCode, "WEB_ACCOUNT_DELETED", System.StringComparison.OrdinalIgnoreCase) ||
+             string.Equals(errorCode, "WEB_ACCOUNT_INACTIVE", System.StringComparison.OrdinalIgnoreCase) ||
+             string.Equals(errorCode, "WEB_AUTH_FORBIDDEN", System.StringComparison.OrdinalIgnoreCase)))
+            return "Tài khoản đã bị khóa hoặc ngừng hoạt động. Vui lòng liên hệ hỗ trợ.";
+        if (status == 429)
+            return "Bạn đã thử đăng nhập quá nhiều lần. Vui lòng chờ rồi thử lại.";
+        if (status >= 500)
+            return "Máy chủ đăng nhập đang tạm ngừng. Vui lòng thử lại sau.";
+        return "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.";
+    }
+
+    private static string ResolveBrowserAuthFailureMessage(AuthService auth)
+    {
+        string errorCode = auth != null ? auth.LastErrorCode : "";
+        if (string.Equals(errorCode, "BROWSER_AUTH_CANCELLED", System.StringComparison.OrdinalIgnoreCase))
+            return "Đã hủy đăng nhập website.";
+        if (string.Equals(errorCode, "BROWSER_AUTH_EXPIRED", System.StringComparison.OrdinalIgnoreCase))
+            return "Phiên đăng nhập website đã hết hạn. Vui lòng thử lại.";
+        if (string.Equals(errorCode, "BROWSER_AUTH_DISABLED", System.StringComparison.OrdinalIgnoreCase))
+            return "Đăng nhập website chưa được bật trên phiên bản này.";
+        if (string.Equals(errorCode, "WEB_ACCOUNT_LOCKED", System.StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(errorCode, "WEB_ACCOUNT_DELETED", System.StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(errorCode, "WEB_ACCOUNT_INACTIVE", System.StringComparison.OrdinalIgnoreCase))
+            return "Tài khoản website đã bị khóa hoặc ngừng hoạt động.";
+        return ResolveLoginFailureMessage(auth);
+    }
+
+    private static string ResolveRegisterFailureMessage(AuthService auth)
+    {
+        long status = auth != null ? auth.LastStatus : 0;
+        if (status == 0)
+            return "Không thể kết nối máy chủ nên chưa thể tạo tài khoản.";
+        if (status == 409)
+            return "Tên tài khoản hoặc email này đã được sử dụng.";
+        if (status >= 500)
+            return "Máy chủ đăng ký đang tạm ngừng. Vui lòng thử lại sau.";
+        return "Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.";
+    }
+
+    private static string ResolveBootstrapFailureMessage(PlayerBootstrapService bootstrap)
+    {
+        long status = bootstrap != null ? bootstrap.LastStatus : 0;
+        if (status == 401)
+            return "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.";
+        if (status == 0)
+            return "Không thể tải dữ liệu nhân vật vì mất kết nối máy chủ.";
+        return "Máy chủ chưa tải được dữ liệu nhân vật. Vui lòng thử lại.";
+    }
+
     private void ShowStatus(Label label, string message, bool isSuccess)
     {
         if (label == null) return;
@@ -571,16 +765,49 @@ public class LoginScreenController : MonoBehaviour
         rememberToggle?.SetEnabled(enabled);
         forgotPassword?.SetEnabled(enabled);
         btnLogin?.SetEnabled(enabled);
+        btnLoginWeb?.SetEnabled(enabled);
         regUsernameField?.SetEnabled(enabled);
         regEmailField?.SetEnabled(enabled);
         regPasswordField?.SetEnabled(enabled);
         regConfirmField?.SetEnabled(enabled);
         btnToggleRegPassword?.SetEnabled(enabled);
+        btnOpenWebRegistration?.SetEnabled(enabled);
 
         if (btnRegister != null)
         {
             btnRegister.SetEnabled(enabled && ValidateRegisterForm(out _));
         }
+    }
+
+    private void UpdateKeyboardAvoidance()
+    {
+        if (rootElement == null || loginShadow == null) return;
+
+        if (!MobileKeyboardAvoidance.ShouldAvoidKeyboard(focusedKeyboardField))
+        {
+            if (keyboardUpShift > 0f)
+                ResetKeyboardAvoidance();
+            return;
+        }
+
+        float newShift = MobileKeyboardAvoidance.CalculateRequiredUpShift(
+            rootElement,
+            focusedKeyboardField,
+            keyboardUpShift,
+            marginAboveKeyboard: 24f);
+
+        if (Mathf.Abs(newShift - keyboardUpShift) < 0.5f) return;
+
+        keyboardUpShift = newShift;
+        loginShadow.style.translate = new Translate(0, -keyboardUpShift, 0);
+    }
+
+    private void ResetKeyboardAvoidance()
+    {
+        focusedKeyboardField = null;
+        keyboardUpShift = 0f;
+        if (loginShadow != null)
+            loginShadow.style.translate = new Translate(0, 0, 0);
     }
 
     private void OnQuitAppClicked()

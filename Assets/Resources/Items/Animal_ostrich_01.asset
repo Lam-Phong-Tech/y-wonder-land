@@ -22,15 +22,15 @@ MonoBehaviour:
   foodAltAmount: 0
   productMainName: "Tr\u1EE9ng \u0111\xE0 \u0111i\u1EC3u"
   productMainAmount: 1
-  productAltName: 
-  productAltAmount: 0
+  productAltName: "Th\u1ECBt \u0111\xE0 \u0111i\u1EC3u"
+  productAltAmount: 20
   produceItemId: ostrich_egg_01
   produceAmount: 1
   produceCycleTimeSec: 360
   maxHarvests: 30
   expReward: 5000
-  meatItemId: 
-  meatAmount: 0
+  meatItemId: ostrich_meat_01
+  meatAmount: 20
   feedIntervalSec: 60
   noFeedDeathSec: 60
   fedLifeSec: 120

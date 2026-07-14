@@ -15,6 +15,9 @@ public class ShopPopupController : MonoBehaviour
     [Header("References")]
     [SerializeField] private UIDocument shopDocument;
 
+    [Header("Platform Layout")]
+    [SerializeField] private bool previewMobileShopLayoutInEditor = true;
+
     // Elements
     private VisualElement overlay;
     private Label shopTitle;
@@ -33,6 +36,8 @@ public class ShopPopupController : MonoBehaviour
     private Button filterAnimals;
     private Button filterTools;
     private Button filterItems;
+    private Button filterFood;
+    private Button filterMaterials;
     private Button activeFilter;
 
     // Detail panel
@@ -60,6 +65,9 @@ public class ShopPopupController : MonoBehaviour
 
     // Current shop data
     private ShopData currentShop;
+    private string currentShopSourceName = "";
+    private string currentShopId = "";
+    private bool actionInFlight;
 
     // Whitelist ID hàng shop chấp nhận THU MUA (null/rỗng = thu mua mọi thứ bán được trong túi).
     private List<string> sellFilterIds;
@@ -153,6 +161,8 @@ public class ShopPopupController : MonoBehaviour
         filterAnimals = root.Q<Button>("FilterAnimals");
         filterTools = root.Q<Button>("FilterTools");
         filterItems = root.Q<Button>("FilterItems");
+        filterFood = root.Q<Button>("FilterFood");
+        filterMaterials = root.Q<Button>("FilterMaterials");
 
         // Detail
         detailEmpty = root.Q<Label>("ShopDetailEmpty");
@@ -179,6 +189,20 @@ public class ShopPopupController : MonoBehaviour
         btnQtyMinus = root.Q<Button>("BtnQtyMinus");
         btnQtyPlus = root.Q<Button>("BtnQtyPlus");
         btnAction = root.Q<Button>("BtnShopAction");
+
+        ApplyPlatformLayoutClass();
+    }
+
+    private void ApplyPlatformLayoutClass()
+    {
+        if (overlay == null) return;
+
+#if UNITY_EDITOR
+        bool useMobileLayout = previewMobileShopLayoutInEditor || Application.isMobilePlatform;
+#else
+        bool useMobileLayout = Application.isMobilePlatform;
+#endif
+        overlay.EnableInClassList("shop-mobile", useMobileLayout);
     }
 
     private void RegisterCallbacks()
@@ -199,6 +223,8 @@ public class ShopPopupController : MonoBehaviour
         filterAnimals?.RegisterCallback<ClickEvent>(evt => SetFilter(filterAnimals, "animals"));
         filterTools?.RegisterCallback<ClickEvent>(evt => SetFilter(filterTools, "tools"));
         filterItems?.RegisterCallback<ClickEvent>(evt => SetFilter(filterItems, "items"));
+        filterFood?.RegisterCallback<ClickEvent>(evt => SetFilter(filterFood, "food"));
+        filterMaterials?.RegisterCallback<ClickEvent>(evt => SetFilter(filterMaterials, "materials"));
 
         // Quantity
         btnQtyMinus?.RegisterCallback<ClickEvent>(evt => ChangeQty(-1));
@@ -233,6 +259,8 @@ public class ShopPopupController : MonoBehaviour
         if (overlay == null || data == null) return;
 
         currentShop = data;
+        currentShopSourceName = data.shopName ?? "";
+        currentShopId = "";
         isSellMode = false;
         selectedQty = 1;
         selectedItem = null;
@@ -265,6 +293,7 @@ public class ShopPopupController : MonoBehaviour
     public void Show()
     {
         sellFilterIds = null; // luồng mock/legacy: thu mua mọi thứ bán được
+        currentShopSourceName = "";
         Show(CreateMockShopData());
     }
 
@@ -312,8 +341,11 @@ public class ShopPopupController : MonoBehaviour
 
         // Whitelist thu mua: rỗng = thu mua mọi thứ bán được.
         sellFilterIds = (def.sellItemIds != null && def.sellItemIds.Count > 0) ? def.sellItemIds : null;
+        currentShopSourceName = $"{def.name} {def.shopName}";
 
         Show(BuildShopDataFrom(def));      // set currentShop + title + tab + về chế độ Mua
+        currentShopSourceName = $"{def.name} {def.shopName}";
+        currentShopId = def.name;
         ApplyAccessMode(MapAccessMode(def.accessMode));
 
         // Giữ TÊN RIÊNG của shop trên tiêu đề (ApplyAccessMode vừa ghi đè thành "CỬA HÀNG"/"BÁN ĐỒ"
@@ -407,29 +439,100 @@ public class ShopPopupController : MonoBehaviour
             btnAction?.RemoveFromClassList("shop-btn-action--sell");
         }
 
+        UpdateFilterVisibility();
         RefreshGrid();
         ShowEmptyDetails();
     }
 
-    // #1: Chỉ hiện các tab filter có hàng trong shop hiện tại (gom category từ buy items + whitelist bán).
+    // #1: Chỉ hiện các tab filter có hàng trong mode hiện tại.
     private void UpdateFilterVisibility()
     {
         var present = new HashSet<string>();
-        if (currentShop != null && currentShop.buyItems != null)
+
+        if (currentShop == null)
+        {
+            SetFilterBtnVisible(filterSeeds, false);
+            SetFilterBtnVisible(filterAnimals, false);
+            SetFilterBtnVisible(filterTools, false);
+            SetFilterBtnVisible(filterItems, false);
+            SetFilterBtnVisible(filterFood, false);
+            SetFilterBtnVisible(filterMaterials, false);
+            return;
+        }
+
+        if (isSellMode)
+        {
+            if (sellFilterIds != null && itemDatabase != null)
+            {
+                foreach (var id in sellFilterIds)
+                {
+                    var d = itemDatabase.GetItem(id);
+                    if (d != null && d.canSell && !string.IsNullOrEmpty(d.category))
+                        present.Add(d.category);
+                }
+            }
+            else if (YWonderLand.Managers.InventoryManager.Instance != null && itemDatabase != null)
+            {
+                var slots = YWonderLand.Managers.InventoryManager.Instance.GetAllSlots();
+                foreach (var slot in slots)
+                {
+                    var d = itemDatabase.GetItem(slot.itemId);
+                    if (d != null && d.canSell && !string.IsNullOrEmpty(d.category))
+                        present.Add(d.category);
+                }
+            }
+        }
+        else if (currentShop.buyItems != null)
+        {
             foreach (var it in currentShop.buyItems)
                 if (!string.IsNullOrEmpty(it.category)) present.Add(it.category); // ShopItem là struct → không so null
-        if (sellFilterIds != null && itemDatabase != null)
-            foreach (var id in sellFilterIds)
-            {
-                var d = itemDatabase.GetItem(id);
-                if (d != null && !string.IsNullOrEmpty(d.category)) present.Add(d.category);
-            }
+        }
+
+        ApplyFilterLabels();
 
         SetFilterBtnVisible(filterSeeds, present.Contains("seeds"));
         SetFilterBtnVisible(filterAnimals, present.Contains("animals"));
         SetFilterBtnVisible(filterTools, present.Contains("tools"));
         SetFilterBtnVisible(filterItems, present.Contains("items"));
+        SetFilterBtnVisible(filterFood, present.Contains("food"));
+        SetFilterBtnVisible(filterMaterials, present.Contains("materials"));
         // filterAll luôn hiện (xem tất cả).
+
+        if (activeCategory != "all" && !present.Contains(activeCategory))
+        {
+            activeFilter?.RemoveFromClassList("shop-filter--active");
+            activeCategory = "all";
+            activeFilter = filterAll;
+            activeFilter?.AddToClassList("shop-filter--active");
+        }
+    }
+
+    private void ApplyFilterLabels()
+    {
+        if (filterFood != null)
+        {
+            if (IsFishShop())
+                filterFood.text = "Cá";
+            else if (IsProduceShop())
+                filterFood.text = "Nông sản";
+            else
+                filterFood.text = "Thực phẩm";
+        }
+
+        if (filterMaterials != null)
+            filterMaterials.text = "Đá quý";
+    }
+
+    private bool IsFishShop()
+    {
+        string source = currentShopSourceName ?? "";
+        return source.Contains("Fish") || source.Contains("Cá");
+    }
+
+    private bool IsProduceShop()
+    {
+        string source = currentShopSourceName ?? "";
+        return source.Contains("Mini Garden") || source.Contains("Nông sản");
     }
 
     private void SetFilterBtnVisible(Button b, bool show)
@@ -460,8 +563,26 @@ public class ShopPopupController : MonoBehaviour
 
         if (isSellMode)
         {
+            if (sellFilterIds != null && sellFilterIds.Count > 0 && itemDatabase != null)
+            {
+                foreach (var id in sellFilterIds)
+                {
+                    var def = itemDatabase.GetItem(id);
+                    if (def == null)
+                    {
+                        Debug.LogWarning($"[Shop] Sell whitelist ID not found in ItemDatabase: '{id}'");
+                        continue;
+                    }
+                    if (!def.canSell) continue;
+
+                    int owned = YWonderLand.Managers.InventoryManager.Instance != null
+                        ? YWonderLand.Managers.InventoryManager.Instance.GetItemQuantity(def.id)
+                        : 0;
+                    itemsToDisplay.Add(BuildSellShopItem(def, owned));
+                }
+            }
             // Load dynamically from InventoryManager
-            if (YWonderLand.Managers.InventoryManager.Instance != null && itemDatabase != null)
+            else if (YWonderLand.Managers.InventoryManager.Instance != null && itemDatabase != null)
             {
                 var slots = YWonderLand.Managers.InventoryManager.Instance.GetAllSlots();
                 foreach (var slot in slots)
@@ -555,12 +676,18 @@ public class ShopPopupController : MonoBehaviour
 
         // Price
         int displayPrice = isSellMode ? item.sellPrice : item.price;
-        var priceLabel = new Label($"{displayPrice} POS");
+        var priceLabel = new Label($"{displayPrice} Point");
         priceLabel.AddToClassList("shop-item-price");
 
         card.Add(iconWrap);
         card.Add(nameLabel);
         card.Add(priceLabel);
+        if (isSellMode)
+        {
+            var ownedLabel = new Label($"Có: {item.maxAvailable}");
+            ownedLabel.AddToClassList("shop-item-price");
+            card.Add(ownedLabel);
+        }
         shadow.Add(card);
 
         // Click
@@ -607,7 +734,11 @@ public class ShopPopupController : MonoBehaviour
         }
 
         int unitPrice = isSellMode ? item.sellPrice : item.price;
-        if (lblShopPrice != null) lblShopPrice.text = $"{unitPrice} POS";
+        if (lblShopPrice != null) lblShopPrice.text = $"{unitPrice} Point";
+
+        int maxQty = isSellMode ? item.maxAvailable : 999;
+        if (maxQty <= 0) selectedQty = 0;
+        else selectedQty = Mathf.Clamp(Mathf.Max(1, selectedQty), 1, maxQty);
 
         if (lblOwned != null)
         {
@@ -620,6 +751,11 @@ public class ShopPopupController : MonoBehaviour
         }
 
         UpdateQtyDisplay(unitPrice);
+        bool canActOnSelectedItem = !isSellMode || item.maxAvailable > 0;
+        btnAction?.SetEnabled(canActOnSelectedItem && !actionInFlight);
+        btnQtyMinus?.SetEnabled(canActOnSelectedItem && !actionInFlight);
+        btnQtyPlus?.SetEnabled(canActOnSelectedItem && !actionInFlight);
+        txtQty?.SetEnabled(canActOnSelectedItem && !actionInFlight);
 
         if (btnAction != null)
         {
@@ -634,7 +770,7 @@ public class ShopPopupController : MonoBehaviour
             string.IsNullOrEmpty(name) ? "—" : (amount > 0 ? $"{amount}x {name}" : name);
 
         return $"\n\nThông tin nuôi:"
-             + $"\nGiá mua: {d.buyPrice} POS   |   Cần: {d.penSlots} ô đất"
+             + $"\nGiá mua: {d.buyPrice} Point   |   Cần: {d.penSlots} ô đất"
              + $"\nThức ăn chính: {Food(d.foodMainName, d.foodMainAmount)}"
              + $"\nThức ăn phụ: {Food(d.foodAltName, d.foodAltAmount)}";
     }
@@ -694,6 +830,14 @@ public class ShopPopupController : MonoBehaviour
         if (!selectedItem.HasValue) return;
         
         int maxQty = isSellMode ? selectedItem.Value.maxAvailable : 999;
+        if (maxQty <= 0)
+        {
+            selectedQty = 0;
+            int emptyPrice = isSellMode ? selectedItem.Value.sellPrice : selectedItem.Value.price;
+            UpdateQtyDisplay(emptyPrice);
+            return;
+        }
+
         selectedQty = Mathf.Clamp(selectedQty + delta, 1, maxQty);
 
         int unitPrice = isSellMode ? selectedItem.Value.sellPrice : selectedItem.Value.price;
@@ -707,131 +851,116 @@ public class ShopPopupController : MonoBehaviour
         if (int.TryParse(newValue, out int parsed))
         {
             int maxQty = isSellMode ? selectedItem.Value.maxAvailable : 999;
-            selectedQty = Mathf.Clamp(parsed, 1, maxQty);
+            selectedQty = maxQty <= 0 ? 0 : Mathf.Clamp(parsed, 1, maxQty);
         }
         else
         {
-            selectedQty = 1;
+            selectedQty = isSellMode && selectedItem.Value.maxAvailable <= 0 ? 0 : 1;
         }
 
         int unitPrice = isSellMode ? selectedItem.Value.sellPrice : selectedItem.Value.price;
         int total = unitPrice * selectedQty;
-        if (lblTotal != null) lblTotal.text = $"{total:N0} POS";
+        if (lblTotal != null) lblTotal.text = $"{total:N0} Point";
     }
 
     private void UpdateQtyDisplay(int unitPrice)
     {
         if (txtQty != null) txtQty.SetValueWithoutNotify(selectedQty.ToString());
         int total = unitPrice * selectedQty;
-        if (lblTotal != null) lblTotal.text = $"{total:N0} POS";
+        if (lblTotal != null) lblTotal.text = $"{total:N0} Point";
     }
 
     // ── Action (Buy / Sell) ──
 
-    private void OnActionClicked()
+    private async void OnActionClicked()
     {
-        if (!selectedItem.HasValue) return;
+        if (actionInFlight || !selectedItem.HasValue) return;
 
         var item = selectedItem.Value;
-        int unitPrice = isSellMode ? item.sellPrice : item.price;
-        int totalCost = unitPrice * selectedQty;
+        int quantity = selectedQty;
+        bool sellMode = isSellMode;
+        string requestedShopId = currentShopId;
 
-        if (!isSellMode)
+        if (quantity <= 0)
         {
-            // Special handling for Animals
-            if (item.category == "animals")
-            {
-                // Current demo flow: buy animal tokens into inventory, then place them into
-                // build-mode enclosures. Pen capacity is validated when placing, not buying.
-                if (!YWonderLand.Managers.EconomyManager.Instance.SpendPOS(totalCost))
-                {
-                    Debug.Log($"[Shop] Không đủ POS để mua thú!");
-                    YWonderLand.Environment.ScreenToast.Show("Không đủ POS để mua thú!");
-                    return;
-                }
-
-                YWonderLand.Managers.InventoryManager.Instance.AddItem(item.id, selectedQty);
-                Debug.Log($"[Shop] Mua {selectedQty}x {item.name} vào túi đồ. Trừ {totalCost} POS.");
-                YWonderLand.Environment.ScreenToast.ShowInfo($"Đã mua: {selectedQty}x {item.name}  (-{totalCost} POS)");
-                YWonderLand.Managers.AudioManager.Instance?.PlaySFX("coin");
-                UpdateBalance();
-                ShowEmptyDetails();
-                return;
-
-                /*
-                // Pre-check POS for the FULL selected quantity. If they want 3, they must afford 3.
-                if (!YWonderLand.Managers.EconomyManager.Instance.SpendPOS(totalCost))
-                {
-                    Debug.Log($"[Shop] Không đủ POS để mua thú!");
-                    YWonderLand.Environment.ScreenToast.Show("Không đủ POS để mua thú!");
-                    return;
-                }
-
-                int spawnedCount = 0;
-                for (int i = 0; i < selectedQty; i++)
-                {
-                    if (YWonderLand.Managers.AnimalManager.Instance != null && 
-                        YWonderLand.Managers.AnimalManager.Instance.BuyAndSpawnAnimal(item.id))
-                    {
-                        spawnedCount++;
-                    }
-                    else
-                    {
-                        Debug.LogWarning($"[Shop] Không đủ chỗ trong chuồng để chứa con thứ {i+1}!");
-                        break;
-                    }
-                }
-
-                if (spawnedCount == 0)
-                {
-                    // Mua thú nhưng chuồng đã đầy/chưa có chuồng → báo người chơi.
-                    YWonderLand.Environment.ScreenToast.Show("Chuồng đã đầy! Xây thêm chuồng trước khi mua thú.");
-                    return;
-                }
-
-                int actualCost = unitPrice * spawnedCount;
-                YWonderLand.Managers.EconomyManager.Instance.SpendPOS(actualCost);
-                Debug.Log($"[Shop] Mua {spawnedCount}x {item.name} — Trừ {actualCost} POS.");
-                YWonderLand.Environment.ScreenToast.ShowInfo($"Đã mua: {spawnedCount}x {item.name}  (-{actualCost} POS)");
-                YWonderLand.Managers.AudioManager.Instance?.PlaySFX("coin");
-                */
-            }
-            else
-            {
-                // Standard items go to inventory
-                if (!YWonderLand.Managers.EconomyManager.Instance.SpendPOS(totalCost))
-                {
-                    Debug.Log($"[Shop] Không đủ POS!");
-                    YWonderLand.Environment.ScreenToast.Show("Không đủ POS để mua!");
-                    return;
-                }
-                YWonderLand.Managers.InventoryManager.Instance.AddItem(item.id, selectedQty);
-                Debug.Log($"[Shop] Mua {selectedQty}x {item.name} — Trừ {totalCost} POS.");
-                YWonderLand.Environment.ScreenToast.ShowInfo($"Đã mua: {selectedQty}x {item.name}  (-{totalCost} POS)");
-                YWonderLand.Managers.AudioManager.Instance?.PlaySFX("coin");
-            }
+            YWonderLand.Environment.ScreenToast.Show("Số lượng giao dịch không hợp lệ.");
+            return;
         }
-        else
+
+        if (string.IsNullOrWhiteSpace(currentShopId))
         {
-            // Sell
-            if (!YWonderLand.Managers.InventoryManager.Instance.RemoveItem(item.id, selectedQty))
+            Debug.LogWarning("[Shop] ShopDefinition is required for server-authoritative transactions.");
+            YWonderLand.Environment.ScreenToast.Show("Cửa hàng này chưa được cấu hình trên máy chủ.");
+            return;
+        }
+
+        actionInFlight = true;
+        btnAction?.SetEnabled(false);
+        btnQtyMinus?.SetEnabled(false);
+        btnQtyPlus?.SetEnabled(false);
+        txtQty?.SetEnabled(false);
+        try
+        {
+            var result = await YWonderLand.Backend.ShopTransactionService.TransactAsync(
+                requestedShopId,
+                sellMode,
+                item.id,
+                quantity);
+
+            if (!result.ok)
             {
-                Debug.Log($"[Shop] Không đủ item để bán!");
-                YWonderLand.Environment.ScreenToast.Show("Không đủ vật phẩm để bán!");
+                Debug.LogWarning($"[Shop] Server transaction failed: {result.errorCode} ({result.status}).");
+                YWonderLand.Environment.ScreenToast.Show(ResolveShopError(result.errorCode));
                 return;
             }
 
-            YWonderLand.Managers.EconomyManager.Instance.AddPOS(totalCost);
-            Debug.Log($"[Shop] Bán {selectedQty}x {item.name} — Nhận {totalCost} POS.");
-            YWonderLand.Environment.ScreenToast.ShowInfo($"Đã bán: {selectedQty}x {item.name}  (+{totalCost} POS)");
+            long totalPrice = result.totalPrice;
+            string message = sellMode
+                ? $"Đã bán: {quantity}x {item.name}  (+{totalPrice:N0} Point)"
+                : $"Đã mua: {quantity}x {item.name}  (-{totalPrice:N0} Point)";
+            YWonderLand.Environment.ScreenToast.ShowInfoForItem(item.id, message);
             YWonderLand.Managers.AudioManager.Instance?.PlaySFX("coin");
-            
-            OnItemSold?.Invoke(item.id, selectedQty);
-            
-            RefreshGrid();
-        }
 
-        ShowEmptyDetails();
+            if (sellMode)
+                OnItemSold?.Invoke(item.id, quantity);
+
+            UpdateBalance();
+            if (currentShopId == requestedShopId)
+            {
+                RefreshGrid();
+                ShowEmptyDetails();
+            }
+        }
+        catch (System.Exception exception)
+        {
+            Debug.LogException(exception);
+            YWonderLand.Environment.ScreenToast.Show("Không thể hoàn tất giao dịch. Vui lòng thử lại.");
+        }
+        finally
+        {
+            actionInFlight = false;
+            if (selectedItem.HasValue)
+                ShowItemDetails(selectedItem.Value);
+            else
+                btnAction?.SetEnabled(false);
+        }
+    }
+
+    private static string ResolveShopError(string errorCode)
+    {
+        switch (errorCode)
+        {
+            case "INSUFFICIENT_BALANCE": return "Không đủ Point để mua.";
+            case "INSUFFICIENT_ITEM": return "Không đủ vật phẩm để bán.";
+            case "SHOP_ITEM_NOT_ALLOWED": return "Cửa hàng này không giao dịch vật phẩm đã chọn.";
+            case "SHOP_NOT_FOUND": return "Cửa hàng chưa được cấu hình trên máy chủ.";
+            case "ITEM_NOT_FOUND": return "Vật phẩm chưa có trong dữ liệu máy chủ.";
+            case "INVALID_QUANTITY": return "Số lượng giao dịch không hợp lệ.";
+            case "NO_AUTH_TOKEN": return "Cần đăng nhập lại trước khi mua bán.";
+            case "AUTH_EXPIRED": return "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.";
+            case "IDEMPOTENCY_CONFLICT": return "Giao dịch bị trùng dữ liệu. Vui lòng thử lại.";
+            default: return "Không thể kết nối máy chủ để mua bán. Vui lòng thử lại.";
+        }
     }
 
     private void UpdateBalance()
@@ -839,7 +968,7 @@ public class ShopPopupController : MonoBehaviour
         if (lblBalance != null && YWonderLand.Managers.EconomyManager.Instance != null)
         {
             long balance = YWonderLand.Managers.EconomyManager.Instance.GetPOS();
-            lblBalance.text = $"{balance:N0} POS";
+            lblBalance.text = $"{balance:N0} Point";
         }
     }
 
@@ -910,6 +1039,24 @@ public class ShopPopupController : MonoBehaviour
             category = def.category,
             canSell = def.canSell,
             sellPrice = def.sellPrice
+        };
+    }
+
+    private ShopItem BuildSellShopItem(YWonderLand.Data.ItemDefinition def, int owned)
+    {
+        return new ShopItem
+        {
+            id = def.id,
+            icon = !string.IsNullOrEmpty(def.iconEmoji) ? def.iconEmoji : "?",
+            iconSprite = def.iconSprite,
+            iconTexture = def.iconTexture,
+            name = def.itemName,
+            price = def.buyPrice,
+            description = def.description,
+            category = def.category,
+            canSell = def.canSell,
+            sellPrice = def.sellPrice,
+            maxAvailable = Mathf.Max(0, owned)
         };
     }
 }

@@ -36,7 +36,7 @@
                             <ui:VisualElement class="user-icon-head" />
                             <ui:VisualElement class="user-icon-body" />
                         </ui:VisualElement>
-                        <ui:TextField name="UsernameField" class="login-textfield" text="" max-length="20" />
+                        <ui:TextField name="UsernameField" class="login-textfield" text="" max-length="254" />
                     </ui:VisualElement>
 
                     <!-- Password -->
@@ -45,7 +45,7 @@
                             <ui:VisualElement class="lock-icon-top" />
                             <ui:VisualElement class="lock-icon-body" />
                         </ui:VisualElement>
-                        <ui:TextField name="PasswordField" password="true" class="login-textfield" text="" max-length="20" />
+                        <ui:TextField name="PasswordField" password="true" class="login-textfield" text="" max-length="128" />
                         <ui:Button name="BtnTogglePassword" text="◉" class="btn-toggle-eye" />
                     </ui:VisualElement>
 
@@ -58,9 +58,9 @@
                         <ui:Label name="ForgotPassword" text="Quên mật khẩu?" class="forgot-password" />
                     </ui:VisualElement>
 
-                    <!-- Login Button with Retro Shadow -->
-                    <ui:VisualElement class="login-btn-shadow">
-                        <ui:Button name="BtnLogin" text="ĐĂNG NHẬP" class="btn-login" />
+                    <ui:VisualElement class="login-actions-row">
+                        <ui:Button name="BtnLogin" text="ĐĂNG NHẬP TRONG GAME" class="btn-login login-action-btn login-action-local" />
+                        <ui:Button name="BtnLoginWeb" text="ĐĂNG NHẬP WEBSITE" class="btn-web-auth login-action-btn login-action-web" />
                     </ui:VisualElement>
 
                     <!-- Status Message -->
@@ -109,9 +109,9 @@
                         <ui:TextField name="RegConfirmField" password="true" class="login-textfield" text="" max-length="20" />
                     </ui:VisualElement>
 
-                    <!-- Register Button with Retro Shadow -->
-                    <ui:VisualElement class="login-btn-shadow">
-                        <ui:Button name="BtnRegister" text="ĐĂNG KÝ" class="btn-login" />
+                    <ui:VisualElement class="register-actions-row">
+                        <ui:Button name="BtnRegister" text="ĐĂNG KÝ TRONG GAME" class="btn-login register-action-btn register-action-local" />
+                        <ui:Button name="BtnOpenWebRegistration" text="ĐĂNG KÝ TRONG WEBSITE" class="btn-web-auth register-action-btn register-action-web" />
                     </ui:VisualElement>
 
                     <!-- Status Message -->

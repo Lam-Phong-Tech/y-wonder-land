@@ -15,6 +15,9 @@
                 <!-- Header (Cam) -->
                 <ui:VisualElement class="workshop-header">
                     <ui:Label name="WorkshopTitle" text="." class="workshop-header-title" />
+                    <ui:VisualElement class="workshop-close-shadow">
+                        <ui:Button name="BtnCloseWorkshop" text="." class="workshop-close-btn" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
 
                 <!-- Body: Sidebar + Detail -->
@@ -51,10 +54,10 @@
                                 <ui:Label text="." class="workshop-req-title" name="LblReqTitle" />
 
                                 <ui:VisualElement name="ReqContainer" class="workshop-req-container">
-                                    <!-- POS -->
+                                    <!-- Point -->
                                     <ui:VisualElement class="workshop-req-row" name="RowReqPOS">
                                         <ui:Label text="." class="workshop-req-icon" />
-                                        <ui:Label text="POS" class="workshop-req-name" />
+                                        <ui:Label text="Point" class="workshop-req-name" />
                                         <ui:Label name="LblReqPOS" text="." class="workshop-req-value" />
                                     </ui:VisualElement>
 
@@ -93,12 +96,6 @@
                 </ui:VisualElement>
 
             </ui:VisualElement>
-
-            <!-- Close Button (SAU panel, khop Memory #4) -->
-            <ui:VisualElement class="workshop-close-shadow">
-                <ui:Button name="BtnCloseWorkshop" text="." class="workshop-close-btn" />
-            </ui:VisualElement>
-
         </ui:VisualElement>
 
     </ui:VisualElement>

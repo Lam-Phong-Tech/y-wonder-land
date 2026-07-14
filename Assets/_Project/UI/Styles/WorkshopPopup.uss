@@ -28,7 +28,7 @@
     background-color: var(--color-deep-blue);
     padding: 14px 16px;
     border-bottom-width: 1px; border-bottom-color: rgba(255, 255, 255, 0.05);
-    min-height: 56px; flex-shrink: 0;
+    min-height: 56px; flex-shrink: 0; position: relative;
 }
 
 .workshop-header-title {

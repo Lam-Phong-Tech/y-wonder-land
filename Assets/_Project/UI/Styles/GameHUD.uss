@@ -85,7 +85,7 @@
 .settings-btn:active { scale: 0.95; }
 .settings-btn-icon { font-size: 30px; color: var(--color-text-white); width: 33px; height: 33px; }
 
-/* Row 2 góc phải-trên: Build (trái) + Bag — xếp ngang */
+/* Row 2 góc phải-trên: Bag */
 .hud-bag-row { flex-direction: row; align-items: center; margin-top: 10px; }
 .bag-btn-shadow { align-self: center; }
 .bag-btn {
@@ -116,6 +116,28 @@
 .sidebar-btn-shop-icon, .sidebar-btn-map-icon { width: 33px; height: 33px; }
 .sidebar-btn-shop-text, .sidebar-btn-map-text { font-size: 14px; -unity-font-style: bold; color: var(--color-text-white); margin-left: 6px; }
 .sidebar-btn-piggy, .sidebar-btn-fishing, .sidebar-btn-build { width: 58px; height: 58px; }
+
+.hud-red-dot {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    width: 15px;
+    height: 15px;
+    border-radius: 8px;
+    background-color: #EF4444;
+    border-width: 2px;
+    border-color: #FFF2B8;
+    display: none;
+}
+
+.hud-red-dot--visible {
+    display: flex;
+}
+
+.hud-red-dot--quest {
+    top: -5px;
+    right: -5px;
+}
 
 /* ── 5. JOYSTICK & SPRINT ── */
 /* Joystick: dịch VÀO TRONG (left 84 để KHỎI đè nút sidebar 58px mép trái) + LÊN, vẫn bên trái */
@@ -188,9 +210,6 @@
     background-image: url('project://database/Assets/_Project/UI/Sprites/Female_avatar2.jpg');
     -unity-background-scale-mode: scale-and-crop;
 }
-.joystick-arrow-container { position: absolute; width: 200px; height: 200px; align-items: center; justify-content: center; }
-.joystick-arrow { position: absolute; font-size: 17px; color: rgba(255, 255, 255, 0.4); }
-.joystick-arrow-up { top: 10px; } .joystick-arrow-down { bottom: 10px; } .joystick-arrow-left { left: 12px; } .joystick-arrow-right { right: 12px; }
 .joystick-inner { width: 88px; height: 88px; border-radius: 44px; background-color: rgba(255, 255, 255, 0.55); border-width: 1px; border-color: rgba(255, 255, 255, 0.45); }
 
 /* ── 6. ACTION BUTTONS ── */
@@ -237,7 +256,7 @@
 .hud-bottom-right { position: absolute; bottom: 90px; right: 24px; align-items: flex-end; }
 
 /* Nút búa (Build) bên phải, nằm trên nút Jump — tròn cho khớp Jump */
-.build-btn-shadow { margin-right: 10px; align-self: center; }
+.build-btn-shadow { margin-right: 12px; margin-bottom: 12px; align-self: center; }
 .build-btn {
     width: 72px; height: 72px; border-radius: 50%;
     background-color: rgba(58, 71, 102, 0.5); border-width: var(--border-medium); border-color: rgba(255, 255, 255, 0.2);
@@ -257,15 +276,15 @@
 .jump-btn:active { scale: 0.95; }
 .jump-btn-icon { width: 58px; height: 58px; }
 
-.crosshair { position: absolute; left: 0; top: 0; right: 0; bottom: 0; align-items: center; justify-content: center; }
+.crosshair { display: none; position: absolute; left: 0; top: 0; right: 0; bottom: 0; align-items: center; justify-content: center; }
 .crosshair-dot { width: 8px; height: 8px; border-radius: 4px; background-color: rgba(255, 255, 255, 0.9); border-width: 1px; border-color: rgba(0, 0, 0, 0.5); }
 
 /* ── 9. INTERACTION MENU (Nút nổi Mobile & PC) ── */
 .interaction-container {
     position: absolute;
-    top: 55%; /* Nằm dưới crosshair */
+    top: 55%; /* Floating action prompt sau khi tap/click vật thể */
     left: 50%;
-    translate: -50% 0; /* Co theo nội dung + căn GIỮA dưới tâm ngắm (KHÔNG full-width để khỏi chặn cả dải ngang) */
+    translate: -50% 0; /* Co theo nội dung + căn giữa màn hình, không full-width để khỏi chặn cả dải ngang */
     align-items: center;
     flex-direction: row; /* Xếp ngang các nút */
 }
@@ -310,3 +329,56 @@
     font-size: 15px;
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9); /* viền đổ bóng -> đọc được cả trên nền sáng */
 }
+
+/* Mobile density pass: applied by GameHUDController only on phone/tablet builds. */
+.hud-mobile { padding: 20px; }
+.hud-mobile .hud-top-left { top: 20px; left: 20px; }
+.hud-mobile .hud-top-right { top: 20px; right: 20px; }
+.hud-mobile .hud-bottom-left { bottom: 56px; left: 94px; }
+.hud-mobile .hud-bottom-right { bottom: 94px; right: 28px; }
+
+.hud-mobile .player-info { padding: 10px 18px 10px 10px; min-height: 68px; }
+.hud-mobile .player-avatar { width: 56px; height: 56px; border-radius: 28px; margin-right: 14px; }
+.hud-mobile .player-name { font-size: 18px; margin-bottom: 6px; }
+.hud-mobile .player-level-badge { padding: 4px 10px; }
+.hud-mobile .player-level-text { font-size: 13px; }
+.hud-mobile .player-exp-text { font-size: 15px; margin-left: 10px; }
+
+.hud-mobile .quest-bubble { max-width: 300px; padding: 11px 14px; margin-top: 12px; }
+.hud-mobile .quest-text { font-size: 16px; margin-right: 10px; }
+.hud-mobile .quest-info-icon { width: 30px; height: 30px; }
+.hud-mobile .quest-info-text { font-size: 15px; }
+
+.hud-mobile .currency-item { padding: 10px 16px; margin-right: 12px; }
+.hud-mobile .currency-icon { width: 28px; height: 28px; margin-right: 10px; }
+.hud-mobile .currency-value { font-size: 18px; }
+.hud-mobile .settings-btn { width: 68px; height: 68px; }
+.hud-mobile .settings-btn-icon { width: 40px; height: 40px; }
+.hud-mobile .bag-btn { width: 82px; height: 82px; }
+.hud-mobile .bag-btn-icon { width: 52px; height: 52px; }
+
+.hud-mobile .sidebar-btn { width: 64px; height: 64px; }
+.hud-mobile .sidebar-btn-icon,
+.hud-mobile .sidebar-btn-shop-icon,
+.hud-mobile .sidebar-btn-map-icon { width: 38px; height: 38px; }
+.hud-mobile .sidebar-btn-shadow { margin-bottom: 13px; }
+.hud-mobile .hud-red-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 9px;
+}
+
+.hud-mobile .joystick-outer { width: 212px; height: 212px; border-radius: 106px; }
+.hud-mobile .joystick-inner { width: 96px; height: 96px; border-radius: 48px; }
+.hud-mobile .sprint-btn-shadow { left: 152px; top: 212px; }
+.hud-mobile .sprint-btn { width: 82px; height: 82px; }
+.hud-mobile .sprint-btn-icon { width: 52px; height: 54px; }
+
+.hud-mobile .build-btn { width: 82px; height: 82px; }
+.hud-mobile .build-btn-icon { width: 44px; height: 44px; }
+.hud-mobile .jump-btn { width: 108px; height: 108px; }
+.hud-mobile .jump-btn-icon { width: 66px; height: 66px; }
+
+.hud-mobile .interaction-action-btn { padding: 12px 20px; margin: 0 6px; }
+.hud-mobile .interaction-key-label { font-size: 20px; padding: 4px 10px; margin-right: 8px; }
+.hud-mobile .interaction-action-label { font-size: 18px; }

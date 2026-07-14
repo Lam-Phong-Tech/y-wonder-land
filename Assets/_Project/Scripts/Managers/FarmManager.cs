@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using YWonderLand.Data;
+using YWonderLand.Backend;
 
 namespace YWonderLand.Managers
 {
@@ -36,6 +37,7 @@ namespace YWonderLand.Managers
         private List<FarmTile> farmTiles = new List<FarmTile>();
 
         private const string SAVE_KEY = "YW_FarmState";
+        private bool loadComplete;
 
         void Awake()
         {
@@ -56,6 +58,45 @@ namespace YWonderLand.Managers
             }
         }
 
+        private void OnEnable()
+        {
+            FarmStateSync.AuthoritativeSnapshotApplied += HandleAuthoritativeSnapshotApplied;
+            if (AuthService.Instance == null) return;
+            AuthService.Instance.IdentityChanging += HandleIdentityChanging;
+            AuthService.Instance.IdentityChanged += HandleIdentityChanged;
+        }
+
+        private void OnDisable()
+        {
+            FarmStateSync.AuthoritativeSnapshotApplied -= HandleAuthoritativeSnapshotApplied;
+            if (AuthService.Instance == null) return;
+            AuthService.Instance.IdentityChanging -= HandleIdentityChanging;
+            AuthService.Instance.IdentityChanged -= HandleIdentityChanged;
+        }
+
+        private void HandleIdentityChanging(string previousScopeId, string nextScopeId)
+        {
+            SaveFarmState();
+        }
+
+        private void HandleIdentityChanged(string previousScopeId, string nextScopeId)
+        {
+            StopAllCoroutines();
+            loadComplete = false;
+            foreach (var tile in farmTiles)
+                if (tile != null) tile.ResetForPlayerState();
+            StartCoroutine(LoadAfterTilesReady());
+        }
+
+        private void HandleAuthoritativeSnapshotApplied()
+        {
+            StopAllCoroutines();
+            loadComplete = false;
+            foreach (var tile in farmTiles)
+                if (tile != null) tile.ResetForPlayerState();
+            StartCoroutine(LoadAfterTilesReady());
+        }
+
         void Start()
         {
             SpawnFarmTiles();
@@ -67,6 +108,7 @@ namespace YWonderLand.Managers
         {
             yield return null;
             LoadFarmState();
+            loadComplete = true;
         }
 
         /// <summary>
@@ -159,6 +201,12 @@ namespace YWonderLand.Managers
 
         public void SaveFarmState()
         {
+            if (!loadComplete)
+            {
+                Debug.LogWarning("[FarmManager] Skip save before load completes to avoid overwriting existing farm state.");
+                return;
+            }
+
             var saveData = new FarmSaveData { tiles = new List<FarmTile.CropSave>() };
 
             foreach (var tile in farmTiles)
@@ -170,16 +218,17 @@ namespace YWonderLand.Managers
                 saveData.tiles.Add(cs);
             }
 
-            PlayerPrefs.SetString(SAVE_KEY, JsonUtility.ToJson(saveData));
-            PlayerPrefs.Save();
+            PlayerScopedPrefs.SetString(SAVE_KEY, JsonUtility.ToJson(saveData));
+            PlayerScopedPrefs.Save();
+            FarmStateSync.NotifyLocalStateSaved();
             Debug.Log($"[FarmManager] Saved {saveData.tiles.Count} crop tiles.");
         }
 
         public void LoadFarmState()
         {
-            if (!PlayerPrefs.HasKey(SAVE_KEY)) return;
+            if (!PlayerScopedPrefs.HasKey(SAVE_KEY)) return;
 
-            FarmSaveData saveData = JsonUtility.FromJson<FarmSaveData>(PlayerPrefs.GetString(SAVE_KEY));
+            FarmSaveData saveData = JsonUtility.FromJson<FarmSaveData>(PlayerScopedPrefs.GetString(SAVE_KEY));
             if (saveData == null || saveData.tiles == null) return;
 
             // Khớp ô theo VỊ TRÍ (ổn định hơn tileIndex — không phụ thuộc thứ tự tạo).

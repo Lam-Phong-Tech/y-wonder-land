@@ -1,5 +1,366 @@
 # Danh sách công việc dự án (Task Backlog & Progress)
 
+## Ưu tiên hiện tại 14/07/2026: đóng MVP Online RC và kiểm thử bàn giao
+
+> Backend đã quay lại sau nhóm chỉnh sửa game. Mục tiêu Phase 1: không làm nạp/rút, tập trung cho khách đăng ký/đăng nhập, lưu tài khoản + dữ liệu chơi tối thiểu, và nhiều người online realtime trên đảo công cộng.
+>
+> Trạng thái 14/07/2026: PostgreSQL production, hardening/reboot, Nginx `/game-api`, HTTPS/WSS, full Phase 1 và bài tải tự động 20 client từ mạng ngoài đều đã pass. Browser SSO public cũng đã pass PKCE, chọn/đổi tài khoản tường minh và bootstrap đúng player; local/web auth vẫn song song để rollback. Unity đã chuyển sang public URL; 1 EXE mạng A + 1 APK mạng B đã gặp/chat/khai thác đồng bộ. P0 phiên đơn + chống ghi đè farm đã hoàn tất và pass regression local, nhưng migration/release mới chưa deploy VPS và chưa nghiệm thu lại chính EXE/APK, nên chưa được gọi là production hoàn chỉnh.
+
+### Nhiệm vụ mới từ sếp 12/07/2026
+
+- `[x]` **Đóng gói tài liệu tester gameplay + lợi nhuận chăn nuôi:** đã tạo bộ `outputs/019f354a-e7f6-7af1-8408-d11408550cb3/YWonder_Tester_Handoff_RC1_2026-07-12.zip`, gồm workbook gameplay RC1, workbook chăn nuôi/lợi nhuận 10 loài, hướng dẫn đọc trước và hai file nguồn `VatNuoi2.xlsx` + `SuaLai4VatNuoi.xlsx`. Không chứa mật khẩu/token/secret.
+- `[~]` **Chênh lệch dữ liệu chăn nuôi cần BA/test lead chốt:** tổng thức ăn Thỏ trong file là `90` nhưng tính từ `80 ngày / 1 ngày x 1` là `80`; Vịt trong file là `180` nhưng tính từ `45 ngày / 0,5 ngày x 1` là `90`; giá trứng Vịt trong `VatNuoi2` là `4,5 Point` nhưng runtime generator hiện là `5 Point`. Đã ghi thành điểm chờ xác nhận, chưa tự sửa dữ liệu/game.
+- `[x]` **Phân tích cổng Đăng nhập/Đăng ký web:** yêu cầu mới đã chốt cả hai nút cùng mở `https://ywonder.net/vi/login`; người mới dùng link `Tạo trang trại mới` trên web. Audit xác nhận login có `callbackUrl` nhưng register chưa giữ callback và luôn về dashboard, nên chỉ `Application.OpenURL` chưa thể đưa phiên web về game. Thiết kế polling + PKCE/callback cùng domain đã ghi tại `docs/WEB_REGISTER_REDIRECT_PLAN_2026-07-12.md`.
+- `[x]` **Nấc A web credential chạy song song, không thay luồng cũ:** release `5db92436a7974b38866fa3291f5f3e3577a2f30f` đã deploy versioned sau backup PostgreSQL/env/unit; production chạy `WEB_AUTH_MODE=http`, `AUTH_TRANSITION_MODE=parallel`, giữ đăng nhập/đăng ký local. Secret chỉ được copy nội bộ trong VPS, không in/lưu. Public acceptance bằng một account web thật và một account game local đã pass login -> bootstrap -> relogin, stable playerId và tách dữ liệu. Unity tách rõ bốn lệnh account; Nấc A vẫn là fallback khi cần rollback Nấc B.
+- `[~]` **Nấc B Browser SSO - backend/web `[x]`, client artifact chờ test:** PKCE/callback/exchange và bootstrap PostgreSQL đã pass bằng tài khoản web thật. Commit callback `cac56e0f` đã deploy build `Q_dfxErFS68Q3YBChCShT`: session web nhớ sẵn không còn tự approve mà phải chọn `Tiếp tục với tài khoản này` hoặc `Đăng nhập tài khoản khác`; đổi account expire đúng session cookie, giữ callback qua login, dùng `no-store` và không còn cảnh báo khóa giả. Public acceptance cuối pass `PLAYER=p_1783873094`, profile `Lam`, Point `5000`. Commit Unity `c002dfa0` vẫn xử lý focus EXE sau exchange; local/web credential tiếp tục song song. Còn smoke trên chính EXE/APK bàn giao: tiếp tục account hiện tại, đổi account, đăng ký mới + OTP bằng mã giới thiệu hợp lệ, Android quay lại app và relogin/cross-device giữ cùng playerId/dữ liệu.
+
+#### Cổng bàn giao tiếp theo
+- `[~]` **MVP cho sếp/khách trải nghiệm - còn 2 cổng:** (1) dùng EXE hiện tại nếu đã chứa commit `c002dfa0`, build APK tương ứng rồi smoke local login + web login + web register/OTP + chọn/đổi account + quay lại game; hotfix callback `cac56e0f` là phía web nên tự nó không bắt buộc build lại Unity; (2) bàn giao artifact, tài liệu tester và kết quả test 2–5 thiết bị. Chưa gọi client artifact hoàn tất trước hai cổng này.
+- `[ ]` **Production hoàn chỉnh - còn 3 nhóm lớn sau Nấc B:** (1) farm hai chiều xuyên thiết bị kèm revision/conflict; (2) server-authoritative cho gameplay còn lại và trạng thái resource qua restart; (3) monitoring/admin/audit/cert renewal cùng nghiệm thu 5–20 thiết bị thật. Không gộp ba nhóm này vào cam kết thời gian bàn giao MVP.
+
+### Khoảng trống trước nghiệm thu production
+
+#### P0 - bắt buộc trước khi tuyên bố đồng bộ tài khoản hoàn chỉnh
+- `[~]` **Đồng bộ farm xuyên thiết bị hai chiều - đã code, chờ runtime:** nguyên nhân lỗi account `Thu2026` là Unity có bốn snapshot PlayerPrefs độc lập (`YW_BuildState`, `YW_PlacedTiles`, `YW_FarmState`, `YW_AnimalState`) nhưng bootstrap chỉ đọc `farm_state` PostgreSQL mà chưa áp vào runtime. `FarmStateSync` nay gộp bốn nguồn thành một snapshot server, tải lại ô đất/cây/timer/công trình/chuồng/thú khi bootstrap và đẩy thay đổi sau cuốc, xây, gieo, tưới, thu hoạch, chăm thú hoặc logout. Migration lần đầu cho phép thiết bị có legacy save nhiều nội dung hơn nâng snapshot nghèo hơn. C# compile và API relogin round-trip đã pass; chưa tick `[x]` trước khi EXE/APK cùng account dựng lại đúng farm.
+- `[~]` **Chống ghi đè farm giữa client/server - code local đã xong, chờ deploy/runtime:** backend đã có compare-and-set nguyên tử theo `expected_version`, tự tăng revision và trả `409 FARM_STATE_CONFLICT` kèm snapshot authoritative khi client cũ ghi đè. Unity giữ revision, phục hồi snapshot server khi gặp `409`, và lưu outbox farm bền vững theo `playerId` để retry sau mất mạng/đóng app mà không lưu token. JSON Phase 1 smoke đã pass conflict/relogin; còn migration PostgreSQL `003`, deploy VPS và nghiệm thu EXE/APK.
+- `[~]` **Nghiệm thu đổi thiết bị/cài lại:** dùng cả EXE và APK chứa hotfix. Đăng nhập `Thu2026` trên máy đang giữ farm đầy đủ trước để migrate, chờ đồng bộ rồi logout; máy thứ hai phải thấy đúng bố cục. Sau đó cuốc/gieo/tưới/xây/thả thú trên máy B, logout và quay về máy A; phải thấy đúng tiền, túi, farm và bù thời gian. Một account chỉ online một phiên; máy B thay máy A theo rule `4008` đã hoàn thành.
+
+##### Ma trận đồng bộ và ca test tuần tự A -> B -> A (13/07/2026)
+- `[x]` **Đã đồng bộ theo cùng tài khoản:** định danh/profile nhân vật, Point/UPoint và túi đồ đều dùng dữ liệu server; bài đổi hai tài khoản A -> B -> A trước đó đã xác nhận dữ liệu riêng không bị lẫn.
+- `[~]` **Farm cùng tài khoản xuyên thiết bị:** hotfix bao phủ bố cục ruộng/đường/chuồng, đất đã cuốc, cây và timer gieo/tưới/lớn/chín/héo, cây lâu năm/cụm nhiều ô, công trình, chuồng/thú, trạng thái cho ăn, sản phẩm và số lần thu hoạch. Outbox + revision/`409` đã pass local; chờ deploy và bài test tuần tự trên đúng EXE/APK mới để chốt `[x]`.
+- `[~]` **Vị trí đứng cuối:** vị trí Farm đã lưu theo account và từng được xác nhận khôi phục; vẫn cần kiểm tra xuyên thiết bị. City/Mine chưa khôi phục trực tiếp từ server nên chưa được coi là đồng bộ hoàn chỉnh.
+- `[~]` **Giới hạn gameplay:** câu cá/đào mỏ và `daily_limits` mới đồng bộ một phần, chưa server-authoritative toàn bộ.
+- `[x]` **Giữa các tài khoản khác nhau:** tiền, túi đồ, farm và nhân vật phải tách riêng theo `playerId`; phần dùng chung chỉ gồm presence/di chuyển/hoạt ảnh/chat và cây/đá công cộng trong City/Mine. Các luồng realtime này đã pass các lần test trước.
+- `[ ]` **Khoảng trống còn lại:** trạng thái cây/đá công cộng còn nằm trong RAM và có thể hồi lại sau backend restart; điểm danh/vòng quay và một số tiến trình phụ cần regression test xuyên thiết bị; vị trí City/Mine và daily limit/câu cá vẫn chưa server-authoritative toàn bộ.
+- `[~]` **Các bước test hiện tại của anh:** (1) máy A đăng nhập cùng account, ghi lại `playerId` nếu có log/admin, tiền, túi đồ và chụp bố cục farm; thực hiện cuốc/gieo/tưới/xây/thả thú rồi chờ đồng bộ và logout; (2) máy B đăng nhập account đó, phải thấy đúng toàn bộ trạng thái và thời gian đã trôi; thay đổi thêm một trạng thái, chờ đồng bộ rồi logout; (3) quay lại máy A, phải thấy đúng thay đổi từ B và không bị phục hồi cache cũ. Không mở A và B đồng thời trong ca này; nếu mở đồng thời thì phiên mới phải thay phiên cũ bằng mã `4008`, đó là bài test phiên trùng riêng.
+- `[x]` **Kết quả runtime retest 14/07 - đạt ở môi trường test:** anh đã build/test lại và xác nhận hai lỗi buổi sáng đã được xử lý ổn: phiên đăng nhập mới thay phiên cũ ngay mà không cần đóng hẳn app, và farm/cây/tưới không còn quay về snapshot cũ khi đổi tuần tự EXE -> APK cùng account. Checkpoint code: `21cc20d2`. Đây là nghiệm thu artifact test; cổng migration `003` + deploy VPS + smoke lại sau deploy vẫn giữ `[~]` bên dưới.
+- `[x]` **Nguyên nhân phiên đơn đã sửa trong code local:** mọi lần register/login/web login/browser exchange nay rotate `sessionId`, lưu phiên active theo player và đưa `sid` vào JWT; REST từ token cũ trả `401 SESSION_REPLACED`, WebSocket cũ bị đóng `4008` ngay khi phiên mới được cấp. Unity theo dõi token/scope đã mở socket, đóng/reconnect khi auth đổi và có `/auth/logout` để thu hồi phiên chủ động.
+- `[x]` **Nguyên nhân farm bị ghi cũ/không lên server đã sửa trong code local:** `PUT /player/farm-state` dùng revision compare-and-set; client bị `4008` đi qua logout không-save nên không thể upload snapshot cũ. Pending farm được ghi vào outbox PlayerPrefs theo player và chỉ xóa khi đúng payload được server nhận; lỗi mạng/`401` giữ lại để lần đăng nhập sau retry trước bootstrap; `409` phục hồi snapshot server.
+- `[x]` **Regression local P0 14/07:** `node --check`, Phase 1 JSON smoke, realtime smoke, `test:security`, `test:browser-auth` và `test:web-auth` đều pass. Test bao gồm token cũ bị `401`, socket cũ bị `4008`, logout thu hồi token, farm stale write nhận `409` và không ghi đè. Unity Editor không phát sinh `error CS` mới sau lần compile cuối. PostgreSQL smoke thật chưa chạy local vì máy chưa có `POSTGRES_TEST_DATABASE_URL`.
+- `[~]` **Cổng triển khai/nghiệm thu P0:** chạy migration `003_active_player_sessions.sql` và PostgreSQL smoke, deploy release VPS có backup/rollback; lưu ý mọi JWT cũ thiếu `sid` sẽ phải đăng nhập lại. Sau đó build EXE/APK và test: B đăng nhập phải đá A ngay dù A chưa đóng app; B thấy đúng farm/cây/nước/túi từ A; quay B -> A không phục hồi snapshot cũ; đóng app đột ngột rồi mở lại phải retry outbox thành công.
+- `[ ]` **Tách cấu hình thời gian Demo/Production:** RC hiện dùng `GameTimeConfig.SecondsPerGameDay = 60f` để khách xem nhanh vòng chơi. Trước bản vận hành phải có cấu hình Production `1 ngày game = 24 giờ thật`, áp đúng `CayTrong2`, `CayTrongLauNam2`, `VatNuoi2`, các cập nhật BA mới hơn và test bằng đồng hồ mô phỏng/server time; không ngồi chờ thực tế hàng tháng.
+- `[~]` **Chốt số liệu thời gian còn mơ hồ:** cây ngắn ngày mới được BA xác nhận miệng 24 giờ; cây lâu năm có chu kỳ tưới/thu hoạch trong file nhưng phải đối chiếu các cập nhật sau file (đặc biệt chanh dây 5.300 Point/cụm 20 cây và rule gieo/thu cụm) trước khi khóa Production Time.
+
+#### P1 - bắt buộc cho sign-off vận hành ổn định
+- `[~]` **Nghiệm thu đúng bản RC trên 4–5 thiết bị thật khác mạng:** hiện mới pass 1 EXE mạng A + 1 APK mạng B; bài 20 client còn lại là tự động, chưa phải 20 người cầm máy chơi. Chạy P0 trong `YWonder_Phase1_TestCases_2026-07-11.xlsx` trên chính EXE/APK bàn giao.
+- `[~]` **Xác minh gia hạn HTTPS tự động:** certificate hiện hợp lệ nhưng `certbot.timer` từng ở trạng thái `enabled/inactive`; phải chạy renewal dry-run và xác nhận timer trước sign-off dài hạn.
+- `[~]` **Theo dõi reconnect chậm:** người chơi có thể phải chờ lâu khi nối lại realtime. Đo thời gian reconnect trên Wi-Fi/4G, chặn sinh player trùng và thêm thông báo rõ nếu vượt ngưỡng; hiện chưa chặn bản trải nghiệm.
+- `[ ]` **Lưu trạng thái cây/đá realtime qua restart:** claim/depleted/respawn của tài nguyên công cộng hiện còn nằm trong RAM Node; backend restart sẽ làm mới trạng thái khai thác. Chuyển snapshot tài nguyên và `respawnAt` vào PostgreSQL hoặc khôi phục theo timestamp server để người chơi không thấy cây/đá hồi sai sau deploy/restart.
+- `[ ]` **Hoàn thiện server-authoritative cho gameplay còn lại:** rà câu cá, đào mỏ/daily limits, phần thưởng/chi phí ngoài shop, cây trồng, thú nuôi và xây dựng; server phải kiểm tra điều kiện, idempotency và là nguồn dữ liệu cuối cùng thay vì chỉ nhận delta từ client.
+- `[ ]` **Đồng bộ vị trí ngoài farm:** vị trí farm đã lưu theo account; City/Mine hiện chưa khôi phục trực tiếp từ server vì scene cần load trước. Chốt quy tắc spawn an toàn theo đảo và lưu island/pose hợp lệ.
+- `[ ]` **Bổ sung vận hành production:** dashboard/admin có xác thực, phân quyền và audit log để khóa account, xem/chỉnh dữ liệu có kiểm soát; monitoring/alert khi Node/PostgreSQL/Nginx/WebSocket chết, backup lỗi hoặc ổ đĩa gần đầy. Dashboard dev `/admin` vẫn phải đóng public.
+- `[ ]` **Dọn account P1 cũ:** PostgreSQL còn `P1A_h09433`, `P1B_h09433`, `P1Race_h09433` dùng cho restart/reboot acceptance. Sau khi chốt không cần regression nữa, backup rồi xóa/vô hiệu hóa; không gửi các account này cho tester thay cho `QARich`.
+- `[ ]` **Ngừng hạ tầng demo cũ sau nghiệm thu VPS:** xác nhận không build nào còn trỏ Cloudflare Quick Tunnel hoặc backend Windows/local, sau đó tắt tiến trình/service cũ và lưu tài liệu rollback cần thiết; chỉ giữ `https://api.ywonder.net/game-api` làm endpoint RC/production.
+- `[ ]` **Vòng đời account QA:** sau đợt test phải đổi mật khẩu hoặc vô hiệu hóa `QARich0001..QARich0005`; không bật `DEMO_ACCOUNTS_ENABLED=true` trên production vì demo seeding có thể ghi lại economy/inventory lúc restart.
+
+#### Ngoài phạm vi MVP Online RC hiện tại
+- `[~]` **Nấc B browser SSO và nghiệm thu trước cutover:** callback/exchange một lần + PKCE, giữ callback qua đăng ký và bộ chọn/đổi tài khoản web đã pass production; account web thật map ổn định về cùng player. Còn test EXE/APK cross-device, restart/rollback Browser SSO, account web khóa/xóa và phiên trùng `4008` trên luồng web. Production tiếp tục giữ account game local/QARich; chưa tắt local và chưa dùng nạp/rút hoặc tiền thật trong RC.
+- `[~]` **Hệ web cũ chung domain cần bên web xử lý:** các vấn đề CORS/header/stack trace của route web nằm ngoài namespace `/game-api`; game backend không được sửa chồng lên route web cũ. Ghi nhận bằng chứng, giao owner web khắc phục và regression test để bảo đảm Nginx vẫn tách biệt hai hệ thống.
+- `[~]` **Mở rộng tải sau 20 người:** bài tự động 20 client đã pass; chỉ nâng room/server, load test dài và scale ngang khi khách chốt số CCU mục tiêu lớn hơn.
+
+### Phase 1 - tài khoản game tự đăng ký + lưu tiến trình MVP
+- `[x]` Tạo 5 tài khoản QA production `QARich0001..QARich0005` qua API đăng ký bình thường, không bật lại demo seeding. Mỗi account đã fresh-login và `/player/bootstrap` xác nhận `500.000 Point / 2.500 UPoint`, profile đã tạo nhân vật + hoàn tất tutorial, 80 ô kho và 31 loại item phục vụ test shop/farm/xây dựng/chăn nuôi. Mật khẩu ngẫu nhiên lưu ngoài repo; phải đổi mật khẩu hoặc vô hiệu hóa account sau đợt test.
+- `[x]` Commit checkpoint trước khi quay lại backend: `8054205 feat: sync backend bootstrap and farm save polish`.
+- `[x]` Unity register gửi `email` lên backend; server `/auth/register` lưu `username/email/phone/password_hash` vào JSON store, chặn trùng username và email.
+- `[x]` Unity login nay thử `/auth/login` local trước; nếu server trả `USER_NOT_FOUND` mới fallback sang `/auth/web-login`. Nhờ vậy tài khoản tự đăng ký có password thật, còn web bridge vẫn dùng được khi có web account thật.
+- `[x]` Server `/auth/login` trả `404 USER_NOT_FOUND` khi chưa có tài khoản local và `401` khi sai mật khẩu, để không vô tình fallback web/mock khi nhập sai password của tài khoản đã đăng ký.
+- `[x]` Thêm `server/phase1SmokeTest.js` và npm script `test:phase1` để chứng minh register -> login -> `/player/bootstrap` -> lưu Point/inventory/farm_state -> idempotency -> realtime chat.
+- `[x]` Đã chạy test Phase 1 trên server tạm port `3101`, data file riêng trong temp: `npm.cmd run test:phase1 --prefix server` pass.
+- `[x]` Hotfix backend demo account: seed sẵn `DemoRealtime01..05` và `DemoRich01..05`, cho phép password `demo` hoặc trùng tên account; token demo cũ được map về player local chuẩn để tránh máy cache cũ/máy fresh login nhìn sai tiền hoặc sai nhân vật.
+- `[x]` Hotfix realtime duplicate session: server chỉ giữ 1 phiên/account, gửi `SESSION_REPLACED` và đóng phiên cũ mã `4008`; Unity phiên cũ dừng reconnect, đăng xuất và quay về Login. Public smoke test và EXE runtime với `Nhien0001` đã được anh xác nhận: phiên mới thay phiên cũ đúng yêu cầu.
+- `[x]` Hotfix online-only: build public không còn tự resume gameplay bằng cache khi backend/tunnel chết; login/register phân biệt rõ lỗi mất kết nối, sai mật khẩu và account/email trùng. Bổ sung 10/07: `ApiClient` giữ mã lỗi JSON, tài khoản không tồn tại hoặc sai mật khẩu đều hiện đúng "Sai tên tài khoản hoặc mật khẩu" thay vì báo nhầm máy chủ tạm ngừng. Anh đã test lại bản EXE/APK và xác nhận luồng đăng nhập hoạt động đúng.
+- `[x]` Đồng bộ animation realtime ngoài walk/run: gửi đúng state hiện tại, tốc độ và dụng cụ cho `Jump`, `Swimming`, `Hoeing`, `Mining`, `TreeCuttingV4`, `Watering`, `Fishing`, `Feed`, `Planting`; remote dùng Animator nam/nữ tương ứng. Smoke test server đã pass `Jump` và `Mining + Pickaxe`, Unity compile không lỗi; anh đã build hai client và xác nhận các hoạt ảnh hoạt động tốt.
+- `[x]` Đồng bộ tài nguyên cây/đá ở room công cộng `city/mine`: server giữ trạng thái theo `resourceId`, chỉ người claim đầu tiên được cộng thưởng, ghi inventory + lượt đào nguyên tử/idempotent, broadcast biến mất, snapshot cho người vào sau và hồi sinh sau 20 giây. Unity chỉ cộng túi đồ sau khi server xác nhận; mất kết nối không tự cộng local. Smoke test backend temp/public và Unity compile đều pass; ngày 10/07 anh đã test bản build nhiều client và xác nhận vận hành rất ổn.
+- `[x]` Đã audit tài nguyên/tiền/túi đồ/shop/farm-state tại `docs/PHASE1_STATE_SYNC_AUDIT.md`: profile có đọc/ghi server; shop và khai thác cây/đá public đã server-authoritative; farm/crop/animal, câu cá và nhiều reward/chi phí khác vẫn local. PostgreSQL adapter đã hoàn thiện ngày 11/07 nhưng các khoảng trống gameplay ownership này vẫn còn, nên Phase 1 chưa nghiệm thu toàn bộ.
+- `[x]` P1 shop buy/sell server-authoritative: catalog server sinh từ 109 `ItemDefinition` + 8 `ShopDefinition`, API nguyên tử `POST /player/shop/transaction` kiểm shop/item/giá/số lượng/idempotency và trả cùng lúc economy + inventory. Unity khóa nút khi request đang chạy, retry bằng cùng key khi mất phản hồi, chỉ áp tiền/túi từ server và không fallback giao dịch local khi mất mạng. Smoke temp/public, C# compile và runtime EXE/APK/relogin đã pass; ngày 10/07 anh xác nhận mọi thứ hoạt động khá tốt. Reconnect đôi lúc hơi lâu nhưng không chặn demo, theo dõi riêng nếu tăng tần suất.
+- `[x]` Tách cache gameplay theo `playerId`: đã thêm `PlayerScopedPrefs`, migration legacy chỉ cho một account nhận, event lưu scope cũ/nạp scope mới và chuyển Point/inventory/tool/EXP/vị trí, farm/cây, ô lát, công trình, thú, lượt câu/đào, điểm danh/vòng quay sang key riêng. Online-only không đọc/ghi save gameplay chung khi chưa đăng nhập; setting thiết bị và auth vẫn dùng chung đúng chủ đích. C# compile pass; ngày 10/07 anh đã test A -> B -> A và đóng hẳn/mở lại EXE, xác nhận hai tài khoản không lẫn dữ liệu và khôi phục đúng.
+- `[x]` Đồng bộ mọi biến động gameplay của inventory/economy: `InventoryManager.AddItem/RemoveItem` và `EconomyManager.Add/Spend` nay xếp hàng gọi `inventory/adjust` hoặc `economy/apply`, mỗi delta có idempotency key và retry cùng key. Bootstrap, shop và logout chờ hàng đợi để không nạp đè snapshot cũ. Nhờ đó cùng một luồng bao phủ hạt, nước, nông sản, gỗ/đá/cá, thức ăn, thú, phân bón, quà, vật liệu xây và Point/UPoint ngoài shop. Unity compile, Phase 1 smoke, API relogin riêng (`+20 nước`, `+2/-1 hạt sầu riêng`, `+50/-20 Point`) và bản Unity runtime đều pass; ngày 10/07 anh xác nhận vận hành ổn.
+- `[x]` Khôi phục vị trí farm theo account: logout lưu pose trước khi hủy nhân vật/clear auth; lần đăng nhập hồ sơ cũ ưu tiên tọa độ farm đã lưu rồi mới fallback về bến. Ngày 10/07 anh test bản mới và xác nhận ổn. Hiện chưa khôi phục trực tiếp vị trí ở City/Mine vì các scene đảo đó cần được load trước.
+- `[~]` Nối `farm_state` hai chiều đã có hotfix Unity + API round-trip, chờ EXE/APK runtime; `daily_limits` cho câu cá/đào mỏ vẫn chưa nối hoàn chỉnh.
+- `[x]` Backend Phase 1 đã public thử qua Cloudflare Quick Tunnel với JWT secret ngẫu nhiên, `WEB_AUTH_MODE=disabled`, dashboard admin tắt và max 20 người/room. Public REST/WebSocket smoke test pass; EXE runtime xác nhận hai account khác nhau gặp/chat được trong City và account trùng bị thay phiên mã `4008`. URL Quick Tunnel là runtime tạm, không commit làm URL production.
+- `[x]` Audit read-only VPS game `42.96.18.14`: Ubuntu 22.04.5 LTS trên KVM, 2 vCPU, RAM 3.8 GiB + swap 3.8 GiB, disk 50 GB còn khoảng 37 GB, timezone Asia/Ho_Chi_Minh/NTP đúng; UFW deny inbound và mới chỉ mở SSH 22. Chưa có Node, PostgreSQL, Caddy/Nginx/Docker, không có service lỗi hay ứng dụng cũ cần giữ. Cấu hình đủ demo khoảng 20 người; báo cáo ở `docs/VPS_GAME_AUDIT_2026-07-10.md`. Mật khẩu giữ ngoài repo.
+- `[x]` Nền PostgreSQL production trên VPS: tạo OS service account `ywonder_game` không có interactive shell, role PostgreSQL `ywonder_game` không có quyền superuser/createdb/createrole và database cùng tên dùng peer authentication qua Unix socket. Migration `001_initial` đã tạo 10 bảng public; env production nằm ngoài repo dưới `/etc/ywonder-game`; backup timer hằng ngày đã `enabled/active`, lượt backup đầu tiên thành công và restore drill vào database tạm đã pass rồi dọn sạch. PostgreSQL vẫn chỉ listen `127.0.0.1:5432`, UFW không public `5432`; chưa import `data.json`.
+- `[x]` Private staging VPS: Node `24.18.0` LTS và Caddy `2.11.4` đã cài; backend commit `ebc9982` chạy bằng `ywonder-game-server.service`, Caddy proxy nội bộ và cả hai service đều `enabled/active`. Migration skip đúng `001_initial`; health xác nhận store `postgres`; full Phase 1 REST/WebSocket smoke qua Caddy pass. Node chỉ listen `127.0.0.1:3000`, Caddy chỉ listen `127.0.0.1:8080`; test từ máy anh xác nhận chỉ `22` mở, còn `80/443/3000/5432/8080` đều đóng. Không import JSON cũ, DNS và Unity URL chưa đổi.
+- `[x]` Gia cố backend trước public ở commit `09433bff`: production startup gate chặn secret yếu/JSON/mock/dashboard/demo/public bind; bcrypt async cost 12; rate limit theo IP + account + đăng ký; body/CORS/security header/request ID/log không ghi body-token; HTTP timeout; WebSocket giới hạn connection/payload/message; shutdown sạch và systemd sandbox bổ sung. `test:security`, full Phase 1 local và `npm audit --omit=dev` đều pass.
+- `[x]` Private redeploy hardening: release `09433bff1e739bd2573c8068ffa58f445cd01bb6` chạy trên PostgreSQL thật; full Phase 1 qua SSH tunnel -> Caddy pass, sai password trả `401` kèm rate-limit `15`, `/admin` trả `404`, backup timer active/enabled. Lần chạy root đầu dừng an toàn trước switch vì migration giữ `USER=root`; script đã ép `PGUSER/USER/LOGNAME=ywonder_game` và lần hai pass. Chỉ `22` public; `80/443/3000/5432/8080` vẫn đóng, DNS `api.ywonder.net` vẫn ở `45.119.83.233`.
+- `[x]` Controlled restart acceptance trên VPS production: trước restart đã chụp fingerprint profile/economy/inventory/farm/daily-limit/transaction của `P1A_h09433`, `P1B_h09433`, `P1Race_h09433`; restart PostgreSQL rồi `ywonder-game-server` lúc `11:35:58 +07` và fingerprint sau restart khớp hoàn toàn. Ba account login/bootstrap lại qua SSH tunnel + Caddy đều giữ Point, inventory và farm state; Node/Caddy health trả `storage.mode=postgres`, PostgreSQL/Node/Caddy/backup timer đều `active/enabled`.
+- `[x]` Full VPS reboot acceptance: VPS boot lại lúc `13:13:19 +07`, `boot_id` đổi sang `ee8dfd96-8d69-43c0-a0ab-5ddcccd109f9`; PostgreSQL, `ywonder-game-server`, Caddy và backup timer đều tự lên ở trạng thái `active/enabled`. Health qua private Caddy trả `storage.mode=postgres`; ba account P1 login/bootstrap lại được và canonical fingerprint trước/sau reboot khớp `a003b888ed68b5ee95e43efae2ee0873fafd291dac66aac0ffceeaf7c649bf6e`.
+- `[x]` Private automated 20-client acceptance: thêm `server/phase1LoadTest.js` + `npm run test:load`, tạo/reuse 20 account theo prefix riêng, bootstrap đủ profile/economy/inventory/farm/daily limits, mở 20 WebSocket cùng room `city`, nhận đủ roster 19 peer, relay state/chat/ping và giữ kết nối. Lượt chạy thật qua Caddy private + PostgreSQL pass; p95 auth `1532.4 ms`, bootstrap `31.9 ms`, WebSocket connect `36.6 ms`. Backup pre-cutover `/var/backups/ywonder-game/ywonder_game_20260711T072715Z.dump` có SHA-256 `04dda7ac1048d0de493a25f91ab98116f784494460c1cbfa390479d646679a7e`; hậu kiểm xác nhận account tải còn `0`, không OOM và PostgreSQL/Node/Caddy/backup timer vẫn active.
+- `[x]` Public Nginx audit read-only: DNS đã trỏ `api.ywonder.net -> 42.96.18.14`; Nginx giữ `80/443`, HTTP -> HTTPS và certificate hợp lệ; `3000/5432/8080` vẫn đóng public. Nginx hiện giữ `/api/game/* -> 3033` cho web API cũ và mọi path còn lại `-> 3036`, nên `/player/bootstrap` và `/realtime` đang `404`; backend PostgreSQL của ta vẫn khỏe tại loopback `3000/8080`. Báo cáo: `docs/NGINX_PUBLIC_AUDIT_2026-07-11.md`.
+- `[x]` Public Nginx cutover: đã backup `/etc/nginx/sites-available/ywonder.net.conf`, thêm đúng `/game-api/*` và WebSocket `/game-api/realtime -> 127.0.0.1:3000`, giữ nguyên `/api/game/* -> 3033` và root `-> 3036`. `nginx -t`/reload pass; Nginx, game-server, PostgreSQL và Caddy đều active/enabled. Backup SHA-256 `87c987eb81767be2e121a4a3fc035600329cc95b73595ca4ddb192650c55a878`, config mới `b7b6cc5b28d89b37e35b94ac26099e992efef25d199cd6489e97d8248b5185d8`.
+- `[x]` External REST/WSS acceptance: từ máy Windows, `https://api.ywonder.net/game-api/health` trả PostgreSQL; automated 20-client pass với p95 auth/bootstrap/WSS `1666.4/64.9/173.7 ms`; full Phase 1 pass register/login/shop/idempotency/farm-state/relogin/chat/session replacement. Account test đã dọn về `0`, ba account P1 gốc còn đủ; `80/443` mở và `3000/5432/8080` vẫn đóng public.
+- `[x]` Unity `Assets/Resources/BackendConfig.asset` đã chuyển `baseUrl = https://api.ywonder.net/game-api`, giữ `useOfflineFallback = 0`; chờ build EXE/APK và test thiết bị thật.
+- `[~]` `certbot.timer` hiện `enabled` nhưng `inactive`; certificate hiện vẫn hợp lệ nhưng cần xác minh/bật lịch renewal trước nghiệm thu production dài hạn.
+- `[~]` Test thiết bị thật ngoài mạng: do giới hạn thiết bị, anh đã test 1 EXE qua mạng A + 1 APK qua mạng B; chat realtime và đào khoáng đồng bộ đều hoạt động rất tốt. Vẫn cần test lại bản hotfix mới và mở rộng lên 4–5 máy khi có điều kiện; chưa đủ để tick nghiệm thu 5–20 thiết bị.
+- `[x]` Hotfix sau test 2 thiết bị: tutorial NPC đã bỏ hoàn toàn node đào khoáng và kết thúc sau đúng ba nhóm `chặt cây -> xây ruộng/trồng trọt -> xây chuồng` (11 bước, không bắt thả thú/cho ăn); `StartTutorial()` khóa chạy lặp theo phiên, reset khi đổi/logout account và dấu `!` được dedupe/dọn khi hoàn tất. Form đăng ký mobile không còn hiện cảnh báo độ dài liên tục khi đang gõ; nội dung chuẩn hóa thành username/password mới cần ít nhất 9 ký tự theo đúng backend. C# compile pass; ngày 11/07 anh đã build/test lại và xác nhận ba lỗi tutorial, dấu `!` và cảnh báo đăng ký mobile đều đã xử lý đúng.
+
+## Ưu tiên hiện tại 06/07/2026: tạm gác backend, quay lại chỉnh sửa game
+
+> Quyết định mới từ anh: tạm dừng chuỗi backend sau khi đã có nền mock/API/dashboard/realtime; giữ toàn bộ task backend bên dưới để quay lại sau khi xong nhóm chỉnh sửa game trước mắt.
+
+### Yêu cầu khách 06/07/2026 - backlog chỉnh sửa game trước mắt
+
+> Nguyên tắc: đây là yêu cầu khách, chưa triển khai. Trước khi sửa từng mục phải đọc script/prefab/scene liên quan và ưu tiên những lỗi ảnh hưởng demo/build/mobile trước. Backend vẫn tạm gác cho tới khi nhóm này ổn.
+
+#### A. Nền game, ánh sáng, nước
+- `[ ]` Giữ hướng ánh sáng/màu nền hiện tại vì anh xác nhận đang đúng mẫu khách từng gửi; khi chỉnh scene phải tránh làm game tối lại.
+- `[x]` Màu nước biển Farm/City đã chỉnh và anh đã test lại trên điện thoại: màu xanh đã cải thiện, đủ chốt cho demo hiện tại. Nếu phát sinh lỗi màu mới trên máy thật thì mở task riêng theo ảnh/video triệu chứng.
+
+#### B. Thành phố / City scene
+- `[ ]` Dời nhà MiniGarden bán sản phẩm sang bên trái nhà nâng cấp dụng cụ, giữ cửa quay ra đường chính.
+- `[ ]` Trang trí quanh nhà MiniGarden bằng hoa/cây cảnh thực tế hơn, tránh cảm giác khối đá/hoạt hình quá thô so với game 3D.
+- `[ ]` Làm bãi biển kéo từ khu nhà MiniGarden xuống phía biển theo yêu cầu khách; cần bố trí lối đi/khu bãi hợp lý để nối với phần bãi biển có thuyền, bờ kè và điểm câu cá.
+- `[ ]` Làm bãi biển thành phố có thuyền và bờ kè như bên farm; đặt vùng câu cá đúng khu bãi biển/gần bờ kè để người chơi tập trung đông vui.
+- `[ ]` Tất cả cửa hàng trong game cần bảng hiệu chuyên nghiệp dạng model 3D gắn trước nhà; dùng tên bảng hiệu hiện tại làm nội dung hiển thị.
+- `[ ]` Nơi dịch chuyển ở thành phố đổi thành căn nhà giống bên farm nhưng cao hơn, trang trí thêm để có phong cách riêng.
+- `[x]` MiniGarden/Sa Chi/Sầu Riêng/Chanh dây: repo đã có seed/product, iconTexture và shop whitelist cho `sacha_01`, `durian_01`, `passion_fruit_01`; anh đã check phần shop/data tổng thể và chốt các sản phẩm này đủ đi tiếp. Icon sản phẩm chanh dây mới có thể đổi mapping sau nếu anh bổ sung asset mới.
+- `[~]` Chanh dây rule mới từ BA/khách: `200 USDT / 20 cây` là giá cả cụm 20 cây; tỉ giá 26.500 được quy về `5.300 Point` trong game. Đã cập nhật `passion_fruit_seed_01.buyPrice = 5300` và `ItemDataGenerator` để không bị generator trả về 1560. Code đã tách `seedItemCost` khỏi `plotSlots`: `Giống chanh leo` trong shop được hiểu là 1 gói/cụm 20 cây giá 5.300 Point, khi gieo trừ 1 item giống nhưng vẫn chiếm 20 ô đất bằng `plotSlots = 20`. Đã vá persistence cây nhiều ô bằng `slaveTileKeys` để save/load lại cụm chanh dây không mất ô phụ. Vẫn cần test runtime riêng và chốt/sửa sản lượng thu hoạch cho đúng ý "cụm 20 cây -> sản phẩm tương ứng" nên chưa tick x.
+
+#### C. Nông trại / Farm scene và cửa hàng
+- `[x]` Các cửa hàng trong game phải hiển thị vật phẩm và câu chữ to hơn khoảng 3 lần so với hiện tại, đặc biệt trên điện thoại: đã thêm layout mobile riêng cho ShopPopup theo hướng giữ khung popup gần kích thước cũ, chỉ làm card/icon/chữ/giá/nút thao tác lớn hơn để mỗi màn hình hiện ít sản phẩm hơn và scroll xem tiếp. Cập nhật 08/07: anh đã chốt layout shop lớn hơn/filter shop sau khi test.
+- `[x]` Sửa trigger cửa hàng ở farm và city: anh đã thu/đặt lại trigger vừa vùng mặt trước cửa hàng để chỉ đứng đúng khu vực cửa mới hiện vật phẩm/vật nuôi/shop; khi đã vào sâu hơn trong vùng cửa thì UI vẫn phải giữ, không bị mất. Cần test lại nhanh trên APK/EXE sau build.
+- `[x]` Chặn lỗi mất tiến trình khi alt-tab/mất focus trong lúc load: các hệ save farm/build/cây nhiều ô/ô tự đặt/thú/tài nguyên nay chỉ được ghi PlayerPrefs sau khi load/restore xong, tránh ghi save rỗng hoặc crop rỗng đè lên dữ liệu cũ. Editor/EXE cũng bật chạy nền để loading/async không bị treo khi anh qua cửa sổ khác.
+- `[ ]` Thêm 5 cây xanh trong trang trại để người chơi chặt cây và nhận gỗ.
+- `[ ]` Nhân vật phải có bóng người rõ ràng khi di chuyển trong scene.
+- `[ ]` Cối xoay gió phải quay và nhìn chuyên nghiệp hơn; hiện tại khách chưa thấy đạt.
+
+#### D. Tutorial, điểm danh, red-dot chỉ dẫn
+- `[x]` Khi đăng nhập, người chơi phải làm hết hướng dẫn NPC tân thủ thì mới nhận được quà điểm danh ngày đầu trong popup: đã code khóa điểm danh ngày 1 nếu `tutorialCompleted` chưa xong; anh đã check xong nhóm tutorial/điểm danh hiện tại.
+- `[x]` Thêm dấu chấm đỏ ở các nút cần bấm để ngầm chỉ dẫn người chơi nhận quà/khám phá/chức năng mới: đã thêm red-dot runtime cho nhiệm vụ/tutorial, lịch điểm danh, nút búa khi tutorial cần xây, và túi đồ khi tutorial cần dùng vật phẩm/thú/thức ăn; anh đã check xong UX hiện tại.
+
+#### E. Tâm tương tác, build/farm thao tác ô đất
+- `[x]` Đổi tâm tương tác trước mũi chân nhân vật thành ô vuông kích thước 1 ô đất: đã thêm `FrontBuildCellSelector` tự chọn `BuildSurfaceCell` ngay phía trước theo hướng mặt nhân vật và vẽ viền trắng runtime. Anh đã test và xác nhận viền sáng tốt.
+- `[x]` Workflow build mới bước 2: đã chuyển nút búa/build xuống cụm tay phải phía trên nút Jump, và mở build list cũ ở góc nhìn nhân vật hiện tại, không tự bật camera top-down/ẩn GameHUD. Anh đã chốt nhóm build flow hiện tại.
+- `[x]` Workflow build mới bước 3: khi chọn Ruộng/Đường đá/Chuồng, ghost tự snap và ghim vào đúng ô đang viền trắng trước mặt; người chơi chỉ cần bấm OK để xác nhận hoặc X để hủy. Anh đã chốt nhóm build flow hiện tại.
+- `[x]` Workflow build compact popup: đã thay full HUD build bằng popup ngang gọn bên phải gần nút búa; góc popup hiện vật liệu đúng cho 3 công trình (Gỗ/Đá), bên dưới có 3 thẻ Ruộng/Đường đá/Chuồng. Chọn thẻ sẽ pin ghost vào ô trắng; nút tích xanh và X nằm ngay dưới thẻ để xác nhận/hủy. Anh đã chốt nhóm build flow hiện tại.
+- `[x]` Bỏ nút X hủy hoạt ảnh HUD khi đang mở build popup/xây Ruộng/Đường đá/Chuồng; build flow chỉ dùng nút tích xanh/X dưới thẻ và nút đóng popup, tránh nút X đỏ nổi đè lên khu vực Jump trên mobile.
+- `[x]` Yêu cầu mới của khách: bỏ tâm/crosshair cho tương tác chính. Cây/tảng đá dùng tap/click trực tiếp lên vật thể trong tầm khoảng 3.5m, có spherecast assist để đỡ miss collider/góc bấm và UI tự ẩn khi nhân vật đi xa. Ruộng/nước/chuồng dùng prompt theo ô/điểm trước chân để thao tác ổn hơn trên điện thoại.
+- `[x]` Fix click nền Thành phố xuyên xuống biển: direct tap chỉ được xuyên sai số bề mặt `0.05m` sau collider đặc, thay vì khoảng hỗ trợ gần `1.7m`; nền đất chặn WaterSource/FishingSpot bên dưới nhưng click trực tiếp biển/điểm câu vẫn hoạt động. Anh đã test runtime ngày 10/07 và xác nhận ổn.
+- `[ ]` Khi đặt khung vào ô đất thì hiện biểu tượng làm nông; bấm biểu tượng mở ngay 3 lựa chọn: cuốc đất, lát đá, xây chuồng.
+- `[ ]` Menu 3 lựa chọn này không được chuyển sang trang khác như hiện tại; phải là thao tác tại chỗ, icon/chữ to hơn khoảng 3 lần.
+
+#### F. UI/HUD, zoom, mobile controls
+- `[x]` Giao diện farm/HUD mobile lớn hơn: đã thêm class `hud-mobile` cho mobile build, tăng kích thước cụm thông tin nhân vật/quest/tiền/sidebar/joystick/sprint/build/jump/nút tương tác, thêm safe inset/popup close guard để giảm lỗi nút `X` bị lẹm; anh đã test/chốt nhóm HUD mobile hiện tại.
+- `[ ]` Thêm/kiểm tra chức năng thu phóng cả map/camera và UI theo nhu cầu khách.
+- `[x]` Bỏ chức năng kéo joystick mạnh/giữ lâu thì tự chạy nhanh; giữ lại nút chạy tự động để người chơi chủ động bật/tắt auto-run. Anh đã test APK và xác nhận tốt.
+- `[x]` Auto-run cancel mới: khi auto-run đang bật mà người chơi bắt đầu điều khiển joystick, `GameHUDController` sẽ tắt auto-run ngay và cập nhật lại trạng thái nút Sprint. Anh đã chốt nhóm joystick/auto-run.
+- `[x]` Joystick mobile: đã bỏ các mũi tên text trang trí trong joystick để tránh lỗi mũi tên trái render thành ô vuông/missing glyph trên thiết bị. Anh đã chốt nhóm joystick/mobile.
+- `[x]` Nhân vật đứng yên: đã bỏ nhánh tự xoay về yaw camera khi thả joystick; nhân vật sẽ giữ hướng di chuyển cuối cùng. Anh đã chốt nhóm joystick/mobile.
+- `[x]` Emote vẫy tay/chỉ tay: không hiện nút X hủy hoạt ảnh; rê joystick sẽ tự hủy `Waving`/`Pointing` và cho nhân vật di chuyển.
+- `[x]` Sửa bug joystick mobile: đã tách touch khỏi action `Look`, chặn pointer joystick không đi vào vùng xoay camera, và đảo lại trục dọc touch-look để vuốt lên = camera ngẩng lên, vuốt xuống = camera cúi xuống. Anh đã test APK: joystick/camera đỡ hơn, trục dọc đúng cảm giác hơn, logic di chuyển giữ đồng bộ giữa các map.
+
+#### G. Tiết kiệm / Version 2
+- `[~]` Gói tiết kiệm để version 2: không sửa tên, chỉ sửa phần tiền và lãi suất; bỏ heo trong logic/visual liên quan nếu đang dùng.
+- `[~]` Lãi suất yêu cầu: 30 ngày = 2%, 90 ngày = 7%, 270 ngày = 22%. Cần kiểm tra thêm cách tính lãi/cuối kỳ khi bắt đầu làm version 2.
+
+#### H. Múc nước, tưới cây
+- `[x]` Tưới cây phải trừ 1 nước mỗi lần.
+- `[x]` Nhân vật muốn tưới cây phải đi múc nước; mỗi thao tác múc nước được 10 thùng/nước đưa về kho.
+- `[x]` Khi mũi chân/điểm trước chân nhân vật tới gần hồ nước (`WaterSource`) thì tự hiện gợi ý `Múc nước`; không cần hiện viền trắng như ô đất canh tác.
+
+## Tạm gác 06/07/2026: backend làm tại nhà, chưa cần chung mạng công ty
+
+> Bối cảnh: anh làm online ở nhà khoảng 3 ngày, không phụ thuộc máy case/mạng công ty. Tập trung các phần có thể code/test local: DB-ready, API contract, server storage, Unity sync từng phần. Các việc public domain/máy vật lý/proxy production tạm gác đến khi có lại máy case.
+
+### Chốt lại phần mơ hồ: Web account -> Game account -> Backend gameplay
+- `[x]` Viết tài liệu hành trình rõ ràng tại `docs/WEB_GAME_BACKEND_JOURNEY.md`: web là nguồn tài khoản, game backend map `web_user_id -> playerId`, Unity chỉ gọi game-server, gameplay nhạy cảm chuyển dần sang server-authoritative.
+- `[x]` Ghi rõ hiện trạng ban đầu: backend MVP đã có API/dashboard/data mẫu còn Unity shop/economy/inventory local. Cập nhật 10/07: shop đã chuyển sang transaction server-authoritative và relogin giữ đúng Point/inventory; các gameplay khác vẫn chuyển dần.
+- `[x]` Ghi nhận yêu cầu trước mắt từ sếp: khách đăng nhập bằng tài khoản web hoặc tài khoản được cấp sẵn, vào game online realtime để chat/tương tác ở các đảo công cộng; đảo farm không thuộc realtime công cộng trong phase này.
+- `[x]` Chốt thêm phạm vi MVP sắp tới: chưa cần làm hệ thống nạp/rút; ưu tiên đảm bảo yếu tố online + realtime cho khách hàng.
+- `[x]` Chốt account MVP: web hiện đăng nhập bằng email/số điện thoại/password; khách phải tạo tài khoản trước khi chơi; 1 account = 1 nhân vật; account bị khóa/xóa mềm thì game cũng bị chặn; nhiều máy cùng account phải dùng chung state server.
+- `[x]` Chốt gameplay online sau lát realtime: tiền, túi đồ, shop, farm/thú sẽ chuyển dần server-side; mất mạng thì không cho mua/bán; daily limit/timer nhạy cảm tính theo giờ server; sếp/admin có thể chỉnh dữ liệu qua dashboard nhưng phải có audit.
+- `[~]` Chốt ví cho phase sau: `Point` vừa là tiền trong game vừa là tiền nạp từ web, nhưng MVP online/realtime chưa làm nạp/rút. Còn cần hỏi `UPoint`, ledger cuối cùng của `Point`, và endpoint spend/reserve khi sang phase tiền thật.
+- `[~]` Tạm gác API ví web nạp/rút cho MVP online/realtime; chỉ giữ yêu cầu tương lai: đọc số dư, cộng tiền nạp/thưởng, trừ tiền khi mua vật phẩm, `ref/idempotency_key`.
+- `[~]` Hỏi/chốt timezone server cho daily reset: khuyến nghị `Asia/Saigon` nếu khách chủ yếu ở Việt Nam; nếu dùng UTC phải ghi rõ trên UI/tài liệu. Tạm gác đến khi quay lại backend.
+- `[~]` Chốt DB/hạ tầng: PostgreSQL cho staging/production; JSON chỉ dev/local; server case có backup, auto-start, HTTPS, WebSocket Upgrade, firewall/router và test ngoài LAN. Tạm gác đến khi quay lại backend.
+- `[~]` Loop A kế tiếp: chuẩn hóa login web/cấp sẵn -> game JWT, map `web_user_id -> playerId`, xử lý `active/locked/soft_deleted`. Tạm gác đến khi xong nhóm chỉnh sửa game.
+- `[x]` Loop B kế tiếp: kiểm lại realtime public islands (`city`/`mine`) và bảo đảm farm không join room realtime công cộng; chat vẫn là kênh global khi client online nhưng không join room.
+- `[x]` Loop C kế tiếp: dựng/test lát online + realtime end-to-end đã pass trên build EXE + APK theo test của anh: `DemoRealtime01` và `DemoRealtime02` đăng nhập được, thấy nhau và chat được.
+- `[x]` Loop D sau realtime: `PlayerBootstrapService` đã gọi `/player/bootstrap` sau login/resume và hydrate `PlayerProfileService`, `EconomyManager`, `InventoryManager`; anh đã test `DemoRich01` đọc đúng `500.000 Point / 2.500 UPoint` từ backend demo.
+- `[x]` Loop E sau realtime/state: shop buy/sell server-authoritative + catalog giá đã pass smoke và runtime; relogin giữ đúng Point/inventory. Reconnect đôi lúc chậm nhưng hiện không ảnh hưởng nghiệm thu loop.
+- `[~]` Loop F sau đó: nâng `/admin` thành dashboard online cho sếp: login admin, role `super_admin`, audit log, reset demo/staging an toàn. Tạm gác đến khi xong nhóm chỉnh sửa game.
+
+### Đã có nền tảng
+- `[x]` Web auth contract đã có: game-server gọi web auth qua `WEB_AUTH_MODE=http`, Unity không giữ `GAME_API_SECRET`.
+- `[x]` Backend Node/Express stub đã có `auth`, `player/profile`, `player/bootstrap`, `economy`, `inventory`, `farm-state` MVP.
+- `[x]` Realtime MVP đã có WebSocket `/realtime` và `/game-api/realtime`, room chung `city`/`mine`, chat global, remote player state; Unity giữ WebSocket cho chat khi rời shared room nhưng không hiện remote player ở farm.
+- `[x]` Thêm smoke test tự động `server/realtimeSmokeTest.js` và npm script `test:realtime` để test realtime bằng account cấp sẵn khi web đang sập (`WEB_AUTH_MODE=mock`).
+- `[x]` Smoke test local bằng data tạm đã pass: `DemoRealtime01` + `DemoRealtime02` + `DemoRealtime03` login qua `/auth/web-login`; 2 client join `city`, client thứ ba không join room vẫn nhận/gửi chat global; `player_state` hoạt động và join `farm` bị chặn `ROOM_NOT_SHARED`.
+- `[x]` Test LAN mức cơ bản đã đạt: 2 Editor trong cùng mạng công ty có thể gặp nhau/chat ở city. Bug visual remote còn kiểm lại sau khi máy case online.
+- `[x]` `server/schema.sql` + `server/migrations/001_initial.sql` đã thành schema PostgreSQL thật, có `game_accounts`, inventory meta và transaction snapshot/idempotency; migration `001_initial` đã pass trên PostgreSQL test VPS. Chưa phải DB production.
+
+### Đã làm / chờ quay lại sau task game
+- `[x]` Rà và chốt schema PostgreSQL tối thiểu cho MVP: `game_players`, `player_profiles`, `player_economy`, `player_inventory`, `player_farm_state`, `player_daily_limits`, `game_transactions`.
+- `[x]` Tách `server/store.js` thành lớp storage rõ ràng để sau này đổi `data.json` sang PostgreSQL không phải sửa API route nhiều.
+- `[x]` Giữ `jsonStore` cho dev/local test, thêm khung `postgresStore` hoặc adapter DB-ready theo env `STORE_MODE=json|postgres`.
+- `[x]` Hoàn thiện `/player/bootstrap` làm nguồn load đầu game: trả profile + economy + inventory + farm_state + daily_limits theo đúng user.
+- `[x]` Chuẩn hóa transaction/idempotency cho `economy/apply` và `inventory/adjust` để shop/mua/bán/đào/câu không bị nhân đôi khi retry.
+- `[x]` Thiết kế API daily limit server-side cho câu cá và đào đá 10 lượt/ngày; Unity vẫn fallback PlayerPrefs khi offline.
+- `[~]` Lập danh sách Unity managers còn đang lưu PlayerPrefs cần chuyển dần: Economy, Inventory, Farm/Build, Animal, Fishing, Mining, PiggyBank, Event. Tạm gác đến khi quay lại backend/state sync.
+- `[~]` Chọn 1 luồng nhỏ để nối thử trước theo scope mới: account + realtime `city/mine` vì đây là yêu cầu MVP gần nhất. `inventory + economy` qua shop bán/mua chuyển sang sau khi realtime pass. Tạm gác.
+- `[~]` Viết tài liệu handoff local test: chạy server, env mẫu, endpoint smoke test, cách đổi `BackendConfig` sang localhost/LAN. Tạm gác.
+
+### Cập nhật 06/07/2026 - backend storage adapter + daily limits
+- `[x]` `server/store.js` đã thành storage facade có `JsonStore` class cho dev/local, chọn mode bằng `STORE_MODE`.
+- `[x]` Hoàn thiện `server/postgresStore.js` bằng driver `pg`: local account/web player, profile, economy, inventory, farm state, daily limits, transaction ledger; shop/resource/delta/limit dùng DB transaction và advisory idempotency lock.
+- `[x]` Thêm dashboard backend local tại `http://127.0.0.1:3000/admin` để xem/tạo/sửa/xóa dữ liệu demo trong JSON store.
+- `[x]` `server/schema.sql` thêm bảng `player_daily_limits`, đủ nhóm tối thiểu `game_players`, `player_profiles`, `player_economy`, `player_inventory`, `player_farm_state`, `player_daily_limits`, `game_transactions`.
+- `[x]` `/player/bootstrap` trả thêm `daily_limits`; thêm `GET /player/daily-limits` và `POST /player/daily-limits/consume`.
+- `[x]` `economy/apply`, `inventory/adjust`, `daily-limits/consume` đều nhận `idempotency_key`; retry cùng key không cộng đôi Point/item/lượt.
+- `[x]` Smoke test Node với data file tạm: đào mỏ 10 lượt còn 0, lần 11 bị `DAILY_LIMIT_EXCEEDED`, economy/inventory retry không cộng đôi.
+- `[x]` Query thật cho `STORE_MODE=postgres`, async REST/admin/realtime, migration/import/verify scripts và `test:postgres` đã hoàn tất. JSON regression, PostgreSQL direct smoke, Phase 1 REST/WebSocket, Node restart, dashboard read đều pass; import schema tạm xác minh `36 accounts / 51 players / 82 transactions`. Runbook: `docs/POSTGRESQL_PHASE2_RUNBOOK.md`.
+- `[~]` Nối Unity client đọc `daily_limits` từ `/player/bootstrap` và chuyển câu cá/đào đá sang server-authoritative khi online. Tạm gác.
+
+### Tạm gác đến khi có máy case/mạng công ty
+- `[~]` Public `api.ywonder.net`, Caddy/Nginx thật, SSL, firewall/router, service auto-start trên Windows server.
+- `[~]` Test điện thoại ngoài mạng công ty, test WebSocket public `wss://api.ywonder.net/game-api/realtime`.
+- `[~]` Backup DB thật trên máy case và giám sát uptime.
+- `[~]` Sửa/tái test các bug realtime chỉ xuất hiện khi 2 máy LAN cùng vào city nếu máy case đang mất mạng.
+
+### Cập nhật 09/07/2026 - thông tin hạ tầng/web auth đã nhận từ chat 01/07
+- `[x]` Đã có thông tin domain public dự kiến: `ywonder.net` và `api.ywonder.net`; DNS/web hiện liên quan IP `45.119.83.233`. IP máy vật lý/game API được trao đổi là `113.171.82.46`.
+- `[x]` Đã được báo port public cần dùng là `80` và `443`; tuy nhiên cần kiểm tra lại từ ngoài mạng vì trước đó `api.ywonder.net` bị kẹt SSL/WAF/default-server, không phải lỗi code game.
+- `[x]` Web auth endpoint dùng được ngay cho game-server: `POST https://ywonder.net/api/game/auth`, gọi server-side với `Authorization: Bearer <GAME_API_SECRET>`. Secret nằm/lưu riêng, không đưa vào Unity và không ghi vào repo.
+- `[x]` Web auth response đã được bàn giao dạng camelCase + snake_case: `userId/user_id`, `username`, `refCode/ref_code`, `fullName/full_name`, `gameToken/game_token`, `tokenType`, `expiresIn/expires_in`. `gameToken` là JWT HS256, verify bằng `GAME_API_SECRET`.
+- `[x]` Web có thêm endpoint đọc/cộng Point: `GET https://ywonder.net/api/game/balance?uid=<username>` và `POST https://ywonder.net/api/game/credit`; MVP online/realtime hiện chưa dùng nạp/rút/spend thật.
+- `[x]` Đã có tài khoản test web `gametest`; mật khẩu test lưu riêng, không ghi vào repo.
+- `[~]` `api.ywonder.net` chỉ là URL đẹp hơn cho game API; đang cần owner/infra xử lý SSL/WAF hoặc DNS-01. Trong khi chờ, game-server có thể gọi web auth qua `https://ywonder.net/api/game/auth`.
+- `[~]` Cần chốt nơi chạy game-server public: theo chat, web VPS riêng, game API dự kiến chạy ở máy vật lý/game-server port nội bộ; cần xác nhận quyền truy cập, service auto-start, domain/proxy tới game-server, DB thật và backup trước khi báo deadline production.
+
+### Gác phase sau, chưa nên làm trong 3 ngày này
+- `[~]` Firebase push notification cho cây/vật nuôi.
+- `[~]` IAP/UPOS thật và validate receipt server-side.
+- `[~]` Bạn bè/thăm farm, leaderboard production, report/profanity moderation.
+- `[~]` Photon/Mirror: chưa cần đổi vì WebSocket MVP hiện đủ cho mục tiêu gần là chat + thấy người chơi ở city/mine.
+
+## Cập nhật 01/07/2026: web auth bridge + realtime multiplayer MVP
+
+- `[x]` Ghi nhận contract web thật: `POST https://api.ywonder.net/api/game/auth` dùng `Authorization: Bearer <GAME_API_SECRET>`, trả cả camelCase/snake_case: `userId/user_id`, `refCode/ref_code`, `fullName/full_name`, `gameToken/game_token`, `expiresIn/expires_in`.
+- `[x]` Cập nhật `webAuthProvider` để game-server gọi web auth qua env `WEB_AUTH_MODE=http`, `WEB_AUTH_LOGIN_URL`, `WEB_AUTH_SECRET` hoặc `GAME_API_SECRET`; Unity không giữ secret.
+- `[x]` Verify `gameToken` JWT HS256 phía game-server theo spec `{ sub, uid, username, iat, exp }`, `sub/uid = web userId`.
+- `[x]` Unity login Phase 1 thử `/auth/login` local trước; nếu server trả `USER_NOT_FOUND` mới fallback `/auth/web-login` để vẫn giữ đường nối web thật sau này.
+- `[x]` Backend thêm WebSocket realtime `/realtime` và `/game-api/realtime` cho room chung `city` và `mine`, chat toàn server, presence, state remote player, emote `Waving`/`Pointing`.
+- `[x]` Unity thêm `RealtimeClient` tự tạo runtime, giữ kết nối WebSocket khi đang gameplay để nhận/gửi chat global; chỉ join room `city`/`mine` để gửi local state và nhận remote player.
+- `[x]` Remote player dùng prefab nhân vật hiện tại nhưng disable `PlayerInput`, `PlayerController`, `CharacterController`, collider/rigidbody để không chặn input/local gameplay.
+- `[~]` Infra tạm gác khi làm ở nhà: Nginx/Caddy proxy WebSocket Upgrade cho `/realtime`; REST chạy không đảm bảo realtime chạy nếu thiếu Upgrade headers.
+- `[x]` Test Unity 2 client mức LAN cơ bản: đăng nhập 2 tài khoản, cùng vào city thấy nhau/chat được theo test của anh; bug visual remote bám theo còn để kiểm lại khi máy case online.
+- `[~]` Production tạm gác đến khi có máy case/public endpoint: set env `WEB_AUTH_MODE=http`, `WEB_AUTH_LOGIN_URL=https://api.ywonder.net/api/game/auth`, `WEB_AUTH_SECRET=<GAME_API_SECRET>`, `JWT_SECRET=<secret dài>`, `REALTIME_MAX_ROOM_PLAYERS=20`. Nếu `api.ywonder.net` còn kẹt SSL thì override tạm `WEB_AUTH_LOGIN_URL=https://ywonder.net/api/game/auth`.
+
+## Cập nhật 01/07/2026: vòng quay may mắn dạng 12 múi
+
+- `[x]` Giữ 12 phần thưởng hiện tại, gồm cả ô `Chúc may mắn lần sau`.
+- `[x]` Giữ nguyên tỉ lệ/weight quay thưởng hiện tại trong `EventPopupController`.
+- `[x]` Đổi visual vòng quay sang nền 12 múi màu runtime, không cần asset nền mới.
+- `[x]` Mỗi múi chỉ hiển thị icon item đang có trong `ItemDatabase`; bỏ tên item và số lượng trong múi cho gọn.
+- `[x]` Ô `Chúc may mắn lần sau` vẫn tồn tại trong logic thưởng nhưng để trống, không hiện icon vòng quay.
+- `[x]` Đưa nút quay vào tâm vòng quay bằng icon mới `arrowforspin.png`; bỏ icon vòng quay ở giữa và mũi tên vẽ bằng USS, footer chỉ còn số lượt còn lại.
+- `[x]` Khóa kích thước vòng quay bằng min/max width/height để giảm nguy cơ flex làm méo vòng khi xoay.
+- `[ ]` Test Unity: mở Sự kiện -> Vòng quay, xác nhận đủ 12 múi, chỉ icon item, ô may mắn trống, tâm có icon `Spin` mới và vẫn bấm quay được.
+- `[ ]` Test Unity: quay thử và nhìn khi đang xoay, vòng không bị méo rõ ở desktop và mobile landscape.
+- `[ ]` Test Unity: quay thử, vòng dừng đúng phần thưởng, trừ lượt ngày, trao item/toast như trước.
+
+## Cập nhật 01/07/2026: tối ưu đặt Build Mode trên mobile
+
+- `[x]` Giữ nguyên luồng đặt bằng chuột/PC: raycast phải trúng `BuildSurfaceCell` như trước, không dùng assist.
+- `[x]` Thêm touch aim offset trong `GhostPlacementController` để điểm ngắm mobile nằm cao hơn ngón tay, đỡ bị tay che ô nhỏ.
+- `[x]` Thêm touch assist chọn `BuildSurfaceCell` gần nhất trên màn hình khi tap/kéo lệch khỏi collider ô nhỏ nhưng vẫn nằm trong bán kính hỗ trợ.
+- `[x]` `BuildModeOverlayController` truyền đúng nguồn input touch/mouse khi pin vị trí, để mobile và PC dùng hai mức hỗ trợ khác nhau.
+- `[ ]` Test trên điện thoại thật: Build Mode -> chọn Ruộng/Đường đá/Chuồng -> tap/kéo quanh ô nhỏ, đặc biệt hơi lệch khỏi ô, xác nhận ghost vẫn snap đúng ô mong muốn và nút OK/X hiện đúng.
+- `[ ]` Test lại Editor/PC: click chuột đặt công trình không bị thay đổi cảm giác cũ.
+
+## Cập nhật 01/07/2026: Farm tile dùng model đất thật
+
+- `[x]` Tắt `FarmTileMarker` tự vẽ viền ô đất màu trắng/vàng/xanh/cam khi trồng trọt.
+- `[x]` Tắt fallback primitive cube/sphere/cylinder trong `FarmTile` mặc định để không còn mảng màu prototype khi gieo/tưới/chín.
+- `[x]` Giữ `plowedVisual` dưới cây ở trạng thái Planted/Watered/Ripe và ưu tiên `CropDefinition.cropPrefab` khi có.
+- `[x]` Hỗ trợ `Soil Visual`/`Plowed Visual` gán trực tiếp prefab asset trong Inspector; `FarmTile` tự instantiate visual con và không tắt cả GameObject khi `Soil Visual` là chính prefab `DatThuong`.
+- `[x]` Thêm hủy ô trồng đặt bằng Build Mode: prompt ngoài gameplay có `G - Hủy ô trồng` xác nhận 2 lần như hủy chuồng, menu xóa trong Build Mode cũng bắt được mesh con và clear `BuildSurfaceCell`.
+- `[ ]` Editor: gán model đất mới xây vào `Soil Visual`, model đất đã cuốc vào `Plowed Visual`; kiểm tra crop nào thiếu `cropPrefab`.
+
+## Cập nhật 01/07/2026: tránh bàn phím mềm che input mobile
+
+- `[x]` Thêm helper `MobileKeyboardAvoidance` dùng chung cho UI Toolkit để đo/ước lượng chiều cao bàn phím mềm iOS/Android.
+- `[x]` Login/Register tự dịch panel lên khi focus username/password/email để input không bị bàn phím che.
+- `[x]` Chat dùng chung helper keyboard avoidance, vẫn giữ offset riêng khi Build Mode đang mở.
+- `[ ]` Test trên điện thoại thật: login username/password, register đủ 4 field, và chat input đều còn nhìn thấy khi bàn phím bật.
+
+## Cập nhật 01/07/2026: shop thu mua đá quý + filter chợ cá
+
+- `[x]` Tạo nhánh `codex/gem-shop-fish-market-icons` từ `dev` cho task shop mới.
+- `[x]` Thêm `Shop_GemShop` dạng SellOnly, whitelist 6 đá quý: Kyanite, Orange Calcite, Green Calcite, Fire Quartz, Amethyst, Ruby.
+- `[x]` Cập nhật `ShopDataGenerator` để khi chạy lại `YWonderLand > Generate Shop Data` không mất shop thu mua đá quý.
+- `[x]` Bổ sung filter `Cá` (`food`) và `Đá quý` (`materials`) cho Shop Popup; icon sản phẩm vẫn lấy từ `ItemDefinition.iconTexture`.
+- `[x]` Gắn icon `Da`/`Go` từ `Assets/Sprites/icon/BoSungIcon/` cho đá/gỗ ở túi đồ qua `ItemDefinition`, và hiển thị icon vật liệu trong Build Mode.
+- `[x]` Thêm helper toast item-icon dùng chung trong `ScreenToast`; đã áp dụng cho câu cá, đào đá, chặt cây, múc nước, thu hoạch cây/thú, shop mua/bán, điểm danh và vòng quay.
+- `[x]` Editor: anh đã gắn `Shop_GemShop` vào quầy/NPC thu mua đá quý trong scene.
+- `[ ]` Test trong Unity: đào được đá quý -> mở shop đá quý -> tab bán hiện đúng đá trong túi, icon đúng, bán cộng Point đúng theo `sellPrice`.
+- `[ ]` Test trong Unity: vào Build Mode kiểm tra pill vật liệu và chi phí ô xây hiện icon `Go`/`Da`; chặt cây/đào đá/múc nước/thu hoạch/mua bán shop đều có toast icon đúng.
+
+## Ưu tiên tiếp theo - 29/06/2026: thêm cá mới + dữ liệu đào đá mới
+
+> Khách đã gửi số liệu mới. Phần cá/đá/daily limit/Gem Shop đã implement phần lớn; còn chờ chốt UI nâng cuốc lv2/lv3 và test Unity.
+
+### 0. Polish đã xong ngày 29/06 trước khi sang data cá/đá
+- `[x]` Đổi text hiển thị `POS` -> `Point`, `UPOS` -> `UPoint` ở UI/toast/log demo liên quan; giữ tên biến/API nội bộ.
+- `[x]` Câu cá thành công có icon cá nổi/fade kèm toast, dùng icon trong `ItemDatabase` nếu có.
+- `[x]` Nước biển Farm/City sáng hơn, xanh hơn; không đổi shader/sóng.
+- `[x]` Khách đổi lại chăn nuôi: gia cầm gà/đà điểu/ngỗng/vịt có thịt ở vụ cuối theo Product 2 trong `VatNuoi2.md`; thịt gia cầm bán được ở Mini Garden.
+- `[x]` Gắn icon mới cho thịt gà/vịt/ngỗng/đà điểu trong item assets, generator, toast vụ cuối, túi đồ và shop.
+- `[x]` Cutscene thuyền không còn bị failsafe 35 giây cắt sớm; timeout nay tự tính theo quãng đường waypoint, tốc độ thuyền và buffer để thuyền kịp cập bờ.
+- `[x]` Popup biểu cảm chỉ còn 2 động tác được duyệt (`Waving`, `Pointing`); bỏ `Laughing`/`Dancing` và đổi icon nút sang `BoSungIcon/VayTay.png`, `BoSungIcon/ChiTay.png`.
+
+### A. Câu cá - thêm giống cá và tỉ lệ
+- `[x]` Tìm lại hệ câu cá hiện tại (`FarmInteractionController`, item definitions/generator, shop/inventory liên quan).
+- `[x]` Thêm item/product cho các loài cá mới, chỉ gắn icon nếu anh đã cung cấp đúng asset; thiếu icon thì hỏi, không đoán bừa.
+- `[x]` Ghi dữ liệu cá mới vào `Assets/_Project/Docs_KichBan/CacLoaiCa.md`, kèm giá Point, tỉ lệ tier và đường dẫn icon mới.
+- `[x]` Áp giá point:
+  - 2 point: Cá cơm, Cá nục, Cá hồng.
+  - 4 point: Cá sư tử, Cá naso, Cá nhồng.
+  - 6 point: Cá sọc dưa, Cá khế, Cá mú.
+  - 10 point: Cá mặt quỷ, Cá heo biển.
+  - 15 point: Cá hoàng đế, Cá ngừ hoàng kim.
+  - 25 point: Cá rồng đỏ.
+- `[x]` Áp tỉ lệ câu từ cá giá trị cao xuống thấp: 2%, 4%, 7%, 17%, 25%, 45%.
+- `[x]` Rà shop bán cá/thành phố/kho đồ/toast thu hoạch để đảm bảo cá câu được hiện đúng tên, icon, số lượng và giá trị point.
+
+### B. Đào đá - thêm bảng đá/gem và lượt đào
+- `[x]` Ghi dữ liệu đá quý mới vào `Assets/_Project/Docs_KichBan/CacLoaiDaQuy.md`, kèm giá Point, tỉ lệ, số viên, icon và ghi chú rock thường vẫn 100% với 10 rock/lượt.
+- `[x]` Tìm lại hệ đào đá hiện tại trước khi sửa; xác định đang là tài nguyên thường trong `FarmInteractionController`/`HarvestableResource`.
+- `[x]` Thêm item/icon đá quý cho túi đồ và toast khi đào trúng; shop thu mua đá quý đã bổ sung ở mục 01/07.
+- `[x]` Hồi sinh gỗ/đá bù thời gian thật khi thoát app: lưu `respawnEndUnix` cho tài nguyên do `ResourceSpawner` quản lý, vẫn tương thích save cũ `respawnTimer`.
+- `[x]` Thêm dữ liệu reward:
+  - Ảnh 1: 2 point/viên, 4 viên, 50% đào trúng.
+  - Ảnh 2: 3 point/viên, 4 viên, 30% đào trúng.
+  - Ảnh 3: 6 point/viên, 3 viên, 12% đào trúng.
+  - Ảnh 4: 12 point/viên, 2 viên, 5% đào trúng.
+  - Ảnh 5: 500 point/viên, 1 viên, 2% đào trúng; nâng cấp cuốc lv2 tốn 250 point/lượt.
+  - Ảnh 6 ruby quý hiếm: 3000 point/viên, 1% đào trúng; nâng cấp cuốc lv3 tốn 1500 point.
+- `[x]` Áp giới hạn mỗi ngày 10 lượt đào theo ngày thật; hết lượt thì chặn đào, đào thành công thì trừ 1 lượt và toast hiện số lượt còn lại.
+- `[ ]` Xác định với anh cách hiển thị/nâng cấp cuốc lv2/lv3 nếu UI hiện tại chưa có màn nâng cấp phù hợp.
+
+### C. Đảo mỏ / map đào khoáng MVP - 30/06/2026
+- `[x]` Mở khóa điểm `mine` trên bản đồ thế giới để demo có thể chọn đảo đào khoáng ngay.
+- `[x]` `IslandTravelManager` cho phép travel tới `mine` và load `MineScene`; có fallback runtime `MineMap -> MineScene` cho dữ liệu Inspector cũ.
+- `[x]` `FarmInteractionController` giữ câu cá chỉ ở `city`, nhưng đào đá được phép ở `city` hoặc `mine`.
+- `[x]` `ResourceSpawner` hỗ trợ gắn prefab cây/đá, snap spawn xuống nền nếu cần, và random lại vị trí khi tài nguyên hồi sinh để đá mỏ không respawn cố định một chỗ.
+- `[x]` `ResourceSpawner` hỗ trợ nhiều vùng spawn bằng `Collider` để anh kiểm soát khu rải đá trên map méo/rộng; nếu không gán vùng thì vẫn fallback về `spawnRadius` cũ.
+- `[x]` Editor: anh đã setup `MineScene`/travel/spawn khu đào mỏ xong ở mức dùng được.
+- `[x]` Editor: trong Build Settings/IslandTravelManager, mine island đã dùng `MineScene` và spawn đúng mặt đảo theo xác nhận của anh.
+- `[x]` Editor: trong `MineScene`, đã đặt `ResourceSpawner`, vùng spawn và rock prefab để rải đá trên đảo mỏ.
+- `[x]` Editor: đã tạo vùng spawn bằng collider/area cho map mỏ không đều.
+- `[x]` Editor: đã xử lý layer/mask/snap đủ để đá spawn đúng vùng mỏ trong test hiện tại.
+- `[ ]` Test: Map -> chọn Khai thác mỏ -> load `MineScene` -> đào đá -> nhận 10 rock + roll đá quý/toast icon -> chờ respawn và xác nhận đá xuất hiện ở vị trí ngẫu nhiên mới.
+- `[ ]` Sau MVP: nâng cuốc lv2/lv3 và hoàn thiện shop/NPC thu mua đá quý theo UI chốt cuối.
+
+### D. iOS/App Store Connect follow-up nếu bị hỏi lại
+- `[x]` CodeMagic đã build/upload IPA lên App Store Connect được bằng exported-Xcode workflow.
+- `[x]` Theo góp ý bên build, đã bỏ `submit_to_testflight: true`; build chỉ upload lên App Store Connect, add vào Internal Testing làm thủ công.
+- `[x]` Tăng CodeMagic `BUILD_NUMBER` lên `2` cho bản upload lại `0.1.1 (2)`.
+- `[x]` Bake `0.1.1 (2)` vào exported iOS project và thêm bước verify IPA version trước publish để tránh upload nhầm `CFBundleVersion = 1`.
+- `[x]` Tăng tiếp iOS build lên `0.1.1 (4)` và thêm `ITSAppUsesNonExemptEncryption=false` vào `ios/Info.plist`; CodeMagic ép lại version/build/export-compliance key sau Unity export.
+- `[ ]` Nếu tester báo không cài được, xác nhận họ đang dùng bản `0.1.1 (4)`, không phải `0.1.0 (0)`, `0.1.1 (1)`, `0.1.1 (2)` hoặc `0.1.1 (3)`.
+- `[ ]` Tối ưu dung lượng iOS sau, hiện TestFlight khoảng 309 MB.
+
 ## Tiến độ đã hoàn thành (Completed)
 
 ### 1. Nâng cấp Giao diện HUD (UI/UX)
@@ -138,7 +499,7 @@
   - **Chặt cây/đào khoáng nhảy bước ngay**: `OnTreeArrived`/`OnRockArrived` auto-nhảy nếu túi đã có gỗ/đá — mà loadout test tặng sẵn `wood_01`/`stone_01` → bỏ đoạn auto-skip, bắt người chơi thực sự chặt 1 nhát (vẫn nghe `HarvestableResource.OnResourceHarvested`).
   - **Thả thú không cập nhật nhiệm vụ**: tutorial nghe `AnimalPenSpawner.OnAnimalPlaced` (hệ CŨ) nhưng hệ chăn nuôi đã viết lại (BuildSurfaceCell). Thêm `FarmAnimal.OnAnimalSpawned` (bắn trong `FarmInteractionController` lúc thả) → tutorial nghe sự kiện mới. `FarmAnimal`/`FarmInteractionController` cũng sửa.
 - `[x]` **Chức năng MÚC NƯỚC (khách yêu cầu 21/06)** — ĐÃ LÀM:
-  - `WaterSource.cs` (component đánh dấu vùng ao múc được). Item `watering_water_01` "Nước tưới". Ngắm ao + bấm **"Múc nước"** → +5 xô/lần (`amountPerScoop`). Tưới cây **TỐN 1 xô**; hết → toast "Ra ao múc nước". KHÔNG animation (khách không cần). `FarmInteractionController` (nhận diện WaterSource + ScoopWater + HandleWater trừ nước). Loadout test có sẵn 30 xô.
+  - `WaterSource.cs` (component đánh dấu vùng ao múc được). Item `watering_water_01` "Nước tưới". Mũi chân/điểm trước chân đến gần ao + bấm **"Múc nước"** → +10 xô/lần (`amountPerScoop`). Tưới cây **TỐN 1 xô**; hết → toast "Ra ao múc nước". KHÔNG animation (khách không cần). `FarmInteractionController` (nhận diện WaterSource + ScoopWater + HandleWater trừ nước). Loadout test có sẵn 30 xô.
   - **CẦN Editor**: gắn 1 Collider(IsTrigger) + `WaterSource` lên bề mặt ao giữa đảo. KHÔNG gắn lên nước biển.
 - `[x]` **#2 Tách tab túi đồ**: sản phẩm (trứng/sữa/thịt + SP cây lâu năm) tách khỏi tab "Thú nuôi" → đổi tab "Đặc biệt" thành **"Sản phẩm"** (category `products`). Live animals giữ tab "Thú nuôi". Sửa ItemDataGenerator (category) + InventoryPopup.uxml + Controller.
 - `[x]` **#1 Ẩn tab filter shop không liên quan**: `ShopPopupController.UpdateFilterVisibility()` — chỉ hiện filter (Seeds/Animals/Tools/Items) có hàng trong shop đó; còn lại ẩn, giữ "Tất cả".
@@ -226,3 +587,17 @@
 - `[ ]` **Sản xuất Asset:** Chạy AI với bộ Prompt đã tạo để sinh ra bộ vật phẩm 2.5D mới (Cà chua, Hạt giống, Rìu, Cuốc, Khoáng sản...).
 - `[ ]` **Tích hợp UI Popup:** Đưa các sprite 2.5D mới vào Unity, xử lý tách nền và gắn vào các slot chứa đồ trong `InventoryPopup.uxml` và `ShopPopup.uxml`.
 - `[ ]` **Kiểm thử Rigging FBX:** Import thử một file FBX nhân vật mới do bạn Artist làm theo workflow chuẩn để kiểm tra thẻ Rig Humanoid trong Unity.
+
+## Update 2026-07-01: login profile cache isolation
+
+- `[x]` Hotfix login nhieu tai khoan demo tren cung may: `PlayerProfileService` tach cache theo `AuthService.UserId/Username`, reset runtime profile khi doi tai khoan, va nhan `player_profile` tu `/auth/web-login` neu backend tra ve de tranh Demo05 bi dinh profile Demo02.
+- `[x]` Hotfix HUD profile goc trai con giu ten cu: `GameHUDController` refresh ten tu active session, uu tien `GameManager.playerName` de khop voi name tag tren dau nhan vat.
+
+## Cap nhat 05/07/2026: dao da 10 luot/ngay + Gem Shop catalog day du
+
+- `[x]` Cau ca da co gioi han 10 luot/ngay tu truoc trong `FishingOverlayController` (`dailyTurns = 10`, `FishingLastDate`, `FishingFreeTurns`).
+- `[x]` Dao da da co gioi han 10 luot/ngay theo ngay that. Khi het luot, nguoi choi khong bat dau dao tiep duoc; khi dao thanh cong, he thong tru 1 luot va toast hien so luot con lai.
+- `[x]` Gem Shop sell mode hien du toan bo da quy trong whitelist `Shop_GemShop`, ke ca da nguoi choi dang co 0 vien.
+- `[x]` Gem Shop hien so luong dang so huu tren card/detail va disable ban neu so luong bang 0.
+- `[ ]` Test Unity: mo Gem Shop -> tab ban phai thay du Kyanite, Orange Calcite, Green Calcite, Fire Quartz, Amethyst, Ruby; da nao 0 vien van hien nhung khong ban duoc.
+- `[ ]` Test Unity: dao da 10 lan trong ngay -> lan thu 11 bi chan bang toast het luot; doi ngay that hoac clear PlayerPrefs thi luot reset ve 10.

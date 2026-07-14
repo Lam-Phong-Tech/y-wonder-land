@@ -15,20 +15,26 @@ namespace YWonderLand.Core
         {
             // Cheap mobile win: cap FPS + tắt vsync để máy yếu không giật/nóng vô ích.
             Application.targetFrameRate = 60;
+#if UNITY_EDITOR || UNITY_STANDALONE
+            Application.runInBackground = true;
+#endif
             QualitySettings.vSyncCount = 0;
 
             GameObject systemsGo = new GameObject("[Persistent Systems]");
             Object.DontDestroyOnLoad(systemsGo);
 
+            // Auth must load its cached identity before gameplay managers resolve
+            // player-scoped PlayerPrefs keys.
+            systemsGo.AddComponent<AuthService>();
             systemsGo.AddComponent<EconomyManager>();
             systemsGo.AddComponent<InventoryManager>();
             systemsGo.AddComponent<ToolManager>();
 
-            // Backend (REST) — đăng nhập + hồ sơ người chơi. Offline-first.
-            systemsGo.AddComponent<AuthService>();
+            // Backend (REST) — hồ sơ + bootstrap sau khi core managers tồn tại.
             systemsGo.AddComponent<PlayerProfileService>();
+            systemsGo.AddComponent<PlayerBootstrapService>();
 
-            Debug.Log("[Bootstrapper] Persistent Systems initialized (Economy, Inventory, Tools, Auth, Profile).");
+            Debug.Log("[Bootstrapper] Persistent Systems initialized (Economy, Inventory, Tools, Auth, Profile, Bootstrap).");
         }
     }
 }

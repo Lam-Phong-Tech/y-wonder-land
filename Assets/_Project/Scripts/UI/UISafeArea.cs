@@ -12,6 +12,8 @@ public class UISafeArea : MonoBehaviour
 {
     [Tooltip("Bật để áp safe area NGAY trong Editor (giả lập tai thỏ). Build mobile luôn áp dù tắt cờ này.")]
     [SerializeField] private bool applyInEditor = false;
+    [SerializeField, Min(0f)] private float minimumMobileInset = 18f;
+    [SerializeField] private bool previewMinimumInsetInEditor = false;
 
     private UIDocument doc;
     private Rect lastSafe = new Rect(-1f, -1f, -1f, -1f);
@@ -56,10 +58,28 @@ public class UISafeArea : MonoBehaviour
         float top = (screen.y - safe.yMax) * sy;
         float bottom = safe.yMin * sy;
 
+        if (ShouldUseMinimumInset())
+        {
+            left = Mathf.Max(left, minimumMobileInset);
+            right = Mathf.Max(right, minimumMobileInset);
+            top = Mathf.Max(top, minimumMobileInset);
+            bottom = Mathf.Max(bottom, minimumMobileInset);
+        }
+
         root.style.paddingLeft = left;
         root.style.paddingRight = right;
         root.style.paddingTop = top;
         root.style.paddingBottom = bottom;
+    }
+
+    private bool ShouldUseMinimumInset()
+    {
+        if (minimumMobileInset <= 0f) return false;
+#if UNITY_EDITOR
+        return previewMinimumInsetInEditor;
+#else
+        return Application.isMobilePlatform;
+#endif
     }
 
     private static void ClearPadding(VisualElement root)

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using YWonderLand.Backend;
 
 namespace YWonderLand.Managers
 {
@@ -39,7 +40,7 @@ namespace YWonderLand.Managers
         // ⚠️ ĐÃ TẮT cho bản BUILD DEMO (22/06) — người chơi KHÔNG được tặng sẵn tiền/đồ.
         // 👉 Muốn test lại trong Editor (có sẵn tiền/đồ) thì tạm đổi về true, build thì để false.
         [SerializeField] private bool giveTestLoadoutOnStart = false; // ĐÃ TẮT cho BUILD (người chơi KHÔNG được tặng sẵn tiền/đồ). Test Editor thì tạm đổi true.
-        [Tooltip("Số POS cộng thêm khi nạp loadout test.")]
+        [Tooltip("Số Point cộng thêm khi nạp loadout test.")]
         [SerializeField] private long testMoney = 500000;
 
         private const string INV_KEY = "YW_Inventory_Data";
@@ -59,6 +60,25 @@ namespace YWonderLand.Managers
                 // → Destroy(gameObject) sẽ huỷ nhầm cả GameManager! (đây là lỗi đã làm mất GameManager.)
                 Destroy(this);
             }
+        }
+
+        private void OnEnable()
+        {
+            if (AuthService.Instance != null)
+                AuthService.Instance.IdentityChanged += HandleIdentityChanged;
+        }
+
+        private void OnDisable()
+        {
+            if (AuthService.Instance != null)
+                AuthService.Instance.IdentityChanged -= HandleIdentityChanged;
+        }
+
+        private void HandleIdentityChanged(string previousScopeId, string nextScopeId)
+        {
+            LoadInventory();
+            OnInventoryChanged?.Invoke();
+            Debug.Log($"[Inventory] Reloaded local cache for '{nextScopeId}'.");
         }
 
         void Start()
@@ -101,8 +121,8 @@ namespace YWonderLand.Managers
             foreach (var id in new[] {
                 "pigskin_01","ostrich_egg_01","deer_velvet_01","goat_milk_01","rabbit_fur_01",
                 "goose_egg_01","duck_egg_01","turtle_shell_01",
-                "beef_01","deer_meat_01","goat_meat_01",
-                "rabbit_meat_01","turtle_meat_01",
+                "chicken_meat_01","beef_01","ostrich_meat_01","deer_meat_01","goat_meat_01",
+                "rabbit_meat_01","goose_meat_01","duck_meat_01","turtle_meat_01",
                 "banana_01","coconut_01","areca_01","date_01","sacha_01","tea_01","durian_01",
                 "asparagus_01","red_ginseng_01","royal_ginseng_01" })
                 AddItem(id, productQty);
@@ -118,12 +138,12 @@ namespace YWonderLand.Managers
 
             if (EconomyManager.Instance != null) EconomyManager.Instance.AddPOS(testMoney);
 
-            Debug.Log($"[Inventory] Đã nạp LOADOUT TEST: thức ăn/nông sản/vật liệu/hạt + {testMoney} POS.");
+            Debug.Log($"[Inventory] Đã nạp LOADOUT TEST: thức ăn/nông sản/vật liệu/hạt + {testMoney} Point.");
         }
 
         private void LoadInventory()
         {
-            string json = PlayerPrefs.GetString(INV_KEY, "");
+            string json = PlayerScopedPrefs.GetString(INV_KEY, "");
             if (string.IsNullOrEmpty(json))
             {
                 inventoryData = new InventoryData();
@@ -148,8 +168,8 @@ namespace YWonderLand.Managers
         private void SaveInventory()
         {
             string json = JsonUtility.ToJson(inventoryData);
-            PlayerPrefs.SetString(INV_KEY, json);
-            PlayerPrefs.Save();
+            PlayerScopedPrefs.SetString(INV_KEY, json);
+            PlayerScopedPrefs.Save();
         }
 
         public int GetMaxSlots() => inventoryData.maxSlots;
@@ -157,6 +177,33 @@ namespace YWonderLand.Managers
         public List<InventorySlot> GetAllSlots()
         {
             return new List<InventorySlot>(inventoryData.slots);
+        }
+
+        public void ApplyServerState(int maxSlots, List<InventorySlot> slots, bool saveLocalCache = true)
+        {
+            inventoryData = new InventoryData
+            {
+                maxSlots = Mathf.Max(1, maxSlots),
+                slots = new List<InventorySlot>()
+            };
+
+            if (slots != null)
+            {
+                foreach (var slot in slots)
+                {
+                    if (slot == null || string.IsNullOrWhiteSpace(slot.itemId) || slot.quantity <= 0)
+                        continue;
+
+                    inventoryData.slots.Add(new InventorySlot(slot.itemId, slot.quantity));
+                }
+            }
+
+            if (inventoryData.maxSlots < inventoryData.slots.Count)
+                inventoryData.maxSlots = inventoryData.slots.Count;
+
+            if (saveLocalCache) SaveInventory();
+            Debug.Log($"[Inventory] Applied server inventory: {inventoryData.slots.Count}/{inventoryData.maxSlots} slots.");
+            OnInventoryChanged?.Invoke();
         }
 
         public int GetItemQuantity(string itemId)
@@ -170,7 +217,7 @@ namespace YWonderLand.Managers
             return total;
         }
 
-        public void AddItem(string itemId, int quantity)
+        public void AddItem(string itemId, int quantity, string syncReason = "gameplay_inventory_add")
         {
             if (quantity <= 0) return;
 
@@ -197,11 +244,12 @@ namespace YWonderLand.Managers
             }
 
             SaveInventory();
+            GameplayMutationSync.QueueInventoryDelta(itemId, quantity, syncReason);
             Debug.Log($"[Inventory] Added {quantity}x {itemId}");
             OnInventoryChanged?.Invoke();
         }
 
-        public bool RemoveItem(string itemId, int quantity)
+        public bool RemoveItem(string itemId, int quantity, string syncReason = "gameplay_inventory_remove")
         {
             if (quantity <= 0) return true;
             if (GetItemQuantity(itemId) < quantity) return false;
@@ -227,6 +275,7 @@ namespace YWonderLand.Managers
             }
 
             SaveInventory();
+            GameplayMutationSync.QueueInventoryDelta(itemId, -quantity, syncReason);
             Debug.Log($"[Inventory] Removed {quantity}x {itemId}");
             OnInventoryChanged?.Invoke();
             return true;

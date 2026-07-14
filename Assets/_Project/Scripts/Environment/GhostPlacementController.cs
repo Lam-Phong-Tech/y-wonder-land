@@ -34,6 +34,14 @@ public class GhostPlacementController : MonoBehaviour
     [Tooltip("Tốc độ nhân vật xoay nhìn theo điểm ghost khi đang chọn chỗ xây.")]
     [SerializeField] private float playerFaceGhostTurnSpeed = 540f;
 
+    [Header("Mobile Placement Assist")]
+    [Tooltip("Touch/mobile only: aim above the finger and pick a nearby build cell when the tap misses the exact collider.")]
+    [SerializeField] private bool enableMobilePlacementAssist = true;
+    [Tooltip("Pixels to aim above the pressed finger while placing on mobile.")]
+    [SerializeField, Min(0f)] private float touchAimOffsetPixels = 90f;
+    [Tooltip("Screen-space pixel radius used to select the nearest build cell when touch raycast misses.")]
+    [SerializeField, Min(0f)] private float touchAssistRadiusPixels = 96f;
+
     // Ghost object
     private GameObject ghostObject;
     private bool ghostIsPrefab = false;
@@ -93,54 +101,14 @@ public class GhostPlacementController : MonoBehaviour
         if (mainCamera == null) mainCamera = Camera.main;
         if (mainCamera == null) return;
 
-        if (!TryGetPlacementPointerPosition(out Vector2 mousePos)) return;
+        if (!TryGetPlacementPointerPosition(out Vector2 mousePos, out bool isTouchPointer)) return;
         var mouse = Mouse.current;
-        bool edgeBlocked = IsInScreenEdgeBlockedArea(mousePos);
-        if (edgeBlocked)
-        {
-            currentPlacementValid = false;
-            UpdateGhostColor(false);
-        }
-        else
-        {
-            Ray ray = mainCamera.ScreenPointToRay(new Vector3(mousePos.x, mousePos.y, 0));
-
-            var hits = Physics.RaycastAll(ray, 200f, groundMask);
-            if (hits.Length > 0)
-            {
-                System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
-
-                // Tìm Ô ĐẤT (BuildSurfaceCell) GẦN NHẤT — bỏ qua collider nền/mesh đảo chắn phía trước.
-                currentCell = null;
-                Vector3 fallback = hits[0].point;
-                foreach (var h in hits)
-                {
-                    var bsc = h.collider.GetComponentInParent<YWonderLand.Environment.BuildSurfaceCell>();
-                    if (bsc != null) { currentCell = bsc; break; }
-                }
-
-                currentSnapPos = (currentCell != null) ? currentCell.SurfaceCenter : fallback;
-                currentGroundY = currentSnapPos.y;
-                ApplyGhostTransform();
-
-                // Chỉ đặt được khi đang trỏ vào ô đất hợp lệ và ô còn TRỐNG.
-                currentPlacementValid = (currentCell != null && !currentCell.IsOccupied);
-                UpdateGhostColor(currentPlacementValid);
-
-                if (currentCell != null)
-                    FacePlayerTowards(currentSnapPos);
-            }
-            else
-            {
-                currentPlacementValid = false;
-                UpdateGhostColor(false);
-            }
-        }
+        RefreshPlacementAtScreenPosition(mousePos, isTouchPointer);
 
         if (mouse != null && mouse.rightButton.wasPressedThisFrame) Deactivate();
     }
 
-    private bool TryGetPlacementPointerPosition(out Vector2 screenPos)
+    private bool TryGetPlacementPointerPosition(out Vector2 screenPos, out bool isTouchPointer)
     {
         var touch = Touchscreen.current;
         if (touch != null)
@@ -149,6 +117,7 @@ public class GhostPlacementController : MonoBehaviour
             if (primary.press.isPressed)
             {
                 screenPos = primary.position.ReadValue();
+                isTouchPointer = true;
                 return true;
             }
 
@@ -158,6 +127,7 @@ public class GhostPlacementController : MonoBehaviour
                 if (finger.press.isPressed)
                 {
                     screenPos = finger.position.ReadValue();
+                    isTouchPointer = true;
                     return true;
                 }
             }
@@ -167,14 +137,21 @@ public class GhostPlacementController : MonoBehaviour
         if (mouse != null)
         {
             screenPos = mouse.position.ReadValue();
+            isTouchPointer = false;
             return true;
         }
 
         screenPos = default;
+        isTouchPointer = false;
         return false;
     }
 
     public void RefreshPlacementAtScreenPosition(Vector2 screenPos)
+    {
+        RefreshPlacementAtScreenPosition(screenPos, false);
+    }
+
+    public void RefreshPlacementAtScreenPosition(Vector2 screenPos, bool isTouchPointer)
     {
         if (!isActive || ghostObject == null) return;
 
@@ -185,35 +162,19 @@ public class GhostPlacementController : MonoBehaviour
             return;
         }
 
-        if (IsInScreenEdgeBlockedArea(screenPos))
+        Vector2 placementScreenPos = GetPlacementScreenPosition(screenPos, isTouchPointer);
+        if (IsInScreenEdgeBlockedArea(placementScreenPos))
         {
             InvalidatePlacement();
             return;
         }
 
-        Ray ray = mainCamera.ScreenPointToRay(new Vector3(screenPos.x, screenPos.y, 0));
-        var hits = Physics.RaycastAll(ray, 200f, groundMask);
-        if (hits.Length == 0)
+        if (!TryResolvePlacementTarget(placementScreenPos, isTouchPointer, out currentCell, out currentSnapPos))
         {
             InvalidatePlacement();
             return;
         }
 
-        System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
-
-        currentCell = null;
-        Vector3 fallback = hits[0].point;
-        foreach (var h in hits)
-        {
-            var bsc = h.collider.GetComponentInParent<YWonderLand.Environment.BuildSurfaceCell>();
-            if (bsc != null)
-            {
-                currentCell = bsc;
-                break;
-            }
-        }
-
-        currentSnapPos = currentCell != null ? currentCell.SurfaceCenter : fallback;
         currentGroundY = currentSnapPos.y;
         ApplyGhostTransform();
 
@@ -224,11 +185,128 @@ public class GhostPlacementController : MonoBehaviour
             FacePlayerTowards(currentSnapPos);
     }
 
+    public bool SnapToCell(YWonderLand.Environment.BuildSurfaceCell cell, bool pinned = true)
+    {
+        if (!isActive || ghostObject == null || cell == null)
+        {
+            InvalidatePlacement();
+            return false;
+        }
+
+        currentCell = cell;
+        currentSnapPos = cell.SurfaceCenter;
+        currentGroundY = currentSnapPos.y;
+        ApplyGhostTransform();
+
+        currentPlacementValid = !cell.IsOccupied;
+        UpdateGhostColor(currentPlacementValid);
+        IsPinned = pinned;
+        return true;
+    }
+
     private void InvalidatePlacement()
     {
         currentPlacementValid = false;
         currentCell = null;
         UpdateGhostColor(false);
+    }
+
+    private Vector2 GetPlacementScreenPosition(Vector2 screenPos, bool isTouchPointer)
+    {
+        if (!ShouldUseMobilePlacementAssist(isTouchPointer) || touchAimOffsetPixels <= 0f)
+            return screenPos;
+
+        screenPos.y = Mathf.Clamp(screenPos.y + touchAimOffsetPixels, 0f, Screen.height);
+        return screenPos;
+    }
+
+    private bool ShouldUseMobilePlacementAssist(bool isTouchPointer)
+    {
+        return enableMobilePlacementAssist && isTouchPointer;
+    }
+
+    private bool TryResolvePlacementTarget(Vector2 screenPos, bool isTouchPointer,
+        out YWonderLand.Environment.BuildSurfaceCell resolvedCell, out Vector3 resolvedPosition)
+    {
+        resolvedCell = null;
+        resolvedPosition = Vector3.zero;
+
+        Ray ray = mainCamera.ScreenPointToRay(new Vector3(screenPos.x, screenPos.y, 0));
+        var hits = Physics.RaycastAll(ray, 200f, groundMask);
+        if (hits.Length > 0)
+        {
+            System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+            Vector3 fallback = hits[0].point;
+
+            foreach (var h in hits)
+            {
+                var bsc = h.collider.GetComponentInParent<YWonderLand.Environment.BuildSurfaceCell>();
+                if (bsc != null)
+                {
+                    resolvedCell = bsc;
+                    resolvedPosition = bsc.SurfaceCenter;
+                    return true;
+                }
+            }
+
+            if (TryFindNearestScreenCell(screenPos, isTouchPointer, out resolvedCell))
+            {
+                resolvedPosition = resolvedCell.SurfaceCenter;
+                return true;
+            }
+
+            resolvedPosition = fallback;
+            return true;
+        }
+
+        if (TryFindNearestScreenCell(screenPos, isTouchPointer, out resolvedCell))
+        {
+            resolvedPosition = resolvedCell.SurfaceCenter;
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool TryFindNearestScreenCell(Vector2 screenPos, bool isTouchPointer,
+        out YWonderLand.Environment.BuildSurfaceCell nearestCell)
+    {
+        nearestCell = null;
+        if (!ShouldUseMobilePlacementAssist(isTouchPointer) || touchAssistRadiusPixels <= 0f)
+            return false;
+
+        float maxDistanceSqr = touchAssistRadiusPixels * touchAssistRadiusPixels;
+        float bestFreeDistanceSqr = maxDistanceSqr;
+        float bestAnyDistanceSqr = maxDistanceSqr;
+        YWonderLand.Environment.BuildSurfaceCell bestFreeCell = null;
+        YWonderLand.Environment.BuildSurfaceCell bestAnyCell = null;
+
+        foreach (var cell in YWonderLand.Environment.BuildSurfaceCell.All)
+        {
+            if (cell == null || !cell.isActiveAndEnabled) continue;
+
+            Vector3 cellScreenPos3 = mainCamera.WorldToScreenPoint(cell.SurfaceCenter);
+            if (cellScreenPos3.z <= 0f) continue;
+
+            Vector2 cellScreenPos = new Vector2(cellScreenPos3.x, cellScreenPos3.y);
+            float distanceSqr = (cellScreenPos - screenPos).sqrMagnitude;
+            if (distanceSqr > maxDistanceSqr) continue;
+
+            if (distanceSqr < bestAnyDistanceSqr)
+            {
+                bestAnyDistanceSqr = distanceSqr;
+                bestAnyCell = cell;
+            }
+
+            if (!cell.IsOccupied && distanceSqr < bestFreeDistanceSqr)
+            {
+                bestFreeDistanceSqr = distanceSqr;
+                bestFreeCell = cell;
+            }
+        }
+
+        nearestCell = bestFreeCell != null ? bestFreeCell : bestAnyCell;
+        return nearestCell != null;
     }
 
     private bool IsInScreenEdgeBlockedArea(Vector2 screenPos)
@@ -241,7 +319,12 @@ public class GhostPlacementController : MonoBehaviour
             || screenPos.y > Screen.height - edge;
     }
 
-    public bool IsScreenPositionBlockedForPlacement(Vector2 screenPos) => IsInScreenEdgeBlockedArea(screenPos);
+    public bool IsScreenPositionBlockedForPlacement(Vector2 screenPos) => IsScreenPositionBlockedForPlacement(screenPos, false);
+
+    public bool IsScreenPositionBlockedForPlacement(Vector2 screenPos, bool isTouchPointer)
+    {
+        return IsInScreenEdgeBlockedArea(GetPlacementScreenPosition(screenPos, isTouchPointer));
+    }
 
     private void FacePlayerTowards(Vector3 worldPoint)
     {
@@ -482,11 +565,11 @@ public class GhostPlacementController : MonoBehaviour
 
     // ── Placement ──
 
-    public void ConfirmPlacement()
+    public bool ConfirmPlacement()
     {
-        if (ghostObject == null) return;
+        if (ghostObject == null) return false;
         // Chỉ đặt khi đang trỏ vào ô đất hợp lệ còn TRỐNG (snap theo cube, không theo lưới ảo).
-        if (!currentPlacementValid || currentCell == null || currentCell.IsOccupied) return;
+        if (!currentPlacementValid || currentCell == null || currentCell.IsOccupied) return false;
 
         // Chi phí VẬT LIỆU: đủ → trừ; thiếu → KHÔNG đặt + báo. (0/"" = miễn phí, vd ô ruộng.)
         if (currentItemPrice > 0 && !string.IsNullOrEmpty(currentMaterialId))
@@ -495,7 +578,7 @@ public class GhostPlacementController : MonoBehaviour
             if (inv == null || inv.GetItemQuantity(currentMaterialId) < currentItemPrice)
             {
                 YWonderLand.Environment.ScreenToast.Show($"Không đủ vật liệu! Cần {currentItemPrice} {MatLabel(currentMaterialId)} để xây.");
-                return;
+                return false;
             }
             inv.RemoveItem(currentMaterialId, currentItemPrice);
         }
@@ -527,6 +610,7 @@ public class GhostPlacementController : MonoBehaviour
         }
 
         OnBuildingPlaced?.Invoke(currentItemName, currentItemPrice);
+        return true;
         // Giữ ghost để đặt tiếp nhiều cái.
     }
 

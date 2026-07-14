@@ -22,15 +22,15 @@ MonoBehaviour:
   foodAltAmount: 0
   productMainName: "Tr\u1EE9ng v\u1ECBt"
   productMainAmount: 1
-  productAltName: 
-  productAltAmount: 0
+  productAltName: "Th\u1ECBt v\u1ECBt"
+  productAltAmount: 5
   produceItemId: duck_egg_01
   produceAmount: 1
   produceCycleTimeSec: 60
   maxHarvests: 45
   expReward: 1000
-  meatItemId: 
-  meatAmount: 0
+  meatItemId: duck_meat_01
+  meatAmount: 5
   feedIntervalSec: 30
   noFeedDeathSec: 60
   fedLifeSec: 120

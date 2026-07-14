@@ -44,7 +44,15 @@ namespace YWonderLand.EditorTools
             // 3) Fish Shop — mua mồi, thu mua cá (Both)
             CreateShop("Shop_FishShop", "Siêu thị Cá", ShopDefinition.AccessMode.Both,
                 buy: new List<string> { "bait_01" },
-                sell: new List<string> { "fish_01", "fish_02", "gift_box_01" });
+                sell: new List<string>
+                {
+                    "fish_ca_com_01", "fish_ca_nuc_01", "fish_ca_hong_01",
+                    "fish_ca_su_tu_01", "fish_ca_naso_01", "fish_ca_nhong_01",
+                    "fish_ca_soc_dua_01", "fish_ca_khe_01", "fish_ca_mu_01",
+                    "fish_ca_mat_quy_01", "fish_ca_heo_bien_01",
+                    "fish_ca_hoang_de_01", "fish_ca_ngu_hoang_kim_01",
+                    "fish_ca_rong_do_01"
+                });
 
             // 4) Mini Garden — thu mua nông sản + sản phẩm chăn nuôi (SellOnly)
             CreateShop("Shop_MiniGarden", "Mini Garden — Thu mua Nông sản", ShopDefinition.AccessMode.SellOnly,
@@ -60,9 +68,9 @@ namespace YWonderLand.EditorTools
                     // Sản phẩm chăn nuôi CHÍNH (10)
                     "egg_01", "milk_01", "pigskin_01", "ostrich_egg_01", "deer_velvet_01", "goat_milk_01",
                     "rabbit_fur_01", "goose_egg_01", "duck_egg_01", "turtle_shell_01",
-                    // THỊT vụ cuối (6 — gia cầm gà/vịt/ngỗng/đà điểu chỉ lấy trứng, KHÔNG có thịt)
-                    "pork_01", "beef_01", "deer_meat_01",
-                    "goat_meat_01", "rabbit_meat_01", "turtle_meat_01"
+                    // THỊT vụ cuối (10 — gia cầm cũng có thịt ở vụ cuối theo cập nhật khách 29/06)
+                    "pork_01", "chicken_meat_01", "beef_01", "ostrich_meat_01", "deer_meat_01",
+                    "goat_meat_01", "rabbit_meat_01", "goose_meat_01", "duck_meat_01", "turtle_meat_01"
                 });
 
             // 5) Hai Lúa — phân/vắc-xin/thuốc (BuyOnly)
@@ -82,9 +90,21 @@ namespace YWonderLand.EditorTools
             CreateShop("Shop_ThuY", "Phòng khám Thú Y", ShopDefinition.AccessMode.BuyOnly,
                 buy: new List<string> { "vaccine_01", "medicine_01" });
 
+            // 8) Gem Shop - thu mua da quy dao duoc o dao khai khoang (SellOnly)
+            CreateShop("Shop_GemShop", "Thu mua Đá quý", ShopDefinition.AccessMode.SellOnly,
+                sell: new List<string>
+                {
+                    "gem_kyanite_01",
+                    "gem_orange_calcite_01",
+                    "gem_green_calcite_01",
+                    "gem_fire_quartz_01",
+                    "gem_amethyst_01",
+                    "gem_ruby_01"
+                });
+
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            Debug.Log($"[ShopDataGenerator] Đã sinh/cập nhật 7 asset shop trong {FolderPath}");
+            Debug.Log($"[ShopDataGenerator] Đã sinh/cập nhật 8 asset shop trong {FolderPath}");
         }
 
         private static void EnsureFolder()

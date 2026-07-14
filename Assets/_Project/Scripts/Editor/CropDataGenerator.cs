@@ -95,6 +95,7 @@ namespace YWonderLand.EditorScripts
             crop.growthStages = stages;
             crop.cropColor = color;
             crop.iconEmoji = emoji;
+            crop.seedItemCost = 1;
 
             EditorUtility.SetDirty(crop);
             db.AddCropEntry(crop);

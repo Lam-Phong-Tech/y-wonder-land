@@ -1,4 +1,5 @@
 using UnityEngine;
+using YWonderLand.Backend;
 
 public class GameManager : MonoBehaviour
 {
@@ -50,6 +51,7 @@ public class GameManager : MonoBehaviour
     private const string K_PosY = "YW_PosY";
     private const string K_PosZ = "YW_PosZ";
     private const string K_Yaw = "YW_PosYaw";
+    private bool logoutInProgress;
     private static readonly string[] DemoRichAccounts = { "DemoRich01", "DemoRich02", "DemoRich03", "DemoRich04", "DemoRich05" };
     private const string DemoFreshAccount = "DemoNew01";
 
@@ -85,7 +87,7 @@ public class GameManager : MonoBehaviour
 
         // Người chơi CŨ (đã có save) -> BỎ QUA Login + Cutscene, vào thẳng game ở vị trí cũ.
         // Người chơi MỚI (hoặc bật alwaysStartFresh để test) -> chạy Login như bình thường.
-        if (!alwaysStartFresh && PlayerPrefs.GetInt(K_HasSave, 0) == 1)
+        if (!alwaysStartFresh && PlayerScopedPrefs.GetInt(K_HasSave, 0) == 1)
             ResumeGame();
         else
             SetGameState(GameState.Login);
@@ -241,12 +243,14 @@ public class GameManager : MonoBehaviour
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
                 if (boatCutscene != null) boatCutscene.enabled = false;
+                SetSpawnedCharacterGameplayEnabled(false);
                 break;
 
             case GameState.Menu:
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
                 if (boatCutscene != null) boatCutscene.enabled = false;
+                SetSpawnedCharacterGameplayEnabled(false);
                 break;
 
             case GameState.Cutscene:
@@ -326,6 +330,180 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void LogoutToLogin()
+    {
+        if (logoutInProgress) return;
+        _ = LogoutToLoginAsync(true);
+    }
+
+    public void LogoutToLoginWithoutSaving()
+    {
+        if (logoutInProgress) return;
+        _ = LogoutToLoginAsync(false);
+    }
+
+    private async Awaitable LogoutToLoginAsync(bool persistGameplayState)
+    {
+        logoutInProgress = true;
+        try
+        {
+            Debug.Log("[GameManager] LogoutToLogin: cleaning gameplay session before showing Login.");
+
+            SetSpawnedCharacterGameplayEnabled(false);
+            if (persistGameplayState)
+            {
+                // The ordinary logout path persists once before auth is revoked.
+                SavePlayerPosition();
+                FarmStateSync.SaveRuntimeState();
+                bool farmFlushed = await FarmStateSync.FlushAsync();
+                if (!farmFlushed)
+                    Debug.LogWarning($"[GameManager] Logout continued with durable pending farm sync: {FarmStateSync.LastError}");
+                bool mutationsFlushed = await GameplayMutationSync.FlushAsync();
+                if (!mutationsFlushed)
+                    Debug.LogWarning($"[GameManager] Logout continued with pending state sync: {GameplayMutationSync.LastError}");
+            }
+
+            if (YWonderLand.Realtime.RealtimeClient.Instance != null)
+                await YWonderLand.Realtime.RealtimeClient.Instance.DisconnectForAuthenticationChangeAsync();
+
+            HideGameplayUiForLogin();
+            ClearGameplayCameraTarget();
+            DestroyRemotePlayers();
+
+            if (boatCutscene != null)
+                boatCutscene.enabled = false;
+
+            if (spawnedCharacter == null)
+            {
+                var taggedPlayer = GameObject.FindGameObjectWithTag("Player");
+                if (taggedPlayer != null)
+                    spawnedCharacter = taggedPlayer;
+            }
+
+            SetSpawnedCharacterGameplayEnabled(false);
+
+            if (spawnedCharacter != null)
+            {
+                Destroy(spawnedCharacter);
+                spawnedCharacter = null;
+            }
+
+            ClearResumeFlag();
+            var auth = YWonderLand.Backend.AuthService.Instance;
+            if (auth != null)
+            {
+                if (persistGameplayState)
+                    await auth.SignOutAfterGameplaySavedAsync();
+                else
+                    auth.SignOutWithoutSavingGameplay();
+            }
+            SetGameState(GameState.Login);
+        }
+        finally
+        {
+            logoutInProgress = false;
+        }
+    }
+
+    private void SetSpawnedCharacterGameplayEnabled(bool enabled)
+    {
+        if (spawnedCharacter == null) return;
+
+        var player = spawnedCharacter.GetComponent<PlayerController>();
+        if (player != null)
+        {
+            if (!enabled)
+            {
+                player.SetMoveInput(Vector2.zero);
+                if (player.IsBusy)
+                    player.CancelAction();
+            }
+
+            player.enabled = enabled;
+        }
+
+        var playerInput = spawnedCharacter.GetComponent<UnityEngine.InputSystem.PlayerInput>();
+        if (playerInput != null)
+            playerInput.enabled = enabled;
+
+        var characterController = spawnedCharacter.GetComponent<CharacterController>();
+        if (characterController != null)
+            characterController.enabled = enabled;
+    }
+
+    private void HideGameplayUiForLogin()
+    {
+        BuildModeOverlayController.Instance?.Hide();
+        FishingOverlayController.Instance?.Hide();
+        AnimalInteractionPopupController.Instance?.Hide();
+        YWonderLand.UI.ResourceInteractionUIController.Instance?.Hide();
+
+        HidePopupIfPresent<InventoryPopupController>();
+        HidePopupIfPresent<ShopPopupController>();
+        HidePopupIfPresent<WorkshopPopupController>();
+        HideEventPopupsForLogin();
+        HidePopupIfPresent<MapPopupController>();
+        HidePopupIfPresent<QuestPopupController>();
+        HidePopupIfPresent<MailboxPopupController>();
+        HidePopupIfPresent<ProfilePopupController>();
+        HidePopupIfPresent<FriendsPopupController>();
+        HidePopupIfPresent<LeaderboardPopupController>();
+        HidePopupIfPresent<PiggyBankPopupController>();
+        HidePopupIfPresent<RewardPopupController>();
+        HidePopupIfPresent<ConfirmDialogController>();
+        HidePopupIfPresent<LevelUpOverlayController>();
+
+        GameHUDController.Instance?.HideInteractionPrompt();
+        GameHUDController.Instance?.HideFishingCancelProgress();
+        GameHUDController.Instance?.SetHUDVisible(false);
+        ChatPanelController.Instance?.SetChatVisible(false);
+        UIPopupTracker.ClearAll();
+    }
+
+    private void HideEventPopupsForLogin()
+    {
+        foreach (var popup in FindObjectsByType<EventPopupController>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+        {
+            if (popup == null) continue;
+            popup.Hide();
+            popup.HideLuckyWheel();
+        }
+    }
+
+    private void HidePopupIfPresent<T>() where T : MonoBehaviour
+    {
+        foreach (var popup in FindObjectsByType<T>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+        {
+            if (popup == null) continue;
+            var hideMethod = typeof(T).GetMethod("Hide", System.Type.EmptyTypes);
+            hideMethod?.Invoke(popup, null);
+        }
+    }
+
+    private void ClearGameplayCameraTarget()
+    {
+        foreach (var thirdPersonCam in FindObjectsByType<ThirdPersonCamera>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+        {
+            if (thirdPersonCam != null)
+                thirdPersonCam.SetTarget(null);
+        }
+    }
+
+    private void DestroyRemotePlayers()
+    {
+        foreach (var remote in FindObjectsByType<YWonderLand.Realtime.RemotePlayerController>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+        {
+            if (remote != null)
+                Destroy(remote.gameObject);
+        }
+    }
+
+    private void ClearResumeFlag()
+    {
+        PlayerScopedPrefs.DeleteKey(K_HasSave);
+        PlayerScopedPrefs.Save();
+    }
+
     public void SelectCharacter(int index)
     {
         selectedCharacterIndex = index;
@@ -359,8 +537,8 @@ public class GameManager : MonoBehaviour
         if (auth != null && profileService != null)
             ApplyDemoAccountOverrides(auth.Username, profileService);
 
-        Debug.Log($"[GameManager] Starting from existing profile: {playerName}, gender={selectedCharacterIndex}.");
-        SetGameState(GameState.Cutscene);
+        Debug.Log($"[GameManager] Starting from existing profile without intro cutscene: {playerName}, gender={selectedCharacterIndex}.");
+        StartExistingCharacterDirectly();
     }
 
     private async Awaitable SignInAndLoadProfileAsync()
@@ -386,7 +564,14 @@ public class GameManager : MonoBehaviour
             Debug.Log($"[GameManager] Using signed-in backend account: {backendUsername}");
         }
 
-        await profile.LoadProfileAsync();
+        bool bootstrapLoaded = false;
+        var bootstrap = YWonderLand.Backend.PlayerBootstrapService.Instance;
+        if (bootstrap != null)
+            bootstrapLoaded = await bootstrap.LoadBootstrapAsync();
+
+        if (!bootstrapLoaded)
+            await profile.LoadProfileAsync();
+
         profile.ApplyCharacterInfo(playerName, selectedCharacterIndex == 0 ? "male" : "female");
         ApplyDemoAccountOverrides(backendUsername, profile);
     }
@@ -450,6 +635,13 @@ public class GameManager : MonoBehaviour
 
         string seedKey = "YW_DemoLoadoutSeeded_" + username;
         if (PlayerPrefs.GetInt(seedKey, 0) == 1) return;
+
+        if (YWonderLand.Backend.PlayerBootstrapService.Instance != null
+            && YWonderLand.Backend.PlayerBootstrapService.Instance.HasServerBootstrap)
+        {
+            Debug.Log($"[GameManager] {username}: server bootstrap loaded, skip local rich demo loadout.");
+            return;
+        }
 
         YWonderLand.Managers.InventoryManager.Instance?.GiveTestLoadout();
         PlayerPrefs.SetInt(seedKey, 1);
@@ -634,17 +826,65 @@ public class GameManager : MonoBehaviour
     /// <summary>Vào THẲNG game cho người chơi cũ: spawn nhân vật ở vị trí đã lưu, KHÔNG chạy cutscene.</summary>
     public void ResumeGame()
     {
-        selectedCharacterIndex = PlayerPrefs.GetInt(K_CharIdx, 0);
-        playerName = PlayerPrefs.GetString(K_Name, "Player");
+        var config = YWonderLand.Backend.BackendConfig.Active;
+        if (config != null && !config.useOfflineFallback)
+        {
+            SetGameState(GameState.Login);
+            YWonderLand.Environment.ScreenToast.ShowInfo("Đang xác nhận phiên với máy chủ...", 3f);
+            _ = ResumeGameAfterServerValidationAsync();
+            return;
+        }
+
+        ResumeGameFromLocalSave(false);
+    }
+
+    private async Awaitable ResumeGameAfterServerValidationAsync()
+    {
+        var auth = YWonderLand.Backend.AuthService.Instance;
+        var bootstrap = YWonderLand.Backend.PlayerBootstrapService.Instance;
+        if (auth == null || bootstrap == null || !auth.IsSignedIn)
+        {
+            SetGameState(GameState.Login);
+            return;
+        }
+
+        string tokenBeingValidated = auth.Token;
+        bool loaded = await bootstrap.LoadBootstrapAsync();
+
+        // A manual login may have replaced the cached token while validation was in flight.
+        if (auth.Token != tokenBeingValidated)
+            return;
+
+        if (!loaded)
+        {
+            long failedStatus = bootstrap.LastStatus;
+            if (failedStatus == 401)
+                auth.SignOutWithoutSavingGameplay();
+
+            SetGameState(GameState.Login);
+            string message = failedStatus == 401
+                ? "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại."
+                : "Không thể kết nối máy chủ. Game chưa vào chế độ online.";
+            YWonderLand.Environment.ScreenToast.Show(message, 6f);
+            return;
+        }
+
+        ResumeGameFromLocalSave(true);
+    }
+
+    private void ResumeGameFromLocalSave(bool bootstrapAlreadyLoaded)
+    {
+        selectedCharacterIndex = PlayerScopedPrefs.GetInt(K_CharIdx, 0);
+        playerName = PlayerScopedPrefs.GetString(K_Name, "Player");
 
         Vector3 pos = new Vector3(
-            PlayerPrefs.GetFloat(K_PosX, 0f),
-            PlayerPrefs.GetFloat(K_PosY, 2f),
-            PlayerPrefs.GetFloat(K_PosZ, 0f));
-        float yaw = PlayerPrefs.GetFloat(K_Yaw, 0f);
+            PlayerScopedPrefs.GetFloat(K_PosX, 0f),
+            PlayerScopedPrefs.GetFloat(K_PosY, 2f),
+            PlayerScopedPrefs.GetFloat(K_PosZ, 0f));
+        float yaw = PlayerScopedPrefs.GetFloat(K_Yaw, 0f);
 
-        // Đăng nhập + nạp hồ sơ chạy nền (offline tự fallback) — giống StartGame.
-        _ = SignInAndLoadProfileAsync();
+        if (!bootstrapAlreadyLoaded)
+            _ = SignInAndLoadProfileAsync();
 
         SpawnCharacterAt(pos, yaw);
         if (spawnedCharacter == null)
@@ -694,6 +934,74 @@ public class GameManager : MonoBehaviour
         if (cc != null) cc.enabled = false;
     }
 
+    private void StartExistingCharacterDirectly()
+    {
+        FloatingNameTag.GloballyHidden = false;
+
+        Vector3 spawnPos;
+        float spawnYaw;
+        if (!TryGetSavedFarmPose(out spawnPos, out spawnYaw)
+            && !TryGetDockSpawnPose(out spawnPos, out spawnYaw))
+        {
+            spawnPos = new Vector3(0f, 2f, 0f);
+            spawnYaw = 0f;
+            Debug.LogWarning($"[GameManager] Existing profile direct start could not resolve saved or dock spawn. Falling back to {spawnPos}.");
+        }
+
+        SpawnCharacterAt(spawnPos, spawnYaw);
+        if (spawnedCharacter == null)
+        {
+            Debug.LogWarning("[GameManager] Existing profile direct start failed to spawn player -> returning to Login.");
+            SetGameState(GameState.Login);
+            return;
+        }
+
+        SetGameState(GameState.Gameplay);
+        Debug.Log($"[GameManager] Existing profile direct start: entered gameplay at {spawnPos}.");
+    }
+
+    private bool TryGetSavedFarmPose(out Vector3 position, out float yaw)
+    {
+        position = Vector3.zero;
+        yaw = 0f;
+        if (!PlayerScopedPrefs.HasKey(K_PosX)
+            || !PlayerScopedPrefs.HasKey(K_PosY)
+            || !PlayerScopedPrefs.HasKey(K_PosZ))
+            return false;
+
+        position = new Vector3(
+            PlayerScopedPrefs.GetFloat(K_PosX, 0f),
+            PlayerScopedPrefs.GetFloat(K_PosY, 2f),
+            PlayerScopedPrefs.GetFloat(K_PosZ, 0f));
+        yaw = PlayerScopedPrefs.GetFloat(K_Yaw, 0f);
+        return float.IsFinite(position.x)
+               && float.IsFinite(position.y)
+               && float.IsFinite(position.z)
+               && float.IsFinite(yaw);
+    }
+
+    private bool TryGetDockSpawnPose(out Vector3 position, out float yaw)
+    {
+        position = Vector3.zero;
+        yaw = 0f;
+
+        var boat = FindFirstObjectByType<BoatCutscene>();
+        if (boat == null)
+            return false;
+
+        boatCutscene = boat;
+        boatObject = boat.gameObject;
+        boat.SnapToDock();
+
+        Transform spawnPoint = FindChildRecursive(boat.transform, "spawn");
+        if (spawnPoint == null)
+            spawnPoint = boat.transform;
+
+        position = spawnPoint.position;
+        yaw = spawnPoint.eulerAngles.y;
+        return true;
+    }
+
     // Lưu vị trí + nhân vật khi thoát/chuyển nền. Chỉ lưu TOẠ ĐỘ khi đang ở Nông trại (base scene)
     // để resume không thả nhầm vào toạ độ thành phố (city scene chưa load lúc khởi động).
     private void SavePlayerPosition()
@@ -704,15 +1012,15 @@ public class GameManager : MonoBehaviour
         if (island == "farm")
         {
             Vector3 p = spawnedCharacter.transform.position;
-            PlayerPrefs.SetFloat(K_PosX, p.x);
-            PlayerPrefs.SetFloat(K_PosY, p.y);
-            PlayerPrefs.SetFloat(K_PosZ, p.z);
-            PlayerPrefs.SetFloat(K_Yaw, spawnedCharacter.transform.eulerAngles.y);
+            PlayerScopedPrefs.SetFloat(K_PosX, p.x);
+            PlayerScopedPrefs.SetFloat(K_PosY, p.y);
+            PlayerScopedPrefs.SetFloat(K_PosZ, p.z);
+            PlayerScopedPrefs.SetFloat(K_Yaw, spawnedCharacter.transform.eulerAngles.y);
         }
-        PlayerPrefs.SetInt(K_CharIdx, selectedCharacterIndex);
-        PlayerPrefs.SetString(K_Name, playerName ?? "Player");
-        PlayerPrefs.SetInt(K_HasSave, 1);
-        PlayerPrefs.Save();
+        PlayerScopedPrefs.SetInt(K_CharIdx, selectedCharacterIndex);
+        PlayerScopedPrefs.SetString(K_Name, playerName ?? "Player");
+        PlayerScopedPrefs.SetInt(K_HasSave, 1);
+        PlayerScopedPrefs.Save();
     }
 
     void OnApplicationPause(bool paused)
@@ -730,10 +1038,10 @@ public class GameManager : MonoBehaviour
     [ContextMenu("Clear Save (test chơi lại từ đầu)")]
     public void ClearSave()
     {
-        PlayerPrefs.DeleteKey(K_HasSave);
-        PlayerPrefs.DeleteKey(K_PosX); PlayerPrefs.DeleteKey(K_PosY); PlayerPrefs.DeleteKey(K_PosZ);
-        PlayerPrefs.DeleteKey(K_Yaw); PlayerPrefs.DeleteKey(K_CharIdx); PlayerPrefs.DeleteKey(K_Name);
-        PlayerPrefs.Save();
+        PlayerScopedPrefs.DeleteKey(K_HasSave);
+        PlayerScopedPrefs.DeleteKey(K_PosX); PlayerScopedPrefs.DeleteKey(K_PosY); PlayerScopedPrefs.DeleteKey(K_PosZ);
+        PlayerScopedPrefs.DeleteKey(K_Yaw); PlayerScopedPrefs.DeleteKey(K_CharIdx); PlayerScopedPrefs.DeleteKey(K_Name);
+        PlayerScopedPrefs.Save();
         Debug.Log("[GameManager] Đã xoá save — lần tới sẽ chạy lại Login + Cutscene.");
     }
 }

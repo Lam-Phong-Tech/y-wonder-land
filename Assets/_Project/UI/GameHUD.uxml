@@ -119,7 +119,7 @@
                     </ui:Button>
                 </ui:VisualElement>
 
-                <!-- Currency (POS + UPOS) -->
+                <!-- Currency (Point + UPoint) -->
                 <ui:VisualElement name="CurrencyDisplay" class="currency-item">
                     <ui:VisualElement class="currency-icon">
                         <ui:VisualElement style="width: 22px; height: 22px; background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_16.png'); -unity-background-scale-mode: scale-to-fit;" />
@@ -131,7 +131,7 @@
                     <ui:VisualElement class="currency-icon currency-icon--upos">
                         <ui:Label text="U" class="currency-icon-label currency-icon-label--upos" />
                     </ui:VisualElement>
-                    <ui:Label name="UposValue" text="0 UPOS" class="currency-value currency-value--upos" />
+                    <ui:Label name="UposValue" text="0 UPoint" class="currency-value currency-value--upos" />
                 </ui:VisualElement>
 
                 <!-- Settings -->
@@ -142,14 +142,8 @@
                 </ui:VisualElement>
             </ui:VisualElement>
 
-            <!-- Row 2: Build (TRÁI) + Bag / Inventory -->
+            <!-- Row 2: Bag / Inventory -->
             <ui:VisualElement class="hud-bag-row">
-                <!-- Build Mode — nút búa: chuyển lên đây, BÊN TRÁI túi đồ (khách yêu cầu) -->
-                <ui:VisualElement class="build-btn-shadow">
-                    <ui:Button name="BtnBuild" class="build-btn">
-                        <ui:VisualElement class="build-btn-icon" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_08.png'); -unity-background-scale-mode: scale-to-fit;" />
-                    </ui:Button>
-                </ui:VisualElement>
                 <ui:VisualElement class="bag-btn-shadow">
                     <ui:Button name="BtnBag" class="bag-btn">
                         <ui:VisualElement class="bag-btn-icon" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_11.png'); -unity-background-scale-mode: scale-to-fit;" />
@@ -167,13 +161,6 @@
             </ui:VisualElement>
 
             <ui:VisualElement name="Joystick" class="joystick-outer">
-                <!-- Direction arrows -->
-                <ui:VisualElement class="joystick-arrow-container">
-                    <ui:Label text="▲" class="joystick-arrow joystick-arrow-up" />
-                    <ui:Label text="▼" class="joystick-arrow joystick-arrow-down" />
-                    <ui:Label text="◄" class="joystick-arrow joystick-arrow-left" />
-                    <ui:Label text="►" class="joystick-arrow joystick-arrow-right" />
-                </ui:VisualElement>
                 <!-- Inner stick -->
                 <ui:VisualElement class="joystick-inner" />
             </ui:VisualElement>
@@ -198,6 +185,11 @@
         <!-- 7. JUMP BUTTON — Bottom Right  -->
         <!-- ============================== -->
         <ui:VisualElement class="hud-bottom-right">
+            <ui:VisualElement class="build-btn-shadow">
+                <ui:Button name="BtnBuild" class="build-btn">
+                    <ui:VisualElement class="build-btn-icon" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_08.png'); -unity-background-scale-mode: scale-to-fit;" />
+                </ui:Button>
+            </ui:VisualElement>
             <ui:VisualElement class="jump-btn-shadow">
                 <ui:Button name="BtnJump" class="jump-btn">
                     <ui:VisualElement class="jump-btn-icon" style="background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_15.png'); -unity-background-scale-mode: scale-to-fit;" />

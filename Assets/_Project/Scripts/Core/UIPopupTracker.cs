@@ -24,4 +24,9 @@ public static class UIPopupTracker
         if (isOpen) _openPopups.Add(popup);
         else _openPopups.Remove(popup);
     }
+
+    public static void ClearAll()
+    {
+        _openPopups.Clear();
+    }
 }

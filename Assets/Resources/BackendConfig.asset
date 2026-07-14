@@ -12,6 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87c63f6e95636df4d95bd322945fca71, type: 3}
   m_Name: BackendConfig
   m_EditorClassIdentifier:
-  baseUrl: https://ywonder.net/game-api
+  baseUrl: https://api.ywonder.net/game-api
+  registrationUrl: https://ywonder.net/vi/login
+  browserAuthEnabled: 1
+  browserAuthTimeoutSec: 600
   requestTimeoutSec: 8
-  useOfflineFallback: 1
+  useOfflineFallback: 0

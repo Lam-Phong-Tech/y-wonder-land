@@ -83,7 +83,7 @@ public class IslandTravelManager : MonoBehaviour
         }
 
         // DEMO (chỉ thị cấp trên): chỉ mở Nông trại + Thành phố. Đảo khác (Mỏ/Hải Phú/Mộc Nhi) KHOÁ.
-        if (targetId != "farm" && targetId != "city")
+        if (targetId != "farm" && targetId != "city" && targetId != "mine")
         {
             Debug.Log($"[IslandTravel] Đảo '{targetId}' đang KHOÁ (demo).");
             YWonderLand.Environment.ScreenToast.Show("Chưa đủ điều kiện để di chuyển.");
@@ -131,20 +131,22 @@ public class IslandTravelManager : MonoBehaviour
             if (player != null) player.enabled = false;
 
             // 3. Load đảo đích (nếu là scene phụ và chưa được load)
-            if (!target.isBaseScene && !string.IsNullOrEmpty(target.sceneName) && !IsSceneLoaded(target.sceneName))
+            string targetSceneName = GetRuntimeSceneName(target);
+            if (!target.isBaseScene && !string.IsNullOrEmpty(targetSceneName) && !IsSceneLoaded(targetSceneName))
             {
-                AsyncOperation loadOp = SceneManager.LoadSceneAsync(target.sceneName, LoadSceneMode.Additive);
+                AsyncOperation loadOp = SceneManager.LoadSceneAsync(targetSceneName, LoadSceneMode.Additive);
                 while (loadOp != null && !loadOp.isDone) await Awaitable.NextFrameAsync();
-                Debug.Log($"[IslandTravel] Đã load đảo: {target.sceneName}");
+                Debug.Log($"[IslandTravel] Đã load đảo: {targetSceneName}");
             }
 
             // 4. Unload đảo cũ (chỉ unload scene phụ — KHÔNG bao giờ unload scene nền)
-            if (previous != null && !previous.isBaseScene && !string.IsNullOrEmpty(previous.sceneName)
-                && previous.id != target.id && IsSceneLoaded(previous.sceneName))
+            string previousSceneName = GetRuntimeSceneName(previous);
+            if (previous != null && !previous.isBaseScene && !string.IsNullOrEmpty(previousSceneName)
+                && previous.id != target.id && IsSceneLoaded(previousSceneName))
             {
-                AsyncOperation unloadOp = SceneManager.UnloadSceneAsync(previous.sceneName);
+                AsyncOperation unloadOp = SceneManager.UnloadSceneAsync(previousSceneName);
                 while (unloadOp != null && !unloadOp.isDone) await Awaitable.NextFrameAsync();
-                Debug.Log($"[IslandTravel] Đã unload đảo cũ: {previous.sceneName}");
+                Debug.Log($"[IslandTravel] Đã unload đảo cũ: {previousSceneName}");
             }
 
             // 4.5 Tối ưu + hết ngập: vật thể chỉ-Nông-trại (biển, địa hình) CHỈ bật khi ở Nông trại
@@ -204,6 +206,17 @@ public class IslandTravelManager : MonoBehaviour
         return false;
     }
 
+    private string GetRuntimeSceneName(IslandDef island)
+    {
+        if (island == null) return string.Empty;
+
+        // Backward compatibility for older Inspector data and old Build Settings entries.
+        if (island.id == "mine" && island.sceneName == "MineMap")
+            return "MineScene";
+
+        return island.sceneName;
+    }
+
 #if UNITY_EDITOR
     // Tự điền sẵn cấu hình mẫu khi mới Add component cho đỡ phải gõ tay.
     // Anh chỉ cần chỉnh lại spawnPosition cho khớp đảo thật.
@@ -213,7 +226,7 @@ public class IslandTravelManager : MonoBehaviour
         {
             new IslandDef { id = "farm",  displayName = "Nông trại",   sceneName = "",          isBaseScene = true,  spawnPosition = new Vector3(0, 2, 0),    spawnYRotation = 0 },
             new IslandDef { id = "city",  displayName = "Thành phố",   sceneName = "CityScene", isBaseScene = false, spawnPosition = new Vector3(1000, 2, 0), spawnYRotation = 0 },
-            new IslandDef { id = "mine",  displayName = "Khai thác mỏ", sceneName = "MineMap",   isBaseScene = false, spawnPosition = new Vector3(0, 2, 500),  spawnYRotation = 0 },
+            new IslandDef { id = "mine",  displayName = "Khai thác mỏ", sceneName = "MineScene", isBaseScene = false, spawnPosition = new Vector3(0, 2, 500),  spawnYRotation = 0 },
         };
     }
 #endif

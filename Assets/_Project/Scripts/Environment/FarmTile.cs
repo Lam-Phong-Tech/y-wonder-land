@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using System.Collections.Generic;
 using YWonderLand.Data;
 using YWonderLand.Environment; // ScreenToast (toast báo cây chết)
 
@@ -33,6 +34,11 @@ public class FarmTile : MonoBehaviour
     public GameObject seedVisual;      // Visual showing small sprout
     public GameObject growingVisual;   // Visual showing half grown plant
     public GameObject ripeVisual;      // Visual showing final product
+    private Renderer[] soilVisualRenderers = Array.Empty<Renderer>();
+    private Renderer[] plowedVisualRenderers = Array.Empty<Renderer>();
+    private Renderer[] seedVisualRenderers = Array.Empty<Renderer>();
+    private Renderer[] growingVisualRenderers = Array.Empty<Renderer>();
+    private Renderer[] ripeVisualRenderers = Array.Empty<Renderer>();
 
     [Header("Timing Configuration")]
     public float tutorialGrowthTime = 24f; // Fallback cho tutorial (tua nhanh 24s) — khớp override ở GetGrowthTime
@@ -40,6 +46,8 @@ public class FarmTile : MonoBehaviour
     [Header("Model 3D")]
     [Tooltip("BẬT nếu ô đất này dùng prefab cây 3D (gán ở CropDefinition) thay khối primitive. Khi BẬT: KHÔNG tạo khối đất/cây mặc định — phần đất do model mảnh đất của bạn lo.")]
     [SerializeField] private bool useCustomCropModels = false;
+    [Tooltip("Chỉ bật cho prototype cũ. Khi tắt, FarmTile không tự tạo cube/sphere/cylinder màu vàng/xanh/đỏ nữa; hãy gán Soil/Plowed Visual và cropPrefab thật.")]
+    [SerializeField] private bool createPrimitiveFallbackVisuals = false;
 
     [Header("Crop Data (Auto-assigned)")]
     [SerializeField] private CropDefinition currentCrop;
@@ -89,6 +97,54 @@ public class FarmTile : MonoBehaviour
         slaveTiles = null;
     }
 
+    private List<string> ExportSlaveTileKeys()
+    {
+        if (slaveTiles == null || slaveTiles.Count == 0) return null;
+
+        var keys = new List<string>();
+        foreach (var tile in slaveTiles)
+        {
+            if (tile == null) continue;
+            keys.Add(TilePosKey(tile.transform.position));
+        }
+        return keys.Count > 0 ? keys : null;
+    }
+
+    private void RestoreSlavesFromSave(List<string> slaveKeys)
+    {
+        if (currentCrop == null || currentCrop.plotSlots <= 1) return;
+
+        FreeSlaves();
+        if (slaveKeys == null || slaveKeys.Count == 0) return;
+
+        var byKey = new Dictionary<string, FarmTile>();
+        foreach (var tile in FindObjectsByType<FarmTile>(FindObjectsSortMode.None))
+        {
+            if (tile == null || tile == this || tile.masterTile != null) continue;
+            byKey[TilePosKey(tile.transform.position)] = tile;
+        }
+
+        var restored = new List<FarmTile>();
+        foreach (string key in slaveKeys)
+        {
+            if (string.IsNullOrEmpty(key)) continue;
+            if (!byKey.TryGetValue(key, out var tile) || tile == null) continue;
+
+            tile.OccupyAsSlot(this);
+            restored.Add(tile);
+        }
+
+        if (restored.Count > 0)
+            RegisterSlaves(restored);
+
+        int expected = Mathf.Max(0, currentCrop.plotSlots - 1);
+        if (restored.Count < expected)
+            Debug.LogWarning($"[FarmTile] Restore multi-slot crop '{plantedSeedId}' only found {restored.Count}/{expected} slave tiles.");
+    }
+
+    private static string TilePosKey(Vector3 p)
+        => $"{Mathf.RoundToInt(p.x * 10f)}_{Mathf.RoundToInt(p.z * 10f)}";
+
     // Thanh nước nổi trên cây — billboard ĐỘC LẬP (KHÔNG parent vào ô đất để né scale lệch của Dirt).
     private Transform waterBarRoot;
     private Transform waterFillPivot;
@@ -113,7 +169,9 @@ public class FarmTile : MonoBehaviour
 
     void Start()
     {
-        if (!useCustomCropModels) CreateFallbackVisuals();
+        PrepareAssignedVisuals();
+        if (createPrimitiveFallbackVisuals) CreateFallbackVisuals();
+        RefreshVisualRendererCaches();
         UpdateVisuals();
     }
 
@@ -138,7 +196,7 @@ public class FarmTile : MonoBehaviour
             // Cây đang lớn mà chưa có thanh nước (vd load từ save) → tạo cho chắc.
             if (waterBarRoot == null) CreateWaterBar();
 
-            if (useCustomCropModels)
+            if (ShouldUseCustomCropModel())
             {
                 // Model 3D phóng to dần theo % trưởng thành
                 ApplyCropGrowthScale();
@@ -160,7 +218,7 @@ public class FarmTile : MonoBehaviour
                 // Ripe state reached
                 isGrowing = false;
                 currentState = TileState.Ripe;
-                if (useCustomCropModels) ApplyCropGrowthScale();
+                if (ShouldUseCustomCropModel()) ApplyCropGrowthScale();
                 DestroyWaterBar(); // cây chín → khỏi cần nước nữa
                 UpdateVisuals();
 
@@ -323,7 +381,9 @@ public class FarmTile : MonoBehaviour
 
     void OnDestroy()
     {
+        FreeSlaves();
         DestroyWaterBar();
+        if (cropInfoRoot != null) { Destroy(cropInfoRoot.gameObject); cropInfoRoot = null; cropInfoTM = null; cropInfoMF = null; }
     }
 
     // ── Interaction Methods ──
@@ -362,11 +422,11 @@ public class FarmTile : MonoBehaviour
         }
 
         // Hiện cây: dùng model 3D thật hoặc primitive tùy cấu hình
-        if (useCustomCropModels)
+        if (ShouldUseCustomCropModel())
         {
             SpawnCropModel();
         }
-        else
+        else if (createPrimitiveFallbackVisuals)
         {
             DestroySeedAndGrowingVisuals();
             CreateCropVisuals();
@@ -564,7 +624,7 @@ public class FarmTile : MonoBehaviour
         if (cropModelInstance != null) { Destroy(cropModelInstance); cropModelInstance = null; }
         if (currentCrop == null || currentCrop.cropPrefab == null)
         {
-            Debug.LogWarning($"[FarmTile] useCustomCropModels BẬT nhưng CropDefinition của '{plantedSeedId}' chưa gán cropPrefab.");
+            Debug.LogWarning($"[FarmTile] cần model cây thật nhưng CropDefinition của '{plantedSeedId}' chưa gán cropPrefab.");
             return;
         }
 
@@ -646,35 +706,136 @@ public class FarmTile : MonoBehaviour
     private void UpdateVisuals()
     {
         // Deactivate all first
-        if (soilVisual != null) soilVisual.SetActive(false);
-        if (plowedVisual != null) plowedVisual.SetActive(false);
-        if (seedVisual != null) seedVisual.SetActive(false);
-        if (growingVisual != null) growingVisual.SetActive(false);
-        if (ripeVisual != null) ripeVisual.SetActive(false);
+        SetVisualActive(soilVisual, soilVisualRenderers, false);
+        SetVisualActive(plowedVisual, plowedVisualRenderers, false);
+        SetVisualActive(seedVisual, seedVisualRenderers, false);
+        SetVisualActive(growingVisual, growingVisualRenderers, false);
+        SetVisualActive(ripeVisual, ripeVisualRenderers, false);
 
         switch (currentState)
         {
             case TileState.Soil:
-                if (soilVisual != null) soilVisual.SetActive(true);
+                SetVisualActive(soilVisual, soilVisualRenderers, true);
                 break;
             case TileState.Plowed:
-                if (plowedVisual != null) plowedVisual.SetActive(true);
+                SetVisualActive(plowedVisual, plowedVisualRenderers, true);
                 break;
             case TileState.Planted:
-                if (seedVisual != null) seedVisual.SetActive(true);
+                SetVisualActive(plowedVisual, plowedVisualRenderers, true);
+                if (!ShouldUseCustomCropModel()) SetVisualActive(seedVisual, seedVisualRenderers, true);
                 break;
             case TileState.Watered:
-                // Seed starts growing
-                if (seedVisual != null) seedVisual.SetActive(true);
+                SetVisualActive(plowedVisual, plowedVisualRenderers, true);
+                if (!ShouldUseCustomCropModel()) SetVisualActive(seedVisual, seedVisualRenderers, true);
                 break;
             case TileState.Ripe:
-                if (ripeVisual != null)
+                SetVisualActive(plowedVisual, plowedVisualRenderers, true);
+                if (!ShouldUseCustomCropModel() && ripeVisual != null)
                 {
-                    ripeVisual.SetActive(true);
+                    SetVisualActive(ripeVisual, ripeVisualRenderers, true);
                     UpdateCropColor(ripeVisual);
                 }
                 break;
         }
+    }
+
+    private void PrepareAssignedVisuals()
+    {
+        soilVisual = EnsureRuntimeVisualInstance(soilVisual, "SoilVisual");
+        plowedVisual = EnsureRuntimeVisualInstance(plowedVisual, "PlowedVisual");
+        seedVisual = EnsureRuntimeVisualInstance(seedVisual, "SeedVisual");
+        growingVisual = EnsureRuntimeVisualInstance(growingVisual, "GrowingVisual");
+        ripeVisual = EnsureRuntimeVisualInstance(ripeVisual, "RipeVisual");
+    }
+
+    private GameObject EnsureRuntimeVisualInstance(GameObject visual, string instanceName)
+    {
+        if (visual == null || visual == gameObject)
+            return visual;
+
+        // Nếu Inspector gán prefab asset (như DatDaCuoc), phải sinh instance con trong scene
+        // rồi mới bật/tắt được theo trạng thái ô đất.
+        if (!visual.scene.IsValid())
+        {
+            GameObject instance = Instantiate(visual, transform, false);
+            instance.name = instanceName;
+            instance.transform.localPosition = Vector3.zero;
+            RemoveVisualColliders(instance);
+            return instance;
+        }
+
+        if (visual.transform != transform && !visual.transform.IsChildOf(transform))
+            visual.transform.SetParent(transform, false);
+
+        RemoveVisualColliders(visual);
+        return visual;
+    }
+
+    private void RefreshVisualRendererCaches()
+    {
+        soilVisualRenderers = GetVisualRenderers(soilVisual);
+        plowedVisualRenderers = GetVisualRenderers(plowedVisual);
+        seedVisualRenderers = GetVisualRenderers(seedVisual);
+        growingVisualRenderers = GetVisualRenderers(growingVisual);
+        ripeVisualRenderers = GetVisualRenderers(ripeVisual);
+    }
+
+    private Renderer[] GetVisualRenderers(GameObject visual)
+    {
+        if (visual == null) return Array.Empty<Renderer>();
+
+        Renderer[] renderers = visual.GetComponentsInChildren<Renderer>(true);
+        if (visual != gameObject)
+            return renderers;
+
+        var filtered = new List<Renderer>(renderers.Length);
+        foreach (Renderer renderer in renderers)
+        {
+            if (renderer == null) continue;
+            Transform t = renderer.transform;
+            if (IsUnderOtherVisual(t, plowedVisual) ||
+                IsUnderOtherVisual(t, seedVisual) ||
+                IsUnderOtherVisual(t, growingVisual) ||
+                IsUnderOtherVisual(t, ripeVisual))
+                continue;
+
+            filtered.Add(renderer);
+        }
+        return filtered.ToArray();
+    }
+
+    private bool IsUnderOtherVisual(Transform target, GameObject otherVisual)
+    {
+        return otherVisual != null &&
+               otherVisual != gameObject &&
+               (target == otherVisual.transform || target.IsChildOf(otherVisual.transform));
+    }
+
+    private void SetVisualActive(GameObject visual, Renderer[] renderers, bool active)
+    {
+        if (visual == null) return;
+
+        if (visual == gameObject)
+        {
+            foreach (Renderer renderer in renderers)
+                if (renderer != null) renderer.enabled = active;
+            return;
+        }
+
+        visual.SetActive(active);
+    }
+
+    private void RemoveVisualColliders(GameObject visual)
+    {
+        if (visual == null || visual == gameObject) return;
+        foreach (Collider col in visual.GetComponentsInChildren<Collider>(true))
+            if (col != null) Destroy(col);
+    }
+
+    private bool ShouldUseCustomCropModel()
+    {
+        return currentCrop != null && currentCrop.cropPrefab != null &&
+               (useCustomCropModels || !createPrimitiveFallbackVisuals);
     }
 
     // ── Nhãn chữ nổi trên cây (đếm ngược + số lần thu) ──
@@ -989,14 +1150,14 @@ public class FarmTile : MonoBehaviour
         public double growStartUnix;
         public int harvestsRemaining;
         public bool isReGrowing;
+        public List<string> slaveTileKeys;
     }
 
-    /// <summary>Xuất trạng thái để LƯU. null nếu không cần (đất trống, ô slave của giàn, cây nhiều-ô chưa hỗ trợ).</summary>
+    /// <summary>Xuất trạng thái để LƯU. null nếu không cần (đất trống hoặc ô slave của giàn).</summary>
     public CropSave ExportSaveOrNull()
     {
         if (currentState == TileState.Soil) return null;
         if (masterTile != null) return null;                                // ô slave → master lo
-        if (currentCrop != null && currentCrop.plotSlots > 1) return null;  // cây nhiều ô (giàn): chưa hỗ trợ lưu
         return new CropSave
         {
             state = (int)currentState,
@@ -1006,7 +1167,44 @@ public class FarmTile : MonoBehaviour
             growStartUnix = growStartTime,
             harvestsRemaining = harvestsRemaining,
             isReGrowing = isReGrowing,
+            slaveTileKeys = ExportSlaveTileKeys(),
         };
+    }
+
+    /// <summary>Clears runtime crop state before loading another signed-in player.</summary>
+    public void ResetForPlayerState()
+    {
+        FreeSlaves();
+        masterTile = null;
+        currentState = TileState.Soil;
+        plantedSeedId = "";
+        currentCrop = null;
+        cropColor = Color.green;
+        growStartTime = 0.0;
+        plantedTime = 0.0;
+        lastWaterTime = 0.0;
+        isGrowing = false;
+        isReGrowing = false;
+        harvestsRemaining = 1;
+        dryAccumSec = 0f;
+        LastHarvestWasFinal = false;
+        LastFinalProductId = "";
+        LastFinalProductAmount = 0;
+        DestroyWaterBar();
+        if (cropInfoRoot != null)
+        {
+            Destroy(cropInfoRoot.gameObject);
+            cropInfoRoot = null;
+            cropInfoTM = null;
+            cropInfoMF = null;
+        }
+        if (cropModelInstance != null)
+        {
+            Destroy(cropModelInstance);
+            cropModelInstance = null;
+        }
+        DestroySeedAndGrowingVisuals();
+        UpdateVisuals();
     }
 
     /// <summary>Khôi phục trạng thái cây từ save + GIẢI QUYẾT thời gian offline đã trôi (lớn-bù / chết-bù).
@@ -1036,8 +1234,10 @@ public class FarmTile : MonoBehaviour
             currentState = TileState.Soil; plantedSeedId = ""; UpdateVisuals(); return;
         }
 
-        if (useCustomCropModels) SpawnCropModel();
-        else { DestroySeedAndGrowingVisuals(); CreateCropVisuals(); }
+        RestoreSlavesFromSave(s.slaveTileKeys);
+
+        if (ShouldUseCustomCropModel()) SpawnCropModel();
+        else if (createPrimitiveFallbackVisuals) { DestroySeedAndGrowingVisuals(); CreateCropVisuals(); }
 
         double now = RealNow();
 
@@ -1054,7 +1254,7 @@ public class FarmTile : MonoBehaviour
         if (currentState == TileState.Ripe)
         {
             isGrowing = false;
-            if (useCustomCropModels) ApplyCropGrowthScale();
+            if (ShouldUseCustomCropModel()) ApplyCropGrowthScale();
             UpdateVisuals();
             return;
         }
@@ -1071,7 +1271,7 @@ public class FarmTile : MonoBehaviour
         {
             isGrowing = false;
             currentState = TileState.Ripe;
-            if (useCustomCropModels) ApplyCropGrowthScale();
+            if (ShouldUseCustomCropModel()) ApplyCropGrowthScale();
             DestroyWaterBar();
             UpdateVisuals();
             return;
@@ -1079,7 +1279,7 @@ public class FarmTile : MonoBehaviour
 
         // Vẫn đang lớn → dựng thanh nước, để Update sống tiếp bình thường.
         CreateWaterBar();
-        if (useCustomCropModels) ApplyCropGrowthScale();
+        if (ShouldUseCustomCropModel()) ApplyCropGrowthScale();
         UpdateVisuals();
     }
 }

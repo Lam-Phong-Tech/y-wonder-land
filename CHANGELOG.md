@@ -1,5 +1,502 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-07-14 (Single-session and farm conflict P0)
+
+### Changed
+- Every local register/login, web credential login, and Browser SSO exchange now rotates a server-side player session ID and embeds `sid` in the JWT. Superseded REST tokens return `401 SESSION_REPLACED`, while an existing WebSocket is closed with `4008` as soon as the newer session is issued.
+- Added authenticated `POST /auth/logout`. Unity disconnects/reconnects realtime when the auth token or player scope changes, and a session replaced by `4008` exits through a no-save path so it cannot upload stale gameplay state.
+- Farm writes now use atomic `expected_version` compare-and-set. The server increments the revision and returns `409 FARM_STATE_CONFLICT` with the authoritative snapshot instead of accepting a stale overwrite.
+- `FarmStateSync` persists a player-scoped, token-free outbox. Interrupted uploads survive app/network loss and retry before bootstrap; successful writes clear only their matching payload, while a `409` restores the server snapshot.
+- Added PostgreSQL migration `003_active_player_sessions.sql`, matching schema fields, JSON/PostgreSQL store session APIs, and session/farm conflict regression coverage.
+
+### Verified
+- Node syntax checks, full JSON Phase 1, standalone realtime, security, Browser SSO, and web-auth test suites pass locally. Coverage includes stale REST token `401`, old socket `4008`, logout revocation, and stale farm write `409` without overwrite.
+- The final Unity Editor compile produced no new C# errors. A real PostgreSQL smoke run is still pending because the workstation does not have `POSTGRES_TEST_DATABASE_URL`.
+- User runtime acceptance passed on the rebuilt EXE/APK test artifacts: a newly issued session replaces the still-open older session without requiring an app restart, and sequential EXE -> APK login no longer restores the stale farm/crop/watering snapshot. Accepted code checkpoint: `21cc20d2`.
+
+### Needs Deployment Test
+- Back up production, apply migration `003`, run PostgreSQL smoke, and deploy as a versioned VPS release with rollback. Existing cached JWTs do not have `sid` and must log in again after cutover.
+- Rebuild EXE/APK and pass sequential A -> B -> A farm acceptance, immediate duplicate-session replacement while the old app remains open, and abrupt-close outbox recovery before marking cross-device sync complete.
+
+## [Unreleased] - 2026-07-11 (Production backend hardening and private VPS staging)
+
+### Changed
+- Unified the four legacy per-device farm caches (`YW_BuildState`, `YW_PlacedTiles`, `YW_FarmState`, `YW_AnimalState`) into one server-backed `farm_state` snapshot. Bootstrap now restores placed/build-mode plots, crops and wall-clock timestamps, buildings, pens and animals across devices; gameplay saves queue the same snapshot after plow/build/plant/water/harvest/animal actions and flush it before logout.
+- Added a guarded legacy migration for accounts such as `Thu2026`: an uninitialized device cannot upload an empty cache before bootstrap, while a later device with a strictly richer legacy save can replace an earlier migration snapshot with fewer saved objects. This is a migration safeguard, not yet a complete server-side revision/conflict protocol.
+- Replaced remembered-session auto-approval with explicit web account selection. Production callback commit `cac56e0f` now shows `Tiếp tục với tài khoản này` or `Đăng nhập tài khoản khác`; only explicit confirmation approves the Browser SSO request. Switching accounts expires only Auth.js/NextAuth session-token cookies, preserves the callback through `/vi/login`, sends `no-store`, and no longer adds the misleading `locked=1` flag. Web build `Q_dfxErFS68Q3YBChCShT` is active with rollback backup `/var/backups/ywonder-web/browser-callback-cac56e0f1e1258e3f7a0cc269e78c7b9dc9d740e-20260713T072713Z`. Real public acceptance passed callback -> PKCE exchange -> PostgreSQL bootstrap as `PLAYER=p_1783873094`, profile `Lam`, Point `5000`. Parallel local/web auth remains enabled; final EXE/APK artifact smoke is still pending.
+- Fixed two Browser SSO artifact issues found in the first EXE acceptance. Commit `c002dfa0` restores/focuses the running Windows game window after a successful browser exchange, with manual taskbar focus retained as fallback. The web callback now sends first-pass `register` intents to `/vi/register` even when the browser has a remembered session, then returns through a `registration_completed=1` callback after registration/OTP. The callback-only deployment completed with build/source backup and rollback protection; a public probe confirmed the expected `302` registration redirect. A new EXE/APK build and real new-account OTP test remain pending.
+- Hotfixed Browser SSO production after repeated-session acceptance exposed two edge cases. Release `fc23f1652a8e484b42e348150d3a5a038825a2e0` isolates `/auth/browser/exchange` polling from password-attempt limits; a public 125-poll probe passed and a second Browser SSO start still returned `201`. Release `f75a7d6b3c5c267fbdf17f58af7d02bdecf8d5b9` opens the same-origin callback directly while signed-out users are redirected through login. Its remembered-session auto-approval behavior was later superseded by callback commit `cac56e0f`, which requires explicit account confirmation. Both game-server deploys created PostgreSQL/env/unit backups and preserved parallel local/web auth.
+- Completed Browser SSO Nấc B infrastructure. Web build `hp9br9UtY4p9PcC214CmF` now preserves login/register callbacks and serves `/api/game/browser/callback`; rollback backup is `/var/backups/ywonder-web/browser-sso-20260712T185239Z`. Versioned game-server release `67ff2565517875fcc48ea515f1fedbbf98f24b8a` applied PostgreSQL migration `002_browser_auth_requests`, retained parallel local/web credential auth, and enabled one-time PKCE browser auth with DB/env/unit backups. Public acceptance with a real web session passed start -> website callback -> exchange -> PostgreSQL bootstrap without exposing credentials/tokens. Unity Browser SSO is now enabled for the next Editor/EXE/APK build; artifact and new-account OTP acceptance remain pending.
+- Added explicit auth transition modes (`local-primary`, `parallel`, `web-primary`). Release `5db92436a7974b38866fa3291f5f3e3577a2f30f` is now deployed on the VPS with `WEB_AUTH_MODE=http`, `AUTH_TRANSITION_MODE=parallel`, and local registration enabled. The deploy created a PostgreSQL backup plus env/unit rollback copies, preserved the previous versioned release, and passed public health through PostgreSQL. Real-account acceptance then passed web login/bootstrap/relogin, local login/bootstrap/relogin, stable player mapping, and web/local player isolation without exposing credentials or tokens.
+- Completed a read-only same-VPS web audit without exposing secret values: Next.js runs from `/var/www/ywonder` on internal port `3033`, has a 64-character `GAME_API_SECRET`, exposes a hardened `/api/game/auth` contract, and places a stable web ID in `session.user.id`. Login preserves `callbackUrl`, registration currently drops it, the referral field is still runtime-required despite its optional label, and the web deployment has no usable Git metadata, so browser-SSO changes require artifact/Nginx backups before editing.
+- Packaged the tester handoff as `YWonder_Tester_Handoff_RC1_2026-07-12.zip`: updated 75-case gameplay workbook, a formula-driven 10-species husbandry/profit workbook, tester instructions, and the authoritative `VatNuoi2` plus four-species override source. No credentials or infrastructure secrets are included. The workbook explicitly flags unresolved Rabbit/Duck feed totals and the Duck egg price mismatch instead of silently changing customer data.
+- Added `docs/WEB_REGISTER_REDIRECT_PLAN_2026-07-12.md`. The transition UI now exposes explicit `ĐĂNG NHẬP TRONG GAME` and `ĐĂNG NHẬP WEBSITE` actions over the same identity/password fields, plus `ĐĂNG KÝ TRONG GAME` and `ĐĂNG KÝ TRONG WEBSITE`. The web-login action calls the credential bridge directly; web registration opens `https://ywonder.net/vi/login`. Unity Editor compilation is clean. This credential bridge is not browser SSO: automatic browser callback/exchange, PKCE, cross-device acceptance and a final cutover decision remain separate work.
+- Provisioned five controlled production QA accounts (`QARich0001..QARich0005`) through normal registration while keeping demo seeding disabled. Fresh login/bootstrap verification confirmed 500,000 Point, 2,500 UPoint, completed-character profiles, 80 inventory slots and 31 item types per account; credentials remain outside the repository and accounts must be rotated or disabled after testing.
+- Added `GameplayMutationSync`, a serialized idempotent queue for all authenticated gameplay inventory and economy deltas. `InventoryManager.AddItem/RemoveItem` and `EconomyManager.Add/Spend` now persist seeds, water, harvests, materials, food, animals, rewards, Point and UPoint outside the already-atomic shop flow.
+- Bootstrap, shop transactions, and logout now flush pending gameplay mutations before reading/applying a newer server snapshot. Logout captures the current farm pose before destroying the player, and existing profiles prefer their saved farm pose over the dock fallback.
+- Added `PlayerScopedPrefs` so gameplay caches are keyed by the authenticated `playerId` instead of one device-wide key. Legacy data can be claimed by only one account, and online-only mode does not read/write shared gameplay state before login.
+- Auth identity transitions now save the previous player's world before switching, then reload economy, inventory, tools/EXP, farm crops, placed tiles/buildings, animals, fishing/mining limits, attendance and wheel state for the new player. Device settings and auth credentials remain intentionally unscoped.
+- Shop buy/sell now calls `POST /player/shop/transaction`; Node validates the shop, item, server-owned price, quantity, balance/inventory, and writes economy + inventory atomically with idempotency.
+- Added a generated server catalog from 109 Unity item assets and 8 shop assets. Client-supplied prices are ignored, and Unity applies Point/inventory only from the accepted server response.
+- Shop UI disables quantity/action controls while the request is in flight and retries transport/server failures once with the same idempotency key.
+- Realtime player state now relays the active animation, animation speed, and held tool so remote avatars can show jump, swim, and farming/mining/chopping actions.
+- Remote avatars resolve child Animators and toggle only visual equipment while gameplay components remain disabled.
+- The realtime smoke test now verifies Jump and Mining + Pickaxe relay.
+- Added `docs/PHASE1_STATE_SYNC_AUDIT.md` with the verified server/local ownership matrix and the next server-authoritative vertical slice.
+- Login failures now preserve backend JSON error codes; unknown users and wrong passwords show the credential error instead of being overwritten by the disabled web-auth fallback's 503 response.
+- Shared `city/mine` trees and rocks now use a server-owned claim cycle: one winner, atomic inventory/mining-limit reward, depletion broadcast, late-join snapshot, and 20-second respawn. Unity does not award the item locally before server confirmation.
+- The expanded realtime smoke test covers a winning harvest, rejected second claimant, late-join depleted snapshot, respawn broadcast, and the existing duplicate-session replacement rule.
+- Recorded candidate VPS `42.96.18.14` without storing its password. TCP `22` and the SSH handshake are now reachable from the work machine; the server identifies as `OpenSSH_8.9p1 Ubuntu-3ubuntu0.15` and offers public-key/password auth. No authenticated audit, deployment, or client URL change has happened yet.
+- Completed a read-only VPS audit: Ubuntu 22.04.5 LTS, KVM, 2 vCPU, 3.8 GiB RAM plus 3.8 GiB swap, 50 GB disk with about 37 GB free, Asia/Ho_Chi_Minh with synchronized NTP. UFW denies inbound by default and only SSH 22 is open. Node, PostgreSQL, Caddy/Nginx, and Docker are not installed; no application service or failed unit needs preservation. Added `docs/VPS_GAME_AUDIT_2026-07-10.md`.
+- On 2026-07-11, created an unprivileged `deploy` account on the game VPS and installed the dedicated ED25519 public key. A non-interactive key login passed and ownership/modes were verified (`deploy:deploy`, `.ssh` `700`, `authorized_keys` `600`). Root/password login, SSH server settings, UFW and installed packages remain unchanged as rollback access.
+- Replaced the PostgreSQL scaffold with a real `pg` adapter, versioned migration, local-account table, inventory metadata, transaction result snapshots, atomic shop/resource/daily-limit operations, JSON import/verify tooling, and async-compatible REST/admin/realtime call sites. Added `docs/POSTGRESQL_PHASE2_RUNBOOK.md`.
+- Installed PostgreSQL 14.23 on the game VPS for integration testing. The service is active/enabled and listens only on `127.0.0.1:5432`; `ywonder_test` and role `deploy` remain test-only and are not used by the production database.
+- Provisioned the production PostgreSQL foundation on the game VPS: isolated `ywonder_game` OS/DB identities, peer authentication over the local Unix socket, a least-privilege owned database, the `001_initial` schema, a root-owned production env outside the repository, and an enabled daily systemd backup timer. No JSON data was imported and no game-server was deployed.
+- Installed verified Node.js `24.18.0` LTS and Caddy `2.11.4`, deployed backend commit `ebc9982`, and enabled a hardened `ywonder-game-server.service`. Added reproducible staging Caddy/systemd examples under `server/deploy/`; no credentials are included.
+- Hardened backend commit `09433bff` with a production startup gate, async bcrypt, auth/register rate limits, request-size/CORS/security-header/request-ID guards, non-sensitive structured logs, HTTP timeouts, WebSocket connection/payload/message limits, and graceful shutdown. Added `test:security` without introducing a new npm dependency.
+- Added `server/deploy/deploy-private-release.sh`: verifies archive SHA-256, installs the lockfile, validates production env, runs migration as `ywonder_game`, applies the sandboxed unit, switches the immutable release, checks Node+Caddy health, and rolls back the symlink/unit on failure.
+- Added `server/deploy/restart-private-services-verify.sh`: fingerprints P1 profile/economy/inventory/farm/daily-limit/transaction state, restarts PostgreSQL followed by the game server, waits for direct Node and private Caddy health, and fails if the before/after snapshots differ.
+- Added `server/phase1LoadTest.js`, `npm run test:load`, and `server/deploy/run-private-load-test.sh` for a bounded 20-client private acceptance run. The VPS runner creates a PostgreSQL backup first, tests registration/bootstrap/room capacity/state/chat/ping through private Caddy, checks health/OOM, and deletes only the run-specific load accounts.
+- Added `docs/NGINX_PUBLIC_AUDIT_2026-07-11.md` with the verified public ownership map, isolated `/game-api` integration plan and rollback gate.
+- Added `server/deploy/configure-public-nginx.sh` with symlink-safe site editing, root-only backup, config validation, health gates and automatic rollback. The WebSocket location disables access logging so JWT query tokens are not written by Nginx.
+- Redeployed private VPS staging to release `09433bff1e739bd2573c8068ffa58f445cd01bb6`; DNS, Unity URL and public firewall rules remain unchanged.
+- The owner has now confirmed `42.96.18.14` is the dedicated game VPS, permitted for Node + PostgreSQL, expected to use Ubuntu Server 24.04 LTS, and will later receive `api.ywonder.net`. Added `docs/VPS_GAME_DEPLOYMENT_PLAN.md` with audit, hardening, PostgreSQL, deploy, DNS, acceptance and rollback gates; no credentials are stored.
+
+### Fixed
+- Fixed the root cause of farm divergence between EXE and APK: `PlayerBootstrapService` previously ignored the server `farm_state`, so each device reconstructed only its own PlayerPrefs layout despite sharing the same web player, economy and inventory. Authoritative snapshots now replace the scoped local caches and trigger all farm persistence owners to rebuild their runtime objects.
+- Local tree/rock prefabs and runtime-spawned resources now use the same 20-second demo respawn time; stale saved timers longer than the configured duration are clamped on load.
+- Tutorial onboarding no longer creates or visits the legacy mining node. Its 11-step runtime route now ends after tree chopping, farm construction/cultivation and pen construction; placing or feeding an animal is no longer required.
+- `StartTutorial()` is idempotent within one authenticated session and resets on identity changes. `GuideNPC` clears stale node/coroutine state, while the tutorial reuses or removes duplicate `NPC_ExclamationMark` children and removes the marker after completion.
+- Registration validation now trims username/email, describes the server rule as a minimum of 9 characters, and avoids showing length errors continuously while mobile users are still filling the form. Existing-account login remains compatible and does not gain a new minimum-length rule.
+- The first root deployment attempt stopped before switching releases because preserved environment variables made the migration request PostgreSQL peer auth as `root`. The deployment script now explicitly sets `USER`, `LOGNAME` and `PGUSER` to `ywonder_game`; the old release stayed active throughout and the corrected run passed.
+- Mock `/auth/web-login` now returns the canonical local demo `playerId` before issuing the response/token, so REST login identity and WebSocket presence use the same ID after the async store conversion.
+- Gameplay consumption/rewards no longer remain local-only: planting a purchased seed or scooping water now generates an authenticated server delta, preventing the next bootstrap from restoring the pre-action inventory snapshot.
+- Direct-tap interaction now allows only `0.05m` of surface tolerance after a solid collider, preventing City ground clicks from selecting water or fishing targets beneath the island while preserving the assist cast for nearby object colliders.
+
+### Verified
+- Unity `Assembly-CSharp` compiles after the farm snapshot integration; only the existing unrelated `enableStickAutoSprint` warning remains. The isolated JSON Phase 1 smoke test passes register/login, full four-part farm snapshot write, relogin/bootstrap equality, economy/inventory idempotency, realtime chat and single-session replacement. Real `Thu2026` EXE/APK migration and round-trip testing are still required before marking cross-device farm sync complete.
+- Partial real-device public acceptance passed with one Windows EXE on network A and one Android APK on network B: realtime chat and shared mining worked correctly. The new tutorial/marker/mobile-registration hotfix compiles with Unity's generated `Assembly-CSharp.rsp`; the rebuilt client runtime retest passed for the revised tutorial, repeated login marker cleanup and mobile registration feedback.
+- JSON demo-account realtime regression passes again: canonical IDs, presence, chat, action/tool relay, resource ownership/late join, farm rejection and duplicate-session close `4008` all pass.
+- JSON Phase 1 regression, PostgreSQL direct transaction smoke, PostgreSQL-backed Phase 1 REST/WebSocket smoke, Node restart persistence and PostgreSQL dashboard read all pass. DB-backed health and concurrent duplicate registration also pass with one `200` and one `409 USERNAME_EXISTS`.
+- A transactional import into an isolated schema preserved `36 accounts`, `51 players` and `82 transactions`; verification passed and the temporary schema was dropped. `npm audit --omit=dev` reports zero vulnerabilities.
+- VPS production DB verification passed with 10 public tables, a successful first backup, checksum verification, restore into an isolated temporary database, and cleanup of that database. The backup timer is enabled/active with its next run scheduled for 03:15 server time; PostgreSQL remains bound only to `127.0.0.1:5432` and UFW has no public 5432 rule.
+- Private VPS staging verification passed: PostgreSQL health and the full Phase 1 REST/WebSocket smoke work through Caddy. Node is bound to `127.0.0.1:3000`; an initial wildcard Caddy socket was caught by the deployment gate, corrected with explicit `bind 127.0.0.1`, and reverified at `127.0.0.1:8080`. External TCP checks confirm only SSH 22 is open while 80/443/3000/5432/8080 remain closed.
+- Hardened release verification passed: local security smoke, full local Phase 1 regression and `npm audit --omit=dev` (`0 vulnerabilities`); then full Phase 1 passed again through an SSH tunnel to private Caddy and production PostgreSQL. Wrong password returned `401` with identity limit `15`, `/admin` returned `404`, systemd sandbox fields and DB backup timer were active, and all service/database/proxy listeners remained loopback-only. `api.ywonder.net` still resolved to `45.119.83.233` during this checkpoint.
+- Controlled PostgreSQL/backend restart acceptance passed at `11:35:58 +07`: before/after fingerprints for `P1A_h09433`, `P1B_h09433`, and `P1Race_h09433` were identical. All three accounts logged in and bootstrapped again through an SSH tunnel and private Caddy with their Point, inventory and farm state intact; PostgreSQL, Node, Caddy and the backup timer remain active/enabled.
+- Full VPS reboot acceptance passed at `13:13:19 +07`: the boot ID changed to `ee8dfd96-8d69-43c0-a0ab-5ddcccd109f9`, PostgreSQL/game-server/Caddy/backup timer all recovered active+enabled, private health returned PostgreSQL mode, and the three P1 login/bootstrap snapshots matched the pre-reboot canonical fingerprint `a003b888ed68b5ee95e43efae2ee0873fafd291dac66aac0ffceeaf7c649bf6e`.
+- Private automated 20-client acceptance passed through Caddy and production PostgreSQL: all accounts authenticated and bootstrapped, 20 WebSockets joined `city`, received the complete 19-peer roster, relayed state/global chat/ping and remained connected. P95 latency was 1532.4 ms for bcrypt-backed auth, 31.9 ms for bootstrap and 36.6 ms for WebSocket connect. A fresh pre-cutover backup was created with SHA-256 `04dda7ac1048d0de493a25f91ab98116f784494460c1cbfa390479d646679a7e`; post-test verification found zero load accounts, no OOM and all four services active.
+- Public Nginx read-only audit passed: DNS/80/443/HTTPS are ready and internal ports remain closed. Existing `/api/game/* -> 3033` and root `-> 3036` ownership was confirmed; the PostgreSQL game backend remains private on `3000/8080`, so public bootstrap/realtime correctly remain blocked until the isolated `/game-api` proxy is added.
+- Public `/game-api` cutover and external acceptance passed. Automated 20-client HTTPS/WSS plus full Phase 1 both succeeded; old web routes remained intact, test accounts were removed, baseline P1 accounts remained, internal ports stayed closed and malformed JSON returned a safe structured error. Unity now targets `https://api.ywonder.net/game-api` with offline fallback disabled.
+- Player-scoped cache runtime acceptance completed: the user switched between two accounts, fully exited the EXE, reopened it, and confirmed each account restored its own state without leakage.
+- Runtime acceptance completed for gameplay inventory/economy deltas and saved farm pose; the user tested the updated Unity flow on 10/07 and confirmed it works correctly.
+- Unity `Assembly-CSharp` compiles with the new mutation queue; only the existing unrelated `enableStickAutoSprint` warning remains. The full local Phase 1 smoke test passes.
+- A dedicated relogin API test verified `+20` watering water, `+2/-1` durian seed, and `+50/-20` Point return as `20`, `1`, and `5030` from bootstrap; retrying the water request with the same idempotency key did not double the reward.
+- Unity `Assembly-CSharp` compiles after the player-scoped cache pass; only the existing unrelated `enableStickAutoSprint` warning remains.
+- A temporary backend on port `3190` and the active public Quick Tunnel both passed atomic shop buy/sell, catalog-price enforcement, duplicate retry, idempotency conflict, insufficient balance/item, shop whitelist, and relogin persistence. The updated Unity assembly compiled successfully with Roslyn.
+- A temporary backend on port `3107` passed auth, room join, global chat, action state/tool relay, farm rejection, and duplicate-session replacement code 4008.
+- The active Unity Editor imported the changed scripts without C# compile errors.
+- The user confirmed remote action animations work in the two-client build.
+- Temporary backends on ports `3188` and `3189` passed the expanded realtime resource smoke and the full Phase 1 regression smoke; the same resource/WebSocket smoke then passed through the refreshed public Quick Tunnel. Unity rebuilt `Assembly-CSharp` successfully.
+- Runtime acceptance completed on 10/07: the user tested the new multi-client build and confirmed shared tree/rock depletion, reward ownership, and respawn behavior run reliably.
+- Runtime acceptance completed for atomic shop buy/sell and relogin persistence; the user reported the flow works well. Reconnect can occasionally take longer than expected, but it is currently non-blocking.
+- Runtime acceptance completed for the City-ground occlusion fix: ground clicks no longer trigger water/fishing interactions beneath the island, while actual water targets remain usable.
+
+### Needs Test
+- Exercise at least one add/remove path for crop harvest, fishing, animal feed/harvest, building materials, event reward, and tool upgrade, then relog and verify inventory/Point match the last accepted state.
+- Verify the first existing account keeps its legacy local save, while a second account does not inherit that legacy save.
+- Finish farm/daily-limit sync and real 5-20 EXE/APK external acceptance before declaring Phase 1 complete; the synthetic private 20-client gate is complete.
+
+## [Unreleased] - 2026-07-08 (Mobile shop item readability)
+
+### Changed
+- `ShopPopupController` now applies a `shop-mobile` class on mobile builds, with an Editor preview toggle for layout checks.
+- `ShopPopup.uss` adds a mobile-specific shop density pass that keeps the popup frame close to the original size while enlarging item cards, icons, names, price/owned labels, quantity controls, and buy/sell action buttons.
+- Shop mobile preview is enabled in Editor Play Mode so the layout can be checked without making a phone build.
+- Shop filters now follow the current mode/shop context: Fish Shop labels `food` as fish, Mini Garden labels it as farm produce, and Sell mode no longer keeps categories that only belong to Buy mode.
+- Removed `gift_box_01` from Fish Shop data and `ShopDataGenerator` so gifts do not appear in the fish buyer.
+- Reopened the Farm Item Shop by setting its `ShopZoneTrigger.comingSoon` flag back to false.
+- The shop grid intentionally shows fewer products per view on phones and relies on scroll for the rest, matching the customer's "bigger items" intent without scaling the whole popup 3x.
+- `task.md` records the farm/city shop trigger scene adjustment and marks the mobile shop popup resize as implemented pending APK/EXE testing.
+
+### Needs Test
+- On APK/EXE, open the main Farm/City shops and verify item cards/icons/text/buttons are easier to read and tap.
+- Confirm shop lists still scroll, item selection/detail works, and buy/sell still updates Point and inventory.
+- Confirm the enlarged shop layout does not clip the close button, sidebar filters, or detail panel on target phones.
+
+## [Unreleased] - 2026-07-07 (Mobile HUD density and popup safe inset)
+
+### Changed
+- `GameHUDController` now applies a `hud-mobile` class on mobile builds so gameplay HUD controls/text can be larger without changing desktop layout.
+- Mobile HUD density pass enlarges player info, quest prompt, currency pills, core buttons, joystick, jump/build buttons, and direct interaction prompts.
+- `UISafeArea` now applies a minimum mobile inset in builds, giving all UIDocuments extra protection from rounded corners/system bars.
+- `DesignSystem.uss` adds shared popup overlay padding, panel max bounds, and minimum 44px close buttons to reduce clipped or hard-to-tap X buttons.
+- Popup close button containers now reserve a real 44x44 anchor so the larger X button does not drift half outside the top-right panel edge.
+- Event, Inventory, Friends, Leaderboard, and Profile popups now also set their own close anchors directly in their local USS files, avoiding stylesheet order overrides.
+- Friends, Event, Leaderboard, Quest, Inventory, and Profile popups now place their X button inside the panel/header structure, matching the Settings popup corner placement instead of floating outside the panel wrapper.
+
+### Needs Test
+- In APK on farm, confirm player info, quest prompt, side buttons, currency, joystick, build, jump, sprint, and direct interaction prompts are easier to read/tap.
+- Open Inventory, Shop, Settings, Quest, Profile, Map, Mailbox/Piggy if available; every X close button should be fully visible and tappable on the target phones.
+- Check that enlarged HUD does not overlap the compact build popup, chat bar, joystick, or right-side camera/tap zones.
+
+## [Unreleased] - 2026-07-07 (Joystick glyph and idle facing)
+
+### Fixed
+- Removed decorative text arrow glyphs from the mobile joystick, avoiding the left arrow rendering as a square/missing glyph on some devices.
+- Player no longer auto-rotates back to camera yaw after joystick release; idle now keeps the last facing direction from movement input.
+
+### Needs Test
+- In APK/EXE, confirm the joystick no longer shows a small square on the left side of the circle.
+- Pull the joystick backward so the character faces the screen, then release; the character should stay facing that direction instead of turning back away from the camera.
+
+## [Unreleased] - 2026-07-07 (Auto-run joystick cancel)
+
+### Changed
+- Mobile joystick input now immediately turns off HUD auto-run when the stick is moved past a small threshold.
+- The Sprint/auto-run HUD visual refreshes immediately after joystick cancel, so the button no longer stays lit after manual control begins.
+
+### Needs Test
+- Enable auto-run with the Sprint button, then drag the left joystick; the character should stop auto-run immediately and follow the joystick.
+- Release the joystick after canceling; the character must not resume auto-run unless the Sprint button is pressed again.
+
+## [Unreleased] - 2026-07-07 (Compact build popup)
+
+### Changed
+- Build Mode now opens as a compact right-side popup near the HUD hammer button instead of a full-width build HUD.
+- The popup shows only the materials used by the three available build choices, currently wood and stone.
+- Farm Plot, Stone Path, and Pen are shown as three horizontal cards; selecting a card pins its ghost to the highlighted front cell.
+- Confirm and cancel controls now appear directly under the selected card, so the player can build or cancel without using floating OK/X controls.
+
+### Needs Test
+- In APK/EXE, tap the hammer button and confirm the compact popup appears near the right-side HUD buttons without blocking joystick/camera/jump.
+- Select each card and confirm the ghost appears on the white front cell; tap the green check to place and the red X to cancel.
+- Test missing materials or an occupied cell: placement must fail without closing the popup or placing on the wrong cell.
+
+## [Unreleased] - 2026-07-07 (Direct tap world interaction)
+
+### Changed
+- World interactions now use direct tap/click targeting instead of continuous center-crosshair scanning.
+- Trees, rocks, water/fishing spots, shops, pens, and farm/build cells only show action UI after the player taps the actual nearby object.
+- Direct tap range now uses `directTapMaxRange = 3.5m` so nearby objects are easier to select on mobile.
+- Direct tap now combines raycast hits with a small world-space spherecast assist, so slight tap offsets and small/misaligned colliders are less likely to miss.
+- Direct-tap range checks now measure against the resolved interactive object/root collider instead of only the exact `hit.point`, reducing angle-dependent misses on large objects.
+- Direct-tap prompts auto-hide when the player walks out of range from the selected target.
+- The HUD crosshair dot is hidden because the new interaction flow no longer uses center-screen targeting.
+
+### Needs Test
+- In APK/EXE, stand near a tree, rock, water source, pen/shop, or farm object and tap the object directly; the action UI should appear.
+- Test the same object from several camera/player angles; the prompt should no longer appear only from one lucky side.
+- Press the shown UI action and confirm the previous behavior still works.
+- Tap empty ground or stand outside roughly 3.5m and confirm no world action prompt appears.
+- After a prompt appears, walk away from that object and confirm the action UI hides automatically.
+
+## [Unreleased] - 2026-07-07 (Front-cell build workflow step 3)
+
+### Changed
+- Selecting a build item now snaps and pins the ghost preview directly onto the currently highlighted front `BuildSurfaceCell`.
+- The new character-facing build flow no longer requires tapping the ground to pin placement; after selecting an item, the player only confirms with OK or cancels with X.
+- `GhostPlacementController.ConfirmPlacement()` now returns success/failure so the UI only exits placement after a real successful build.
+
+### Needs Test
+- In Editor/APK, stand in front of a highlighted cell, open build, select Farm Plot/Stone Path/Pen, and confirm the ghost appears on the highlighted cell immediately.
+- Confirm OK places on that cell and X cancels cleanly.
+- Test occupied cell or missing materials: placement must fail without closing the ghost incorrectly.
+
+## [Unreleased] - 2026-07-07 (Front-cell build workflow step 2)
+
+### Changed
+- Moved the hammer/build HUD button from the top-right inventory cluster to the right-hand action cluster above Jump.
+- Build mode now opens its existing item list without activating the top-down build camera or hiding the GameHUD by default, so the player keeps the normal character-facing view.
+- Added Inspector flags to `BuildModeOverlayController` for the legacy behavior: `useTopDownBuildCamera` and `hideGameHudWhileOpen`.
+
+### Needs Test
+- In Editor/APK, press the right-side hammer button and confirm the build list opens without switching camera.
+- While the build list is open, confirm joystick movement and right-side camera look still work. Fixed ghost placement at the highlighted front cell is still the next step.
+
+## [Unreleased] - 2026-07-07 (Front-cell build workflow step 1)
+
+### Added
+- Added `FrontBuildCellSelector`, a runtime selector that finds the `BuildSurfaceCell` directly in front of the player based on character facing and draws a white outline on that cell.
+- This is step 1 of the new build workflow: no build camera switch and no freely movable ghost yet; hammer button/build list/fixed ghost integration comes next.
+
+### Needs Test
+- In Editor/APK, rotate and move the player and confirm the white outline follows the cell in front of the character's feet.
+- Confirm the outline hides when there is no valid `BuildSurfaceCell` in front.
+
+## [Unreleased] - 2026-07-07 (Mobile joystick camera isolation)
+
+### Fixed
+- Changed the Player `Look` binding from `<Pointer>/delta` to `<Mouse>/delta` so mobile touch/joystick drags are no longer read as full-screen camera look input.
+- Tightened `GameHUDController` joystick/look-zone pointer handling: joystick captures its own pointer, stops propagation on pointer down/move/up/capture-out, and `LookZone` rejects joystick-owned pointers.
+- Inverted the mobile touch-look vertical axis in `ThirdPersonCamera` so swipe up looks up and swipe down looks down, without changing PC mouse look.
+- Removed joystick-driven auto sprint/auto-run; the HUD Sprint button now remains the explicit auto-run toggle.
+
+### Needs Test
+- Build/test on a phone: dragging the left joystick must not rotate the camera/map, while dragging the right half of the screen still rotates the camera.
+- Confirm right-half touch vertical look now feels correct, and PC mouse/gamepad right-stick camera look still work.
+- Confirm dragging/holding the joystick at the edge keeps normal movement speed, and only the Sprint button toggles auto-run.
+
+## [Unreleased] - 2026-07-06 (Backend storage adapter and daily limits)
+
+### Added
+- Added `docs/WEB_GAME_BACKEND_JOURNEY.md` to clarify the Web account -> Game account -> backend gameplay journey, development loops, expected results, and verification steps.
+- Added a backend storage facade in `server/store.js` with a `JsonStore` class for local/dev data and `STORE_MODE=json|postgres` selection.
+- Added `server/postgresStore.js` as a PostgreSQL adapter scaffold so API routes can keep a stable store interface before production DB queries are implemented.
+- Added a local dev backend dashboard at `/admin` for inspecting players, profiles, economy, inventory, daily limits, farm state, and transactions.
+- Added `player_daily_limits` to `server/schema.sql` for server-side fishing/mining daily counters.
+- Added `daily_limits` to `/player/bootstrap`, plus `GET /player/daily-limits` and `POST /player/daily-limits/consume`.
+- Added `server/realtimeSmokeTest.js` and `npm run test:realtime` to test auth + WebSocket using provisioned/mock accounts while web auth is unavailable.
+
+### Changed
+- Updated `task.md`, `server/README.md`, `docs/API_CONTRACTS.md`, `docs/ARCHITECTURE.md`, `docs/TECHNICAL_DESIGN.md`, `docs/DB_SCHEMA.md`, and context recovery docs to state that backend is currently an MVP API/dashboard/WebSocket while Unity shop/economy/inventory are still local, with online account flow + realtime as the next proof loop under the new scope.
+- Recorded the later wallet direction: money topped up from the web for in-game use must go through web wallet APIs called by the game server; the exact target currency (`Point`, `UPoint`, or a new wallet) and spend/debit/reserve endpoint still need confirmation for the post-MVP money phase.
+- Recorded the backend interview decisions: web login uses email/phone/password; players must have an account before playing; 1 account maps to 1 game character; locked/soft-deleted web accounts must block game access; multiple devices on one account must share server state.
+- Converted the boss's rough requirement into a roadmap: web/provisioned login, public-island realtime for `city`/`mine` excluding farm, server-authoritative Point/inventory/shop, daily/farm/animal server-time sync, secured admin dashboard with audit logs, and PostgreSQL/HTTPS/WebSocket/backup infrastructure.
+- Updated the wallet direction around `Point`: Point is both game currency and web top-up currency, while `UPoint`, the final Point ledger owner, and spend/debit/reserve endpoints still need confirmation.
+- Recorded the new MVP scope: the next MVP does not need deposit/withdrawal; prioritize online account flow and realtime customer demo first. Web wallet/top-up/spend is deferred to a later phase.
+- Updated Unity realtime connection scope: `RealtimeClient` now keeps the WebSocket alive during gameplay for server-wide chat, but only joins `city`/`mine` rooms for remote player state, so farm stays private.
+- Game-server JWT/WebSocket now carries `username/displayName`, so chat-only clients outside a room still broadcast with the correct account name instead of the `Player` fallback.
+- `economy/apply` now checks idempotency before balance validation and returns duplicate results without applying the delta again.
+- `inventory/adjust` now accepts `idempotency_key` and avoids duplicate item adjustments on retry.
+- Daily-limit consumption records transactions with `idempotency_key` so retrying the same mining/fishing consume action does not spend extra turns.
+
+### Verified
+- `node --check` passed for `server/store.js`, `server/postgresStore.js`, and `server/index.js`.
+- `node --check` passed for `server/adminDashboard.js`.
+- Node smoke test with a temporary JSON data file confirmed mining blocks after 10 daily consumes and economy/inventory idempotency does not double-apply.
+- Express smoke test on a temporary localhost server confirmed `/player/bootstrap` includes `daily_limits` and the 11th mining consume returns HTTP 409.
+- Admin dashboard smoke test confirmed `/admin` serves HTML, creates a demo user, edits economy JSON, and deletes that user from a temporary JSON store.
+- Local realtime smoke test with `WEB_AUTH_MODE=mock` passed: `DemoRealtime01`, `DemoRealtime02`, and `DemoRealtime03` logged in through `/auth/web-login`; two clients joined `city`, a third no-room client still received/sent global chat, player state worked, and `farm` join was rejected with `ROOM_NOT_SHARED`.
+
+## [Unreleased] - 2026-07-05 (Mining daily limit and Gem Shop sell catalog)
+
+### Fixed
+- Gem Shop sell mode now lists every whitelisted gemstone even when the player owns 0, shows the owned quantity on each card/detail, and disables selling for items with no stock.
+- Mining now enforces the customer rule of 10 rock-mining attempts per real-world day using PlayerPrefs date keys. The limit resets daily, blocks new mining when exhausted, and successful rock harvest toasts show the remaining daily mining turns.
+
+### Notes
+- Fishing already had the 10-free-turns-per-real-day limit through `FishingOverlayController` (`dailyTurns`, `FishingLastDate`, `FishingFreeTurns`), so no fishing code change was needed in this pass.
+
+## [Unreleased] - 2026-07-03 (Remote visual and NPC material cleanup)
+
+### Fixed
+- Realtime state sending now validates the local player source before broadcasting position/yaw. If `PlayerController.Instance` points at an invalid remote clone, it falls back to the active tagged local `Player` object, preventing one Editor from sending another player's remote visual position as its own.
+- Realtime remote clones now restore the real local `PlayerController.Instance` immediately after cloning if any remote prefab script tries to claim it during `Awake()`, preventing one client from broadcasting another player's visual clone as its own movement state.
+- Realtime self-filtering now trusts the server-provided `selfId` from the `welcome` packet in addition to the cached auth user id, reducing stale-token/self-echo cases while testing multiple accounts in Editor.
+- Remote player clones are now instantiated under an inactive staging root, stripped of gameplay scripts/colliders/listeners/root motion, and have all equipment/fishing-line visuals hidden before being activated in the scene. This prevents remote clones from pairing `PlayerInput` devices and from showing every tool at once.
+- Added dedicated tracked `MAT_NPC_*` materials under `Assets/_Project/Materials/NPC` and reassigned the real NPC prefabs so fresh clones no longer fall back to shared `NPCText.mat`, `Brown.mat`, or `Yellow.mat` placeholders.
+- Moved the matching NPC base-color textures into tracked LFS-backed files under `Assets/_Project/Materials/NPC/Textures` so fresh clones receive the texture assets instead of showing white materials.
+- Kept `NPCWorkshop` as the temporary capsule/trigger placeholder; the visible workshop NPC uses `BlacksmithNPC` with its own material.
+
+## [Unreleased] - 2026-07-03 (Realtime remote clone stability)
+
+### Fixed
+- Remote player clones now disable all non-visual gameplay scripts, cameras, listeners, colliders, rigidbodies, and root motion so they cannot steal local player singletons or interfere with input/tools.
+- Realtime locomotion state now sends the active local `PlayerController` animation names instead of hardcoded `Idle/Walk/Run`, and remote animation crossfades now target base layer 0 only when the state exists. This avoids `Invalid Layer Index '-1'` spam from remote players.
+- `EquipmentManager` and `FishingLineController` now ignore duplicate remote character owners during `Awake()` and clear their singleton references on destroy.
+- Redirected the city NPC prefabs `GiftGirlNPC`, `MiniGardenNPC`, `GameBoyNPC`, `YwonderNPC`, `MaidNPC`, `ThuYNPC`, and `HaiLuaNPC` from missing material GUIDs to the tracked `NPCText.mat` fallback so fresh clones do not render those NPCs magenta.
+
+## [Unreleased] - 2026-07-03 (Backend LAN realtime test)
+
+### Fixed
+- `AuthService` now stores the backend URL used for the cached auth token and clears cached auth automatically when `BackendConfig.baseUrl` changes, preventing stale tokens from breaking realtime WebSocket handshakes after switching between local/domain/LAN backend servers.
+
+### Changed
+- Pointed `Assets/Resources/BackendConfig.asset` at `http://192.168.1.50:3000` for current LAN testing against the physical case backend.
+- Enabled insecure HTTP connections in Player Settings for the current LAN test build so Unity can call the temporary `http://192.168.1.50:3000` backend.
+
+## [Unreleased] - 2026-07-03 (Clone asset dependency fix)
+
+### Fixed
+- Added missing tracked dependencies under `Assets/Building/Map1.1` that were referenced by farm scene materials/prefabs but ignored by Git, covering tree trunks, rocks, stone paths, garden plots, several building textures, NPC texture dependencies, and the exclamation/stonewalk source FBX assets for fresh clones.
+- Redirected `SeedNPC.prefab` away from an ignored `OptimizedNPCAssets` material and back to the tracked SeedNPC material so fresh clones no longer show SeedNPC with a missing material.
+
+## [Unreleased] - 2026-07-02 (Realtime chat delivery)
+
+### Fixed
+- Serialized Unity WebSocket sends in `RealtimeClient` so chat messages no longer race against frequent `player_state` updates on the same `ClientWebSocket`.
+- Chat now appears immediately in the sender's history when realtime accepts the message, while self echo from the server is ignored to avoid duplicate bubbles.
+- Added a lightweight `[Realtime] Chat from ...` log when a remote chat packet reaches Unity, making future chat debugging visible in Console.
+
+### Verified
+- Local backend WebSocket smoke test confirmed two independent clients in `city` both receive a `chat` broadcast.
+
+## [Unreleased] - 2026-07-01 (Login profile cache isolation)
+
+### Fixed
+- Isolated `PlayerProfileService` local cache per signed-in `AuthService.UserId`/`Username` instead of reusing the legacy global `YW_Profile_Cache` for every account.
+- Reset the runtime profile when auth identity changes, and accept `player_profile` returned by `/auth/web-login` before the follow-up profile load. This prevents DemoRich05/Demo 05 from falling back to a stale DemoRich02/Demo 02 profile when testing multiple accounts in the same Editor/app session or when `/player/profile` temporarily fails.
+- Refreshed the top-left HUD profile name from the active session after gameplay starts. The HUD now follows `GameManager.playerName` first, then auth/profile fallback, so the corner profile card no longer stays on DemoRich02 while the world name tag already shows DemoRich03.
+
+### Notes
+- The old `YW_Profile_Cache` remains as a fallback only when no auth identity exists, so old/offline local flows still have a migration path.
+
+## [Unreleased] - 2026-07-01 (Web auth bridge + realtime MVP)
+
+### Added
+- Added backend WebSocket realtime support at `/realtime` and `/game-api/realtime` using `ws`, with shared rooms `city` and `mine`, max 20 players per room, global chat, presence, remote player state, and `Waving`/`Pointing` emote broadcast.
+- Added Unity runtime `RealtimeClient` and `RemotePlayerController` for auto-connecting on shared islands, sending local movement/emote state, receiving global chat, and spawning remote players from the existing character prefabs without local input/colliders.
+
+### Changed
+- Updated `AuthService.LoginAsync` to try `/auth/web-login` first, then fall back to legacy `/auth/login` for local/dev compatibility.
+- Updated `webAuthProvider` for the handed-off web contract: `POST https://api.ywonder.net/api/game/auth` with `Authorization: Bearer <WEB_AUTH_SECRET|GAME_API_SECRET>`, plus JWT HS256 verification for the returned `gameToken`.
+- Chat sends through realtime when connected; if realtime is unavailable it keeps the existing local/mock chat behavior.
+
+### Notes
+- Unity never receives `GAME_API_SECRET`; only the game server reads it from environment variables.
+- Nginx/Caddy must proxy WebSocket Upgrade requests for `/realtime`, otherwise REST can work while chat/remote players cannot connect.
+
+## [Unreleased] - 2026-07-01 (Backend public URL compatibility)
+
+### Added
+- Added `/health` to the Node server stub and mounted the existing API under both local routes and the legacy `/game-api` prefix.
+- Added `server/Caddyfile.example` and `server/DEPLOY_WINDOWS.md` with the minimum Windows/Caddy reverse-proxy setup for `https://api.ywonder.net`.
+- Redirected Unity `BackendConfig.asset` to `https://api.ywonder.net`, keeping `ywonder.net` free for the existing web VPS.
+- Added `server/webAuthProvider.js` as a mock/http adapter layer for web-account login while waiting for the real web API contract.
+- Added Game API MVP endpoints for `auth/web-login`, player bootstrap, economy, inventory, and farm-state.
+- Added `server/schema.sql` as the PostgreSQL target schema for `game_players`, profiles, economy, inventory, farm-state, and transactions.
+
+### Notes
+- DNS currently resolves `ywonder.net` and `api.ywonder.net` to `45.119.83.233`, but external checks from this machine could not connect to ports `80`, `443`, or `3000`; the server/router/firewall/Caddy side still needs to be fixed on the physical server.
+- `WEB_AUTH_MODE=mock` is the current unblocker. When the web team provides login/verify endpoints, switch to `WEB_AUTH_MODE=http` and configure `WEB_AUTH_LOGIN_URL` / `WEB_AUTH_VERIFY_URL`.
+
+## [Unreleased] - 2026-07-01 (Segmented lucky wheel)
+
+### Changed
+- Redesigned the lucky wheel UI from icons placed around a dark ring into a fixed-square 12-segment colored wheel. Prize segments now show item icons only; product names and quantities were removed for a cleaner spin view.
+- The "better luck next time" segment is intentionally blank, while the prize list and existing weighted drop logic stay unchanged.
+- Moved the spin button into the center of the wheel and removed the decorative center wheel icon; the footer now only shows remaining daily spins.
+- Replaced the drawn center pointer/`QUAY` text with the new `arrowforspin.png` spin icon as the clickable center button.
+
+### Notes
+- The segment background is generated at runtime in `EventPopupController`, so no new wheel background asset is required.
+
+## [Unreleased] - 2026-07-01 (Mobile build placement assist)
+
+### Added
+- Added touch-only Build Mode placement assist in `GhostPlacementController`: mobile touches now aim slightly above the finger and can snap to the nearest visible `BuildSurfaceCell` within a screen-space assist radius if the raycast misses the exact small tile collider.
+
+### Changed
+- `BuildModeOverlayController` now tells the ghost placement system whether the pin tap came from touch or mouse, so mobile gets the forgiving placement path while desktop/mouse placement keeps the exact raycast behavior.
+
+### Notes
+- New Inspector knobs on `GhostPlacementController`: `enableMobilePlacementAssist`, `touchAimOffsetPixels`, and `touchAssistRadiusPixels`. Defaults are enabled, 90px aim offset, and 96px assist radius.
+
+## [Unreleased] - 2026-07-01 (Farm tile model visuals)
+
+### Changed
+- Disabled the automatic `FarmTileMarker` colored border overlay, removing the white/yellow/green/orange tile outline during farming.
+- `FarmTile` no longer creates primitive cube/sphere/cylinder fallback visuals by default. Soil/plowed visuals now come from the assigned Inspector models, and planted/watered/ripe states keep the plowed soil model underneath the crop.
+- Crop visuals now prefer `CropDefinition.cropPrefab` when available, even if the old `useCustomCropModels` flag was not manually enabled.
+- `FarmTile` now supports `soilVisual`/`plowedVisual` fields assigned to prefab assets at runtime. It instantiates prefab visuals as children and toggles renderers when `soilVisual` is the tile root, so plowing `DatThuong` can reveal `DatDaCuoc` without disabling the whole tile object.
+- Build-mode farm plots can now be demolished like pens: gameplay prompt adds `G`/`Hủy ô trồng` with a second-tap confirmation, and the Build Mode delete menu resolves child mesh hits back to the placed root before deleting.
+- Deleting a placed farm plot clears the owning `BuildSurfaceCell`, saves `BuildPersistence` immediately, and `FarmTile.OnDestroy` now cleans independent water bars/crop labels.
+
+### Notes
+- Assign `soilVisual` and `plowedVisual` on the farm tile prefab/scene objects. If a crop has no `cropPrefab`, no colored fallback plant will appear unless `createPrimitiveFallbackVisuals` is explicitly enabled for prototype testing.
+
+## [Unreleased] - 2026-07-01 (Mobile keyboard avoidance)
+
+### Added
+- Added `MobileKeyboardAvoidance`, a shared UI Toolkit helper for keeping focused text inputs above the iOS/Android soft keyboard.
+
+### Changed
+- Login/Register now shifts the login panel upward only while a text field is focused and the mobile keyboard is expected to cover it.
+- Chat now reuses the same keyboard-height calculation instead of its local hardcoded keyboard fallback, while preserving the existing Build Mode chat offset.
+
+## [Unreleased] - 2026-07-01 (Gem shop and market filters)
+
+### Added
+- Added `Shop_GemShop` as a sell-only gemstone buyer shop definition for the six mining gemstone item IDs.
+- Added Fish and Gemstone category filters to the shared Shop Popup so Fish Shop and Gem Shop can expose their product categories instead of relying only on the All filter.
+- Added reusable item-icon toast helpers in `ScreenToast` so item rewards/purchases can resolve icon/name from `ItemDatabase` instead of duplicating fish/gem-only code.
+
+### Changed
+- Updated `ShopDataGenerator` so regenerating shop data preserves the gemstone buyer shop.
+- Switched fishing, mining, crop/animal harvest, water scooping, shop buy/sell, attendance rewards, and lucky wheel item rewards to the shared item-icon toast path.
+- Updated Build Mode material balance and item costs to show the new `Go`/`Da` icons from `Assets/Sprites/icon/BoSungIcon/`.
+- Mapped `wood_01`, `stone_01`, and `watering_water_01` to `Go.png`, `Da.png`, and `NuocTuoi.png` in `ItemDataGenerator`; `watering_water_01.asset` now has an icon texture assigned.
+
+### Notes
+- Gemstone shop still needs Unity Editor setup: assign `Shop_GemShop` to a `ShopZoneTrigger` or `MerchantNPC` on the intended mine/city shop object.
+- Fish and gemstone card/detail icons continue to resolve from `ItemDefinition.iconTexture`; no economy values were changed.
+- Wood/stone economy logic was not changed; this pass only changes icons/UI feedback.
+
+## [Unreleased] - 2026-06-30 (Mining island MVP groundwork)
+
+### Added
+- Added code groundwork for the mining island MVP: the world map can unlock/select `mine`, `IslandTravelManager` can travel to `MineScene`, and mining interactions are allowed on both `city` and `mine`.
+- `ResourceSpawner` now supports optional tree/rock prefabs, ground snapping, and random-position respawn so mine rocks can reappear at a new position inside the configured spawn zone.
+- `ResourceSpawner` now supports controlled spawn areas through assigned `Collider` volumes, weighted random sampling, minimum spacing, and scene gizmos; this lets the mine map spawn many rocks inside irregular hand-defined zones instead of a single circular area.
+
+### Changed
+- Kept fishing restricted to `city`, but expanded rock mining from city-only to city-or-mine.
+- Added a runtime fallback that maps old `MineMap` island scene data to `MineScene`, reducing risk while existing Unity Inspector/scene data is being cleaned up.
+
+### Notes
+- Editor setup is still required: replace the old `MineMap` Build Settings entry with `Assets/_Project/_Scenes/MineScene.unity`, set the mine island scene name to `MineScene` in `IslandTravelManager`, and place/configure a `ResourceSpawner` in `MineScene`.
+- For irregular mine terrain, create a few tall `BoxCollider`/trigger volumes over valid ground, assign them to `ResourceSpawner > Spawn Areas`, enable `snapSpawnToGround` with a ground-only mask, then use the component context menu `Clear Saved Resource State` once if old PlayerPrefs positions should be regenerated.
+- Daily 10 mining attempts, pickaxe lv2/lv3 upgrade costs, and a gemstone buyer shop remain deferred.
+
+### Changed Files
+- `Assets/_Project/Scripts/Managers/IslandTravelManager.cs`
+- `Assets/_Project/UI/MapPopupController.cs`
+- `Assets/_Project/Scripts/Environment/FarmInteractionController.cs`
+- `Assets/_Project/Scripts/Managers/ResourceSpawner.cs`
+- `Assets/_Project/Scripts/Environment/HarvestableResource.cs`
+
+## [Unreleased] - 2026-06-29 (Handoff iOS/TestFlight + fish/mining data)
+
+### Added
+- Added a fish catch reward icon effect: successful fishing now shows the caught fish icon through `ScreenToast.ShowInfoWithIcon`, falling back safely if item art is missing.
+- Added `Assets/_Project/Docs_KichBan/CacLoaiCa.md` as the canonical fish data note for new fish prices, rarity tiers, proposed item IDs, and icon paths.
+- Added `Assets/_Project/Docs_KichBan/CacLoaiDaQuy.md` as the canonical gemstone mining data note for point values, drop rates, quantities, pickaxe upgrade notes, daily limit, and icon paths.
+- Added 14 new fish `ItemDefinition` assets under `Assets/Resources/Items/` using the customer-provided icons from `Assets/Sprites/icon/CacLoaiCa/`.
+- Added 6 gemstone `ItemDefinition` assets under `Assets/Resources/Items/` using the customer-provided icons from `Assets/Sprites/icon/CacLoaiDaQuy/`.
+- Added customer-provided poultry meat icons from `Assets/Sprites/icon/ThitGiaCam/` to chicken, duck, goose, and ostrich meat item definitions.
+- Added handoff notes for the next session: upcoming customer request is to expand fishing rewards with new fish tiers and mining rewards with new stone/gem tiers.
+- Recorded the new fish point tiers for implementation:
+  - 2 point: Ca com, ca nuc, ca hong.
+  - 4 point: Ca su tu, ca naso, ca nhong.
+  - 6 point: Ca soc dua, ca khe, ca mu.
+  - 10 point: Ca mat quy, ca heo bien.
+  - 15 point: Ca hoang de, ca ngu hoang kim.
+  - 25 point: Ca rong do.
+  - Fishing rarity weights from high value down to low value: 2%, 4%, 7%, 17%, 25%, 45%.
+- Recorded the new mining/gemstone point tiers for implementation:
+  - Image 1: 2 point/stone, 4 stones, 50% hit rate.
+  - Image 2: 3 point/stone, 4 stones, 30% hit rate.
+  - Image 3: 6 point/stone, 3 stones, 12% hit rate.
+  - Image 4: 12 point/stone, 2 stones, 5% hit rate.
+  - Image 5: 500 point/stone, 1 stone, 2% hit rate, pickaxe lv2 upgrade costs 250 point/attempt.
+  - Image 6: rare ruby, 3000 point/stone, 1% hit rate, pickaxe lv3 upgrade costs 1500 point.
+  - Mining limit: 10 attempts/day.
+
+### Changed
+- Trimmed the character emote popup to the approved two actions only: removed laugh and dance, and swapped the remaining wave/point buttons to use `Assets/Sprites/icon/BoSungIcon/VayTay.png` and `Assets/Sprites/icon/BoSungIcon/ChiTay.png` instead of emoji text.
+- Renamed visible currency copy from `POS` to `Point` across gameplay UI, shop, inventory, HUD, event rewards, piggy bank, workshop, tutorial/reward toasts, and test UI while keeping internal `POS/UPOS` code names unchanged for low-risk demo stability.
+- Updated the premium visible currency suffix from `UPOS` to `UPoint`.
+- Fishing reward selection now uses the customer fish tier table: 25 Point = 2%, 15 Point = 4%, 10 Point = 7%, 6 Point = 17%, 4 Point = 25%, 2 Point = 45%; after a tier is picked, one fish in that tier is selected randomly.
+- Fish Shop now whitelists all new fish IDs for selling, so newly caught fish can appear with icon/name/price in shop sell mode.
+- `ItemDatabase.GetItem` now falls back to `Resources/Items/{id}` when an item is not listed in `ItemDatabase.asset`, which lets newly added item assets resolve in fishing, inventory, shop, and toast before the Unity generator refreshes the database list.
+- Boat cutscene failsafe now uses estimated waypoint travel time plus a buffer instead of cutting at a fixed 35 seconds, so the boat has time to reach the shore before gameplay starts.
+- Mining now keeps the normal rock reward at 100% with 10 rock, then rolls one gemstone reward by customer tiers: Ruby 1%, Amethyst 2%, Fire Quartz 5%, Green Calcite 12%, Orange Calcite 30%, Kyanite 50%.
+- Successful gemstone mining now shows `ScreenToast.ShowInfoWithIcon` with the gemstone icon, and gemstone items appear in the inventory materials tab through `ItemDefinition.iconTexture`.
+- Resource respawn now catches up while the app is closed: `HarvestableResource` stores a real-world `respawnEndUnix` timestamp, and `ResourceSpawner` persists it on harvest/pause/quit while remaining compatible with old `respawnTimer` saves.
+- Brightened/blued the active Farm/City sea water materials while preserving their existing shaders, texture setup, transparency, and wave settings.
+- Restored final-harvest meat for poultry per the customer's 29/06 reversal: chicken/ostrich/goose/duck still produce eggs by cycle, then give meat on the final harvest and can sell that meat at Mini Garden.
+- Poultry final-harvest meat toast now uses `ScreenToast.ShowInfoWithIcon`, so the new meat icon appears immediately when the animal is slaughtered at the last harvest; inventory and shop UI reuse the same `ItemDefinition.iconTexture`.
+- Stabilized CodeMagic exported-Xcode iOS workflow enough for TestFlight: signing, bundle id `com.ywonder.greenfarm`, iOS app icon set, executable symbol scripts, IL2CPP binary handling, and build number bump to `0.1.1 (2)`.
+- Adjusted CodeMagic App Store Connect publishing to upload the IPA only; removed automatic `submit_to_testflight` so Internal Testing assignment can be handled manually in App Store Connect.
+- Baked `0.1.1 (2)` into the exported iOS Xcode project and added an IPA version sanity check before App Store Connect publishing.
+- Bumped the next iOS/TestFlight upload to `0.1.1 (4)` and added `ITSAppUsesNonExemptEncryption=false` to the exported app `Info.plist`; CodeMagic now also forces this key after Unity export so App Store Connect should not block the build with Missing Export Compliance.
+- iOS/TestFlight artifact reached TestFlight. After this hotfix, current install/publish issues must be checked against the newest build `0.1.1 (4)` instead of stale `0.1.0 (0)`, `0.1.1 (1)`, `0.1.1 (2)`, or `0.1.1 (3)`.
+- TestFlight package size was observed around 309 MB; size optimization is intentionally deferred after functional TestFlight validation.
+
+### Notes
+- Fish data above is now wired into gameplay reward selection, item data, icons, and Fish Shop selling. Gemstone/mining data is wired for item data, inventory icons, mining reward roll, and toast icon; gemstone shop selling is intentionally deferred because no gemstone buyer shop exists yet.
+- Do not stage unrelated Unity/iOS generated dirty files unless the next task explicitly needs them.
+
 ## [Unreleased] - 2026-06-27 (CodeMagic iOS signing bundle fix)
 
 ### Fixed
@@ -281,7 +778,7 @@
 - Shop mở bằng nút HUD/legacy mock giờ cũng tra `ItemDatabase` cho giá mua/bán/tên/icon, tránh lệch số liệu so với NPC shop data-driven.
 
 ### Notes
-- Không gán thịt gia cầm (`chicken_meat_01`, `duck_meat_01`, `goose_meat_01`, `ostrich_meat_01`) vì gameplay hiện đang chốt gia cầm chỉ lấy trứng.
+- Lưu ý 29/06: quyết định "gia cầm chỉ lấy trứng" đã bị thay thế; 4 thịt gia cầm đã bật lại ở vụ cuối.
 
 ### Changed Files
 - `Assets/_Project/Scripts/Editor/ItemDataGenerator.cs`
@@ -297,7 +794,7 @@
   - `goat_milk_01`: 24 -> 12
   - `goose_egg_01`: 28 -> 14
   - `rabbit_fur_01`: 172 -> 21
-- Giữ nguyên quyết định cũ: gia cầm chỉ lấy trứng, không bật thịt ngỗng.
+- Lưu ý 29/06: quyết định cũ "gia cầm chỉ lấy trứng" đã bị thay thế; thịt ngỗng và các thịt gia cầm khác đã bật lại ở vụ cuối.
 
 ### Changed Files
 - `Assets/_Project/Scripts/Editor/ItemDataGenerator.cs`
@@ -372,7 +869,7 @@
 - **Generator:** `CropDataGenerator` set 8h/20h; `ItemDataGenerator.SetAnimalGameplay` thêm noFeed/fedLife (24h/48h · rùa 5/10 ngày).
 
 ### Docs / Audit
-- **RÀ SOÁT KINH TẾ THÚ** (`RaSoat_SoLieu_MauThuan.md`, mục 23/06): đối chiếu `VatNuoi2.xlsx` (cả tab "Thuyết minh cách tính" — đọc thẳng .xlsx vì .md thiếu) ↔ generator. **Giá mua/bán/sản lượng/số lần thu = KHỚP 100%.** Công thức `maxHarvests = floor(số ngày nuôi ÷ chu kỳ thu)` đúng. Gia cầm chỉ-trứng = **khách chốt, giữ nguyên**. **Chi phí bệnh (vắc-xin/thuốc) chưa áp (Gói B) → lời game > bảng tới khi làm bệnh.** Trứng vịt 4.5→làm tròn 5.
+- **RÀ SOÁT KINH TẾ THÚ** (`RaSoat_SoLieu_MauThuan.md`, mục 23/06): đối chiếu `VatNuoi2.xlsx` (cả tab "Thuyết minh cách tính" — đọc thẳng .xlsx vì .md thiếu) ↔ generator. **Giá mua/bán/sản lượng/số lần thu = KHỚP 100%.** Công thức `maxHarvests = floor(số ngày nuôi ÷ chu kỳ thu)` đúng. Cập nhật 29/06: quyết định gia cầm chỉ-trứng đã bị thay bằng trứng theo chu kỳ + thịt ở vụ cuối. **Chi phí bệnh (vắc-xin/thuốc) chưa áp (Gói B) → lời game > bảng tới khi làm bệnh.** Trứng vịt 4.5→làm tròn 5.
 - Thêm ghi chú "cây ngắn ngày chín 24h" vào `CayTrong2.md`. Xoá `CayTrong.md` + `CayTrongLauNam.md` (cũ, đã có bản …2).
 
 ### Fixed
@@ -407,7 +904,7 @@
 
 ### Changed
 - **ÁP BỘ GIÁ MỚI (file …2.xlsx khách gửi):** MỌI giá = **Point = USDT × 26**; giá BÁN hạ để giữ lời ~250%. 54 mục trong `ItemDataGenerator`. Con giống: Bò 7800/Hươu 10400/Gà 156… Giá bán: sữa bò **50**, da heo 7042, mai rùa 11893, Hộp Sa Chi 194, chanh leo 57… (1 USDT = 26 Point.)
-- **Gia cầm BỎ THỊT** (gà/vịt/ngỗng/đà điểu): `meatItemId` rỗng → chỉ lấy trứng, hết số lần thu thì biến mất; gỡ 4 thịt gia cầm khỏi Mini Garden.
+- **Gia cầm tạm BỎ THỊT ở thời điểm 22/06** (gà/vịt/ngỗng/đà điểu): `meatItemId` rỗng → chỉ lấy trứng, hết số lần thu thì biến mất; gỡ 4 thịt gia cầm khỏi Mini Garden. Cập nhật 29/06: quyết định này đã bị đảo lại, 4 gia cầm nay có thịt ở vụ cuối.
 - **EXP/Level (khách chốt):** ramp **250 + (cấp−1)×5**, Level Cap **90**; EXP thu hoạch = **số ngày × 10** (cây/thú); đào khoáng **15**.
 - **Mobile UI:** nút búa Build chuyển sang PHẢI (trên Jump); phóng to nút điều khiển ~**+27%** (joystick/sidebar/settings/bag/sprint/jump/X); Sprint **giữ→bấm-toggle**; PanelSettings ref 1280×720; popup clamp max-w/h %.
 - **Vắc-xin 30 / thuốc 70** (giá mua).

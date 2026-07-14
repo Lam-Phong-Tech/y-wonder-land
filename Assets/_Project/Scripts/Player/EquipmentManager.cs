@@ -63,7 +63,25 @@ namespace YWonderLand.Player
 
         private void Awake()
         {
+            var owner = GetComponent<PlayerController>();
+            if (owner != null && PlayerController.Instance != null && PlayerController.Instance != owner)
+            {
+                enabled = false;
+                return;
+            }
+
+            if (Instance != null && Instance != this)
+            {
+                enabled = false;
+                return;
+            }
+
             Instance = this;
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
         }
 
         private void Start()

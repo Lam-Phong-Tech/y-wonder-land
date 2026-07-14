@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using YWonderLand.Backend;
 
 namespace YWonderLand.Environment
 {
@@ -20,11 +21,59 @@ namespace YWonderLand.Environment
         public int TileCount => _tiles.Count;
 
         private const string SAVE_KEY = "YW_PlacedTiles";
+        private bool loadComplete;
 
         private void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
+        }
+
+        private void OnEnable()
+        {
+            FarmStateSync.AuthoritativeSnapshotApplied += HandleAuthoritativeSnapshotApplied;
+            if (AuthService.Instance == null) return;
+            AuthService.Instance.IdentityChanging += HandleIdentityChanging;
+            AuthService.Instance.IdentityChanged += HandleIdentityChanged;
+        }
+
+        private void OnDisable()
+        {
+            FarmStateSync.AuthoritativeSnapshotApplied -= HandleAuthoritativeSnapshotApplied;
+            if (AuthService.Instance == null) return;
+            AuthService.Instance.IdentityChanging -= HandleIdentityChanging;
+            AuthService.Instance.IdentityChanged -= HandleIdentityChanged;
+        }
+
+        private void HandleIdentityChanging(string previousScopeId, string nextScopeId)
+        {
+            SaveTiles();
+        }
+
+        private void HandleIdentityChanged(string previousScopeId, string nextScopeId)
+        {
+            StopAllCoroutines();
+            loadComplete = false;
+            foreach (var tile in _tiles.Values)
+                if (tile != null) Destroy(tile);
+            _tiles.Clear();
+            StartCoroutine(ReloadAfterIdentityChange());
+        }
+
+        private System.Collections.IEnumerator ReloadAfterIdentityChange()
+        {
+            yield return null;
+            LoadTiles();
+        }
+
+        private void HandleAuthoritativeSnapshotApplied()
+        {
+            StopAllCoroutines();
+            loadComplete = false;
+            foreach (var tile in _tiles.Values)
+                if (tile != null) Destroy(tile);
+            _tiles.Clear();
+            StartCoroutine(ReloadAfterIdentityChange());
         }
 
         private void Start()
@@ -66,6 +115,12 @@ namespace YWonderLand.Environment
         /// <summary>Lưu mọi ô đã lát (toạ độ + cao độ) + trạng thái cây (tái dùng FarmTile.ExportSaveOrNull).</summary>
         public void SaveTiles()
         {
+            if (!loadComplete)
+            {
+                Debug.LogWarning("[TilePlacement] Skip save before load completes to avoid overwriting existing placed tiles.");
+                return;
+            }
+
             var data = new PlacedTilesSave { tiles = new List<PlacedTileSave>() };
             foreach (var kv in _tiles)
             {
@@ -79,16 +134,25 @@ namespace YWonderLand.Environment
                     crop = ft != null ? ft.ExportSaveOrNull() : null   // null nếu ô trống
                 });
             }
-            PlayerPrefs.SetString(SAVE_KEY, JsonUtility.ToJson(data));
-            PlayerPrefs.Save();
+            PlayerScopedPrefs.SetString(SAVE_KEY, JsonUtility.ToJson(data));
+            PlayerScopedPrefs.Save();
+            FarmStateSync.NotifyLocalStateSaved();
             Debug.Log($"[TilePlacement] Saved {data.tiles.Count} placed tiles.");
         }
 
         private void LoadTiles()
         {
-            if (!PlayerPrefs.HasKey(SAVE_KEY)) return;
-            var data = JsonUtility.FromJson<PlacedTilesSave>(PlayerPrefs.GetString(SAVE_KEY));
-            if (data == null || data.tiles == null) return;
+            if (!PlayerScopedPrefs.HasKey(SAVE_KEY))
+            {
+                loadComplete = true;
+                return;
+            }
+            var data = JsonUtility.FromJson<PlacedTilesSave>(PlayerScopedPrefs.GetString(SAVE_KEY));
+            if (data == null || data.tiles == null)
+            {
+                loadComplete = true;
+                return;
+            }
 
             var pending = new List<PendingCrop>();
             foreach (var e in data.tiles)
@@ -104,6 +168,7 @@ namespace YWonderLand.Environment
                 }
             }
             if (pending.Count > 0) StartCoroutine(RestoreCropsNextFrame(pending));
+            else loadComplete = true;
             Debug.Log($"[TilePlacement] Recreated {data.tiles.Count} tiles ({pending.Count} có cây).");
         }
 
@@ -114,6 +179,7 @@ namespace YWonderLand.Environment
             yield return null;
             foreach (var p in pending)
                 if (p.tile != null) p.tile.RestoreSave(p.crop, db);
+            loadComplete = true;
         }
 
         private void OnApplicationPause(bool paused) { if (paused) SaveTiles(); }

@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cac8b9f5919afc44599c356803f7ca4a, type: 3}
+  m_Name: gem_fire_quartz_01
+  m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.ItemDefinition
+  id: gem_fire_quartz_01
+  itemName: Fire Quartz
+  description: "\u0110\xE1 qu\xFD Fire Quartz. B\xE1n \u0111\u01B0\u1EE3c 12 Point."
+  iconEmoji: "\U0001F48E"
+  iconSprite: {fileID: 0}
+  iconTexture: {fileID: 2800000, guid: 8aa7e55ec37032e489779be48100cac8, type: 3}
+  category: materials
+  buyPrice: 0
+  sellPrice: 12
+  canSell: 1
+  isStackable: 1
+  maxStack: 999

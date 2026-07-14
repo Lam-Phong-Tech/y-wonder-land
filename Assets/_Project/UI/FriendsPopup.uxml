@@ -45,11 +45,11 @@
 
                 </ui:VisualElement>
 
-            </ui:VisualElement>
+                <!-- Close Button -->
+                <ui:VisualElement class="friends-close-shadow" picking-mode="Ignore">
+                    <ui:Button name="BtnCloseFriends" text="X" class="friends-close-btn" picking-mode="Position" />
+                </ui:VisualElement>
 
-            <!-- Close Button (rendered on top of panel) -->
-            <ui:VisualElement class="friends-close-shadow" picking-mode="Ignore">
-                <ui:Button name="BtnCloseFriends" text="X" class="friends-close-btn" picking-mode="Position" />
             </ui:VisualElement>
 
         </ui:VisualElement>

@@ -48,8 +48,10 @@ public class PlayerController : MonoBehaviour
     [SerializeField, Range(0.6f, 1f)] private float stickAutoSprintThreshold = 0.88f;
     // Runtime cap để đảm bảo ngưỡng sprint bằng joystick không quá gắt trên mobile
     private const float MobileSprintThresholdCap = 0.62f;
+    private const float JoystickEmoteCancelThreshold = 0.08f;
     private float actionLockTimer = 0f;
     private float _actionSpeed = 1f;
+    private YWonderLand.Player.ToolType currentActionTool = YWonderLand.Player.ToolType.None;
 
     [Header("Animation State Names")]
     public string animIdle = "Idle";
@@ -60,7 +62,21 @@ public class PlayerController : MonoBehaviour
 
     void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            enabled = false;
+            return;
+        }
+
         Instance = this;
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            Instance = null;
+        }
     }
 
     void Start()
@@ -158,6 +174,8 @@ public class PlayerController : MonoBehaviour
             if (actionLockTimer <= 0)
             {
                 if (animator != null) animator.speed = 1f;
+                _actionSpeed = 1f;
+                currentActionTool = YWonderLand.Player.ToolType.None;
                 if (YWonderLand.Player.EquipmentManager.Instance != null)
                 {
                     YWonderLand.Player.EquipmentManager.Instance.HideAllTools();
@@ -252,17 +270,6 @@ public class PlayerController : MonoBehaviour
             controller.Move(moveDirectionNormalized * (currentSpeed * inputMagnitude) * Time.deltaTime);
         }
 
-        // Không có input di chuyển: mới quay follow camera (tránh cảm giác bị "kéo lùi" khi đang lái joystick).
-        if (!IsFreeLook() && !hasMoveInput && mainCameraTransform != null)
-        {
-            ThirdPersonCamera tpc = mainCameraTransform.GetComponent<ThirdPersonCamera>();
-            if (tpc != null)
-            {
-                Quaternion targetRotation = Quaternion.Euler(0, tpc.Yaw, 0);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * 1.4f * Time.deltaTime);
-            }
-        }
-
         // 4. Handle Jumping — nhảy trên cạn HOẶC bật lên khỏi mặt nước để trèo lên bờ.
         if (jumpPressed && (isGrounded || isSwimming))
         {
@@ -337,13 +344,9 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     public void SetStickAutoSprint(bool enabled)
     {
-        isStickAutoSprintLatched = enableStickAutoSprint && enabled;
-        autoRunForward = isStickAutoSprintLatched;
-        if (!isStickAutoSprintLatched)
-        {
-            stickSprintDirectionLocked = false;
-            stickSprintLockDirection = Vector3.zero;
-        }
+        isStickAutoSprintLatched = false;
+        stickSprintDirectionLocked = false;
+        stickSprintLockDirection = Vector3.zero;
     }
 
     /// <summary>Nút Sprint trên HUD bấm 1 lần = bật/tắt chạy nhanh. Trả về trạng thái mới (true = đang chạy nhanh).</summary>
@@ -386,6 +389,7 @@ public class PlayerController : MonoBehaviour
     public void SetMoveInput(Vector2 move)
     {
         virtualMoveInput = Vector2.ClampMagnitude(move, 1f);
+        CancelJoystickCancelableEmote(virtualMoveInput.magnitude);
     }
 
     /// <summary>
@@ -395,6 +399,7 @@ public class PlayerController : MonoBehaviour
     public void SetMoveInput(Vector2 move, float rawMagnitude)
     {
         virtualMoveInput = Vector2.ClampMagnitude(move, 1f);
+        CancelJoystickCancelableEmote(rawMagnitude);
     }
 
     // ── Nút Nhảy ảo (mobile) ──
@@ -405,11 +410,32 @@ public class PlayerController : MonoBehaviour
     // ── Hủy hoạt ảnh (nút X trên HUD) ──
     /// <summary>Nhân vật đang khóa trong một hoạt ảnh hành động (chặt/đào/cuốc/tưới/câu...).</summary>
     public bool IsBusy => actionLockTimer > 0f;
+    public bool IsJoystickCancelableEmote => actionLockTimer > 0f && IsJoystickCancelableEmoteState(currentAnimState);
+    public string CurrentAnimationState => string.IsNullOrWhiteSpace(currentAnimState) ? animIdle : currentAnimState;
+    public float CurrentAnimationSpeed => actionLockTimer > 0f ? Mathf.Max(0.1f, _actionSpeed) : 1f;
+    public YWonderLand.Player.ToolType CurrentActionTool => actionLockTimer > 0f
+        ? currentActionTool
+        : YWonderLand.Player.ToolType.None;
+
+    private static bool IsJoystickCancelableEmoteState(string stateName)
+    {
+        return stateName == "Waving" || stateName == "Pointing";
+    }
+
+    private void CancelJoystickCancelableEmote(float inputMagnitude)
+    {
+        if (inputMagnitude <= JoystickEmoteCancelThreshold || !IsJoystickCancelableEmote)
+            return;
+
+        CancelAction();
+    }
     /// <summary>Nút X trên HUD gọi: ngắt hoạt ảnh đang chạy, cất đồ nghề, ẩn thanh tiến trình, về Idle.</summary>
     public void CancelAction()
     {
         if (actionLockTimer <= 0f) return;
         actionLockTimer = 0f;
+        _actionSpeed = 1f;
+        currentActionTool = YWonderLand.Player.ToolType.None;
         if (animator != null)
         {
             animator.speed = 1f;
@@ -450,6 +476,7 @@ public class PlayerController : MonoBehaviour
 
         speed = Mathf.Max(0.1f, speed);
         _actionSpeed = speed;
+        currentActionTool = tool;
         animator.speed = speed;        // tăng/giảm tốc phát animation (2 = nhanh gấp đôi)
 
         CrossFadeAnim(animName, 0.1f); // phát animation trước

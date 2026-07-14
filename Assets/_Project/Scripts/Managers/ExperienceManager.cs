@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using YWonderLand.Backend;
 
 namespace YWonderLand.Managers
 {
@@ -46,8 +47,31 @@ namespace YWonderLand.Managers
         {
             if (_instance != null && _instance != this) { Destroy(gameObject); return; }
             _instance = this;
-            level = Mathf.Max(1, PlayerPrefs.GetInt(LEVEL_KEY, 1));
-            expInLevel = Mathf.Max(0, PlayerPrefs.GetInt(EXP_KEY, 0));
+            LoadProgress();
+        }
+
+        private void OnEnable()
+        {
+            if (AuthService.Instance != null)
+                AuthService.Instance.IdentityChanged += HandleIdentityChanged;
+        }
+
+        private void OnDisable()
+        {
+            if (AuthService.Instance != null)
+                AuthService.Instance.IdentityChanged -= HandleIdentityChanged;
+        }
+
+        private void LoadProgress()
+        {
+            level = Mathf.Max(1, PlayerScopedPrefs.GetInt(LEVEL_KEY, 1));
+            expInLevel = Mathf.Max(0, PlayerScopedPrefs.GetInt(EXP_KEY, 0));
+        }
+
+        private void HandleIdentityChanged(string previousScopeId, string nextScopeId)
+        {
+            LoadProgress();
+            OnEXPChanged?.Invoke(level, ExpPercent);
         }
 
         public void AddEXP(int amount)
@@ -65,9 +89,9 @@ namespace YWonderLand.Managers
             }
             if (level >= MAX_LEVEL) expInLevel = 0; // đạt cấp tối đa
 
-            PlayerPrefs.SetInt(LEVEL_KEY, level);
-            PlayerPrefs.SetInt(EXP_KEY, expInLevel);
-            PlayerPrefs.Save();
+            PlayerScopedPrefs.SetInt(LEVEL_KEY, level);
+            PlayerScopedPrefs.SetInt(EXP_KEY, expInLevel);
+            PlayerScopedPrefs.Save();
 
             OnEXPChanged?.Invoke(level, ExpPercent);
 

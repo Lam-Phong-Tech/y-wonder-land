@@ -115,7 +115,7 @@ public class UITestHelper : MonoBehaviour
 
         confirmDialog.Show(
             "XÁC NHẬN MUA",
-            "Bạn muốn gửi 5000 POS vào Heo đất gói 30 ngày? Lãi suất 6%, không rút sớm được.",
+            "Bạn muốn gửi 5000 Point vào Heo đất gói 30 ngày? Lãi suất 6%, không rút sớm được.",
             "Gửi tiền",
             "Để sau",
             () => Debug.Log("[UITest] ℹ️ Info → Đã bấm Gửi tiền!"),
@@ -138,7 +138,7 @@ public class UITestHelper : MonoBehaviour
         List<RewardItemData> rewards = new List<RewardItemData>
         {
             new RewardItemData("🥕", "Cà rốt", 10),
-            new RewardItemData("💰", "POS", 50),
+            new RewardItemData("💰", "Point", 50),
             new RewardItemData("⭐", "EXP", 20)
         };
 

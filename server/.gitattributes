@@ -1,0 +1,2 @@
+# This file is required when packaging the server subtree with `git archive <commit>:server`.
+*.sh text eol=lf

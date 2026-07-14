@@ -132,7 +132,9 @@ namespace YWonderLand.Environment
                 inv.RemoveItem(woodId, woodCost);
             }
 
-            TilePlacementSystem.Instance.PlaceTile(cell, groundY);
+            GameObject placedTile = TilePlacementSystem.Instance.PlaceTile(cell, groundY);
+            if (placedTile == null) return;
+            TilePlacementSystem.Instance.SaveTiles();
 
             // Múa động tác gõ + cầm búa
             PlayerController.Instance.PlayActionAnimation("TreeCuttingV4", 0.5f, ToolType.Hammer);

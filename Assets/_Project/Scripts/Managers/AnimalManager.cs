@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using YWonderLand.Data;
 using YWonderLand.Environment;
 using System.Linq;
+using YWonderLand.Backend;
 
 namespace YWonderLand.Managers
 {
@@ -15,6 +16,7 @@ namespace YWonderLand.Managers
         [SerializeField] private CropDatabase cropDatabase; // Note: You might want a dedicated AnimalDatabase later, reusing for now if it holds AnimalDefinition
 
         private const string SAVE_KEY = "YW_AnimalState";
+        private bool loadComplete;
         
         // Lookup dictionary for animal definitions
         private Dictionary<string, AnimalDefinition> animalDefs = new Dictionary<string, AnimalDefinition>();
@@ -34,10 +36,54 @@ namespace YWonderLand.Managers
             LoadDefinitions();
         }
 
+        private void OnEnable()
+        {
+            FarmStateSync.AuthoritativeSnapshotApplied += HandleAuthoritativeSnapshotApplied;
+            if (AuthService.Instance == null) return;
+            AuthService.Instance.IdentityChanging += HandleIdentityChanging;
+            AuthService.Instance.IdentityChanged += HandleIdentityChanged;
+        }
+
+        private void OnDisable()
+        {
+            FarmStateSync.AuthoritativeSnapshotApplied -= HandleAuthoritativeSnapshotApplied;
+            if (AuthService.Instance == null) return;
+            AuthService.Instance.IdentityChanging -= HandleIdentityChanging;
+            AuthService.Instance.IdentityChanged -= HandleIdentityChanged;
+        }
+
+        private void HandleIdentityChanging(string previousScopeId, string nextScopeId)
+        {
+            SaveAnimalState();
+        }
+
+        private void HandleIdentityChanged(string previousScopeId, string nextScopeId)
+        {
+            if (pens == null || pens.Length == 0)
+                pens = FindObjectsByType<AnimalPen>(FindObjectsSortMode.None);
+
+            ClearRuntimeAnimals();
+            loadComplete = false;
+            LoadAnimalState();
+            loadComplete = true;
+        }
+
+        private void HandleAuthoritativeSnapshotApplied()
+        {
+            if (pens == null || pens.Length == 0)
+                pens = FindObjectsByType<AnimalPen>(FindObjectsSortMode.None);
+
+            ClearRuntimeAnimals();
+            loadComplete = false;
+            LoadAnimalState();
+            loadComplete = true;
+        }
+
         void Start()
         {
             pens = FindObjectsByType<AnimalPen>(FindObjectsSortMode.None);
             LoadAnimalState();
+            loadComplete = true;
         }
 
         private void LoadDefinitions()
@@ -102,13 +148,27 @@ namespace YWonderLand.Managers
 
         public void SaveAnimalState()
         {
+            if (!loadComplete)
+            {
+                Debug.LogWarning("[AnimalManager] Skip save before load completes to avoid overwriting existing animal state.");
+                return;
+            }
+
+            if (pens == null)
+            {
+                Debug.LogWarning("[AnimalManager] Skip save because animal pens are not initialized.");
+                return;
+            }
+
             AnimalSaveData saveData = new AnimalSaveData();
             saveData.animals = new List<AnimalStateData>();
 
             foreach (var pen in pens)
             {
+                if (pen == null) continue;
                 foreach (var animal in pen.GetAnimals())
                 {
+                    if (animal == null || animal.data == null) continue;
                     saveData.animals.Add(new AnimalStateData
                     {
                         instanceId = animal.animalInstanceId,
@@ -128,28 +188,21 @@ namespace YWonderLand.Managers
             }
 
             string json = JsonUtility.ToJson(saveData);
-            PlayerPrefs.SetString(SAVE_KEY, json);
-            PlayerPrefs.Save();
+            PlayerScopedPrefs.SetString(SAVE_KEY, json);
+            PlayerScopedPrefs.Save();
+            FarmStateSync.NotifyLocalStateSaved();
         }
 
         public void LoadAnimalState()
         {
-            if (!PlayerPrefs.HasKey(SAVE_KEY)) return;
+            if (!PlayerScopedPrefs.HasKey(SAVE_KEY)) return;
 
-            string json = PlayerPrefs.GetString(SAVE_KEY);
+            string json = PlayerScopedPrefs.GetString(SAVE_KEY);
             AnimalSaveData saveData = JsonUtility.FromJson<AnimalSaveData>(json);
 
             if (saveData == null || saveData.animals == null) return;
 
-            // Clear existing animals in pens
-            foreach (var pen in pens)
-            {
-                foreach(var a in pen.GetAnimals().ToArray())
-                {
-                    Destroy(a.gameObject);
-                }
-                pen.GetAnimals().Clear();
-            }
+            ClearRuntimeAnimals();
 
             foreach (var aData in saveData.animals)
             {
@@ -169,6 +222,18 @@ namespace YWonderLand.Managers
                 animal.LoadState((FarmAnimal.AnimalState)aData.state, aData.feedTimer, aData.produceTimer, aData.harvests, aData.hasProduct, aData.vaccinated);
                 
                 pen.AddAnimal(animal);
+            }
+        }
+
+        private void ClearRuntimeAnimals()
+        {
+            if (pens == null) return;
+            foreach (var pen in pens)
+            {
+                if (pen == null) continue;
+                foreach (var animal in pen.GetAnimals().ToArray())
+                    if (animal != null) Destroy(animal.gameObject);
+                pen.GetAnimals().Clear();
             }
         }
 

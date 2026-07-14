@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UIElements;
+using YWonderLand.Backend;
 
 public class MainMenuUIToolkit : MonoBehaviour
 {
@@ -208,10 +209,11 @@ public class MainMenuUIToolkit : MonoBehaviour
         name = name.Trim();
 
         // Save character configuration in PlayerPrefs (Mock database)
-        PlayerPrefs.SetString("PlayerName", name);
+        PlayerScopedPrefs.SetString("PlayerName", name);
         if (GameManager.Instance != null)
         {
-            PlayerPrefs.SetInt("PlayerGender", GameManager.Instance.selectedCharacterIndex);
+            PlayerScopedPrefs.SetInt("PlayerGender", GameManager.Instance.selectedCharacterIndex);
+            PlayerScopedPrefs.Save();
             
             confirmOverlay?.AddToClassList(HIDDEN_CLASS);
             Debug.Log($"[MainMenuUI] Configuration Saved: Name = '{name}', Gender = {(GameManager.Instance.selectedCharacterIndex == 0 ? "Male" : "Female")}. Starting game...");

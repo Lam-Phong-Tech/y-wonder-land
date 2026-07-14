@@ -23,9 +23,11 @@ namespace YWonderLand.Environment
         public int minYield = 1;
         public int maxYield = 3;
 
+        public const float DefaultRespawnTimeSec = 20f;
+
         [Header("Tái sinh (respawn) — tùy chỉnh dễ dàng")]
-        [Tooltip("Bao lâu (GIÂY) cây/đá MỌC LẠI sau khi chặt/đào xong. Demo nên để NGẮN (vd 60). 3600 = 1 giờ.\nMẹo: chọn NHIỀU prefab/đối tượng trong Hierarchy rồi sửa 1 lần là áp cho hết.")]
-        public float respawnTimeSec = 60f;
+        [Tooltip("Bao lâu (giây) cây/đá mọc lại sau khi chặt/đào xong. Demo hiện chốt 20 giây.")]
+        public float respawnTimeSec = DefaultRespawnTimeSec;
 
         [Tooltip("Thời gian (giây) phải GIỮ để chặt/đào xong 1 lần.")]
         public float harvestDuration = 3f;
@@ -44,10 +46,20 @@ namespace YWonderLand.Environment
         public float currentProgress = 0f;
         public float respawnTimer = 0f;
 
+        private double respawnEndUnix = 0.0;
         private GameObject visualObject;
         private Collider resourceCollider;
         private Quaternion _originalVisualRot = Quaternion.identity;
         private bool _rotCaptured = false;
+
+        public double RespawnEndUnix
+        {
+            get
+            {
+                if (isHarvestable || respawnTimer <= 0f) return 0.0;
+                return respawnEndUnix > 0.0 ? respawnEndUnix : RealNow() + respawnTimer;
+            }
+        }
 
         void Awake()
         {
@@ -187,14 +199,32 @@ namespace YWonderLand.Environment
 
         public void RestoreState(float timer)
         {
-            if (timer > 0)
+            RestoreState(timer, 0.0);
+        }
+
+        public void RestoreState(float timer, double savedRespawnEndUnix)
+        {
+            double endUnix = savedRespawnEndUnix > 0.0 ? savedRespawnEndUnix : RealNow() + Mathf.Max(0f, timer);
+            float remaining = savedRespawnEndUnix > 0.0
+                ? Mathf.Max(0f, (float)(savedRespawnEndUnix - RealNow()))
+                : Mathf.Max(0f, timer);
+            float maxRespawn = Mathf.Max(0f, respawnTimeSec);
+            if (maxRespawn > 0f && remaining > maxRespawn)
             {
-                respawnTimer = timer;
+                remaining = maxRespawn;
+                endUnix = RealNow() + remaining;
+            }
+
+            if (remaining > 0f)
+            {
+                respawnTimer = remaining;
+                respawnEndUnix = endUnix;
                 SetHarvestable(false);
             }
             else
             {
                 respawnTimer = 0;
+                respawnEndUnix = 0.0;
                 SetHarvestable(true);
             }
         }
@@ -203,11 +233,18 @@ namespace YWonderLand.Environment
         {
             if (!isHarvestable && respawnTimer > 0)
             {
-                respawnTimer -= Time.deltaTime;
+                if (respawnEndUnix > 0.0)
+                    respawnTimer = Mathf.Max(0f, (float)(respawnEndUnix - RealNow()));
+                else
+                    respawnTimer -= Time.deltaTime;
+
                 if (respawnTimer <= 0)
                 {
-                    SetHarvestable(true);
                     var spawner = GetComponentInParent<ResourceSpawner>();
+                    if (spawner != null)
+                        spawner.PrepareResourceRespawn(this);
+
+                    SetHarvestable(true);
                     if (spawner != null)
                         spawner.SaveResourceState();
                 }
@@ -218,6 +255,11 @@ namespace YWonderLand.Environment
         {
             isHarvestable = state;
             currentProgress = 0f;
+            if (state)
+            {
+                respawnTimer = 0f;
+                respawnEndUnix = 0.0;
+            }
 
             SetVisualsActive(state);
             if (resourceCollider != null) resourceCollider.enabled = state;
@@ -294,6 +336,7 @@ namespace YWonderLand.Environment
             // VFX/SFX could be added here
 
             respawnTimer = respawnTimeSec;
+            respawnEndUnix = RealNow() + respawnTimer;
 
             // CÂY thì cho ĐỔ xuống rồi mới biến mất; ĐÁ thì ẩn ngay như cũ.
             if (type == ResourceType.Tree && visualObject != null && gameObject.activeInHierarchy)
@@ -356,5 +399,7 @@ namespace YWonderLand.Environment
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(transform.position, interactionRange);
         }
+
+        private static double RealNow() => System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() / 1000.0;
     }
 }

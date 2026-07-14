@@ -13,7 +13,7 @@
             <ui:VisualElement class="piggy-header">
                 <!-- Balance pill (left) -->
                 <ui:VisualElement class="piggy-balance-pill">
-                    <ui:Label name="LblPiggyBalance" text="5,000 POS" class="piggy-pill-value" />
+                    <ui:Label name="LblPiggyBalance" text="5,000 Point" class="piggy-pill-value" />
                 </ui:VisualElement>
 
                 <ui:Label text="HEO ĐẤT" class="piggy-header-title" />
@@ -76,23 +76,23 @@
                         </ui:VisualElement>
 
                         <!-- Amount input -->
-                        <ui:Label text="Số tiền gửi (POS)" class="piggy-input-label" />
+                        <ui:Label text="Số tiền gửi (Point)" class="piggy-input-label" />
                         <ui:TextField name="TxtAmount" value="100" class="piggy-input" />
 
                         <!-- Preview -->
                         <ui:VisualElement class="piggy-preview">
                             <ui:VisualElement class="piggy-preview-row">
                                 <ui:Label text="Gốc:" class="piggy-preview-label" />
-                                <ui:Label name="LblPreviewPrincipal" text="100 POS" class="piggy-preview-value" />
+                                <ui:Label name="LblPreviewPrincipal" text="100 Point" class="piggy-preview-value" />
                             </ui:VisualElement>
                             <ui:VisualElement class="piggy-preview-row">
                                 <ui:Label text="Lãi dự kiến:" class="piggy-preview-label" />
-                                <ui:Label name="LblPreviewInterest" text="+2 POS" class="piggy-preview-value piggy-preview-value--green" />
+                                <ui:Label name="LblPreviewInterest" text="+2 Point" class="piggy-preview-value piggy-preview-value--green" />
                             </ui:VisualElement>
                             <ui:VisualElement class="piggy-preview-divider" />
                             <ui:VisualElement class="piggy-preview-row">
                                 <ui:Label text="Nhận về:" class="piggy-preview-label piggy-preview-label--bold" />
-                                <ui:Label name="LblPreviewTotal" text="102 POS" class="piggy-preview-value piggy-preview-value--bold" />
+                                <ui:Label name="LblPreviewTotal" text="102 Point" class="piggy-preview-value piggy-preview-value--bold" />
                             </ui:VisualElement>
                         </ui:VisualElement>
 
@@ -115,11 +115,11 @@
                             </ui:VisualElement>
                             <ui:VisualElement class="piggy-active-row">
                                 <ui:Label text="Gốc:" class="piggy-active-label" />
-                                <ui:Label name="LblActivePrincipal" text="100 POS" class="piggy-active-value" />
+                                <ui:Label name="LblActivePrincipal" text="100 Point" class="piggy-active-value" />
                             </ui:VisualElement>
                             <ui:VisualElement class="piggy-active-row">
                                 <ui:Label text="Lãi:" class="piggy-active-label" />
-                                <ui:Label name="LblActiveInterest" text="+2 POS" class="piggy-active-value piggy-preview-value--green" />
+                                <ui:Label name="LblActiveInterest" text="+2 Point" class="piggy-active-value piggy-preview-value--green" />
                             </ui:VisualElement>
                         </ui:VisualElement>
 

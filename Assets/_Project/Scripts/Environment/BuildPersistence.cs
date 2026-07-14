@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using YWonderLand.Backend;
 
 namespace YWonderLand.Environment
 {
@@ -17,9 +18,25 @@ namespace YWonderLand.Environment
     public class BuildPersistence : MonoBehaviour
     {
         private const string SAVE_KEY = "YW_BuildState";
+        private bool loadComplete;
 
-        private void OnEnable()  { GhostPlacementController.OnBuildingPlaced += HandleBuildingPlaced; }
-        private void OnDisable() { GhostPlacementController.OnBuildingPlaced -= HandleBuildingPlaced; }
+        private void OnEnable()
+        {
+            GhostPlacementController.OnBuildingPlaced += HandleBuildingPlaced;
+            FarmStateSync.AuthoritativeSnapshotApplied += HandleAuthoritativeSnapshotApplied;
+            if (AuthService.Instance == null) return;
+            AuthService.Instance.IdentityChanging += HandleIdentityChanging;
+            AuthService.Instance.IdentityChanged += HandleIdentityChanged;
+        }
+
+        private void OnDisable()
+        {
+            GhostPlacementController.OnBuildingPlaced -= HandleBuildingPlaced;
+            FarmStateSync.AuthoritativeSnapshotApplied -= HandleAuthoritativeSnapshotApplied;
+            if (AuthService.Instance == null) return;
+            AuthService.Instance.IdentityChanging -= HandleIdentityChanging;
+            AuthService.Instance.IdentityChanged -= HandleIdentityChanged;
+        }
 
         private void Start() => StartCoroutine(LoadAfterCellsReady());
 
@@ -31,9 +48,63 @@ namespace YWonderLand.Environment
 
         private void HandleBuildingPlaced(string itemName, int price) => SaveBuildings(); // lưu ngay khi đặt
 
+        private void HandleIdentityChanging(string previousScopeId, string nextScopeId)
+        {
+            SaveBuildings();
+        }
+
+        private void HandleIdentityChanged(string previousScopeId, string nextScopeId)
+        {
+            StopAllCoroutines();
+            loadComplete = false;
+            ClearRuntimeState();
+            StartCoroutine(ReloadAfterIdentityChange());
+        }
+
+        private IEnumerator ReloadAfterIdentityChange()
+        {
+            yield return null;
+            LoadBuildings();
+        }
+
+        private void HandleAuthoritativeSnapshotApplied()
+        {
+            StopAllCoroutines();
+            loadComplete = false;
+            ClearRuntimeState();
+            StartCoroutine(ReloadAfterIdentityChange());
+        }
+
+        private static void ClearRuntimeState()
+        {
+            var animals = new HashSet<GameObject>();
+            foreach (var cell in BuildSurfaceCell.All)
+            {
+                if (cell == null) continue;
+                if (cell.AnimalObject != null) animals.Add(cell.AnimalObject);
+                cell.ClearAnimal();
+            }
+            foreach (var animal in animals)
+                if (animal != null) Destroy(animal);
+
+            var buildings = FindObjectsByType<PlacedBuilding>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var building in buildings)
+            {
+                if (building == null) continue;
+                BuildSurfaceCell.ClearOccupant(building.gameObject);
+                Destroy(building.gameObject);
+            }
+        }
+
         // ── SAVE ──
         public void SaveBuildings()
         {
+            if (!loadComplete)
+            {
+                Debug.LogWarning("[BuildPersistence] Skip save before load completes to avoid overwriting existing build state.");
+                return;
+            }
+
             var data = new BuildSave { items = new List<BuildItem>() };
             foreach (var cell in BuildSurfaceCell.All)
             {
@@ -86,17 +157,26 @@ namespace YWonderLand.Environment
                 });
             }
 
-            PlayerPrefs.SetString(SAVE_KEY, JsonUtility.ToJson(data));
-            PlayerPrefs.Save();
+            PlayerScopedPrefs.SetString(SAVE_KEY, JsonUtility.ToJson(data));
+            PlayerScopedPrefs.Save();
+            FarmStateSync.NotifyLocalStateSaved();
             Debug.Log($"[BuildPersistence] Saved {data.items.Count} buildings + {data.animals.Count} animals.");
         }
 
         // ── LOAD ──
         private void LoadBuildings()
         {
-            if (!PlayerPrefs.HasKey(SAVE_KEY)) return;
-            var data = JsonUtility.FromJson<BuildSave>(PlayerPrefs.GetString(SAVE_KEY));
-            if (data == null || data.items == null) return;
+            if (!PlayerScopedPrefs.HasKey(SAVE_KEY))
+            {
+                loadComplete = true;
+                return;
+            }
+            var data = JsonUtility.FromJson<BuildSave>(PlayerScopedPrefs.GetString(SAVE_KEY));
+            if (data == null || data.items == null)
+            {
+                loadComplete = true;
+                return;
+            }
 
             var gpc = GhostPlacementController.Instance;
             if (gpc == null)
@@ -131,6 +211,7 @@ namespace YWonderLand.Environment
                 }
             }
             if (pendingCrops.Count > 0) StartCoroutine(RestoreCropsNextFrame(pendingCrops));
+            else loadComplete = true;
 
             // ── Khôi phục CON VẬT (sau khi rào đã dựng) — re-spawn trên ô chuồng + đói-bù/chết-bù ──
             int na = 0;
@@ -195,6 +276,7 @@ namespace YWonderLand.Environment
             yield return null;
             foreach (var p in pending)
                 if (p.tile != null) p.tile.RestoreSave(p.crop, db);
+            loadComplete = true;
         }
 
         private static string PosKey(Vector3 p)

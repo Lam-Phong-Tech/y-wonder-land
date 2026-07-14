@@ -2,6 +2,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace YWonderLand.Backend
 {
@@ -12,6 +13,8 @@ namespace YWonderLand.Backend
         public T data;
         public long status;   // HTTP status code (0 nếu không kết nối được)
         public string error;
+        public string errorCode;
+        public int retryAfterSec;
     }
 
     /// <summary>
@@ -64,16 +67,26 @@ namespace YWonderLand.Backend
                     await Awaitable.NextFrameAsync();
 
                 result.status = req.responseCode;
+                string responseBody = req.downloadHandler != null ? req.downloadHandler.text : "";
+                result.retryAfterSec = ExtractRetryAfterSec(req, responseBody);
 
                 if (req.result == UnityWebRequest.Result.Success)
                 {
-                    string text = req.downloadHandler != null ? req.downloadHandler.text : null;
-                    result.data = string.IsNullOrEmpty(text) ? default : JsonConvert.DeserializeObject<T>(text);
+                    result.data = string.IsNullOrEmpty(responseBody)
+                        ? default
+                        : JsonConvert.DeserializeObject<T>(responseBody);
                     result.ok = true;
                 }
                 else
                 {
-                    result.error = $"{req.result}: {req.error} (code {req.responseCode})";
+                    if (!string.IsNullOrEmpty(responseBody))
+                    {
+                        try { result.data = JsonConvert.DeserializeObject<T>(responseBody); }
+                        catch { result.data = default; }
+                    }
+                    result.errorCode = ExtractErrorCode(responseBody);
+                    string detail = !string.IsNullOrEmpty(result.errorCode) ? result.errorCode : req.error;
+                    result.error = $"{req.result}: {detail} (code {req.responseCode})";
                     Debug.LogWarning($"[ApiClient] {method} {path} lỗi -> {result.error}");
                 }
             }
@@ -87,6 +100,38 @@ namespace YWonderLand.Backend
                 req?.Dispose();
             }
             return result;
+        }
+
+        private static string ExtractErrorCode(string responseBody)
+        {
+            if (string.IsNullOrWhiteSpace(responseBody)) return "";
+            try
+            {
+                var payload = JObject.Parse(responseBody);
+                return payload.Value<string>("code") ?? payload.Value<string>("error") ?? "";
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        private static int ExtractRetryAfterSec(UnityWebRequest request, string responseBody)
+        {
+            string header = request != null ? request.GetResponseHeader("Retry-After") : "";
+            if (int.TryParse(header, out int headerValue) && headerValue > 0)
+                return headerValue;
+
+            if (string.IsNullOrWhiteSpace(responseBody)) return 0;
+            try
+            {
+                var payload = JObject.Parse(responseBody);
+                return Mathf.Max(0, payload.Value<int?>("retryAfterSec") ?? 0);
+            }
+            catch
+            {
+                return 0;
+            }
         }
     }
 }

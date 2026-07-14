@@ -10,9 +10,8 @@
     <ui:VisualElement name="LoadingContainer" class="loading-screen-container">
         
         <ui:VisualElement class="content-wrapper">
-            <!-- Logo Text -->
-            <ui:Label name="LogoText" text="Y WONDER GREEN FARM" class="logo-text" />
-            <ui:Label name="SubtitleText" text="3D FARMING ADVENTURE" class="subtitle-text" />
+            <!-- Brand Logo -->
+            <ui:VisualElement name="LoadingLogo" class="loading-brand-logo" />
 
             <!-- Progress Bar -->
             <ui:VisualElement class="progress-bar-container">
