@@ -12,6 +12,7 @@
 ### Verified
 - Node syntax checks, full JSON Phase 1, standalone realtime, security, Browser SSO, and web-auth test suites pass locally. Coverage includes stale REST token `401`, old socket `4008`, logout revocation, and stale farm write `409` without overwrite.
 - The final Unity Editor compile produced no new C# errors. A real PostgreSQL smoke run is still pending because the workstation does not have `POSTGRES_TEST_DATABASE_URL`.
+- User runtime acceptance passed on the rebuilt EXE/APK test artifacts: a newly issued session replaces the still-open older session without requiring an app restart, and sequential EXE -> APK login no longer restores the stale farm/crop/watering snapshot. Accepted code checkpoint: `21cc20d2`.
 
 ### Needs Deployment Test
 - Back up production, apply migration `003`, run PostgreSQL smoke, and deploy as a versioned VPS release with rollback. Existing cached JWTs do not have `sid` and must log in again after cutover.

@@ -17,6 +17,7 @@
 ### Verified
 - `node --check`, full Phase 1 JSON smoke, realtime smoke, `test:security`, `test:browser-auth` và `test:web-auth` đều pass. Regression xác nhận token cũ bị `401`, socket cũ bị `4008`, logout thu hồi token, farm stale write nhận `409` và không thay snapshot mới.
 - Unity Editor không ghi nhận `error CS` mới sau lần compile cuối. PostgreSQL smoke thật chưa chạy local vì chưa có `POSTGRES_TEST_DATABASE_URL`.
+- Anh đã build/test lại EXE/APK và xác nhận hai lỗi buổi sáng hoạt động ổn: phiên mới thay phiên cũ ngay khi app cũ vẫn mở, và đổi tuần tự EXE -> APK cùng account không còn phục hồi snapshot farm/cây/tưới cũ. Checkpoint nghiệm thu artifact test: `21cc20d2`.
 
 ### Pending deployment acceptance
 - Chưa deploy release này lên VPS. Cần backup, chạy migration `003`, PostgreSQL smoke và deploy versioned có rollback; sau deploy, JWT cũ thiếu `sid` sẽ phải đăng nhập lại.
