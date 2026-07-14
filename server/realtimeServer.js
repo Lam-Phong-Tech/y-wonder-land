@@ -198,19 +198,44 @@ function attachRealtimeServer(server, options) {
         continue;
       }
 
-      send(otherWs, {
+      closeClientSession(otherWs, 4008, "SESSION_REPLACED", true);
+    }
+  }
+
+  function closeClientSession(ws, code, reason, notifyReplacement) {
+    const client = clients.get(ws);
+    if (!client) return;
+    if (notifyReplacement) {
+      send(ws, {
         type: "error",
         code: "SESSION_REPLACED",
         message: "Tai khoan nay da dang nhap o thiet bi khac.",
         sentAt: nowISO(),
       });
-      leaveRoom(otherWs, true);
-      clients.delete(otherWs);
-      try {
-        otherWs.close(4008, "SESSION_REPLACED");
-      } catch (e) {
-        // Ignore close errors; the socket may already be closing.
-      }
+    }
+    leaveRoom(ws, true);
+    clients.delete(ws);
+    try {
+      ws.close(code, reason);
+    } catch (e) {
+      // Ignore close errors; the socket may already be closing.
+    }
+  }
+
+  function replacePlayerSession(playerId, activeSessionId) {
+    if (!playerId || !activeSessionId) return;
+    for (const [ws, client] of clients.entries()) {
+      if (!client || client.playerId !== playerId || client.sessionId === activeSessionId) continue;
+      closeClientSession(ws, 4008, "SESSION_REPLACED", true);
+    }
+  }
+
+  function disconnectPlayerSession(playerId, sessionId, code = 4001, reason = "SIGNED_OUT") {
+    if (!playerId) return;
+    for (const [ws, client] of clients.entries()) {
+      if (!client || client.playerId !== playerId) continue;
+      if (sessionId && client.sessionId !== sessionId) continue;
+      closeClientSession(ws, code, reason, false);
     }
   }
 
@@ -514,6 +539,7 @@ function attachRealtimeServer(server, options) {
       connectionId: id,
       userId: auth.uid || auth.userId || "",
       playerId,
+      sessionId: auth.sid || "",
       webUserId: auth.webUserId || "",
       name: safeText(auth.displayName || auth.username || auth.name, "Player", 32),
       gender: "male",
@@ -690,7 +716,15 @@ function attachRealtimeServer(server, options) {
     wss.close();
   }
 
-  return { wss, clients, rooms, resourcesByRoom, close };
+  return {
+    wss,
+    clients,
+    rooms,
+    resourcesByRoom,
+    close,
+    replacePlayerSession,
+    disconnectPlayerSession,
+  };
 }
 
 module.exports = { attachRealtimeServer };

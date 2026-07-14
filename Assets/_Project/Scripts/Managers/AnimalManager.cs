@@ -38,6 +38,7 @@ namespace YWonderLand.Managers
 
         private void OnEnable()
         {
+            FarmStateSync.AuthoritativeSnapshotApplied += HandleAuthoritativeSnapshotApplied;
             if (AuthService.Instance == null) return;
             AuthService.Instance.IdentityChanging += HandleIdentityChanging;
             AuthService.Instance.IdentityChanged += HandleIdentityChanged;
@@ -45,6 +46,7 @@ namespace YWonderLand.Managers
 
         private void OnDisable()
         {
+            FarmStateSync.AuthoritativeSnapshotApplied -= HandleAuthoritativeSnapshotApplied;
             if (AuthService.Instance == null) return;
             AuthService.Instance.IdentityChanging -= HandleIdentityChanging;
             AuthService.Instance.IdentityChanged -= HandleIdentityChanged;
@@ -56,6 +58,17 @@ namespace YWonderLand.Managers
         }
 
         private void HandleIdentityChanged(string previousScopeId, string nextScopeId)
+        {
+            if (pens == null || pens.Length == 0)
+                pens = FindObjectsByType<AnimalPen>(FindObjectsSortMode.None);
+
+            ClearRuntimeAnimals();
+            loadComplete = false;
+            LoadAnimalState();
+            loadComplete = true;
+        }
+
+        private void HandleAuthoritativeSnapshotApplied()
         {
             if (pens == null || pens.Length == 0)
                 pens = FindObjectsByType<AnimalPen>(FindObjectsSortMode.None);
@@ -141,13 +154,21 @@ namespace YWonderLand.Managers
                 return;
             }
 
+            if (pens == null)
+            {
+                Debug.LogWarning("[AnimalManager] Skip save because animal pens are not initialized.");
+                return;
+            }
+
             AnimalSaveData saveData = new AnimalSaveData();
             saveData.animals = new List<AnimalStateData>();
 
             foreach (var pen in pens)
             {
+                if (pen == null) continue;
                 foreach (var animal in pen.GetAnimals())
                 {
+                    if (animal == null || animal.data == null) continue;
                     saveData.animals.Add(new AnimalStateData
                     {
                         instanceId = animal.animalInstanceId,
@@ -169,6 +190,7 @@ namespace YWonderLand.Managers
             string json = JsonUtility.ToJson(saveData);
             PlayerScopedPrefs.SetString(SAVE_KEY, json);
             PlayerScopedPrefs.Save();
+            FarmStateSync.NotifyLocalStateSaved();
         }
 
         public void LoadAnimalState()

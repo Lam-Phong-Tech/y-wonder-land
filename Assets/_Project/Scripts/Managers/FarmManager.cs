@@ -60,6 +60,7 @@ namespace YWonderLand.Managers
 
         private void OnEnable()
         {
+            FarmStateSync.AuthoritativeSnapshotApplied += HandleAuthoritativeSnapshotApplied;
             if (AuthService.Instance == null) return;
             AuthService.Instance.IdentityChanging += HandleIdentityChanging;
             AuthService.Instance.IdentityChanged += HandleIdentityChanged;
@@ -67,6 +68,7 @@ namespace YWonderLand.Managers
 
         private void OnDisable()
         {
+            FarmStateSync.AuthoritativeSnapshotApplied -= HandleAuthoritativeSnapshotApplied;
             if (AuthService.Instance == null) return;
             AuthService.Instance.IdentityChanging -= HandleIdentityChanging;
             AuthService.Instance.IdentityChanged -= HandleIdentityChanged;
@@ -78,6 +80,15 @@ namespace YWonderLand.Managers
         }
 
         private void HandleIdentityChanged(string previousScopeId, string nextScopeId)
+        {
+            StopAllCoroutines();
+            loadComplete = false;
+            foreach (var tile in farmTiles)
+                if (tile != null) tile.ResetForPlayerState();
+            StartCoroutine(LoadAfterTilesReady());
+        }
+
+        private void HandleAuthoritativeSnapshotApplied()
         {
             StopAllCoroutines();
             loadComplete = false;
@@ -209,6 +220,7 @@ namespace YWonderLand.Managers
 
             PlayerScopedPrefs.SetString(SAVE_KEY, JsonUtility.ToJson(saveData));
             PlayerScopedPrefs.Save();
+            FarmStateSync.NotifyLocalStateSaved();
             Debug.Log($"[FarmManager] Saved {saveData.tiles.Count} crop tiles.");
         }
 

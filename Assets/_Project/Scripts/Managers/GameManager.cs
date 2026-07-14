@@ -333,48 +333,70 @@ public class GameManager : MonoBehaviour
     public void LogoutToLogin()
     {
         if (logoutInProgress) return;
-        _ = LogoutToLoginAsync();
+        _ = LogoutToLoginAsync(true);
     }
 
-    private async Awaitable LogoutToLoginAsync()
+    public void LogoutToLoginWithoutSaving()
+    {
+        if (logoutInProgress) return;
+        _ = LogoutToLoginAsync(false);
+    }
+
+    private async Awaitable LogoutToLoginAsync(bool persistGameplayState)
     {
         logoutInProgress = true;
         try
         {
             Debug.Log("[GameManager] LogoutToLogin: cleaning gameplay session before showing Login.");
 
-        // Capture the old account's pose and stop input while its final gameplay
-        // mutations are persisted with the still-valid auth token.
-        SavePlayerPosition();
-        SetSpawnedCharacterGameplayEnabled(false);
-        bool mutationsFlushed = await GameplayMutationSync.FlushAsync();
-        if (!mutationsFlushed)
-            Debug.LogWarning($"[GameManager] Logout continued with pending state sync: {GameplayMutationSync.LastError}");
+            SetSpawnedCharacterGameplayEnabled(false);
+            if (persistGameplayState)
+            {
+                // The ordinary logout path persists once before auth is revoked.
+                SavePlayerPosition();
+                FarmStateSync.SaveRuntimeState();
+                bool farmFlushed = await FarmStateSync.FlushAsync();
+                if (!farmFlushed)
+                    Debug.LogWarning($"[GameManager] Logout continued with durable pending farm sync: {FarmStateSync.LastError}");
+                bool mutationsFlushed = await GameplayMutationSync.FlushAsync();
+                if (!mutationsFlushed)
+                    Debug.LogWarning($"[GameManager] Logout continued with pending state sync: {GameplayMutationSync.LastError}");
+            }
 
-        HideGameplayUiForLogin();
-        ClearGameplayCameraTarget();
-        DestroyRemotePlayers();
+            if (YWonderLand.Realtime.RealtimeClient.Instance != null)
+                await YWonderLand.Realtime.RealtimeClient.Instance.DisconnectForAuthenticationChangeAsync();
 
-        if (boatCutscene != null)
-            boatCutscene.enabled = false;
+            HideGameplayUiForLogin();
+            ClearGameplayCameraTarget();
+            DestroyRemotePlayers();
 
-        if (spawnedCharacter == null)
-        {
-            var taggedPlayer = GameObject.FindGameObjectWithTag("Player");
-            if (taggedPlayer != null)
-                spawnedCharacter = taggedPlayer;
-        }
+            if (boatCutscene != null)
+                boatCutscene.enabled = false;
 
-        SetSpawnedCharacterGameplayEnabled(false);
+            if (spawnedCharacter == null)
+            {
+                var taggedPlayer = GameObject.FindGameObjectWithTag("Player");
+                if (taggedPlayer != null)
+                    spawnedCharacter = taggedPlayer;
+            }
 
-        if (spawnedCharacter != null)
-        {
-            Destroy(spawnedCharacter);
-            spawnedCharacter = null;
-        }
+            SetSpawnedCharacterGameplayEnabled(false);
 
-        ClearResumeFlag();
-        YWonderLand.Backend.AuthService.Instance?.SignOut();
+            if (spawnedCharacter != null)
+            {
+                Destroy(spawnedCharacter);
+                spawnedCharacter = null;
+            }
+
+            ClearResumeFlag();
+            var auth = YWonderLand.Backend.AuthService.Instance;
+            if (auth != null)
+            {
+                if (persistGameplayState)
+                    await auth.SignOutAfterGameplaySavedAsync();
+                else
+                    auth.SignOutWithoutSavingGameplay();
+            }
             SetGameState(GameState.Login);
         }
         finally
@@ -837,7 +859,7 @@ public class GameManager : MonoBehaviour
         {
             long failedStatus = bootstrap.LastStatus;
             if (failedStatus == 401)
-                auth.SignOut();
+                auth.SignOutWithoutSavingGameplay();
 
             SetGameState(GameState.Login);
             string message = failedStatus == 401

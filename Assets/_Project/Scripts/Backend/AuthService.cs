@@ -78,6 +78,12 @@ namespace YWonderLand.Backend
             public string code_verifier;
         }
 
+        [System.Serializable]
+        private class LogoutResponse
+        {
+            public bool ok;
+        }
+
         private void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(this); return; }
@@ -285,8 +291,10 @@ namespace YWonderLand.Backend
             PlayerPrefs.SetString(KEY_USERNAME, Username);
             PlayerPrefs.SetString(KEY_BACKEND_URL, GetActiveBackendUrl());
             PlayerPrefs.Save();
+            YWonderLand.Realtime.RealtimeClient.Instance?.NotifyAuthenticationChanged();
             if (identityChanged)
             {
+                FarmStateSync.MarkIdentityNeedsBootstrap();
                 PlayerProfileService.Instance?.ResetRuntimeProfileForAuthChange();
                 InvokeIdentityHandlers(IdentityChanged, previousScopeId, nextScopeId, "changed");
             }
@@ -356,19 +364,44 @@ namespace YWonderLand.Backend
             return requestedUsername;
         }
 
+        public async Awaitable SignOutAfterGameplaySavedAsync()
+        {
+            string token = Token;
+            if (!string.IsNullOrEmpty(token))
+            {
+                var result = await ApiClient.PostAsync<LogoutResponse>("/auth/logout", new { }, token);
+                if (!result.ok && result.status != 401 && result.status != 0)
+                    Debug.LogWarning($"[Auth] Server logout failed: {result.errorCode}");
+            }
+
+            SignOutInternal(false);
+        }
+
         public void SignOut()
+        {
+            SignOutInternal(true);
+        }
+
+        public void SignOutWithoutSavingGameplay()
+        {
+            SignOutInternal(false);
+        }
+
+        private void SignOutInternal(bool notifyIdentityChanging)
         {
             CancelBrowserLogin();
             string previousScopeId = GetScopeId(UserId, Username);
-            if (!string.IsNullOrEmpty(previousScopeId))
+            if (notifyIdentityChanging && !string.IsNullOrEmpty(previousScopeId))
                 InvokeIdentityHandlers(IdentityChanging, previousScopeId, "", "changing");
 
+            FarmStateSync.MarkIdentityNeedsBootstrap();
             Token = "";
             UserId = "";
             Username = "";
             ClearCachedAuth();
             PlayerBootstrapService.Instance?.ResetRuntimeState();
             PlayerProfileService.Instance?.ResetRuntimeProfileForAuthChange();
+            YWonderLand.Realtime.RealtimeClient.Instance?.NotifyAuthenticationChanged();
             if (!string.IsNullOrEmpty(previousScopeId))
                 InvokeIdentityHandlers(IdentityChanged, previousScopeId, "", "changed");
         }

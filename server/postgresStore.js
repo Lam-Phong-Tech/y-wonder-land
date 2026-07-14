@@ -610,6 +610,42 @@ class PostgresStore {
     return playerFromRow(result.rows[0]);
   }
 
+  async setActivePlayerSession(playerId, sessionId) {
+    const result = await this.pool.query(
+      `update game_players
+       set active_session_id=$2, active_session_updated_at=now(), updated_at=now()
+       where id=$1 returning id, active_session_id`,
+      [playerId, String(sessionId || "")]
+    );
+    if (result.rowCount === 0) throw new Error(`PLAYER_NOT_FOUND:${playerId}`);
+    return { playerId: result.rows[0].id, sessionId: result.rows[0].active_session_id };
+  }
+
+  async isActivePlayerSession(playerId, sessionId) {
+    if (!playerId || !sessionId) return false;
+    const result = await this.pool.query(
+      "select 1 from game_players where id=$1 and active_session_id=$2",
+      [playerId, sessionId]
+    );
+    return result.rowCount > 0;
+  }
+
+  async clearActivePlayerSession(playerId, sessionId) {
+    const params = [playerId];
+    let condition = "id=$1";
+    if (sessionId) {
+      params.push(sessionId);
+      condition += " and active_session_id=$2";
+    }
+    const result = await this.pool.query(
+      `update game_players
+       set active_session_id=null, active_session_updated_at=now(), updated_at=now()
+       where ${condition}`,
+      params
+    );
+    return result.rowCount > 0;
+  }
+
   async getProfile(playerId) {
     const result = await this.pool.query("select * from player_profiles where player_id = $1", [playerId]);
     return profileFromRow(result.rows[0]);
@@ -1007,6 +1043,40 @@ class PostgresStore {
       );
       const row = result.rows[0];
       return { ...(row.state_json || {}), version: toInt(row.version, 1), updatedAt: new Date(row.updated_at).toISOString() };
+    });
+  }
+
+  async compareAndSetFarmState(playerId, expectedVersion, farmState) {
+    return this.withTransaction(async (client) => {
+      await this.ensurePlayerStateWithClient(client, playerId);
+      const current = await this.getFarmStateWithClient(client, playerId);
+      const incoming = { ...current, ...(farmState || {}) };
+      delete incoming.version;
+      delete incoming.updatedAt;
+
+      const result = await client.query(
+        `update player_farm_state
+         set version=version+1,state_json=$3::jsonb,updated_at=now()
+         where player_id=$1 and version=$2 returning *`,
+        [playerId, expectedVersion, JSON.stringify(incoming)]
+      );
+      if (result.rowCount === 0) {
+        return {
+          ok: false,
+          error: "FARM_STATE_CONFLICT",
+          farm_state: await this.getFarmStateWithClient(client, playerId),
+        };
+      }
+
+      const row = result.rows[0];
+      return {
+        ok: true,
+        farm_state: {
+          ...(row.state_json || {}),
+          version: toInt(row.version, 1),
+          updatedAt: new Date(row.updated_at).toISOString(),
+        },
+      };
     });
   }
 

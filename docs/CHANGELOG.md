@@ -5,6 +5,34 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+## [2026-07-14] — P0 phiên đơn và chống ghi đè farm hoàn tất local
+
+### Fixed
+- Mỗi lần đăng ký/đăng nhập local, web credential hoặc Browser SSO exchange nay tạo một `sessionId` mới, lưu phiên active theo player và đưa `sid` vào JWT. Token cũ bị REST từ chối bằng `401 SESSION_REPLACED`; WebSocket cũ bị đóng mã `4008` ngay khi phiên mới được cấp, không cần đóng/mở lại app.
+- Thêm `POST /auth/logout` để thu hồi đúng phiên hiện tại. Unity đóng/reconnect realtime khi token hoặc player scope đổi; phiên bị thay dùng logout không-save để không đẩy snapshot farm cũ lên server.
+- `PUT /player/farm-state` chuyển từ last-write-wins sang compare-and-set nguyên tử theo `expected_version`. Server tự tăng revision và trả `409 FARM_STATE_CONFLICT` kèm snapshot authoritative khi client cũ cố ghi đè.
+- `FarmStateSync` lưu pending snapshot thành outbox bền vững theo `playerId`, không lưu token. Mất mạng/đóng app giữ outbox cho lần login sau; upload thành công chỉ xóa đúng payload, còn `409` phục hồi snapshot server.
+- Thêm migration `003_active_player_sessions.sql` và schema cột phiên active cho PostgreSQL. JSON store cũng giữ phiên active và chặn đăng ký trùng trong tình huống hai request đồng thời.
+
+### Verified
+- `node --check`, full Phase 1 JSON smoke, realtime smoke, `test:security`, `test:browser-auth` và `test:web-auth` đều pass. Regression xác nhận token cũ bị `401`, socket cũ bị `4008`, logout thu hồi token, farm stale write nhận `409` và không thay snapshot mới.
+- Unity Editor không ghi nhận `error CS` mới sau lần compile cuối. PostgreSQL smoke thật chưa chạy local vì chưa có `POSTGRES_TEST_DATABASE_URL`.
+
+### Pending deployment acceptance
+- Chưa deploy release này lên VPS. Cần backup, chạy migration `003`, PostgreSQL smoke và deploy versioned có rollback; sau deploy, JWT cũ thiếu `sid` sẽ phải đăng nhập lại.
+- Chưa tick hoàn tất xuyên thiết bị cho tới khi build lại EXE/APK và pass A → B → A, thay phiên ngay khi app cũ vẫn mở, farm/cây/nước/túi không rollback, cùng ca đóng app đột ngột rồi retry outbox.
+
+## [2026-07-13] — Hotfix đồng bộ nông trại xuyên thiết bị
+
+### Fixed
+- Xác định lỗi `Thu2026` không phải hai tài khoản khác nhau: EXE và APK dùng cùng player server nhưng mỗi máy tự đọc bốn cache farm cục bộ, còn `farm_state` PostgreSQL trước đây bị Unity bỏ qua khi bootstrap.
+- Thêm `FarmStateSync` để gộp/lưu/khôi phục ô đất, cây và mốc thời gian, công trình, chuồng và vật nuôi qua endpoint `PUT /player/farm-state`. Snapshot server được áp lại cho bốn hệ persistence và dựng lại runtime sau login.
+- Chặn thiết bị chưa bootstrap ghi cache rỗng lên server; migration legacy ưu tiên nâng từ snapshot ít nội dung sang snapshot nhiều nội dung hơn. Đây chưa thay thế conditional revision/`409` ở backend.
+
+### Verified
+- `Assembly-CSharp` compile thành công; chỉ còn warning auto-sprint cũ không liên quan.
+- Phase 1 smoke riêng pass snapshot đủ bốn phần qua save -> relogin -> bootstrap. Còn phải build lại cả EXE/APK và nghiệm thu hai chiều bằng cùng account trước khi chuyển task sang `[x]`.
+
 ## [2026-07-13] — Hotfix chọn tài khoản website trước khi vào game
 
 ### Fixed

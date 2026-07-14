@@ -31,7 +31,7 @@ async function main() {
 
   const suffix = `${Date.now()}_${Math.floor(Math.random() * 1e6)}`;
   const schema = `ywtest_${suffix}`;
-  const migrationSql = ["001_initial.sql", "002_browser_auth_requests.sql"]
+  const migrationSql = ["001_initial.sql", "002_browser_auth_requests.sql", "003_active_player_sessions.sql"]
     .map((file) => fs.readFileSync(path.join(__dirname, "migrations", file), "utf8"))
     .join("\n");
   const adminPool = makePool(connectionString, "public");
@@ -98,7 +98,29 @@ async function main() {
     const dailyDuplicate = await store.consumeDailyLimit(userId, "fishing", 1, { idempotencyKey: dailyKey, maxCount: 10 });
     assert(daily.ok && dailyDuplicate.duplicate === true, "Daily limit retry was not idempotent.");
 
-    await store.setFarmState(userId, { version: 2, marker: suffix, tiles: [{ id: "tile-1" }] });
+    const farmSaved = await store.compareAndSetFarmState(
+      userId,
+      1,
+      { marker: suffix, tiles: [{ id: "tile-1" }] }
+    );
+    assert(farmSaved.ok && farmSaved.farm_state.version === 2,
+      "Farm compare-and-set did not advance the revision.");
+    const staleFarm = await store.compareAndSetFarmState(
+      userId,
+      1,
+      { marker: "stale-overwrite" }
+    );
+    assert(!staleFarm.ok && staleFarm.error === "FARM_STATE_CONFLICT" && staleFarm.farm_state.marker === suffix,
+      "Stale farm compare-and-set overwrote PostgreSQL state.");
+
+    await store.setActivePlayerSession(userId, `session-a-${suffix}`);
+    assert(await store.isActivePlayerSession(userId, `session-a-${suffix}`),
+      "Active player session was not persisted.");
+    await store.setActivePlayerSession(userId, `session-b-${suffix}`);
+    assert(!await store.isActivePlayerSession(userId, `session-a-${suffix}`),
+      "Previous player session remained active after rotation.");
+    assert(await store.isActivePlayerSession(userId, `session-b-${suffix}`),
+      "Replacement player session was not active.");
 
     const browserRequestHash = crypto.createHash("sha256").update(`browser-${suffix}`).digest("hex");
     const browserChallenge = crypto.createHash("sha256").update(`verifier-${suffix}`).digest("base64url");

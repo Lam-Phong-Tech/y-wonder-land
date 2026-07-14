@@ -48,6 +48,7 @@ const TOKEN_TTL = process.env.JWT_TOKEN_TTL || "30d";
 const securityConfig = buildSecurityConfig();
 const BROWSER_AUTH_CALLBACK_URL = process.env.BROWSER_AUTH_CALLBACK_URL || "https://ywonder.net/api/game/browser/callback";
 const BROWSER_AUTH_APPROVAL_SECRET = process.env.WEB_AUTH_SECRET || process.env.GAME_API_SECRET || "";
+let realtime = null;
 
 validateProductionConfig();
 
@@ -137,6 +138,19 @@ function signToken(userId, extra = {}) {
   return jwt.sign({ uid: userId, ...extra }, JWT_SECRET, { algorithm: "HS256", expiresIn: TOKEN_TTL });
 }
 
+function sessionReplacedError() {
+  const error = new Error("SESSION_REPLACED");
+  error.code = "SESSION_REPLACED";
+  return error;
+}
+
+async function issuePlayerToken(playerId, extra = {}) {
+  const sessionId = crypto.randomUUID();
+  await store.setActivePlayerSession(playerId, sessionId);
+  if (realtime) realtime.replacePlayerSession(playerId, sessionId);
+  return signToken(playerId, { ...extra, sid: sessionId });
+}
+
 async function issueWebPlayerSession(webUser) {
   const demoCandidate = await canonicalizeDemoAuthPayload({
     username: webUser.username || webUser.displayName || "",
@@ -157,7 +171,7 @@ async function issueWebPlayerSession(webUser) {
   }
 
   return {
-    token: signToken(player.id, {
+    token: await issuePlayerToken(player.id, {
       webUserId: player.webUserId,
       authSource: player.authSource,
       username: player.username,
@@ -186,7 +200,14 @@ function browserAuthErrorStatus(error) {
 }
 
 async function verifyTokenPayload(token) {
-  return canonicalizeDemoAuthPayload(jwt.verify(token, JWT_SECRET, { algorithms: ["HS256"] }), store);
+  const payload = await canonicalizeDemoAuthPayload(
+    jwt.verify(token, JWT_SECRET, { algorithms: ["HS256"] }),
+    store
+  );
+  if (!payload.uid || !payload.sid || !await store.isActivePlayerSession(payload.uid, payload.sid)) {
+    throw sessionReplacedError();
+  }
+  return payload;
 }
 
 // Middleware: xác thực Bearer token -> gắn req.userId
@@ -200,7 +221,8 @@ const auth = asyncRoute(async (req, res, next) => {
     req.auth = payload;
     next();
   } catch (e) {
-    return res.status(401).json({ error: "Token không hợp lệ" });
+    const code = e && e.code === "SESSION_REPLACED" ? "SESSION_REPLACED" : "INVALID_TOKEN";
+    return res.status(401).json({ error: code });
   }
 });
 
@@ -251,7 +273,13 @@ api.post("/auth/register", authIpLimiter, registerLimiter, asyncRoute(async (req
   await store.setProfile(id, profile);
 
   console.log(JSON.stringify({ event: "auth_register_succeeded", requestId: req.requestId, userId: id }));
-  res.json({ token: signToken(id, { username, email, authSource: "local" }), userId: id, playerId: id, username, email });
+  res.json({
+    token: await issuePlayerToken(id, { username, email, authSource: "local" }),
+    userId: id,
+    playerId: id,
+    username,
+    email,
+  });
 }));
 
 api.post("/auth/login", authIpLimiter, authIdentityLimiter, asyncRoute(async (req, res) => {
@@ -281,7 +309,11 @@ api.post("/auth/login", authIpLimiter, authIdentityLimiter, asyncRoute(async (re
   console.log(JSON.stringify({ event: "auth_login_succeeded", requestId: req.requestId, userId: user.id }));
   const playerId = user.player_id || user.id;
   res.json({
-    token: signToken(playerId, { username: user.username, email: user.email || "", authSource: "local" }),
+    token: await issuePlayerToken(playerId, {
+      username: user.username,
+      email: user.email || "",
+      authSource: "local",
+    }),
     userId: user.id,
     playerId,
     username: user.username,
@@ -403,6 +435,12 @@ api.post("/auth/browser/exchange", browserAuthExchangeLimiter, asyncRoute(async 
     playerId: session.playerId,
   }));
   res.json({ ...session, status: "complete" });
+}));
+
+api.post("/auth/logout", auth, asyncRoute(async (req, res) => {
+  await store.clearActivePlayerSession(req.userId, req.auth.sid);
+  if (realtime) realtime.disconnectPlayerSession(req.userId, req.auth.sid, 4001, "SIGNED_OUT");
+  res.json({ ok: true });
 }));
 
 // ── Player profile ──
@@ -574,9 +612,20 @@ api.get("/player/farm-state", auth, asyncRoute(async (req, res) => {
 }));
 
 api.put("/player/farm-state", auth, asyncRoute(async (req, res) => {
-  const incoming = req.body && req.body.farm_state;
+  const body = req.body || {};
+  const incoming = body.farm_state;
   if (!incoming) return res.status(400).json({ error: "Missing farm_state" });
-  res.json({ ok: true, farm_state: await store.setFarmState(req.userId, incoming) });
+  const rawExpectedVersion = body.expected_version ?? body.expectedVersion ?? (Number(incoming.version) - 1);
+  const expectedVersion = Number(rawExpectedVersion);
+  if (!Number.isInteger(expectedVersion) || expectedVersion < 1) {
+    return res.status(400).json({ error: "INVALID_EXPECTED_VERSION" });
+  }
+
+  const result = await store.compareAndSetFarmState(req.userId, expectedVersion, incoming);
+  if (!result.ok) {
+    return res.status(409).json({ error: result.error, farm_state: result.farm_state });
+  }
+  res.json(result);
 }));
 
 app.use("/game-api", api);
@@ -608,7 +657,7 @@ server.headersTimeout = securityConfig.headersTimeoutMs;
 server.keepAliveTimeout = securityConfig.keepAliveTimeoutMs;
 server.maxHeadersCount = 100;
 
-const realtime = attachRealtimeServer(server, { verifyToken: verifyTokenPayload, store });
+realtime = attachRealtimeServer(server, { verifyToken: verifyTokenPayload, store });
 let shuttingDown = false;
 
 async function shutdown(signal) {

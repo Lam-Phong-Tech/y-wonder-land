@@ -232,20 +232,45 @@ async function testPersistence(account) {
   }, account.token);
   assert(duplicateInventory.payload.duplicate === true, "Inventory idempotency did not mark duplicate.");
 
-  await putJson("/player/farm-state", {
-    farm_state: {
-      version: 1,
-      phase1SmokeMarker: suffix,
-      note: "server persisted this farm marker",
-    },
+  const farmSnapshot = {
+    version: 2,
+    snapshot_schema: 1,
+    build_state_json: JSON.stringify({ items: [{ cellKey: `build_${suffix}` }], animals: [] }),
+    placed_tiles_json: JSON.stringify({ tiles: [{ cx: 2, cy: 6, groundY: 0 }] }),
+    farm_tiles_json: JSON.stringify({ tiles: [{ posKey: `farm_${suffix}`, state: 2 }] }),
+    animal_state_json: JSON.stringify({ animals: [{ instanceId: `animal_${suffix}` }] }),
+    legacy_migration: false,
+    legacy_content_score: 4,
+    client_saved_at: new Date().toISOString(),
+  };
+  const savedFarm = await putJson("/player/farm-state", {
+    expected_version: 1,
+    farm_state: farmSnapshot,
   }, account.token);
+  assert(savedFarm.payload.farm_state.snapshot_schema === 1,
+    "Farm snapshot schema was not persisted.");
+
+  const staleFarm = await putJson("/player/farm-state", {
+    expected_version: 1,
+    farm_state: {
+      ...farmSnapshot,
+      build_state_json: JSON.stringify({ items: [{ cellKey: "stale_overwrite" }], animals: [] }),
+    },
+  }, account.token, [409]);
+  assert(staleFarm.payload.error === "FARM_STATE_CONFLICT",
+    "Stale farm snapshot did not return FARM_STATE_CONFLICT.");
+  assert(staleFarm.payload.farm_state.build_state_json === farmSnapshot.build_state_json,
+    "Stale farm snapshot overwrote the authoritative state.");
 
   const relogged = await login(account);
   const boot = await getJson("/player/bootstrap", relogged.token);
   const slot = (boot.payload.inventory.slots || []).find((item) => item.itemId === "phase1_test_item");
   assert(Number(boot.payload.economy.pos) === startPos + 123, "Relogin bootstrap did not keep economy.");
   assert(slot && slot.quantity === 2, "Relogin bootstrap did not keep inventory.");
-  assert(boot.payload.farm_state.phase1SmokeMarker === suffix, "Relogin bootstrap did not keep farm_state.");
+  for (const key of ["build_state_json", "placed_tiles_json", "farm_tiles_json", "animal_state_json"]) {
+    assert(boot.payload.farm_state[key] === farmSnapshot[key],
+      `Relogin bootstrap did not keep farm snapshot field ${key}.`);
+  }
   return relogged;
 }
 
@@ -393,6 +418,24 @@ async function testSingleRealtimeSession(account) {
   }
 }
 
+async function testSingleAuthSession(account) {
+  const replacement = await login(account);
+  const stale = await getJson("/player/bootstrap", account.token, [401]);
+  assert(stale.payload.error === "SESSION_REPLACED",
+    "Previous JWT remained valid after a newer login.");
+  const active = await getJson("/player/bootstrap", replacement.token);
+  assert(active.payload.player_profile, "Replacement JWT could not load bootstrap.");
+  return replacement;
+}
+
+async function testLogoutRevokesSession(account) {
+  const loggedOut = await postJson("/auth/logout", {}, account.token);
+  assert(loggedOut.payload.ok === true, "Server logout did not succeed.");
+  const revoked = await getJson("/player/bootstrap", account.token, [401]);
+  assert(revoked.payload.error === "SESSION_REPLACED",
+    "Logged-out JWT remained valid.");
+}
+
 async function main() {
   console.log(`[phase1-smoke] Base URL: ${baseUrl}`);
   const health = await getJson("/health");
@@ -423,8 +466,10 @@ async function main() {
   const loggedB = await login(registered[1]);
   await testRealtime(loggedA, loggedB);
   await testSingleRealtimeSession(loggedA);
+  const replacementA = await testSingleAuthSession(loggedA);
+  await testLogoutRevokesSession(replacementA);
 
-  console.log("[phase1-smoke] PASS: register, login, atomic shop buy/sell, bootstrap persistence, idempotency, farm-state, realtime chat, and single-account session replacement work.");
+  console.log("[phase1-smoke] PASS: register, login, atomic shop buy/sell, bootstrap persistence, idempotency, farm revision conflicts, realtime chat, and single-account session replacement work.");
 }
 
 main().catch((error) => {

@@ -12,6 +12,8 @@ create table if not exists game_players (
     username text not null,
     display_name text not null,
     auth_source text not null default 'web',
+    active_session_id text,
+    active_session_updated_at timestamptz,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now()
 );
@@ -113,6 +115,9 @@ create unique index if not exists ux_game_transactions_idempotency
     on game_transactions (idempotency_key)
     where idempotency_key is not null and idempotency_key <> '';
 create index if not exists idx_game_players_web_user_id on game_players(web_user_id);
+create index if not exists idx_game_players_active_session_id
+    on game_players(active_session_id)
+    where active_session_id is not null;
 create index if not exists idx_player_inventory_player_id on player_inventory(player_id);
 create index if not exists idx_player_daily_limits_player_id on player_daily_limits(player_id);
 create index if not exists idx_game_transactions_player_id on game_transactions(player_id);

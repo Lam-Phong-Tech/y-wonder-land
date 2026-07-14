@@ -79,6 +79,11 @@ namespace YWonderLand.Backend
                 }
                 else
                 {
+                    if (!string.IsNullOrEmpty(responseBody))
+                    {
+                        try { result.data = JsonConvert.DeserializeObject<T>(responseBody); }
+                        catch { result.data = default; }
+                    }
                     result.errorCode = ExtractErrorCode(responseBody);
                     string detail = !string.IsNullOrEmpty(result.errorCode) ? result.errorCode : req.error;
                     result.error = $"{req.result}: {detail} (code {req.responseCode})";

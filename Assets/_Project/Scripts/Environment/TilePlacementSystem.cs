@@ -31,6 +31,7 @@ namespace YWonderLand.Environment
 
         private void OnEnable()
         {
+            FarmStateSync.AuthoritativeSnapshotApplied += HandleAuthoritativeSnapshotApplied;
             if (AuthService.Instance == null) return;
             AuthService.Instance.IdentityChanging += HandleIdentityChanging;
             AuthService.Instance.IdentityChanged += HandleIdentityChanged;
@@ -38,6 +39,7 @@ namespace YWonderLand.Environment
 
         private void OnDisable()
         {
+            FarmStateSync.AuthoritativeSnapshotApplied -= HandleAuthoritativeSnapshotApplied;
             if (AuthService.Instance == null) return;
             AuthService.Instance.IdentityChanging -= HandleIdentityChanging;
             AuthService.Instance.IdentityChanged -= HandleIdentityChanged;
@@ -62,6 +64,16 @@ namespace YWonderLand.Environment
         {
             yield return null;
             LoadTiles();
+        }
+
+        private void HandleAuthoritativeSnapshotApplied()
+        {
+            StopAllCoroutines();
+            loadComplete = false;
+            foreach (var tile in _tiles.Values)
+                if (tile != null) Destroy(tile);
+            _tiles.Clear();
+            StartCoroutine(ReloadAfterIdentityChange());
         }
 
         private void Start()
@@ -124,6 +136,7 @@ namespace YWonderLand.Environment
             }
             PlayerScopedPrefs.SetString(SAVE_KEY, JsonUtility.ToJson(data));
             PlayerScopedPrefs.Save();
+            FarmStateSync.NotifyLocalStateSaved();
             Debug.Log($"[TilePlacement] Saved {data.tiles.Count} placed tiles.");
         }
 

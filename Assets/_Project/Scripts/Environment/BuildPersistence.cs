@@ -23,6 +23,7 @@ namespace YWonderLand.Environment
         private void OnEnable()
         {
             GhostPlacementController.OnBuildingPlaced += HandleBuildingPlaced;
+            FarmStateSync.AuthoritativeSnapshotApplied += HandleAuthoritativeSnapshotApplied;
             if (AuthService.Instance == null) return;
             AuthService.Instance.IdentityChanging += HandleIdentityChanging;
             AuthService.Instance.IdentityChanged += HandleIdentityChanged;
@@ -31,6 +32,7 @@ namespace YWonderLand.Environment
         private void OnDisable()
         {
             GhostPlacementController.OnBuildingPlaced -= HandleBuildingPlaced;
+            FarmStateSync.AuthoritativeSnapshotApplied -= HandleAuthoritativeSnapshotApplied;
             if (AuthService.Instance == null) return;
             AuthService.Instance.IdentityChanging -= HandleIdentityChanging;
             AuthService.Instance.IdentityChanged -= HandleIdentityChanged;
@@ -63,6 +65,14 @@ namespace YWonderLand.Environment
         {
             yield return null;
             LoadBuildings();
+        }
+
+        private void HandleAuthoritativeSnapshotApplied()
+        {
+            StopAllCoroutines();
+            loadComplete = false;
+            ClearRuntimeState();
+            StartCoroutine(ReloadAfterIdentityChange());
         }
 
         private static void ClearRuntimeState()
@@ -149,6 +159,7 @@ namespace YWonderLand.Environment
 
             PlayerScopedPrefs.SetString(SAVE_KEY, JsonUtility.ToJson(data));
             PlayerScopedPrefs.Save();
+            FarmStateSync.NotifyLocalStateSaved();
             Debug.Log($"[BuildPersistence] Saved {data.items.Count} buildings + {data.animals.Count} animals.");
         }
 

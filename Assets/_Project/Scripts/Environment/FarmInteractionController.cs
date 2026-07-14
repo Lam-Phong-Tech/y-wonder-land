@@ -2074,6 +2074,7 @@ namespace YWonderLand.Environment
                     if (animal != null)
                     {
                         animal.Feed();
+                        FarmStateSync.SaveBuildState();
                         ScreenToast.ShowInfo($"Đã cho {(def != null ? def.animalName : "thú")} ăn {required}x {matchedName}.");
                     }
                     else if (inv != null)
@@ -2163,6 +2164,7 @@ namespace YWonderLand.Environment
             // Chưa có animation "tiêm/chữa bệnh" riêng -> tạm dùng "Feed" (động tác đưa tay) cho đỡ trống
             if (player != null) player.PlayActionAnimation("Feed", 0f);
             animal.Heal();
+            FarmStateSync.SaveBuildState();
         }
 
         private void HarvestAnimal(FarmAnimal animal)
@@ -2184,6 +2186,8 @@ namespace YWonderLand.Environment
                 // Chỉ báo thu sản phẩm khi con vật CÒN SỐNG để khỏi đè toast làm thịt.
                 if (animal != null && !string.IsNullOrEmpty(itemId) && amount > 0)
                     ScreenToast.ShowItemReward(itemId, amount, "Thu hoạch");
+
+                FarmStateSync.SaveBuildState();
             }
         }
 
@@ -2551,7 +2555,10 @@ namespace YWonderLand.Environment
                 () =>
                 {
                     if (tile != null && tile.currentState == FarmTile.TileState.Soil && tile.InteractPlow())
+                    {
+                        FarmStateSync.SaveTileState(tile);
                         Debug.Log("[FarmInteraction] Plowed tile!");
+                    }
                 });
         }
 
@@ -2698,6 +2705,8 @@ namespace YWonderLand.Environment
                 spawned.occupiedCells = new List<BuildSurfaceCell>(cells);
                 FarmAnimal.RaiseSpawned(spawned); // báo tutorial: đã thả thú (flow mới)
             }
+
+            FarmStateSync.SaveBuildState();
 
             ScreenToast.ShowInfo($"Đã thả {(def != null ? def.animalName : itemId)} ({need} ô).");
             if (inventoryPopup != null) inventoryPopup.Hide();
@@ -3047,6 +3056,7 @@ namespace YWonderLand.Environment
                 {
                     if (tile != null && PlantWithSlots(tile, seedId))
                     {
+                        FarmStateSync.SaveTileState(tile);
                         Debug.Log($"[FarmInteraction] Gieo hạt {seedId} SAU khi múa xong!");
                     }
                     else if (seedConsumed && inv != null)
@@ -3149,7 +3159,9 @@ namespace YWonderLand.Environment
                     if (tile != null && tile.currentState == FarmTile.TileState.Planted) watered = tile.InteractWater();
                     else if (tile != null && tile.currentState == FarmTile.TileState.Watered) watered = tile.WaterAgain();
 
-                    if (!watered)
+                    if (watered)
+                        FarmStateSync.SaveTileState(tile);
+                    else
                         inv.AddItem("watering_water_01", 1);
                 },
                 () => inv.AddItem("watering_water_01", 1));
@@ -3240,11 +3252,7 @@ namespace YWonderLand.Environment
                     ScreenToast.ShowItemReward(harvestId, amount, "Thu hoạch");
                 }
 
-                // Save farm state
-                if (YWonderLand.Managers.FarmManager.Instance != null)
-                {
-                    YWonderLand.Managers.FarmManager.Instance.SaveFarmState();
-                }
+                FarmStateSync.SaveTileState(tile);
             }
         }
     }

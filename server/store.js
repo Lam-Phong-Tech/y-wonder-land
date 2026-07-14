@@ -21,6 +21,7 @@ function emptyDb() {
     profiles: {},
     players: {},
     playersByWebUserId: {},
+    playerSessions: {},
     economies: {},
     inventories: {},
     farmStates: {},
@@ -44,6 +45,7 @@ function normalizeDb(db) {
     profiles: normalizeObject(source.profiles),
     players: normalizeObject(source.players),
     playersByWebUserId: normalizeObject(source.playersByWebUserId),
+    playerSessions: normalizeObject(source.playerSessions),
     economies: normalizeObject(source.economies),
     inventories: normalizeObject(source.inventories),
     farmStates: normalizeObject(source.farmStates),
@@ -209,6 +211,20 @@ class JsonStore {
 
   createUser(user) {
     const db = this.readAll();
+    const usernameKey = normalizeIdentity(user && user.username);
+    const emailKey = normalizeIdentity(user && user.email);
+    if (db.users.some((current) => normalizeIdentity(current.username) === usernameKey)) {
+      const error = new Error("USERNAME_EXISTS");
+      error.code = "23505";
+      error.constraint = "ux_game_accounts_username_ci";
+      throw error;
+    }
+    if (emailKey && db.users.some((current) => normalizeIdentity(current.email) === emailKey)) {
+      const error = new Error("EMAIL_EXISTS");
+      error.code = "23505";
+      error.constraint = "ux_game_accounts_email_ci";
+      throw error;
+    }
     db.users.push(user);
     if (!db.players[user.id]) {
       db.players[user.id] = {
@@ -346,6 +362,44 @@ class JsonStore {
 
   getPlayer(playerId) {
     return this.readAll().players[playerId] || null;
+  }
+
+  setActivePlayerSession(playerId, sessionId) {
+    const db = this.readAll();
+    if (!db.players[playerId]) {
+      const legacyUser = db.users.find((user) => user.id === playerId);
+      if (!legacyUser) throw new Error(`PLAYER_NOT_FOUND:${playerId}`);
+      db.players[playerId] = {
+        id: playerId,
+        webUserId: "",
+        username: legacyUser.username || "Player",
+        displayName: legacyUser.username || "Player",
+        authSource: "local",
+        createdAt: legacyUser.created_at || nowISO(),
+        updatedAt: nowISO(),
+      };
+    }
+    db.playerSessions[playerId] = {
+      sessionId: String(sessionId || ""),
+      updatedAt: nowISO(),
+    };
+    this.writeAll(db);
+    return { playerId, sessionId: db.playerSessions[playerId].sessionId };
+  }
+
+  isActivePlayerSession(playerId, sessionId) {
+    if (!playerId || !sessionId) return false;
+    const current = this.readAll().playerSessions[playerId];
+    return Boolean(current && current.sessionId === sessionId);
+  }
+
+  clearActivePlayerSession(playerId, sessionId) {
+    const db = this.readAll();
+    const current = db.playerSessions[playerId];
+    if (!current || (sessionId && current.sessionId !== sessionId)) return false;
+    delete db.playerSessions[playerId];
+    this.writeAll(db);
+    return true;
   }
 
   getProfile(userId) {
@@ -737,6 +791,35 @@ class JsonStore {
     return db.farmStates[playerId];
   }
 
+  compareAndSetFarmState(playerId, expectedVersion, farmState) {
+    const db = this.readAll();
+    this.ensurePlayerStateInDb(db, playerId);
+    const current = db.farmStates[playerId];
+    const currentVersion = Math.max(1, toInt(current.version, 1));
+    if (currentVersion !== expectedVersion) {
+      return {
+        ok: false,
+        error: "FARM_STATE_CONFLICT",
+        farm_state: JSON.parse(JSON.stringify(current)),
+      };
+    }
+
+    const incoming = { ...(farmState || {}) };
+    delete incoming.version;
+    delete incoming.updatedAt;
+    db.farmStates[playerId] = {
+      ...current,
+      ...incoming,
+      version: currentVersion + 1,
+      updatedAt: nowISO(),
+    };
+    this.writeAll(db);
+    return {
+      ok: true,
+      farm_state: JSON.parse(JSON.stringify(db.farmStates[playerId])),
+    };
+  }
+
   getDailyLimits(playerId) {
     const db = this.readAll();
     this.ensurePlayerStateInDb(db, playerId);
@@ -829,6 +912,7 @@ class JsonStore {
     delete db.inventories[playerId];
     delete db.farmStates[playerId];
     delete db.dailyLimits[playerId];
+    delete db.playerSessions[playerId];
     delete db.players[playerId];
     for (const [webUserId, mappedPlayerId] of Object.entries(db.playersByWebUserId)) {
       if (mappedPlayerId === playerId) delete db.playersByWebUserId[webUserId];
@@ -871,6 +955,9 @@ module.exports = {
   approveBrowserAuthRequest: activeStore.approveBrowserAuthRequest.bind(activeStore),
   exchangeBrowserAuthRequest: activeStore.exchangeBrowserAuthRequest.bind(activeStore),
   getPlayer: activeStore.getPlayer.bind(activeStore),
+  setActivePlayerSession: activeStore.setActivePlayerSession.bind(activeStore),
+  isActivePlayerSession: activeStore.isActivePlayerSession.bind(activeStore),
+  clearActivePlayerSession: activeStore.clearActivePlayerSession.bind(activeStore),
   getProfile: activeStore.getProfile.bind(activeStore),
   setProfile: activeStore.setProfile.bind(activeStore),
   ensurePlayerState: activeStore.ensurePlayerState.bind(activeStore),
@@ -884,6 +971,7 @@ module.exports = {
   applyResourceHarvest: activeStore.applyResourceHarvest.bind(activeStore),
   getFarmState: activeStore.getFarmState.bind(activeStore),
   setFarmState: activeStore.setFarmState.bind(activeStore),
+  compareAndSetFarmState: activeStore.compareAndSetFarmState.bind(activeStore),
   getDailyLimits: activeStore.getDailyLimits.bind(activeStore),
   consumeDailyLimit: activeStore.consumeDailyLimit.bind(activeStore),
   setDailyLimits: activeStore.setDailyLimits.bind(activeStore),

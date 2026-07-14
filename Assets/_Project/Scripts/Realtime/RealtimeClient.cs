@@ -71,6 +71,8 @@ namespace YWonderLand.Realtime
         private CancellationTokenSource socketCts;
         private bool connectInProgress;
         private bool sessionReplacementHandled;
+        private string connectedToken = "";
+        private string connectedScopeId = "";
         private string currentRoom = "";
         private string serverSelfId = "";
         private float nextConnectionCheck;
@@ -251,6 +253,16 @@ namespace YWonderLand.Realtime
 
             if (!IsConnected) return;
 
+            string activeToken = AuthService.Instance != null ? AuthService.Instance.Token : "";
+            string activeScopeId = AuthService.GetCurrentPlayerScopeId();
+            if (!string.Equals(connectedToken, activeToken, StringComparison.Ordinal)
+                || !string.Equals(connectedScopeId, activeScopeId, StringComparison.Ordinal))
+            {
+                _ = DisconnectAsync();
+                nextReconnectAt = Time.unscaledTime;
+                return;
+            }
+
             if (!string.IsNullOrEmpty(desiredRoom) && currentRoom != desiredRoom)
             {
                 JoinRoom(desiredRoom);
@@ -280,6 +292,7 @@ namespace YWonderLand.Realtime
                 await DisconnectAsync();
 
                 string token = AuthService.Instance != null ? AuthService.Instance.Token : "";
+                string scopeId = AuthService.GetCurrentPlayerScopeId();
                 if (string.IsNullOrEmpty(token)) return;
 
                 sessionReplacementHandled = false;
@@ -287,6 +300,17 @@ namespace YWonderLand.Realtime
                 socket = new ClientWebSocket();
                 Uri uri = BuildRealtimeUri(token);
                 await socket.ConnectAsync(uri, socketCts.Token);
+
+                if (AuthService.Instance == null
+                    || !string.Equals(AuthService.Instance.Token, token, StringComparison.Ordinal)
+                    || !string.Equals(AuthService.GetCurrentPlayerScopeId(), scopeId, StringComparison.Ordinal))
+                {
+                    await DisconnectAsync();
+                    return;
+                }
+
+                connectedToken = token;
+                connectedScopeId = scopeId;
 
                 Debug.Log($"[Realtime] Connected: {uri.GetLeftPart(UriPartial.Path)}");
                 if (!string.IsNullOrEmpty(room))
@@ -311,6 +335,8 @@ namespace YWonderLand.Realtime
         {
             currentRoom = "";
             serverSelfId = "";
+            connectedToken = "";
+            connectedScopeId = "";
             ClearRemotePlayers();
             ClearSharedResourceSession();
 
@@ -333,6 +359,20 @@ namespace YWonderLand.Realtime
                 socketCts?.Dispose();
                 socketCts = null;
             }
+        }
+
+        public Task DisconnectForAuthenticationChangeAsync()
+        {
+            nextReconnectAt = Time.unscaledTime + 0.25f;
+            return DisconnectAsync();
+        }
+
+        public void NotifyAuthenticationChanged()
+        {
+            sessionReplacementHandled = false;
+            nextReconnectAt = Time.unscaledTime;
+            if (IsConnected || connectInProgress)
+                _ = DisconnectAsync();
         }
 
         private Uri BuildRealtimeUri(string token)
@@ -820,9 +860,9 @@ namespace YWonderLand.Realtime
             _ = DisconnectAsync();
 
             if (GameManager.Instance != null)
-                GameManager.Instance.LogoutToLogin();
+                GameManager.Instance.LogoutToLoginWithoutSaving();
             else
-                AuthService.Instance?.SignOut();
+                AuthService.Instance?.SignOutWithoutSavingGameplay();
 
             YWonderLand.Environment.ScreenToast.Show(
                 "Tài khoản đã đăng nhập ở thiết bị khác. Phiên này đã được đăng xuất.",

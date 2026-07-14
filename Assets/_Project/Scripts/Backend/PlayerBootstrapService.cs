@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using UnityEngine;
 using YWonderLand.Managers;
 
@@ -54,6 +55,30 @@ namespace YWonderLand.Backend
         {
             public int version = 1;
             public string updatedAt;
+
+            [JsonProperty("snapshot_schema")]
+            public int snapshotSchema;
+
+            [JsonProperty("build_state_json")]
+            public string buildStateJson;
+
+            [JsonProperty("placed_tiles_json")]
+            public string placedTilesJson;
+
+            [JsonProperty("farm_tiles_json")]
+            public string farmTilesJson;
+
+            [JsonProperty("animal_state_json")]
+            public string animalStateJson;
+
+            [JsonProperty("legacy_migration")]
+            public bool legacyMigration;
+
+            [JsonProperty("legacy_content_score")]
+            public int legacyContentScore;
+
+            [JsonProperty("client_saved_at")]
+            public string clientSavedAt;
         }
 
         [Serializable]
@@ -106,6 +131,18 @@ namespace YWonderLand.Backend
                 Debug.LogWarning("[Bootstrap] A gameplay mutation was rejected; loading the authoritative snapshot for reconciliation.");
             }
 
+            bool farmFlushed = await FarmStateSync.FlushAsync();
+            if (!farmFlushed && FarmStateSync.PendingCount > 0)
+            {
+                HasServerBootstrap = false;
+                LastStatus = 503;
+                LastError = !string.IsNullOrWhiteSpace(FarmStateSync.LastError)
+                    ? FarmStateSync.LastError
+                    : "PENDING_FARM_SYNC_FAILED";
+                Debug.LogWarning("[Bootstrap] Refusing to load an older farm snapshot while a local upload is pending.");
+                return false;
+            }
+
             var res = await ApiClient.GetAsync<PlayerBootstrapPayload>("/player/bootstrap", auth.Token);
             LastStatus = res.status;
             LastError = res.error ?? "";
@@ -117,11 +154,22 @@ namespace YWonderLand.Backend
             }
 
             ApplyBootstrap(res.data);
+            bool farmReady = await FarmStateSync.ReconcileBootstrapAsync(res.data.farm_state);
+            if (!farmReady)
+            {
+                HasServerBootstrap = false;
+                LastStatus = 503;
+                LastError = !string.IsNullOrWhiteSpace(FarmStateSync.LastError)
+                    ? FarmStateSync.LastError
+                    : "FARM_BOOTSTRAP_FAILED";
+                Debug.LogWarning("[Bootstrap] Farm snapshot reconciliation failed.");
+                return false;
+            }
             GameplayMutationSync.MarkAuthoritativeSnapshotApplied();
             LastBootstrap = res.data;
             HasServerBootstrap = true;
             LastError = "";
-            Debug.Log("[Bootstrap] Applied server profile, economy, and inventory.");
+            Debug.Log("[Bootstrap] Applied server profile, economy, inventory, and farm state.");
             return true;
         }
 

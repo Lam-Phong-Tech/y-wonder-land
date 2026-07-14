@@ -1,8 +1,27 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-07-14 (Single-session and farm conflict P0)
+
+### Changed
+- Every local register/login, web credential login, and Browser SSO exchange now rotates a server-side player session ID and embeds `sid` in the JWT. Superseded REST tokens return `401 SESSION_REPLACED`, while an existing WebSocket is closed with `4008` as soon as the newer session is issued.
+- Added authenticated `POST /auth/logout`. Unity disconnects/reconnects realtime when the auth token or player scope changes, and a session replaced by `4008` exits through a no-save path so it cannot upload stale gameplay state.
+- Farm writes now use atomic `expected_version` compare-and-set. The server increments the revision and returns `409 FARM_STATE_CONFLICT` with the authoritative snapshot instead of accepting a stale overwrite.
+- `FarmStateSync` persists a player-scoped, token-free outbox. Interrupted uploads survive app/network loss and retry before bootstrap; successful writes clear only their matching payload, while a `409` restores the server snapshot.
+- Added PostgreSQL migration `003_active_player_sessions.sql`, matching schema fields, JSON/PostgreSQL store session APIs, and session/farm conflict regression coverage.
+
+### Verified
+- Node syntax checks, full JSON Phase 1, standalone realtime, security, Browser SSO, and web-auth test suites pass locally. Coverage includes stale REST token `401`, old socket `4008`, logout revocation, and stale farm write `409` without overwrite.
+- The final Unity Editor compile produced no new C# errors. A real PostgreSQL smoke run is still pending because the workstation does not have `POSTGRES_TEST_DATABASE_URL`.
+
+### Needs Deployment Test
+- Back up production, apply migration `003`, run PostgreSQL smoke, and deploy as a versioned VPS release with rollback. Existing cached JWTs do not have `sid` and must log in again after cutover.
+- Rebuild EXE/APK and pass sequential A -> B -> A farm acceptance, immediate duplicate-session replacement while the old app remains open, and abrupt-close outbox recovery before marking cross-device sync complete.
+
 ## [Unreleased] - 2026-07-11 (Production backend hardening and private VPS staging)
 
 ### Changed
+- Unified the four legacy per-device farm caches (`YW_BuildState`, `YW_PlacedTiles`, `YW_FarmState`, `YW_AnimalState`) into one server-backed `farm_state` snapshot. Bootstrap now restores placed/build-mode plots, crops and wall-clock timestamps, buildings, pens and animals across devices; gameplay saves queue the same snapshot after plow/build/plant/water/harvest/animal actions and flush it before logout.
+- Added a guarded legacy migration for accounts such as `Thu2026`: an uninitialized device cannot upload an empty cache before bootstrap, while a later device with a strictly richer legacy save can replace an earlier migration snapshot with fewer saved objects. This is a migration safeguard, not yet a complete server-side revision/conflict protocol.
 - Replaced remembered-session auto-approval with explicit web account selection. Production callback commit `cac56e0f` now shows `Tiếp tục với tài khoản này` or `Đăng nhập tài khoản khác`; only explicit confirmation approves the Browser SSO request. Switching accounts expires only Auth.js/NextAuth session-token cookies, preserves the callback through `/vi/login`, sends `no-store`, and no longer adds the misleading `locked=1` flag. Web build `Q_dfxErFS68Q3YBChCShT` is active with rollback backup `/var/backups/ywonder-web/browser-callback-cac56e0f1e1258e3f7a0cc269e78c7b9dc9d740e-20260713T072713Z`. Real public acceptance passed callback -> PKCE exchange -> PostgreSQL bootstrap as `PLAYER=p_1783873094`, profile `Lam`, Point `5000`. Parallel local/web auth remains enabled; final EXE/APK artifact smoke is still pending.
 - Fixed two Browser SSO artifact issues found in the first EXE acceptance. Commit `c002dfa0` restores/focuses the running Windows game window after a successful browser exchange, with manual taskbar focus retained as fallback. The web callback now sends first-pass `register` intents to `/vi/register` even when the browser has a remembered session, then returns through a `registration_completed=1` callback after registration/OTP. The callback-only deployment completed with build/source backup and rollback protection; a public probe confirmed the expected `302` registration redirect. A new EXE/APK build and real new-account OTP test remain pending.
 - Hotfixed Browser SSO production after repeated-session acceptance exposed two edge cases. Release `fc23f1652a8e484b42e348150d3a5a038825a2e0` isolates `/auth/browser/exchange` polling from password-attempt limits; a public 125-poll probe passed and a second Browser SSO start still returned `201`. Release `f75a7d6b3c5c267fbdf17f58af7d02bdecf8d5b9` opens the same-origin callback directly while signed-out users are redirected through login. Its remembered-session auto-approval behavior was later superseded by callback commit `cac56e0f`, which requires explicit account confirmation. Both game-server deploys created PostgreSQL/env/unit backups and preserved parallel local/web auth.
@@ -43,6 +62,7 @@
 - The owner has now confirmed `42.96.18.14` is the dedicated game VPS, permitted for Node + PostgreSQL, expected to use Ubuntu Server 24.04 LTS, and will later receive `api.ywonder.net`. Added `docs/VPS_GAME_DEPLOYMENT_PLAN.md` with audit, hardening, PostgreSQL, deploy, DNS, acceptance and rollback gates; no credentials are stored.
 
 ### Fixed
+- Fixed the root cause of farm divergence between EXE and APK: `PlayerBootstrapService` previously ignored the server `farm_state`, so each device reconstructed only its own PlayerPrefs layout despite sharing the same web player, economy and inventory. Authoritative snapshots now replace the scoped local caches and trigger all farm persistence owners to rebuild their runtime objects.
 - Local tree/rock prefabs and runtime-spawned resources now use the same 20-second demo respawn time; stale saved timers longer than the configured duration are clamped on load.
 - Tutorial onboarding no longer creates or visits the legacy mining node. Its 11-step runtime route now ends after tree chopping, farm construction/cultivation and pen construction; placing or feeding an animal is no longer required.
 - `StartTutorial()` is idempotent within one authenticated session and resets on identity changes. `GuideNPC` clears stale node/coroutine state, while the tutorial reuses or removes duplicate `NPC_ExclamationMark` children and removes the marker after completion.
@@ -53,6 +73,7 @@
 - Direct-tap interaction now allows only `0.05m` of surface tolerance after a solid collider, preventing City ground clicks from selecting water or fishing targets beneath the island while preserving the assist cast for nearby object colliders.
 
 ### Verified
+- Unity `Assembly-CSharp` compiles after the farm snapshot integration; only the existing unrelated `enableStickAutoSprint` warning remains. The isolated JSON Phase 1 smoke test passes register/login, full four-part farm snapshot write, relogin/bootstrap equality, economy/inventory idempotency, realtime chat and single-session replacement. Real `Thu2026` EXE/APK migration and round-trip testing are still required before marking cross-device farm sync complete.
 - Partial real-device public acceptance passed with one Windows EXE on network A and one Android APK on network B: realtime chat and shared mining worked correctly. The new tutorial/marker/mobile-registration hotfix compiles with Unity's generated `Assembly-CSharp.rsp`; the rebuilt client runtime retest passed for the revised tutorial, repeated login marker cleanup and mobile registration feedback.
 - JSON demo-account realtime regression passes again: canonical IDs, presence, chat, action/tool relay, resource ownership/late join, farm rejection and duplicate-session close `4008` all pass.
 - JSON Phase 1 regression, PostgreSQL direct transaction smoke, PostgreSQL-backed Phase 1 REST/WebSocket smoke, Node restart persistence and PostgreSQL dashboard read all pass. DB-backed health and concurrent duplicate registration also pass with one `200` and one `409 USERNAME_EXISTS`.
