@@ -5,7 +5,7 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
-## [2026-07-14] — P0 phiên đơn và chống ghi đè farm hoàn tất local
+## [2026-07-14] — P0 phiên đơn và chống ghi đè farm đã deploy production
 
 ### Fixed
 - Mỗi lần đăng ký/đăng nhập local, web credential hoặc Browser SSO exchange nay tạo một `sessionId` mới, lưu phiên active theo player và đưa `sid` vào JWT. Token cũ bị REST từ chối bằng `401 SESSION_REPLACED`; WebSocket cũ bị đóng mã `4008` ngay khi phiên mới được cấp, không cần đóng/mở lại app.
@@ -16,12 +16,16 @@
 
 ### Verified
 - `node --check`, full Phase 1 JSON smoke, realtime smoke, `test:security`, `test:browser-auth` và `test:web-auth` đều pass. Regression xác nhận token cũ bị `401`, socket cũ bị `4008`, logout thu hồi token, farm stale write nhận `409` và không thay snapshot mới.
-- Unity Editor không ghi nhận `error CS` mới sau lần compile cuối. PostgreSQL smoke thật chưa chạy local vì chưa có `POSTGRES_TEST_DATABASE_URL`.
+- Unity Editor không ghi nhận `error CS` mới sau lần compile cuối. Máy dev không có `POSTGRES_TEST_DATABASE_URL`; PostgreSQL smoke cô lập sau đó đã pass trong đợt deploy production có kiểm soát.
 - Anh đã build/test lại EXE/APK và xác nhận hai lỗi buổi sáng hoạt động ổn: phiên mới thay phiên cũ ngay khi app cũ vẫn mở, và đổi tuần tự EXE -> APK cùng account không còn phục hồi snapshot farm/cây/tưới cũ. Checkpoint nghiệm thu artifact test: `21cc20d2`.
 
-### Pending deployment acceptance
-- Chưa deploy release này lên VPS. Cần backup, chạy migration `003`, PostgreSQL smoke và deploy versioned có rollback; sau deploy, JWT cũ thiếu `sid` sẽ phải đăng nhập lại.
-- Chưa tick hoàn tất xuyên thiết bị cho tới khi build lại EXE/APK và pass A → B → A, thay phiên ngay khi app cũ vẫn mở, farm/cây/nước/túi không rollback, cùng ca đóng app đột ngột rồi retry outbox.
+### Production deployment
+- Đã backup PostgreSQL/env/systemd unit và deploy versioned release `21cc20d2a827e5327429cf5f0ecf67a6b67fdf79`; migration `003_active_player_sessions` áp dụng thành công, release trước vẫn được giữ làm rollback.
+- PostgreSQL smoke trong schema tạm và public Phase 1 REST/WSS smoke đều pass: rotate/revoke session, token cũ `401`, socket cũ `4008`, farm stale write `409`, persistence/relogin. Account smoke đã được dọn khỏi DB.
+- Kiểm tra độc lập từ Windows xác nhận health `storage.mode=postgres`; chỉ `80/443` public, còn `3000/5432/8080` đóng.
+
+### Pending client acceptance
+- JWT cũ thiếu `sid` phải đăng nhập lại. Dùng EXE/APK chứa checkpoint `21cc20d2` để lặp A → B → A, thay phiên ngay khi app cũ vẫn mở, xác nhận farm/cây/nước/túi không rollback và kiểm tra đóng app đột ngột rồi retry outbox trước khi tick hoàn tất toàn luồng.
 
 ## [2026-07-13] — Hotfix đồng bộ nông trại xuyên thiết bị
 
