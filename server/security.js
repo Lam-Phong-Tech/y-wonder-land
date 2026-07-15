@@ -90,6 +90,7 @@ function buildSecurityConfig(env = process.env) {
     webTopupClockSkewSec: envInteger("WEB_TOPUP_CLOCK_SKEW_SEC", 300, { min: 30, max: 900 }, env),
     webTopupMaxPoints: envInteger("WEB_TOPUP_MAX_POINTS", 1_000_000_000, { min: 1, max: Number.MAX_SAFE_INTEGER }, env),
     clientAssetGrantsEnabled: envBoolean("CLIENT_ASSET_GRANTS_ENABLED", true, env),
+    clientAssetGrantsBlockedWebUserIds: new Set(envList("CLIENT_ASSET_GRANTS_BLOCKED_WEB_USER_IDS", env)),
     rateLimitEnabled: envBoolean("RATE_LIMIT_ENABLED", true, env),
     requestTimeoutMs: envInteger("HTTP_REQUEST_TIMEOUT_MS", 30_000, { min: 1000 }, env),
     headersTimeoutMs: envInteger("HTTP_HEADERS_TIMEOUT_MS", 15_000, { min: 1000 }, env),
@@ -183,11 +184,10 @@ function validateProductionConfig(env = process.env) {
     const topupSecret = String(env.WEB_TOPUP_SECRET || "");
     const topupMode = String(env.WEB_TOPUP_MODE || "canary").trim().toLowerCase();
     const allowedWebUserIds = envList("WEB_TOPUP_ALLOWED_WEB_USER_IDS", env);
+    const blockedGrantWebUserIds = envList("CLIENT_ASSET_GRANTS_BLOCKED_WEB_USER_IDS", env);
+    const clientAssetGrantsEnabled = envBoolean("CLIENT_ASSET_GRANTS_ENABLED", true, env);
     if (topupSecret.length < 32) {
       errors.push("WEB_TOPUP_SECRET must contain at least 32 characters when WEB_TOPUP_ENABLED=true");
-    }
-    if (envBoolean("CLIENT_ASSET_GRANTS_ENABLED", true, env)) {
-      errors.push("CLIENT_ASSET_GRANTS_ENABLED must be false when WEB_TOPUP_ENABLED=true");
     }
     if (!["canary", "open"].includes(topupMode)) {
       errors.push("WEB_TOPUP_MODE must be canary or open when WEB_TOPUP_ENABLED=true");
@@ -197,6 +197,22 @@ function validateProductionConfig(env = process.env) {
       errors.push("WEB_TOPUP_ALLOWED_WEB_USER_IDS cannot contain more than 25 IDs in canary mode");
     } else if (topupMode === "open" && allowedWebUserIds.length > 0) {
       errors.push("WEB_TOPUP_ALLOWED_WEB_USER_IDS must be empty in open mode");
+    }
+    if (topupMode === "canary" && clientAssetGrantsEnabled) {
+      const blockedSet = new Set(blockedGrantWebUserIds);
+      const exactCanaryGrantBlock = blockedGrantWebUserIds.length === allowedWebUserIds.length
+        && allowedWebUserIds.every((webUserId) => blockedSet.has(webUserId));
+      if (!exactCanaryGrantBlock) {
+        errors.push("CLIENT_ASSET_GRANTS_BLOCKED_WEB_USER_IDS must exactly match WEB_TOPUP_ALLOWED_WEB_USER_IDS when canary top-up keeps client grants enabled");
+      }
+    }
+    if (topupMode === "open") {
+      if (clientAssetGrantsEnabled) {
+        errors.push("CLIENT_ASSET_GRANTS_ENABLED must be false when WEB_TOPUP_MODE=open");
+      }
+      if (blockedGrantWebUserIds.length > 0) {
+        errors.push("CLIENT_ASSET_GRANTS_BLOCKED_WEB_USER_IDS must be empty when WEB_TOPUP_MODE=open");
+      }
     }
   }
   if (String(env.ADMIN_DASHBOARD_ENABLED || "").toLowerCase() !== "false") {

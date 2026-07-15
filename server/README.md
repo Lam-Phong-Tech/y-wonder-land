@@ -429,6 +429,26 @@ first dispatch, duplicate retry and decimal remainder passed, temporary data was
 and the production PID/active time, env hashes, health and dormant callback were unchanged.
 No live build was replaced, no service restarted and no real payment was used.
 
+The hardening was then deployed in dormant mode as backend release
+`f573721533c0a65a3f2fc49fa6a2673b224f8bea` and web build
+`YVgCFF1Bwu_XJc4sfVpo3`. Independent postflight kept the callback at `404`, the
+unauthenticated cron at `401`, both allowlists empty, the web Point outbox empty,
+and the game PID/env unchanged. `CLIENT_ASSET_GRANTS_ENABLED` is still unset in
+production because legitimate Unity rewards use the generic positive-delta path;
+the startup interlock therefore continues to block real top-up enablement.
+
+For a single-identity canary, set
+`CLIENT_ASSET_GRANTS_BLOCKED_WEB_USER_IDS` to exactly the same stable IDs as
+`WEB_TOPUP_ALLOWED_WEB_USER_IDS`. Positive generic Point/item deltas are then
+blocked only for those players, using both the signed token and the authoritative
+player mapping; other players retain legacy rewards and all debits remain valid.
+`WEB_TOPUP_MODE=open` still requires `CLIENT_ASSET_GRANTS_ENABLED=false` and an
+empty scoped block list. This code path must be deployed dormant and tested before
+any environment switch.
+
+The production web build also warns that Next.js `14.2.18` needs a security
+upgrade before real-money traffic is opened.
+
 `/player/bootstrap` nay tra:
 
 ```json

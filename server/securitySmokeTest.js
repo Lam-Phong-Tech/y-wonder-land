@@ -24,6 +24,16 @@ async function reservePort() {
   });
 }
 
+function removeTestDirectory(tempDir, expectedPrefix) {
+  const resolvedTempRoot = `${path.resolve(os.tmpdir())}${path.sep}`;
+  const resolvedTarget = path.resolve(tempDir);
+  if (!resolvedTarget.startsWith(resolvedTempRoot)
+      || !path.basename(resolvedTarget).startsWith(expectedPrefix)) {
+    throw new Error(`Refusing to remove unexpected test directory: ${resolvedTarget}`);
+  }
+  fs.rmSync(resolvedTarget, { recursive: true, force: true });
+}
+
 function testConfigurationGate() {
   let rejected = false;
   try {
@@ -244,11 +254,75 @@ function testConfigurationGate() {
     });
     topupWithClientGrantsAccepted = true;
   } catch (error) {
-    assert(String(error.message).includes("CLIENT_ASSET_GRANTS_ENABLED"),
+    assert(String(error.message).includes("CLIENT_ASSET_GRANTS_BLOCKED_WEB_USER_IDS"),
       "Unsafe Point-credit client grant mode returned the wrong production error.");
   }
   assert(!topupWithClientGrantsAccepted,
-    "Production Point credit started while client asset grants were enabled.");
+    "Production Point credit started without isolating canary client asset grants.");
+
+  validateProductionConfig({
+    NODE_ENV: "production",
+    HOST: "127.0.0.1",
+    STORE_MODE: "postgres",
+    WEB_AUTH_MODE: "disabled",
+    WEB_TOPUP_ENABLED: "true",
+    WEB_TOPUP_SECRET: "security-smoke-topup-secret-with-32-plus-characters",
+    WEB_TOPUP_MODE: "canary",
+    WEB_TOPUP_ALLOWED_WEB_USER_IDS: "security-canary-web-user",
+    CLIENT_ASSET_GRANTS_ENABLED: "true",
+    CLIENT_ASSET_GRANTS_BLOCKED_WEB_USER_IDS: "security-canary-web-user",
+    ADMIN_DASHBOARD_ENABLED: "false",
+    DEMO_ACCOUNTS_ENABLED: "false",
+    JWT_SECRET: "security-smoke-secret-with-more-than-32-characters",
+  });
+
+  let mismatchedGrantCanaryAccepted = false;
+  try {
+    validateProductionConfig({
+      NODE_ENV: "production",
+      HOST: "127.0.0.1",
+      STORE_MODE: "postgres",
+      WEB_AUTH_MODE: "disabled",
+      WEB_TOPUP_ENABLED: "true",
+      WEB_TOPUP_SECRET: "security-smoke-topup-secret-with-32-plus-characters",
+      WEB_TOPUP_MODE: "canary",
+      WEB_TOPUP_ALLOWED_WEB_USER_IDS: "security-canary-web-user",
+      CLIENT_ASSET_GRANTS_ENABLED: "true",
+      CLIENT_ASSET_GRANTS_BLOCKED_WEB_USER_IDS: "different-web-user",
+      ADMIN_DASHBOARD_ENABLED: "false",
+      DEMO_ACCOUNTS_ENABLED: "false",
+      JWT_SECRET: "security-smoke-secret-with-more-than-32-characters",
+    });
+    mismatchedGrantCanaryAccepted = true;
+  } catch (error) {
+    assert(String(error.message).includes("exactly match"),
+      "Mismatched canary grant isolation returned the wrong production error.");
+  }
+  assert(!mismatchedGrantCanaryAccepted,
+    "Production Point canary accepted a mismatched client-grant block list.");
+
+  let openTopupWithClientGrantsAccepted = false;
+  try {
+    validateProductionConfig({
+      NODE_ENV: "production",
+      HOST: "127.0.0.1",
+      STORE_MODE: "postgres",
+      WEB_AUTH_MODE: "disabled",
+      WEB_TOPUP_ENABLED: "true",
+      WEB_TOPUP_SECRET: "security-smoke-topup-secret-with-32-plus-characters",
+      WEB_TOPUP_MODE: "open",
+      CLIENT_ASSET_GRANTS_ENABLED: "true",
+      ADMIN_DASHBOARD_ENABLED: "false",
+      DEMO_ACCOUNTS_ENABLED: "false",
+      JWT_SECRET: "security-smoke-secret-with-more-than-32-characters",
+    });
+    openTopupWithClientGrantsAccepted = true;
+  } catch (error) {
+    assert(String(error.message).includes("CLIENT_ASSET_GRANTS_ENABLED"),
+      "Open Point mode returned the wrong global client-grant error.");
+  }
+  assert(!openTopupWithClientGrantsAccepted,
+    "Open Point mode started while global client asset grants were enabled.");
 
   let topupWithoutCanaryUserAccepted = false;
   try {
@@ -568,12 +642,137 @@ async function runIntegrationTest() {
   } finally {
     if (child.exitCode == null) child.kill("SIGTERM");
     await new Promise((resolve) => setTimeout(resolve, 200));
-    const resolvedTempRoot = `${path.resolve(os.tmpdir())}${path.sep}`;
-    const resolvedTarget = path.resolve(tempDir);
-    if (!resolvedTarget.startsWith(resolvedTempRoot) || !path.basename(resolvedTarget).startsWith("yw-security-")) {
-      throw new Error(`Refusing to remove unexpected test directory: ${resolvedTarget}`);
-    }
-    fs.rmSync(resolvedTarget, { recursive: true, force: true });
+    removeTestDirectory(tempDir, "yw-security-");
+  }
+}
+
+async function runCanaryGrantIsolationIntegrationTest() {
+  const port = await reservePort();
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "yw-security-canary-"));
+  const dataPath = path.join(tempDir, "data.json");
+  const child = spawn(process.execPath, ["index.js"], {
+    cwd: __dirname,
+    env: {
+      ...process.env,
+      NODE_ENV: "test",
+      HOST: "127.0.0.1",
+      PORT: String(port),
+      STORE_MODE: "json",
+      YW_DATA_PATH: dataPath,
+      JWT_SECRET: "security-canary-secret-with-more-than-32-characters",
+      WEB_AUTH_MODE: "mock",
+      ADMIN_DASHBOARD_ENABLED: "false",
+      DEMO_ACCOUNTS_ENABLED: "false",
+      HTTP_ACCESS_LOG: "false",
+      RATE_LIMIT_ENABLED: "false",
+      BCRYPT_ROUNDS: "8",
+      CLIENT_ASSET_GRANTS_ENABLED: "true",
+      CLIENT_ASSET_GRANTS_BLOCKED_WEB_USER_IDS: "mock:securitycanary01",
+    },
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+
+  try {
+    await waitForServer(child, port);
+    const baseUrl = `http://127.0.0.1:${port}`;
+    const canaryLogin = await postJson(baseUrl, "/auth/web-login", {
+      username: "SecurityCanary01",
+      password: "Strong@123",
+    });
+    const controlLogin = await postJson(baseUrl, "/auth/web-login", {
+      username: "SecurityControl01",
+      password: "Strong@123",
+    });
+    const storeMappedLogin = await postJson(baseUrl, "/auth/web-login", {
+      username: "SecurityStoreMapped01",
+      password: "Strong@123",
+    });
+    assert(canaryLogin.response.status === 200 && canaryLogin.payload.token,
+      "Canary web login failed in client-grant isolation test.");
+    assert(controlLogin.response.status === 200 && controlLogin.payload.token,
+      "Control web login failed in client-grant isolation test.");
+    assert(storeMappedLogin.response.status === 200 && storeMappedLogin.payload.token,
+      "Store-mapped web login failed in client-grant isolation test.");
+
+    const persisted = JSON.parse(fs.readFileSync(dataPath, "utf8"));
+    persisted.players[storeMappedLogin.payload.playerId].webUserId = "mock:securitycanary01";
+    fs.writeFileSync(dataPath, JSON.stringify(persisted, null, 2), "utf8");
+    const authoritativeStoreBlock = await authorizedJson(
+      baseUrl,
+      "POST",
+      "/player/economy/apply",
+      {
+        delta_pos: 1,
+        idempotency_key: "security-authoritative-store-positive-point",
+      },
+      storeMappedLogin.payload.token
+    );
+    assert(authoritativeStoreBlock.response.status === 403
+      && authoritativeStoreBlock.payload.error === "CLIENT_POSITIVE_ECONOMY_DELTA_FORBIDDEN",
+    "Client-grant isolation trusted a non-blocked JWT claim over the authoritative player mapping.");
+
+    const canaryBefore = await authorizedJson(
+      baseUrl, "GET", "/player/bootstrap", null, canaryLogin.payload.token
+    );
+    const controlBefore = await authorizedJson(
+      baseUrl, "GET", "/player/bootstrap", null, controlLogin.payload.token
+    );
+
+    const canaryPoint = await authorizedJson(baseUrl, "POST", "/player/economy/apply", {
+      delta_pos: 7,
+      idempotency_key: "security-canary-positive-point",
+    }, canaryLogin.payload.token);
+    assert(canaryPoint.response.status === 403
+      && canaryPoint.payload.error === "CLIENT_POSITIVE_ECONOMY_DELTA_FORBIDDEN",
+    "Canary web user can still mint Point through the generic delta endpoint.");
+
+    const canaryItem = await authorizedJson(baseUrl, "POST", "/player/inventory/adjust", {
+      item_id: "fish_ca_com_01",
+      quantity_delta: 2,
+      idempotency_key: "security-canary-positive-item",
+    }, canaryLogin.payload.token);
+    assert(canaryItem.response.status === 403
+      && canaryItem.payload.error === "CLIENT_POSITIVE_INVENTORY_DELTA_FORBIDDEN",
+    "Canary web user can still mint inventory through the generic delta endpoint.");
+
+    const canaryAfter = await authorizedJson(
+      baseUrl, "GET", "/player/bootstrap", null, canaryLogin.payload.token
+    );
+    assert(Number(canaryAfter.payload.economy.pos) === Number(canaryBefore.payload.economy.pos),
+      "Rejected canary Point grant changed the authoritative balance.");
+    assert(!(canaryAfter.payload.inventory.slots || [])
+      .some((slot) => slot.itemId === "fish_ca_com_01" && Number(slot.quantity) > 0),
+    "Rejected canary inventory grant changed the authoritative inventory.");
+
+    const canaryDebit = await authorizedJson(baseUrl, "POST", "/player/economy/apply", {
+      delta_pos: -1,
+      idempotency_key: "security-canary-debit-point",
+    }, canaryLogin.payload.token);
+    assert(canaryDebit.response.status === 200
+      && Number(canaryDebit.payload.economy.pos) === Number(canaryBefore.payload.economy.pos) - 1,
+    "Canary grant isolation blocked a legitimate debit.");
+
+    const controlPoint = await authorizedJson(baseUrl, "POST", "/player/economy/apply", {
+      delta_pos: 7,
+      idempotency_key: "security-control-positive-point",
+    }, controlLogin.payload.token);
+    assert(controlPoint.response.status === 200
+      && Number(controlPoint.payload.economy.pos) === Number(controlBefore.payload.economy.pos) + 7,
+    "Canary grant isolation blocked a non-canary Point reward.");
+
+    const controlItem = await authorizedJson(baseUrl, "POST", "/player/inventory/adjust", {
+      item_id: "fish_ca_com_01",
+      quantity_delta: 2,
+      idempotency_key: "security-control-positive-item",
+    }, controlLogin.payload.token);
+    const controlFish = (controlItem.payload.inventory.slots || [])
+      .find((slot) => slot.itemId === "fish_ca_com_01");
+    assert(controlItem.response.status === 200 && Number(controlFish && controlFish.quantity) === 2,
+      "Canary grant isolation blocked a non-canary inventory reward.");
+  } finally {
+    if (child.exitCode == null) child.kill("SIGTERM");
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    removeTestDirectory(tempDir, "yw-security-canary-");
   }
 }
 
@@ -581,7 +780,8 @@ async function main() {
   testConfigurationGate();
   testRegistrationValidation();
   await runIntegrationTest();
-  console.log("[security-smoke] PASS: production gate, validation, HTTP guards, auth rate limits, and realtime limits work.");
+  await runCanaryGrantIsolationIntegrationTest();
+  console.log("[security-smoke] PASS: production gate, canary grant isolation, HTTP guards, auth rate limits, and realtime limits work.");
 }
 
 main().catch((error) => {

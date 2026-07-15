@@ -248,6 +248,21 @@ const auth = asyncRoute(async (req, res, next) => {
   }
 });
 
+async function isPositiveClientAssetGrantBlocked(req) {
+  if (!securityConfig.clientAssetGrantsEnabled) return true;
+
+  const blockedWebUserIds = securityConfig.clientAssetGrantsBlockedWebUserIds;
+  if (!blockedWebUserIds || blockedWebUserIds.size === 0) return false;
+
+  const tokenWebUserId = String((req.auth && req.auth.webUserId) || "").trim();
+  if (tokenWebUserId && blockedWebUserIds.has(tokenWebUserId)) return true;
+
+  const player = await store.getPlayer(req.userId);
+  if (!player) return true;
+  const authoritativeWebUserId = String(player.webUserId || "").trim();
+  return authoritativeWebUserId ? blockedWebUserIds.has(authoritativeWebUserId) : false;
+}
+
 // ── Health check ──
 api.get("/", (req, res) => res.json({ ok: true, service: "ywonderland-stub" }));
 api.get("/health", asyncRoute(async (req, res) => {
@@ -524,7 +539,7 @@ api.post("/player/economy/apply", auth, asyncRoute(async (req, res) => {
   if (!Number.isSafeInteger(deltaPos)) {
     return res.status(400).json({ error: "INVALID_POINT_DELTA" });
   }
-  if (deltaPos > 0 && !securityConfig.clientAssetGrantsEnabled) {
+  if (deltaPos > 0 && await isPositiveClientAssetGrantBlocked(req)) {
     return res.status(403).json({ error: "CLIENT_POSITIVE_ECONOMY_DELTA_FORBIDDEN" });
   }
   const result = await store.applyEconomyDelta(
@@ -556,7 +571,7 @@ api.post("/player/inventory/adjust", auth, asyncRoute(async (req, res) => {
   if (!itemId || !Number.isSafeInteger(quantityDelta)) {
     return res.status(400).json({ error: "Missing item_id or quantity_delta" });
   }
-  if (quantityDelta > 0 && !securityConfig.clientAssetGrantsEnabled) {
+  if (quantityDelta > 0 && await isPositiveClientAssetGrantBlocked(req)) {
     return res.status(403).json({ error: "CLIENT_POSITIVE_INVENTORY_DELTA_FORBIDDEN" });
   }
 
