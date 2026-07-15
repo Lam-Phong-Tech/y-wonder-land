@@ -429,8 +429,8 @@ first dispatch, duplicate retry and decimal remainder passed, temporary data was
 and the production PID/active time, env hashes, health and dormant callback were unchanged.
 No live build was replaced, no service restarted and no real payment was used.
 
-The hardening was then deployed in dormant mode as backend release
-`f573721533c0a65a3f2fc49fa6a2673b224f8bea` and web build
+The hardening was then deployed in dormant mode. The active backend release is
+`32adf45fd4edb4b13b4ac3ed6c1bb69c7afbc2dc` and the web build is
 `YVgCFF1Bwu_XJc4sfVpo3`. Independent postflight kept the callback at `404`, the
 unauthenticated cron at `401`, both allowlists empty, the web Point outbox empty,
 and the game PID/env unchanged. `CLIENT_ASSET_GRANTS_ENABLED` is still unset in
@@ -443,8 +443,9 @@ For a single-identity canary, set
 blocked only for those players, using both the signed token and the authoritative
 player mapping; other players retain legacy rewards and all debits remain valid.
 `WEB_TOPUP_MODE=open` still requires `CLIENT_ASSET_GRANTS_ENABLED=false` and an
-empty scoped block list. This code path must be deployed dormant and tested before
-any environment switch.
+empty scoped block list. This code path passed the Linux artifact security suite,
+production startup-gate probes and dormant postflight. Both live lists remain
+empty until the exact QA identity is selected.
 
 The production web build also warns that Next.js `14.2.18` needs a security
 upgrade before real-money traffic is opened.
