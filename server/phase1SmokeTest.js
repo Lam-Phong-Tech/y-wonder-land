@@ -199,11 +199,27 @@ async function testPersistence(account) {
   const start = await getJson("/player/bootstrap", account.token);
   const startPos = Number(start.payload.economy && start.payload.economy.pos);
   assert(Number.isFinite(startPos), "Bootstrap economy.pos is not numeric.");
+  assert(!Object.prototype.hasOwnProperty.call(start.payload.economy || {}, "upos"),
+    "Bootstrap still exposes retired UPoint balance.");
+
+  const directSet = await putJson("/player/economy", {
+    economy: { pos: startPos + 999999 },
+  }, account.token, [405]);
+  assert(directSet.payload.error === "ECONOMY_SERVER_AUTHORITATIVE",
+    "Direct economy overwrite was not blocked.");
+
+  const retiredUPoint = await postJson("/player/economy/apply", {
+    delta_pos: 0,
+    delta_upos: 1,
+    type: "phase1_retired_currency_probe",
+    idempotency_key: `phase1-upoint-${suffix}`,
+  }, account.token, [400]);
+  assert(retiredUPoint.payload.error === "UPOINT_RETIRED",
+    "Legacy UPoint mutation was not rejected.");
 
   const economyKey = `phase1-economy-${suffix}`;
   const firstEconomy = await postJson("/player/economy/apply", {
     delta_pos: 123,
-    delta_upos: 0,
     type: "phase1_smoke",
     ref: suffix,
     idempotency_key: economyKey,
@@ -271,6 +287,70 @@ async function testPersistence(account) {
     assert(boot.payload.farm_state[key] === farmSnapshot[key],
       `Relogin bootstrap did not keep farm snapshot field ${key}.`);
   }
+  return relogged;
+}
+
+async function testAtomicAnimalPlacement(account) {
+  const start = await getJson("/player/bootstrap", account.token);
+  const startRabbit = inventoryQuantity(start.payload.inventory, "rabbit_01");
+  const fixtureKey = `phase1-animal-fixture-${suffix}`;
+  await postJson("/player/inventory/adjust", {
+    item_id: "rabbit_01",
+    quantity_delta: 2,
+    type: "phase1_animal_fixture",
+    idempotency_key: fixtureKey,
+  }, account.token);
+
+  const currentFarm = start.payload.farm_state;
+  const readyFarm = await putJson("/player/farm-state", {
+    expected_version: currentFarm.version,
+    farm_state: {
+      ...currentFarm,
+      snapshot_schema: 1,
+      build_state_json: JSON.stringify({
+        items: [
+          { cellKey: "0_0", itemName: "Chuong", fx: 1, fy: 1 },
+          { cellKey: "8_0", itemName: "Chuong", fx: 1, fy: 1 },
+        ],
+        animals: [],
+      }),
+    },
+  }, account.token);
+
+  const placementKey = `phase1-animal-place-${suffix}`;
+  const placementBody = {
+    item_id: "rabbit_01",
+    cell_keys: ["0_0"],
+    expected_version: readyFarm.payload.farm_state.version,
+    idempotency_key: placementKey,
+  };
+  const placed = await postJson("/player/farm/animals/place", placementBody, account.token);
+  const duplicate = await postJson("/player/farm/animals/place", placementBody, account.token);
+  assert(placed.payload.ok && !placed.payload.duplicate
+    && inventoryQuantity(placed.payload.inventory, "rabbit_01") === startRabbit + 1,
+  "Animal placement did not consume exactly one inventory item.");
+  assert(duplicate.payload.ok && duplicate.payload.duplicate
+    && inventoryQuantity(duplicate.payload.inventory, "rabbit_01") === startRabbit + 1,
+  "Animal placement retry was not idempotent through HTTP.");
+  assert(JSON.parse(placed.payload.farm_state.build_state_json).animals.length === 1,
+    "Animal placement did not append exactly one farm animal through HTTP.");
+
+  const stale = await postJson("/player/farm/animals/place", {
+    item_id: "rabbit_01",
+    cell_keys: ["8_0"],
+    expected_version: readyFarm.payload.farm_state.version,
+    idempotency_key: `phase1-animal-stale-${suffix}`,
+  }, account.token, [409]);
+  assert(stale.payload.error === "FARM_STATE_CONFLICT"
+    && inventoryQuantity(stale.payload.inventory, "rabbit_01") === startRabbit + 1,
+  "Stale animal placement consumed inventory through HTTP.");
+
+  const relogged = await login(account);
+  const boot = await getJson("/player/bootstrap", relogged.token);
+  assert(inventoryQuantity(boot.payload.inventory, "rabbit_01") === startRabbit + 1,
+    "Animal inventory result did not survive relogin.");
+  assert(JSON.parse(boot.payload.farm_state.build_state_json).animals.length === 1,
+    "Placed animal did not survive relogin.");
   return relogged;
 }
 
@@ -462,14 +542,15 @@ async function main() {
   assert(unknownAccount.payload.error === "USER_NOT_FOUND", "Unknown account did not return USER_NOT_FOUND.");
 
   const shopLoggedA = await testShopTransactions(registered[0]);
-  const loggedA = await testPersistence(shopLoggedA);
+  const persistedA = await testPersistence(shopLoggedA);
+  const loggedA = await testAtomicAnimalPlacement(persistedA);
   const loggedB = await login(registered[1]);
   await testRealtime(loggedA, loggedB);
   await testSingleRealtimeSession(loggedA);
   const replacementA = await testSingleAuthSession(loggedA);
   await testLogoutRevokesSession(replacementA);
 
-  console.log("[phase1-smoke] PASS: register, login, atomic shop buy/sell, bootstrap persistence, idempotency, farm revision conflicts, realtime chat, and single-account session replacement work.");
+  console.log("[phase1-smoke] PASS: register, login, atomic shop/animal placement, bootstrap persistence, idempotency, farm revision conflicts, realtime chat, and single-account session replacement work.");
 }
 
 main().catch((error) => {

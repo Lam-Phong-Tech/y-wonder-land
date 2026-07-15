@@ -56,7 +56,6 @@ select
   coalesce(p.exp, 0),
   coalesce(md5(p.profile_json::text), '-'),
   coalesce(e.pos, 0),
-  coalesce(e.upos, 0),
   coalesce((select count(*) from player_inventory i where i.player_id = a.player_id), 0),
   coalesce((select sum(i.quantity) from player_inventory i where i.player_id = a.player_id), 0),
   md5(coalesce((

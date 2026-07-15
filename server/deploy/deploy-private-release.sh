@@ -105,6 +105,10 @@ runuser -u "${service_user}" --preserve-environment -- \
   "${node_bin}" -e "require('./security').validateProductionConfig();"
 runuser -u "${service_user}" --preserve-environment -- \
   env USER="${service_user}" LOGNAME="${service_user}" HOME="${base_dir}" PGUSER="${service_user}" \
+      POSTGRES_TEST_DATABASE_URL="${DATABASE_URL:-${POSTGRES_URL:-}}" \
+  "${node_bin}" postgresSmokeTest.js
+runuser -u "${service_user}" --preserve-environment -- \
+  env USER="${service_user}" LOGNAME="${service_user}" HOME="${base_dir}" PGUSER="${service_user}" \
   "${node_bin}" scripts/migratePostgres.js
 
 install -o root -g root -m 0644 \

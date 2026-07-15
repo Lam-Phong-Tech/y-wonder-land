@@ -55,8 +55,17 @@ create table if not exists player_economy (
     player_id text primary key references game_players(id) on delete cascade,
     version integer not null default 1,
     pos bigint not null default 5000 check (pos >= 0),
-    upos bigint not null default 0 check (upos >= 0),
+    web_point_micros_remainder bigint not null default 0
+        check (web_point_micros_remainder >= 0 and web_point_micros_remainder < 1000000),
     updated_at timestamptz not null default now()
+);
+
+-- Audit-only archive populated by migration 004 when upgrading legacy UPoint data.
+-- It is never read as an active wallet and is not converted to Point automatically.
+create table if not exists legacy_upoint_balances (
+    player_id text primary key references game_players(id) on delete cascade,
+    upoint_balance bigint not null,
+    archived_at timestamptz not null default now()
 );
 
 create table if not exists player_inventory_meta (
@@ -103,7 +112,6 @@ create table if not exists game_transactions (
     idempotency_key text null,
     request_signature text not null default '',
     delta_pos bigint not null default 0,
-    delta_upos bigint not null default 0,
     item_id text null,
     quantity_delta integer null,
     details_json jsonb not null default '{}'::jsonb,

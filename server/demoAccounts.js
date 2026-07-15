@@ -52,7 +52,6 @@ function makeEconomy(name) {
     return {
       version: 1,
       pos: 500000,
-      upos: 2500,
       updatedAt: nowISO(),
     };
   }
@@ -60,7 +59,6 @@ function makeEconomy(name) {
   return {
     version: 1,
     pos: 5000,
-    upos: 0,
     updatedAt: nowISO(),
   };
 }

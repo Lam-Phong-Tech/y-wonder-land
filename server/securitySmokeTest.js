@@ -185,6 +185,108 @@ function testConfigurationGate() {
       "Parallel auth without web auth returned the wrong error.");
   }
   assert(!parallelWithoutWebAccepted, "Parallel auth with disabled web auth was accepted.");
+
+  let topupWithoutSecretAccepted = false;
+  try {
+    validateProductionConfig({
+      NODE_ENV: "production",
+      HOST: "127.0.0.1",
+      STORE_MODE: "postgres",
+      WEB_AUTH_MODE: "disabled",
+      WEB_TOPUP_ENABLED: "true",
+      WEB_TOPUP_SECRET: "short",
+      ADMIN_DASHBOARD_ENABLED: "false",
+      DEMO_ACCOUNTS_ENABLED: "false",
+      JWT_SECRET: "security-smoke-secret-with-more-than-32-characters",
+    });
+    topupWithoutSecretAccepted = true;
+  } catch (error) {
+    assert(String(error.message).includes("WEB_TOPUP_SECRET"),
+      "Missing Point-credit secret returned the wrong production error.");
+  }
+  assert(!topupWithoutSecretAccepted, "Production Point credit accepted a short secret.");
+
+  let reusedGameSecretAccepted = false;
+  try {
+    validateProductionConfig({
+      NODE_ENV: "production",
+      HOST: "127.0.0.1",
+      STORE_MODE: "postgres",
+      WEB_AUTH_MODE: "disabled",
+      WEB_TOPUP_ENABLED: "true",
+      GAME_API_SECRET: "shared-game-api-secret-with-32-plus-characters",
+      ADMIN_DASHBOARD_ENABLED: "false",
+      DEMO_ACCOUNTS_ENABLED: "false",
+      JWT_SECRET: "security-smoke-secret-with-more-than-32-characters",
+    });
+    reusedGameSecretAccepted = true;
+  } catch (error) {
+    assert(String(error.message).includes("WEB_TOPUP_SECRET"),
+      "A reused game API secret returned the wrong Point-credit error.");
+  }
+  assert(!reusedGameSecretAccepted,
+    "Production Point credit reused GAME_API_SECRET instead of a dedicated secret.");
+
+  let topupWithClientGrantsAccepted = false;
+  try {
+    validateProductionConfig({
+      NODE_ENV: "production",
+      HOST: "127.0.0.1",
+      STORE_MODE: "postgres",
+      WEB_AUTH_MODE: "disabled",
+      WEB_TOPUP_ENABLED: "true",
+      WEB_TOPUP_SECRET: "security-smoke-topup-secret-with-32-plus-characters",
+      WEB_TOPUP_MODE: "canary",
+      WEB_TOPUP_ALLOWED_WEB_USER_IDS: "security-canary-web-user",
+      ADMIN_DASHBOARD_ENABLED: "false",
+      DEMO_ACCOUNTS_ENABLED: "false",
+      JWT_SECRET: "security-smoke-secret-with-more-than-32-characters",
+    });
+    topupWithClientGrantsAccepted = true;
+  } catch (error) {
+    assert(String(error.message).includes("CLIENT_ASSET_GRANTS_ENABLED"),
+      "Unsafe Point-credit client grant mode returned the wrong production error.");
+  }
+  assert(!topupWithClientGrantsAccepted,
+    "Production Point credit started while client asset grants were enabled.");
+
+  let topupWithoutCanaryUserAccepted = false;
+  try {
+    validateProductionConfig({
+      NODE_ENV: "production",
+      HOST: "127.0.0.1",
+      STORE_MODE: "postgres",
+      WEB_AUTH_MODE: "disabled",
+      WEB_TOPUP_ENABLED: "true",
+      WEB_TOPUP_SECRET: "security-smoke-topup-secret-with-32-plus-characters",
+      WEB_TOPUP_MODE: "canary",
+      CLIENT_ASSET_GRANTS_ENABLED: "false",
+      ADMIN_DASHBOARD_ENABLED: "false",
+      DEMO_ACCOUNTS_ENABLED: "false",
+      JWT_SECRET: "security-smoke-secret-with-more-than-32-characters",
+    });
+    topupWithoutCanaryUserAccepted = true;
+  } catch (error) {
+    assert(String(error.message).includes("WEB_TOPUP_ALLOWED_WEB_USER_IDS"),
+      "Missing Point-credit canary account returned the wrong production error.");
+  }
+  assert(!topupWithoutCanaryUserAccepted,
+    "Production Point credit started in canary mode without an account allowlist.");
+
+  validateProductionConfig({
+    NODE_ENV: "production",
+    HOST: "127.0.0.1",
+    STORE_MODE: "postgres",
+    WEB_AUTH_MODE: "disabled",
+    WEB_TOPUP_ENABLED: "true",
+    WEB_TOPUP_SECRET: "security-smoke-topup-secret-with-32-plus-characters",
+    WEB_TOPUP_MODE: "canary",
+    WEB_TOPUP_ALLOWED_WEB_USER_IDS: "security-canary-web-user",
+    CLIENT_ASSET_GRANTS_ENABLED: "false",
+    ADMIN_DASHBOARD_ENABLED: "false",
+    DEMO_ACCOUNTS_ENABLED: "false",
+    JWT_SECRET: "security-smoke-secret-with-more-than-32-characters",
+  });
 }
 
 function testRegistrationValidation() {
@@ -243,6 +345,13 @@ async function request(baseUrl, method, route, body, headers = {}) {
 
 async function postJson(baseUrl, route, body) {
   return request(baseUrl, "POST", route, JSON.stringify(body), { "Content-Type": "application/json" });
+}
+
+async function authorizedJson(baseUrl, method, route, body, token) {
+  return request(baseUrl, method, route, body == null ? undefined : JSON.stringify(body), {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  });
 }
 
 async function register(baseUrl, suffix) {
@@ -328,6 +437,7 @@ async function runIntegrationTest() {
       REALTIME_MAX_PAYLOAD_BYTES: "1024",
       REALTIME_MESSAGE_RATE_MAX: "30",
       REALTIME_MESSAGE_RATE_WINDOW_MS: "60000",
+      CLIENT_ASSET_GRANTS_ENABLED: "false",
     },
     stdio: ["ignore", "pipe", "pipe"],
   });
@@ -388,6 +498,72 @@ async function runIntegrationTest() {
       password: accountB.password,
     });
     assert(otherLogin.response.status === 200 && otherLogin.payload.token, "Another account was incorrectly blocked.");
+
+    const bootstrap = await authorizedJson(baseUrl, "GET", "/player/bootstrap", null, otherLogin.payload.token);
+    assert(bootstrap.response.status === 200, "Player bootstrap failed.");
+    assert(!Object.prototype.hasOwnProperty.call(bootstrap.payload.economy || {}, "upos"),
+      "Bootstrap still exposes retired UPoint balance.");
+
+    const directEconomySet = await authorizedJson(baseUrl, "PUT", "/player/economy", {
+      economy: { pos: 999999999 },
+    }, otherLogin.payload.token);
+    assert(directEconomySet.response.status === 405,
+      "Authenticated client can still overwrite its Point balance.");
+    assert(directEconomySet.payload.error === "ECONOMY_SERVER_AUTHORITATIVE",
+      "Direct Point overwrite returned the wrong error.");
+
+    const retiredUPoint = await authorizedJson(baseUrl, "POST", "/player/economy/apply", {
+      delta_upos: 1,
+      idempotency_key: "security-retired-upoint",
+    }, otherLogin.payload.token);
+    assert(retiredUPoint.response.status === 400 && retiredUPoint.payload.error === "UPOINT_RETIRED",
+      "Legacy UPoint mutation was not rejected.");
+
+    const positivePoint = await authorizedJson(baseUrl, "POST", "/player/economy/apply", {
+      delta_pos: 1,
+      idempotency_key: "security-positive-point",
+    }, otherLogin.payload.token);
+    assert(positivePoint.response.status === 403
+      && positivePoint.payload.error === "CLIENT_POSITIVE_ECONOMY_DELTA_FORBIDDEN",
+    "Authenticated client can still mint Point through a positive delta.");
+
+    const positiveItem = await authorizedJson(baseUrl, "POST", "/player/inventory/adjust", {
+      item_id: "fish_ca_com_01",
+      quantity_delta: 1,
+      idempotency_key: "security-positive-item",
+    }, otherLogin.payload.token);
+    assert(positiveItem.response.status === 403
+      && positiveItem.payload.error === "CLIENT_POSITIVE_INVENTORY_DELTA_FORBIDDEN",
+    "Authenticated client can still mint inventory through a positive delta.");
+
+    const replaceInventory = await authorizedJson(baseUrl, "PUT", "/player/inventory", {
+      inventory: { maxSlots: 999, slots: [{ itemId: "fish_ca_com_01", quantity: 999999 }] },
+    }, otherLogin.payload.token);
+    assert(replaceInventory.response.status === 405
+      && replaceInventory.payload.error === "INVENTORY_SERVER_AUTHORITATIVE",
+    "Authenticated client can still replace its complete inventory.");
+
+    const debitPoint = await authorizedJson(baseUrl, "POST", "/player/economy/apply", {
+      delta_pos: -1,
+      idempotency_key: "security-debit-point",
+    }, otherLogin.payload.token);
+    assert(debitPoint.response.status === 200
+      && Number(debitPoint.payload.economy.pos) === Number(bootstrap.payload.economy.pos) - 1,
+    "Debit-only Point mutation stopped working in strict mode.");
+
+    const carrotBefore = (bootstrap.payload.inventory.slots || [])
+      .find((slot) => slot.itemId === "carrot_seed_01");
+    const debitItem = await authorizedJson(baseUrl, "POST", "/player/inventory/adjust", {
+      item_id: "carrot_seed_01",
+      quantity_delta: -1,
+      idempotency_key: "security-debit-item",
+    }, otherLogin.payload.token);
+    const carrotAfter = (debitItem.payload.inventory.slots || [])
+      .find((slot) => slot.itemId === "carrot_seed_01");
+    assert(debitItem.response.status === 200 && carrotBefore
+      && Number(carrotAfter && carrotAfter.quantity) === Number(carrotBefore.quantity) - 1,
+    "Debit-only inventory mutation stopped working in strict mode.");
+
     await testRealtimeGuards(baseUrl, otherLogin.payload.token);
   } finally {
     if (child.exitCode == null) child.kill("SIGTERM");

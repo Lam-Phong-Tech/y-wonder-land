@@ -16,6 +16,13 @@ function envInteger(name, fallback, options = {}, env = process.env) {
   return Math.min(max, Math.max(min, parsed));
 }
 
+function envList(name, env = process.env) {
+  return [...new Set(String(env[name] || "")
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean))];
+}
+
 function resolveAuthTransitionMode(webAuthMode, env = process.env) {
   const configured = String(env.AUTH_TRANSITION_MODE || "").trim().toLowerCase();
   if (configured) return configured;
@@ -78,6 +85,11 @@ function buildSecurityConfig(env = process.env) {
     browserAuthStartMax: envInteger("BROWSER_AUTH_START_RATE_LIMIT_MAX", 30, { min: 1 }, env),
     browserAuthExchangeWindowMs: envInteger("BROWSER_AUTH_EXCHANGE_RATE_LIMIT_WINDOW_MS", 10 * 60 * 1000, { min: 1000 }, env),
     browserAuthExchangeMax: envInteger("BROWSER_AUTH_EXCHANGE_RATE_LIMIT_MAX", 1500, { min: 1 }, env),
+    webTopupEnabled: envBoolean("WEB_TOPUP_ENABLED", false, env),
+    webTopupAllowRemote: envBoolean("WEB_TOPUP_ALLOW_REMOTE", false, env),
+    webTopupClockSkewSec: envInteger("WEB_TOPUP_CLOCK_SKEW_SEC", 300, { min: 30, max: 900 }, env),
+    webTopupMaxPoints: envInteger("WEB_TOPUP_MAX_POINTS", 1_000_000_000, { min: 1, max: Number.MAX_SAFE_INTEGER }, env),
+    clientAssetGrantsEnabled: envBoolean("CLIENT_ASSET_GRANTS_ENABLED", true, env),
     rateLimitEnabled: envBoolean("RATE_LIMIT_ENABLED", true, env),
     requestTimeoutMs: envInteger("HTTP_REQUEST_TIMEOUT_MS", 30_000, { min: 1000 }, env),
     headersTimeoutMs: envInteger("HTTP_HEADERS_TIMEOUT_MS", 15_000, { min: 1000 }, env),
@@ -165,6 +177,26 @@ function validateProductionConfig(env = process.env) {
     }
     if (authSecret.length < 16) {
       errors.push("Browser auth approval requires WEB_AUTH_SECRET or GAME_API_SECRET");
+    }
+  }
+  if (envBoolean("WEB_TOPUP_ENABLED", false, env)) {
+    const topupSecret = String(env.WEB_TOPUP_SECRET || "");
+    const topupMode = String(env.WEB_TOPUP_MODE || "canary").trim().toLowerCase();
+    const allowedWebUserIds = envList("WEB_TOPUP_ALLOWED_WEB_USER_IDS", env);
+    if (topupSecret.length < 32) {
+      errors.push("WEB_TOPUP_SECRET must contain at least 32 characters when WEB_TOPUP_ENABLED=true");
+    }
+    if (envBoolean("CLIENT_ASSET_GRANTS_ENABLED", true, env)) {
+      errors.push("CLIENT_ASSET_GRANTS_ENABLED must be false when WEB_TOPUP_ENABLED=true");
+    }
+    if (!["canary", "open"].includes(topupMode)) {
+      errors.push("WEB_TOPUP_MODE must be canary or open when WEB_TOPUP_ENABLED=true");
+    } else if (topupMode === "canary" && allowedWebUserIds.length === 0) {
+      errors.push("WEB_TOPUP_ALLOWED_WEB_USER_IDS must contain at least one web user ID in canary mode");
+    } else if (topupMode === "canary" && allowedWebUserIds.length > 25) {
+      errors.push("WEB_TOPUP_ALLOWED_WEB_USER_IDS cannot contain more than 25 IDs in canary mode");
+    } else if (topupMode === "open" && allowedWebUserIds.length > 0) {
+      errors.push("WEB_TOPUP_ALLOWED_WEB_USER_IDS must be empty in open mode");
     }
   }
   if (String(env.ADMIN_DASHBOARD_ENABLED || "").toLowerCase() !== "false") {

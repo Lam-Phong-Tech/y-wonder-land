@@ -152,11 +152,11 @@ async function importProfile(client, playerId, profile) {
 
 async function importEconomy(client, playerId, economy) {
   await client.query(
-    `insert into player_economy (player_id,version,pos,upos,updated_at)
-     values ($1,$2,$3,$4,$5)
+    `insert into player_economy (player_id,version,pos,updated_at)
+     values ($1,$2,$3,$4)
      on conflict (player_id) do update set
-       version=excluded.version,pos=excluded.pos,upos=excluded.upos,updated_at=excluded.updated_at`,
-    [playerId, toInt(economy.version, 1), toInt(economy.pos, 5000), toInt(economy.upos, 0), economy.updatedAt || nowISO()]
+       version=excluded.version,pos=excluded.pos,updated_at=excluded.updated_at`,
+    [playerId, toInt(economy.version, 1), toInt(economy.pos, 5000), economy.updatedAt || nowISO()]
   );
 }
 
@@ -229,8 +229,18 @@ async function importDailyLimits(client, playerId, dailyLimits) {
 async function importTransactions(client, transactions) {
   for (const transaction of transactions) {
     if (!transaction || !transaction.id || !transaction.playerId) continue;
+    const economyAfter = transaction.economyAfter
+      ? {
+        version: toInt(transaction.economyAfter.version, 1),
+        pos: toInt(transaction.economyAfter.pos, 5000),
+        updatedAt: transaction.economyAfter.updatedAt || transaction.createdAt || nowISO(),
+      }
+      : transaction.economyAfter;
+    const details = { ...transaction };
+    delete details.deltaUpos;
+    if (details.economyAfter) details.economyAfter = economyAfter;
     const result = {
-      economy: transaction.economyAfter,
+      economy: economyAfter,
       inventory: transaction.inventoryAfter,
       daily_limits: transaction.dailyLimitsAfter,
       limit: transaction.limitAfter,
@@ -238,9 +248,9 @@ async function importTransactions(client, transactions) {
     };
     await client.query(
       `insert into game_transactions
-       (id,player_id,type,ref,idempotency_key,request_signature,delta_pos,delta_upos,
+       (id,player_id,type,ref,idempotency_key,request_signature,delta_pos,
         item_id,quantity_delta,details_json,result_json,created_at)
-       values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12::jsonb,$13)
+       values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10::jsonb,$11::jsonb,$12)
        on conflict (id) do nothing`,
       [
         transaction.id,
@@ -250,10 +260,9 @@ async function importTransactions(client, transactions) {
         transaction.idempotencyKey || null,
         transaction.requestSignature || "",
         toInt(transaction.deltaPos, 0),
-        toInt(transaction.deltaUpos, 0),
         transaction.itemId || null,
         transaction.quantityDelta == null ? null : toInt(transaction.quantityDelta, 0),
-        JSON.stringify(transaction),
+        JSON.stringify(details),
         JSON.stringify(result),
         transaction.createdAt || nowISO(),
       ]

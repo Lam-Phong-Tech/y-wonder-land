@@ -10,7 +10,11 @@ const store = require("./store");
 const webAuth = require("./webAuthProvider");
 const { attachRealtimeServer } = require("./realtimeServer");
 const { createAdminDashboardRouter } = require("./adminDashboard");
-const { resolveShopOffer } = require("./shopCatalog");
+const { resolveAnimalPlacementRule, resolveShopOffer } = require("./shopCatalog");
+const {
+  buildWebPointCreditConfig,
+  createWebPointCreditHandler,
+} = require("./webPointCredit");
 const {
   bearerToken,
   buildBrowserEntryUrl,
@@ -46,6 +50,7 @@ const HOST = process.env.HOST || "0.0.0.0";
 const JWT_SECRET = process.env.JWT_SECRET || DEVELOPMENT_JWT_SECRET;
 const TOKEN_TTL = process.env.JWT_TOKEN_TTL || "30d";
 const securityConfig = buildSecurityConfig();
+const webPointCreditConfig = buildWebPointCreditConfig();
 const BROWSER_AUTH_CALLBACK_URL = process.env.BROWSER_AUTH_CALLBACK_URL || "https://ywonder.net/api/game/browser/callback";
 const BROWSER_AUTH_APPROVAL_SECRET = process.env.WEB_AUTH_SECRET || process.env.GAME_API_SECRET || "";
 let realtime = null;
@@ -58,6 +63,23 @@ if (securityConfig.trustProxy) app.set("trust proxy", securityConfig.trustProxy)
 app.use(createRequestSecurityMiddleware({ accessLogEnabled: securityConfig.accessLogEnabled }));
 app.use(cors(createCorsOptions(securityConfig.corsAllowedOrigins)));
 app.use(express.json({ limit: securityConfig.jsonBodyLimit, strict: true }));
+
+if (webPointCreditConfig.enabled) {
+  app.post("/internal/web/point-credit", createWebPointCreditHandler({
+    store,
+    config: webPointCreditConfig,
+    onCredit: async (result) => {
+      if (!realtime || typeof realtime.notifyPlayer !== "function") return;
+      realtime.notifyPlayer(result.player && result.player.id, {
+        type: "economy_updated",
+        reason: "web_topup",
+        economy: result.economy,
+        duplicate: Boolean(result.duplicate),
+        sentAt: new Date().toISOString(),
+      });
+    },
+  }));
+}
 
 function asyncRoute(handler) {
   return (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
@@ -489,16 +511,25 @@ api.get("/player/economy", auth, asyncRoute(async (req, res) => {
 }));
 
 api.put("/player/economy", auth, asyncRoute(async (req, res) => {
-  const incoming = req.body && req.body.economy;
-  if (!incoming) return res.status(400).json({ error: "Missing economy" });
-  res.json({ ok: true, economy: await store.setEconomy(req.userId, incoming) });
+  res.status(405).json({ error: "ECONOMY_SERVER_AUTHORITATIVE" });
 }));
 
 api.post("/player/economy/apply", auth, asyncRoute(async (req, res) => {
   const body = req.body || {};
+  const legacyUPointDelta = Number(body.delta_upos ?? body.deltaUpos ?? 0);
+  if (!Number.isFinite(legacyUPointDelta) || legacyUPointDelta !== 0) {
+    return res.status(400).json({ error: "UPOINT_RETIRED" });
+  }
+  const deltaPos = Number(body.delta_pos ?? body.deltaPos ?? 0);
+  if (!Number.isSafeInteger(deltaPos)) {
+    return res.status(400).json({ error: "INVALID_POINT_DELTA" });
+  }
+  if (deltaPos > 0 && !securityConfig.clientAssetGrantsEnabled) {
+    return res.status(403).json({ error: "CLIENT_POSITIVE_ECONOMY_DELTA_FORBIDDEN" });
+  }
   const result = await store.applyEconomyDelta(
     req.userId,
-    { pos: body.delta_pos || body.deltaPos || 0, upos: body.delta_upos || body.deltaUpos || 0 },
+    { pos: deltaPos },
     {
       type: body.type || "adjust",
       ref: body.ref || "",
@@ -515,20 +546,21 @@ api.get("/player/inventory", auth, asyncRoute(async (req, res) => {
 }));
 
 api.put("/player/inventory", auth, asyncRoute(async (req, res) => {
-  const incoming = req.body && req.body.inventory;
-  if (!incoming) return res.status(400).json({ error: "Missing inventory" });
-  res.json({ ok: true, inventory: await store.setInventory(req.userId, incoming) });
+  res.status(405).json({ error: "INVENTORY_SERVER_AUTHORITATIVE" });
 }));
 
 api.post("/player/inventory/adjust", auth, asyncRoute(async (req, res) => {
   const body = req.body || {};
   const itemId = body.item_id || body.itemId;
-  const quantityDelta = body.quantity_delta || body.quantityDelta;
-  if (!itemId || !Number.isFinite(Number(quantityDelta))) {
+  const quantityDelta = Number(body.quantity_delta ?? body.quantityDelta);
+  if (!itemId || !Number.isSafeInteger(quantityDelta)) {
     return res.status(400).json({ error: "Missing item_id or quantity_delta" });
   }
+  if (quantityDelta > 0 && !securityConfig.clientAssetGrantsEnabled) {
+    return res.status(403).json({ error: "CLIENT_POSITIVE_INVENTORY_DELTA_FORBIDDEN" });
+  }
 
-  const result = await store.adjustInventoryItem(req.userId, itemId, Number(quantityDelta), {
+  const result = await store.adjustInventoryItem(req.userId, itemId, quantityDelta, {
     type: body.type || "inventory_adjust",
     ref: body.ref || itemId,
     idempotencyKey: body.idempotency_key || body.idempotencyKey || "",
@@ -601,6 +633,51 @@ api.post("/player/daily-limits/consume", auth, asyncRoute(async (req, res) => {
       error: result.error,
       daily_limits: result.daily_limits,
       limit: result.limit,
+    });
+  }
+
+  res.json(result);
+}));
+
+api.post("/player/farm/animals/place", auth, asyncRoute(async (req, res) => {
+  const body = req.body || {};
+  const itemId = String(body.item_id || body.itemId || "").trim();
+  const cellKeys = body.cell_keys || body.cellKeys;
+  const expectedVersion = Number(body.expected_version ?? body.expectedVersion);
+  const idempotencyKey = String(body.idempotency_key || body.idempotencyKey || "").trim();
+
+  if (!itemId || !Array.isArray(cellKeys)) {
+    return res.status(400).json({ error: "INVALID_ANIMAL_PLACEMENT" });
+  }
+  if (!Number.isInteger(expectedVersion) || expectedVersion < 1) {
+    return res.status(400).json({ error: "INVALID_EXPECTED_VERSION" });
+  }
+  if (!idempotencyKey || idempotencyKey.length > 160) {
+    return res.status(400).json({ error: "MISSING_IDEMPOTENCY_KEY" });
+  }
+
+  const rule = resolveAnimalPlacementRule(itemId);
+  if (!rule.ok) {
+    return res.status(400).json({ error: rule.error });
+  }
+
+  const result = await store.placeFarmAnimal(
+    req.userId,
+    { itemId, cellKeys, rule },
+    { expectedVersion, idempotencyKey }
+  );
+  if (!result.ok) {
+    const conflictErrors = new Set([
+      "FARM_STATE_CONFLICT",
+      "FARM_STATE_NOT_READY",
+      "INSUFFICIENT_ITEM",
+      "PEN_CELL_OCCUPIED",
+      "IDEMPOTENCY_CONFLICT",
+    ]);
+    return res.status(conflictErrors.has(result.error) ? 409 : 400).json({
+      error: result.error,
+      inventory: result.inventory,
+      farm_state: result.farm_state,
     });
   }
 
