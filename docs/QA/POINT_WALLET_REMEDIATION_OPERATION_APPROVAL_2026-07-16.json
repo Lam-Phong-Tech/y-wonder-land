@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "mode": "POINT_WALLET_REMEDIATION_OPERATION_APPROVAL",
+  "approvedAt": "2026-07-16T16:06:22.236Z",
+  "approvedByRole": "PROJECT_OWNER",
+  "approvalReference": "OWNER_CHAT_APPROVAL_2026-07-16_AFTER_PLAN_75CE5DD9",
+  "remediationPlan": {
+    "sha256": "fdd118a89f0ac70a60a96eb587d5f7a89b8dd731f02a9922d96410fda2b65357",
+    "plannerSha256": "4677eae4abf327480610e34fe09a0f6f8d2e138190f87075f75cec31eee98fb4",
+    "generatedAt": "2026-07-16T15:56:41.000Z"
+  },
+  "executionOrder": [
+    "LEGACY_RESIDUAL_NORMALIZATION",
+    "SYNTHETIC_CREDIT_REVERSAL"
+  ],
+  "operations": {
+    "legacyResidualNormalization": {
+      "authorized": true,
+      "action": "ROUND_HALF_EVEN_WITH_APPEND_ONLY_RESIDUAL_AUDIT",
+      "roundingMode": "ROUND_HALF_EVEN",
+      "accountCount": 3,
+      "valueCount": 6,
+      "totalResidualPointAttos": "-666666328800",
+      "normalizationDeltaPointAttos": "666666328800"
+    },
+    "syntheticCreditReversal": {
+      "authorized": true,
+      "action": "AUDITED_SYNTHETIC_CREDIT_REVERSAL",
+      "accountCount": 1,
+      "sourceCount": 3,
+      "pointMicros": "3000000"
+    }
+  },
+  "constraints": {
+    "authorizesOnlyListedOperations": true,
+    "authorizesDatabaseMutation": true,
+    "authorizesCompensatingRollback": true,
+    "authorizesAccountLink": false,
+    "authorizesBalanceMigration": false,
+    "authorizesDeployment": false,
+    "authorizesServiceRestart": false,
+    "authorizesRealPayment": false,
+    "requiresChecksummedBackup": true,
+    "requiresFreshPreflight": true,
+    "requiresAtomicWriteAndAudit": true,
+    "requiresPostWriteReconciliation": true
+  }
+}
