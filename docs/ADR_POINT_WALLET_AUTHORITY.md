@@ -125,6 +125,21 @@ The migration command records one immutable migration transaction and then freez
 the web Point columns. It never performs `gamePoint += webBalance` without an
 approved reconciliation record.
 
+### Read-only dry-run implementation
+
+The candidate dry-run exports only the minimum Point fields from SQLite opened in
+`mode=ro/query_only` and PostgreSQL under `REPEATABLE READ READ ONLY`. It captures
+both ledgers twice and aborts if either relevant snapshot changes during the
+cross-database window. Raw identities live only in a mode-`0700` temporary
+directory; the retained report contains HMAC references, aggregate evidence and
+classification reasons but no raw user/player/transaction IDs.
+
+The report deliberately sets `automaticMigrationAllowed=false`, emits no SQL and
+never suggests a migration amount. `READY_TO_LINK` only means that the captured
+data has no unexplained difference; identity approval, rollback and a separate
+write release are still required. This implementation has passed local isolated
+tests but has not yet been run against production.
+
 ## Business Gates
 
 The customer answers are sufficient to build the shared-wallet foundation, but the

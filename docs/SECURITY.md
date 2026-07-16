@@ -106,6 +106,20 @@ Cho tới khi migration và web debit orchestrator hoàn tất, không chuyển 
 - `PRODUCTION_PLAYER_DATA_MUTATED=no` chỉ hợp lệ sau khi database tạm đã bị xóa và test user/transaction không tồn tại trong PostgreSQL game hay SQLite web thật.
 - Trạng thái hiện tại: harness safety test, Bash syntax và backend regression pass local. Runner đã pass lại trên VPS ngày 16/07/2026 bằng đúng release active Next.js `15.5.20`: canary rejection, first dispatch, duplicate retry, web restart cô lập, post-commit response loss và idempotent recovery đều đạt. Database tạm/bản sao SQLite/process/upload đã dọn; production PID/root/build/env/health không đổi và không dùng giao dịch tiền thật.
 
+### Migration dry-run hai ledger
+
+- Chỉ được chạy bằng exporter cố định: SQLite `mode=ro/query_only` và PostgreSQL
+  `REPEATABLE READ READ ONLY`; không dùng câu SQL ad-hoc để copy/cộng balance.
+- Vì SQLite và PostgreSQL không có transaction chung, runner phải capture cả hai
+  hai lượt và dừng nếu một snapshot thay đổi giữa cửa sổ đọc.
+- Raw `User.id`, `playerId` và transaction ID là dữ liệu nhạy cảm: chỉ nằm trong
+  temp `0700`, bị xóa bằng trap, không gửi qua chat/log và không commit.
+- Report giữ balance/evidence nhưng thay identity bằng HMAC. Khóa report tối thiểu
+  32 ký tự, root-only, ổn định giữa các lượt cần so sánh và không lưu trong repo.
+- `READY_TO_LINK` không phải quyền tự migrate. Mọi balance seed/legacy/reward phải
+  có phân loại và phê duyệt; write migration là release độc lập có backup/rollback.
+- Candidate đã pass local; production dry-run chưa chạy.
+
 ## 7. Checklist nghiệm thu top-up
 
 - [x] UPoint không còn trong runtime/HUD/API/fresh schema; cột production legacy chỉ tạm tồn tại qua nấc deploy tương thích.
@@ -113,9 +127,9 @@ Cho tới khi migration và web debit orchestrator hoàn tất, không chuyển 
 - [x] Endpoint top-up riêng có HMAC, timestamp, loopback và giới hạn số Point.
 - [x] Cộng Point + transaction nguyên tử và idempotent.
 - [x] Test chữ ký sai, request quá hạn, retry, conflict, restart và realtime refresh.
-- [ ] Audit đúng bảng/trạng thái giao dịch nạp của website.
-- [ ] Chọn ledger Point authoritative duy nhất và migration số dư Point/GXL web hiện hữu.
-- [ ] Chốt contract tỷ giá Admin, precision/rounding và audit rate version.
+- [~] Exporter đã audit đúng bảng Point/outbox web ở fixture và fail-closed schema lệch; còn phải chạy production read-only.
+- [~] Đã chọn PostgreSQL game làm ledger authoritative và có candidate dry-run từng account; chưa phân loại/migrate số dư production.
+- [~] Candidate có rate version, integer micros, rounding journal và test retry; còn chờ duyệt production và semantics YWH/rút.
 - [ ] Chốt `YWH <-> Point`, chuyển Point và state machine `Point -> USDT` gồm reversal.
 - [ ] Chốt công thức/số tầng/điều kiện/refund hoa hồng YWH từ tiêu dùng game.
 - [~] Source web tạo outbox trong cùng transaction với bản ghi SWAP `SUCCESS`; còn chờ canary production chứng minh bằng giao dịch thật.
@@ -130,4 +144,4 @@ Cho tới khi migration và web debit orchestrator hoàn tất, không chuyển 
 - [x] Script bật/tắt canary có shared lock, validate-only, backup root-only và rollback tự động; VPS rollback preflight, live dormant -> canary và client relogin sau double restart đều pass. Env trở về byte-for-byte baseline, HUD/PostgreSQL cùng `5003` và ledger/outbox không đổi.
 - [x] Web production đã nâng từ Next.js `14.2.18` lên release Next.js `15.5.20`, build `O-PUYMkTlVdeNCYQWp2gJ`. Build/audit `0 vulnerabilities`, route guards, production credential login/session/authenticated wallet, cleanup synthetic, DB/foreign key, rollback candidate và postflight đều pass; source cũ còn nguyên để rollback. Top-up đang ở canary đúng một identity, chưa dùng tiền thật.
 - [~] Nạp synthetic có kiểm soát, retry cùng transaction, relogin, đổi EXE/APK, restart backend, web restart cô lập và post-commit timeout đã đúng một lần; giao dịch web thật cực nhỏ chưa thực hiện.
-- [ ] Có truy vấn/audit để đối soát web transaction ID với `game_transactions`.
+- [~] Có report đối soát web transaction/outbox source với `game_transactions` và phát hiện duplicate/mismatch; local pass, production chưa chạy.

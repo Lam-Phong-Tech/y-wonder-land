@@ -6,6 +6,17 @@
 
 ---
 
+## [2026-07-16] — Candidate migration dry-run ví Point, chưa chạy production
+
+### Đã thêm
+- Exporter web SQLite chỉ đọc (`mode=ro`, `query_only`, foreign-key check) và exporter game PostgreSQL `REPEATABLE READ READ ONLY`; dữ liệu tiền dùng integer micros, không dùng float để quyết định migration.
+- Báo cáo ẩn danh từng account phát hiện mapping/transaction trùng, identity mồ côi, thiếu wallet, balance âm/locked, outbox chưa settle hoặc lệch game ledger. Report luôn cấm auto-migration và không sinh SQL/số tiền đề xuất.
+- Runner chụp hai ledger hai lượt, dừng nếu dữ liệu đổi giữa lúc capture, chỉ giữ raw ID trong temp `0700` rồi xóa; file cuối dùng HMAC ref và quyền `0600`. Runbook nằm tại `docs/QA/POINT_WALLET_MIGRATION_DRY_RUN.md`.
+
+### Bằng chứng
+- Suite migration dry-run, Point authority/reservation/credit, security, Phase 1 cô lập và animal placement đều pass; Bash syntax và `git diff --check` pass.
+- Chưa chạy tool trên production, chưa tạo live report, không restart service, không sửa DB và không migrate Point. Cổng tiếp theo là xin duyệt lượt production read-only rồi phân loại thủ công từng account.
+
 ## [2026-07-16] — Candidate ví Point authoritative v3, chưa deploy
 
 ### Đã triển khai cô lập

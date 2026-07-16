@@ -93,3 +93,7 @@ Assets/Building/Map1*
 /outputs/
 /.tools/
 /.claude/settings.local.json
+
+# Python test cache
+__pycache__/
+*.py[cod]

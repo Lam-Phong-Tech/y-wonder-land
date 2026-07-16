@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-07-16 (Point wallet migration dry-run, not run on production)
+
+### Added
+- Added read-only web SQLite and game PostgreSQL snapshot exporters plus an anonymized per-account reconciliation report. The report uses integer micros, rejects duplicate/orphan mappings and ledger rows, reconciles web outbox sources to game credits, and never emits migration SQL or a suggested automatic balance move.
+- Added a guarded runner that captures both ledgers twice, aborts on cross-capture drift, retains raw identities only under a temporary `0700` directory, and installs only the HMAC-pseudonymized report with mode `0600`.
+- Added `docs/QA/POINT_WALLET_MIGRATION_DRY_RUN.md` with the approval, execution, classification and acceptance gates.
+
+### Verified
+- `test:web-point-migration-dry-run` passes the report, SQLite checksum/read-only export, PostgreSQL `REPEATABLE READ READ ONLY`, rollback and raw-identity leak tests. Bash syntax and `git diff --check` pass.
+- Point authority, reservation, credit, security, isolated phase-one and farm animal placement regressions pass. Production was not contacted, no report was generated from live data, no service was restarted and no balance was migrated.
+
 ## [Unreleased] - 2026-07-16 (Shared Point wallet authority v3, not deployed)
 
 ### Added
