@@ -12,6 +12,7 @@ web_database="$1"
 report_path="$2"
 run_root=""
 report_key="${POINT_MIGRATION_REPORT_KEY:-}"
+game_export_user="${POINT_MIGRATION_GAME_EXPORT_USER:-}"
 
 fail() {
   echo "[point-wallet-migration-dry-run] $*" >&2
@@ -33,9 +34,16 @@ trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 
-for command_name in chmod cmp dirname install mktemp node python3 rm; do
+for command_name in chmod cmp dirname env id install mktemp node python3 rm; do
   command -v "${command_name}" >/dev/null || fail "Missing command: ${command_name}"
 done
+if [[ -n "${game_export_user}" ]]; then
+  [[ "${game_export_user}" =~ ^[a-z_][a-z0-9_-]*$ ]] \
+    || fail "POINT_MIGRATION_GAME_EXPORT_USER has an invalid format."
+  command -v runuser >/dev/null || fail "Missing command: runuser"
+  id "${game_export_user}" >/dev/null 2>&1 \
+    || fail "POINT_MIGRATION_GAME_EXPORT_USER does not exist."
+fi
 [[ -f "${web_database}" ]] || fail "Web SQLite database is missing."
 [[ -n "${DATABASE_URL:-}" ]] || fail "DATABASE_URL is required for the game PostgreSQL read."
 [[ ${#report_key} -ge 32 ]] \
@@ -51,13 +59,23 @@ web_snapshot_second="${run_root}/web.second.raw.json"
 game_snapshot_second="${run_root}/game.second.raw.json"
 anonymized_report="${run_root}/report.json"
 
+export_game_snapshot() {
+  if [[ -n "${game_export_user}" ]]; then
+    runuser -u "${game_export_user}" --preserve-environment -- \
+      env -u POINT_MIGRATION_REPORT_KEY \
+      node "${script_root}/exportGamePointMigrationSnapshot.js"
+  else
+    node "${script_root}/exportGamePointMigrationSnapshot.js"
+  fi
+}
+
 export POINT_MIGRATION_RAW_EXPORT_ACK=I_UNDERSTAND_THIS_OUTPUT_CONTAINS_RAW_WALLET_IDENTITIES
 python3 "${script_root}/exportWebPointMigrationSnapshot.py" \
   --database "${web_database}" >"${web_snapshot_first}"
-node "${script_root}/exportGamePointMigrationSnapshot.js" >"${game_snapshot_first}"
+export_game_snapshot >"${game_snapshot_first}"
 python3 "${script_root}/exportWebPointMigrationSnapshot.py" \
   --database "${web_database}" >"${web_snapshot_second}"
-node "${script_root}/exportGamePointMigrationSnapshot.js" >"${game_snapshot_second}"
+export_game_snapshot >"${game_snapshot_second}"
 unset POINT_MIGRATION_RAW_EXPORT_ACK
 
 cmp -s "${web_snapshot_first}" "${web_snapshot_second}" \

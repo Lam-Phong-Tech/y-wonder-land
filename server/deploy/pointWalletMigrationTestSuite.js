@@ -1,10 +1,22 @@
 "use strict";
 
 const assert = require("assert");
+const fs = require("fs");
 const path = require("path");
 const { spawnSync } = require("child_process");
 
 const deployRoot = __dirname;
+const runnerSource = fs.readFileSync(
+  path.join(deployRoot, "run-point-wallet-migration-dry-run.sh"),
+  "utf8"
+);
+
+assert(runnerSource.includes('POINT_MIGRATION_GAME_EXPORT_USER'),
+  "Runner does not support PostgreSQL peer-auth service users.");
+assert(runnerSource.includes('runuser -u "${game_export_user}" --preserve-environment'),
+  "Runner does not drop only the PostgreSQL exporter to the service user.");
+assert(runnerSource.includes("env -u POINT_MIGRATION_REPORT_KEY"),
+  "Runner leaks the report HMAC key into the service-user exporter.");
 
 function run(command, args, label) {
   const result = spawnSync(command, args, {
