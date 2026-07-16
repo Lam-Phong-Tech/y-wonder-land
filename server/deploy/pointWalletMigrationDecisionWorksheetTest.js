@@ -189,6 +189,7 @@ function run() {
   assert.strictEqual(worksheet.summary.totalReviewWebPointMicros, "12666667");
   assert.strictEqual(worksheet.summary.totalGameOpeningPointMicros, "5000000000");
   assert.strictEqual(worksheet.summary.totalSyntheticCreditMicros, "3000000");
+  assert.strictEqual(worksheet.summary.totalRemediatedSyntheticCreditMicros, "0");
   assert.strictEqual(worksheet.summary.classCounts.LEGACY_SUB_MICRO_PRECISION, 1);
   assert.strictEqual(worksheet.summary.classCounts.GAME_OPENING_BALANCE, 1);
   assert.strictEqual(worksheet.summary.classCounts.SYNTHETIC_CREDIT_WITHOUT_WEB_SOURCE, 1);
@@ -202,6 +203,33 @@ function run() {
   assert(mapped.requiredDecisions.some((item) => item.key === "legacyWebBalanceTreatment"));
   assert.deepStrictEqual(mapped.facts.unmatchedOutboxSourceRefs, ["5".repeat(24)]);
   assert.strictEqual(mapped.approval.status, "PENDING");
+
+  const remediatedReport = copy(report);
+  const remediatedAccount = remediatedReport.accounts.find(
+    (item) => item.accountRef === "3".repeat(24)
+  );
+  remediatedAccount.evidence.outboxes[0].syntheticRemediationStatus = "REVERSED";
+  remediatedAccount.evidence.outboxes[0].syntheticRemediationOperationRef = "7".repeat(24);
+  remediatedAccount.evidence.outboxes[0].syntheticRemediationRollbackRef = null;
+  const remediatedWorksheet = buildPointWalletMigrationDecisionWorksheet(remediatedReport, {
+    reportSha256: REPORT_SHA256,
+    generatorSha256: GENERATOR_SHA256,
+    generatedAt: "2026-07-16T15:05:00.000Z",
+  });
+  const remediatedMapped = remediatedWorksheet.accounts.find(
+    (item) => item.accountRef === "3".repeat(24)
+  );
+  assert(!remediatedMapped.requiredDecisions.some(
+    (item) => item.key === "syntheticCreditTreatment"
+  ));
+  assert.strictEqual(remediatedMapped.facts.unmatchedOutboxMicros, "0");
+  assert.strictEqual(remediatedMapped.facts.remediatedOutboxMicros, "3000000");
+  assert.deepStrictEqual(remediatedMapped.facts.remediatedOutboxSourceRefs, ["5".repeat(24)]);
+  assert.strictEqual(remediatedWorksheet.summary.pendingDecisionCount, 5);
+  assert.strictEqual(remediatedWorksheet.summary.totalSyntheticCreditMicros, "0");
+  assert.strictEqual(remediatedWorksheet.summary.totalRemediatedSyntheticCreditMicros, "3000000");
+  assert(renderPointWalletMigrationDecisionMarkdown(remediatedWorksheet)
+    .includes("Synthetic credit already reversed with audit: **3.000000 Point**"));
 
   const markdown = renderPointWalletMigrationDecisionMarkdown(worksheet);
   assert(markdown.includes("Point Wallet Migration Decision Worksheet"));
@@ -221,6 +249,11 @@ function run() {
   const badReference = copy(report);
   badReference.accounts[0].accountRef = "raw-account-name";
   assert.throws(() => validateReport(badReference), /INVALID_ACCOUNT_REF/);
+
+  const badRemediationEvidence = copy(report);
+  badRemediationEvidence.accounts[2].evidence.outboxes[0].syntheticRemediationStatus = "REVERSED";
+  assert.throws(() => validateReport(badRemediationEvidence),
+    /INVALID_OUTBOX_SYNTHETIC_REMEDIATION_REF/);
 
   assert.throws(() => buildPointWalletMigrationDecisionWorksheet(report, {
     reportSha256: "not-a-sha",

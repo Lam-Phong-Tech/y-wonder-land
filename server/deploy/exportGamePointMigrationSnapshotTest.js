@@ -43,7 +43,7 @@ async function run() {
   };
   const snapshot = await exportGameSnapshot(client);
   assert.deepStrictEqual(snapshot, {
-    schemaVersion: 1,
+    schemaVersion: 2,
     players: [{
       playerId: "player-1",
       webUserId: "web-user-1",
@@ -59,6 +59,7 @@ async function run() {
       pointAmountMicros: "1500000",
       pointMicrosRemainderBefore: "0",
       pointMicrosRemainderAfter: "500000",
+      remediation: null,
     }],
   });
   assert.match(queries[0], /REPEATABLE READ READ ONLY/);
@@ -89,6 +90,52 @@ async function run() {
   assert.throws(
     () => buildGameSnapshot([{ ...fixturePlayers()[0], web_point_micros_remainder: "1000000" }], []),
     /INVALID_GAME_POINT_MICROS_REMAINDER/
+  );
+
+  const operationId = `point-remediation:${"a".repeat(32)}`;
+  const remediationRow = {
+    transaction_id: operationId,
+    player_id: "player-1",
+    type: "point_remediation_reversal",
+    ref: operationId,
+    idempotency_key: operationId,
+    request_signature: "b".repeat(64),
+    delta_pos: "-3",
+    point_amount_micros: "3000000",
+    point_micros_remainder_before: "0",
+    point_micros_remainder_after: "0",
+    remediation_kind: "SYNTHETIC_CREDIT_REVERSAL",
+    remediation_plan_sha256: "c".repeat(64),
+    operation_approval_sha256: "d".repeat(64),
+    remediation_original_operation_id: operationId,
+    remediation_source_refs: ["e".repeat(24)],
+  };
+  const remediation = buildGameSnapshot(fixturePlayers(), [remediationRow]).transactions[0];
+  assert.deepStrictEqual(remediation.remediation, {
+    action: "APPLY",
+    originalOperationId: operationId,
+    planSha256: "c".repeat(64),
+    approvalSha256: "d".repeat(64),
+    requestSignature: "b".repeat(64),
+    sourceRefs: ["e".repeat(24)],
+  });
+  assert.throws(
+    () => buildGameSnapshot(fixturePlayers(), [{
+      ...remediationRow,
+      remediation_source_refs: ["e".repeat(24), "e".repeat(24)],
+    }]),
+    /DUPLICATE_GAME_REMEDIATION_SOURCE_REF/
+  );
+  assert.throws(
+    () => buildGameSnapshot(fixturePlayers(), [{ ...remediationRow, delta_pos: "-2" }]),
+    /GAME_REMEDIATION_BALANCE_ARITHMETIC_MISMATCH/
+  );
+  assert.throws(
+    () => buildGameSnapshot(fixturePlayers(), [{
+      ...fixtureTransactions()[0],
+      remediation_source_refs: ["e".repeat(24)],
+    }]),
+    /UNEXPECTED_GAME_REMEDIATION_METADATA/
   );
 
   const runner = fs.readFileSync(path.join(__dirname, "run-point-wallet-migration-dry-run.sh"), "utf8");

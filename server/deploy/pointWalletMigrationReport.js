@@ -6,6 +6,10 @@ const fs = require("fs");
 const POINT_MICROS = 1_000_000n;
 const HALF_MICRO_POINT_ATTOS = 500_000_000_000n;
 const REPORT_DOMAIN = "ywonder-point-migration-report-v1";
+const PUBLIC_REF_PATTERN = /^[a-f0-9]{24}$/;
+const SHA256_PATTERN = /^[a-f0-9]{64}$/;
+const APPLY_OPERATION_PATTERN = /^point-remediation:[a-f0-9]{32}$/;
+const ROLLBACK_OPERATION_PATTERN = /^point-remediation-rollback:[a-f0-9]{32}$/;
 
 function asArray(value, field) {
   if (value == null) return [];
@@ -33,6 +37,12 @@ function optionalText(value, field, maxLength = 256) {
   if (text.length > maxLength || /[\r\n\0]/.test(text)) {
     throw new Error(`INVALID_${field.toUpperCase()}`);
   }
+  return text;
+}
+
+function requiredPattern(value, field, pattern) {
+  const text = String(value || "").trim();
+  if (!pattern.test(text)) throw new Error(`INVALID_${field.toUpperCase()}`);
   return text;
 }
 
@@ -181,6 +191,10 @@ function normalizeWebSnapshot(input) {
 
 function normalizeGameSnapshot(input) {
   const snapshot = asObject(input, "game_snapshot");
+  const schemaVersion = Number(snapshot.schemaVersion == null ? 1 : snapshot.schemaVersion);
+  if (!Number.isInteger(schemaVersion) || schemaVersion < 1 || schemaVersion > 2) {
+    throw new Error("UNSUPPORTED_GAME_SNAPSHOT_SCHEMA_VERSION");
+  }
   const players = new Map();
   const playersByWebUserId = new Map();
   const transactions = new Map();
@@ -246,14 +260,77 @@ function normalizeGameSnapshot(input) {
         : null,
       pointMicrosRemainderBefore: remainderBefore,
       pointMicrosRemainderAfter: remainderAfter,
+      remediation: null,
     };
+    const isApply = normalized.type === "point_remediation_reversal";
+    const isRollback = normalized.type === "point_remediation_reversal_rollback";
+    if (tx.remediation != null) {
+      if (!isApply && !isRollback) throw new Error("UNEXPECTED_GAME_REMEDIATION_METADATA");
+      const remediation = asObject(tx.remediation, "game_transaction_remediation");
+      const expectedAction = isApply ? "APPLY" : "ROLLBACK";
+      const operationPattern = isApply ? APPLY_OPERATION_PATTERN : ROLLBACK_OPERATION_PATTERN;
+      if (!operationPattern.test(transactionId)) {
+        throw new Error("INVALID_GAME_REMEDIATION_OPERATION_ID");
+      }
+      const originalOperationId = requiredPattern(
+        remediation.originalOperationId,
+        "game_remediation_original_operation_id",
+        APPLY_OPERATION_PATTERN
+      );
+      if (normalized.ref !== originalOperationId || (isApply && transactionId !== originalOperationId)) {
+        throw new Error("INVALID_GAME_REMEDIATION_ORIGINAL_OPERATION");
+      }
+      if (String(remediation.action || "") !== expectedAction) {
+        throw new Error("INVALID_GAME_REMEDIATION_ACTION");
+      }
+      const sourceRefs = asArray(remediation.sourceRefs, "game_remediation_source_refs")
+        .map((value) => requiredPattern(value, "game_remediation_source_ref", PUBLIC_REF_PATTERN))
+        .sort();
+      if (sourceRefs.length === 0) throw new Error("EMPTY_GAME_REMEDIATION_SOURCE_REFS");
+      if (new Set(sourceRefs).size !== sourceRefs.length) {
+        throw new Error("DUPLICATE_GAME_REMEDIATION_SOURCE_REF");
+      }
+      const planSha256 = requiredPattern(
+        remediation.planSha256,
+        "game_remediation_plan_sha256",
+        SHA256_PATTERN
+      );
+      const approvalSha256 = requiredPattern(
+        remediation.approvalSha256,
+        "game_remediation_approval_sha256",
+        SHA256_PATTERN
+      );
+      requiredPattern(remediation.requestSignature, "game_remediation_request_signature", SHA256_PATTERN);
+      if (normalized.pointAmountMicros == null
+          || normalized.pointMicrosRemainderBefore == null
+          || normalized.pointMicrosRemainderAfter == null) {
+        throw new Error("GAME_REMEDIATION_EXACT_EVIDENCE_MISSING");
+      }
+      const actualDeltaMicros = normalized.deltaPoint * POINT_MICROS
+        + normalized.pointMicrosRemainderAfter
+        - normalized.pointMicrosRemainderBefore;
+      const expectedDeltaMicros = normalized.pointAmountMicros * (isApply ? -1n : 1n);
+      if (actualDeltaMicros !== expectedDeltaMicros) {
+        throw new Error("GAME_REMEDIATION_BALANCE_ARITHMETIC_MISMATCH");
+      }
+      normalized.remediation = {
+        action: expectedAction,
+        originalOperationId,
+        planSha256,
+        approvalSha256,
+        requestSignature: String(remediation.requestSignature),
+        sourceRefs,
+      };
+    } else if (schemaVersion >= 2 && (isApply || isRollback)) {
+      throw new Error("GAME_REMEDIATION_EVIDENCE_MISSING");
+    }
     addGrouped(transactions, playerId, normalized);
     if (normalized.type === "web_topup_credit" && normalized.ref) {
       addGrouped(webCreditsByRef, normalized.ref, normalized);
     }
   }
 
-  return { players, playersByWebUserId, transactions, webCreditsByRef };
+  return { schemaVersion, players, playersByWebUserId, transactions, webCreditsByRef };
 }
 
 function summarizeWebTransactions(rows) {
@@ -283,7 +360,122 @@ function gameTransactionDeltaMicros(row) {
   if (row.type === "web_topup_credit" && row.pointAmountMicros != null) {
     return row.pointAmountMicros;
   }
+  if (row.pointMicrosRemainderBefore != null && row.pointMicrosRemainderAfter != null) {
+    return row.deltaPoint * POINT_MICROS
+      + row.pointMicrosRemainderAfter
+      - row.pointMicrosRemainderBefore;
+  }
   return row.deltaPoint * POINT_MICROS;
+}
+
+function sameStringArray(left, right) {
+  return left.length === right.length && left.every((value, index) => value === right[index]);
+}
+
+function buildSyntheticRemediationIndex(options) {
+  const {
+    gameTransactions,
+    outboxes,
+    transactionsById,
+    gameCreditByRef,
+    player,
+    referenceKey,
+    blockingIssues,
+  } = options;
+  const outboxesByPublicRef = new Map();
+  for (const outbox of outboxes) {
+    outboxesByPublicRef.set(publicRef(referenceKey, "source", outbox.sourceTransactionId), outbox);
+  }
+
+  const groups = new Map();
+  for (const transaction of gameTransactions) {
+    const apply = transaction.type === "point_remediation_reversal";
+    const rollback = transaction.type === "point_remediation_reversal_rollback";
+    if (!apply && !rollback) continue;
+    if (!transaction.remediation) {
+      blockingIssues.push("GAME_REMEDIATION_EVIDENCE_MISSING");
+      continue;
+    }
+    const operationId = transaction.remediation.originalOperationId;
+    if (!groups.has(operationId)) groups.set(operationId, { apply: [], rollback: [] });
+    groups.get(operationId)[apply ? "apply" : "rollback"].push(transaction);
+  }
+
+  const sourceOwners = new Map();
+  for (const [operationId, group] of groups.entries()) {
+    for (const transaction of [...group.apply, ...group.rollback]) {
+      for (const sourceRef of transaction.remediation.sourceRefs) {
+        if (!sourceOwners.has(sourceRef)) sourceOwners.set(sourceRef, new Set());
+        sourceOwners.get(sourceRef).add(operationId);
+      }
+    }
+  }
+  const reusedSources = new Set([...sourceOwners.entries()]
+    .filter(([, owners]) => owners.size > 1)
+    .map(([sourceRef]) => sourceRef));
+  if (reusedSources.size > 0) blockingIssues.push("SYNTHETIC_REMEDIATION_SOURCE_REUSED");
+
+  const bySourceRef = new Map();
+  for (const [operationId, group] of groups.entries()) {
+    const issues = [];
+    if (group.apply.length !== 1) {
+      issues.push(group.apply.length === 0
+        ? "SYNTHETIC_REMEDIATION_APPLY_MISSING"
+        : "DUPLICATE_SYNTHETIC_REMEDIATION_APPLY");
+    }
+    if (group.rollback.length > 1) issues.push("DUPLICATE_SYNTHETIC_REMEDIATION_ROLLBACK");
+    const apply = group.apply.length === 1 ? group.apply[0] : null;
+    const rollback = group.rollback.length === 1 ? group.rollback[0] : null;
+    const evidence = apply || rollback;
+    if (!evidence) continue;
+
+    if (rollback && apply) {
+      if (!sameStringArray(rollback.remediation.sourceRefs, apply.remediation.sourceRefs)
+          || rollback.pointAmountMicros !== apply.pointAmountMicros
+          || rollback.remediation.planSha256 !== apply.remediation.planSha256
+          || rollback.remediation.approvalSha256 !== apply.remediation.approvalSha256) {
+        issues.push("SYNTHETIC_REMEDIATION_ROLLBACK_EVIDENCE_MISMATCH");
+      }
+    }
+    const sourceRefs = evidence.remediation.sourceRefs;
+    if (sourceRefs.some((sourceRef) => reusedSources.has(sourceRef))) {
+      issues.push("SYNTHETIC_REMEDIATION_SOURCE_REUSED");
+    }
+    let sourceMicros = 0n;
+    for (const sourceRef of sourceRefs) {
+      const outbox = outboxesByPublicRef.get(sourceRef);
+      if (!outbox) {
+        issues.push("SYNTHETIC_REMEDIATION_SOURCE_UNKNOWN");
+        continue;
+      }
+      sourceMicros += outbox.pointMicros;
+      const sourceTransaction = transactionsById.get(outbox.sourceTransactionId) || null;
+      if (sourceTransaction) issues.push("SYNTHETIC_REMEDIATION_SOURCE_NOW_FUNDED");
+      if (outbox.status !== "SENT") issues.push("SYNTHETIC_REMEDIATION_OUTBOX_NOT_SENT");
+      const credits = gameCreditByRef.get(outbox.sourceTransactionId) || [];
+      if (credits.length !== 1
+          || credits[0].playerId !== player.playerId
+          || credits[0].pointAmountMicros !== outbox.pointMicros) {
+        issues.push("SYNTHETIC_REMEDIATION_GAME_CREDIT_MISMATCH");
+      }
+    }
+    if (sourceMicros !== evidence.pointAmountMicros) {
+      issues.push("SYNTHETIC_REMEDIATION_AMOUNT_MISMATCH");
+    }
+    const uniqueIssues = [...new Set(issues)].sort();
+    blockingIssues.push(...uniqueIssues);
+    if (uniqueIssues.length > 0 || !apply) continue;
+
+    const status = rollback ? "ROLLED_BACK" : "REVERSED";
+    const operationRef = publicRef(referenceKey, "game-transaction", apply.transactionId);
+    const rollbackRef = rollback
+      ? publicRef(referenceKey, "game-transaction", rollback.transactionId)
+      : null;
+    for (const sourceRef of sourceRefs) {
+      bySourceRef.set(sourceRef, { status, operationRef, rollbackRef, operationId });
+    }
+  }
+  return bySourceRef;
 }
 
 function buildPointWalletMigrationReport(webInput, gameInput, options = {}) {
@@ -306,6 +498,8 @@ function buildPointWalletMigrationReport(webInput, gameInput, options = {}) {
   let legacySubMicroValueCount = 0;
   let totalLegacyResidualPointAttos = 0n;
   let maxAbsLegacyResidualPointAttos = 0n;
+  let remediatedSyntheticOutboxCount = 0;
+  let totalRemediatedSyntheticPointMicros = 0n;
 
   for (const webUserId of [...allWebUserIds].sort()) {
     const wallet = web.wallets.get(webUserId) || {
@@ -395,12 +589,28 @@ function buildPointWalletMigrationReport(webInput, gameInput, options = {}) {
       blockingIssues.push("GAME_CURRENT_REMAINDER_MISMATCH");
     }
 
+    const syntheticRemediationBySourceRef = player
+      ? buildSyntheticRemediationIndex({
+        gameTransactions,
+        outboxes,
+        transactionsById: web.transactionsById,
+        gameCreditByRef,
+        player,
+        referenceKey,
+        blockingIssues,
+      })
+      : new Map();
+
     const outboxSourceIds = new Set(outboxes.map((row) => row.sourceTransactionId));
     const webTransactionById = new Map(webTransactions.map((row) => [row.transactionId, row]));
     let sentOutboxMicros = 0n;
     let matchedGameCreditMicros = 0n;
+    let remediatedSyntheticPointMicros = 0n;
     const outboxEvidence = [];
     for (const outbox of outboxes) {
+      const sourceRef = publicRef(referenceKey, "source", outbox.sourceTransactionId);
+      const remediation = syntheticRemediationBySourceRef.get(sourceRef) || null;
+      const remediationStatus = remediation ? remediation.status : "NONE";
       const credits = gameCreditByRef.get(outbox.sourceTransactionId) || [];
       const globalSourceTransaction = web.transactionsById.get(outbox.sourceTransactionId) || null;
       const sourceTransaction = webTransactionById.get(outbox.sourceTransactionId) || null;
@@ -412,7 +622,13 @@ function buildPointWalletMigrationReport(webInput, gameInput, options = {}) {
         blockingIssues.push("GAME_CREDIT_PLAYER_MISMATCH");
       }
       if (!sourceTransaction) {
-        reviewReasons.push("OUTBOX_WITHOUT_WEB_SOURCE_TRANSACTION");
+        if (remediationStatus !== "REVERSED") {
+          reviewReasons.push("OUTBOX_WITHOUT_WEB_SOURCE_TRANSACTION");
+        } else {
+          remediatedSyntheticOutboxCount += 1;
+          remediatedSyntheticPointMicros += outbox.pointMicros;
+          totalRemediatedSyntheticPointMicros += outbox.pointMicros;
+        }
       } else {
         if (sourceTransaction.amountMicros !== outbox.pointMicros) {
           blockingIssues.push("OUTBOX_WEB_SOURCE_AMOUNT_MISMATCH");
@@ -441,12 +657,15 @@ function buildPointWalletMigrationReport(webInput, gameInput, options = {}) {
         }
       }
       outboxEvidence.push({
-        sourceRef: publicRef(referenceKey, "source", outbox.sourceTransactionId),
+        sourceRef,
         status: outbox.status,
         attempts: outbox.attempts,
         pointMicros: outbox.pointMicros.toString(),
         webSourceTransactionMatched: Boolean(sourceTransaction),
         gameCreditCount: credits.length,
+        syntheticRemediationStatus: remediationStatus,
+        syntheticRemediationOperationRef: remediation ? remediation.operationRef : null,
+        syntheticRemediationRollbackRef: remediation ? remediation.rollbackRef : null,
       });
     }
 
@@ -507,6 +726,7 @@ function buildPointWalletMigrationReport(webInput, gameInput, options = {}) {
         outboxes: outboxEvidence.sort((a, b) => a.sourceRef.localeCompare(b.sourceRef)),
         sentOutboxMicros: sentOutboxMicros.toString(),
         matchedGameCreditMicros: matchedGameCreditMicros.toString(),
+        remediatedSyntheticPointMicros: remediatedSyntheticPointMicros.toString(),
         gameTransactionCount: gameTransactions.length,
         gameLedgerDeltaMicros: gameLedgerDeltaMicros.toString(),
         legacySubMicroNormalization: {
@@ -539,6 +759,8 @@ function buildPointWalletMigrationReport(webInput, gameInput, options = {}) {
       legacySubMicroValueCount,
       totalLegacyResidualPointAttos: totalLegacyResidualPointAttos.toString(),
       maxAbsLegacyResidualPointAttos: maxAbsLegacyResidualPointAttos.toString(),
+      remediatedSyntheticOutboxCount,
+      totalRemediatedSyntheticPointMicros: totalRemediatedSyntheticPointMicros.toString(),
     },
     accounts,
   };

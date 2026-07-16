@@ -1,9 +1,18 @@
 "use strict";
 
 const assert = require("assert");
+const crypto = require("crypto");
 const { buildPointWalletMigrationReport } = require("./pointWalletMigrationReport");
 
 const REFERENCE_KEY = "migration-report-test-key-with-at-least-32-characters";
+const REPORT_DOMAIN = "ywonder-point-migration-report-v1";
+
+function publicRef(kind, value) {
+  return crypto.createHmac("sha256", REFERENCE_KEY)
+    .update(`${REPORT_DOMAIN}\0${kind}\0${value}`, "utf8")
+    .digest("hex")
+    .slice(0, 24);
+}
 
 function accountByStatus(report, status) {
   return report.accounts.find((account) => account.status === status);
@@ -114,6 +123,109 @@ function run() {
   assert.strictEqual(canary.evidence.matchedGameCreditMicros, "3000000");
   assert(canary.reviewReasons.includes("GAME_OPENING_BALANCE_REQUIRES_CLASSIFICATION"));
   assert(canary.reviewReasons.includes("OUTBOX_WITHOUT_WEB_SOURCE_TRANSACTION"));
+
+  const reversalOperationId = `point-remediation:${"a".repeat(32)}`;
+  const sourceRef = publicRef("source", "source-canary-1");
+  const reversal = {
+    transactionId: reversalOperationId,
+    playerId: "player-canary",
+    type: "point_remediation_reversal",
+    ref: reversalOperationId,
+    deltaPoint: "-3",
+    pointAmountMicros: "3000000",
+    pointMicrosRemainderBefore: "0",
+    pointMicrosRemainderAfter: "0",
+    remediation: {
+      action: "APPLY",
+      originalOperationId: reversalOperationId,
+      planSha256: "b".repeat(64),
+      approvalSha256: "c".repeat(64),
+      requestSignature: "d".repeat(64),
+      sourceRefs: [sourceRef],
+    },
+  };
+  const remediatedGame = {
+    schemaVersion: 2,
+    players: game.players.map((player) => player.playerId === "player-canary"
+      ? { ...player, point: "5000" }
+      : player),
+    transactions: [...game.transactions, reversal],
+  };
+  const remediatedReport = buildPointWalletMigrationReport(web, remediatedGame, {
+    referenceKey: REFERENCE_KEY,
+    generatedAt: "2026-07-16T01:00:00.000Z",
+  });
+  const remediatedCanary = remediatedReport.accounts.find((account) =>
+    account.evidence.sentOutboxMicros === "3000000");
+  assert(remediatedCanary, "Remediated canary evidence missing");
+  assert.strictEqual(remediatedCanary.balances.gameOpeningPointMicros, "5000000000");
+  assert(!remediatedCanary.reviewReasons.includes("OUTBOX_WITHOUT_WEB_SOURCE_TRANSACTION"));
+  assert.strictEqual(remediatedCanary.evidence.remediatedSyntheticPointMicros, "3000000");
+  assert.strictEqual(remediatedCanary.evidence.outboxes[0].syntheticRemediationStatus, "REVERSED");
+  assert(PUBLIC_REF_PATTERN_FOR_TEST(remediatedCanary.evidence.outboxes[0]
+    .syntheticRemediationOperationRef));
+  assert.strictEqual(remediatedCanary.evidence.outboxes[0].syntheticRemediationRollbackRef, null);
+  assert.strictEqual(remediatedReport.summary.remediatedSyntheticOutboxCount, 1);
+  assert.strictEqual(remediatedReport.summary.totalRemediatedSyntheticPointMicros, "3000000");
+  assert(!JSON.stringify(remediatedReport).includes(reversalOperationId));
+
+  const unknownSourceReport = buildPointWalletMigrationReport(web, {
+    ...remediatedGame,
+    transactions: [...game.transactions, {
+      ...reversal,
+      remediation: { ...reversal.remediation, sourceRefs: ["e".repeat(24)] },
+    }],
+  }, { referenceKey: REFERENCE_KEY });
+  assert(unknownSourceReport.accounts.some((account) =>
+    account.blockingIssues.includes("SYNTHETIC_REMEDIATION_SOURCE_UNKNOWN")));
+
+  const amountMismatchReport = buildPointWalletMigrationReport(web, {
+    ...remediatedGame,
+    players: remediatedGame.players.map((player) => player.playerId === "player-canary"
+      ? { ...player, point: "5001" }
+      : player),
+    transactions: [...game.transactions, {
+      ...reversal,
+      deltaPoint: "-2",
+      pointAmountMicros: "2000000",
+    }],
+  }, { referenceKey: REFERENCE_KEY });
+  assert(amountMismatchReport.accounts.some((account) =>
+    account.blockingIssues.includes("SYNTHETIC_REMEDIATION_AMOUNT_MISMATCH")));
+
+  const rollbackOperationId = `point-remediation-rollback:${"f".repeat(32)}`;
+  const rollback = {
+    ...reversal,
+    transactionId: rollbackOperationId,
+    type: "point_remediation_reversal_rollback",
+    deltaPoint: "3",
+    remediation: {
+      ...reversal.remediation,
+      action: "ROLLBACK",
+      requestSignature: "1".repeat(64),
+    },
+  };
+  const rolledBackReport = buildPointWalletMigrationReport(web, {
+    ...remediatedGame,
+    players: game.players,
+    transactions: [...game.transactions, reversal, rollback],
+  }, { referenceKey: REFERENCE_KEY });
+  const rolledBackCanary = rolledBackReport.accounts.find((account) =>
+    account.evidence.sentOutboxMicros === "3000000");
+  assert(rolledBackCanary.reviewReasons.includes("OUTBOX_WITHOUT_WEB_SOURCE_TRANSACTION"));
+  assert.strictEqual(rolledBackCanary.evidence.outboxes[0].syntheticRemediationStatus, "ROLLED_BACK");
+  assert(PUBLIC_REF_PATTERN_FOR_TEST(rolledBackCanary.evidence.outboxes[0]
+    .syntheticRemediationRollbackRef));
+  assert.strictEqual(rolledBackReport.summary.remediatedSyntheticOutboxCount, 0);
+  assert.strictEqual(rolledBackReport.summary.totalRemediatedSyntheticPointMicros, "0");
+
+  assert.throws(
+    () => buildPointWalletMigrationReport(web, {
+      ...remediatedGame,
+      transactions: [...game.transactions, { ...reversal, remediation: null }],
+    }, { referenceKey: REFERENCE_KEY }),
+    /GAME_REMEDIATION_EVIDENCE_MISSING/
+  );
 
   const duplicateMapping = report.accounts.find((account) =>
     account.blockingIssues.includes("DUPLICATE_GAME_MAPPING"));
@@ -274,6 +386,10 @@ function run() {
   );
 
   console.log("[point-wallet-migration-report] PASS: report is anonymized, read-only, fail-closed, and never proposes automatic balance migration.");
+}
+
+function PUBLIC_REF_PATTERN_FOR_TEST(value) {
+  return /^[a-f0-9]{24}$/.test(String(value || ""));
 }
 
 run();

@@ -87,6 +87,25 @@ function validateReport(report) {
     for (const outbox of account.evidence.outboxes) {
       assertCondition(ACCOUNT_REF_PATTERN.test(String(outbox.sourceRef || "")), "INVALID_OUTBOX_SOURCE_REF");
       integerValue(outbox.pointMicros, "OUTBOX_POINT_MICROS");
+      const remediationStatus = String(outbox.syntheticRemediationStatus || "NONE");
+      assertCondition(["NONE", "REVERSED", "ROLLED_BACK"].includes(remediationStatus),
+        "INVALID_OUTBOX_SYNTHETIC_REMEDIATION_STATUS");
+      const operationRef = outbox.syntheticRemediationOperationRef == null
+        ? null
+        : String(outbox.syntheticRemediationOperationRef);
+      const rollbackRef = outbox.syntheticRemediationRollbackRef == null
+        ? null
+        : String(outbox.syntheticRemediationRollbackRef);
+      if (remediationStatus === "NONE") {
+        assertCondition(operationRef == null && rollbackRef == null,
+          "UNEXPECTED_OUTBOX_SYNTHETIC_REMEDIATION_REF");
+      } else {
+        assertCondition(ACCOUNT_REF_PATTERN.test(operationRef || ""),
+          "INVALID_OUTBOX_SYNTHETIC_REMEDIATION_REF");
+        assertCondition(remediationStatus === "ROLLED_BACK"
+          ? ACCOUNT_REF_PATTERN.test(rollbackRef || "")
+          : rollbackRef == null, "INVALID_OUTBOX_SYNTHETIC_REMEDIATION_ROLLBACK_REF");
+      }
     }
   }
 }
@@ -107,8 +126,17 @@ function classifyAccount(account) {
   const webTransactions = account.evidence.webPointTransactions;
   const unmatchedOutboxes = account.evidence.outboxes.filter(
     (outbox) => outbox.webSourceTransactionMatched === false
+      && String(outbox.syntheticRemediationStatus || "NONE") !== "REVERSED"
+  );
+  const remediatedOutboxes = account.evidence.outboxes.filter(
+    (outbox) => outbox.webSourceTransactionMatched === false
+      && String(outbox.syntheticRemediationStatus || "NONE") === "REVERSED"
   );
   const unmatchedOutboxMicros = unmatchedOutboxes.reduce(
+    (sum, outbox) => sum + integerValue(outbox.pointMicros, "OUTBOX_POINT_MICROS"),
+    0n
+  );
+  const remediatedOutboxMicros = remediatedOutboxes.reduce(
     (sum, outbox) => sum + integerValue(outbox.pointMicros, "OUTBOX_POINT_MICROS"),
     0n
   );
@@ -235,6 +263,10 @@ function classifyAccount(account) {
       gameOpeningPointMicros: account.balances.gameOpeningPointMicros,
       unmatchedOutboxMicros: unmatchedOutboxMicros.toString(),
       unmatchedOutboxSourceRefs: unmatchedOutboxes.map((outbox) => outbox.sourceRef).sort(),
+      ...(remediatedOutboxes.length > 0 ? {
+        remediatedOutboxMicros: remediatedOutboxMicros.toString(),
+        remediatedOutboxSourceRefs: remediatedOutboxes.map((outbox) => outbox.sourceRef).sort(),
+      } : {}),
       webPointTransactions: webTransactions,
       gameTransactionCount: account.evidence.gameTransactionCount,
       gameLedgerDeltaMicros: account.evidence.gameLedgerDeltaMicros,
@@ -270,6 +302,7 @@ function buildPointWalletMigrationDecisionWorksheet(report, options = {}) {
   let totalReviewWebPointMicros = 0n;
   let totalGameOpeningPointMicros = 0n;
   let totalSyntheticCreditMicros = 0n;
+  let totalRemediatedSyntheticCreditMicros = 0n;
   for (const account of accounts) {
     pendingDecisionCount += account.requiredDecisions.length;
     totalReviewWebPointMicros += integerValue(account.facts.webPointMicros, "WEB_POINT_MICROS");
@@ -281,6 +314,10 @@ function buildPointWalletMigrationDecisionWorksheet(report, options = {}) {
     totalSyntheticCreditMicros += integerValue(
       account.facts.unmatchedOutboxMicros,
       "UNMATCHED_OUTBOX_MICROS"
+    );
+    totalRemediatedSyntheticCreditMicros += integerValue(
+      account.facts.remediatedOutboxMicros || "0",
+      "REMEDIATED_OUTBOX_MICROS"
     );
     for (const reviewClass of account.reviewClasses) {
       classCounts[reviewClass] = (classCounts[reviewClass] || 0) + 1;
@@ -313,6 +350,7 @@ function buildPointWalletMigrationDecisionWorksheet(report, options = {}) {
       totalReviewWebPointMicros: totalReviewWebPointMicros.toString(),
       totalGameOpeningPointMicros: totalGameOpeningPointMicros.toString(),
       totalSyntheticCreditMicros: totalSyntheticCreditMicros.toString(),
+      totalRemediatedSyntheticCreditMicros: totalRemediatedSyntheticCreditMicros.toString(),
       migrationGate: "BLOCKED_PENDING_EXPLICIT_APPROVALS",
     },
     accounts,
@@ -352,6 +390,7 @@ function renderPointWalletMigrationDecisionMarkdown(worksheet) {
     `- Legacy web Point under review: **${formatFixed(worksheet.summary.totalReviewWebPointMicros, 6)} Point**`,
     `- Game opening balance under review: **${formatFixed(worksheet.summary.totalGameOpeningPointMicros, 6)} Point**`,
     `- Synthetic credit without web source: **${formatFixed(worksheet.summary.totalSyntheticCreditMicros, 6)} Point**`,
+    `- Synthetic credit already reversed with audit: **${formatFixed(worksheet.summary.totalRemediatedSyntheticCreditMicros, 6)} Point**`,
     `- Migration gate: **${worksheet.summary.migrationGate}**`,
     "",
     "## Account Decision Table",
@@ -369,6 +408,7 @@ function renderPointWalletMigrationDecisionMarkdown(worksheet) {
     lines.push(`- Blocking issues: ${account.blockingIssues.map((item) => `\`${item}\``).join(", ") || "none"}`);
     lines.push(`- Review reasons: ${account.reviewReasons.map((item) => `\`${item}\``).join(", ") || "none"}`);
     lines.push(`- Synthetic source refs: ${account.facts.unmatchedOutboxSourceRefs.map((item) => `\`${item}\``).join(", ") || "none"}`);
+    lines.push(`- Remediated synthetic source refs: ${(account.facts.remediatedOutboxSourceRefs || []).map((item) => `\`${item}\``).join(", ") || "none"}`);
     for (const decision of account.requiredDecisions) {
       lines.push(`- Decision \`${decision.key}\` (${decision.owner}): **PENDING**`);
       lines.push(`  - Recommendation: \`${decision.recommendation}\``);
