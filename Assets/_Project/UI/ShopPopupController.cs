@@ -959,6 +959,8 @@ public class ShopPopupController : MonoBehaviour
             case "NO_AUTH_TOKEN": return "Cần đăng nhập lại trước khi mua bán.";
             case "AUTH_EXPIRED": return "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.";
             case "IDEMPOTENCY_CONFLICT": return "Giao dịch bị trùng dữ liệu. Vui lòng thử lại.";
+            case "PENDING_STATE_SYNC_FAILED": return "Dữ liệu đang đồng bộ. Vui lòng thử lại sau ít giây.";
+            case "STATE_RECONCILIATION_FAILED": return "Chưa thể đối soát dữ liệu người chơi. Vui lòng thử lại.";
             default: return "Không thể kết nối máy chủ để mua bán. Vui lòng thử lại.";
         }
     }

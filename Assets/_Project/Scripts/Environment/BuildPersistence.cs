@@ -146,6 +146,7 @@ namespace YWonderLand.Environment
 
                 data.animals.Add(new AnimalSave
                 {
+                    instanceId = fa.animalInstanceId,
                     itemId = cell.AnimalItemId,
                     cellKeys = cellKeys,
                     feedRefUnix = fa.FeedRefUnix,
@@ -262,6 +263,8 @@ namespace YWonderLand.Environment
             var spawned = go.GetComponent<FarmAnimal>();
             if (spawned != null)
             {
+                if (!string.IsNullOrWhiteSpace(a.instanceId))
+                    spawned.animalInstanceId = a.instanceId;
                 spawned.occupiedCells = new List<BuildSurfaceCell>(cells);
                 spawned.RestoreAnimalState(a.feedRefUnix, a.produceRefUnix, a.hasBeenFed,
                     a.harvestsRemaining, a.hasProductReady, a.isVaccinated);
@@ -306,6 +309,7 @@ namespace YWonderLand.Environment
         [System.Serializable]
         private class AnimalSave
         {
+            public string instanceId;
             public string itemId;
             public List<string> cellKeys; // ô chuồng con vật chiếm (ô đầu = ô neo)
             public double feedRefUnix;

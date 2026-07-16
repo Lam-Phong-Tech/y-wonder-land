@@ -22,6 +22,14 @@ namespace YWonderLand.Environment
         private const float MaxFishingInteractRange = 5f;
         private const float SolidHitPassthroughTolerance = 0.75f;
         private const float DirectTapSurfaceTolerance = 0.05f;
+        private const float DefaultFarmSlotSpacing = 0.8f;
+        private static readonly Vector2Int[] FarmSlotDirections =
+        {
+            new Vector2Int(1, 0),
+            new Vector2Int(-1, 0),
+            new Vector2Int(0, 1),
+            new Vector2Int(0, -1)
+        };
         private const float ResourceExecuteRangePadding = 0.25f;
         private const float FarmTileAimFallbackRadius = 0.45f;
         private const float TreeCuttingClipDuration = 2.26f;
@@ -113,6 +121,7 @@ namespace YWonderLand.Environment
         private YWonderLand.Environment.AnimalPenSpawner pendingPen; // Chuồng đang chờ chọn con vật từ túi
         private FarmAnimal pendingFeedAnimal; // Con vật đang chờ chọn thức ăn từ túi
         private List<BuildSurfaceCell> pendingEnclosure; // Vùng quây (rào) đang chờ thả thú
+        private bool animalPlacementInFlight;
         private List<BuildSurfaceCell> pendingDemolishEnclosure;
         private FarmTile pendingDemolishTile;
         private float demolishConfirmTimer;
@@ -775,14 +784,17 @@ namespace YWonderLand.Environment
         {
             if (tile == null || actions == null) return;
 
-            string actName = "T\u01b0\u01a1ng t\u00e1c";
-            switch (tile.currentState)
+            string actName = tile.masterTile != null ? "\u00d4 thu\u1ed9c gi\u00e0n" : "T\u01b0\u01a1ng t\u00e1c";
+            if (tile.masterTile == null)
             {
-                case FarmTile.TileState.Soil: actName = "Cu\u1ed1c \u0111\u1ea5t"; break;
-                case FarmTile.TileState.Plowed: actName = "Gieo h\u1ea1t"; break;
-                case FarmTile.TileState.Planted: actName = "T\u01b0\u1edbi n\u01b0\u1edbc"; break;
-                case FarmTile.TileState.Watered: actName = "T\u01b0\u1edbi n\u01b0\u1edbc"; break;
-                case FarmTile.TileState.Ripe: actName = "Thu ho\u1ea1ch"; break;
+                switch (tile.currentState)
+                {
+                    case FarmTile.TileState.Soil: actName = "Cu\u1ed1c \u0111\u1ea5t"; break;
+                    case FarmTile.TileState.Plowed: actName = "Gieo h\u1ea1t"; break;
+                    case FarmTile.TileState.Planted: actName = "T\u01b0\u1edbi n\u01b0\u1edbc"; break;
+                    case FarmTile.TileState.Watered: actName = "T\u01b0\u1edbi n\u01b0\u1edbc"; break;
+                    case FarmTile.TileState.Ripe: actName = "Thu ho\u1ea1ch"; break;
+                }
             }
 
             actions.Add(new InteractionAction { keyName = "Click", actionName = actName, onClick = () => PerformTileAction(tile) });
@@ -1752,16 +1764,6 @@ namespace YWonderLand.Environment
                     foundActions.Add(new InteractionAction { keyName = "Click", actionName = merchant.GetInteractionLabel(), onClick = () => merchant.Interact() });
                     break;
                 }
-                else if (hit.collider.GetComponentInParent<YWonderLand.Environment.AnimalPenSpawner>() != null)
-                {
-                    var penS = hit.collider.GetComponentInParent<YWonderLand.Environment.AnimalPenSpawner>();
-                    if (penS.HasSpace && IsPenSpawnerInRange(penS, directTap))
-                    {
-                        foundObj = penS.gameObject;
-                        foundActions.Add(new InteractionAction { keyName = "Click", actionName = "Thả thú", onClick = () => { if (IsPenSpawnerInRange(penS, useDirectTapInteraction)) OpenPenAnimalPicker(penS); } });
-                    }
-                    break;
-                }
                 else if (ResolveBuildSurfaceCellFromHit(hit) is BuildSurfaceCell directPenCell && directPenCell != null && directPenCell.HasFence)
                 {
                     if (directPenCell != hoverEnclosureSeed)
@@ -1777,6 +1779,19 @@ namespace YWonderLand.Environment
                             foundObj = directPenCell.gameObject;
                             AddEnclosureActions(encl, foundActions);
                         }
+                    }
+                    break;
+                }
+                else if (hit.collider.GetComponentInParent<YWonderLand.Environment.AnimalPenSpawner>() != null)
+                {
+                    // Legacy static pens have no BuildSurfaceCell snapshot. Keep this fallback
+                    // after the authoritative enclosure path so placed fence prefabs cannot
+                    // bypass the atomic inventory + farm transaction.
+                    var penS = hit.collider.GetComponentInParent<YWonderLand.Environment.AnimalPenSpawner>();
+                    if (penS.HasSpace && IsPenSpawnerInRange(penS, directTap))
+                    {
+                        foundObj = penS.gameObject;
+                        foundActions.Add(new InteractionAction { keyName = "Click", actionName = "Thả thú", onClick = () => { if (IsPenSpawnerInRange(penS, useDirectTapInteraction)) OpenPenAnimalPicker(penS); } });
                     }
                     break;
                 }
@@ -2580,6 +2595,19 @@ namespace YWonderLand.Environment
 
         private void HandleOpenSeedSelection(FarmTile tile)
         {
+            if (tile == null || tile.masterTile != null)
+            {
+                pendingPlantTile = null;
+                ScreenToast.Show("\u00d4 \u0111\u1ea5t n\u00e0y \u0111ang thu\u1ed9c m\u1ed9t gi\u00e0n c\u00e2y. H\u00e3y ch\u1ecdn \u00f4 \u0111\u1ea5t tr\u1ed1ng kh\u00e1c.");
+                return;
+            }
+            if (tile.currentState != FarmTile.TileState.Plowed)
+            {
+                pendingPlantTile = null;
+                ScreenToast.Show("\u00d4 \u0111\u1ea5t kh\u00f4ng c\u00f2n s\u1eb5n s\u00e0ng \u0111\u1ec3 gieo h\u1ea1t.");
+                return;
+            }
+
             // Ghi nhớ ô đất đang chờ gieo, rồi mở Túi đồ ở tab Hạt giống để người chơi CHỌN loại cây.
             pendingPlantTile = tile;
 
@@ -2623,20 +2651,12 @@ namespace YWonderLand.Environment
         private void OpenPenAnimalPicker(YWonderLand.Environment.AnimalPenSpawner pen)
         {
             if (pen == null) return;
-            pendingPen = pen;
+            pendingPen = null;
             pendingPlantTile = null; // tránh nhầm với luồng gieo hạt
             pendingEnclosure = null;
-            if (PlayerController.Instance != null) PlayerController.Instance.FaceTowards(pen.transform.position);
-
-            EnsureStarterAnimals(); // demo: chắc chắn có vài con vật để test (production: mua từ shop)
-
-            if (inventoryPopup == null)
-                inventoryPopup = Object.FindFirstObjectByType<InventoryPopupController>();
-            if (inventoryPopup != null)
-            {
-                inventoryPopup.ShowAtTab("animals");
-                Debug.Log("[FarmInteraction] Mở Túi đồ (Thú nuôi) để chọn con vật thả vào chuồng.");
-            }
+            pendingFeedAnimal = null;
+            ScreenToast.Show("Chuồng kiểu cũ chưa hỗ trợ đồng bộ. Hãy dùng chuồng hàng rào.");
+            Debug.LogWarning($"[AnimalPlacement] Blocked legacy local pen '{pen.name}'.");
         }
 
         // Mở túi đồ (tab Thú nuôi) để chọn con vật thả vào VÙNG QUÂY (chuồng từ hàng rào).
@@ -2648,8 +2668,6 @@ namespace YWonderLand.Environment
             pendingFeedAnimal = null;
             pendingPlantTile = null;
 
-            EnsureStarterAnimals(); // demo: có sẵn vài con để test
-
             if (inventoryPopup == null)
                 inventoryPopup = Object.FindFirstObjectByType<InventoryPopupController>();
             if (inventoryPopup != null)
@@ -2660,15 +2678,25 @@ namespace YWonderLand.Environment
             }
         }
 
-        // Người chơi chọn con vật từ túi cho VÙNG QUÂY -> validate số ô rồi thả hoặc báo lỗi.
-        private void HandleEnclosureAnimalSelected(string itemId)
+        // Server atomically consumes the inventory item and appends the animal to the farm snapshot.
+        private async Awaitable HandleEnclosureAnimalSelectedAsync(string itemId)
         {
             var interior = pendingEnclosure;
             pendingEnclosure = null;
-            if (interior == null) return;
+            if (interior == null || animalPlacementInFlight) return;
 
             var def = YWonderLand.Managers.AnimalManager.LookupDefinition(itemId);
-            int need = def != null ? Mathf.Max(1, def.penSlots) : 1;
+            var inventory = YWonderLand.Managers.InventoryManager.Instance;
+            if (def == null || inventory == null || inventory.GetItemQuantity(itemId) < 1)
+            {
+                ScreenToast.Show("Không có con giống này trong túi.");
+                if (inventoryPopup != null) inventoryPopup.Hide();
+                return;
+            }
+
+            int quantityBefore = inventory.GetItemQuantity(itemId);
+
+            int need = Mathf.Max(1, def.penSlots);
             int free = PenEnclosure.AvailableCount(interior);
 
             if (free < need)
@@ -2684,48 +2712,74 @@ namespace YWonderLand.Environment
             {
                 if (c != null && !c.HasAnimal) { cells.Add(c); if (cells.Count >= need) break; }
             }
-            if (cells.Count < need) { ScreenToast.Show("Chuồng không đủ chỗ!"); return; }
-
-            Vector3 pos = cells[0].SurfaceCenter;
-            if (AnimalPrefabLibrary.Instance != null)
-                pos.y += AnimalPrefabLibrary.Instance.GetSpawnHeightOffset(itemId); // chỉnh cao theo pivot từng loài
-            GameObject prefab = AnimalPrefabLibrary.Instance != null ? AnimalPrefabLibrary.Instance.GetPrefab(itemId) : null;
-            GameObject go;
-            if (prefab != null)
+            if (cells.Count < need)
             {
-                go = Instantiate(prefab, pos, Quaternion.identity);
-                go.name = prefab.name;
-                // Gắn logic vật nuôi (đói/sản phẩm theo mốc thời gian) lên CHÍNH model thật.
-                // false = không sinh khối primitive, chỉ thêm thanh HP nổi trên đầu.
-                var fa = go.GetComponent<FarmAnimal>();
-                if (fa == null) fa = go.AddComponent<FarmAnimal>();
-                if (def != null) fa.Initialize(def, false);
-            }
-            else
-            {
-                go = new GameObject($"Animal_{itemId}");
-                go.transform.position = pos;
-                var faNew = go.AddComponent<FarmAnimal>();
-                if (def != null) faNew.Initialize(def);
+                ScreenToast.Show("Chuồng không đủ chỗ!");
+                if (inventoryPopup != null) inventoryPopup.Hide();
+                return;
             }
 
-            // Ô ĐẦU = ô neo: giữ tham chiếu con vật + itemId (để trả con giống khi phá chuồng).
-            // Các ô còn lại chỉ "mượn chỗ" (HasAnimal=true, không giữ GameObject).
-            cells[0].SetAnimalOccupant(go, itemId);
-            for (int i = 1; i < cells.Count; i++) cells[i].SetAnimal(true);
+            var cellKeys = new List<string>(cells.Count);
+            foreach (var cell in cells)
+                cellKeys.Add(FarmStateSync.CellKey(cell.transform.position));
 
-            // Cho con vật biết nó chiếm ô nào → tự trả ô về trống khi làm thịt vụ cuối.
-            var spawned = go.GetComponent<FarmAnimal>();
-            if (spawned != null)
-            {
-                spawned.occupiedCells = new List<BuildSurfaceCell>(cells);
-                FarmAnimal.RaiseSpawned(spawned); // báo tutorial: đã thả thú (flow mới)
-            }
-
-            FarmStateSync.SaveBuildState();
-
-            ScreenToast.ShowInfo($"Đã thả {(def != null ? def.animalName : itemId)} ({need} ô).");
             if (inventoryPopup != null) inventoryPopup.Hide();
+
+            animalPlacementInFlight = true;
+            try
+            {
+                var result = await FarmStateSync.PlaceAnimalAsync(itemId, cellKeys);
+                if (!result.ok)
+                {
+                    string message;
+                    switch (result.errorCode)
+                    {
+                        case "INSUFFICIENT_ITEM":
+                            message = "Con giống đã hết trong túi.";
+                            break;
+                        case "PEN_CELL_OCCUPIED":
+                        case "FARM_STATE_CONFLICT":
+                            message = "Chuồng vừa thay đổi. Hãy chọn lại vị trí thả thú.";
+                            break;
+                        case "INVALID_PEN_CELL":
+                        case "INVALID_PEN_SLOT_COUNT":
+                            message = "Vị trí chuồng không hợp lệ.";
+                            break;
+                        default:
+                            message = "Không thể thả thú khi chưa kết nối máy chủ. Hãy thử lại.";
+                            break;
+                    }
+                    ScreenToast.Show(message);
+                    return;
+                }
+
+                int appliedQuantity = inventory.GetItemQuantity(itemId);
+                if (appliedQuantity != result.remainingQuantity)
+                {
+                    Debug.LogWarning(
+                        $"[AnimalPlacement] Inventory snapshot mismatch for '{itemId}': " +
+                        $"response={result.remainingQuantity}, applied={appliedQuantity}.");
+                }
+                if (result.remainingQuantity >= quantityBefore)
+                {
+                    Debug.LogWarning(
+                        $"[AnimalPlacement] Accepted placement did not reduce the visible quantity for '{itemId}': " +
+                        $"before={quantityBefore}, remaining={result.remainingQuantity}, duplicate={result.duplicate}.");
+                }
+
+                // The authoritative snapshot rebuilds the enclosure on the following frames.
+                await Awaitable.NextFrameAsync();
+                await Awaitable.NextFrameAsync();
+                var spawned = cells[0] != null && cells[0].AnimalObject != null
+                    ? cells[0].AnimalObject.GetComponent<FarmAnimal>()
+                    : null;
+                if (spawned != null) FarmAnimal.RaiseSpawned(spawned);
+                ScreenToast.ShowInfo($"Đã thả {def.animalName}. Còn {result.remainingQuantity} trong túi.");
+            }
+            finally
+            {
+                animalPlacementInFlight = false;
+            }
         }
 
         private void RequestDemolishEnclosure(List<BuildSurfaceCell> encl)
@@ -2959,47 +3013,15 @@ namespace YWonderLand.Environment
             persistence?.SaveBuildings();
         }
 
-        // Demo helper: đảm bảo túi có sẵn vài con vật để test thả chuồng (production: mua từ shop).
-        private void EnsureStarterAnimals()
-        {
-            var inv = YWonderLand.Managers.InventoryManager.Instance;
-            if (inv == null) return;
-
-            string[] starterAnimals = { "chicken_01", "rabbit_01", "ostrich_01", "goat_01", "cow_01", "deer_01" };
-            foreach (var a in starterAnimals)
-            {
-                if (inv.GetItemQuantity(a) <= 0)
-                {
-                    inv.AddItem(a, 2);
-                    Debug.Log($"[FarmInteraction] Bổ sung con vật cho demo: {a} +2");
-                }
-            }
-        }
-
         // Người chơi chọn 1 con vật trong túi khi đang đứng ở chuồng -> kiểm tra + thả.
         private void HandlePenAnimalSelected(string itemId)
         {
             var pen = pendingPen;
-            pendingPen = null; // dùng 1 lần — chọn sai loài thì bấm "Thả thú" lại
+            pendingPen = null;
             if (pen == null) return;
-
-            if (!pen.CanAccept(itemId))
-            {
-                Debug.Log($"[FarmInteraction] Chuồng '{pen.name}' KHÔNG nhận '{itemId}'. Danh sách cho phép: {pen.AllowedIdsText()} | Còn chỗ: {pen.HasSpace}");
-                return;
-            }
-
-            var inv = YWonderLand.Managers.InventoryManager.Instance;
-            if (inv != null && !inv.RemoveItem(itemId, 1))
-            {
-                Debug.Log($"[FarmInteraction] Không có '{itemId}' trong túi để thả.");
-                return;
-            }
-
-            if (PlayerController.Instance != null) PlayerController.Instance.FaceTowards(pen.transform.position);
-            pen.SpawnByItem(itemId);
-
             if (inventoryPopup != null) inventoryPopup.Hide();
+            ScreenToast.Show("Chuồng kiểu cũ chưa hỗ trợ đồng bộ. Hãy dùng chuồng hàng rào.");
+            Debug.LogWarning($"[AnimalPlacement] Rejected legacy selection '{itemId}' for pen '{pen.name}'.");
         }
 
         private void OnInventoryItemSelected(string itemId)
@@ -3014,7 +3036,7 @@ namespace YWonderLand.Environment
             // Ưu tiên: đang chờ thả thú vào VÙNG QUÂY (chuồng từ hàng rào).
             if (pendingEnclosure != null)
             {
-                HandleEnclosureAnimalSelected(itemId);
+                _ = HandleEnclosureAnimalSelectedAsync(itemId);
                 return;
             }
 
@@ -3028,6 +3050,12 @@ namespace YWonderLand.Environment
             // Only handle seed selection when we have a pending tile
             if (pendingPlantTile == null) return;
             if (!itemId.Contains("seed")) return; // Only accept seed items
+
+            if (!TryValidatePlanting(pendingPlantTile, itemId, out string plantingError))
+            {
+                ScreenToast.Show(plantingError);
+                return;
+            }
 
             pendingSeedId = itemId;
 
@@ -3060,10 +3088,14 @@ namespace YWonderLand.Environment
         // Múa động tác Planting xong MỚI thật sự gieo hạt xuống ô đất.
         private bool StartPlantTimedAction(FarmTile tile, string seedId, bool seedConsumed, int seedConsumedAmount = 1)
         {
-            if (tile == null || string.IsNullOrEmpty(seedId)) return false;
+            if (!TryValidatePlanting(tile, seedId, out string plantingError))
+            {
+                ScreenToast.Show(plantingError);
+                return false;
+            }
 
             var inv = YWonderLand.Managers.InventoryManager.Instance;
-            return BeginTimedAction(
+            bool started = BeginTimedAction(
                 "Planting",
                 PlantingClipDuration,
                 YWonderLand.Player.ToolType.SeedBag,
@@ -3085,6 +3117,10 @@ namespace YWonderLand.Environment
                     if (seedConsumed && inv != null)
                         inv.AddItem(seedId, Mathf.Max(1, seedConsumedAmount));
                 });
+
+            if (!started)
+                ScreenToast.Show("Ch\u01b0a th\u1ec3 gieo h\u1ea1t l\u00fac n\u00e0y. H\u00e3y ch\u1edd thao t\u00e1c hi\u1ec7n t\u1ea1i k\u1ebft th\u00fac.");
+            return started;
         }
 
         private int GetSeedCostForPlanting(string seedId)
@@ -3099,12 +3135,23 @@ namespace YWonderLand.Environment
         // Trồng cây có thể CHIẾM NHIỀU Ô (giàn): cây nhiều ô (vd chanh dây 20 ô) cần thêm ô trống gần nhất.
         private bool PlantWithSlots(FarmTile master, string seedId)
         {
+            if (!TryValidatePlanting(master, seedId, out string plantingError))
+            {
+                ScreenToast.Show(plantingError);
+                return false;
+            }
+
             int slots = 1;
             var cropDb = Resources.Load<CropDatabase>("CropDatabase");
             var crop = cropDb != null ? cropDb.GetCropBySeedId(seedId) : null;
             if (crop != null) slots = Mathf.Max(1, crop.plotSlots);
 
-            if (slots <= 1) return master.InteractPlant(seedId);
+            if (slots <= 1)
+            {
+                if (master.InteractPlant(seedId)) return true;
+                ScreenToast.Show("\u00d4 \u0111\u1ea5t v\u1eeba thay \u0111\u1ed5i. H\u00e3y ch\u1ecdn l\u1ea1i \u00f4 gieo h\u1ea1t.");
+                return false;
+            }
 
             // Cây nhiều ô: cần thêm (slots-1) ô ĐÃ CUỐC & còn trống gần nhất.
             var extras = FindNearbyPlowedTiles(master, slots - 1);
@@ -3114,33 +3161,104 @@ namespace YWonderLand.Environment
                 return false;
             }
 
-            if (!master.InteractPlant(seedId)) return false;
+            if (!master.InteractPlant(seedId))
+            {
+                ScreenToast.Show("\u00d4 \u0111\u1ea5t v\u1eeba thay \u0111\u1ed5i. H\u00e3y ch\u1ecdn l\u1ea1i \u00f4 gieo h\u1ea1t.");
+                return false;
+            }
             foreach (var t in extras) t.OccupyAsSlot(master);
             master.RegisterSlaves(extras);
             Debug.Log($"[FarmInteraction] Trồng {seedId} chiếm {slots} ô (1 master + {extras.Count} ô giàn).");
             return true;
         }
 
-        // Tìm 'count' ô đã cuốc & còn trống GẦN NHẤT quanh master (theo khoảng cách thế giới).
-        private System.Collections.Generic.List<FarmTile> FindNearbyPlowedTiles(FarmTile master, int count)
+        private bool TryValidatePlanting(FarmTile tile, string seedId, out string error)
         {
-            var all = new System.Collections.Generic.List<FarmTile>(
-                FindObjectsByType<FarmTile>(FindObjectsSortMode.None));
-            Vector3 origin = master.transform.position;
-            all.Sort((a, b) =>
-                (a.transform.position - origin).sqrMagnitude.CompareTo((b.transform.position - origin).sqrMagnitude));
-
-            var result = new System.Collections.Generic.List<FarmTile>();
-            foreach (var t in all)
+            error = "";
+            if (tile == null || string.IsNullOrWhiteSpace(seedId))
             {
-                if (t == master) continue;
-                if (t.IsPlowedFree)
+                error = "Kh\u00f4ng x\u00e1c \u0111\u1ecbnh \u0111\u01b0\u1ee3c \u00f4 \u0111\u1ea5t ho\u1eb7c h\u1ea1t gi\u1ed1ng.";
+                return false;
+            }
+            if (tile.masterTile != null)
+            {
+                error = "\u00d4 \u0111\u1ea5t n\u00e0y \u0111ang thu\u1ed9c m\u1ed9t gi\u00e0n c\u00e2y. H\u00e3y ch\u1ecdn \u00f4 \u0111\u1ea5t tr\u1ed1ng kh\u00e1c.";
+                return false;
+            }
+            if (tile.currentState != FarmTile.TileState.Plowed)
+            {
+                error = "\u00d4 \u0111\u1ea5t kh\u00f4ng c\u00f2n s\u1eb5n s\u00e0ng \u0111\u1ec3 gieo h\u1ea1t.";
+                return false;
+            }
+
+            var cropDb = Resources.Load<CropDatabase>("CropDatabase");
+            var crop = cropDb != null ? cropDb.GetCropBySeedId(seedId) : null;
+            int slots = crop != null ? Mathf.Max(1, crop.plotSlots) : 1;
+            if (slots <= 1) return true;
+
+            int availableExtras = FindNearbyPlowedTiles(tile, slots - 1).Count;
+            if (availableExtras >= slots - 1) return true;
+
+            error = $"C\u1ea7n {slots} \u00f4 \u0111\u1ea5t \u0111\u00e3 cu\u1ed1c li\u1ec1n nhau \u0111\u1ec3 tr\u1ed3ng {GetItemDisplayName(seedId)}; " +
+                    $"c\u1ee5m hi\u1ec7n t\u1ea1i c\u00f2n thi\u1ebfu {slots - 1 - availableExtras} \u00f4.";
+            return false;
+        }
+
+        // Only connected, cardinally adjacent plowed tiles may belong to one multi-slot crop.
+        private List<FarmTile> FindNearbyPlowedTiles(FarmTile master, int count)
+        {
+            var result = new List<FarmTile>();
+            if (master == null || count <= 0) return result;
+
+            Vector2 spacing = GetFarmSlotSpacing(master);
+            Vector3 origin = master.transform.position;
+            var map = new Dictionary<Vector2Int, FarmTile>();
+            foreach (var tile in FindObjectsByType<FarmTile>(FindObjectsSortMode.None))
+            {
+                if (tile == null || tile == master || !tile.IsPlowedFree) continue;
+
+                Vector3 position = tile.transform.position;
+                float gridX = (position.x - origin.x) / spacing.x;
+                float gridZ = (position.z - origin.z) / spacing.y;
+                int x = Mathf.RoundToInt(gridX);
+                int z = Mathf.RoundToInt(gridZ);
+                if (Mathf.Abs(gridX - x) > 0.2f || Mathf.Abs(gridZ - z) > 0.2f) continue;
+                if (Mathf.Abs(position.y - origin.y) > Mathf.Max(spacing.x, spacing.y)) continue;
+
+                var key = new Vector2Int(x, z);
+                if (key == Vector2Int.zero || map.ContainsKey(key)) continue;
+                map[key] = tile;
+            }
+
+            var visited = new HashSet<Vector2Int> { Vector2Int.zero };
+            var queue = new Queue<Vector2Int>();
+            queue.Enqueue(Vector2Int.zero);
+            while (queue.Count > 0 && result.Count < count)
+            {
+                Vector2Int current = queue.Dequeue();
+                foreach (Vector2Int direction in FarmSlotDirections)
                 {
-                    result.Add(t);
+                    Vector2Int next = current + direction;
+                    if (!visited.Add(next) || !map.TryGetValue(next, out FarmTile tile)) continue;
+                    result.Add(tile);
+                    queue.Enqueue(next);
                     if (result.Count >= count) break;
                 }
             }
+
             return result;
+        }
+
+        private Vector2 GetFarmSlotSpacing(FarmTile tile)
+        {
+            GameObject building = ResolvePlacedBuildingRoot(tile);
+            BuildSurfaceCell cell = BuildSurfaceCell.FindByOccupant(building != null ? building : tile.gameObject);
+            Vector2 spacing = cell != null
+                ? cell.FootprintSize
+                : new Vector2(DefaultFarmSlotSpacing, DefaultFarmSlotSpacing);
+            if (spacing.x < 0.05f) spacing.x = DefaultFarmSlotSpacing;
+            if (spacing.y < 0.05f) spacing.y = DefaultFarmSlotSpacing;
+            return spacing;
         }
 
         private void HandleWater(FarmTile tile)

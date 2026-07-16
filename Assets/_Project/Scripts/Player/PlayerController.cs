@@ -44,7 +44,7 @@ public class PlayerController : MonoBehaviour
     private Vector3 stickSprintLockDirection = Vector3.zero;
     private bool autoRunForward = false; // AUTO-RUN: nút chạy nhanh -> tự tiến thẳng, vuốt màn hình để lái
     [Header("Mobile Sprint")]
-    [SerializeField] private bool enableStickAutoSprint = true;
+    [SerializeField, HideInInspector] private bool enableStickAutoSprint = false;
     [SerializeField, Range(0.6f, 1f)] private float stickAutoSprintThreshold = 0.88f;
     // Runtime cap để đảm bảo ngưỡng sprint bằng joystick không quá gắt trên mobile
     private const float MobileSprintThresholdCap = 0.62f;
@@ -69,6 +69,12 @@ public class PlayerController : MonoBehaviour
         }
 
         Instance = this;
+
+        // Older player prefabs may still carry the retired joystick auto-sprint flag.
+        if (enableStickAutoSprint)
+        {
+            enableStickAutoSprint = false;
+        }
     }
 
     private void OnDestroy()
