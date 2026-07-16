@@ -3,7 +3,7 @@
 > Lược đồ DB thật theo **REST API riêng** (thay blueprint UGS cũ trong `docs/DATA_SCHEMA.md`).
 > Phiên bản: 0.1 — 16/06/2026. **Đợt 1** (users, profiles) đã hiện thực ở server stub bằng file JSON; phần còn lại là **đề xuất** cho PostgreSQL production.
 > Quy ước: mọi bảng dữ liệu người chơi có `version` (migration) + `updated_at`. Tiền & số lượng dùng `BIGINT` (tránh tràn `int`).
-> Cập nhật 06/07/2026: account game production phải map từ tài khoản web/cấp sẵn; 1 account = 1 nhân vật; MVP sắp tới chưa làm nạp/rút, ưu tiên online + realtime. `Point` vẫn là tiền game và có thể là tiền nạp web ở phase sau; admin/sếp có thể chỉnh dữ liệu nhưng phải ghi audit log.
+> Cập nhật 16/07/2026: BA/khách xác nhận Point web và Point game là cùng một ví/số dư; USDT -> Point, YWH <-> Point, Point -> USDT và tỷ giá do Admin thay đổi. ADR candidate chọn PostgreSQL game làm ledger Point authoritative cho account đã link; migration số dư web cũ vẫn phải đối soát/phê duyệt theo từng account. Xem `docs/POINT_WALLET_BUSINESS_RULES.md` và `docs/ADR_POINT_WALLET_AUTHORITY.md`.
 
 ---
 
@@ -86,11 +86,19 @@
 | Cột | Kiểu | Ghi chú |
 |---|---|---|
 | `user_id` | FK PK | |
-| `point` / `pos` | BIGINT | `Point`; MVP online/realtime dùng như tiền game/server demo, phase sau mới nối tiền nạp web; hiện code nội bộ còn dùng tên `pos` |
-| `upoint` / `upos` | BIGINT | `UPoint`; vai trò còn cần sếp/web team chốt |
+| `point` / `pos` | BIGINT | Ví duy nhất `Point`, gồm cả tiền gameplay và tiền nạp web; code/API hiện giữ tên nội bộ `pos` |
 | `version` / `updated_at` | INT / TIMESTAMP | |
 
-> Client KHÔNG ghi trực tiếp; mọi thay đổi qua endpoint giao dịch (xem `SECURITY.md`). MVP sắp tới chưa làm nạp/rút. Nếu phase sau web là wallet authority của `Point`, game-server phải gọi web wallet API khi cộng/trừ tiền nạp và vẫn ghi transaction mirror để đối soát.
+> Client KHÔNG ghi đè trực tiếp. Giao dịch nạp đã duyệt đi từ web server tới game-server bằng chữ ký + transaction ID, rồi tăng `player_economy.pos` và ghi ledger trong cùng PostgreSQL transaction. UPoint legacy được lưu vào `legacy_upoint_balances` để audit, không tự quy đổi. Migration mở rộng `004` chưa xóa cột cũ để release trước vẫn rollback được; migration contract xóa cột chỉ chạy sau khi release Point-only đã deploy/verify.
+
+#### Ràng buộc một ví Point theo xác nhận BA/khách 16/07
+
+- `player_economy.pos` là balance Point spendable duy nhất cho account đã link. `balanceGXL/lockedGXL` của account đó bị đóng băng ở `0`; web đọc balance game bằng endpoint HMAC và kiểm đúng `gamePlayerId` đã ghim.
+- Mọi credit/debit/conversion/transfer/withdrawal/reserve/reversal phải có source transaction ID unique, trạng thái rõ và audit actor/rate/before/after.
+- Candidate v3 đã version hóa tỷ giá `USDT_POINT` theo integer micros, effective time và Admin actor; conversion lưu rate version, exact source/destination micros và rounding remainder. `YWH_POINT` vẫn feature-gated tới khi BA chốt semantics.
+- Candidate game đã có state machine `reserve/capture/release` cho `Point -> USDT/YWH`; không được trừ Point bằng delta rời rạc. Web orchestrator, phí/hạn mức/phê duyệt/reconciliation bên thanh toán vẫn chưa nối production.
+- Tiêu dùng game phải tạo payout hoa hồng YWH cho referrer qua cùng source transaction hoặc transactional outbox. Công thức/số tầng/refund chưa được cung cấp nên chưa chốt schema payout.
+- Số dư Point/GXL hiện hữu trên web phải được kiểm kê và migrate một lần; tuyệt đối không cộng nguyên balance web vào `player_economy.pos` nếu cả hai từng đại diện cùng giá trị.
 
 ### `inventory` — túi đồ (1-N)
 | Cột | Kiểu | Ghi chú |
@@ -109,12 +117,41 @@
 | `id` | PK | |
 | `user_id` | FK | |
 | `type` | TEXT | buy/sell/reward/upgrade/piggy_deposit... |
-| `delta_pos` / `delta_upos` | BIGINT | |
+| `delta_pos` | BIGINT | Biến động Point; UPoint không còn là cột active |
 | `ref` | TEXT | item_id / shop_id / quest_id |
 | `idempotency_key` | TEXT UNIQUE | chống double-spend |
-| `external_ref` | TEXT NULL | mã giao dịch/web wallet ref nếu có |
+| `external_ref` / `ref` | TEXT NULL | mã giao dịch web bất biến với `web_topup_credit` |
 | `status` | TEXT | `pending`, `committed`, `failed`, `reversed` |
 | `created_at` | TIMESTAMP | |
+
+### Web-side Point authority journal (candidate v3, chưa deploy)
+
+Các bảng này nằm trong SQLite của web, không thay thế PostgreSQL game:
+
+| Bảng | Khóa/field chính | Quy tắc |
+|---|---|---|
+| `GamePointLinkedAccount` | `userId` PK, `gamePlayerId` UNIQUE | Một web account ghim đúng một game player; chỉ link khi legacy `balanceGXL` và `lockedGXL` đều bằng `0` |
+| `PointExchangeRateVersion` | `id` PK, một active row mỗi `pair` | Rate immutable dạng micros text; lưu effective time, Admin actor và source rate cũ; Admin đổi rate bằng deactivate + insert version mới |
+| `GamePointConversion` | `requestId`, `sourceTransactionId`, `outboxId` đều UNIQUE | Lưu `usdtMicros`, `pointMicros`, `rateVersionId`, `rateMicros`, `roundingRemainder`; retry đọc journal trước current rate; một user chỉ có một conversion chưa `SENT`/`REFUNDED` |
+| `GamePointSyncOutbox` | `sourceTransactionId` UNIQUE | Retry cùng source; trạng thái `PENDING/RETRY/SENT/FAILED`, không được làm `SENT` lùi lại |
+
+Trigger SQLite đóng băng mọi thay đổi `balanceGXL/lockedGXL` của account đã link. Point spendable duy nhất của account này nằm ở `player_economy.pos`; web đọc bằng endpoint balance ký HMAC. Candidate v3 bao phủ `USDT -> Point`, rate Admin bất biến và phía game của debit reservation; chưa bao phủ web orchestrator Point -> USDT/YWH, transfer, migration legacy hoặc payout hoa hồng YWH. Account legacy chưa link vẫn giữ nguyên và chưa tự migrate số dư cũ.
+
+### `point_wallet_reservations` (migration `006`, candidate chưa deploy)
+
+| Cột | Kiểu | Ghi chú |
+|---|---|---|
+| `id` | TEXT PK | Reservation/source ID bất biến |
+| `player_id` | FK | Player bị debit, khóa cùng row economy khi reserve |
+| `web_user_id` / `expected_player_id` | TEXT | Identity pinning; mismatch fail closed |
+| `point_amount` | BIGINT | Số Point nguyên dương đã reserve |
+| `purpose` / `source` / `occurred_at` | TEXT / TEXT / TIMESTAMPTZ | Ngữ cảnh có trong request fingerprint/HMAC |
+| `request_signature` | TEXT | Fingerprint payload chuẩn hóa để phát hiện cùng ID khác payload |
+| `status` | TEXT | `RESERVED`, `CAPTURED`, `RELEASED`; hai trạng thái cuối là terminal |
+| `captured_at` / `released_at` | TIMESTAMPTZ NULL | Audit transition terminal |
+| `created_at` / `updated_at` | TIMESTAMPTZ | Audit/reconciliation |
+
+`reserve` trừ `player_economy.pos`, tạo reservation và ledger transaction trong một PostgreSQL transaction. `capture` không debit lần nữa; `release` hoàn đúng một lần. Migration `006` chỉ tạo khả năng lưu state, không tự bật endpoint hoặc migrate balance.
 
 ### `player_daily_limits` — giới hạn lượt theo ngày (1-N)
 > Đã thêm vào `server/schema.sql` ngày 06/07/2026 để đưa câu cá/đào đá 10 lượt/ngày lên server khi online.

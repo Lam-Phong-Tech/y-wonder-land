@@ -3,6 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const {
   assertDisjointRoots,
+  classifyProductionTopupState,
   parseProductionDatabase,
   safeErrorMessage,
 } = require("./test-web-point-sync-e2e-isolated");
@@ -66,6 +67,57 @@ const redacted = safeErrorMessage(
 );
 assert(!redacted.includes("super-secret"), "Harness error leaked a PostgreSQL password.");
 
+assert.deepStrictEqual(classifyProductionTopupState({
+  webEnabled: "false",
+  webMode: "canary",
+  webAllowed: "",
+  gameEnabled: "false",
+  gameMode: "canary",
+  gameAllowed: "",
+  allowRemote: "false",
+  clientGrantsEnabled: "true",
+  blockedGrants: "",
+}), { name: "dormant", callbackStatus: 404 });
+assert.deepStrictEqual(classifyProductionTopupState({
+  webEnabled: "true",
+  webMode: "canary",
+  webAllowed: "qa-user",
+  gameEnabled: "true",
+  gameMode: "canary",
+  gameAllowed: "qa-user",
+  allowRemote: "false",
+  clientGrantsEnabled: "true",
+  blockedGrants: "qa-user",
+}), { name: "exact-one-canary", callbackStatus: 401 });
+expectFailure(
+  () => classifyProductionTopupState({
+    webEnabled: "true",
+    webMode: "canary",
+    webAllowed: "qa-user,second-user",
+    gameEnabled: "true",
+    gameMode: "canary",
+    gameAllowed: "qa-user,second-user",
+    allowRemote: "false",
+    clientGrantsEnabled: "true",
+    blockedGrants: "qa-user,second-user",
+  }),
+  "Harness accepted a multi-user production canary."
+);
+expectFailure(
+  () => classifyProductionTopupState({
+    webEnabled: "true",
+    webMode: "open",
+    webAllowed: "",
+    gameEnabled: "true",
+    gameMode: "open",
+    gameAllowed: "",
+    allowRemote: "false",
+    clientGrantsEnabled: "false",
+    blockedGrants: "",
+  }),
+  "Harness accepted open-mode production top-up."
+);
+
 const runnerPath = path.join(__dirname, "run-web-point-sync-e2e-isolated.sh");
 const harnessPath = path.join(__dirname, "test-web-point-sync-e2e-isolated.js");
 const runner = fs.readFileSync(runnerPath, "utf8");
@@ -85,10 +137,39 @@ assert(runner.includes('E2E_RUN_ID="${run_id}"') && runner.includes("database.na
 assert(!harness.includes("search_path="), "Harness still uses a production-database schema fallback.");
 assert(harness.includes("createTemporaryGameDatabase") && harness.includes("dropTemporaryGameDatabase"),
   "Harness no longer owns a dedicated temporary database lifecycle.");
+assert(harness.includes('enterStage("postgres-store-smoke")')
+    && harness.includes("POSTGRES_TEST_DATABASE_URL")
+    && harness.includes("[postgres-smoke] PASS"),
+  "Harness no longer validates the PostgreSQL store in its temporary database.");
+assert(runner.includes("validate_production_topup_state")
+    && runner.includes("exact-one-canary")
+    && runner.includes("CLIENT_ASSET_GRANTS_BLOCKED_WEB_USER_IDS")
+    && runner.includes("baseline_game_env_sha")
+    && runner.includes("baseline_web_env_sha")
+    && runner.includes('systemctl show --property=WorkingDirectory --value "${web_service}"')
+    && runner.includes("baseline_web_root")
+    && runner.includes("canonical production environment"),
+  "Runner lost its dormant/exact-one production-state or environment-integrity gate.");
+assert(!runner.includes("WEB_TOPUP_MODE=open"),
+  "Runner contains an open-mode production top-up configuration.");
+assert(harness.includes("http.createServer")
+    && harness.includes('server.listen(port, "127.0.0.1"')
+    && harness.includes('enterStage("restart-isolated-web-with-durable-outbox")')
+    && harness.includes('enterStage("post-commit-response-loss")')
+    && harness.includes('enterStage("retry-after-post-commit-response-loss")'),
+  "Harness lost its loopback-only web-restart or post-commit response-loss drill.");
+assert(harness.includes("assertProductionWebRoot")
+    && harness.includes("productionBaseline.activeWebRoot")
+    && harness.includes("productionFileHashes(gameService.WorkingDirectory, activeWebRoot)")
+    && !harness.includes('const PRODUCTION_WEB_ROOT = "/var/www/ywonder"'),
+  "Harness no longer follows and fingerprints the active systemd web release.");
 
 const noLeakCheck = harness.indexOf('enterStage("verify-no-production-data-leak")');
 const noMutationClaim = harness.indexOf('console.log("PRODUCTION_PLAYER_DATA_MUTATED=no")');
 assert(noLeakCheck >= 0 && noMutationClaim > noLeakCheck,
   "Harness claims production safety before running explicit leak checks.");
+const postCommitVerification = harness.indexOf('console.log("POST_COMMIT_IDEMPOTENT_RECOVERY=pass")');
+assert(postCommitVerification > harness.indexOf('enterStage("verify-production-baseline-unchanged")'),
+  "Harness claims post-commit recovery before completing production verification.");
 
 console.log("[web-point-e2e-harness] PASS: isolation boundaries, cleanup, resource guards and claim ordering are intact.");

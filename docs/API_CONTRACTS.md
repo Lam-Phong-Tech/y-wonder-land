@@ -52,8 +52,8 @@ Tài liệu hành trình product/backend đầy đủ nằm ở `docs/WEB_GAME_B
 - MVP chốt 1 account web = 1 game player/nhân vật. Khách phải có tài khoản trước khi chơi; không làm guest account trong backend thật.
 - Account web `locked` hoặc `soft_deleted` phải bị game-server chặn login/gameplay online.
 - Unity không gọi trực tiếp API web nội bộ và không giữ `GAME_API_SECRET`.
-- Economy/inventory/daily limit/farm-state phải chuyển dần sang server-authoritative. Shop và khai thác cây/đá public đã nối lát đầu tiên; farm/crop/animal/câu cá và các reward/chi phí khác vẫn chưa hoàn tất.
-- MVP sắp tới chưa làm nạp/rút. `Point` có thể là game-server currency cho demo/state sync; web wallet/top-up/spend chuyển sang phase sau. Khi sang phase tiền thật, game-server phải ghi ledger/transaction rõ ràng và gọi web wallet API server-side; Unity không được tự cộng/trừ ví nạp.
+- Game chỉ còn một tiền tệ `Point`; `UPoint` đã nghỉ hưu khỏi runtime/API/HUD và fresh schema. Dữ liệu PostgreSQL cũ được archive bằng migration mở rộng `004`, không tự quy đổi; cột legacy chỉ bị xóa ở migration contract sau khi release Point-only đã deploy/verify làm mốc rollback.
+- Giao dịch nạp đã được web xác nhận phải gọi game-server qua kênh server-to-server có chữ ký và transaction ID bất biến. Unity không được gửi số Point cần cộng. Shop và khai thác cây/đá public đã server-authoritative; farm/crop/animal/câu cá cùng các reward/chi phí khác vẫn cần tiếp tục siết quyền server.
 - Realtime trước mắt chỉ dành cho đảo công cộng như `city`/`mine`; farm không join room realtime công cộng. Chat là kênh toàn server cho client còn online, không phụ thuộc đang đứng cùng room.
 
 | Method | Endpoint | Body | Tra ve |
@@ -64,11 +64,11 @@ Tài liệu hành trình product/backend đầy đủ nằm ở `docs/WEB_GAME_B
 | POST | `/auth/browser/exchange` | `{ requestId, code_verifier }` | `{ token, playerId, webUserId, player_profile, status:"complete" }` hoặc `202 pending` |
 | GET | `/player/bootstrap` | Bearer token | `{ player_profile, economy, inventory, farm_state, daily_limits }` |
 | GET | `/player/economy` | Bearer token | `{ economy }` |
-| PUT | `/player/economy` | `{ economy }` + Bearer | `{ ok, economy }` |
-| POST | `/player/economy/apply` | `{ delta_pos, delta_upos, type, ref, idempotency_key }` + Bearer | `{ ok, economy, transaction }` |
+| PUT | `/player/economy` | Bất kỳ body + Bearer | `405 ECONOMY_SERVER_AUTHORITATIVE`; client không được ghi đè ví |
+| POST | `/player/economy/apply` | `{ delta_pos, type, ref, idempotency_key }` + Bearer | `{ ok, economy, transaction }`; UPoint khác 0 trả `400`; delta Point dương trả `403 CLIENT_POSITIVE_ECONOMY_DELTA_FORBIDDEN` khi strict toàn cục hoặc web user nằm trong scoped block list |
 | GET | `/player/inventory` | Bearer token | `{ inventory }` |
-| PUT | `/player/inventory` | `{ inventory }` + Bearer | `{ ok, inventory }` |
-| POST | `/player/inventory/adjust` | `{ item_id, quantity_delta, type, ref, idempotency_key }` + Bearer | `{ ok, inventory, transaction }` |
+| PUT | `/player/inventory` | Bất kỳ body + Bearer | `405 INVENTORY_SERVER_AUTHORITATIVE`; client không được thay nguyên túi |
+| POST | `/player/inventory/adjust` | `{ item_id, quantity_delta, type, ref, idempotency_key }` + Bearer | `{ ok, inventory, transaction }`; item dương trả `403 CLIENT_POSITIVE_INVENTORY_DELTA_FORBIDDEN` khi strict toàn cục hoặc web user nằm trong scoped block list |
 | POST | `/player/shop/transaction` | `{ shop_id, mode:"buy"|"sell", item_id, quantity, idempotency_key }` + Bearer | `{ ok, economy, inventory, transaction, duplicate }` |
 | GET | `/player/daily-limits` | Bearer token | `{ daily_limits }` |
 | POST | `/player/daily-limits/consume` | `{ limit_key, amount, max_count, period_key, type, ref, idempotency_key }` + Bearer | `{ ok, daily_limits, limit, transaction }` |
@@ -81,7 +81,7 @@ Quy uoc mapping:
 - DB game rieng luu `web_user_id -> playerId`, khong ghi truc tiep vao DB web.
 - `web_user_id` phai unique trong `game_players` de dam bao 1 web account = 1 game player.
 - Game-server phai kiem tra account status tu web: `active`, `locked`, `soft_deleted` hoac field tuong duong.
-- MVP online/realtime chua lam nap/rut va chua can web wallet. Phase sau: tien nap tu web phai di qua web wallet API; `Point` la tien trong game va tien nap, con can chot `UPoint` dung lam gi va web hay game-server la ledger cuoi cung cua Point.
+- `Point` vừa là tiền gameplay vừa là tiền nạp. Web là nguồn giao dịch nạp; PostgreSQL game là nguồn số dư dùng trong game. UPoint không còn vai trò sản phẩm.
 - `STORE_MODE=json` là mặc định dev/local. Từ 11/07/2026, `STORE_MODE=postgres` đã có driver `pg`, migration versioned và query thật cho account/profile/economy/inventory/farm/daily-limit/transactions; cùng bộ Phase 1 smoke đã pass trên PostgreSQL test thật. Production DB/backup/deploy vẫn chưa hoàn tất; xem `docs/POSTGRESQL_PHASE2_RUNBOOK.md`.
 - Production startup gate bắt buộc loopback bind, PostgreSQL, secret JWT dài, tắt
   dashboard/demo seed và cấm `WEB_AUTH_MODE=mock`. HTTP có request ID, body limit,
@@ -117,6 +117,108 @@ Game-server gọi web, Unity KHÔNG gọi trực tiếp và KHÔNG giữ `GAME_A
 | GET | `https://ywonder.net/api/game/balance?uid=<username>` | `Authorization: Bearer <GAME_API_SECRET>` | — | Web Point balance |
 | POST | `https://ywonder.net/api/game/credit` | `Authorization: Bearer <GAME_API_SECRET>` | `{ "uid":"<username>", "amount": number, "ref":"<event id>", "reason":"..." }` | Web credit result |
 
+`/api/game/credit` là contract cũ để cộng ledger phía web, không được coi là callback nạp tiền vào game. Luồng top-up mới chỉ chạy sau khi web xác nhận giao dịch thành công và gọi endpoint loopback bên dưới.
+
+### Hợp đồng nghiệp vụ ví Point được xác nhận 16/07/2026
+
+Nguồn chuẩn: `docs/POINT_WALLET_BUSINESS_RULES.md`.
+
+- Point web và Point game là cùng một loại tiền và phải hiển thị cùng số dư như một ví.
+- Người dùng đổi `USDT -> Point`, `YWH <-> Point` và có thể đổi `Point -> USDT`; tỷ giá do Admin thay đổi, không cố định `0,06 USDT/Point` hoặc `25 Point/USDT`.
+- Tiêu dùng game phải phát sinh payout hoa hồng bằng YWH cho người giới thiệu tương tự HUB. Phạm vi ít nhất gồm vật nuôi, cây dài/ngắn ngày, mồi câu, lượt vòng quay, lượt đào khoáng và mọi tiêu dùng game.
+- Hai bề mặt không được giữ hai balance Point spendable độc lập. Mọi mutation Point phải đi vào một ledger authoritative và trả số dư absolute cho cả web lẫn game.
+- Giao dịch tiêu dùng Point và sự kiện/payout YWH phải chia sẻ source transaction ID hoặc transactional outbox để retry không trừ/cộng/trả hoa hồng hai lần.
+
+Quyết định kỹ thuật candidate đã chốt trong `docs/ADR_POINT_WALLET_AUTHORITY.md`:
+
+- PostgreSQL game `player_economy.pos` là ledger Point spendable duy nhất cho account đã link.
+- Web account đã link đóng băng `balanceGXL/lockedGXL` ở `0` và đọc balance bằng request HMAC; account legacy chưa link không tự migrate hoặc cộng dồn.
+- Settlement mới dùng integer micros, rate version bất biến và lưu rate snapshot/rounding remainder trong conversion journal.
+- Point dùng cho thao tác web-side đi qua state machine `reserve -> capture|release`; không ghi một delta âm rời rạc vào bản sao balance web.
+
+Còn chặn **production/money thật**, nhưng không chặn code và test candidate cô lập:
+
+- Báo cáo reconciliation và phê duyệt migration riêng cho từng balance web legacy.
+- Mâu thuẫn nghiệp vụ `YWH -> Point`, hành vi chuyển Point giữa người dùng và các action web legacy đang cộng `balanceGXL`.
+- Phí, hạn mức, phê duyệt và đối soát bên thanh toán cho `Point -> USDT`.
+- Công thức, số tầng, điều kiện, thời điểm và reversal hoa hồng YWH.
+
+Các endpoint dưới đây là contract candidate v3 đã có test cô lập, chưa deploy. Chúng không phải quyền bật giao dịch thật hoặc chuyển `WEB_TOPUP_MODE=open`.
+
+### Internal web top-up -> game Point
+
+Endpoint này không được Nginx public dưới `/game-api`:
+
+```text
+POST http://127.0.0.1:3000/internal/web/point-credit
+X-YWonder-Timestamp: <unix-seconds>
+X-YWonder-Signature: <HMAC-SHA256 canonical payload>
+```
+
+```json
+{
+  "transaction_id": "web-transaction-id-on-dinh",
+  "web_user_id": "web-user-id-on-dinh",
+  "expected_player_id": "game-player-id-da-ghim",
+  "point_amount": "1000.000000",
+  "occurred_at": "2026-07-15T00:00:00.000Z",
+  "source": "ywonder-web",
+  "username": "optional",
+  "display_name": "optional"
+}
+```
+
+- Payload có `expected_player_id` dùng canonical domain `ywonder-point-credit-v2`; chữ ký bao phủ field này ngay sau `web_user_id`. Game chỉ nhận khi `game_players.web_user_id` tồn tại và map đúng player đã ghim, nếu không trả `409 GAME_POINT_IDENTITY_MISMATCH` trước khi đổi Point/ledger. V1 không có field này chỉ được giữ tạm để nâng game trước web; producer mới bắt buộc dùng v2.
+- `WEB_TOPUP_SECRET` là secret riêng chỉ nằm ở web server và game-server; không
+  dùng lại secret login/browser auth và không nằm trong Unity/browser bundle.
+- `source + transaction_id` là idempotency key. Retry cùng payload không cộng lần hai; cùng key nhưng payload khác trả `409 IDEMPOTENCY_CONFLICT`.
+- Timestamp mặc định chỉ lệch tối đa 300 giây; route mặc định chỉ nhận loopback.
+- Mỗi lần cộng ghi `game_transactions.type = web_topup_credit` trong cùng transaction với cập nhật `player_economy`.
+- Player online nhận `economy_updated` với số dư absolute; bootstrap/relogin vẫn đọc lại PostgreSQL.
+- Production `open` chỉ được bật khi `CLIENT_ASSET_GRANTS_ENABLED=false`. Với canary, có thể tạm giữ reward legacy cho người chơi ngoài thử nghiệm nếu `CLIENT_ASSET_GRANTS_BLOCKED_WEB_USER_IDS` khớp tuyệt đối `WEB_TOPUP_ALLOWED_WEB_USER_IDS`; game kiểm cả JWT và mapping player authoritative trước khi nhận delta dương.
+- Rollout mặc định là `WEB_TOPUP_MODE=canary`; `WEB_TOPUP_ALLOWED_WEB_USER_IDS` giới hạn đúng account thử. Account ngoài allowlist nhận `425 WEB_TOPUP_CANARY_USER_NOT_ALLOWED`, nên web outbox giữ retry thay vì mất giao dịch. Chỉ chuyển sang `open` bằng quyết định riêng sau canary; lúc đó scoped block list phải rỗng.
+- Trạng thái triển khai web hook phải được nghiệm thu riêng tại đúng điểm giao dịch chuyển sang thành công; không gọi từ browser hoặc chỉ dựa vào trang báo thành công.
+
+Đọc balance authoritative để link/hiển thị account web đã ghim dùng cùng secret và loopback:
+
+```text
+POST http://127.0.0.1:3000/internal/web/point-balance
+```
+
+Body gồm `{ request_id, web_user_id }`, canonical domain `ywonder-point-balance-v1`. Response thành công gồm `{ ok, request_id, web_user_id, player_id, point, economy }`. Web phải so `player_id` với `GamePointLinkedAccount.gamePlayerId` và fail closed bằng `GAME_POINT_IDENTITY_MISMATCH` nếu lệch.
+
+### Internal web Point reserve/capture/release (candidate v3)
+
+Ba endpoint loopback dùng cùng secret/header với Point credit và mặc định không tồn tại
+cho tới khi bật riêng `WEB_POINT_WALLET_DEBIT_ENABLED=true`:
+
+```text
+POST http://127.0.0.1:3000/internal/web/point-reserve
+POST http://127.0.0.1:3000/internal/web/point-capture
+POST http://127.0.0.1:3000/internal/web/point-release
+```
+
+```json
+{
+  "reservation_id": "withdraw-or-conversion-id-on-dinh",
+  "web_user_id": "web-user-id-on-dinh",
+  "expected_player_id": "game-player-id-da-ghim",
+  "point_amount": "1000.000000",
+  "purpose": "point_to_usdt",
+  "source": "ywonder-web",
+  "occurred_at": "2026-07-16T00:00:00.000Z"
+}
+```
+
+- Canonical domain là `ywonder-point-reservation-v1`; chữ ký bao phủ cả operation, reservation ID, hai identity, amount, purpose, source và occurred time.
+- Candidate hiện chỉ nhận số Point nguyên vì `player_economy.pos` là `BIGINT`; amount có phần lẻ trả `400 POINT_RESERVATION_REQUIRES_WHOLE_POINT`.
+- `reserve` khóa row player, kiểm mapping/số dư, trừ Point đúng một lần và tạo trạng thái `RESERVED` trong cùng PostgreSQL transaction.
+- `capture` chỉ chuyển `RESERVED -> CAPTURED`; không trừ lần hai. `release` chuyển `RESERVED -> RELEASED` và hoàn đúng một lần.
+- `CAPTURED` và `RELEASED` là terminal. Retry cùng ID/cùng payload/cùng operation trả `duplicate=true`; đổi payload hoặc đi chéo terminal state trả `409`.
+- Response thành công gồm `{ ok, duplicate, operation, player_id, economy, reservation, transaction }` và gửi realtime balance absolute cho player đang online.
+- Web orchestrator phải giữ nguyên `reservation_id` qua timeout/retry và chỉ capture sau khi nghiệp vụ web đã commit. Nếu nghiệp vụ thất bại hoặc bị hủy, nó release cùng ID; không tạo một debit/credit bù bằng ID khác.
+- Producer/orchestrator web cho luồng rút và `Point -> YWH` chưa được nối production. Flag debit phải giữ `false` cho tới khi migration, reconciliation và fault E2E của chính orchestrator đạt gate.
+
 Cập nhật bàn giao 09/07/2026 từ chat 01/07:
 - Endpoint web auth đang dùng được ngay qua SSL hợp lệ là `POST https://ywonder.net/api/game/auth`.
 - `api.ywonder.net` đã được cấu hình nhưng SSL/public routing đang kẹt ở lớp hạ tầng/WAF/default-server; không chặn việc nối game nếu game-server tạm gọi `ywonder.net/api/game/auth`.
@@ -124,11 +226,19 @@ Cập nhật bàn giao 09/07/2026 từ chat 01/07:
 - Đã có test account web `gametest`; mật khẩu lưu riêng ngoài repo.
 - `gameToken` là JWT HS256 chuẩn, payload có `{ sub, uid, username, iat, exp }`, trong đó `sub/uid = web userId`.
 
-Điểm cần xin/chốt thêm với web team:
-- MVP online/realtime chưa cần endpoint ví nạp/rút.
-- Phase sau mới cần endpoint trừ tiền/spend/debit hoặc reserve/capture để game-server mua vật phẩm bằng tiền nạp.
-- Phase sau mọi cộng/trừ ví web phải có `ref` hoặc `idempotency_key` để retry không nhân đôi.
-- Phase sau cần xác nhận `Point` là wallet chính cho cả gameplay và tiền nạp; nếu `UPoint` còn dùng, cần định nghĩa rõ loại giao dịch nào dùng `UPoint`.
+Điểm còn phải triển khai/chốt với web team:
+- Dùng PostgreSQL game làm ledger Point authoritative theo ADR; xác định đúng
+  transition web đã commit cho conversion/transfer/withdrawal và source transaction
+  ID bất biến dùng để đối soát.
+- Hoàn thiện outbox/orchestrator gọi `credit` hoặc `reserve/capture/release` tại đúng
+  transition; retry cùng ID khi game-server lỗi, tuyệt đối không ghi balance Point web.
+- Lập reconciliation/migration report từng account legacy trước khi link và đóng băng
+  `balanceGXL/lockedGXL`; không bulk-add số dư web vào game.
+- Chặn các action quest/commission/investment/gift/staking/transfer legacy ghi Point
+  đối với account đã link; action chưa có contract phải fail closed.
+- Mọi cộng/trừ ví web phải có `ref` hoặc `idempotency_key` để retry không nhân đôi.
+- Mỗi giao dịch tiêu dùng game phải tạo sự kiện hoa hồng YWH idempotent; cần endpoint
+  hoặc outbox cho payout/reversal sau khi BA chốt công thức.
 - Field trạng thái account rõ ràng để game-server chặn `locked`/`soft_deleted`.
 - Trang đăng ký hiện bắt nhập mã giới thiệu nhưng chưa kiểm tra mã có tồn tại. Trước
   khi public cần BA/web chốt một mã chính thức cho người chơi đến từ game hoặc sửa web
@@ -186,6 +296,7 @@ Server -> client:
 | `resource_snapshot` | `{ type, room, resources:[{ resourceId, resourceType, position, available, respawnInSec, cycle }] }` |
 | `resource_state` | `{ type, resource:{ resourceId, resourceType, position, available, respawnInSec, cycle }, harvestedBy? }` |
 | `resource_harvest_result` | `{ type, requestId, resourceId, accepted, code, rewards, inventory, daily_limits, limit }` |
+| `economy_updated` | `{ type, reason:"web_topup", economy:{ version, pos, updatedAt }, duplicate, sentAt }` |
 
 Scope hiện tại: chat toàn server cho client còn kết nối WebSocket, remote player visual trong `city`/`mine`, tối đa 20 người/room. Cây/đá public là lát gameplay server-authoritative đầu tiên: server chỉ cho một claim thắng, ghi inventory + lượt đào nguyên tử/idempotent, broadcast depletion và hồi sinh sau 20 giây. Registry tài nguyên hiện nằm trong RAM Node nên reset khi backend restart.
 

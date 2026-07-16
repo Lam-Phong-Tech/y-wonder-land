@@ -13,7 +13,9 @@ const { createAdminDashboardRouter } = require("./adminDashboard");
 const { resolveAnimalPlacementRule, resolveShopOffer } = require("./shopCatalog");
 const {
   buildWebPointCreditConfig,
+  createWebPointBalanceHandler,
   createWebPointCreditHandler,
+  createWebPointReservationHandler,
 } = require("./webPointCredit");
 const {
   bearerToken,
@@ -65,6 +67,10 @@ app.use(cors(createCorsOptions(securityConfig.corsAllowedOrigins)));
 app.use(express.json({ limit: securityConfig.jsonBodyLimit, strict: true }));
 
 if (webPointCreditConfig.enabled) {
+  app.post("/internal/web/point-balance", createWebPointBalanceHandler({
+    store,
+    config: webPointCreditConfig,
+  }));
   app.post("/internal/web/point-credit", createWebPointCreditHandler({
     store,
     config: webPointCreditConfig,
@@ -79,6 +85,23 @@ if (webPointCreditConfig.enabled) {
       });
     },
   }));
+  for (const operation of ["reserve", "capture", "release"]) {
+    app.post(`/internal/web/point-${operation}`, createWebPointReservationHandler({
+      store,
+      config: webPointCreditConfig,
+      operation,
+      onMutation: async (currentOperation, result) => {
+        if (!realtime || typeof realtime.notifyPlayer !== "function") return;
+        realtime.notifyPlayer(result.player && result.player.id, {
+          type: "economy_updated",
+          reason: `web_point_${currentOperation}`,
+          economy: result.economy,
+          duplicate: Boolean(result.duplicate),
+          sentAt: new Date().toISOString(),
+        });
+      },
+    }));
+  }
 }
 
 function asyncRoute(handler) {

@@ -162,6 +162,25 @@ function transactionFromRow(row) {
   };
 }
 
+function pointReservationFromRow(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    playerId: row.player_id,
+    webUserId: row.web_user_id,
+    expectedPlayerId: row.expected_player_id,
+    pointAmount: toSafeInteger(row.point_amount, "point_reservation.point_amount"),
+    purpose: row.purpose,
+    source: row.source,
+    occurredAt: new Date(row.occurred_at).toISOString(),
+    status: row.status,
+    capturedAt: row.captured_at ? new Date(row.captured_at).toISOString() : null,
+    releasedAt: row.released_at ? new Date(row.released_at).toISOString() : null,
+    createdAt: new Date(row.created_at).toISOString(),
+    updatedAt: new Date(row.updated_at).toISOString(),
+  };
+}
+
 function browserAuthRequestFromRow(row) {
   if (!row) return null;
   return {
@@ -512,6 +531,20 @@ class PostgresStore {
     return this.withTransaction((client) => this.getOrCreatePlayerForWebUserWithClient(client, webUser));
   }
 
+  async getWebPointBalance(webUserId) {
+    return this.withTransaction(async (client) => {
+      const playerResult = await client.query(
+        "select * from game_players where web_user_id = $1",
+        [String(webUserId || "").trim()]
+      );
+      if (playerResult.rowCount === 0) return null;
+      const player = playerFromRow(playerResult.rows[0]);
+      const economy = await this.getEconomyWithClient(client, player.id);
+      if (!economy) return null;
+      return { player, economy };
+    });
+  }
+
   async createBrowserAuthRequest(record) {
     await this.pool.query(
       "delete from browser_auth_requests where expires_at < now() - interval '1 hour'"
@@ -767,18 +800,33 @@ class PostgresStore {
     const pointAmount = String(meta.pointAmount || "").trim();
     const transactionId = String(meta.transactionId || "").trim();
     const source = String(meta.source || "ywonder-web").trim();
+    const expectedPlayerId = String(meta.expectedPlayerId || "").trim();
     if (!transactionId || !pointAmount || amountMicros < 1) {
       return { ok: false, error: "INVALID_WEB_TOPUP" };
     }
 
     return this.withTransaction(async (client) => {
-      const player = await this.getOrCreatePlayerForWebUserWithClient(client, webUser);
+      let player;
+      if (expectedPlayerId) {
+        const mapped = await client.query(
+          "select * from game_players where web_user_id = $1 for update",
+          [webUser.id]
+        );
+        if (mapped.rowCount !== 1 || mapped.rows[0].id !== expectedPlayerId) {
+          return { ok: false, error: "GAME_POINT_IDENTITY_MISMATCH" };
+        }
+        player = playerFromRow(mapped.rows[0]);
+        await this.ensurePlayerStateWithClient(client, player.id);
+      } else {
+        player = await this.getOrCreatePlayerForWebUserWithClient(client, webUser);
+      }
       const idempotencyKey = `web_topup:${source}:${transactionId}`;
       const requestSignature = JSON.stringify({
         op: "web_topup_credit",
         source,
         transactionId,
         webUserId: webUser.id,
+        expectedPlayerId,
         pointAmount,
         pointAmountMicros: amountMicros,
         occurredAt: String(meta.occurredAt || ""),
@@ -826,6 +874,7 @@ class PostgresStore {
         requestSignature,
         source,
         webUserId: webUser.id,
+        expectedPlayerId: expectedPlayerId || undefined,
         occurredAt: String(meta.occurredAt || ""),
         pointAmount,
         pointAmountMicros: amountMicros,
@@ -836,6 +885,175 @@ class PostgresStore {
         createdAt: nowISO(),
       };
       const response = { ok: true, duplicate: false, economy: economyAfter };
+      await this.insertTransaction(client, transaction, response);
+      return { ...response, player, transaction };
+    });
+  }
+
+  async applyWebPointReservation(operation, input) {
+    const op = String(operation || "").trim().toLowerCase();
+    const reservationId = String(input && input.reservationId || "").trim();
+    const webUserId = String(input && input.webUserId || "").trim();
+    const expectedPlayerId = String(input && input.expectedPlayerId || "").trim();
+    const pointAmount = Number(input && input.pointAmount);
+    const purpose = String(input && input.purpose || "").trim();
+    const source = String(input && input.source || "").trim();
+    const occurredAt = String(input && input.occurredAt || "").trim();
+    if (!["reserve", "capture", "release"].includes(op)
+        || !reservationId || !webUserId || !expectedPlayerId || !purpose || !source
+        || !Number.isSafeInteger(pointAmount) || pointAmount < 1) {
+      return { ok: false, error: "INVALID_POINT_RESERVATION" };
+    }
+
+    const requestSignature = JSON.stringify({
+      reservationId,
+      webUserId,
+      expectedPlayerId,
+      pointAmount,
+      purpose,
+      source,
+      occurredAt,
+    });
+
+    return this.withTransaction(async (client) => {
+      await this.lockIdempotency(client, `point_reservation:${reservationId}`);
+      const playerResult = await client.query(
+        "select * from game_players where web_user_id=$1 for update",
+        [webUserId]
+      );
+      if (playerResult.rowCount !== 1 || playerResult.rows[0].id !== expectedPlayerId) {
+        return { ok: false, error: "GAME_POINT_IDENTITY_MISMATCH" };
+      }
+      const player = playerFromRow(playerResult.rows[0]);
+      await this.ensurePlayerStateWithClient(client, player.id);
+
+      const storedResult = await client.query(
+        "select * from point_wallet_reservations where id=$1 for update",
+        [reservationId]
+      );
+      let stored = storedResult.rows[0] || null;
+      if (stored && (stored.player_id !== player.id
+          || stored.web_user_id !== webUserId
+          || stored.expected_player_id !== expectedPlayerId
+          || stored.request_signature !== requestSignature)) {
+        return { ok: false, error: "IDEMPOTENCY_CONFLICT" };
+      }
+
+      const economy = await this.getEconomyWithClient(client, player.id, true);
+      const idempotencyKey = `web_point_${op}:${source}:${reservationId}`;
+      const existingTransaction = await this.findStoredTransaction(client, idempotencyKey);
+      const duplicateResult = (reservation) => ({
+        ok: true,
+        duplicate: true,
+        player,
+        economy,
+        reservation: pointReservationFromRow(reservation),
+        transaction: transactionFromRow(existingTransaction),
+      });
+
+      if (op === "reserve") {
+        if (stored) return duplicateResult(stored);
+        if (economy.pos < pointAmount) {
+          return { ok: false, error: "INSUFFICIENT_BALANCE", economy };
+        }
+
+        const updatedEconomyResult = await client.query(
+          `update player_economy set pos=pos-$2, updated_at=now()
+           where player_id=$1 returning *`,
+          [player.id, pointAmount]
+        );
+        const economyAfter = economyFromRow(updatedEconomyResult.rows[0]);
+        const inserted = await client.query(
+          `insert into point_wallet_reservations
+           (id,player_id,web_user_id,expected_player_id,point_amount,purpose,source,
+            occurred_at,request_signature,status,created_at,updated_at)
+           values ($1,$2,$3,$4,$5,$6,$7,$8,$9,'RESERVED',now(),now()) returning *`,
+          [
+            reservationId,
+            player.id,
+            webUserId,
+            expectedPlayerId,
+            pointAmount,
+            purpose,
+            source,
+            occurredAt,
+            requestSignature,
+          ]
+        );
+        stored = inserted.rows[0];
+        const transaction = {
+          id: makeId("wpr"),
+          playerId: player.id,
+          type: "web_point_reserve",
+          ref: reservationId,
+          idempotencyKey,
+          requestSignature: JSON.stringify({ op, requestSignature }),
+          deltaPos: -pointAmount,
+          economyAfter,
+          createdAt: nowISO(),
+        };
+        const response = {
+          ok: true,
+          duplicate: false,
+          economy: economyAfter,
+          reservation: pointReservationFromRow(stored),
+        };
+        await this.insertTransaction(client, transaction, response);
+        return { ...response, player, transaction };
+      }
+
+      if (!stored) return { ok: false, error: "POINT_RESERVATION_NOT_FOUND" };
+      const targetStatus = op === "capture" ? "CAPTURED" : "RELEASED";
+      if (stored.status === targetStatus) return duplicateResult(stored);
+      if (stored.status !== "RESERVED") {
+        return { ok: false, error: "POINT_RESERVATION_STATE_CONFLICT" };
+      }
+
+      let economyAfter = economy;
+      let deltaPos = 0;
+      if (op === "release") {
+        if (economy.pos > Number.MAX_SAFE_INTEGER - pointAmount) {
+          return { ok: false, error: "POINT_BALANCE_OVERFLOW" };
+        }
+        const updatedEconomyResult = await client.query(
+          `update player_economy set pos=pos+$2, updated_at=now()
+           where player_id=$1 returning *`,
+          [player.id, pointAmount]
+        );
+        economyAfter = economyFromRow(updatedEconomyResult.rows[0]);
+        deltaPos = pointAmount;
+      }
+
+      const transitioned = await client.query(
+        `update point_wallet_reservations
+         set status=$2,
+             captured_at=case when $2='CAPTURED' then now() else captured_at end,
+             released_at=case when $2='RELEASED' then now() else released_at end,
+             updated_at=now()
+         where id=$1 and status='RESERVED' returning *`,
+        [reservationId, targetStatus]
+      );
+      if (transitioned.rowCount !== 1) {
+        throw new Error("POINT_RESERVATION_TRANSITION_RACE");
+      }
+      stored = transitioned.rows[0];
+      const transaction = {
+        id: makeId("wpr"),
+        playerId: player.id,
+        type: `web_point_${op}`,
+        ref: reservationId,
+        idempotencyKey,
+        requestSignature: JSON.stringify({ op, requestSignature }),
+        deltaPos,
+        economyAfter,
+        createdAt: nowISO(),
+      };
+      const response = {
+        ok: true,
+        duplicate: false,
+        economy: economyAfter,
+        reservation: pointReservationFromRow(stored),
+      };
       await this.insertTransaction(client, transaction, response);
       return { ...response, player, transaction };
     });

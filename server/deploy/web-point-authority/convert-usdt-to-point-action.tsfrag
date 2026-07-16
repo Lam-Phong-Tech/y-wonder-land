@@ -1,0 +1,223 @@
+export async function convertUsdtToPointAction(
+  usdt: number,
+  requestId: string
+): Promise<Result & { point?: number; pending?: boolean; duplicate?: boolean }> {
+  try {
+    const me = await getActiveUser();
+    if ("error" in me) return { ok: false, error: me.error };
+    const userId = me.id;
+    const rl = checkRateLimit(`conv:${userId}`, POLICIES.paymentCreate.limit, POLICIES.paymentCreate.windowMs);
+    if (!rl.allowed) return { ok: false, error: `Too many requests. Retry after ${Math.ceil(rl.retryAfterMs / 1000)}s` };
+
+    let normalizedRequestId: string;
+    let normalizedUsdt: { amount: number; micros: string };
+    try {
+      normalizedRequestId = normalizeGamePointConversionRequestId(requestId);
+      normalizedUsdt = normalizeUsdtMicros(usdt);
+    } catch (error: any) {
+      return { ok: false, error: error?.message || "INVALID_GAME_POINT_CONVERSION" };
+    }
+    if (normalizedUsdt.amount > MAX_CONVERT_USDT) {
+      return { ok: false, error: "USDT amount is too large" };
+    }
+
+    const authority = await resolveGamePointConversionAuthority(userId);
+    if (authority.mode === "blocked") {
+      return { ok: false, error: authority.error || "GAME_POINT_CONVERSION_BLOCKED" };
+    }
+
+    const transactionId = gamePointConversionTransactionId(normalizedRequestId);
+    const authorityName = authority.mode === "game" ? "game" : "legacy-web";
+    let pointMicros = "";
+    let gamePointAmount = "";
+    let point = 0;
+    let rateVersionId = "";
+    let rateMicros = "";
+    let roundingRemainder = "";
+    let gamePointOutboxId: string | undefined;
+    let duplicate = false;
+
+    const validateBaseTransaction = (transaction: any) => {
+      let parsed: any;
+      try {
+        parsed = JSON.parse(String(transaction?.metadata || ""));
+      } catch {
+        throw new Error("IDEMPOTENCY_CONFLICT");
+      }
+      if (transaction?.userId !== userId
+          || transaction?.type !== "SWAP"
+          || parsed?.requestId !== normalizedRequestId
+          || parsed?.usdtMicros !== normalizedUsdt.micros
+          || parsed?.authority !== authorityName
+          || !/^[1-9]\d*$/.test(String(parsed?.pointMicros || ""))
+          || !/^[1-9]\d*$/.test(String(parsed?.rateMicros || ""))
+          || !/^[0-9]+$/.test(String(parsed?.roundingRemainder || ""))
+          || !String(parsed?.rateVersionId || "")) {
+        throw new Error("IDEMPOTENCY_CONFLICT");
+      }
+      pointMicros = String(parsed.pointMicros);
+      rateVersionId = String(parsed.rateVersionId);
+      rateMicros = String(parsed.rateMicros);
+      roundingRemainder = String(parsed.roundingRemainder);
+      gamePointAmount = pointMicrosToAmountText(pointMicros);
+      point = pointMicrosToNumber(pointMicros);
+    };
+
+    const validateConversion = (conversion: any) => {
+      if (!conversion
+          || conversion.userId !== userId
+          || conversion.sourceTransactionId !== transactionId
+          || conversion.usdtMicros !== normalizedUsdt.micros
+          || conversion.pointMicros !== pointMicros
+          || conversion.rateVersionId !== rateVersionId
+          || conversion.rateMicros !== rateMicros
+          || conversion.roundingRemainder !== roundingRemainder) {
+        throw new Error("IDEMPOTENCY_CONFLICT");
+      }
+      gamePointOutboxId = conversion.outboxId;
+    };
+
+    const loadCommittedReplay = async (): Promise<boolean> => {
+      const transaction = await db.transaction.findUnique({ where: { id: transactionId } });
+      if (!transaction) return false;
+      validateBaseTransaction(transaction);
+      if (authority.mode === "game") {
+        const conversion = await db.gamePointConversion.findUnique({
+          where: { requestId: normalizedRequestId },
+        });
+        validateConversion(conversion);
+      }
+      duplicate = true;
+      return true;
+    };
+
+    try {
+      await db.$transaction(async (txdb) => {
+        const existing = await txdb.transaction.findUnique({ where: { id: transactionId } });
+        if (existing) {
+          validateBaseTransaction(existing);
+          if (authority.mode === "game") {
+            const conversion = await txdb.gamePointConversion.findUnique({
+              where: { requestId: normalizedRequestId },
+            });
+            validateConversion(conversion);
+          }
+          duplicate = true;
+          return;
+        }
+
+        if (authority.mode === "game") {
+          const unresolved = await txdb.gamePointConversion.findFirst({
+            where: { userId, status: { notIn: ["SENT", "REFUNDED"] } },
+            select: { id: true },
+          });
+          if (unresolved) throw new Error("GAME_POINT_CONVERSION_ALREADY_PENDING");
+        }
+
+        const activeRate = await getActiveUsdtPointRate(txdb);
+        const quote = quoteUsdtToPointMicros(normalizedUsdt.micros, activeRate.rateMicros);
+        pointMicros = quote.pointMicros;
+        gamePointAmount = quote.pointAmount;
+        point = pointMicrosToNumber(pointMicros);
+        rateVersionId = activeRate.id;
+        rateMicros = activeRate.rateMicros;
+        roundingRemainder = quote.roundingRemainder;
+
+        const debit = await txdb.wallet.updateMany({
+          where: { userId, balanceUsdt: { gte: normalizedUsdt.amount } },
+          data: authority.mode === "game"
+            ? { balanceUsdt: { decrement: normalizedUsdt.amount } }
+            : {
+                balanceUsdt: { decrement: normalizedUsdt.amount },
+                balanceGXL: { increment: point },
+              },
+        });
+        if (debit.count === 0) throw new Error("INSUFFICIENT_USDT");
+
+        const swapTransaction = await txdb.transaction.create({
+          data: {
+            id: transactionId,
+            userId,
+            type: "SWAP",
+            amount: point,
+            currency: "GXL",
+            status: authority.mode === "game" ? "PENDING" : "SUCCESS",
+            metadata: JSON.stringify({
+              from: "USDT",
+              to: "POINT",
+              usdt: normalizedUsdt.amount,
+              point,
+              requestId: normalizedRequestId,
+              usdtMicros: normalizedUsdt.micros,
+              pointMicros,
+              rateVersionId,
+              rateMicros,
+              roundingRemainder,
+              authority: authorityName,
+            }),
+          },
+        });
+
+        if (authority.mode === "game") {
+          const outbox = await txdb.gamePointSyncOutbox.create({
+            data: {
+              sourceTransactionId: swapTransaction.id,
+              userId,
+              pointAmount: gamePointAmount,
+              occurredAt: swapTransaction.createdAt,
+              source: GAME_POINT_SYNC_SOURCE,
+            },
+          });
+          await txdb.gamePointConversion.create({
+            data: {
+              id: `gpcv_${normalizedRequestId.replace(/-/g, "")}`,
+              requestId: normalizedRequestId,
+              sourceTransactionId: swapTransaction.id,
+              outboxId: outbox.id,
+              userId,
+              usdtMicros: normalizedUsdt.micros,
+              pointMicros,
+              rateVersionId,
+              rateMicros,
+              roundingRemainder,
+              status: "PENDING",
+            },
+          });
+          gamePointOutboxId = outbox.id;
+        }
+      });
+    } catch (error: any) {
+      if (error?.message === "INSUFFICIENT_USDT") {
+        return { ok: false, error: "Insufficient USDT balance" };
+      }
+      if (["GAME_POINT_CONVERSION_ALREADY_PENDING", "IDEMPOTENCY_CONFLICT"].includes(error?.message)) {
+        return { ok: false, error: error.message };
+      }
+      if (!await loadCommittedReplay()) {
+        if (authority.mode === "game") {
+          const unresolved = await db.gamePointConversion.findFirst({
+            where: { userId, status: { notIn: ["SENT", "REFUNDED"] } },
+            select: { id: true },
+          });
+          if (unresolved) {
+            return { ok: false, error: "GAME_POINT_CONVERSION_ALREADY_PENDING" };
+          }
+        }
+        throw error;
+      }
+    }
+
+    let pending = false;
+    if (authority.mode === "game") {
+      if (!gamePointOutboxId) return { ok: false, error: "GAME_POINT_OUTBOX_MISSING" };
+      const dispatch = await dispatchGamePointSyncOutboxById(gamePointOutboxId);
+      pending = !dispatch.ok;
+    }
+
+    revalidatePath("/wallet");
+    revalidatePath("/", "layout");
+    return { ok: true, point, pending, duplicate };
+  } catch (error: any) {
+    return { ok: false, error: error?.message || "Point conversion failed" };
+  }
+}

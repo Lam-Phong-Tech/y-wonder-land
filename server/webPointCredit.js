@@ -26,6 +26,7 @@ function buildWebPointCreditConfig(env = process.env) {
   const configuredMode = String(env.WEB_TOPUP_MODE || "canary").trim().toLowerCase();
   return {
     enabled: envBoolean("WEB_TOPUP_ENABLED", false, env),
+    debitEnabled: envBoolean("WEB_POINT_WALLET_DEBIT_ENABLED", false, env),
     allowRemote: envBoolean("WEB_TOPUP_ALLOW_REMOTE", false, env),
     clockSkewSec: envInteger("WEB_TOPUP_CLOCK_SKEW_SEC", 300, 30, 900, env),
     maxPoints: envInteger("WEB_TOPUP_MAX_POINTS", 1_000_000_000, 1, MAX_SAFE_POINT_AMOUNT, env),
@@ -82,6 +83,14 @@ function normalizeWebPointCreditBody(body, maxPoints) {
     128,
     true
   );
+  const expectedPlayerId = normalizeText(
+    input.expected_player_id ?? input.expectedPlayerId,
+    "EXPECTED_PLAYER_ID",
+    128
+  );
+  if (expectedPlayerId && !/^[A-Za-z0-9._:-]+$/.test(expectedPlayerId)) {
+    throw new Error("INVALID_EXPECTED_PLAYER_ID");
+  }
   const normalizedAmount = normalizePointAmount(
     input.point_amount ?? input.pointAmount ?? input.amount,
     maxPoints
@@ -102,6 +111,7 @@ function normalizeWebPointCreditBody(body, maxPoints) {
   return {
     transactionId,
     webUserId,
+    expectedPlayerId,
     ...normalizedAmount,
     occurredAt: new Date(occurredAtMs).toISOString(),
     source,
@@ -111,6 +121,20 @@ function normalizeWebPointCreditBody(body, maxPoints) {
 }
 
 function canonicalWebPointCredit(timestamp, credit) {
+  if (credit.expectedPlayerId) {
+    return JSON.stringify([
+      "ywonder-point-credit-v2",
+      String(timestamp),
+      credit.transactionId,
+      credit.webUserId,
+      credit.expectedPlayerId,
+      credit.pointAmount,
+      credit.occurredAt,
+      credit.source,
+      credit.username,
+      credit.displayName,
+    ]);
+  }
   return JSON.stringify([
     "ywonder-point-credit-v1",
     String(timestamp),
@@ -128,6 +152,125 @@ function signWebPointCredit(secret, timestamp, credit) {
   return crypto
     .createHmac("sha256", secret)
     .update(canonicalWebPointCredit(timestamp, credit), "utf8")
+    .digest("hex");
+}
+
+function normalizeWebPointBalanceBody(body) {
+  const input = body && typeof body === "object" ? body : {};
+  const requestId = normalizeText(
+    input.request_id ?? input.requestId,
+    "REQUEST_ID",
+    128,
+    true
+  );
+  if (!/^[A-Za-z0-9._:-]+$/.test(requestId)) throw new Error("INVALID_REQUEST_ID");
+
+  const webUserId = normalizeText(
+    input.web_user_id ?? input.webUserId ?? input.uid,
+    "WEB_USER_ID",
+    128,
+    true
+  );
+  return { requestId, webUserId };
+}
+
+function canonicalWebPointBalance(timestamp, query) {
+  return JSON.stringify([
+    "ywonder-point-balance-v1",
+    String(timestamp),
+    query.requestId,
+    query.webUserId,
+  ]);
+}
+
+function signWebPointBalance(secret, timestamp, query) {
+  return crypto
+    .createHmac("sha256", secret)
+    .update(canonicalWebPointBalance(timestamp, query), "utf8")
+    .digest("hex");
+}
+
+function normalizeWebPointReservationBody(body, maxPoints) {
+  const input = body && typeof body === "object" ? body : {};
+  const reservationId = normalizeText(
+    input.reservation_id ?? input.reservationId ?? input.transaction_id ?? input.transactionId,
+    "RESERVATION_ID",
+    128,
+    true
+  );
+  if (!/^[A-Za-z0-9._:-]+$/.test(reservationId)) {
+    throw new Error("INVALID_RESERVATION_ID");
+  }
+
+  const webUserId = normalizeText(
+    input.web_user_id ?? input.webUserId ?? input.uid,
+    "WEB_USER_ID",
+    128,
+    true
+  );
+  const expectedPlayerId = normalizeText(
+    input.expected_player_id ?? input.expectedPlayerId,
+    "EXPECTED_PLAYER_ID",
+    128,
+    true
+  );
+  if (!/^[A-Za-z0-9._:-]+$/.test(expectedPlayerId)) {
+    throw new Error("INVALID_EXPECTED_PLAYER_ID");
+  }
+
+  const normalizedAmount = normalizePointAmount(
+    input.point_amount ?? input.pointAmount ?? input.amount,
+    maxPoints
+  );
+  if (normalizedAmount.pointAmountMicros % POINT_MICROS_SCALE !== 0) {
+    throw new Error("POINT_RESERVATION_REQUIRES_WHOLE_POINT");
+  }
+  const pointAmount = normalizedAmount.pointAmountMicros / POINT_MICROS_SCALE;
+
+  const purpose = normalizeText(input.purpose, "PURPOSE", 64, true);
+  if (!/^[a-z][a-z0-9_.:-]*$/.test(purpose)) throw new Error("INVALID_PURPOSE");
+  const source = normalizeText(input.source || "ywonder-web", "SOURCE", 64, true);
+  if (!/^[A-Za-z0-9._:-]+$/.test(source)) throw new Error("INVALID_SOURCE");
+
+  const rawOccurredAt = normalizeText(
+    input.occurred_at ?? input.occurredAt,
+    "OCCURRED_AT",
+    64,
+    true
+  );
+  const occurredAtMs = Date.parse(rawOccurredAt);
+  if (!Number.isFinite(occurredAtMs)) throw new Error("INVALID_OCCURRED_AT");
+
+  return {
+    reservationId,
+    webUserId,
+    expectedPlayerId,
+    pointAmount,
+    purpose,
+    source,
+    occurredAt: new Date(occurredAtMs).toISOString(),
+  };
+}
+
+function canonicalWebPointReservation(timestamp, operation, reservation) {
+  return JSON.stringify([
+    "ywonder-point-reservation-v1",
+    String(timestamp),
+    operation,
+    reservation.reservationId,
+    reservation.webUserId,
+    reservation.expectedPlayerId,
+    String(reservation.pointAmount),
+    reservation.purpose,
+    reservation.source,
+    reservation.occurredAt,
+  ]);
+}
+
+function signWebPointReservation(secret, timestamp, operation, reservation) {
+  return crypto
+    .createHmac("sha256", secret)
+    .update(canonicalWebPointReservation(timestamp, operation, reservation), "utf8")
     .digest("hex");
 }
 
@@ -202,6 +345,7 @@ function createWebPointCreditHandler(options) {
         transactionId: credit.transactionId,
         occurredAt: credit.occurredAt,
         source: credit.source,
+        expectedPlayerId: credit.expectedPlayerId,
       });
 
       if (!result.ok && result.error === "IDEMPOTENCY_CONFLICT") {
@@ -233,12 +377,179 @@ function createWebPointCreditHandler(options) {
   };
 }
 
+function createWebPointBalanceHandler(options) {
+  const store = options.store;
+  const config = options.config;
+  if (!store || typeof store.getWebPointBalance !== "function") {
+    throw new Error("Web Point balance requires a storage adapter with getWebPointBalance().");
+  }
+
+  return async (req, res, next) => {
+    try {
+      if (!config.enabled) return res.status(404).json({ error: "NOT_FOUND" });
+      if (!config.allowRemote && !isLoopbackAddress(req.socket && req.socket.remoteAddress)) {
+        return res.status(403).json({ error: "WEB_TOPUP_LOOPBACK_ONLY" });
+      }
+      if (config.secret.length < 32) {
+        return res.status(503).json({ error: "WEB_TOPUP_NOT_CONFIGURED" });
+      }
+
+      const timestamp = String(req.headers["x-ywonder-timestamp"] || "").trim();
+      if (!/^\d{10,11}$/.test(timestamp)) {
+        return res.status(401).json({ error: "INVALID_WEB_TOPUP_SIGNATURE" });
+      }
+      const timestampSec = Number(timestamp);
+      if (!Number.isInteger(timestampSec)) {
+        return res.status(401).json({ error: "INVALID_WEB_TOPUP_SIGNATURE" });
+      }
+      if (Math.abs(Math.floor(Date.now() / 1000) - timestampSec) > config.clockSkewSec) {
+        return res.status(401).json({ error: "WEB_TOPUP_REQUEST_EXPIRED" });
+      }
+
+      let query;
+      try {
+        query = normalizeWebPointBalanceBody(req.body);
+      } catch (error) {
+        return res.status(400).json({ error: error.message || "INVALID_WEB_POINT_BALANCE_REQUEST" });
+      }
+
+      const expectedSignature = signWebPointBalance(config.secret, timestamp, query);
+      if (!signaturesMatch(expectedSignature, req.headers["x-ywonder-signature"])) {
+        return res.status(401).json({ error: "INVALID_WEB_TOPUP_SIGNATURE" });
+      }
+      if (config.mode !== "open"
+          && (!config.allowedWebUserIds || !config.allowedWebUserIds.has(query.webUserId))) {
+        return res.status(403).json({ error: "WEB_TOPUP_CANARY_USER_NOT_ALLOWED" });
+      }
+
+      const result = await store.getWebPointBalance(query.webUserId);
+      if (!result || !result.player || !result.economy) {
+        return res.status(404).json({ error: "WEB_PLAYER_NOT_FOUND" });
+      }
+
+      return res.json({
+        ok: true,
+        request_id: query.requestId,
+        web_user_id: query.webUserId,
+        player_id: result.player.id,
+        point: result.economy.pos,
+        economy: {
+          version: result.economy.version,
+          pos: result.economy.pos,
+          updatedAt: result.economy.updatedAt,
+        },
+      });
+    } catch (error) {
+      return next(error);
+    }
+  };
+}
+
+function createWebPointReservationHandler(options) {
+  const store = options.store;
+  const config = options.config;
+  const operation = String(options.operation || "").trim().toLowerCase();
+  const onMutation = options.onMutation;
+  if (!store || typeof store.applyWebPointReservation !== "function") {
+    throw new Error("Web Point reservation requires applyWebPointReservation().");
+  }
+  if (!["reserve", "capture", "release"].includes(operation)) {
+    throw new Error("Invalid Web Point reservation operation.");
+  }
+
+  return async (req, res, next) => {
+    try {
+      if (!config.enabled || !config.debitEnabled) {
+        return res.status(404).json({ error: "NOT_FOUND" });
+      }
+      if (!config.allowRemote && !isLoopbackAddress(req.socket && req.socket.remoteAddress)) {
+        return res.status(403).json({ error: "WEB_TOPUP_LOOPBACK_ONLY" });
+      }
+      if (config.secret.length < 32) {
+        return res.status(503).json({ error: "WEB_TOPUP_NOT_CONFIGURED" });
+      }
+
+      const timestamp = String(req.headers["x-ywonder-timestamp"] || "").trim();
+      if (!/^\d{10,11}$/.test(timestamp)) {
+        return res.status(401).json({ error: "INVALID_WEB_TOPUP_SIGNATURE" });
+      }
+      const timestampSec = Number(timestamp);
+      if (!Number.isInteger(timestampSec)) {
+        return res.status(401).json({ error: "INVALID_WEB_TOPUP_SIGNATURE" });
+      }
+      if (Math.abs(Math.floor(Date.now() / 1000) - timestampSec) > config.clockSkewSec) {
+        return res.status(401).json({ error: "WEB_TOPUP_REQUEST_EXPIRED" });
+      }
+
+      let reservation;
+      try {
+        reservation = normalizeWebPointReservationBody(req.body, config.maxPoints);
+      } catch (error) {
+        return res.status(400).json({
+          error: error.message || "INVALID_WEB_POINT_RESERVATION_REQUEST",
+        });
+      }
+
+      const expectedSignature = signWebPointReservation(
+        config.secret,
+        timestamp,
+        operation,
+        reservation
+      );
+      if (!signaturesMatch(expectedSignature, req.headers["x-ywonder-signature"])) {
+        return res.status(401).json({ error: "INVALID_WEB_TOPUP_SIGNATURE" });
+      }
+      if (config.mode !== "open"
+          && (!config.allowedWebUserIds || !config.allowedWebUserIds.has(reservation.webUserId))) {
+        return res.status(403).json({ error: "WEB_TOPUP_CANARY_USER_NOT_ALLOWED" });
+      }
+
+      const result = await store.applyWebPointReservation(operation, reservation);
+      if (!result.ok) {
+        const status = result.error === "POINT_RESERVATION_NOT_FOUND" ? 404 : 409;
+        return res.status(status).json({ error: result.error || "WEB_POINT_RESERVATION_REJECTED" });
+      }
+
+      if (typeof onMutation === "function") {
+        try {
+          await onMutation(operation, result);
+        } catch (error) {
+          console.warn(JSON.stringify({
+            event: "web_point_reservation_realtime_notify_failed",
+            errorCode: error && (error.code || error.name) || "UNKNOWN_ERROR",
+          }));
+        }
+      }
+
+      return res.json({
+        ok: true,
+        duplicate: Boolean(result.duplicate),
+        operation,
+        player_id: result.player && result.player.id,
+        economy: result.economy,
+        reservation: result.reservation,
+        transaction: result.transaction,
+      });
+    } catch (error) {
+      return next(error);
+    }
+  };
+}
+
 module.exports = {
   POINT_MICROS_SCALE,
   buildWebPointCreditConfig,
+  canonicalWebPointBalance,
   canonicalWebPointCredit,
+  canonicalWebPointReservation,
+  createWebPointBalanceHandler,
   createWebPointCreditHandler,
+  createWebPointReservationHandler,
   normalizePointAmount,
+  normalizeWebPointBalanceBody,
   normalizeWebPointCreditBody,
+  normalizeWebPointReservationBody,
+  signWebPointBalance,
   signWebPointCredit,
+  signWebPointReservation,
 };

@@ -38,6 +38,7 @@ async function main() {
     "003_active_player_sessions.sql",
     "004_single_point_currency.sql",
     "005_web_topup_point_remainder.sql",
+    "006_point_wallet_reservations.sql",
   ]
     .map((file) => fs.readFileSync(path.join(__dirname, "migrations", file), "utf8"))
     .join("\n");
@@ -220,9 +221,24 @@ async function main() {
       displayName: "Postgres Topup Smoke",
       authSource: "web",
     };
+    const topupPlayer = await store.getOrCreatePlayerForWebUser(topupIdentity);
+    const topupPlayerId = topupPlayer.id;
+    const mismatchedTopup = await store.creditWebTopup(topupIdentity, 1_000_000, {
+      pointAmount: "1.000000",
+      transactionId: `topup-wrong-player-${suffix}`,
+      expectedPlayerId: `wrong-${topupPlayerId}`,
+      occurredAt: new Date().toISOString(),
+      source: "postgres-smoke",
+    });
+    assert(!mismatchedTopup.ok && mismatchedTopup.error === "GAME_POINT_IDENTITY_MISMATCH",
+      "PostgreSQL web top-up accepted the wrong pinned player.");
+    const economyAfterMismatch = await store.getEconomy(topupPlayerId);
+    assert(economyAfterMismatch.pos === 5000,
+      "PostgreSQL identity mismatch changed the authoritative Point balance.");
     const topupFirst = await store.creditWebTopup(topupIdentity, 750_500_000, {
       pointAmount: "750.500000",
       transactionId: `topup-first-${suffix}`,
+      expectedPlayerId: topupPlayerId,
       occurredAt: new Date().toISOString(),
       source: "postgres-smoke",
     });
@@ -231,6 +247,7 @@ async function main() {
     const topupDuplicate = await store.creditWebTopup(topupIdentity, 750_500_000, {
       pointAmount: "750.500000",
       transactionId: `topup-first-${suffix}`,
+      expectedPlayerId: topupPlayerId,
       occurredAt: topupFirst.transaction.occurredAt,
       source: "postgres-smoke",
     });
@@ -239,18 +256,62 @@ async function main() {
     const topupCarry = await store.creditWebTopup(topupIdentity, 500_000, {
       pointAmount: "0.500000",
       transactionId: `topup-carry-${suffix}`,
+      expectedPlayerId: topupPlayerId,
       occurredAt: new Date().toISOString(),
       source: "postgres-smoke",
     });
     assert(topupCarry.ok && topupCarry.economy.pos === 5751,
       "PostgreSQL web top-up did not carry the fractional Point remainder exactly.");
-    const topupPlayerId = topupFirst.player.id;
+    assert(topupFirst.player.id === topupPlayerId,
+      "PostgreSQL web top-up credited a player other than the pinned identity.");
     const remainder = await pool.query(
       "select web_point_micros_remainder from player_economy where player_id=$1",
       [topupPlayerId]
     );
     assert(Number(remainder.rows[0].web_point_micros_remainder) === 0,
       "PostgreSQL fractional Point remainder was not settled to zero.");
+
+    const reservationIdentity = {
+      id: `pg-reservation-web-${suffix}`,
+      username: `reservation_${suffix}@example.test`,
+      displayName: "Reservation Smoke",
+      authSource: "web",
+    };
+    const reservationPlayer = await store.getOrCreatePlayerForWebUser(reservationIdentity);
+    const releasedReservation = {
+      reservationId: `pg-reservation-release-${suffix}`,
+      webUserId: reservationIdentity.id,
+      expectedPlayerId: reservationPlayer.id,
+      pointAmount: 100,
+      purpose: "point_to_usdt",
+      source: "postgres-smoke",
+      occurredAt: new Date().toISOString(),
+    };
+    const reserveRace = await Promise.all([
+      store.applyWebPointReservation("reserve", releasedReservation),
+      store.applyWebPointReservation("reserve", releasedReservation),
+    ]);
+    assert(reserveRace.every((entry) => entry.ok)
+      && reserveRace.filter((entry) => entry.duplicate).length === 1
+      && reserveRace.every((entry) => entry.economy.pos === 4900),
+    "Concurrent PostgreSQL reservation did not debit exactly once.");
+    const releaseRace = await Promise.all([
+      store.applyWebPointReservation("release", releasedReservation),
+      store.applyWebPointReservation("release", releasedReservation),
+    ]);
+    assert(releaseRace.every((entry) => entry.ok)
+      && releaseRace.filter((entry) => entry.duplicate).length === 1
+      && releaseRace.every((entry) => entry.economy.pos === 5000),
+    "Concurrent PostgreSQL release did not refund exactly once.");
+
+    const capturedReservation = {
+      ...releasedReservation,
+      reservationId: `pg-reservation-capture-${suffix}`,
+      pointAmount: 200,
+    };
+    const pendingCapture = await store.applyWebPointReservation("reserve", capturedReservation);
+    assert(pendingCapture.ok && pendingCapture.economy.pos === 4800,
+      "PostgreSQL capture fixture was not reserved.");
 
     const beforeRestartInventory = await store.getInventory(userId);
     assert(itemQuantity(beforeRestartInventory, "pg_test_item") === 3, "Inventory quantity is incorrect before restart.");
@@ -269,9 +330,13 @@ async function main() {
     const topupReplayAfterRestart = await store.creditWebTopup(topupIdentity, 750_500_000, {
       pointAmount: "750.500000",
       transactionId: `topup-first-${suffix}`,
+      expectedPlayerId: topupPlayerId,
       occurredAt: topupFirst.transaction.occurredAt,
       source: "postgres-smoke",
     });
+    const captureAfterRestart = await store.applyWebPointReservation("capture", capturedReservation);
+    const captureReplayAfterRestart = await store.applyWebPointReservation("capture", capturedReservation);
+    const releaseCaptured = await store.applyWebPointReservation("release", capturedReservation);
     assert(restoredProfile.customMarker === suffix, "Profile JSON did not survive pool restart.");
     assert(restoredEconomy.pos === startEconomy.pos + 25, "Economy did not preserve delta plus shop cost.");
     assert(itemQuantity(restoredInventory, "pg_test_item") === 3, "Inventory did not survive pool restart.");
@@ -287,10 +352,19 @@ async function main() {
     assert(topupReplayAfterRestart.ok && topupReplayAfterRestart.duplicate
       && topupReplayAfterRestart.economy.pos === 5751,
     "PostgreSQL web top-up idempotency or remainder did not survive pool restart.");
+    assert(captureAfterRestart.ok && !captureAfterRestart.duplicate
+      && captureAfterRestart.economy.pos === 4800
+      && captureAfterRestart.reservation.status === "CAPTURED",
+    "PostgreSQL reservation capture did not survive pool restart.");
+    assert(captureReplayAfterRestart.ok && captureReplayAfterRestart.duplicate
+      && captureReplayAfterRestart.economy.pos === 4800,
+    "PostgreSQL capture replay was not idempotent.");
+    assert(!releaseCaptured.ok && releaseCaptured.error === "POINT_RESERVATION_STATE_CONFLICT",
+      "Captured PostgreSQL reservation was released.");
 
     const db = await store.readAll();
     assert(db.users.length === 1, "PostgreSQL admin snapshot is missing the local account.");
-    assert(db.transactions.length === 8, "PostgreSQL transaction ledger count is incorrect.");
+    assert(db.transactions.length === 12, "PostgreSQL transaction ledger count is incorrect.");
     console.log(`[postgres-smoke] PASS schema=${schema}`);
   } finally {
     if (pool) await pool.end().catch(() => {});

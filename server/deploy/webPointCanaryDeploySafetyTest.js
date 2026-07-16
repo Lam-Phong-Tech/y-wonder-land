@@ -3,6 +3,8 @@ const path = require("path");
 
 const scriptPath = path.join(__dirname, "deploy-web-point-canary-hardening.sh");
 const source = fs.readFileSync(scriptPath, "utf8");
+const activationSource = fs.readFileSync(path.join(__dirname, "activate-web-point-canary.sh"), "utf8");
+const deactivationSource = fs.readFileSync(path.join(__dirname, "deactivate-web-point-canary.sh"), "utf8");
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -68,4 +70,54 @@ assert(!source.includes('DATABASE_URL="file:${live_db}"'),
 assert(!source.includes("upsert_env"),
   "Web hardening runner can rewrite environment files.");
 
-console.log("[web-point-canary-deploy] PASS: dormant gates, validate-only, backups, rollback and live-data isolation are intact.");
+function requireToggleText(toggleSource, text, message) {
+  assert(toggleSource.includes(text), message);
+  return toggleSource.indexOf(text);
+}
+
+function requireToggleBefore(toggleSource, first, second, message) {
+  const firstIndex = requireToggleText(toggleSource, first, `Missing toggle safety marker: ${first}`);
+  const secondIndex = requireToggleText(toggleSource, second, `Missing toggle safety marker: ${second}`);
+  assert(firstIndex < secondIndex, message);
+}
+
+for (const [label, toggleSource] of [
+  ["activation", activationSource],
+  ["deactivation", deactivationSource],
+]) {
+  requireToggleText(toggleSource, "[[ ${EUID} -eq 0 ]]", `${label} does not require root.`);
+  requireToggleText(toggleSource, "/run/lock/ywonder-point-canary-config.lock", `${label} does not share the canary configuration lock.`);
+  requireToggleText(toggleSource, "flock -n 9", `${label} does not enforce a single configuration writer.`);
+  requireToggleText(toggleSource, "restore_backup", `${label} does not define rollback restoration.`);
+  requireToggleText(toggleSource, "trap rollback EXIT", `${label} does not arm rollback.`);
+  requireToggleText(toggleSource, "WEB_POINT_CANARY_VALIDATE_ONLY", `${label} does not support validate-only mode.`);
+  requireToggleText(toggleSource, "https://api.ywonder.net/game-api/internal/web/point-credit", `${label} does not pin the public ingress guard.`);
+  requireToggleText(toggleSource, 'install -d -o root -g root -m 0700 "${backup_dir}"', `${label} does not create a root-only backup.`);
+  requireToggleBefore(
+    toggleSource,
+    "WEB_POINT_CANARY_VALIDATE_ONLY",
+    'install -d -o root -g root -m 0700 "${backup_dir}"',
+    `${label} validate-only mode can create a backup or mutate production.`
+  );
+  assert(!toggleSource.includes('systemctl stop "${web_service}"'), `${label} can stop the web service.`);
+  assert(!toggleSource.includes('systemctl stop "${game_service}"'), `${label} can stop the game service.`);
+  assert(!toggleSource.includes("WEB_TOPUP_MODE open"), `${label} can enable open mode.`);
+  assert(!toggleSource.includes("rm -"), `${label} contains a destructive remove command.`);
+}
+
+requireToggleText(activationSource, 'upsert_env "${game_env}" WEB_TOPUP_ALLOW_REMOTE false',
+  "Activation does not keep remote Point ingress disabled.");
+requireToggleText(activationSource, 'upsert_env "${game_env}" CLIENT_ASSET_GRANTS_BLOCKED_WEB_USER_IDS "${web_user_id}"',
+  "Activation does not scope the client grant block to the canary user.");
+requireToggleText(deactivationSource, 'upsert_env "${web_env}" WEB_TOPUP_ENABLED false',
+  "Deactivation does not disable the web producer.");
+requireToggleText(deactivationSource, 'upsert_env "${game_env}" WEB_TOPUP_ENABLED false',
+  "Deactivation does not disable the game ingress.");
+requireToggleText(deactivationSource, 'upsert_env "${game_env}" WEB_TOPUP_ALLOWED_WEB_USER_IDS ""',
+  "Deactivation does not clear the game canary allowlist.");
+requireToggleText(deactivationSource, 'upsert_env "${game_env}" CLIENT_ASSET_GRANTS_BLOCKED_WEB_USER_IDS ""',
+  "Deactivation does not clear the scoped client grant block.");
+requireToggleText(deactivationSource, '[[ "${topup_http}" == "404" ]]',
+  "Deactivation does not verify dormant loopback ingress.");
+
+console.log("[web-point-canary-deploy] PASS: hardening deploy plus canary activation/deactivation locks, validate-only gates, backups and rollback are intact.");

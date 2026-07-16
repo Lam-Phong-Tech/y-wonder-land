@@ -1,12 +1,14 @@
 const crypto = require("crypto");
 const fs = require("fs");
+const http = require("http");
 const net = require("net");
 const os = require("os");
 const path = require("path");
 const { spawn, spawnSync } = require("child_process");
 
 const GAME_ENV_FILE = "/etc/ywonder-game/game-server.env";
-const PRODUCTION_WEB_ROOT = "/var/www/ywonder";
+const CANONICAL_WEB_ROOT = "/var/www/ywonder";
+const PRODUCTION_WEB_ENV_FILE = path.join(CANONICAL_WEB_ROOT, ".env");
 const GAME_SERVICE = "ywonder-game-server.service";
 const WEB_SERVICE = "greenxland.service";
 const TEMP_DATABASE_PREFIX = "yw_point_e2e_";
@@ -140,6 +142,84 @@ async function stopChild(child) {
       child.kill("SIGKILL");
     }
   }
+}
+
+function startCommitThenTimeoutProxy(port, targetPort) {
+  const state = {
+    intercepted: 0,
+    committed: 0,
+    passedThrough: 0,
+    upstreamStatus: 0,
+  };
+  const sockets = new Set();
+  const server = http.createServer((incoming, outgoing) => {
+    const chunks = [];
+    incoming.on("data", (chunk) => chunks.push(chunk));
+    incoming.on("error", () => outgoing.destroy());
+    incoming.on("end", () => {
+      const shouldIntercept = state.intercepted === 0
+        && incoming.method === "POST"
+        && incoming.url === "/internal/web/point-credit";
+      if (shouldIntercept) state.intercepted += 1;
+
+      const upstream = http.request({
+        hostname: "127.0.0.1",
+        port: targetPort,
+        path: incoming.url,
+        method: incoming.method,
+        headers: {
+          ...incoming.headers,
+          host: `127.0.0.1:${targetPort}`,
+        },
+        agent: false,
+      }, (upstreamResponse) => {
+        const responseChunks = [];
+        upstreamResponse.on("data", (chunk) => responseChunks.push(chunk));
+        upstreamResponse.on("end", () => {
+          const status = Number(upstreamResponse.statusCode || 502);
+          state.upstreamStatus = status;
+          if (shouldIntercept && status >= 200 && status < 300) {
+            state.committed += 1;
+            const destroyTimer = setTimeout(() => outgoing.destroy(), 12_000);
+            outgoing.once("close", () => clearTimeout(destroyTimer));
+            return;
+          }
+
+          if (!shouldIntercept) state.passedThrough += 1;
+          if (outgoing.destroyed) return;
+          outgoing.writeHead(status, upstreamResponse.headers);
+          outgoing.end(Buffer.concat(responseChunks));
+        });
+      });
+      upstream.on("error", () => {
+        if (!outgoing.destroyed) {
+          outgoing.writeHead(502, { "Content-Type": "application/json" });
+          outgoing.end('{"error":"ISOLATED_FAULT_PROXY_UPSTREAM_FAILED"}');
+        }
+      });
+      upstream.end(Buffer.concat(chunks));
+    });
+  });
+  server.on("connection", (socket) => {
+    sockets.add(socket);
+    socket.once("close", () => sockets.delete(socket));
+  });
+
+  return new Promise((resolve, reject) => {
+    server.once("error", reject);
+    server.listen(port, "127.0.0.1", () => {
+      server.removeListener("error", reject);
+      resolve({ server, sockets, state });
+    });
+  });
+}
+
+async function closeFaultProxy(proxy) {
+  if (!proxy || !proxy.server) return;
+  for (const socket of proxy.sockets) socket.destroy();
+  await new Promise((resolve, reject) => {
+    proxy.server.close((error) => error ? reject(error) : resolve());
+  });
 }
 
 function runChecked(executable, args, options = {}) {
@@ -320,6 +400,24 @@ function migrateTemporaryGameDatabase(user, serverRoot, databaseUrl) {
   runGameDatabaseScript(user, serverRoot, databaseUrl, script);
 }
 
+function runPostgresStoreSmoke(user, serverRoot, databaseUrl) {
+  const output = runAsUserChecked(user, "/usr/local/bin/npm", ["run", "test:postgres"], {
+    cwd: serverRoot,
+    env: {
+      ...process.env,
+      DATABASE_URL: "",
+      POSTGRES_TEST_DATABASE_URL: databaseUrl,
+      POSTGRES_TEST_KEEP_SCHEMA: "false",
+      USER: user,
+      LOGNAME: user,
+      HOME: accountHome(user),
+    },
+  });
+  if (!output.includes("[postgres-smoke] PASS")) {
+    throw new Error("Isolated PostgreSQL store smoke did not report success.");
+  }
+}
+
 function envFileValue(filePath, key) {
   const lines = fs.readFileSync(filePath, "utf8").split(/\r?\n/);
   let value = "";
@@ -333,6 +431,65 @@ function envFileValue(filePath, key) {
     }
   }
   return value;
+}
+
+function envList(value) {
+  return Array.from(new Set(String(value || "")
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean)));
+}
+
+function classifyProductionTopupState(config) {
+  const webEnabled = String(config.webEnabled || "").trim().toLowerCase();
+  const gameEnabled = String(config.gameEnabled || "").trim().toLowerCase();
+  const webMode = String(config.webMode || "").trim().toLowerCase();
+  const gameMode = String(config.gameMode || "").trim().toLowerCase();
+  const allowRemote = String(config.allowRemote || "").trim().toLowerCase();
+  const clientGrantsEnabled = String(config.clientGrantsEnabled || "").trim().toLowerCase();
+  const webAllowed = envList(config.webAllowed);
+  const gameAllowed = envList(config.gameAllowed);
+  const blockedGrants = envList(config.blockedGrants);
+  const disabled = (value) => value === "" || value === "false";
+  const safeMode = (value) => value === "" || value === "canary";
+
+  if (allowRemote !== "false") {
+    throw new Error("Production web Point remote ingress must remain disabled.");
+  }
+
+  if (disabled(webEnabled) && disabled(gameEnabled)) {
+    if (!safeMode(webMode) || !safeMode(gameMode)
+        || webAllowed.length !== 0 || gameAllowed.length !== 0 || blockedGrants.length !== 0) {
+      throw new Error("Production dormant web Point configuration is inconsistent.");
+    }
+    return { name: "dormant", callbackStatus: 404 };
+  }
+
+  if (webEnabled === "true" && gameEnabled === "true") {
+    if (webMode !== "canary" || gameMode !== "canary"
+        || webAllowed.length !== 1 || gameAllowed.length !== 1
+        || blockedGrants.length !== 1 || clientGrantsEnabled !== "true"
+        || webAllowed[0] !== gameAllowed[0] || webAllowed[0] !== blockedGrants[0]) {
+      throw new Error("Production web Point canary is not scoped to exactly one matching identity.");
+    }
+    return { name: "exact-one-canary", callbackStatus: 401 };
+  }
+
+  throw new Error("Production web Point state is neither dormant nor an exact-one canary.");
+}
+
+function productionTopupState() {
+  return classifyProductionTopupState({
+    webEnabled: envFileValue(PRODUCTION_WEB_ENV_FILE, "WEB_TOPUP_ENABLED"),
+    webMode: envFileValue(PRODUCTION_WEB_ENV_FILE, "WEB_TOPUP_MODE"),
+    webAllowed: envFileValue(PRODUCTION_WEB_ENV_FILE, "WEB_TOPUP_ALLOWED_WEB_USER_IDS"),
+    gameEnabled: envFileValue(GAME_ENV_FILE, "WEB_TOPUP_ENABLED"),
+    gameMode: envFileValue(GAME_ENV_FILE, "WEB_TOPUP_MODE"),
+    gameAllowed: envFileValue(GAME_ENV_FILE, "WEB_TOPUP_ALLOWED_WEB_USER_IDS"),
+    allowRemote: envFileValue(GAME_ENV_FILE, "WEB_TOPUP_ALLOW_REMOTE"),
+    clientGrantsEnabled: envFileValue(GAME_ENV_FILE, "CLIENT_ASSET_GRANTS_ENABLED"),
+    blockedGrants: envFileValue(GAME_ENV_FILE, "CLIENT_ASSET_GRANTS_BLOCKED_WEB_USER_IDS"),
+  });
 }
 
 function sha256File(filePath) {
@@ -353,6 +510,23 @@ function serviceSnapshot(serviceName) {
   return result;
 }
 
+function assertProductionWebRoot(value) {
+  const configured = String(value || "").trim();
+  if (!configured || !fs.existsSync(configured)) {
+    throw new Error("Production web service WorkingDirectory is missing.");
+  }
+  const resolved = fs.realpathSync(configured);
+  if (!/^\/var\/www\/(?:ywonder|ywonder-releases\/[A-Za-z0-9._-]+)$/.test(resolved)) {
+    throw new Error("Production web service WorkingDirectory is outside an approved release root.");
+  }
+  const activeEnv = path.join(resolved, ".env");
+  if (!fs.existsSync(activeEnv)
+      || fs.realpathSync(activeEnv) !== fs.realpathSync(PRODUCTION_WEB_ENV_FILE)) {
+    throw new Error("Active web release does not use the canonical production environment.");
+  }
+  return resolved;
+}
+
 async function httpStatus(url, options = {}) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 5000);
@@ -365,15 +539,16 @@ async function httpStatus(url, options = {}) {
   }
 }
 
-function productionFileHashes(gameWorkingDirectory) {
+function productionFileHashes(gameWorkingDirectory, webWorkingDirectory) {
   const candidates = [
     GAME_ENV_FILE,
-    path.join(PRODUCTION_WEB_ROOT, ".env"),
-    path.join(PRODUCTION_WEB_ROOT, "package-lock.json"),
-    path.join(PRODUCTION_WEB_ROOT, "prisma", "schema.prisma"),
-    path.join(PRODUCTION_WEB_ROOT, "lib", "game-point-sync.ts"),
-    path.join(PRODUCTION_WEB_ROOT, "app", "api", "cron", "game-point-sync", "route.ts"),
-    path.join(PRODUCTION_WEB_ROOT, ".next", "BUILD_ID"),
+    PRODUCTION_WEB_ENV_FILE,
+    path.join(webWorkingDirectory, ".env"),
+    path.join(webWorkingDirectory, "package-lock.json"),
+    path.join(webWorkingDirectory, "prisma", "schema.prisma"),
+    path.join(webWorkingDirectory, "lib", "game-point-sync.ts"),
+    path.join(webWorkingDirectory, "app", "api", "cron", "game-point-sync", "route.ts"),
+    path.join(webWorkingDirectory, ".next", "BUILD_ID"),
     path.join(gameWorkingDirectory, "index.js"),
     path.join(gameWorkingDirectory, "security.js"),
     path.join(gameWorkingDirectory, "webPointCredit.js"),
@@ -390,15 +565,10 @@ function productionFileHashes(gameWorkingDirectory) {
 }
 
 async function captureProductionBaseline() {
-  if (envFileValue(GAME_ENV_FILE, "WEB_TOPUP_ENABLED").toLowerCase() !== "false") {
-    throw new Error("Production WEB_TOPUP_ENABLED must remain false during isolated E2E.");
-  }
-  if (envFileValue(GAME_ENV_FILE, "WEB_TOPUP_ALLOW_REMOTE").toLowerCase() !== "false") {
-    throw new Error("Production WEB_TOPUP_ALLOW_REMOTE must remain false during isolated E2E.");
-  }
-
+  const topupState = productionTopupState();
   const gameService = serviceSnapshot(GAME_SERVICE);
   const webService = serviceSnapshot(WEB_SERVICE);
+  const activeWebRoot = assertProductionWebRoot(webService.WorkingDirectory);
   const statuses = await Promise.all([
     httpStatus(PRODUCTION_GAME_HEALTH_URL),
     httpStatus(PRODUCTION_WEB_HEALTH_URL),
@@ -408,26 +578,30 @@ async function captureProductionBaseline() {
       body: "{}",
     }),
   ]);
-  if (statuses[0] !== 200 || statuses[1] !== 200 || statuses[2] !== 404) {
+  if (statuses[0] !== 200 || statuses[1] !== 200 || statuses[2] !== topupState.callbackStatus) {
     throw new Error("Production health/top-up baseline is not safe for isolated E2E.");
   }
   return {
+    topupState,
+    activeWebRoot,
     gameService,
     webService,
-    files: productionFileHashes(gameService.WorkingDirectory),
+    files: productionFileHashes(gameService.WorkingDirectory, activeWebRoot),
   };
 }
 
 async function verifyProductionBaseline(baseline) {
   const current = await captureProductionBaseline();
-  if (JSON.stringify(current.gameService) !== JSON.stringify(baseline.gameService)
+  if (current.activeWebRoot !== baseline.activeWebRoot
+      || JSON.stringify(current.topupState) !== JSON.stringify(baseline.topupState)
+      || JSON.stringify(current.gameService) !== JSON.stringify(baseline.gameService)
       || JSON.stringify(current.webService) !== JSON.stringify(baseline.webService)
       || JSON.stringify(current.files) !== JSON.stringify(baseline.files)) {
     throw new Error("Production service identity, environment, source or build changed during E2E.");
   }
 }
 
-function productionWebDatabasePath() {
+function productionWebDatabasePath(webWorkingDirectory) {
   const script = `
     const path = require("path");
     process.loadEnvFile(".env");
@@ -441,7 +615,7 @@ function productionWebDatabasePath() {
   delete webEnv.DATABASE_URL;
   delete webEnv.POSTGRES_URL;
   const value = runChecked("/usr/local/bin/node", ["-e", script], {
-    cwd: PRODUCTION_WEB_ROOT,
+    cwd: webWorkingDirectory,
     env: webEnv,
   });
   if (!value || !fs.existsSync(value)) throw new Error("Production web SQLite database was not found.");
@@ -524,8 +698,28 @@ function seedCopiedWebDatabase(user, webRoot, databaseUrl, allowedPointAmount) {
     };
     (async () => {
       const allowed = await createSeed("allowed", process.env.E2E_POINT_AMOUNT);
+      const timeoutSuffix = crypto.randomUUID().replace(/-/g, "");
+      const timeoutOccurredAt = new Date();
+      const timeoutOutbox = await db.gamePointSyncOutbox.create({
+        data: {
+          sourceTransactionId: "e2e-swap-timeout-" + timeoutSuffix,
+          userId: allowed.userId,
+          pointAmount: "2.000000",
+          occurredAt: timeoutOccurredAt,
+          source: "ywonder-web-usdt-to-point",
+          nextAttemptAt: new Date("9999-12-31T23:59:59.000Z"),
+        },
+      });
+      const timeout = {
+        userId: allowed.userId,
+        outboxId: timeoutOutbox.id,
+        transactionId: timeoutOutbox.sourceTransactionId,
+        pointAmount: timeoutOutbox.pointAmount,
+        occurredAt: timeoutOccurredAt.toISOString(),
+        source: timeoutOutbox.source,
+      };
       const blocked = await createSeed("blocked", "1.000000");
-      process.stdout.write(JSON.stringify({ allowed, blocked }));
+      process.stdout.write(JSON.stringify({ allowed, timeout, blocked }));
     })().finally(() => db.$disconnect());
   `;
   const output = runAsUserChecked(user, "/usr/local/bin/node", ["-e", script], {
@@ -558,6 +752,15 @@ function queueOutboxRetry(databasePath, outboxId) {
   runChecked("python3", [
     "-c",
     "import sqlite3,sys,time; db=sqlite3.connect(sys.argv[1],timeout=10); db.execute(\"update GamePointSyncOutbox set status='RETRY', sentAt=null, nextAttemptAt=0, updatedAt=? where id=?\",(int(time.time()*1000),sys.argv[2])); db.commit(); db.close()",
+    databasePath,
+    outboxId,
+  ]);
+}
+
+function makeOutboxDue(databasePath, outboxId) {
+  runChecked("python3", [
+    "-c",
+    "import sqlite3,sys,time; db=sqlite3.connect(sys.argv[1],timeout=10); db.execute('update GamePointSyncOutbox set nextAttemptAt=0, updatedAt=? where id=?',(int(time.time()*1000),sys.argv[2])); db.commit(); db.close()",
     databasePath,
     outboxId,
   ]);
@@ -619,25 +822,36 @@ async function postBlockedCanaryProbe(port, secret, blocked) {
   }
 }
 
-function verifyGameCredit(user, serverRoot, databaseUrl, webUserId, expectedPos, expectedRemainder) {
+function verifyGameCredit(
+  user,
+  serverRoot,
+  databaseUrl,
+  webUserId,
+  expectedPos,
+  expectedRemainder,
+  expectedTransactionIds
+) {
   const script = `
     const { Pool } = require("pg");
     const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 1 });
     pool.query(
       "select e.pos, e.web_point_micros_remainder, " +
-      "(select count(*)::integer from game_transactions t where t.player_id=p.id and t.type='web_topup_credit') as credit_count " +
+      "(select count(*)::integer from game_transactions t where t.player_id=p.id and t.type='web_topup_credit') as credit_count, " +
+      "(select count(distinct t.ref)::integer from game_transactions t where t.player_id=p.id and t.type='web_topup_credit' and t.ref=any($2::text[])) as matching_ref_count " +
       "from game_players p join player_economy e on e.player_id=p.id where p.web_user_id=$1",
-      [process.env.E2E_WEB_USER_ID]
+      [process.env.E2E_WEB_USER_ID, JSON.parse(process.env.E2E_TRANSACTION_IDS)]
     ).then((result) => process.stdout.write(JSON.stringify(result.rows))).finally(() => pool.end());
   `;
   const rows = JSON.parse(runGameDatabaseScript(user, serverRoot, databaseUrl, script, {
     E2E_WEB_USER_ID: webUserId,
+    E2E_TRANSACTION_IDS: JSON.stringify(expectedTransactionIds),
   }));
   if (rows.length !== 1) throw new Error("Isolated game player was not created from web identity.");
   const row = rows[0];
   if (Number(row.pos) !== expectedPos
       || Number(row.web_point_micros_remainder) !== expectedRemainder
-      || Number(row.credit_count) !== 1) {
+      || Number(row.credit_count) !== expectedTransactionIds.length
+      || Number(row.matching_ref_count) !== expectedTransactionIds.length) {
     throw new Error("Isolated game Point balance or idempotency ledger is incorrect.");
   }
 }
@@ -674,11 +888,11 @@ function verifyNoProductionGameLeak(user, serverRoot, productionDatabaseUrl, see
 function verifyNoProductionWebLeak(productionDatabasePath, seeded) {
   const output = runChecked("python3", [
     "-c",
-    "import json,sqlite3,sys; db=sqlite3.connect('file:'+sys.argv[1]+'?mode=ro',uri=True); ids=json.loads(sys.argv[2]); emails=json.loads(sys.argv[3]); tx=json.loads(sys.argv[4]); users=db.execute('select count(*) from User where id in (?,?) or email in (?,?)',ids+emails).fetchone()[0]; outbox=db.execute('select count(*) from GamePointSyncOutbox where sourceTransactionId in (?,?)',tx).fetchone()[0]; db.close(); print(json.dumps({'users':users,'outbox':outbox}))",
+    "import json,sqlite3,sys; db=sqlite3.connect('file:'+sys.argv[1]+'?mode=ro',uri=True); ids=json.loads(sys.argv[2]); emails=json.loads(sys.argv[3]); tx=json.loads(sys.argv[4]); users=db.execute('select count(*) from User where id in (?,?) or email in (?,?)',ids+emails).fetchone()[0]; outbox=db.execute('select count(*) from GamePointSyncOutbox where sourceTransactionId in (?,?,?)',tx).fetchone()[0]; db.close(); print(json.dumps({'users':users,'outbox':outbox}))",
     productionDatabasePath,
     JSON.stringify([seeded.allowed.userId, seeded.blocked.userId]),
     JSON.stringify([seeded.allowed.email, seeded.blocked.email]),
-    JSON.stringify([seeded.allowed.transactionId, seeded.blocked.transactionId]),
+    JSON.stringify([seeded.allowed.transactionId, seeded.timeout.transactionId, seeded.blocked.transactionId]),
   ]);
   const counts = JSON.parse(output);
   if (Number(counts.users) !== 0 || Number(counts.outbox) !== 0) {
@@ -781,8 +995,8 @@ async function main() {
   const isolatedWebRoot = assertSafeTemporaryRoot(process.env.E2E_WEB_ROOT, "E2E_WEB_ROOT");
   const runtimeRoot = assertSafeTemporaryRoot(process.env.E2E_RUNTIME_ROOT, "E2E_RUNTIME_ROOT");
   assertDisjointRoots({ serverRoot, isolatedWebRoot, runtimeRoot });
-  if (isolatedWebRoot === fs.realpathSync(PRODUCTION_WEB_ROOT)) {
-    throw new Error("Isolated web root must not be the production web root.");
+  if (isolatedWebRoot === fs.realpathSync(CANONICAL_WEB_ROOT)) {
+    throw new Error("Isolated web root must not be the canonical production web root.");
   }
   requireStageFiles(serverRoot, "GAME_SERVER_ROOT", [
     "index.js",
@@ -798,20 +1012,26 @@ async function main() {
 
   enterStage("capture-production-baseline");
   const productionBaseline = await captureProductionBaseline();
+  if (isolatedWebRoot === productionBaseline.activeWebRoot) {
+    throw new Error("Isolated web root must not be the active production web release.");
+  }
   const productionDatabaseUrl = productionGameDatabaseUrl();
   const gameServiceUser = systemdServiceUser(GAME_SERVICE);
   const webServiceUser = systemdServiceUser(WEB_SERVICE);
   const database = parseProductionDatabase(productionDatabaseUrl, runId, gameServiceUser);
-  const productionWebDb = productionWebDatabasePath();
+  const productionWebDb = productionWebDatabasePath(productionBaseline.activeWebRoot);
   const copiedWebDb = path.join(runtimeRoot, "web-copy.db");
   const copiedWebUrl = `file:${copiedWebDb}`;
   const gamePort = await reservePort();
   const webPort = await reservePort();
+  const restartedWebPort = await reservePort();
+  const faultProxyPort = await reservePort();
   const topupSecret = crypto.randomBytes(48).toString("hex");
   const cronSecret = crypto.randomBytes(48).toString("hex");
   const pointAmount = "12.345678";
   let game;
   let web;
+  let faultProxy;
   let seeded;
   let databaseCreated = false;
   let testFailure = null;
@@ -823,6 +1043,9 @@ async function main() {
     databaseCreated = true;
     writeDatabaseMarker(runtimeRoot, database.temporaryName);
     migrateTemporaryGameDatabase(gameServiceUser, serverRoot, database.isolatedUrl);
+
+    enterStage("postgres-store-smoke");
+    runPostgresStoreSmoke(gameServiceUser, serverRoot, database.isolatedUrl);
 
     enterStage("copy-production-web-sqlite");
     copySqlite(productionWebDb, copiedWebDb);
@@ -869,14 +1092,26 @@ async function main() {
     if (first.processed !== 1 || first.sent !== 1 || first.retry !== 0 || first.failed !== 0) {
       throw new Error("First isolated web outbox dispatch did not report one sent row.");
     }
-    verifyGameCredit(gameServiceUser, serverRoot, database.isolatedUrl, seeded.allowed.userId, 5012, 345678);
+    verifyGameCredit(
+      gameServiceUser,
+      serverRoot,
+      database.isolatedUrl,
+      seeded.allowed.userId,
+      5012,
+      345678,
+      [seeded.allowed.transactionId]
+    );
     const firstOutbox = readOutbox(copiedWebDb, seeded.allowed.outboxId);
+    const timeoutOutbox = readOutbox(copiedWebDb, seeded.timeout.outboxId);
     const blockedOutbox = readOutbox(copiedWebDb, seeded.blocked.outboxId);
     if (firstOutbox.status !== "SENT" || firstOutbox.attempts !== 1 || firstOutbox.lastError) {
       throw new Error("First isolated web outbox state is incorrect.");
     }
     if (blockedOutbox.status !== "PENDING" || blockedOutbox.attempts !== 0 || blockedOutbox.lastError) {
       throw new Error("Canary filter touched a non-allowlisted outbox row.");
+    }
+    if (timeoutOutbox.status !== "PENDING" || timeoutOutbox.attempts !== 0 || timeoutOutbox.lastError) {
+      throw new Error("Future post-commit timeout row was dispatched too early.");
     }
 
     enterStage("dispatch-idempotent-retry");
@@ -885,7 +1120,15 @@ async function main() {
     if (second.processed !== 1 || second.sent !== 1 || second.retry !== 0 || second.failed !== 0) {
       throw new Error("Duplicate isolated web outbox retry did not complete as SENT.");
     }
-    verifyGameCredit(gameServiceUser, serverRoot, database.isolatedUrl, seeded.allowed.userId, 5012, 345678);
+    verifyGameCredit(
+      gameServiceUser,
+      serverRoot,
+      database.isolatedUrl,
+      seeded.allowed.userId,
+      5012,
+      345678,
+      [seeded.allowed.transactionId]
+    );
     const secondOutbox = readOutbox(copiedWebDb, seeded.allowed.outboxId);
     if (secondOutbox.status !== "SENT" || secondOutbox.attempts !== 2 || secondOutbox.lastError) {
       throw new Error("Duplicate isolated web outbox state is incorrect.");
@@ -894,6 +1137,90 @@ async function main() {
     enterStage("verify-empty-allowlisted-outbox");
     const empty = await postCron(webPort, cronSecret);
     if (empty.processed !== 0) throw new Error("Sent or blocked outbox row was dispatched again.");
+
+    enterStage("restart-isolated-web-with-durable-outbox");
+    const firstWebPid = web.pid;
+    await stopChild(web);
+    web = null;
+    const persistedFirstOutbox = readOutbox(copiedWebDb, seeded.allowed.outboxId);
+    const persistedTimeoutOutbox = readOutbox(copiedWebDb, seeded.timeout.outboxId);
+    if (persistedFirstOutbox.status !== "SENT" || persistedFirstOutbox.attempts !== 2
+        || persistedTimeoutOutbox.status !== "PENDING" || persistedTimeoutOutbox.attempts !== 0) {
+      throw new Error("Copied web outbox state did not survive isolated web shutdown.");
+    }
+
+    faultProxy = await startCommitThenTimeoutProxy(faultProxyPort, gamePort);
+    web = spawnIsolatedWeb(
+      webServiceUser,
+      isolatedWebRoot,
+      copiedWebUrl,
+      restartedWebPort,
+      faultProxyPort,
+      topupSecret,
+      cronSecret,
+      seeded.allowed.userId
+    );
+    if (web.pid === firstWebPid) throw new Error("Isolated web restart reused the original process identity.");
+    writePidFile(runtimeRoot, "web", web);
+    const restartedWebOutput = capture(web);
+    await waitForHttp(web, restartedWebOutput, `http://127.0.0.1:${restartedWebPort}/api/health`);
+
+    enterStage("post-commit-response-loss");
+    makeOutboxDue(copiedWebDb, seeded.timeout.outboxId);
+    const lostResponse = await postCron(restartedWebPort, cronSecret);
+    if (lostResponse.processed !== 1 || lostResponse.sent !== 0
+        || lostResponse.retry !== 1 || lostResponse.failed !== 0) {
+      throw new Error("Post-commit response loss did not leave exactly one retryable outbox row.");
+    }
+    if (faultProxy.state.intercepted !== 1 || faultProxy.state.committed !== 1
+        || faultProxy.state.upstreamStatus < 200 || faultProxy.state.upstreamStatus >= 300) {
+      throw new Error("Fault proxy did not prove the isolated game committed before dropping the response.");
+    }
+    const retryableTimeoutOutbox = readOutbox(copiedWebDb, seeded.timeout.outboxId);
+    if (retryableTimeoutOutbox.status !== "RETRY" || retryableTimeoutOutbox.attempts !== 1
+        || !retryableTimeoutOutbox.lastError) {
+      throw new Error("Post-commit response loss produced an incorrect retry state.");
+    }
+    verifyGameCredit(
+      gameServiceUser,
+      serverRoot,
+      database.isolatedUrl,
+      seeded.allowed.userId,
+      5014,
+      345678,
+      [seeded.allowed.transactionId, seeded.timeout.transactionId]
+    );
+
+    enterStage("retry-after-post-commit-response-loss");
+    queueOutboxRetry(copiedWebDb, seeded.timeout.outboxId);
+    const recovered = await postCron(restartedWebPort, cronSecret);
+    if (recovered.processed !== 1 || recovered.sent !== 1
+        || recovered.retry !== 0 || recovered.failed !== 0) {
+      throw new Error("Retry after post-commit response loss did not complete as SENT.");
+    }
+    if (faultProxy.state.passedThrough !== 1) {
+      throw new Error("Fault proxy did not pass the idempotent retry through exactly once.");
+    }
+    const recoveredTimeoutOutbox = readOutbox(copiedWebDb, seeded.timeout.outboxId);
+    if (recoveredTimeoutOutbox.status !== "SENT" || recoveredTimeoutOutbox.attempts !== 2
+        || recoveredTimeoutOutbox.lastError) {
+      throw new Error("Recovered post-commit outbox state is incorrect.");
+    }
+    verifyGameCredit(
+      gameServiceUser,
+      serverRoot,
+      database.isolatedUrl,
+      seeded.allowed.userId,
+      5014,
+      345678,
+      [seeded.allowed.transactionId, seeded.timeout.transactionId]
+    );
+
+    enterStage("verify-empty-after-fault-recovery");
+    const recoveredEmpty = await postCron(restartedWebPort, cronSecret);
+    if (recoveredEmpty.processed !== 0) {
+      throw new Error("Recovered or blocked outbox row was dispatched again.");
+    }
   } catch (error) {
     testFailure = error;
   }
@@ -901,6 +1228,11 @@ async function main() {
   enterStage("cleanup-isolated-processes");
   try {
     await stopChild(web);
+  } catch (error) {
+    cleanupFailures.push(error);
+  }
+  try {
+    await closeFaultProxy(faultProxy);
   } catch (error) {
     cleanupFailures.push(error);
   }
@@ -947,7 +1279,11 @@ async function main() {
   console.log("CANARY_ALLOWLIST=pass");
   console.log("FIRST_DISPATCH=pass");
   console.log("DUPLICATE_RETRY=pass");
+  console.log("ISOLATED_WEB_RESTART=pass");
+  console.log("POST_COMMIT_RESPONSE_LOSS=pass");
+  console.log("POST_COMMIT_IDEMPOTENT_RECOVERY=pass");
   console.log("POINT_DECIMAL_REMAINDER=pass");
+  console.log(`PRODUCTION_TOPUP_BASELINE=${productionBaseline.topupState.name}`);
   console.log("PRODUCTION_SERVICES_RESTARTED=no");
   console.log("PRODUCTION_PLAYER_DATA_MUTATED=no");
 }
@@ -961,6 +1297,7 @@ if (require.main === module) {
 
 module.exports = {
   assertDisjointRoots,
+  classifyProductionTopupState,
   parseProductionDatabase,
   safeErrorMessage,
 };

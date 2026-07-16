@@ -12,7 +12,9 @@ game_archive="$1"
 game_expected_sha="$2"
 overlay_archive="$3"
 overlay_expected_sha="$4"
-live_web_root="/var/www/ywonder"
+canonical_web_root="/var/www/ywonder"
+live_web_root=""
+web_env="${canonical_web_root}/.env"
 game_env="/etc/ywonder-game/game-server.env"
 game_service="ywonder-game-server.service"
 web_service="greenxland.service"
@@ -95,7 +97,7 @@ terminate_e2e_process() {
 
 for command_name in \
   awk chown chmod createdb curl date df dropdb env flock getent grep id install ionice \
-  mkdir mktemp nice nproc npm openssl ps psql python3 rm runuser sha256sum sleep systemctl tar timeout tr; do
+  mkdir mktemp nice nproc npm openssl ps psql python3 readlink rm runuser sha256sum sleep systemctl tar timeout tr; do
   command -v "${command_name}" >/dev/null || fail "Missing command: ${command_name}"
 done
 [[ -x "${node_bin}" ]] || fail "Node.js runtime not found at ${node_bin}."
@@ -214,6 +216,50 @@ env_value() {
   awk -F= -v wanted="${key}" '$1 == wanted {value=substr($0,index($0,"=")+1)} END {gsub(/^[[:space:]]+|[[:space:]]+$/,"",value); gsub(/^\047|\047$/,"",value); gsub(/^\042|\042$/,"",value); print value}' "${file}"
 }
 
+production_topup_state=""
+production_topup_callback_status=""
+validate_production_topup_state() {
+  local web_enabled web_mode web_allowed
+  local game_enabled game_mode game_allowed allow_remote client_grants blocked_grants
+  web_enabled="$(env_value "${web_env}" WEB_TOPUP_ENABLED)"
+  web_mode="$(env_value "${web_env}" WEB_TOPUP_MODE)"
+  web_allowed="$(env_value "${web_env}" WEB_TOPUP_ALLOWED_WEB_USER_IDS)"
+  game_enabled="$(env_value "${game_env}" WEB_TOPUP_ENABLED)"
+  game_mode="$(env_value "${game_env}" WEB_TOPUP_MODE)"
+  game_allowed="$(env_value "${game_env}" WEB_TOPUP_ALLOWED_WEB_USER_IDS)"
+  allow_remote="$(env_value "${game_env}" WEB_TOPUP_ALLOW_REMOTE)"
+  client_grants="$(env_value "${game_env}" CLIENT_ASSET_GRANTS_ENABLED)"
+  blocked_grants="$(env_value "${game_env}" CLIENT_ASSET_GRANTS_BLOCKED_WEB_USER_IDS)"
+
+  [[ "${allow_remote}" == "false" ]] \
+    || fail "Production WEB_TOPUP_ALLOW_REMOTE is not false."
+
+  if [[ ( -z "${web_enabled}" || "${web_enabled}" == "false" )
+      && ( -z "${game_enabled}" || "${game_enabled}" == "false" ) ]]; then
+    [[ ( -z "${web_mode}" || "${web_mode}" == "canary" )
+        && ( -z "${game_mode}" || "${game_mode}" == "canary" )
+        && -z "${web_allowed}" && -z "${game_allowed}" && -z "${blocked_grants}" ]] \
+      || fail "Production dormant web Point configuration is inconsistent."
+    production_topup_state="dormant"
+    production_topup_callback_status="404"
+    return
+  fi
+
+  if [[ "${web_enabled}" == "true" && "${game_enabled}" == "true" ]]; then
+    [[ "${web_mode}" == "canary" && "${game_mode}" == "canary"
+        && "${client_grants}" == "true"
+        && "${web_allowed}" =~ ^[A-Za-z0-9._:-]{1,128}$
+        && "${web_allowed}" == "${game_allowed}"
+        && "${web_allowed}" == "${blocked_grants}" ]] \
+      || fail "Production web Point canary is not scoped to exactly one matching identity."
+    production_topup_state="exact-one-canary"
+    production_topup_callback_status="401"
+    return
+  fi
+
+  fail "Production web Point state is neither dormant nor an exact-one canary."
+}
+
 validate_archive "${game_archive}" "game"
 validate_archive "${overlay_archive}" "overlay"
 
@@ -228,17 +274,34 @@ grep -qx 'cron-route.ts' "${run_root}/overlay.list" || fail "Overlay is missing 
 
 [[ "$(systemctl is-active "${game_service}")" == "active" ]] || fail "Game service is not active."
 [[ "$(systemctl is-active "${web_service}")" == "active" ]] || fail "Web service is not active."
-[[ "$(env_value "${game_env}" WEB_TOPUP_ENABLED)" == "false" ]] \
-  || fail "Production WEB_TOPUP_ENABLED is not false."
-[[ "$(env_value "${game_env}" WEB_TOPUP_ALLOW_REMOTE)" == "false" ]] \
-  || fail "Production WEB_TOPUP_ALLOW_REMOTE is not false."
+[[ -f "${web_env}" && -f "${game_env}" ]] || fail "Production environment file is missing."
+live_web_root="$(systemctl show --property=WorkingDirectory --value "${web_service}")"
+[[ "${live_web_root}" =~ ^/var/www/(ywonder|ywonder-releases/[A-Za-z0-9._-]+)$ ]] \
+  || fail "Production web WorkingDirectory is outside an approved release root."
+live_web_root="$(readlink -f "${live_web_root}")"
+[[ "${live_web_root}" =~ ^/var/www/(ywonder|ywonder-releases/[A-Za-z0-9._-]+)$
+    && -d "${live_web_root}" ]] \
+  || fail "Resolved production web WorkingDirectory is unsafe."
+[[ -e "${live_web_root}/.env"
+    && "$(readlink -f "${live_web_root}/.env")" == "$(readlink -f "${web_env}")" ]] \
+  || fail "Active web release does not use the canonical production environment."
+validate_production_topup_state
+baseline_topup_state="${production_topup_state}"
+baseline_topup_callback_status="${production_topup_callback_status}"
+baseline_web_root="${live_web_root}"
+baseline_game_pid="$(systemctl show --property=MainPID --value "${game_service}")"
+baseline_web_pid="$(systemctl show --property=MainPID --value "${web_service}")"
+[[ "${baseline_game_pid}" =~ ^[1-9][0-9]*$ && "${baseline_web_pid}" =~ ^[1-9][0-9]*$ ]] \
+  || fail "Production service PID baseline is unsafe."
+baseline_game_env_sha="$(sha256sum "${game_env}" | awk '{print $1}')"
+baseline_web_env_sha="$(sha256sum "${web_env}" | awk '{print $1}')"
 [[ "$(curl -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:3000/health)" == "200" ]] \
   || fail "Production game health check failed."
 [[ "$(curl -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:3033/api/health)" == "200" ]] \
   || fail "Production web health check failed."
 [[ "$(curl -sS -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{}' \
-  http://127.0.0.1:3000/internal/web/point-credit)" == "404" ]] \
-  || fail "Production Point top-up endpoint is not dormant."
+  http://127.0.0.1:3000/internal/web/point-credit)" == "${baseline_topup_callback_status}" ]] \
+  || fail "Production Point callback does not match its guarded rollout state."
 
 game_user="$(service_user "${game_service}")"
 web_user="$(service_user "${web_service}")"
@@ -266,7 +329,6 @@ log "installing and testing isolated game candidate at low priority"
 )
 
 [[ -f "${live_web_root}/package-lock.json" ]] || fail "Production web package lock is missing."
-[[ -f "${live_web_root}/.env" ]] || fail "Production web environment is missing."
 [[ "$(grep -c '^model GamePointSyncOutbox' "${live_web_root}/prisma/schema.prisma")" -eq 1 ]] \
   || fail "Production web source does not have exactly one Point outbox model."
 [[ "$(grep -c 'gamePointSyncOutbox.create' "${live_web_root}/lib/actions/convert.ts")" -eq 1 ]] \
@@ -283,7 +345,7 @@ tar -C "${live_web_root}" \
   --exclude='*.sqlite-*' \
   -cf "${run_root}/web-source.tar" .
 tar -xf "${run_root}/web-source.tar" -C "${web_stage}"
-install -m 0600 "${live_web_root}/.env" "${web_stage}/.env"
+install -m 0600 "${web_env}" "${web_stage}/.env"
 install -m 0644 "${overlay_stage}/game-point-sync.ts" "${web_stage}/lib/game-point-sync.ts"
 install -d -m 0755 "${web_stage}/app/api/cron/game-point-sync"
 install -m 0644 "${overlay_stage}/cron-route.ts" \
@@ -353,11 +415,21 @@ run_limited_root 8m \
 
 [[ "$(systemctl is-active "${game_service}")" == "active" ]] || fail "Game service changed state after E2E."
 [[ "$(systemctl is-active "${web_service}")" == "active" ]] || fail "Web service changed state after E2E."
-[[ "$(env_value "${game_env}" WEB_TOPUP_ENABLED)" == "false" ]] \
-  || fail "Production WEB_TOPUP_ENABLED changed during E2E."
+validate_production_topup_state
+[[ "${production_topup_state}" == "${baseline_topup_state}"
+    && "${production_topup_callback_status}" == "${baseline_topup_callback_status}" ]] \
+  || fail "Production Point rollout state changed during E2E."
+[[ "$(systemctl show --property=MainPID --value "${game_service}")" == "${baseline_game_pid}"
+    && "$(systemctl show --property=MainPID --value "${web_service}")" == "${baseline_web_pid}" ]] \
+  || fail "Production service PID changed during E2E."
+[[ "$(readlink -f "$(systemctl show --property=WorkingDirectory --value "${web_service}")")" == "${baseline_web_root}" ]] \
+  || fail "Production web release root changed during E2E."
+[[ "$(sha256sum "${game_env}" | awk '{print $1}')" == "${baseline_game_env_sha}"
+    && "$(sha256sum "${web_env}" | awk '{print $1}')" == "${baseline_web_env_sha}" ]] \
+  || fail "Production environment changed during E2E."
 [[ "$(curl -sS -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{}' \
-  http://127.0.0.1:3000/internal/web/point-credit)" == "404" ]] \
-  || fail "Production Point top-up endpoint changed during E2E."
+  http://127.0.0.1:3000/internal/web/point-credit)" == "${baseline_topup_callback_status}" ]] \
+  || fail "Production Point callback changed during E2E."
 
 echo "WEB_POINT_SYNC_HARDENED_RUNNER=success"
 echo "LIVE_WEB_BUILD_REPLACED=no"

@@ -6,7 +6,9 @@ const { spawn } = require("child_process");
 const WebSocket = require("ws");
 const {
   buildWebPointCreditConfig,
+  normalizeWebPointBalanceBody,
   normalizeWebPointCreditBody,
+  signWebPointBalance,
   signWebPointCredit,
 } = require("./webPointCredit");
 
@@ -107,6 +109,23 @@ function signedHeaders(body, timestamp = Math.floor(Date.now() / 1000), secret =
   };
 }
 
+function makeBalanceQuery(overrides = {}) {
+  return {
+    request_id: "web-point-balance-test-001",
+    web_user_id: "mock:point.tester@example.test",
+    ...overrides,
+  };
+}
+
+function signedBalanceHeaders(body, timestamp = Math.floor(Date.now() / 1000), secret = SECRET) {
+  const normalized = normalizeWebPointBalanceBody(body);
+  return {
+    "Content-Type": "application/json",
+    "X-YWonder-Timestamp": String(timestamp),
+    "X-YWonder-Signature": signWebPointBalance(secret, String(timestamp), normalized),
+  };
+}
+
 async function post(baseUrl, route, body, headers) {
   const response = await fetch(`${baseUrl}${route}`, {
     method: "POST",
@@ -186,15 +205,69 @@ async function main() {
     assert(login.status === 200 && login.payload.token, "Mock web account login failed.");
     socket = await connectRealtime(server.baseUrl, login.payload.token);
 
+    const balanceQuery = makeBalanceQuery();
+    const publicBalanceProbe = await post(
+      server.baseUrl,
+      "/game-api/internal/web/point-balance",
+      balanceQuery,
+      signedBalanceHeaders(balanceQuery)
+    );
+    assert(publicBalanceProbe.status === 404, "Internal Point-balance route leaked under /game-api.");
+
+    const unsignedBalance = await post(server.baseUrl, "/internal/web/point-balance", balanceQuery);
+    assert(unsignedBalance.status === 401
+        && unsignedBalance.payload.error === "INVALID_WEB_TOPUP_SIGNATURE",
+      "Unsigned Point-balance query was not rejected.");
+
+    const staleBalanceTimestamp = Math.floor(Date.now() / 1000) - 3600;
+    const staleBalance = await post(
+      server.baseUrl,
+      "/internal/web/point-balance",
+      balanceQuery,
+      signedBalanceHeaders(balanceQuery, staleBalanceTimestamp)
+    );
+    assert(staleBalance.status === 401
+        && staleBalance.payload.error === "WEB_TOPUP_REQUEST_EXPIRED",
+      "Expired Point-balance query was not rejected.");
+
+    const blockedBalanceQuery = makeBalanceQuery({
+      request_id: "web-point-balance-test-blocked",
+      web_user_id: "mock:not-allowed@example.test",
+    });
+    const blockedBalance = await post(
+      server.baseUrl,
+      "/internal/web/point-balance",
+      blockedBalanceQuery,
+      signedBalanceHeaders(blockedBalanceQuery)
+    );
+    assert(blockedBalance.status === 403
+        && blockedBalance.payload.error === "WEB_TOPUP_CANARY_USER_NOT_ALLOWED",
+      "Point-balance query accepted a web user outside the canary allowlist.");
+
+    const initialBalance = await post(
+      server.baseUrl,
+      "/internal/web/point-balance",
+      balanceQuery,
+      signedBalanceHeaders(balanceQuery)
+    );
+    assert(initialBalance.status === 200
+        && initialBalance.payload.ok === true
+        && initialBalance.payload.request_id === balanceQuery.request_id
+        && typeof initialBalance.payload.player_id === "string"
+        && Number(initialBalance.payload.point) === 5000,
+      "Point-balance query did not return the mapped player's initial authoritative balance.");
+
+    const pinnedBody = makeCredit({ expected_player_id: initialBalance.payload.player_id });
+
     const publicProbe = await post(
       server.baseUrl,
       "/game-api/internal/web/point-credit",
-      body,
-      signedHeaders(body)
+      pinnedBody,
+      signedHeaders(pinnedBody)
     );
     assert(publicProbe.status === 404, "Internal Point-credit route leaked under /game-api.");
 
-    const unsigned = await post(server.baseUrl, "/internal/web/point-credit", body);
+    const unsigned = await post(server.baseUrl, "/internal/web/point-credit", pinnedBody);
     assert(unsigned.status === 401 && unsigned.payload.error === "INVALID_WEB_TOPUP_SIGNATURE",
       "Unsigned Point credit was not rejected.");
 
@@ -202,8 +275,8 @@ async function main() {
     const stale = await post(
       server.baseUrl,
       "/internal/web/point-credit",
-      body,
-      signedHeaders(body, staleTimestamp)
+      pinnedBody,
+      signedHeaders(pinnedBody, staleTimestamp)
     );
     assert(stale.status === 401 && stale.payload.error === "WEB_TOPUP_REQUEST_EXPIRED",
       "Expired Point credit was not rejected.");
@@ -212,8 +285,8 @@ async function main() {
     const milliseconds = await post(
       server.baseUrl,
       "/internal/web/point-credit",
-      body,
-      signedHeaders(body, millisecondTimestamp)
+      pinnedBody,
+      signedHeaders(pinnedBody, millisecondTimestamp)
     );
     assert(milliseconds.status === 401 && milliseconds.payload.error === "INVALID_WEB_TOPUP_SIGNATURE",
       "Millisecond timestamp was accepted even though the contract requires Unix seconds.");
@@ -221,8 +294,8 @@ async function main() {
     const wrongSecret = await post(
       server.baseUrl,
       "/internal/web/point-credit",
-      body,
-      signedHeaders(body, Math.floor(Date.now() / 1000), `${SECRET}-wrong`)
+      pinnedBody,
+      signedHeaders(pinnedBody, Math.floor(Date.now() / 1000), `${SECRET}-wrong`)
     );
     assert(wrongSecret.status === 401 && wrongSecret.payload.error === "INVALID_WEB_TOPUP_SIGNATURE",
       "Invalid Point-credit signature was not rejected.");
@@ -262,26 +335,86 @@ async function main() {
     assert(tooPrecise.status === 400 && tooPrecise.payload.error === "INVALID_POINT_AMOUNT",
       "Point amount with more than six decimals was not rejected.");
 
+    const legacyV1Body = makeCredit({
+      transaction_id: "web-order-legacy-v1",
+      point_amount: "1.000000",
+    });
+    const legacyV1 = await post(
+      server.baseUrl,
+      "/internal/web/point-credit",
+      legacyV1Body,
+      signedHeaders(legacyV1Body)
+    );
+    assert(legacyV1.status === 200 && Number(legacyV1.payload.economy.pos) === 5001,
+      "Backward-compatible v1 Point credit stopped working.");
+
+    const wrongPlayerBody = makeCredit({
+      transaction_id: "web-order-wrong-player",
+      expected_player_id: "player-that-is-not-mapped",
+      point_amount: "1.000000",
+    });
+    const wrongPlayer = await post(
+      server.baseUrl,
+      "/internal/web/point-credit",
+      wrongPlayerBody,
+      signedHeaders(wrongPlayerBody)
+    );
+    assert(wrongPlayer.status === 409
+        && wrongPlayer.payload.error === "GAME_POINT_IDENTITY_MISMATCH",
+      "Pinned Point credit accepted the wrong game player.");
+    const afterWrongPlayerQuery = makeBalanceQuery({ request_id: "web-point-balance-test-identity" });
+    const afterWrongPlayer = await post(
+      server.baseUrl,
+      "/internal/web/point-balance",
+      afterWrongPlayerQuery,
+      signedBalanceHeaders(afterWrongPlayerQuery)
+    );
+    assert(afterWrongPlayer.status === 200 && Number(afterWrongPlayer.payload.point) === 5001,
+      "Identity mismatch changed the authoritative Point balance.");
+
     const realtimeUpdate = waitForMessage(
       socket,
       (message) => message.type === "economy_updated" && message.reason === "web_topup",
       "realtime Point balance update"
     );
-    const first = await post(server.baseUrl, "/internal/web/point-credit", body, signedHeaders(body));
+    const first = await post(
+      server.baseUrl,
+      "/internal/web/point-credit",
+      pinnedBody,
+      signedHeaders(pinnedBody)
+    );
     assert(first.status === 200 && first.payload.ok === true && first.payload.duplicate === false,
       "Valid Point credit failed.");
-    assert(Number(first.payload.economy.pos) === 5750,
+    assert(Number(first.payload.economy.pos) === 5751,
       "Whole Point portion of the first decimal credit was wrong.");
     const pushed = await realtimeUpdate;
-    assert(Number(pushed.economy && pushed.economy.pos) === 5750,
+    assert(Number(pushed.economy && pushed.economy.pos) === 5751,
       "Online player did not receive the authoritative Point balance update.");
 
-    const duplicate = await post(server.baseUrl, "/internal/web/point-credit", body, signedHeaders(body));
+    const creditedBalanceQuery = makeBalanceQuery({ request_id: "web-point-balance-test-credited" });
+    const creditedBalance = await post(
+      server.baseUrl,
+      "/internal/web/point-balance",
+      creditedBalanceQuery,
+      signedBalanceHeaders(creditedBalanceQuery)
+    );
+    assert(creditedBalance.status === 200 && Number(creditedBalance.payload.point) === 5751,
+      "Point-balance query did not reflect the committed web top-up credit.");
+
+    const duplicate = await post(
+      server.baseUrl,
+      "/internal/web/point-credit",
+      pinnedBody,
+      signedHeaders(pinnedBody)
+    );
     assert(duplicate.status === 200 && duplicate.payload.duplicate === true,
       "Retry was not recognized as an idempotent duplicate.");
-    assert(Number(duplicate.payload.economy.pos) === 5750, "Duplicate Point credit was applied twice.");
+    assert(Number(duplicate.payload.economy.pos) === 5751, "Duplicate Point credit was applied twice.");
 
-    const conflictBody = makeCredit({ point_amount: "751.000000" });
+    const conflictBody = makeCredit({
+      expected_player_id: initialBalance.payload.player_id,
+      point_amount: "751.000000",
+    });
     const conflict = await post(
       server.baseUrl,
       "/internal/web/point-credit",
@@ -293,6 +426,7 @@ async function main() {
 
     const carryBody = makeCredit({
       transaction_id: "web-order-test-002",
+      expected_player_id: initialBalance.payload.player_id,
       point_amount: "0.500000",
     });
     const carry = await post(
@@ -301,11 +435,12 @@ async function main() {
       carryBody,
       signedHeaders(carryBody)
     );
-    assert(carry.status === 200 && Number(carry.payload.economy.pos) === 5751,
+    assert(carry.status === 200 && Number(carry.payload.economy.pos) === 5752,
       "Fractional Point remainder was not carried into the next credit.");
 
     const integerBody = makeCredit({
       transaction_id: "web-order-test-003",
+      expected_player_id: initialBalance.payload.player_id,
       point_amount: 2,
     });
     const integerCredit = await post(
@@ -314,7 +449,7 @@ async function main() {
       integerBody,
       signedHeaders(integerBody)
     );
-    assert(integerCredit.status === 200 && Number(integerCredit.payload.economy.pos) === 5753,
+    assert(integerCredit.status === 200 && Number(integerCredit.payload.economy.pos) === 5754,
       "Integer Point payload stopped working after decimal support was added.");
 
     socket.close();
@@ -329,21 +464,31 @@ async function main() {
     );
     assert(afterRestart.status === 200 && afterRestart.payload.duplicate === true,
       "Point-credit idempotency did not survive a backend restart.");
-    assert(Number(afterRestart.payload.economy.pos) === 5753,
+    assert(Number(afterRestart.payload.economy.pos) === 5754,
       "Point balance changed after backend restart/retry.");
+
+    const restartBalanceQuery = makeBalanceQuery({ request_id: "web-point-balance-test-restart" });
+    const restartBalance = await post(
+      server.baseUrl,
+      "/internal/web/point-balance",
+      restartBalanceQuery,
+      signedBalanceHeaders(restartBalanceQuery)
+    );
+    assert(restartBalance.status === 200 && Number(restartBalance.payload.point) === 5754,
+      "Point-balance query did not survive backend restart.");
 
     await stopServer(server);
     server = null;
     const db = JSON.parse(fs.readFileSync(dataPath, "utf8"));
     const topups = (db.transactions || []).filter((tx) => tx.type === "web_topup_credit");
-    assert(topups.length === 3, `Expected three persisted web top-up transactions, found ${topups.length}.`);
+    assert(topups.length === 4, `Expected four persisted web top-up transactions, found ${topups.length}.`);
     const playerId = topups[0].playerId;
     assert(Number((db.webTopupPointMicrosRemainders || {})[playerId]) === 0,
       "Fractional Point remainder was not persisted and settled exactly.");
     assert(!JSON.stringify(db.economies || {}).toLowerCase().includes("upos"),
       "Retired UPoint data was written back into active economy storage.");
 
-    console.log("[web-point-credit] PASS: signed decimal Point, canary allowlist, micro remainder carry, integer compatibility, realtime refresh, idempotency, and restart persistence work.");
+    console.log("[web-point-credit] PASS: v1/v2 signed credit, identity pinning, authoritative balance, canary allowlist, exact remainder, realtime, idempotency, and restart persistence work.");
   } finally {
     if (socket) socket.close();
     if (server) await stopServer(server);
