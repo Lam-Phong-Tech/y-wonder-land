@@ -1,15 +1,18 @@
 # CHANGELOG
 
-## [Unreleased] - 2026-07-16 (Point wallet migration dry-run, not run on production)
+## [Unreleased] - 2026-07-16 (Point wallet migration production dry-run, migration blocked)
 
 ### Added
 - Added read-only web SQLite and game PostgreSQL snapshot exporters plus an anonymized per-account reconciliation report. The report uses integer micros, rejects duplicate/orphan mappings and ledger rows, reconciles web outbox sources to game credits, and never emits migration SQL or a suggested automatic balance move.
 - Added a guarded runner that captures both ledgers twice, aborts on cross-capture drift, retains raw identities only under a temporary `0700` directory, and installs only the HMAC-pseudonymized report with mode `0600`.
+- Legacy SQLite REAL values are rounded to the nearest micro only inside the temporary snapshot, with exact signed atto-Point residual evidence. Every affected account is `BLOCKED`; settlement outbox values still reject sub-micro precision. The runner can drop only the PostgreSQL exporter to the game service user for Unix-socket peer auth while withholding the report HMAC key and `PGPASSWORD`.
 - Added `docs/QA/POINT_WALLET_MIGRATION_DRY_RUN.md` with the approval, execution, classification and acceptance gates.
 
 ### Verified
 - `test:web-point-migration-dry-run` passes the report, SQLite checksum/read-only export, PostgreSQL `REPEATABLE READ READ ONLY`, rollback and raw-identity leak tests. Bash syntax and `git diff --check` pass.
-- Point authority, reservation, credit, security, isolated phase-one and farm animal placement regressions pass. Production was not contacted, no report was generated from live data, no service was restarted and no balance was migrated.
+- Point authority, reservation, credit, security, isolated phase-one and farm animal placement regressions pass.
+- Production read-only run at `2026-07-16T13:48:26Z` completed from commit `7dffc8b5`. The two captures matched; report SHA-256 is `3ef6343bbef65bcfd35bce78aab10408df24c71c3c5fa90acd800788f3f14f16`. Statuses are `NO_ACTION=143`, `UNMAPPED_LEGACY_REVIEW=7`, `MANUAL_RECONCILIATION_REQUIRED=6`, `BLOCKED=3`; all three canary outboxes matched exactly one game credit for a total of `3 Point`.
+- Postflight retained web/game PIDs `186434/186418`, health `200/200`, the same release/build/env checksums, public Point credit `404`, and zero upload/raw-snapshot directories. No service was restarted, no database/mapping/balance was changed and no real payment was used. Migration remains blocked pending sub-micro and opening-seed classification.
 
 ## [Unreleased] - 2026-07-16 (Shared Point wallet authority v3, not deployed)
 

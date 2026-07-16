@@ -6,16 +6,19 @@
 
 ---
 
-## [2026-07-16] — Candidate migration dry-run ví Point, chưa chạy production
+## [2026-07-16] — Production migration dry-run ví Point đã chạy, chưa được migrate
 
 ### Đã thêm
 - Exporter web SQLite chỉ đọc (`mode=ro`, `query_only`, foreign-key check) và exporter game PostgreSQL `REPEATABLE READ READ ONLY`; dữ liệu tiền dùng integer micros, không dùng float để quyết định migration.
 - Báo cáo ẩn danh từng account phát hiện mapping/transaction trùng, identity mồ côi, thiếu wallet, balance âm/locked, outbox chưa settle hoặc lệch game ledger. Report luôn cấm auto-migration và không sinh SQL/số tiền đề xuất.
 - Runner chụp hai ledger hai lượt, dừng nếu dữ liệu đổi giữa lúc capture, chỉ giữ raw ID trong temp `0700` rồi xóa; file cuối dùng HMAC ref và quyền `0600`. Runbook nằm tại `docs/QA/POINT_WALLET_MIGRATION_DRY_RUN.md`.
+- SQLite REAL legacy được làm tròn về micro gần nhất chỉ trong snapshot tạm, giữ residual chính xác bằng atto-Point và gắn blocker cho mọi account bị ảnh hưởng; outbox settlement vẫn từ chối sub-micro. Runner hỗ trợ PostgreSQL peer auth bằng cách hạ riêng game exporter sang user service và loại HMAC key/`PGPASSWORD` khỏi child.
 
 ### Bằng chứng
 - Suite migration dry-run, Point authority/reservation/credit, security, Phase 1 cô lập và animal placement đều pass; Bash syntax và `git diff --check` pass.
-- Chưa chạy tool trên production, chưa tạo live report, không restart service, không sửa DB và không migrate Point. Cổng tiếp theo là xin duyệt lượt production read-only rồi phân loại thủ công từng account.
+- Lượt production read-only `2026-07-16T13:48:26Z` từ commit `7dffc8b5` đã pass snapshot kép và sinh report SHA-256 `3ef6343bbef65bcfd35bce78aab10408df24c71c3c5fa90acd800788f3f14f16`: 159 account gồm `143 NO_ACTION`, `7 UNMAPPED_LEGACY_REVIEW`, `6 MANUAL_RECONCILIATION_REQUIRED`, `3 BLOCKED`.
+- Ba outbox canary, mỗi row `1 Point`, đều `SENT` và khớp đúng một game credit; tổng gửi/nhận `3 Point`, không duplicate. Ba blocker chứa 6 giá trị SWAP/ví legacy dưới 1 micro-Point; 6 mapping game đều có opening seed `5000 Point` cần phân loại.
+- Hậu kiểm giữ nguyên PID game/web `186418/186434`, health `200/200`, release/build/env checksum và callback public `404`; upload/raw temp đều `0`. Không restart, không sửa DB/mapping/balance, không dùng tiền thật và chưa được phép migrate.
 
 ## [2026-07-16] — Candidate ví Point authoritative v3, chưa deploy
 
