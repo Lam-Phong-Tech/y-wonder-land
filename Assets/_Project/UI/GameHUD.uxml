@@ -119,19 +119,12 @@
                     </ui:Button>
                 </ui:VisualElement>
 
-                <!-- Currency (Point + UPoint) -->
+                <!-- Currency (Point) -->
                 <ui:VisualElement name="CurrencyDisplay" class="currency-item">
                     <ui:VisualElement class="currency-icon">
                         <ui:VisualElement style="width: 22px; height: 22px; background-image: url('project:/Assets/_Project/UI/Icons/FarmingIconsCollection_REMOVE_BG/Icon_16.png'); -unity-background-scale-mode: scale-to-fit;" />
                     </ui:VisualElement>
                     <ui:Label name="CurrencyValue" text="84.00" class="currency-value" />
-                </ui:VisualElement>
-
-                <ui:VisualElement name="UposDisplay" class="currency-item currency-item--upos">
-                    <ui:VisualElement class="currency-icon currency-icon--upos">
-                        <ui:Label text="U" class="currency-icon-label currency-icon-label--upos" />
-                    </ui:VisualElement>
-                    <ui:Label name="UposValue" text="0 UPoint" class="currency-value currency-value--upos" />
                 </ui:VisualElement>
 
                 <!-- Settings -->

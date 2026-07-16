@@ -24,7 +24,6 @@ namespace YWonderLand.Backend
             public string itemId;
             public int quantityDelta;
             public long posDelta;
-            public long uposDelta;
             public string reason;
             public string idempotencyKey;
         }
@@ -42,7 +41,6 @@ namespace YWonderLand.Backend
         private sealed class EconomyAdjustRequest
         {
             public long delta_pos;
-            public long delta_upos;
             public string type;
             public string idempotency_key;
         }
@@ -97,9 +95,9 @@ namespace YWonderLand.Backend
             StartProcessing();
         }
 
-        public static void QueueEconomyDelta(long posDelta, long uposDelta, string reason)
+        public static void QueueEconomyDelta(long posDelta, string reason)
         {
-            if (posDelta == 0 && uposDelta == 0) return;
+            if (posDelta == 0) return;
             if (!TryCaptureSession(out string token, out string scopeId)) return;
 
             Pending.Enqueue(new PendingMutation
@@ -108,7 +106,6 @@ namespace YWonderLand.Backend
                 token = token,
                 scopeId = scopeId,
                 posDelta = posDelta,
-                uposDelta = uposDelta,
                 reason = NormalizeReason(reason, "gameplay_economy"),
                 idempotencyKey = Guid.NewGuid().ToString("N")
             });
@@ -237,7 +234,6 @@ namespace YWonderLand.Backend
                 new EconomyAdjustRequest
                 {
                     delta_pos = mutation.posDelta,
-                    delta_upos = mutation.uposDelta,
                     type = mutation.reason,
                     idempotency_key = mutation.idempotencyKey
                 },
@@ -255,7 +251,7 @@ namespace YWonderLand.Backend
         {
             if (mutation.kind == MutationKind.Inventory)
                 return $"inventory {mutation.itemId} {mutation.quantityDelta:+#;-#;0}";
-            return $"economy Point {mutation.posDelta:+#;-#;0}, UPoint {mutation.uposDelta:+#;-#;0}";
+            return $"economy Point {mutation.posDelta:+#;-#;0}";
         }
     }
 }

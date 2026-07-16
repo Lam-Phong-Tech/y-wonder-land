@@ -54,7 +54,6 @@ public class GameHUDController : MonoBehaviour
 
     // Currency
     private Label currencyValue;
-    private Label uposValue;
 
     // Quest
     private VisualElement questBubble;
@@ -176,9 +175,7 @@ public class GameHUDController : MonoBehaviour
         {
             var economy = YWonderLand.Managers.EconomyManager.Instance;
             SetCurrency(economy.GetPOS());
-            SetUPOS(economy.GetUPOS());
             economy.OnPOSChanged += SetCurrency;
-            economy.OnUPOSChanged += SetUPOS;
         }
 
         // EXP/Level (tối giản) — hiện cấp + % EXP thật, cập nhật khi cộng EXP.
@@ -204,7 +201,6 @@ public class GameHUDController : MonoBehaviour
         {
             var economy = YWonderLand.Managers.EconomyManager.Instance;
             economy.OnPOSChanged -= SetCurrency;
-            economy.OnUPOSChanged -= SetUPOS;
         }
 
         if (_expMgr != null) _expMgr.OnEXPChanged -= OnExpChanged;
@@ -229,7 +225,6 @@ public class GameHUDController : MonoBehaviour
 
         // Currency
         currencyValue = root.Q<Label>("CurrencyValue");
-        uposValue = root.Q<Label>("UposValue");
 
         // Quest
         questBubble = root.Q<VisualElement>("QuestBubble");
@@ -630,14 +625,6 @@ public class GameHUDController : MonoBehaviour
     public void SetCurrency(long amount)
     {
         if (currencyValue != null) currencyValue.text = amount.ToString("N0");
-    }
-
-    /// <summary>
-    /// Update premium currency display (UPoint).
-    /// </summary>
-    public void SetUPOS(long amount)
-    {
-        if (uposValue != null) uposValue.text = $"{amount:N0} UPoint";
     }
 
     /// <summary>

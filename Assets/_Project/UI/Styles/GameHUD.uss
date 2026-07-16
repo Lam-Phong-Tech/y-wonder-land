@@ -61,19 +61,9 @@
     border-radius: var(--radius-panel); border-width: var(--border-medium); border-color: rgba(255, 255, 255, 0.2);
     padding: 8px 14px; margin-right: 10px; flex-shrink: 0;
 }
-.currency-item--upos {
-    background-color: rgba(78, 176, 230, 0.18);
-    border-color: rgba(78, 176, 230, 0.5);
-}
 .currency-icon { width: 22px; height: 22px; margin-right: 8px; align-items: center; justify-content: center; }
-.currency-icon--upos {
-    background-color: rgba(78, 176, 230, 0.22);
-    border-radius: 10px;
-}
 .currency-icon-label { font-size: 10px; -unity-font-style: bold; color: var(--color-primary); margin: 0; padding: 0; -unity-text-align: middle-center; }
-.currency-icon-label--upos { color: var(--color-accent-blue); }
 .currency-value { font-size: 15px; -unity-font-style: bold; color: var(--color-text-white); white-space: nowrap; }
-.currency-value--upos { color: var(--color-accent-blue); }
 
 .settings-btn {
     width: 58px; height: 58px; border-radius: var(--radius-button);

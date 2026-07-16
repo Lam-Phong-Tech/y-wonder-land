@@ -570,6 +570,12 @@ namespace YWonderLand.Realtime
                 case "resource_harvest_result":
                     ReceiveResourceHarvestResult(msg);
                     break;
+                case "economy_updated":
+                    JObject economy = msg["economy"] as JObject;
+                    long? pointBalance = economy?.Value<long?>("pos");
+                    if (pointBalance.HasValue)
+                        YWonderLand.Managers.EconomyManager.Instance?.ApplyServerState(pointBalance.Value);
+                    break;
                 case "error":
                     string errorCode = msg.Value<string>("code") ?? "";
                     Debug.LogWarning($"[Realtime] Server error: {errorCode} {msg.Value<string>("message")}");

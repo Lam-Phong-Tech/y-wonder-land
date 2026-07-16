@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using UnityEngine;
 using YWonderLand.Backend;
 
@@ -13,13 +14,11 @@ namespace YWonderLand.Managers
         public static EconomyManager Instance { get; private set; }
 
         public event Action<long> OnPOSChanged;
-        public event Action<long> OnUPOSChanged;
-
         private long currentPOS;
-        private long currentUPOS;
 
-        private const string POS_KEY = "YW_POS_Balance";
-        private const string UPOS_KEY = "YW_UPOS_Balance";
+        private const string POS_KEY = "YW_POS_Balance_Long";
+        private const string LEGACY_POS_KEY = "YW_POS_Balance";
+        private const string LEGACY_UPOS_KEY = "YW_UPOS_Balance";
 
         void Awake()
         {
@@ -51,35 +50,38 @@ namespace YWonderLand.Managers
         {
             LoadBalances();
             OnPOSChanged?.Invoke(currentPOS);
-            OnUPOSChanged?.Invoke(currentUPOS);
             Debug.Log($"[Economy] Reloaded local cache for '{nextScopeId}'.");
         }
 
         private void LoadBalances()
         {
             // Nếu chưa có data, tặng 5000 Point làm vốn khởi nghiệp
-            currentPOS = PlayerScopedPrefs.GetInt(POS_KEY, 5000);
-            currentUPOS = PlayerScopedPrefs.GetInt(UPOS_KEY, 0);
+            long legacyBalance = PlayerScopedPrefs.GetInt(LEGACY_POS_KEY, 5000);
+            string cachedBalance = PlayerScopedPrefs.GetString(POS_KEY, "");
+            if (!long.TryParse(cachedBalance, NumberStyles.Integer, CultureInfo.InvariantCulture, out currentPOS))
+                currentPOS = legacyBalance;
+
+            currentPOS = Math.Max(0, currentPOS);
+            PlayerScopedPrefs.SetString(POS_KEY, currentPOS.ToString(CultureInfo.InvariantCulture));
+            PlayerScopedPrefs.DeleteKey(LEGACY_POS_KEY);
+            PlayerScopedPrefs.DeleteKey(LEGACY_UPOS_KEY);
+            PlayerScopedPrefs.Save();
         }
 
         private void SaveBalances()
         {
-            PlayerScopedPrefs.SetInt(POS_KEY, (int)currentPOS);
-            PlayerScopedPrefs.SetInt(UPOS_KEY, (int)currentUPOS);
+            PlayerScopedPrefs.SetString(POS_KEY, currentPOS.ToString(CultureInfo.InvariantCulture));
             PlayerScopedPrefs.Save();
         }
 
         public long GetPOS() => currentPOS;
-        public long GetUPOS() => currentUPOS;
 
-        public void ApplyServerState(long pos, long upos, bool saveLocalCache = true)
+        public void ApplyServerState(long pos, bool saveLocalCache = true)
         {
             currentPOS = Math.Max(0, pos);
-            currentUPOS = Math.Max(0, upos);
             if (saveLocalCache) SaveBalances();
             OnPOSChanged?.Invoke(currentPOS);
-            OnUPOSChanged?.Invoke(currentUPOS);
-            Debug.Log($"[Economy] Applied server state. Point={currentPOS}, UPoint={currentUPOS}");
+            Debug.Log($"[Economy] Applied server state. Point={currentPOS}");
         }
 
         public void AddPOS(long amount, string syncReason = "gameplay_point_add")
@@ -87,7 +89,7 @@ namespace YWonderLand.Managers
             if (amount <= 0) return;
             currentPOS += amount;
             SaveBalances();
-            GameplayMutationSync.QueueEconomyDelta(amount, 0, syncReason);
+            GameplayMutationSync.QueueEconomyDelta(amount, syncReason);
             OnPOSChanged?.Invoke(currentPOS);
             Debug.Log($"[Economy] Add {amount} Point. Balance: {currentPOS}");
         }
@@ -99,7 +101,7 @@ namespace YWonderLand.Managers
             {
                 currentPOS -= amount;
                 SaveBalances();
-                GameplayMutationSync.QueueEconomyDelta(-amount, 0, syncReason);
+                GameplayMutationSync.QueueEconomyDelta(-amount, syncReason);
                 OnPOSChanged?.Invoke(currentPOS);
                 Debug.Log($"[Economy] Spend {amount} Point. Balance: {currentPOS}");
                 return true;
@@ -108,41 +110,10 @@ namespace YWonderLand.Managers
             return false;
         }
 
-        public void AddUPOS(long amount, string syncReason = "gameplay_upoint_add")
-        {
-            if (amount <= 0) return;
-            currentUPOS += amount;
-            SaveBalances();
-            GameplayMutationSync.QueueEconomyDelta(0, amount, syncReason);
-            OnUPOSChanged?.Invoke(currentUPOS);
-            Debug.Log($"[Economy] Add {amount} UPoint. Balance: {currentUPOS}");
-        }
-
-        public bool SpendUPOS(long amount, string syncReason = "gameplay_upoint_spend")
-        {
-            if (amount <= 0) return true;
-            if (currentUPOS >= amount)
-            {
-                currentUPOS -= amount;
-                SaveBalances();
-                GameplayMutationSync.QueueEconomyDelta(0, -amount, syncReason);
-                OnUPOSChanged?.Invoke(currentUPOS);
-                Debug.Log($"[Economy] Spend {amount} UPoint. Balance: {currentUPOS}");
-                return true;
-            }
-
-            Debug.LogWarning($"[Economy] Not enough UPoint! Needed: {amount}, Have: {currentUPOS}");
-            return false;
-        }
-        
         public bool CanAffordPOS(long amount)
         {
             return currentPOS >= amount;
         }
 
-        public bool CanAffordUPOS(long amount)
-        {
-            return currentUPOS >= amount;
-        }
     }
 }
