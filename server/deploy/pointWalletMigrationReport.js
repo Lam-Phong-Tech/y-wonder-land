@@ -4,6 +4,7 @@ const crypto = require("crypto");
 const fs = require("fs");
 
 const POINT_MICROS = 1_000_000n;
+const HALF_MICRO_POINT_ATTOS = 500_000_000_000n;
 const REPORT_DOMAIN = "ywonder-point-migration-report-v1";
 
 function asArray(value, field) {
@@ -42,6 +43,16 @@ function integerValue(value, field, options = {}) {
   if (options.nonNegative && parsed < 0n) throw new Error(`INVALID_${field.toUpperCase()}`);
   if (options.positive && parsed <= 0n) throw new Error(`INVALID_${field.toUpperCase()}`);
   return parsed;
+}
+
+function legacyResidualAttos(value, field) {
+  if (value == null || String(value).trim() === "") return 0n;
+  const residual = integerValue(value, field);
+  const absolute = residual < 0n ? -residual : residual;
+  if (absolute > HALF_MICRO_POINT_ATTOS) {
+    throw new Error(`INVALID_${field.toUpperCase()}`);
+  }
+  return residual;
 }
 
 function publicRef(referenceKey, kind, value) {
@@ -87,7 +98,15 @@ function normalizeWebSnapshot(input) {
     userIds.add(userId);
     uniqueRecord(wallets, userId, {
       pointMicros: integerValue(wallet.pointMicros, "wallet_point_micros"),
+      pointLegacyResidualAttos: legacyResidualAttos(
+        wallet.pointLegacyResidualAttos,
+        "wallet_point_legacy_residual_attos"
+      ),
       lockedPointMicros: integerValue(wallet.lockedPointMicros, "wallet_locked_point_micros"),
+      lockedPointLegacyResidualAttos: legacyResidualAttos(
+        wallet.lockedPointLegacyResidualAttos,
+        "wallet_locked_point_legacy_residual_attos"
+      ),
     }, "DUPLICATE_WEB_WALLET");
   }
 
@@ -115,6 +134,10 @@ function normalizeWebSnapshot(input) {
       currency: optionalText(tx.currency, "web_transaction_currency", 32).toUpperCase() || "UNKNOWN",
       status: optionalText(tx.status, "web_transaction_status", 64).toUpperCase() || "UNKNOWN",
       amountMicros: integerValue(tx.amountMicros, "web_transaction_amount_micros"),
+      amountLegacyResidualAttos: legacyResidualAttos(
+        tx.amountLegacyResidualAttos,
+        "web_transaction_amount_legacy_residual_attos"
+      ),
     };
     transactionsById.set(transactionId, normalized);
     addGrouped(transactions, userId, normalized);
@@ -279,9 +302,18 @@ function buildPointWalletMigrationReport(webInput, gameInput, options = {}) {
   let totalWebPointMicros = 0n;
   let totalWebLockedPointMicros = 0n;
   let totalMappedGamePointMicros = 0n;
+  let legacySubMicroAccountCount = 0;
+  let legacySubMicroValueCount = 0;
+  let totalLegacyResidualPointAttos = 0n;
+  let maxAbsLegacyResidualPointAttos = 0n;
 
   for (const webUserId of [...allWebUserIds].sort()) {
-    const wallet = web.wallets.get(webUserId) || { pointMicros: 0n, lockedPointMicros: 0n };
+    const wallet = web.wallets.get(webUserId) || {
+      pointMicros: 0n,
+      pointLegacyResidualAttos: 0n,
+      lockedPointMicros: 0n,
+      lockedPointLegacyResidualAttos: 0n,
+    };
     const hasWallet = web.wallets.has(webUserId);
     const link = web.links.get(webUserId) || null;
     const players = game.playersByWebUserId.get(webUserId) || [];
@@ -310,6 +342,26 @@ function buildPointWalletMigrationReport(webInput, gameInput, options = {}) {
     if (wallet.pointMicros < 0n) blockingIssues.push("NEGATIVE_WEB_POINT_BALANCE");
     if (wallet.lockedPointMicros < 0n) blockingIssues.push("NEGATIVE_WEB_LOCKED_POINT_BALANCE");
     if (wallet.lockedPointMicros !== 0n) blockingIssues.push("LOCKED_WEB_POINT_PRESENT");
+
+    const legacyResiduals = [
+      wallet.pointLegacyResidualAttos,
+      wallet.lockedPointLegacyResidualAttos,
+      ...webTransactions.map((row) => row.amountLegacyResidualAttos),
+    ].filter((value) => value !== 0n);
+    const accountLegacyResidualAttos = legacyResiduals.reduce((sum, value) => sum + value, 0n);
+    const accountMaxAbsLegacyResidualAttos = legacyResiduals.reduce((maximum, value) => {
+      const absolute = value < 0n ? -value : value;
+      return absolute > maximum ? absolute : maximum;
+    }, 0n);
+    if (legacyResiduals.length > 0) {
+      blockingIssues.push("LEGACY_SUB_MICRO_VALUE_PRESENT");
+      legacySubMicroAccountCount += 1;
+      legacySubMicroValueCount += legacyResiduals.length;
+      totalLegacyResidualPointAttos += accountLegacyResidualAttos;
+      if (accountMaxAbsLegacyResidualAttos > maxAbsLegacyResidualPointAttos) {
+        maxAbsLegacyResidualPointAttos = accountMaxAbsLegacyResidualAttos;
+      }
+    }
 
     const player = players.length === 1 ? players[0] : null;
     const gameTransactions = player ? (game.transactions.get(player.playerId) || []) : [];
@@ -457,6 +509,12 @@ function buildPointWalletMigrationReport(webInput, gameInput, options = {}) {
         matchedGameCreditMicros: matchedGameCreditMicros.toString(),
         gameTransactionCount: gameTransactions.length,
         gameLedgerDeltaMicros: gameLedgerDeltaMicros.toString(),
+        legacySubMicroNormalization: {
+          roundingMode: "ROUND_HALF_EVEN",
+          valueCount: legacyResiduals.length,
+          totalResidualPointAttos: accountLegacyResidualAttos.toString(),
+          maxAbsResidualPointAttos: accountMaxAbsLegacyResidualAttos.toString(),
+        },
       },
       suggestedMigrationMicros: null,
     });
@@ -464,7 +522,7 @@ function buildPointWalletMigrationReport(webInput, gameInput, options = {}) {
 
   accounts.sort((a, b) => a.accountRef.localeCompare(b.accountRef));
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     generatedAt: generatedAt.toISOString(),
     referenceKeyId: crypto.createHash("sha256").update(referenceKey).digest("hex").slice(0, 16),
     mode: "READ_ONLY_DRY_RUN",
@@ -477,6 +535,10 @@ function buildPointWalletMigrationReport(webInput, gameInput, options = {}) {
       totalWebPointMicros: totalWebPointMicros.toString(),
       totalWebLockedPointMicros: totalWebLockedPointMicros.toString(),
       totalMappedGamePointMicros: totalMappedGamePointMicros.toString(),
+      legacySubMicroAccountCount,
+      legacySubMicroValueCount,
+      totalLegacyResidualPointAttos: totalLegacyResidualPointAttos.toString(),
+      maxAbsLegacyResidualPointAttos: maxAbsLegacyResidualPointAttos.toString(),
     },
     accounts,
   };

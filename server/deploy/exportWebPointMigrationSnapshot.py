@@ -9,13 +9,15 @@ import math
 import os
 import sqlite3
 import sys
-from decimal import Decimal, InvalidOperation
+from decimal import ROUND_HALF_EVEN, Decimal, InvalidOperation
 from pathlib import Path
 from urllib.parse import quote
 
 
 RAW_EXPORT_ACK = "I_UNDERSTAND_THIS_OUTPUT_CONTAINS_RAW_WALLET_IDENTITIES"
 POINT_MICROS = Decimal("1000000")
+POINT_ATTOS = Decimal("1000000000000000000")
+MICRO_POINT_ATTOS = Decimal("1000000000000")
 
 
 def fail(message: str) -> None:
@@ -66,6 +68,30 @@ def decimal_micros(value: object, field: str) -> str:
     return str(int(integral))
 
 
+def legacy_decimal_micros(value: object, field: str) -> tuple[str, str]:
+    """Quantize legacy SQLite REAL Point to micros while preserving exact residual evidence."""
+    if isinstance(value, float) and not math.isfinite(value):
+        fail(f"INVALID_{field.upper()}")
+    try:
+        decimal = Decimal(str(value))
+    except (InvalidOperation, ValueError):
+        fail(f"INVALID_{field.upper()}")
+    if not decimal.is_finite():
+        fail(f"INVALID_{field.upper()}")
+
+    point_attos = decimal * POINT_ATTOS
+    integral_attos = point_attos.to_integral_value()
+    if point_attos != integral_attos:
+        fail(f"{field.upper()}_HAS_MORE_THAN_EIGHTEEN_DECIMALS")
+
+    micros = decimal * POINT_MICROS
+    rounded_micros = micros.to_integral_value(rounding=ROUND_HALF_EVEN)
+    residual_attos = integral_attos - (rounded_micros * MICRO_POINT_ATTOS)
+    if abs(residual_attos) > MICRO_POINT_ATTOS / 2:
+        fail(f"INVALID_{field.upper()}_ROUNDING_RESIDUAL")
+    return str(int(rounded_micros)), str(int(residual_attos))
+
+
 def non_negative_integer(value: object, field: str) -> str:
     text = str(value).strip()
     if not text.isdigit():
@@ -101,32 +127,41 @@ def build_snapshot(db: sqlite3.Connection) -> dict[str, object]:
         {"userId": required_text(row[0], "web_user_id")}
         for row in db.execute('select "id" from "User" order by "id"')
     ]
-    wallets = [
-        {
-            "userId": required_text(row[0], "wallet_user_id"),
-            "pointMicros": decimal_micros(row[1], "wallet_point"),
-            "lockedPointMicros": decimal_micros(row[2], "wallet_locked_point"),
-        }
-        for row in db.execute(
-            'select "userId", "balanceGXL", "lockedGXL" from "Wallet" order by "userId"'
+    wallets = []
+    for row in db.execute(
+        'select "userId", "balanceGXL", "lockedGXL" from "Wallet" order by "userId"'
+    ):
+        point_micros, point_residual_attos = legacy_decimal_micros(row[1], "wallet_point")
+        locked_micros, locked_residual_attos = legacy_decimal_micros(
+            row[2], "wallet_locked_point"
         )
-    ]
-    transactions = [
-        {
+        wallets.append({
+            "userId": required_text(row[0], "wallet_user_id"),
+            "pointMicros": point_micros,
+            "pointLegacyResidualAttos": point_residual_attos,
+            "lockedPointMicros": locked_micros,
+            "lockedPointLegacyResidualAttos": locked_residual_attos,
+        })
+
+    transactions = []
+    for row in db.execute(
+        'select "id", "userId", "type", "amount", "currency", "status" '
+        'from "Transaction" '
+        "where upper(trim(coalesce(\"currency\", ''))) in ('GXL', 'POINT') "
+        'order by "userId", "createdAt", "id"'
+    ):
+        amount_micros, amount_residual_attos = legacy_decimal_micros(
+            row[3], "web_transaction_amount"
+        )
+        transactions.append({
             "transactionId": required_text(row[0], "web_transaction_id"),
             "userId": required_text(row[1], "web_transaction_user_id"),
             "type": optional_text(row[2], "web_transaction_type", 128) or "UNKNOWN",
-            "amountMicros": decimal_micros(row[3], "web_transaction_amount"),
+            "amountMicros": amount_micros,
+            "amountLegacyResidualAttos": amount_residual_attos,
             "currency": optional_text(row[4], "web_transaction_currency", 32) or "UNKNOWN",
             "status": optional_text(row[5], "web_transaction_status", 64) or "UNKNOWN",
-        }
-        for row in db.execute(
-            'select "id", "userId", "type", "amount", "currency", "status" '
-            'from "Transaction" '
-            "where upper(trim(coalesce(\"currency\", ''))) in ('GXL', 'POINT') "
-            'order by "userId", "createdAt", "id"'
-        )
-    ]
+        })
     outboxes = [
         {
             "userId": required_text(row[0], "outbox_user_id"),
@@ -153,7 +188,7 @@ def build_snapshot(db: sqlite3.Connection) -> dict[str, object]:
         ]
 
     return {
-        "schemaVersion": 1,
+        "schemaVersion": 2,
         "users": users,
         "wallets": wallets,
         "transactions": transactions,

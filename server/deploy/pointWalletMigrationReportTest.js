@@ -22,7 +22,12 @@ function run() {
       { userId: "web-canary", pointMicros: "0", lockedPointMicros: "0" },
       { userId: "web-commission", pointMicros: "12000000", lockedPointMicros: "0" },
       { userId: "web-ready", pointMicros: "0", lockedPointMicros: "0" },
-      { userId: "web-legacy", pointMicros: "3410666667", lockedPointMicros: "0" },
+      {
+        userId: "web-legacy",
+        pointMicros: "3410666667",
+        pointLegacyResidualAttos: "-333333314400",
+        lockedPointMicros: "0",
+      },
       { userId: "web-duplicate", pointMicros: "0", lockedPointMicros: "0" },
     ],
     transactions: [
@@ -33,6 +38,15 @@ function run() {
         currency: "GXL",
         status: "COMPLETED",
         amountMicros: "12000000",
+      },
+      {
+        transactionId: "web-tx-legacy-swap",
+        userId: "web-legacy",
+        type: "SWAP",
+        currency: "GXL",
+        status: "SUCCESS",
+        amountMicros: "316666667",
+        amountLegacyResidualAttos: "-333333300000",
       },
     ],
     outboxes: [
@@ -82,8 +96,12 @@ function run() {
   assert.strictEqual(report.summary.totalWebPointMicros, "3422666667");
   assert.strictEqual(report.summary.statusCounts.READY_TO_LINK, 1);
   assert.strictEqual(report.summary.statusCounts.MANUAL_RECONCILIATION_REQUIRED, 2);
-  assert.strictEqual(report.summary.statusCounts.UNMAPPED_LEGACY_REVIEW, 1);
-  assert.strictEqual(report.summary.statusCounts.BLOCKED, 2);
+  assert.strictEqual(report.summary.statusCounts.UNMAPPED_LEGACY_REVIEW, undefined);
+  assert.strictEqual(report.summary.statusCounts.BLOCKED, 3);
+  assert.strictEqual(report.summary.legacySubMicroAccountCount, 1);
+  assert.strictEqual(report.summary.legacySubMicroValueCount, 2);
+  assert.strictEqual(report.summary.totalLegacyResidualPointAttos, "-666666614400");
+  assert.strictEqual(report.summary.maxAbsLegacyResidualPointAttos, "333333314400");
 
   const ready = accountByStatus(report, "READY_TO_LINK");
   assert(ready && ready.reviewReasons.length === 0 && ready.blockingIssues.length === 0);
@@ -104,6 +122,16 @@ function run() {
     account.blockingIssues.includes("GAME_MAPPING_WITHOUT_WEB_USER"));
   assert(orphanMapping, "Game mapping without an authoritative web user was not blocked");
   assert(orphanMapping.blockingIssues.includes("GAME_MAPPING_WITHOUT_WEB_WALLET"));
+  const legacySubMicro = report.accounts.find((account) =>
+    account.blockingIssues.includes("LEGACY_SUB_MICRO_VALUE_PRESENT"));
+  assert(legacySubMicro, "Legacy sub-micro evidence was not blocked");
+  assert.strictEqual(legacySubMicro.status, "BLOCKED");
+  assert.deepStrictEqual(legacySubMicro.evidence.legacySubMicroNormalization, {
+    roundingMode: "ROUND_HALF_EVEN",
+    valueCount: 2,
+    totalResidualPointAttos: "-666666614400",
+    maxAbsResidualPointAttos: "333333314400",
+  });
   for (const account of report.accounts) {
     assert.strictEqual(account.suggestedMigrationMicros, null);
   }
@@ -119,6 +147,7 @@ function run() {
     "player-canary",
     "source-canary-1",
     "web-tx-commission",
+    "web-tx-legacy-swap",
     "game-tx-canary-1",
   ]) {
     assert(!serialized.includes(rawIdentity), `Raw identity leaked: ${rawIdentity}`);
@@ -233,6 +262,15 @@ function run() {
       }],
     }, game, { referenceKey: REFERENCE_KEY }),
     /INVALID_OUTBOX_ATTEMPTS/
+  );
+  assert.throws(
+    () => buildPointWalletMigrationReport({
+      ...web,
+      wallets: web.wallets.map((wallet) => wallet.userId === "web-ready"
+        ? { ...wallet, pointLegacyResidualAttos: "500000000001" }
+        : wallet),
+    }, game, { referenceKey: REFERENCE_KEY }),
+    /INVALID_WALLET_POINT_LEGACY_RESIDUAL_ATTOS/
   );
 
   console.log("[point-wallet-migration-report] PASS: report is anonymized, read-only, fail-closed, and never proposes automatic balance migration.");

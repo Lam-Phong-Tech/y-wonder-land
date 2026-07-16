@@ -82,10 +82,14 @@ def run() -> None:
         assert snapshot["wallets"] == [{
             "userId": "web-user-1",
             "pointMicros": "12250000",
+            "pointLegacyResidualAttos": "0",
             "lockedPointMicros": "0",
+            "lockedPointLegacyResidualAttos": "0",
         }]
+        assert snapshot["schemaVersion"] == 2
         assert len(snapshot["transactions"]) == 1
         assert snapshot["transactions"][0]["currency"] == "GXL"
+        assert snapshot["transactions"][0]["amountLegacyResidualAttos"] == "0"
         assert snapshot["outboxes"][0]["pointMicros"] == "1500000"
         assert snapshot["links"] == [{"userId": "web-user-1", "gamePlayerId": "game-player-1"}]
         assert "must-not-leak@example.test" not in json.dumps(snapshot)
@@ -118,7 +122,30 @@ def run() -> None:
         assert file_sha256(database) == before
 
         db = sqlite3.connect(database)
-        db.execute('update "Wallet" set "balanceGXL" = 0.0000001')
+        db.execute('update "Wallet" set "balanceGXL" = 0.6666666666666856')
+        db.execute(
+            'update "Transaction" set "amount" = 316.6666666666667 where "id" = ?',
+            ("tx-point",),
+        )
+        db.commit()
+        db.close()
+
+        before_legacy_export = file_sha256(database)
+        legacy_snapshot = export_snapshot(str(database))
+        assert legacy_snapshot["wallets"][0]["pointMicros"] == "666667"
+        assert legacy_snapshot["wallets"][0]["pointLegacyResidualAttos"] == "-333333314400"
+        assert legacy_snapshot["transactions"][0]["amountMicros"] == "316666667"
+        assert (
+            legacy_snapshot["transactions"][0]["amountLegacyResidualAttos"]
+            == "-333333300000"
+        )
+        assert file_sha256(database) == before_legacy_export
+
+        db = sqlite3.connect(database)
+        db.execute(
+            'update "GamePointSyncOutbox" set "pointAmount" = ?',
+            ("0.0000001",),
+        )
         db.commit()
         db.close()
         try:
@@ -126,9 +153,9 @@ def run() -> None:
         except RuntimeError as error:
             assert "HAS_MORE_THAN_SIX_DECIMALS" in str(error)
         else:
-            raise AssertionError("Sub-micro web Point value was not rejected")
+            raise AssertionError("Sub-micro settlement outbox value was not rejected")
 
-    print("[web-point-migration-export] PASS: SQLite stayed unchanged and only minimum Point data was exported.")
+    print("[web-point-migration-export] PASS: legacy residuals were preserved, settlement stayed exact, and SQLite stayed unchanged.")
 
 
 if __name__ == "__main__":
