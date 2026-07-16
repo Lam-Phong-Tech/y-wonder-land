@@ -6,6 +6,18 @@
 
 ---
 
+## [2026-07-17] — Reconciliation ví Point sau remediation đã khóa chống đảo trùng
+
+### Đã thêm
+- Game snapshot read-only nay xuất evidence remediation có kiểm tra operation/idempotency, checksum, source ref ẩn danh và phép tính Point/remainder. Report đối chiếu đủ nguồn, tổng micros và cặp apply/rollback; evidence thiếu, trùng, dùng lại, sai account/credit hoặc sai số tiền đều fail-closed.
+- Worksheet tách synthetic chưa xử lý với synthetic đã reversal. Chỉ reversal hợp lệ và chưa rollback mới loại quyết định đảo lại; artifact cũ checksum-pinned vẫn giữ tương thích.
+
+### Bằng chứng
+- Targeted test, full migration suite và hai remediation execution suite đều pass local; candidate test trên VPS pass trong thư mục tạm không chứa secret rồi được dọn.
+- Production double-snapshot chỉ đọc tạo report `point-wallet-migration-post-remediation-20260716T172353Z-c62f14df.json`, SHA-256 `7397b05d18780cc056dea7c3727aedcc80400570d421caa58072c92d4bf6fd2a`: `BLOCKED=0`, residual `0`, ba outbox synthetic tổng `3000000` micros đã reversal và không còn yêu cầu đảo lần hai.
+- Worksheet mới có 16 account review và 17 decision: 6 opening seed, 10 legacy balance, 1 zero-balance history; synthetic chưa xử lý và residual pending đều `0`. JSON/Markdown SHA-256 là `e223c85ddd26233f0478ae5f02a2b02b2318d5ee050f0c5343174d843a238e0f` / `5c76c718cc636514ad731afb42bc8f8de2a90723c2508d8cbb06b6224abffc73`.
+- SQLite checksum, PID game/web `186418/186434`, health `200/307/404`, file mode `0600` giữ nguyên; không restart/deploy/mutation/link/migrate hoặc dùng tiền thật. Source/raw tạm đã xóa.
+
 ## [2026-07-16] — Remediation ví Point đã chạy và đối soát production
 
 ### Đã thêm

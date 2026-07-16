@@ -1,8 +1,9 @@
 # Point Wallet Migration Dry-Run
 
-Trạng thái: candidate và lượt production read-only ngày 16/07/2026 đã pass;
-21/21 decision item đã được duyệt bằng policy checksum-pinned, nhưng **report còn
-`BLOCKED=3` và chưa được migrate**.
+Trạng thái: remediation và lượt production read-only hậu kiểm ngày 17/07/2026 đã
+pass; report mới có `BLOCKED=0`, nhưng **account link/balance migration vẫn chưa
+được phép**. Worksheet còn 17 quyết định defer/archive cần policy successor được
+ghim checksum trước khi đi tiếp.
 
 ## Mục tiêu
 
@@ -20,6 +21,9 @@ link một ví chung. Công cụ này chỉ tạo báo cáo; không sinh SQL mig
   tạm quyền `0700`, `umask 077`, rồi bị xóa khi thành công, lỗi hoặc interrupt.
 - Báo cáo thay identity bằng HMAC ref. Khóa HMAC tối thiểu 32 ký tự, không lưu
   trong repo, log hoặc báo cáo.
+- Stable report key production nằm ngoài service env trong file root-only mode
+  `0600`; chỉ lưu fingerprint trong tài liệu. Key phải được dùng lại để đối chiếu
+  source refs remediation, không được thay bằng key ngẫu nhiên giữa các lượt.
 - Báo cáo luôn có `automaticMigrationAllowed=false`,
   `migrationStatementsGenerated=0` và `databaseMutationsPerformed=false`.
 - `Wallet.balanceGXL`, `lockedGXL` và lịch sử `Transaction.amount` là SQLite REAL
@@ -197,6 +201,38 @@ Manifest này chỉ đủ để review và xin duyệt change. Trước khi th�
 checksum, operation ID bất biến, transaction nguyên tử balance + ledger/audit, rollback và
 fresh double-snapshot ngay trước write. Sau write phải chạy lại dry-run; chỉ report mới có
 `BLOCKED=0` mới được đi tiếp tới account link/migration.
+
+## Reconciliation sau remediation 17/07/2026
+
+Exporter/report/worksheet được harden để đọc ledger `point_remediation_reversal` và
+`point_remediation_reversal_rollback`. Evidence hợp lệ phải khớp operation ID,
+idempotency, request/plan/approval checksum, source refs HMAC, toàn bộ outbox/game
+credit, tổng Point micros và phép tính remainder. Thiếu, trùng, dùng lại source, sai
+amount hoặc rollback lệch đều fail-closed; chỉ apply hợp lệ chưa rollback mới được
+ghi nhận `REVERSED` và không sinh quyết định đảo lần hai.
+
+- Report root-only:
+  `/root/ywonder-point-reports/point-wallet-migration-post-remediation-20260716T172353Z-c62f14df.json`.
+- Report SHA-256:
+  `7397b05d18780cc056dea7c3727aedcc80400570d421caa58072c92d4bf6fd2a`.
+- Kết quả: 159 account; `NO_ACTION=143`, `MANUAL_RECONCILIATION_REQUIRED=6`,
+  `UNMAPPED_LEGACY_REVIEW=10`, `BLOCKED=0`; residual account/value đều `0`.
+- Ba outbox synthetic tổng `3000000` micros được chứng minh đã reversal; unresolved
+  synthetic bằng `0`, không có `OUTBOX_WITHOUT_WEB_SOURCE_TRANSACTION` còn lại.
+- Worksheet JSON/Markdown root-only có 16 account và 17 decision: 6 opening seed,
+  10 legacy balance và 1 zero-balance history. SHA-256 lần lượt là
+  `e223c85ddd26233f0478ae5f02a2b02b2318d5ee050f0c5343174d843a238e0f` và
+  `5c76c718cc636514ad731afb42bc8f8de2a90723c2508d8cbb06b6224abffc73`.
+- SQLite checksum, PID game/web `186418/186434`, health `200/307/404` và file mode
+  `0600` giữ nguyên; raw/source tạm đã xóa. Không restart/deploy/DB mutation,
+  account link, balance migration hoặc giao dịch tiền thật.
+
+Policy 21 quyết định cũ là bằng chứng lịch sử trước remediation, không được áp thẳng
+vào worksheet mới vì còn hai key operation đã hoàn tất. Bước kế tiếp là tạo policy
+successor chỉ gồm `gameOpeningBalanceTreatment=DEFER_ACCOUNT_LINK`,
+`legacyWebBalanceTreatment=DEFER_ACCOUNT_LINK` và
+`legacyWebHistoryTreatment=ARCHIVE_HISTORY_WITH_NO_BALANCE_MIGRATION`; policy đó
+vẫn không cấp quyền ghi, deploy, link hoặc migrate.
 
 ## Đọc trạng thái
 

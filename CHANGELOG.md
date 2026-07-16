@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-07-17 (Post-remediation Point reconciliation hardened)
+
+### Added
+- Extended the read-only game snapshot with validated synthetic-remediation evidence: operation/idempotency shape, request and approval checksums, exact Point/remainder arithmetic, original operation and anonymized source refs.
+- The migration report now proves full source coverage and amount equality for apply/rollback pairs. Missing, duplicate, reused, unknown, newly funded or mismatched evidence blocks the account; only a valid non-rolled-back reversal suppresses a second synthetic-reversal decision.
+- The decision worksheet separately totals unresolved and already-remediated synthetic credits while retaining backward compatibility with checksum-pinned pre-remediation facts.
+
+### Verified
+- Targeted tests, the complete migration suite and both remediation execution suites pass locally. VPS candidate tests passed from a temporary non-secret tool directory, which was removed afterward.
+- Production double-snapshot read-only report `/root/ywonder-point-reports/point-wallet-migration-post-remediation-20260716T172353Z-c62f14df.json` has SHA-256 `7397b05d18780cc056dea7c3727aedcc80400570d421caa58072c92d4bf6fd2a`: `BLOCKED=0`, zero residuals, and all three historical synthetic outboxes (`3000000` micros) proven reversed without a duplicate action.
+- The new worksheet has 16 review accounts and 17 remaining decisions: six opening balances, ten legacy web balances and one zero-balance history review. Unresolved synthetic and residual decisions are zero. JSON/Markdown SHA-256 values are `e223c85ddd26233f0478ae5f02a2b02b2318d5ee050f0c5343174d843a238e0f` and `5c76c718cc636514ad731afb42bc8f8de2a90723c2508d8cbb06b6224abffc73`.
+- SQLite checksum, game/web PIDs `186418/186434`, health `200/307/404` and root-only artifact modes remained unchanged. No service restart, deployment, database mutation, account link, balance migration or real payment occurred.
+
 ## [Unreleased] - 2026-07-16 (Point wallet remediation executed and reconciled)
 
 ### Added
