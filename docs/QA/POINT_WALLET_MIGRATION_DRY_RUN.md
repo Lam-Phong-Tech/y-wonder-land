@@ -97,6 +97,30 @@ RAW_SNAPSHOTS_RETAINED=no
   public Point credit `404`, wallet debit tắt, upload/raw temp bằng `0`. Không có
   restart, deploy, DB/mapping/balance mutation hoặc thanh toán thật.
 
+## Worksheet quyết định production 16/07/2026
+
+Generator `server/deploy/pointWalletMigrationDecisionWorksheet.js` chỉ nhận report dry-run
+đúng schema/checksum, từ chối field identity thô, không sinh migration SQL và ghi output mới
+bằng chế độ exclusive `0600`. Unit test được ghim trong suite dry-run.
+
+- Generator SHA-256:
+  `923017f8f6574b8d036ca7045a70f2982897aa22d8e8e1d1d00df0d2a812906e`.
+- JSON root-only:
+  `/root/ywonder-point-reports/point-wallet-migration-decision-worksheet-20260716T143041Z-923017f8.json`,
+  SHA-256 `d3cf5dbb9d4eabcae3e4c9e9f97e7c0146440d3eb13f9495626bbefb115cf455`.
+- Markdown root-only:
+  `/root/ywonder-point-reports/point-wallet-migration-decision-worksheet-20260716T143041Z-923017f8.md`,
+  SHA-256 `8a3f52381c3b4f2008f2e3aceeeead10178ed009c5d82e083738e990928c8cd9`.
+- Worksheet có 16 account ẩn danh và 21 mục quyết định `PENDING`: 6 opening balance
+  tổng `30000 Point`, 1 nhóm synthetic canary tổng `3 Point`, 9 account có balance web
+  legacy khác 0 (gồm các account residual) và 1 account balance 0 nhưng còn lịch sử legacy.
+  Ba account residual dưới micro vẫn `BLOCKED`; các nhóm có thể chồng nhau.
+- Tổng balance web nằm trong review là `3422.666667 Point`. Không được hiểu đây là số
+  cần cộng vào game. Một account đã map đồng thời có `12 Point` commission web và opening
+  seed game, nên mâu thuẫn nghiệp vụ một ví phải được giải quyết trước migration.
+- Lượt sinh worksheet không gọi database, không restart/deploy service và đã xóa script
+  tạm. Worksheet chỉ là phiếu xin quyết định; mọi lựa chọn vẫn chưa được phê duyệt.
+
 ## Đọc trạng thái
 
 | Trạng thái | Ý nghĩa | Hành động |

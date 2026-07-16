@@ -6,6 +6,17 @@
 
 ---
 
+## [2026-07-16] — Worksheet quyết định migration ví Point, còn chờ duyệt
+
+### Đã thêm
+- Generator fail-closed biến report HMAC production thành worksheet JSON/Markdown root-only. Tool từ chối identity thô, schema/flag/checksum sai, HMAC ref trùng và không ghi đè output; mọi decision mặc định `PENDING`, không có SQL hay số tiền migrate đề xuất.
+- Phân loại riêng phần lẻ legacy dưới micro, opening balance game, synthetic credit không có nguồn web, balance web legacy đã/chưa map và lịch sử legacy balance 0.
+
+### Bằng chứng
+- Unit test và full suite dry-run pass. Hai worksheet mode `0600` chứa 16 account ẩn danh, 21 decision key còn chờ Product/Finance, tổng opening seed `30000 Point`, synthetic canary `3 Point` và web legacy `3422.666667 Point` trong phạm vi review.
+- Generator SHA-256 `923017f8f6574b8d036ca7045a70f2982897aa22d8e8e1d1d00df0d2a812906e`; JSON SHA-256 `d3cf5dbb9d4eabcae3e4c9e9f97e7c0146440d3eb13f9495626bbefb115cf455`; Markdown SHA-256 `8a3f52381c3b4f2008f2e3aceeeead10178ed009c5d82e083738e990928c8cd9`.
+- Không gọi database/service, không deploy/restart/đổi balance và script tạm đã xóa. Gate migration vẫn khóa cho tới khi duyệt từng decision, xử lý nguồn và chạy lại report đạt `BLOCKED=0`.
+
 ## [2026-07-16] — Production migration dry-run ví Point đã chạy, chưa được migrate
 
 ### Đã thêm

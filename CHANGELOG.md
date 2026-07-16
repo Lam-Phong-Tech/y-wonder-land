@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-07-16 (Point wallet decision worksheet, approvals pending)
+
+### Added
+- Added a fail-closed decision worksheet generator for the anonymized production migration report. It rejects raw identity fields, unsafe report flags, wrong schema/checksum, duplicate HMAC refs and output overwrite; generated JSON/Markdown remain non-mutating and mode `0600`.
+- Added decision classes for sub-micro legacy precision, game opening balances, synthetic credits without a web source, mapped/unmapped legacy web balances and zero-balance legacy history. Every decision remains explicitly `PENDING`; the tool never selects or emits a migration amount.
+
+### Verified
+- Unit and full Point migration dry-run suites pass. The production report checksum generated root-only JSON/Markdown worksheets containing 16 anonymized accounts and 21 pending decisions: `30000 Point` opening balances, `3 Point` synthetic credits and `3422.666667 Point` legacy web balances under review.
+- Generator SHA-256 is `923017f8f6574b8d036ca7045a70f2982897aa22d8e8e1d1d00df0d2a812906e`; worksheet JSON/Markdown SHA-256 values are `d3cf5dbb9d4eabcae3e4c9e9f97e7c0146440d3eb13f9495626bbefb115cf455` and `8a3f52381c3b4f2008f2e3aceeeead10178ed009c5d82e083738e990928c8cd9`.
+- No database or service command ran, no production balance/configuration changed and the temporary uploaded generator was removed. Migration remains blocked pending Product/Finance approvals and a fresh dry-run with `BLOCKED=0`.
+
 ## [Unreleased] - 2026-07-16 (Point wallet migration production dry-run, migration blocked)
 
 ### Added

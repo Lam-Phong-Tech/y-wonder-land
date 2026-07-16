@@ -51,6 +51,11 @@ function findPython() {
 }
 
 run(process.execPath, [path.join(deployRoot, "pointWalletMigrationReportTest.js")], "report test");
+run(
+  process.execPath,
+  [path.join(deployRoot, "pointWalletMigrationDecisionWorksheetTest.js")],
+  "decision worksheet test"
+);
 run(process.execPath, [path.join(deployRoot, "exportGamePointMigrationSnapshotTest.js")], "game export test");
 const python = findPython();
 run(
@@ -59,4 +64,4 @@ run(
   "web export test"
 );
 
-console.log("[point-wallet-migration-suite] PASS: report and both read-only exporters are pinned.");
+console.log("[point-wallet-migration-suite] PASS: report, decision worksheet, and both read-only exporters are pinned.");
