@@ -6,6 +6,19 @@
 
 ---
 
+## [2026-07-16] — Remediation ví Point đã chạy và đối soát production
+
+### Đã thêm
+- Thêm validator approval/checksum, executor SQLite chuẩn hóa residual có audit append-only, executor PostgreSQL đảo synthetic credit bằng transaction serializable/idempotent, nhánh rollback bù và suite test chung. Tooling được khóa ở commit `7aeec648`.
+- Hai executor fail-closed khi plan/source/account drift, audit dở dang, idempotency conflict, target còn phiên active, credit sai player hoặc phép tính số dư không khớp; artifact approval không chứa identity thô.
+
+### Bằng chứng
+- Local/full migration suite và execution suite pass. Bản sao SQLite/PostgreSQL trên VPS pass apply, replay, rollback bù, phục hồi logical checksum và hậu kiểm. Planner ghim approved artifact cũ dừng bằng `SOURCE_STATUS_COUNTS_DRIFT` sau khi normalization là hành vi đúng; báo cáo nền mới là cổng hậu kiểm và xác nhận `BLOCKED=0`, residual value `0`.
+- Backup production `/root/ywonder-point-backups/point-remediation-20260716T163736Z-7aeec648` có manifest SHA-256 `7c5dc5272cc791e1632f1a4738ed3a2b73ef89d4ba6b3544848360fff8977954`. Fresh preflight khớp tuyệt đối 3 account/6 residual, 3 synthetic source và `3000000` micros đã duyệt.
+- Production residual normalization tạo đúng `NORMALIZE=6`, `ROLLBACK=0`; replay không ghi thêm, báo cáo mới đưa `BLOCKED 3 -> 0` và residual value `6 -> 0`.
+- Ba Point canary không tiền lịch sử đã được đảo đúng một lần sau các chi tiêu gameplay: balance tại thời điểm operation là `4370`, không còn là ảnh HUD cũ `5003`; số dư PostgreSQL hiện là `4367 Point`, có đúng một ledger `delta_pos=-3`, không có rollback ledger và replay idempotent.
+- Validation summary cuối có SHA-256 `e31f737bc0177fcceb6fa3f6b1c980a6c5ad379ac4ee7f13352ef50b2e46c37d`. PID game/web vẫn `186418/186434`, health `200/307/404`, outbox pending và warning log đều `0`; không restart/deploy/link/migrate, không dùng tiền thật, không mở mode `open`. Canary vẫn đúng một account, remote ingress tắt; PostgreSQL clone và raw snapshot tạm đã xóa.
+
 ## [2026-07-16] — Remediation dry-run ví Point đã sẵn sàng xin duyệt riêng
 
 ### Đã thêm
