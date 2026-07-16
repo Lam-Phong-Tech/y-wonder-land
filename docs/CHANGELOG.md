@@ -6,6 +6,18 @@
 
 ---
 
+## [2026-07-16] — Remediation dry-run ví Point đã sẵn sàng xin duyệt riêng
+
+### Đã thêm
+- Planner fail-closed đọc approved artifact đã ghim checksum và snapshot kép hiện tại, đối chiếu lại toàn bộ account/fact/status trước khi lập kế hoạch. Tool xác minh từng source synthetic với đúng một game credit và tính chính xác từng residual signed atto-Point; không sinh SQL hoặc lệnh đổi số dư.
+- Reversal synthetic và residual normalization chỉ có operation ID đề xuất, điều kiện vận hành và trạng thái `NOT_AUTHORIZED`. Account link, balance migration và deploy tiếp tục defer/cấm; identity thô chỉ nằm trong temp `0700` rồi bị xóa.
+
+### Bằng chứng
+- Syntax, unit/full migration suite, Point authority, credit, reservation và security smoke đều pass local; candidate pass Node `24.18.0`, Python và `bash -n` trên VPS.
+- Production tạo JSON/Markdown root-only `point-wallet-remediation-dry-run-20260716T155640Z-4677eae4.*`, SHA-256 `fdd118a89f0ac70a60a96eb587d5f7a89b8dd731f02a9922d96410fda2b65357` / `975342dc9bec62f6166e7ef62d9fb657ff36d78a0f3028f902470320dd279416`: reversal plan đúng `3 Point` từ 3 source; residual có 3 account/6 giá trị; nếu operation residual được duyệt và thực hiện đúng thì projection `BLOCKED 3 -> 0`.
+- Lượt candidate tạm đầu tiên dừng trước khi sinh plan vì user game không traverse được thư mục source root-only; cleanup xác nhận raw/upload/output đều 0 và PID/health không đổi. Lượt sau chỉ mở quyền đọc source không nhạy cảm cho service user, còn raw vẫn root-only, rồi pass.
+- Hậu kiểm cuối giữ PID game/web `186418/186434`, health `200/200`, web root `307 -> 200`, callback public `404`, critical log `0`, temp `0`. Chưa sửa DB/Point, chưa reversal/normalize, chưa link/migrate, deploy hoặc restart.
+
 ## [2026-07-16] — Policy ví Point đã duyệt, migration vẫn khóa
 
 ### Đã thêm

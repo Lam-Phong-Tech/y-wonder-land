@@ -162,6 +162,42 @@ restart, không link/migrate account, không đảo synthetic `3 Point` và khô
 residual. Hai việc sau phải là change riêng có audit, backup/rollback và duyệt vận hành;
 sau đó chạy lại dry-run để giải quyết `BLOCKED=3` trước mọi migration.
 
+## Remediation dry-run production 16/07/2026
+
+`server/deploy/pointWalletMigrationRemediationPlan.js` chỉ nhận approved artifact đúng
+checksum cùng snapshot web/game mới. Planner dựng lại report bằng cùng HMAC key rồi
+fail-closed nếu account, status, mapping, balance, outbox, ledger hoặc residual khác bản đã
+duyệt. Output không có identity thô, SQL hoặc lệnh thực thi; mọi operation đều
+`NOT_AUTHORIZED` và cần phê duyệt vận hành riêng.
+
+- Planner SHA-256:
+  `4677eae4abf327480610e34fe09a0f6f8d2e138190f87075f75cec31eee98fb4`.
+- JSON root-only:
+  `/root/ywonder-point-reports/point-wallet-remediation-dry-run-20260716T155640Z-4677eae4.json`,
+  SHA-256 `fdd118a89f0ac70a60a96eb587d5f7a89b8dd731f02a9922d96410fda2b65357`.
+- Markdown root-only:
+  `/root/ywonder-point-reports/point-wallet-remediation-dry-run-20260716T155640Z-4677eae4.md`,
+  SHA-256 `975342dc9bec62f6166e7ef62d9fb657ff36d78a0f3028f902470320dd279416`.
+- Synthetic plan: 1 account, 3 source, tổng reversal đề xuất `3000000` micros; từng
+  source khớp đúng một game credit và operation ID đề xuất chưa tồn tại.
+- Residual plan: 3 account, 6 giá trị; giữ source/normalized/residual signed atto-Point và
+  đề xuất append-only audit. Projection sau khi operation được duyệt là `BLOCKED 3 -> 0`.
+- Authorization: reversal `NOT_AUTHORIZED`, residual normalization `NOT_AUTHORIZED`,
+  account link `DEFERRED`, balance migration/deployment `NOT_AUTHORIZED`; execution
+  statements `0`, database mutations `false`.
+- Candidate tạm đầu tiên dừng trước khi tạo plan vì `ywonder_game` không traverse được
+  thư mục upload source `0700`. Runner đã xóa raw temp, orchestrator xóa upload, output
+  count bằng 0 và PID/health không đổi. Lượt thành công chỉ mở read-only cho source không
+  nhạy cảm; snapshot raw vẫn nằm trong temp root-only `0700` và bị xóa sau run.
+- Hậu kiểm cuối: PID game/web `186418/186434`, health `200/200`, web root `307 -> 200`,
+  callback public `404`, critical log match `0`, remediation/upload temp `0`; không restart,
+  deploy, DB write, reversal, residual normalization, account link hoặc migration.
+
+Manifest này chỉ đủ để review và xin duyệt change. Trước khi thực thi vẫn phải có backup
+checksum, operation ID bất biến, transaction nguyên tử balance + ledger/audit, rollback và
+fresh double-snapshot ngay trước write. Sau write phải chạy lại dry-run; chỉ report mới có
+`BLOCKED=0` mới được đi tiếp tới account link/migration.
+
 ## Đọc trạng thái
 
 | Trạng thái | Ý nghĩa | Hành động |

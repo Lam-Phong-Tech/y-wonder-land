@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-07-16 (Point wallet remediation dry-run ready for separate approval)
+
+### Added
+- Added a fail-closed remediation planner and double-snapshot runner for the approved Point migration decisions. The planner verifies the current anonymized report against the checksum-pinned approval, proves each synthetic source/game credit and each signed sub-micro residual, and emits no SQL or executable balance command.
+- Synthetic reversal and legacy residual operations receive deterministic proposed IDs, explicit preconditions and `NOT_AUTHORIZED` status. Account linking, balance migration and deployment remain deferred or unauthorized; raw identities exist only inside the temporary `0700` capture and are deleted.
+
+### Verified
+- Syntax, remediation unit tests, the full migration suite, Point authority, signed credit, reserve/capture/release and security smoke tests pass locally. Node `24.18.0`, Python and Bash validation also pass on the VPS candidate.
+- Production double capture generated root-only `point-wallet-remediation-dry-run-20260716T155640Z-4677eae4.{json,md}` with SHA-256 `fdd118a89f0ac70a60a96eb587d5f7a89b8dd731f02a9922d96410fda2b65357` / `975342dc9bec62f6166e7ef62d9fb657ff36d78a0f3028f902470320dd279416`. It proves one `3 Point` synthetic reversal plan from three sources and six residual values across three accounts; authorized residual normalization is projected to reduce `BLOCKED` from `3` to `0`.
+- The first temporary candidate invocation stopped before plan creation because the game service user could not traverse a root-only source upload; cleanup retained zero raw/upload directories and unchanged services. The rerun exposed only non-secret candidate source read-only while keeping captures root-only, then passed.
+- Final postflight retained game/web PIDs `186418/186434`, health `200/200`, web root `307 -> 200`, public callback `404`, zero critical log matches and zero temporary directories. No database mutation, Point reversal, residual normalization, account link, migration, deployment or restart ran.
+
 ## [Unreleased] - 2026-07-16 (Point wallet decisions approved, migration blocked)
 
 ### Added
