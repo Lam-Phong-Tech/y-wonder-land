@@ -17,6 +17,10 @@ assert(runnerSource.includes('runuser -u "${game_export_user}" --preserve-enviro
   "Runner does not drop only the PostgreSQL exporter to the service user.");
 assert(runnerSource.includes("env -u POINT_MIGRATION_REPORT_KEY"),
   "Runner leaks the report HMAC key into the service-user exporter.");
+assert(runnerSource.includes('PGUSER="${game_export_user}"'),
+  "Runner lets a preserved root identity override the PostgreSQL peer-auth user.");
+assert(runnerSource.includes("-u PGPASSWORD"),
+  "Runner forwards an unrelated PostgreSQL password into the peer-auth exporter.");
 
 function run(command, args, label) {
   const result = spawnSync(command, args, {

@@ -63,6 +63,10 @@ export_game_snapshot() {
   if [[ -n "${game_export_user}" ]]; then
     runuser -u "${game_export_user}" --preserve-environment -- \
       env -u POINT_MIGRATION_REPORT_KEY \
+      -u PGPASSWORD \
+      USER="${game_export_user}" \
+      LOGNAME="${game_export_user}" \
+      PGUSER="${game_export_user}" \
       node "${script_root}/exportGamePointMigrationSnapshot.js"
   else
     node "${script_root}/exportGamePointMigrationSnapshot.js"
