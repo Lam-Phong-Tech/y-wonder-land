@@ -6,6 +6,17 @@
 
 ---
 
+## [2026-07-17] — Duyệt successor policy ví Point nhưng tiếp tục khóa migration
+
+### Đã thêm
+- Thêm policy checksum-pinned `docs/QA/POINT_WALLET_MIGRATION_POST_REMEDIATION_POLICY_2026-07-17.json`, chỉ gồm ba lựa chọn còn hiệu lực sau remediation: opening seed và legacy web balance tiếp tục `DEFER_ACCOUNT_LINK`; zero-balance history dùng `ARCHIVE_HISTORY_WITH_NO_BALANCE_MIGRATION`.
+- Policy không cấp quyền ghi DB, deploy, migrate balance hoặc chạy lại synthetic reversal; mọi operational change vẫn phải xin duyệt riêng.
+
+### Bằng chứng
+- Full migration/remediation execution suite pass local. Policy SHA-256 là `89fcdc1b22d8ac9d20d5bf4761b5696c4d0503b0962eb7f7bd9f28af6d88aacc`.
+- Applicator production được ghim checksum tạo artifact root-only `point-wallet-migration-approved-post-remediation-20260716T173254Z-84042119.{json,md}`, SHA-256 `aa371bd52ef22ef473d390b2d14cf44d53f62f0b23b216f1ef74f02503c96ca8` / `9fa41f3f5d9fa70a6a0957f8d518ad936a3e4dc51efb3e64eb26cf9dd7f00891`: `17/17` decision approved, pending `0`, source blocked `0`, nhưng migration vẫn `BLOCKED_NO_BALANCE_MIGRATION_AUTHORIZED`.
+- SQLite SHA-256 `a4f0ffa570071c9799c3c3c915519b65bea434b0bfe886f1a59f2b572ac22467`, PID game/web `186418/186434`, health `200/200`, web root `307` và callback public `404` giữ nguyên. Không deploy/restart/DB mutation/link/migrate/reversal/normalization/tiền thật; source tạm đã xóa.
+
 ## [2026-07-17] — Reconciliation ví Point sau remediation đã khóa chống đảo trùng
 
 ### Đã thêm

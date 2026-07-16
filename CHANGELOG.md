@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-07-17 (Post-remediation Point decisions approved without migration authority)
+
+### Added
+- Added checksum-pinned successor policy `docs/QA/POINT_WALLET_MIGRATION_POST_REMEDIATION_POLICY_2026-07-17.json`. It contains only the three decisions still present after remediation: defer opening-balance links, defer legacy web-balance links, and archive zero-balance legacy history without migration.
+- The successor policy explicitly authorizes no database mutation, deployment, balance migration or synthetic reversal and still requires a separate operational approval.
+
+### Verified
+- The full migration and remediation execution suites pass locally. The policy SHA-256 is `89fcdc1b22d8ac9d20d5bf4761b5696c4d0503b0962eb7f7bd9f28af6d88aacc`.
+- The checksum-pinned production applicator created root-only `point-wallet-migration-approved-post-remediation-20260716T173254Z-84042119.{json,md}` with SHA-256 `aa371bd52ef22ef473d390b2d14cf44d53f62f0b23b216f1ef74f02503c96ca8` / `9fa41f3f5d9fa70a6a0957f8d518ad936a3e4dc51efb3e64eb26cf9dd7f00891`. All 17 decisions are approved, pending is zero and source blockers are zero, while migration remains `BLOCKED_NO_BALANCE_MIGRATION_AUTHORIZED`.
+- SQLite SHA-256 `a4f0ffa570071c9799c3c3c915519b65bea434b0bfe886f1a59f2b572ac22467`, game/web PIDs `186418/186434`, health `200/200`, web root `307` and public callback `404` remained unchanged. No deployment, restart, database mutation, account link, balance migration, reversal, normalization or real payment occurred; temporary policy sources were removed.
+
 ## [Unreleased] - 2026-07-17 (Post-remediation Point reconciliation hardened)
 
 ### Added

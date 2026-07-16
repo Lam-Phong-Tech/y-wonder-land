@@ -234,6 +234,41 @@ successor chỉ gồm `gameOpeningBalanceTreatment=DEFER_ACCOUNT_LINK`,
 `legacyWebHistoryTreatment=ARCHIVE_HISTORY_WITH_NO_BALANCE_MIGRATION`; policy đó
 vẫn không cấp quyền ghi, deploy, link hoặc migrate.
 
+## Successor policy hậu remediation 17/07/2026
+
+Chủ dự án đã duyệt ba lựa chọn còn hiệu lực; policy được lưu tại
+`docs/QA/POINT_WALLET_MIGRATION_POST_REMEDIATION_POLICY_2026-07-17.json`, SHA-256
+`89fcdc1b22d8ac9d20d5bf4761b5696c4d0503b0962eb7f7bd9f28af6d88aacc`. Policy
+không còn key synthetic/residual đã hoàn tất và đặt mọi cờ DB mutation, deploy,
+balance migration, synthetic reversal về `false`; operational change vẫn phải xin
+duyệt riêng.
+
+- Full migration suite và remediation execution suite pass local.
+- Applicator SHA-256
+  `84042119984beda631d4c3f9305ce5756998e60ac127778dbafac3d98aa00107` đọc đúng
+  worksheet SHA-256
+  `e223c85ddd26233f0478ae5f02a2b02b2318d5ee050f0c5343174d843a238e0f`.
+- Artifact JSON root-only:
+  `/root/ywonder-point-reports/point-wallet-migration-approved-post-remediation-20260716T173254Z-84042119.json`,
+  SHA-256 `aa371bd52ef22ef473d390b2d14cf44d53f62f0b23b216f1ef74f02503c96ca8`.
+- Artifact Markdown root-only:
+  `/root/ywonder-point-reports/point-wallet-migration-approved-post-remediation-20260716T173254Z-84042119.md`,
+  SHA-256 `9fa41f3f5d9fa70a6a0957f8d518ad936a3e4dc51efb3e64eb26cf9dd7f00891`.
+- Kết quả: 16 account review, `17/17` decision approved, pending `0`, source blocked
+  `0`; migration gate vẫn `BLOCKED_NO_BALANCE_MIGRATION_AUTHORIZED`.
+- `syntheticCreditReversal` và `legacySubMicroNormalization` đều `NOT_EXECUTED` với
+  `selectedPolicy=null`; account link `DEFERRED`, balance migration `NOT_AUTHORIZED`.
+- Hai artifact mode `0600`; source policy/applicator tạm trên VPS đã xóa.
+- SQLite SHA-256
+  `a4f0ffa570071c9799c3c3c915519b65bea434b0bfe886f1a59f2b572ac22467`, dung lượng
+  `76980224` byte, PID game/web `186418/186434`, health `200/200`, web root `307` và
+  callback public `404` giữ nguyên. Không deploy/restart/DB mutation/link/migrate,
+  reversal, normalization hoặc tiền thật.
+
+Gate quyết định đã đạt nhưng không phải gate vận hành. Bước kế tiếp là audit và code
+web debit orchestrator `Point -> USDT/YWH` trong một tranche riêng; mọi deploy, account
+link hoặc balance migration vẫn cần approval/checksum/rollback riêng.
+
 ## Đọc trạng thái
 
 | Trạng thái | Ý nghĩa | Hành động |
