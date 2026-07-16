@@ -17,6 +17,7 @@
 - Backup production `/root/ywonder-point-backups/point-remediation-20260716T163736Z-7aeec648` có manifest SHA-256 `7c5dc5272cc791e1632f1a4738ed3a2b73ef89d4ba6b3544848360fff8977954`. Fresh preflight khớp tuyệt đối 3 account/6 residual, 3 synthetic source và `3000000` micros đã duyệt.
 - Production residual normalization tạo đúng `NORMALIZE=6`, `ROLLBACK=0`; replay không ghi thêm, báo cáo mới đưa `BLOCKED 3 -> 0` và residual value `6 -> 0`.
 - Ba Point canary không tiền lịch sử đã được đảo đúng một lần sau các chi tiêu gameplay: balance tại thời điểm operation là `4370`, không còn là ảnh HUD cũ `5003`; số dư PostgreSQL hiện là `4367 Point`, có đúng một ledger `delta_pos=-3`, không có rollback ledger và replay idempotent.
+- Nghiệm thu client thủ công sau reversal đã đạt. EXE đăng nhập mới hiển thị `4367`; đăng nhập APK khi EXE còn mở đẩy EXE ra và APK vẫn là `4367`; đăng nhập lại EXE đẩy APK ra và EXE tiếp tục là `4367`. Cả hai client bị thay phiên đều hiện toast đúng; không mua đồ hoặc nhận thưởng trong vòng kiểm tra.
 - Validation summary cuối có SHA-256 `e31f737bc0177fcceb6fa3f6b1c980a6c5ad379ac4ee7f13352ef50b2e46c37d`. PID game/web vẫn `186418/186434`, health `200/307/404`, outbox pending và warning log đều `0`; không restart/deploy/link/migrate, không dùng tiền thật, không mở mode `open`. Canary vẫn đúng một account, remote ingress tắt; PostgreSQL clone và raw snapshot tạm đã xóa.
 
 ## [2026-07-16] — Remediation dry-run ví Point đã sẵn sàng xin duyệt riêng
