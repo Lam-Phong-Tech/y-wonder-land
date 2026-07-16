@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "mode": "POINT_WALLET_MIGRATION_POLICY_APPROVAL",
+  "approvedAt": "2026-07-16T15:07:04.247Z",
+  "approvedByRole": "PROJECT_OWNER",
+  "approvalReference": "OWNER_CHAT_APPROVAL_2026-07-16",
+  "decisions": {
+    "gameOpeningBalanceTreatment": "DEFER_ACCOUNT_LINK",
+    "syntheticCreditTreatment": "AUDITED_REVERSAL_BEFORE_OPEN",
+    "legacyWebBalanceTreatment": "DEFER_ACCOUNT_LINK",
+    "legacyWebHistoryTreatment": "ARCHIVE_HISTORY_WITH_NO_BALANCE_MIGRATION",
+    "legacySubMicroTreatment": "APPROVE_ROUND_HALF_EVEN_WITH_RESIDUAL_AUDIT"
+  },
+  "constraints": {
+    "authorizesDatabaseMutation": false,
+    "authorizesDeployment": false,
+    "authorizesBalanceMigration": false,
+    "authorizesSyntheticReversalExecution": false,
+    "requiresSeparateOperationalChangeApproval": true
+  }
+}

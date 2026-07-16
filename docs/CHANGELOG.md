@@ -6,16 +6,19 @@
 
 ---
 
-## [2026-07-16] — Worksheet quyết định migration ví Point, còn chờ duyệt
+## [2026-07-16] — Policy ví Point đã duyệt, migration vẫn khóa
 
 ### Đã thêm
 - Generator fail-closed biến report HMAC production thành worksheet JSON/Markdown root-only. Tool từ chối identity thô, schema/flag/checksum sai, HMAC ref trùng và không ghi đè output; mọi decision mặc định `PENDING`, không có SQL hay số tiền migrate đề xuất.
 - Phân loại riêng phần lẻ legacy dưới micro, opening balance game, synthetic credit không có nguồn web, balance web legacy đã/chưa map và lịch sử legacy balance 0.
+- Thêm policy JSON đã được chủ dự án duyệt và applicator fail-closed. Tool bắt buộc checksum đúng, đủ đúng decision key, giá trị thuộc whitelist, không có field/constraint thừa và không được cấp quyền DB/deploy/migration/reversal.
 
 ### Bằng chứng
-- Unit test và full suite dry-run pass. Hai worksheet mode `0600` chứa 16 account ẩn danh, 21 decision key còn chờ Product/Finance, tổng opening seed `30000 Point`, synthetic canary `3 Point` và web legacy `3422.666667 Point` trong phạm vi review.
+- Unit test và full suite dry-run pass. Hai worksheet mode `0600` chứa 16 account ẩn danh, 21 decision key, tổng opening seed `30000 Point`, synthetic canary `3 Point` và web legacy `3422.666667 Point` trong phạm vi review.
 - Generator SHA-256 `923017f8f6574b8d036ca7045a70f2982897aa22d8e8e1d1d00df0d2a812906e`; JSON SHA-256 `d3cf5dbb9d4eabcae3e4c9e9f97e7c0146440d3eb13f9495626bbefb115cf455`; Markdown SHA-256 `8a3f52381c3b4f2008f2e3aceeeead10178ed009c5d82e083738e990928c8cd9`.
-- Không gọi database/service, không deploy/restart/đổi balance và script tạm đã xóa. Gate migration vẫn khóa cho tới khi duyệt từng decision, xử lý nguồn và chạy lại report đạt `BLOCKED=0`.
+- Policy chọn defer account link cho seed/balance legacy, reversal có audit cho synthetic `3 Point`, archive không migrate lịch sử balance 0 và `ROUND_HALF_EVEN` kèm residual audit. Applicator/policy SHA-256 cuối là `84042119984beda631d4c3f9305ce5756998e60ac127778dbafac3d98aa00107` / `ab262f7f532df2bc008ce9e0ca0769a7a8f78cb0b1ad747309b4e09d0af19e63`.
+- Artifact approved JSON/Markdown root-only cuối có SHA-256 `76c3368cc5937db5c93d8adbebb23d5abe2f2a8c279dd9f8d1daada5ddc7ca37` / `dd7a6190cdf7e5d8fe4c55a3b59275adb08921173e70eb1330ced3c863355282`: 21 approved, 0 pending, migration gate vẫn `BLOCKED_NO_BALANCE_MIGRATION_AUTHORIZED`. Artifact trung gian trước hardening chỉ giữ làm audit và đã bị supersede.
+- Hậu kiểm giữ PID game/web `186418/186434`, health `200/200`, web root `307 -> 200`, callback public `404`, temp `0`. Không gọi DB, không deploy/restart/đổi balance, không link/migrate, chưa reversal hoặc normalize residual.
 
 ## [2026-07-16] — Production migration dry-run ví Point đã chạy, chưa được migrate
 

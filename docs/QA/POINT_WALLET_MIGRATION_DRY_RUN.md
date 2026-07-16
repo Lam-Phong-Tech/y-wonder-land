@@ -1,7 +1,8 @@
 # Point Wallet Migration Dry-Run
 
 Trạng thái: candidate và lượt production read-only ngày 16/07/2026 đã pass;
-**report còn blocker nên chưa được migrate**.
+21/21 decision item đã được duyệt bằng policy checksum-pinned, nhưng **report còn
+`BLOCKED=3` và chưa được migrate**.
 
 ## Mục tiêu
 
@@ -119,7 +120,47 @@ bằng chế độ exclusive `0600`. Unit test được ghim trong suite dry-run
   cần cộng vào game. Một account đã map đồng thời có `12 Point` commission web và opening
   seed game, nên mâu thuẫn nghiệp vụ một ví phải được giải quyết trước migration.
 - Lượt sinh worksheet không gọi database, không restart/deploy service và đã xóa script
-  tạm. Worksheet chỉ là phiếu xin quyết định; mọi lựa chọn vẫn chưa được phê duyệt.
+  tạm. Tại thời điểm sinh ban đầu, worksheet chỉ là phiếu xin quyết định và 21 lựa chọn
+  đều `PENDING`; policy ở mục kế tiếp là bằng chứng phê duyệt mới hơn.
+
+## Policy phê duyệt production 16/07/2026
+
+Chủ dự án đã duyệt policy ở
+`docs/QA/POINT_WALLET_MIGRATION_APPROVED_POLICY_2026-07-16.json`:
+
+- opening seed `5000 Point`: `DEFER_ACCOUNT_LINK`, chưa preserve hoặc đảo;
+- balance web legacy: `DEFER_ACCOUNT_LINK`, giữ nguyên và chưa migrate;
+- synthetic canary tổng `3 Point`: `AUDITED_REVERSAL_BEFORE_OPEN`;
+- lịch sử legacy có balance 0: `ARCHIVE_HISTORY_WITH_NO_BALANCE_MIGRATION`;
+- residual dưới micro: `APPROVE_ROUND_HALF_EVEN_WITH_RESIDUAL_AUDIT`.
+
+`server/deploy/pointWalletMigrationDecisionApproval.js` chỉ áp policy lên đúng worksheet
+và checksum đã duyệt. Tool từ chối field identity thô, decision thiếu/thừa, giá trị ngoài
+`allowedValues`, cờ cấp quyền ghi, input/output trùng và output đã tồn tại. File mới luôn
+dùng `wx`/`0600`; tool không có kết nối database hoặc HTTP và không sinh SQL.
+
+- Applicator SHA-256:
+  `84042119984beda631d4c3f9305ce5756998e60ac127778dbafac3d98aa00107`.
+- Policy SHA-256:
+  `ab262f7f532df2bc008ce9e0ca0769a7a8f78cb0b1ad747309b4e09d0af19e63`.
+- Approved JSON root-only:
+  `/root/ywonder-point-reports/point-wallet-migration-approved-decisions-20260716T152324Z-84042119.json`,
+  SHA-256 `76c3368cc5937db5c93d8adbebb23d5abe2f2a8c279dd9f8d1daada5ddc7ca37`.
+- Approved Markdown root-only:
+  `/root/ywonder-point-reports/point-wallet-migration-approved-decisions-20260716T152324Z-84042119.md`,
+  SHA-256 `dd7a6190cdf7e5d8fe4c55a3b59275adb08921173e70eb1330ced3c863355282`.
+- Kết quả: 16 account, 21 decision `APPROVED`, 0 `PENDING`; decision gate
+  `APPROVED`, migration gate `BLOCKED_NO_BALANCE_MIGRATION_AUTHORIZED`.
+- Hậu kiểm: PID game/web `186418/186434`, health `200/200`, web root `307 -> 200`,
+  callback public `404`, temp upload `0`.
+- Artifact trung gian `point-wallet-migration-approved-decisions-20260716T151542Z-dabbee60.*`
+  được giữ root-only để audit nhưng đã bị artifact `84042119` phía trên supersede; không dùng
+  artifact trung gian làm nguồn release.
+
+Phê duyệt policy không phải phê duyệt vận hành. Lượt này không gọi DB, không deploy hoặc
+restart, không link/migrate account, không đảo synthetic `3 Point` và không normalize
+residual. Hai việc sau phải là change riêng có audit, backup/rollback và duyệt vận hành;
+sau đó chạy lại dry-run để giải quyết `BLOCKED=3` trước mọi migration.
 
 ## Đọc trạng thái
 

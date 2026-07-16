@@ -1,15 +1,18 @@
 # CHANGELOG
 
-## [Unreleased] - 2026-07-16 (Point wallet decision worksheet, approvals pending)
+## [Unreleased] - 2026-07-16 (Point wallet decisions approved, migration blocked)
 
 ### Added
 - Added a fail-closed decision worksheet generator for the anonymized production migration report. It rejects raw identity fields, unsafe report flags, wrong schema/checksum, duplicate HMAC refs and output overwrite; generated JSON/Markdown remain non-mutating and mode `0600`.
-- Added decision classes for sub-micro legacy precision, game opening balances, synthetic credits without a web source, mapped/unmapped legacy web balances and zero-balance legacy history. Every decision remains explicitly `PENDING`; the tool never selects or emits a migration amount.
+- Added decision classes for sub-micro legacy precision, game opening balances, synthetic credits without a web source, mapped/unmapped legacy web balances and zero-balance legacy history. The generator leaves every item `PENDING` and never emits a migration amount.
+- Added a checksum-pinned policy approval file and a separate fail-closed applicator. It rejects missing, extra or disallowed decisions, raw identity fields, unsafe authorization flags, input overwrite and output overwrite. Approval records never authorize a database mutation, deployment, balance migration or synthetic reversal execution.
 
 ### Verified
-- Unit and full Point migration dry-run suites pass. The production report checksum generated root-only JSON/Markdown worksheets containing 16 anonymized accounts and 21 pending decisions: `30000 Point` opening balances, `3 Point` synthetic credits and `3422.666667 Point` legacy web balances under review.
+- Unit and full Point migration dry-run suites pass. The production report checksum generated root-only JSON/Markdown worksheets containing 16 anonymized accounts and 21 decisions: `30000 Point` opening balances, `3 Point` synthetic credits and `3422.666667 Point` legacy web balances under review.
 - Generator SHA-256 is `923017f8f6574b8d036ca7045a70f2982897aa22d8e8e1d1d00df0d2a812906e`; worksheet JSON/Markdown SHA-256 values are `d3cf5dbb9d4eabcae3e4c9e9f97e7c0146440d3eb13f9495626bbefb115cf455` and `8a3f52381c3b4f2008f2e3aceeeead10178ed009c5d82e083738e990928c8cd9`.
-- No database or service command ran, no production balance/configuration changed and the temporary uploaded generator was removed. Migration remains blocked pending Product/Finance approvals and a fresh dry-run with `BLOCKED=0`.
+- Owner policy selected `DEFER_ACCOUNT_LINK` for opening/legacy balances, audited reversal for the synthetic `3 Point`, archive-without-migration for zero-balance history, and `ROUND_HALF_EVEN` with residual audit. The final applicator/policy SHA-256 values are `84042119984beda631d4c3f9305ce5756998e60ac127778dbafac3d98aa00107` and `ab262f7f532df2bc008ce9e0ca0769a7a8f78cb0b1ad747309b4e09d0af19e63`.
+- Final root-only approved JSON/Markdown artifacts have SHA-256 `76c3368cc5937db5c93d8adbebb23d5abe2f2a8c279dd9f8d1daada5ddc7ca37` and `dd7a6190cdf7e5d8fe4c55a3b59275adb08921173e70eb1330ced3c863355282`. They contain 21 approved decisions and zero pending decisions while retaining `BLOCKED_NO_BALANCE_MIGRATION_AUTHORIZED`; the earlier pre-hardening artifact remains audit-only and is superseded.
+- Postflight retained game/web PIDs `186418/186434`, health `200/200`, web root `307 -> 200`, public callback `404` and zero temporary uploads. No database mutation, deployment, restart, balance migration, account link, residual normalization or synthetic reversal ran.
 
 ## [Unreleased] - 2026-07-16 (Point wallet migration production dry-run, migration blocked)
 

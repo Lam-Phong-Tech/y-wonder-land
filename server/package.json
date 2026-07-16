@@ -25,6 +25,7 @@
     "test:web-point-authority": "node deploy/webPointAuthoritySafetyTest.js",
     "test:web-point-migration-dry-run": "node deploy/pointWalletMigrationTestSuite.js",
     "test:web-point-migration-decisions": "node deploy/pointWalletMigrationDecisionWorksheetTest.js",
+    "test:web-point-migration-approval": "node deploy/pointWalletMigrationDecisionApprovalTest.js",
     "test:web-point-e2e-harness": "node deploy/webPointE2EHarnessSafetyTest.js",
     "test:web-point-canary-deploy": "node deploy/webPointCanaryDeploySafetyTest.js"
   },

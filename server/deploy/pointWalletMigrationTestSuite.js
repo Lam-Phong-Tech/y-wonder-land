@@ -56,6 +56,11 @@ run(
   [path.join(deployRoot, "pointWalletMigrationDecisionWorksheetTest.js")],
   "decision worksheet test"
 );
+run(
+  process.execPath,
+  [path.join(deployRoot, "pointWalletMigrationDecisionApprovalTest.js")],
+  "decision approval test"
+);
 run(process.execPath, [path.join(deployRoot, "exportGamePointMigrationSnapshotTest.js")], "game export test");
 const python = findPython();
 run(
@@ -64,4 +69,4 @@ run(
   "web export test"
 );
 
-console.log("[point-wallet-migration-suite] PASS: report, decision worksheet, and both read-only exporters are pinned.");
+console.log("[point-wallet-migration-suite] PASS: report, decision approval, and both read-only exporters are pinned.");
