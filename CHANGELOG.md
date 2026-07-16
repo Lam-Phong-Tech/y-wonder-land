@@ -1,5 +1,159 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-07-16 (Shared Point wallet authority v3, not deployed)
+
+### Added
+- Chose game PostgreSQL `player_economy.pos` as the sole spendable Point ledger for linked accounts in `docs/ADR_POINT_WALLET_AUTHORITY.md`. Linked web Point stays frozen at zero and reads a signed game balance; unlinked legacy wallets require per-account reconciliation and are never bulk-added to game balances.
+- Added signed, loopback-only `point-reserve`, `point-capture`, and `point-release` handlers behind the separate default-off `WEB_POINT_WALLET_DEBIT_ENABLED` flag. Reserve debits once; capture is terminal without a second debit; release refunds once; retries and conflicting payload/state transitions are idempotent or fail closed.
+- Added PostgreSQL migration `006_point_wallet_reservations.sql`, JSON/PostgreSQL reservation state machines, realtime absolute-balance notification, integration coverage and restart/race smoke tests.
+- Upgraded the isolated web authority overlay to use immutable Admin-controlled `USDT_POINT` rate versions and exact integer-micro quotes. Conversion journals pin `rateVersionId`, `rateMicros` and `roundingRemainder`; a retry loads the committed journal before the current rate.
+
+### Verified
+- Backend reservation, credit, security, authority, isolated phase-one and farm animal placement suites pass. PostgreSQL smoke passed in a temporary auto-dropped VPS schema.
+- The 13-file web overlay has SHA-256 `99a901958f4fb65379c32cf9e128cda9244ffa162f71e85333df635672a6cb2b`. Isolated VPS validation passed Prisma/migration/database E2E, Next.js `15.5.20` build `S7-EGQjdX4Wv8vxyDOlU8` and runtime fault E2E, including an Admin rate change after commit while retry retained the original quote.
+- Validation reported `LIVE_WEB_CHANGED=no`, `PRODUCTION_DATABASE_MUTATED=no`, `PRODUCTION_SERVICES_RESTARTED=no` and `REAL_PAYMENT_USED=no`. Web debit orchestration, legacy migration, YWH conversion/commission and production rollout remain pending.
+
+## [Unreleased] - 2026-07-16 (BA Point-wallet contract, documentation only)
+
+### Documented
+- Recorded the BA/customer confirmation that web Point and game Point are one currency and one displayed balance. Supported business directions are `USDT -> Point`, `YWH <-> Point`, and `Point -> USDT`; exchange rates are Admin-controlled rather than fixed.
+- Recorded that game consumption must generate HUB-style referral commission in YWH, including animals, long/short crops, bait, spin attempts, mining attempts, and all other game consumption. Commission formula, levels, eligibility, rounding, refunds, and reversal remain unspecified.
+- Flagged two blocking contradictions instead of inventing behavior: `YWH -> Point` and Point transfers were also said not to affect game Point, which conflicts with a shared wallet. The authoritative ledger, legacy web balance migration, dynamic-rate versioning, withdrawal state machine, and YWH payout contract remain open.
+- Put the fixed `0.06 USDT -> 1 Point` no-money playbook on hold. The current authority candidate remains undeployed and cannot be treated as the final shared-wallet design.
+- Corrected the canary identity record: `Nhien345` is a real account, not a dedicated QA account. Runtime control testing showed its scoped positive-grant `403`/shop lock while `senh2026` successfully collected water and purchased without `403/409/503`; no production configuration was changed.
+
+## [Unreleased] - 2026-07-16 (Farm client acceptance fixes, not built)
+
+### Fixed
+- Confirmed the active `FarmScene` build catalog uses `Fence.prefab` with `FenceAutoConnect`; the three legacy `AnimalPenSpawner` prefabs have no scene/catalog references. The observed `7 -> 7` behavior matches the old enclosure client, which spawned and saved an animal without consuming inventory; the atomic client files were still uncommitted and therefore were not proven to exist in the tested EXE/APK.
+- The authoritative placement result now carries the remaining item quantity from the server inventory snapshot. Unity applies that snapshot and reports the remaining count in the success toast. Legacy pen selection now fails closed instead of performing a separate local inventory mutation and spawn.
+- Multi-slot crops reject slave tiles before opening inventory, consuming seed, or starting animation. Slot selection now uses a cardinal flood fill on the `BuildSurfaceCell` grid, so a passion-fruit cluster cannot claim disconnected plowed tiles elsewhere in the scene. Invalid, changed, insufficient, or busy states display a toast and preserve/refund the seed.
+- Building-cost source audit found no Rich-account bypass: the active scene keeps farm plots free, stone paths at four stone, and pens at four wood. Placement now requires `RemoveItem` to succeed, tags the mutation as `build_place`, and logs exact before/after quantities for runtime/database reconciliation. Material debit and farm placement are still not one server transaction.
+- Added repeatable `BuildWindows` and `BuildAndroid` batch entry points to the existing Unity build script. Output paths are configurable through `UNITY_WINDOWS_PATH` and `UNITY_ANDROID_PATH`.
+- Fixed the first P0 runtime attempt being blocked before animal placement. `Player.log` proved the backend was healthy and no shop request was sent: a scoped-canary `403` rejected a positive gameplay item delta, the queue dropped that permanent failure but retained `reconciliationRequired`, and every later shop action returned local `PENDING_STATE_SYNC_FAILED (503)`. Shop transactions now invoke the existing guarded authoritative bootstrap when the queue is empty but reconciliation is required, then continue against the server snapshot. Real pending mutations still fail closed, and no positive client-delta endpoint was reopened. Sync/reconciliation failures now have specific Vietnamese toasts instead of the generic connection error.
+
+### Verified
+- Unity Roslyn compilation passes for runtime and Editor assemblies with both Standalone Windows and Android response files from Unity `6000.3.15f1`; the post-shop-fix `Assembly-CSharp` compile also passes into a separate temporary output.
+- `test:farm-animal-placement`, `test:security`, `test:phase1:isolated`, and `test:web-point-authority` pass across this tranche. EXE/APK runtime acceptance is still required; no production service was changed or deployed.
+
+## [Unreleased] - 2026-07-16 (Web Point authority candidate, not deployed)
+
+### Hardened
+- Added a unique web `User.id -> gamePlayerId` authority pin. Web dispatch now signs `expected_player_id` in the domain-separated `ywonder-point-credit-v2` payload; the game rejects a missing/mismatched mapping with `409 GAME_POINT_IDENTITY_MISMATCH` before changing Point or writing a ledger. Credit v1 remains accepted temporarily for deployment compatibility.
+- Made linked web accounts read Point from the signed game balance endpoint and fail closed if the returned `player_id` differs from the pinned identity. Linked legacy web Point remains frozen at zero, while existing unlinked accounts retain their current balances.
+- Extended isolated tests with duplicate game-player link rejection, PostgreSQL/JSON wrong-player rejection, malformed and wrong-player HTTP 200 responses, post-commit response loss, permanent conflict quarantine and concurrent success/failure settlement.
+
+### Verified
+- Backend Point integration and authority safety tests pass. The 12-file authority overlay has SHA-256 `8f326cb79e0c8123712aec90217602f2428612cfa6e54d30c42aad3e804cf9fb`.
+- VPS isolated validation passed migration/database E2E, Prisma validation, Next.js `15.5.20` build `m31Ry3w4SeOT1N3oxcdJw` and runtime fault E2E. It reported `LIVE_WEB_CHANGED=no`, `PRODUCTION_DATABASE_MUTATED=no`, `PRODUCTION_SERVICES_RESTARTED=no` and `REAL_PAYMENT_USED=no`.
+- Extended the production-artifact harness to run `postgresSmokeTest` inside its dedicated temporary PostgreSQL database. The VPS run passed the pinned-player store branch plus canary rejection, first dispatch, duplicate retry, isolated web restart and post-commit response loss; the temporary database was removed and production services/player data remained unchanged.
+- Added `docs/QA/WEB_POINT_NO_MONEY_CANARY.md`. The remaining no-money production gate must fund exactly `0.06 USDT` synthetically with an audit journal, invoke the real web conversion action, and reconcile one source transaction through web journals, game ledger and EXE/APK HUD. The candidate is not deployed.
+
+## [Unreleased] - 2026-07-16 (Production no-money Point canary)
+
+### Activated
+- Added `server/deploy/activate-web-point-canary.sh` with exact one-user allowlisting, atomic env replacement, root-only backups, automatic rollback, service health checks and public-ingress guards. Production now runs `WEB_TOPUP_MODE=canary` for one dedicated QA web identity; the matching client-originated positive grant block is scoped to that same identity while legacy grants remain available to other players.
+- Hardened activation with a shared `flock` configuration lock and no-change validate-only mode. Added `server/deploy/deactivate-web-point-canary.sh` to atomically return both services to dormant canary configuration, clear both allowlists and the scoped grant block, keep remote ingress disabled, and automatically restore the active env files if any restart, health or ingress assertion fails.
+- The QA web account mapped exactly once through Browser SSO to one `game_players` row. Before the canary, all web wallet balances and the web outbox were zero while the new game player had the expected `5000 Point` bootstrap balance and no top-up ledger.
+
+### Verified
+- Queued one explicitly synthetic, no-money `+1.000000 Point` outbox row after an online SQLite backup. The authenticated production cron sent it over the signed loopback callback; the outbox became `SENT`, PostgreSQL became `5001 Point`, and exactly one `web_topup_credit` ledger row was written while every web wallet balance stayed zero.
+- Forced the same outbox through a second retry. Attempts increased from one to two, but Point stayed `5001` and the immutable source transaction still had exactly one ledger row.
+- Windows EXE screenshots confirm `5001` while online immediately after the callback, after logout/relogin, and after fully exiting and reopening the app. Final DB reconciliation still reports one web mapping, one player, one ledger row and no unsent outbox.
+- Android APK restored `5001`, then confirmed `5002` after relogin and received a separate realtime `5002 -> 5003` update without leaving the game. Retrying that source kept `5003` and one ledger row; APK relogin/full process restart and a following Windows EXE login all restored the same `5003` balance.
+- Single-session replacement passed both directions on the same QA account: logging in on EXE pushed the already-open APK out, logging back in on APK pushed the already-open EXE out, and each displaced client showed the session-replaced toast. This confirms the equal cross-device balance was not produced by two stale sessions remaining active.
+- A controlled game-backend-only restart changed the game PID while preserving the web PID, both environment hashes, `5003 Point`, zero remainder, all three ledger rows and all three sent outbox rows. Direct/public game health and web health recovered to `200`; ingress guards remained `401/404/401` and the game service emitted no warning-level log.
+- A transport-failure drill reused the already-credited APK realtime synthetic transaction instead of creating Point. With the game backend stopped, authenticated cron kept the row as `RETRY` and incremented attempts `2 -> 3`; after service recovery, the same row became `SENT` at attempt `4`. Point remained `5003`, the ledger remained three rows with exactly one row for that source transaction, and aggregate outbox attempts changed only from `5 -> 7`.
+- Rollback preflight passed on the VPS without changing production: the original dormant backup is root-only, uses safe missing-key defaults (`enabled=false`, `mode=canary`), has empty allowlists/block, and matches the live env outside the expected canary keys. Linux `bash -n` plus activation/deactivation validate-only both passed; game/web PIDs, env hashes, backup count and public `404` were unchanged. The separately approved live drill is recorded below.
+- User runtime confirmation after the controlled backend restart and transport-failure outage passed: the client logged back in and restored the authoritative `5003 Point` balance.
+- Extended the no-money E2E with an isolated web-process restart and a loopback fault proxy. The proxy lets the temporary game server commit a second transaction, drops the successful response until the temporary web dispatcher times out into `RETRY`, then passes the same immutable transaction through again. Recovery reaches `SENT` at attempt two while the temporary game remains at exactly two ledger rows, proving no lost or double credit after a post-commit response loss.
+- Hardened the runner to follow `greenxland.service`'s actual `WorkingDirectory` instead of the legacy rollback tree. It accepts only the canonical web root or a safe versioned release root, requires the active `.env` to resolve to the canonical production env, and fingerprints the active source/build, service identity, PID and environment before and after the run.
+- The corrected VPS run built the active Next.js `15.5.20` release and passed canary rejection, first dispatch, duplicate retry, isolated web restart, post-commit response loss and idempotent recovery. The dedicated PostgreSQL database, copied SQLite runtime, processes and uploads were removed. Production game/web PIDs stayed `181238/177260`; build `O-PUYMkTlVdeNCYQWp2gJ`, health `200/200`, exact-one canary and callback guards were unchanged.
+- Read-only postflight still reports QA Point `5003`, micro remainder `0`, three `web_topup_credit` ledger rows, three `SENT` web outbox rows and aggregate attempts `7`. No production wallet, outbox, ledger, service or build changed during the isolated fault run.
+- With explicit approval, production completed a live exact-one-canary -> dormant -> exact-one-canary cycle. Deactivation created `/var/backups/ywonder-point-link/deactivate-20260715T204412Z`, returned the loopback callback to `404`, restarted both services and preserved Point/outbox/ledger. Reactivation created `/var/backups/ywonder-point-link/canary-20260715T204455Z`, restored the original env files byte-for-byte, restarted both services and returned the protected loopback callback to `401` while public ingress stayed `404`.
+- Independent postflight reports final game/web PIDs `186418/186434`, the same active release and build, health `200/200`, exact one-user allowlists, matching scoped client-grant block, remote ingress disabled, matching shared-secret hashes and no critical service-log matches. QA state remains `5003 Point`, remainder `0`, three ledgers and web outbox `3 SENT / 7 attempts / 0 pending`; no temporary PostgreSQL database or E2E run directory remains.
+- Both switch backups use a root-owned `0700` parent. Their env copies preserve the production file owners/modes but are unreadable by the non-root service accounts through that parent. One unused, secret-free E2E source archive left from an older run was verified by manifest and removed from `/tmp`; no service or production data was touched.
+- Client acceptance after the live double restart passed: the user logged out and back in, and the HUD screenshot showed `5,003`. The matching read-only postflight found one active QA session, `5003 Point`, zero remainder, three ledgers and unchanged web outbox `3 SENT / 7 attempts / 0 pending`.
+- Postflight reports web/game healthy with no service warnings, unauthenticated loopback/cron requests rejected with `401`, and the public Point callback still hidden with `404`. No real payment, deposit or web-wallet mutation was used.
+
+### Remaining gate
+- Canary access remains limited to the selected QA identity; this is not general or real-money enablement. The live dormant -> canary drill, including post-restart client relogin, is complete. The remaining business gate is a separately approved tiny real web-wallet conversion with end-to-end transaction-ID reconciliation; it has not started.
+
+## [Unreleased] - 2026-07-16 (Patched production web runtime)
+
+### Deployed
+- Deployed versioned web release `/var/www/ywonder-releases/next15-49ee6f3-hardened` through systemd drop-in `next15-release.conf`. Active build `O-PUYMkTlVdeNCYQWp2gJ` runs Next.js `15.5.20` and React/ReactDOM `19.2.7`; the original `/var/www/ywonder` Next.js `14.2.18` tree remains clean and intact as the immediate rollback target.
+- Created verified root-only backup `/var/backups/ywonder-web/next15-pre-20260716T002949+0700` containing SQLite, env, unit, source, build/audit/smoke evidence and rollback script. Backup source commit `b2510d4ad38eef89881931609ede60010ac50a83` has parent `49ee6f3b9f9c1547bb8dbfcfc0dbec6d6502ca24`, exactly seven changed files, and a verified Git bundle/patch matching the active release byte-for-byte.
+
+### Verified
+- Isolated build and runtime smoke pass home/login/session `200`, unauthorized Point cron `401`, incomplete Browser SSO callback `400` and unauthenticated wallet `307`; `npm audit --omit=dev` reports `0 vulnerabilities`.
+- Production credential regression passed login `302`, session `200` and authenticated wallet `200` using one synthetic MEMBER with login alerts disabled. The user, wallet, session/account, notification/audit and outbox markers were removed; SQLite integrity/foreign keys remain clean.
+- Rollback script syntax, drop-in checksum and the untouched Next.js `14.2.18` build pass an isolated loopback rollback smoke. A deliberate double production restart was not performed after the successful upgrade; the old release remains ready for the exact rollback script.
+- Final postflight reports web/login/game `200`, cron `401`, public top-up `404`, zero web outbox rows, zero PostgreSQL `web_topup_credit` ledger rows, no synthetic markers, no candidate processes/listeners and no service warnings/errors.
+
+### Point canary gate
+- Web/game top-up remains disabled, both allowlists and the scoped grant block remain empty, and `CLIENT_ASSET_GRANTS_ENABLED` remains unset/default-true. No real payment or Point credit was used. The next gate is a dedicated QA web identity with an exact `User.id -> playerId` mapping.
+
+## [Unreleased] - 2026-07-15 (Money-grade Point canary gate)
+
+### Security
+- Locked `PUT /player/inventory` with `405 INVENTORY_SERVER_AUTHORITATIVE`. Added strict client mutation mode: positive Point and inventory deltas return `403`, while legitimate debit-only mutations remain available.
+- Added a production startup interlock: `WEB_TOPUP_ENABLED=true` is rejected unless `CLIENT_ASSET_GRANTS_ENABLED=false`.
+- Added `WEB_TOPUP_MODE=canary` and a stable web-user allowlist. Non-canary credits return retryable `425`; the web cron filters the same allowlist so unrelated pending rows are neither failed nor allowed to starve the canary account.
+- Added canary-scoped client grant isolation. `CLIENT_ASSET_GRANTS_BLOCKED_WEB_USER_IDS` may keep legacy rewards available to non-canary players only when it exactly matches the top-up allowlist; the mutation routes check both the signed token and the authoritative player mapping. `open` mode still requires global strict mode and an empty scoped block list.
+
+### Verified
+- `node --check`, `test:security`, `test:web-point-credit`, `test:phase1:isolated` and `test:farm-animal-placement` pass. The web outbox source was traced to the same SQLite transaction as the successful SWAP record, and both SSO and Point credit use the same web `User.id -> game_players.web_user_id` mapping.
+- Hardened the no-money production-artifact E2E before its next VPS run. It now requires game/web stages below `/tmp`, uses a dedicated temporary PostgreSQL database instead of a schema in `ywonder_game`, runs dependency/build work behind RAM/disk/load gates with `nice`/`ionice`/timeouts, and has marked-process plus fallback cleanup. The final no-mutation claim is emitted only after the temporary database is removed, synthetic IDs are absent from both live databases, service PID/health remains stable, production files/env hashes match, and the dormant route still returns `404`. `test:web-point-e2e-harness` and Bash syntax pass locally.
+- On 2026-07-15 the hardened runner passed on the production VPS using checksum-pinned candidates below `/tmp`, a copied web SQLite database and a dedicated `yw_point_e2e_*` PostgreSQL database. Canary rejection, first dispatch, duplicate retry and decimal remainder all passed; the temporary database/processes/stages were removed, production service PID/active time and env hashes remained unchanged, health stayed `200`, and the dormant callback stayed `404`.
+- Canary grant isolation passes startup-gate coverage plus integration with a blocked web user, an unaffected control user, debit-only mutations and a JWT/store mapping mismatch. Point-credit, isolated Phase 1, animal-placement and E2E-harness regressions also pass. The same security suite passed from the deployed Linux artifact.
+
+### Production deployment (still dormant)
+- Deployed backend release `f573721533c0a65a3f2fc49fa6a2673b224f8bea` after a fresh PostgreSQL/env/unit backup at `/var/backups/ywonder-point-hardening/pre-f5737215-20260715T153753Z`. Migrations `001`-`005` were already applied; PostgreSQL smoke and game/web health passed.
+- Deployed the scoped-grant follow-up as active backend release `32adf45fd4edb4b13b4ac3ed6c1bb69c7afbc2dc` after validating backup `/var/backups/ywonder-point-hardening/pre-32adf45f-20260715T161547Z`. PostgreSQL smoke passed and migrations `001`-`005` again skipped as already applied.
+- Deployed the two-file web canary guard from commit `82e20e3ed31dc3d3aea631c7c57cbdc3e9ba8e94` after an isolated production build. Active web build `YVgCFF1Bwu_XJc4sfVpo3` has rollback backup `/var/backups/ywonder-web/point-canary-hardening-20260715T154611Z`; only the web service restarted, while the game PID and both env files stayed unchanged.
+- Independent postflight passed: game/web health `200`, unauthenticated cron `401`, top-up callback `404`, canary guard present in the live build, no temporary E2E database/schema/stage/process, zero web Point outbox rows, and no service warnings or restarts. No real payment was used.
+- Production intentionally remains `WEB_TOPUP_ENABLED=false`, both canary allowlists are empty, and `CLIENT_ASSET_GRANTS_ENABLED` is unset (legacy positive gameplay grants remain enabled). The startup interlock therefore still prevents enabling top-up. A one-account canary must not start until the legitimate positive-reward path is isolated and the exact QA web user/player mapping is selected.
+- Postflight for `32adf45f...` passed local/public health, unchanged web PID and env hashes, callback `404`, cron `401`, live scoped guard, synthetic startup-gate checks, zero outbox/ledger rows, zero temporary DB/schema leftovers and zero service warnings. The scoped isolation mechanism is now available, but its list remains empty until the QA identity is selected; no real payment was used.
+- Unity source audit finds one Point HUD display and no active UPoint runtime binding; the only remaining runtime-code reference is deletion of the legacy PlayerPrefs key. `Assembly-CSharp` compiles cleanly into an isolated temporary output with Unity `6000.3.15f1`. EXE/APK visual runtime acceptance is still pending because the project is currently open in Unity and no competing batch build was started.
+- A read-only production identity audit found five active web-browser mappings, all with existing player data and none explicitly marked QA. No full web ID or account secret was written to the repo. A dedicated QA web account is preferred; an existing account requires explicit owner selection before any allowlist/env change.
+- Prepared an isolated web hardening candidate from clean web HEAD `49ee6f3b9f9c`: Next.js `15.5.20`, React/ReactDOM `19.2.7`, patched PostCSS/form-data overrides and a Nodemailer `9.0.3` alias compatible with the existing Auth.js beta peer contract. The candidate changes exactly seven source/lock/config files.
+- `npm audit --omit=dev` reports `0 vulnerabilities`; the production build, unauthenticated route guards, credential login/session, authenticated wallet page, referral route and mail transport API smoke all pass against a copied SQLite database. Synthetic users/processes were cleaned up, and the live web PID/active timestamp remained unchanged.
+- Stored candidate `/var/backups/ywonder-web/candidates/next15-hardened-49ee6f3b9f9c-20260715T165605Z.tar.gz` with SHA-256 `a31e4192463b9ef75718c851e9e31b3e6ce85543145f2072d2b65d61db122165`; it was subsequently deployed and verified in the 2026-07-16 release above while top-up remained disabled.
+
+## [Unreleased] - 2026-07-15 (Atomic farm animal placement)
+
+### Fixed
+- Replaced client-only enclosure spawning with `POST /player/farm/animals/place`. JSON and PostgreSQL stores now validate the authoritative pen cells and species slot rule, consume exactly one animal inventory item, append exactly one server-created animal instance, increment both revisions and persist the idempotency result atomically.
+- Unity flushes the latest pen snapshot before placement, applies the returned inventory/farm snapshots, restores the server animal instance ID and refuses offline/local fallback. Opening either animal picker no longer grants starter animals that could hide inventory defects.
+- Placed fence colliders now prefer the authoritative `BuildSurfaceCell` enclosure flow over the legacy `AnimalPenSpawner` fallback.
+
+### Verified
+- `test:farm-animal-placement` covers success, duplicate retry, changed-payload conflict, stale farm revision, insufficient inventory, occupied/non-pen cells and multi-slot species. Node syntax, security, isolated Phase 1 and web Point credit regressions pass.
+- Unity recompiled `Assembly-CSharp.dll` after the client changes with no C# error in the latest Editor compile.
+- Deployed versioned production release `9c5bd9d1066637b6f176fcd09781358d22a73de4` after PostgreSQL backup and temporary-schema smoke. Local regressions plus public Phase 1 HTTP/WSS acceptance passed; failed precursor attempts rolled back without replacing the healthy release.
+- Independent external checks report PostgreSQL health, unauthenticated animal placement `401`, and public top-up `404`. `WEB_TOPUP_ENABLED=false` remains unchanged. Sequential EXE/APK runtime acceptance is still pending.
+
+## [Unreleased] - 2026-07-15 (Single Point wallet and web top-up ingress)
+
+### Changed
+- Retired UPoint from the Unity economy runtime, bootstrap/mutation DTOs, HUD and event bundle copy. Point cache is now stored as a 64-bit invariant string so a paid balance cannot overflow the legacy PlayerPrefs integer key.
+- Retired active UPoint fields from JSON/PostgreSQL stores, API responses, fresh schema and tests. Expand migration `004_single_point_currency.sql` archives legacy balances and transaction deltas without conversion, but deliberately keeps the old columns until the Point-only release is deployed and verified as the rollback target; a later contract migration will drop them.
+
+### Added
+- Added a disabled-by-default, loopback-only `POST /internal/web/point-credit` ingress for website-confirmed top-ups. It requires a dedicated HMAC secret, a short-lived timestamp and an immutable transaction ID, credits Point and records `web_topup_credit` atomically, rejects changed replay payloads, and pushes an absolute `economy_updated` balance to the active player session.
+- Added `test:web-point-credit` coverage for unsigned/wrong/expired requests, invalid amounts, valid credit, realtime refresh, duplicate retry, idempotency conflict and restart persistence.
+- Added a production web outbox and authenticated cron dispatcher. A failed delivery remains retryable; a repeated source transaction keeps the same immutable idempotency key.
+
+### Deployed and verified (dormant)
+- Deployed Point-only game release `6e41be4d298ac51b0246583a14759c47ab9b47b8` with migrations `004_single_point_currency.sql` and `005_web_topup_point_remainder.sql`; PostgreSQL smoke, Point credit integration and security regression passed.
+- Deployed the web Point outbox/cron with backups and rollback. Configured a shared internal secret on web/game without printing it, while deliberately preserving `WEB_TOPUP_ENABLED=false` and loopback-only access.
+- Isolated production-artifact E2E passed first delivery, duplicate retry, decimal remainder carry and confirmed `PRODUCTION_PLAYER_DATA_MUTATED=no`. Post-restart public checks are web/game `200`, unauthenticated cron `401`, and public top-up route `404`.
+
+### Security gate
+- Real-money top-up remains disabled until the live website approval transition is audited/wired and generic client-originated positive economy/inventory deltas are replaced by server-validated gameplay claims. The dedicated top-up route passing does not by itself make the whole economy money-grade.
+- Backend Point, security and isolated Phase 1 regression suites plus an independent `Assembly-CSharp` compile using Unity's generated Roslyn response file pass. Visual EXE/APK confirmation that UPoint is absent remains pending; no real-money transaction has been activated.
+
 ## [Unreleased] - 2026-07-14 (Farm action cancel and live lifecycle)
 
 ### Fixed
@@ -7,7 +161,7 @@
 - Crops and animals now die immediately in the active session when water/hunger reaches zero, including during tutorial. Crop/pen occupancy is released first and the resulting farm snapshot is saved immediately so a later device or relogin cannot restore the dead object.
 
 ### Verified
-- Unity `Assembly-CSharp` compiles successfully with the generated response file. Only the pre-existing unrelated `enableStickAutoSprint` warning remains. Runtime Editor/EXE/APK acceptance is still pending.
+- Unity `Assembly-CSharp` compiles successfully with the generated response file. The retired serialized joystick auto-sprint flag is normalized for legacy prefabs, so the previous `enableStickAutoSprint` warning is cleared without restoring joystick sprint. Runtime Editor/EXE/APK acceptance is still pending.
 
 ## [Unreleased] - 2026-07-14 (Single-session and farm conflict P0)
 

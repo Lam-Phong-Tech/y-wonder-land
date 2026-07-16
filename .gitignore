@@ -88,3 +88,8 @@ Assets/Building/Map1*
 
 # File khóa tạm của Word/Office (~$...) khi đang mở .docx
 ~$*
+
+# Local test, handoff, and helper artifacts (not source)
+/outputs/
+/.tools/
+/.claude/settings.local.json

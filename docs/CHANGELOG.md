@@ -5,6 +5,156 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+
+## [2026-07-16] — Candidate ví Point authoritative v3, chưa deploy
+
+### Đã triển khai cô lập
+- Chốt ADR dùng `player_economy.pos` trong PostgreSQL game làm số dư Point spendable duy nhất cho account đã link. Web đóng băng Point legacy của account link ở `0` và đọc balance ký HMAC; account chưa link phải đối soát từng trường hợp, tuyệt đối không cộng dồn hàng loạt.
+- Thêm route nội bộ ký HMAC `point-reserve/capture/release` sau kill switch riêng mặc định tắt. Reserve trừ đúng một lần, capture không trừ lại, release hoàn đúng một lần; retry cùng payload idempotent và conflict fail closed.
+- Thêm migration `006_point_wallet_reservations.sql`, state machine JSON/PostgreSQL, realtime balance absolute và test restart/race.
+- Overlay web v3 dùng rate `USDT_POINT` do Admin tạo thành version bất biến, tính bằng integer micros và ghim `rateVersionId/rateMicros/roundingRemainder` vào conversion journal. Retry sau đổi rate vẫn dùng quote đã commit.
+
+### Bằng chứng
+- Các suite reservation, credit, security, authority, phase-one cô lập và animal placement pass; PostgreSQL smoke pass trong schema VPS tạm đã tự xóa.
+- Overlay 13 file có SHA-256 `99a901958f4fb65379c32cf9e128cda9244ffa162f71e85333df635672a6cb2b`; validator pass migration/DB E2E, Next.js `15.5.20` build `S7-EGQjdX4Wv8vxyDOlU8` và fault E2E đổi rate sau commit.
+- Chốt `LIVE_WEB_CHANGED=no`, `PRODUCTION_DATABASE_MUTATED=no`, `PRODUCTION_SERVICES_RESTARTED=no`, `REAL_PAYMENT_USED=no`. Còn thiếu web debit orchestrator, migration legacy, YWH conversion/hoa hồng và phê duyệt rollout.
+
+## [2026-07-16] — Ghi nhận hợp đồng nghiệp vụ ví Point từ BA/khách
+
+### Đã xác nhận
+- Point web và Point game là cùng loại/cùng một số dư như một ví; USDT -> Point, YWH <-> Point, Point -> USDT và tỷ giá do Admin thay đổi.
+- Tiêu dùng game phải trả hoa hồng YWH cho người giới thiệu tương tự HUB, gồm vật nuôi, cây dài/ngắn ngày, mồi câu, lượt vòng quay, lượt đào khoáng và mọi tiêu dùng game.
+
+### Còn chặn triển khai
+- Câu `YWH -> Point` và chuyển Point không làm đổi Point game mâu thuẫn với yêu cầu một ví; chưa tự suy diễn. Còn phải chốt ledger authoritative, migration Point/GXL cũ, rate version/rounding, transfer/rút/reversal và công thức hoa hồng YWH.
+- Đặt playbook fixed-rate `0,06 USDT -> 1 Point` ở trạng thái HOLD; candidate authority v2 chưa deploy và không được coi là thiết kế ví cuối.
+- Sửa bản ghi identity: `Nhien345` là tài khoản thật, không phải QA. Log xác nhận scoped grant block gây `403`/shop lock trên account này; đối chứng `senh2026` nhận nước và mua bình thường, không có `403/409/503`. Chưa đổi cấu hình production.
+
+## [2026-07-16] — Vá client farm, chưa build artifact
+
+### Fixed
+- Xác nhận `FarmScene` active map Chuồng sang `Fence.prefab` có `FenceAutoConnect`; ba prefab `AnimalPenSpawner` cũ không được scene/build catalog tham chiếu. Hành vi `7 -> 7` khớp client enclosure cũ chỉ spawn + save farm mà không trừ túi; hai file client atomic vẫn đang là thay đổi chưa commit nên artifact EXE/APK đã test chưa được chứng minh có fix.
+- Kết quả placement authoritative nay mang số lượng con giống còn lại từ snapshot inventory server. Unity áp snapshot đó và hiện số còn lại ngay trong toast thành công. Nhánh pen legacy chuyển sang fail-closed, không còn trừ inventory và spawn local bằng hai mutation rời nhau.
+- Cây nhiều ô chặn ô slave trước khi mở túi, trừ hạt hoặc chạy animation. Việc chọn ô phụ đổi sang flood-fill 4 hướng theo lưới `BuildSurfaceCell`, nên cụm chanh dây không thể lấy ô đã cuốc rời rạc ở nơi khác trong scene. Mọi ca state sai/đổi giữa chừng/thiếu ô/action bận đều có toast và giữ hoặc hoàn hạt.
+- Audit source chi phí xây không thấy bypass theo account Rich: scene active giữ ruộng miễn phí, đường `4 đá`, chuồng `4 gỗ`. Placement nay bắt buộc `RemoveItem` thành công, gắn reason `build_place` và log chính xác số lượng trước/sau để đối soát runtime/DB. Trừ vật liệu và lưu công trình vẫn chưa nằm trong cùng một transaction server.
+- Bổ sung entry batch `BuildWindows` và `BuildAndroid` vào build script Unity hiện có; đường dẫn artifact nhận qua `UNITY_WINDOWS_PATH`/`UNITY_ANDROID_PATH` để build lặp lại cùng một source.
+- Sửa blocker ở lượt test P0 đầu tiên trước cả bước thả thú. `Player.log` chứng minh backend vẫn khỏe và request shop chưa được gửi: scoped canary trả `403` cho reward item dương, queue đã bỏ mutation lỗi vĩnh viễn nhưng giữ `reconciliationRequired`, nên shop sau đó tự trả `PENDING_STATE_SYNC_FAILED (503)`. Shop nay chỉ khi queue đã rỗng mới dùng bootstrap authoritative có guard để đối soát rồi tiếp tục transaction; queue thật còn pending vẫn fail-closed và không mở lại API delta dương. Toast lỗi đồng bộ/đối soát cũng được tách khỏi thông báo mất kết nối chung.
+
+### Verified
+- Roslyn của Unity `6000.3.15f1` compile sạch cả runtime lẫn Editor assembly theo response file Standalone Windows và Android; `Assembly-CSharp` sau hotfix shop cũng compile pass vào output tạm riêng.
+- `test:farm-animal-placement`, `test:security`, `test:phase1:isolated` và `test:web-point-authority` đều pass trong tranche này. Vẫn phải build và nghiệm thu runtime EXE/APK; không đổi hoặc deploy service production.
+
+## [2026-07-16] — Candidate web Point authoritative, chưa deploy
+
+### Gia cố định danh và single ledger
+- Thêm khóa duy nhất `User.id -> gamePlayerId` ở web. Dispatcher ký `expected_player_id` trong contract `ywonder-point-credit-v2`; game trả `409 GAME_POINT_IDENTITY_MISMATCH` trước khi cộng Point/ghi ledger nếu mapping không tồn tại hoặc lệch. Contract v1 tạm thời vẫn tương thích để nâng release theo thứ tự an toàn.
+- Web account đã link đọc Point từ endpoint balance ký HMAC và fail closed nếu `player_id` trả về khác identity đã ghim. Legacy Point web của account link bị giữ ở `0`; account cũ chưa link không bị đổi dữ liệu.
+- Bổ sung test từ chối hai web account cùng ghim một game player, sai player trên JSON/PostgreSQL store, response HTTP 200 sai player, duplicate, `409`, mất response sau commit và race callback.
+
+### Bằng chứng cô lập
+- Backend integration và authority safety test pass. Overlay 12 file có SHA-256 `8f326cb79e0c8123712aec90217602f2428612cfa6e54d30c42aad3e804cf9fb`.
+- Validator VPS pass migration/DB E2E, Prisma, Next.js `15.5.20` build `m31Ry3w4SeOT1N3oxcdJw` và runtime fault E2E; chốt `LIVE_WEB_CHANGED=no`, `PRODUCTION_DATABASE_MUTATED=no`, `PRODUCTION_SERVICES_RESTARTED=no`, `REAL_PAYMENT_USED=no`.
+- Harness production-artifact nay chạy thêm `postgresSmokeTest` trong PostgreSQL database tạm riêng. Lượt VPS pass nhánh ghim player trên store thật, canary rejection, first dispatch, duplicate, restart web cô lập và mất response sau commit; database tạm đã xóa, service/player data production không đổi.
+- Thêm `docs/QA/WEB_POINT_NO_MONEY_CANARY.md`: cổng còn lại không cần tiền thật là cấp synthetic có audit đúng `0,06 USDT`, thao tác đổi thật trên UI web, rồi đối soát cùng source transaction qua web journal/outbox, game ledger và HUD EXE/APK. Candidate chưa deploy.
+
+## [2026-07-16] — Canary production ví web -> Point không dùng tiền
+
+### Kích hoạt có giới hạn
+- Thêm `server/deploy/activate-web-point-canary.sh` với allowlist đúng một web identity QA, backup root-only, ghi env nguyên tử, rollback tự động, health-check và cổng bắt buộc callback public vẫn `404`. Production đang chạy `WEB_TOPUP_MODE=canary`; khóa grant dương từ client chỉ áp dụng cho đúng identity canary, người chơi khác vẫn giữ luồng legacy hiện tại.
+- Gia cố script bật bằng lock `flock` dùng chung và chế độ validate-only không đổi cấu hình. Thêm `server/deploy/deactivate-web-point-canary.sh` để đưa hai service về dormant nguyên tử, xóa hai allowlist/scoped block, giữ remote ingress tắt và tự phục hồi env canary nếu restart/health/guard bất kỳ không đạt.
+- Browser SSO đã tạo đúng một mapping web account -> `playerId`. Baseline trước test: mọi số dư ví web bằng `0`, outbox web trống, game có `5000 Point` khởi tạo và chưa có ledger top-up.
+
+### Nghiệm thu không tiền
+- Sau SQLite online-backup, đã queue đúng một outbox synthetic `+1.000000 Point`, không tạo nạp tiền và không đổi ví web. Cron production có xác thực gửi HMAC qua loopback; outbox thành `SENT`, PostgreSQL thành `5001 Point`, có đúng một `web_topup_credit`.
+- Ép retry lại cùng payload: attempts `1 -> 2`, Point vẫn `5001`, ledger vẫn một dòng. Ví web tiếp tục toàn `0`, không có outbox chưa gửi và SQLite `quick_check=ok`.
+- Ba ảnh Windows EXE xác nhận HUD là `5,001` ngay khi đang online, sau logout/login và sau thoát hẳn/mở lại app. Đối soát cuối vẫn đúng một mapping, một player và một ledger.
+- Android APK khôi phục `5,001`, xác nhận `5,002` sau relogin, rồi nhận realtime riêng `5,002 -> 5,003` ngay trong game. Retry cùng nguồn giữ `5,003` và một ledger; APK relogin/full process restart và lần đăng nhập Windows EXE tiếp theo đều đọc cùng `5,003`.
+- Phiên đơn pass đủ hai chiều trên cùng account QA: đăng nhập EXE đẩy APK đang mở ra, đăng nhập lại APK đẩy EXE đang mở ra; cả hai client cũ đều hiện toast phiên bị thay thế. Vì vậy số dư giống nhau xuyên thiết bị không phải do hai phiên cũ cùng tiếp tục hoạt động.
+- Restart có kiểm soát riêng game backend làm PID game đổi nhưng giữ nguyên PID web, hash hai env, `5,003 Point`, phần lẻ `0`, ba ledger và ba outbox `SENT`. Health game nội bộ/public cùng web đều về `200`; guard tiếp tục `401/404/401` và service game không có log mức warning.
+- Fault drill dùng lại transaction synthetic realtime APK đã credit, không tạo Point mới: khi backend tắt, cron có xác thực giữ row ở `RETRY` và attempts `2 -> 3`; sau khi backend phục hồi, đúng row đó về `SENT` ở attempt `4`. Point vẫn `5,003`, ledger vẫn ba dòng và transaction nguồn vẫn đúng một ledger; tổng attempts outbox chỉ đổi `5 -> 7`.
+- Rollback preflight trên VPS pass mà không đổi production: backup dormant root-only dùng default an toàn khi thiếu khóa (`enabled=false`, `mode=canary`), allowlist/block rỗng và env ngoài nhóm canary khớp live. `bash -n` Linux cùng validate-only bật/tắt đều đạt; PID game/web, hash env, số backup và public `404` không đổi. Lượt live được duyệt riêng đã chạy ở mốc bên dưới.
+- Anh đã đăng nhập client sau các lần restart/fault có kiểm soát và xác nhận khôi phục đúng số dư authoritative `5,003 Point`.
+- Mở rộng E2E không tiền bằng restart web process cô lập và fault proxy chỉ bind loopback. Proxy cho game tạm commit transaction thứ hai nhưng giữ response thành công tới khi web tạm timeout và ghi `RETRY`; lượt gửi lại dùng nguyên transaction ID rồi về `SENT` ở attempt hai, trong khi game tạm vẫn chỉ có đúng hai ledger, không mất hoặc cộng đôi Point.
+- Gia cố runner để lấy đúng `WorkingDirectory` đang chạy của `greenxland.service`, không còn vô tình build cây rollback Next.js 14. Runner chỉ chấp nhận root web chuẩn hoặc release versioned an toàn, bắt buộc `.env` active trỏ về env production chuẩn và fingerprint source/build active, PID, service identity cùng env trước/sau.
+- Lượt VPS đã sửa build đúng release active Next.js `15.5.20` và pass canary rejection, first dispatch, duplicate retry, isolated web restart, post-commit response loss cùng idempotent recovery. PostgreSQL database tạm, bản sao SQLite, process/stage/upload đều được dọn; PID production game/web giữ `181238/177260`, build `O-PUYMkTlVdeNCYQWp2gJ`, health `200/200`, exact-one canary và callback guard không đổi.
+- Hậu kiểm chỉ đọc vẫn là Point QA `5,003`, phần lẻ `0`, ba ledger `web_topup_credit`, ba outbox `SENT`, tổng attempts `7`. Fault run cô lập không đổi ví web, outbox, ledger, service hoặc build production.
+- Sau khi được duyệt, production đã chạy đủ exact-one canary -> dormant -> exact-one canary. Lượt tắt tạo backup `/var/backups/ywonder-point-link/deactivate-20260715T204412Z`, đưa callback loopback về `404` và restart hai service; lượt bật tạo backup `/var/backups/ywonder-point-link/canary-20260715T204455Z`, khôi phục hai env khớp byte-for-byte baseline, restart hai service và đưa loopback thiếu chữ ký về `401`; callback public luôn `404`.
+- Hậu kiểm độc lập chốt PID game/web cuối `186418/186434`, đúng release/build cũ, health `200/200`, allowlist đúng một identity, scoped block khớp, remote ingress tắt và không có critical log match. Point vẫn `5,003`, phần lẻ `0`, ledger `3`; outbox vẫn `3 SENT / 7 attempts / 0 pending`; database và thư mục E2E tạm đều bằng `0`.
+- Hai thư mục backup live thuộc `root:root` mode `0700`; file env bên trong giữ owner/mode production nhưng service account không thể đọc xuyên thư mục cha. Một archive source E2E cũ, không chứa `.env`/secret/dữ liệu người chơi và không process nào dùng, đã được xóa khỏi `/tmp` mà không đụng service hoặc dữ liệu production.
+- Nghiệm thu client sau live double restart đã đạt: anh đăng xuất rồi đăng nhập lại và ảnh HUD hiển thị `5,003`. Hậu kiểm chỉ đọc tương ứng thấy đúng một phiên QA active, Point `5,003`, remainder `0`, ba ledger và outbox không đổi `3 SENT / 7 attempts / 0 pending`.
+- Hậu kiểm đạt web/game `200`, request loopback/cron thiếu auth `401`, callback public `404`, không warning service. Chưa dùng tiền thật.
+
+### Cổng còn lại
+- Canary vẫn chỉ dành cho identity QA đã chọn, chưa bật đại trà. Live dormant -> canary và relogin client sau double restart đều đã đạt. Cổng nghiệp vụ còn lại là giao dịch ví web thật cực nhỏ có đối soát transaction ID đầu-cuối và phải được duyệt riêng; chưa bắt đầu.
+
+## [2026-07-16] — Nâng web production lên Next.js 15 đã vá
+
+### Deploy và rollback
+- Đã deploy release versioned `/var/www/ywonder-releases/next15-49ee6f3-hardened` bằng systemd drop-in `next15-release.conf`. Build active `O-PUYMkTlVdeNCYQWp2gJ` chạy Next.js `15.5.20`, React/ReactDOM `19.2.7`; source Next.js `14.2.18` cũ tại `/var/www/ywonder` vẫn sạch và nguyên vẹn để rollback.
+- Backup root-only `/var/backups/ywonder-web/next15-pre-20260716T002949+0700` đã pass checksum, gồm SQLite/env/unit/source, build/audit/smoke và rollback script. Commit nguồn backup `b2510d4ad38eef89881931609ede60010ac50a83` có parent `49ee6f3b9f9c1547bb8dbfcfc0dbec6d6502ca24`, đúng 7 file và bundle/patch khớp byte với active release.
+- Rollback script, checksum drop-in và bản Next.js `14.2.18` cũ đã pass loopback smoke. Không cố ý restart production thêm hai lần chỉ để drill sau khi upgrade đã thành công; rollback target cũ vẫn sẵn sàng.
+
+### Regression và hậu kiểm
+- Build/runtime cô lập đạt home/login/session `200`, cron Point thiếu quyền `401`, Browser SSO callback thiếu request `400`, wallet chưa đăng nhập `307`; `npm audit --omit=dev` có `0 vulnerabilities`.
+- Regression đăng nhập production bằng một MEMBER synthetic đạt login `302`, session `200`, wallet authenticated `200`. User cùng wallet/session/account/notification/audit/outbox liên quan đã xóa hết; SQLite integrity và foreign key đều sạch.
+- Hậu kiểm cuối đạt web/login/game `200`, cron `401`, top-up public `404`, outbox web `0`, ledger PostgreSQL `web_topup_credit=0`, không còn marker synthetic, process/listener candidate hay warning/error service.
+- Top-up web/game vẫn tắt, allowlist/scoped block đều rỗng và `CLIENT_ASSET_GRANTS_ENABLED` vẫn unset/default-true. Không dùng tiền thật hoặc cộng Point. Cổng tiếp theo là tạo/chọn identity QA riêng và xác minh chính xác `User.id -> playerId`.
+
+## [2026-07-15] — Gate an toàn canary ví web -> Point
+
+### Security
+- Khóa `PUT /player/inventory` bằng `405 INVENTORY_SERVER_AUTHORITATIVE`; thêm strict mode chặn delta Point/item dương bằng `403` nhưng vẫn giữ debit hợp lệ.
+- Production startup từ chối `WEB_TOPUP_ENABLED=true` nếu `CLIENT_ASSET_GRANTS_ENABLED` chưa là `false`.
+- Thêm `WEB_TOPUP_MODE=canary` và allowlist web user dùng chung ở web/game. Account ngoài danh sách nhận `425` để outbox tiếp tục retry; cron không lấy các hàng ngoài canary nên không làm nghẽn account thử.
+- Thêm khóa grant theo đúng web user canary bằng `CLIENT_ASSET_GRANTS_BLOCKED_WEB_USER_IDS`. Khi vẫn giữ reward legacy cho người chơi thường, danh sách khóa phải khớp tuyệt đối allowlist top-up; endpoint kiểm cả JWT đã ký và mapping player authoritative. Mode `open` vẫn bắt buộc strict toàn cục và danh sách khóa riêng phải rỗng.
+
+### Verified local và VPS
+- Pass `node --check`, `test:security`, `test:web-point-credit`, `test:phase1:isolated` và `test:farm-animal-placement`. Audit source xác nhận outbox nằm trong cùng SQLite transaction với SWAP `SUCCESS`; Browser SSO và top-up đều map cùng web `User.id` sang `game_players.web_user_id`.
+- Đã gia cố E2E không dùng tiền cho lần chạy VPS kế tiếp: game/web bắt buộc chạy từ stage dưới `/tmp`; PostgreSQL dùng database tạm riêng thay vì schema trong `ywonder_game`; build có cổng RAM/disk/load, `nice`/`ionice`, timeout, lock một lượt và cleanup tiến trình có marker. Chỉ in `PRODUCTION_PLAYER_DATA_MUTATED=no` sau khi xóa database tạm, xác minh test ID không lọt vào hai DB thật, service PID/health và hash source/env production không đổi, callback thật vẫn `404`. `test:web-point-e2e-harness` và Bash syntax pass local.
+- Ngày 15/07/2026 runner mới đã pass trên VPS production bằng candidate có SHA-256 cố định dưới `/tmp`, bản sao SQLite web và PostgreSQL database `yw_point_e2e_*` riêng. Canary rejection, gửi lần đầu, retry idempotent và phần lẻ Point đều pass; DB/process/stage tạm được dọn sạch, PID/active time/hash env production không đổi, health vẫn `200` và callback dormant vẫn `404`.
+- Test khóa grant canary đã pass startup gate, account canary bị `403`, account đối chứng vẫn nhận reward, debit vẫn chạy và mapping store authoritative thắng claim JWT không thuộc canary. Point-credit, Phase 1, animal placement và E2E harness regression cũng pass; security suite tương tự đã pass trực tiếp từ artifact Linux live.
+- Đã deploy backend hardening thành release `f573721533c0a65a3f2fc49fa6a2673b224f8bea` sau backup `/var/backups/ywonder-point-hardening/pre-f5737215-20260715T153753Z`; migration `001`-`005` đã có sẵn, PostgreSQL smoke và health đều pass.
+- Follow-up khóa grant scoped đã deploy thành backend release active `32adf45fd4edb4b13b4ac3ed6c1bb69c7afbc2dc` sau backup đã xác thực `/var/backups/ywonder-point-hardening/pre-32adf45f-20260715T161547Z`; PostgreSQL smoke pass, migration `001`-`005` skip đúng.
+- Đã deploy guard canary web từ commit `82e20e3ed31dc3d3aea631c7c57cbdc3e9ba8e94` sau build production cô lập. Build live `YVgCFF1Bwu_XJc4sfVpo3`, rollback tại `/var/backups/ywonder-web/point-canary-hardening-20260715T154611Z`; chỉ web restart, game PID và hai env không đổi.
+- Hậu kiểm độc lập đạt game/web `200`, cron thiếu quyền `401`, callback `404`, guard canary có trong live build, không còn DB/schema/stage/process E2E, outbox Point web có `0` hàng và hai service không có warning/restart. Không dùng tiền thật.
+- Production vẫn cố ý giữ `WEB_TOPUP_ENABLED=false`, allowlist web/game rỗng và `CLIENT_ASSET_GRANTS_ENABLED` chưa set nên positive grant gameplay legacy còn hoạt động. Startup interlock vẫn chặn bật top-up; chưa được chạy canary cho tới khi cô lập đường reward dương hợp lệ và chốt đúng web user/player QA.
+- Hậu kiểm release `32adf45f...` đạt health local/public, web PID và env hash không đổi, callback `404`, cron `401`, guard scoped có trong live source, startup gate synthetic pass, outbox/ledger đều `0`, không còn DB/schema tạm và không có warning service. Cơ chế cô lập đã sẵn sàng nhưng scoped list vẫn rỗng cho tới khi chọn QA identity; không dùng tiền thật.
+- Audit source Unity chỉ còn một HUD Point, không còn binding UPoint active; tham chiếu runtime còn lại chỉ dùng để xóa PlayerPrefs legacy. `Assembly-CSharp` compile sạch vào output tạm riêng bằng Unity `6000.3.15f1`. Chưa chạy batch build tranh project vì Editor đang mở; EXE/APK visual acceptance vẫn còn.
+- Audit identity chỉ đọc thấy 5 mapping web-browser active, đều đã có dữ liệu player và không account nào được đánh dấu QA. Không ghi web ID đầy đủ/secret vào repo. Ưu tiên tạo web account QA riêng; nếu dùng account hiện hữu phải do owner chỉ định rõ trước khi đổi allowlist/env.
+- Đã dựng candidate web cô lập từ clean HEAD `49ee6f3b9f9c`, nâng Next.js lên `15.5.20`, React/ReactDOM `19.2.7`, vá PostCSS/form-data và dùng alias Nodemailer `9.0.3` tương thích peer contract của Auth.js beta hiện tại. Candidate chỉ đổi đúng 7 file source/lock/config.
+- Candidate đạt `npm audit --omit=dev` với `0 vulnerabilities`, production build, guard route không đăng nhập, credential login/session, trang ví có đăng nhập, referral và smoke API gửi mail trên bản sao SQLite. User/process synthetic đã được dọn; PID/active timestamp của web production không đổi.
+- Artifact `/var/backups/ywonder-web/candidates/next15-hardened-49ee6f3b9f9c-20260715T165605Z.tar.gz`, SHA-256 `a31e4192463b9ef75718c851e9e31b3e6ce85543145f2072d2b65d61db122165`, sau đó đã được deploy và nghiệm thu ở release ngày 16/07 phía trên; top-up vẫn tắt.
+
+## [2026-07-15] — Thả vật nuôi nguyên tử với túi đồ và farm
+
+### Fixed
+- Thay luồng sinh thú local bằng `POST /player/farm/animals/place`. JSON/PostgreSQL store kiểm revision farm, item trong túi, số ô theo loài, ô thuộc chuồng và chưa bị chiếm; sau đó trừ đúng `1` con giống và thêm đúng một animal do server cấp `instanceId` trong cùng transaction/idempotency.
+- Unity flush chuồng mới nhất trước khi thả, áp lại inventory + farm authoritative từ response và không có fallback thả local khi mất mạng. Đã bỏ helper tự cấp thú demo mỗi lần mở túi vì helper này che lỗi số lượng.
+- Collider hàng rào đặt bằng Build Mode được ưu tiên nhận diện qua `BuildSurfaceCell`/`PenEnclosure`, không đi nhầm nhánh `AnimalPenSpawner` legacy.
+
+### Verified
+- Pass `test:farm-animal-placement`, `test:security`, `test:phase1:isolated`, `test:web-point-credit` và `node --check` các file server liên quan. Unity Editor đã compile lại `Assembly-CSharp.dll` sau thay đổi, không ghi nhận lỗi C#.
+- Release production versioned `9c5bd9d1066637b6f176fcd09781358d22a73de4` đã deploy sau backup PostgreSQL/env/unit và PostgreSQL smoke trên schema tạm. Local regression cùng public Phase 1 HTTP/WSS đều pass; các lần thử chưa đạt trước đó đã rollback về release khỏe.
+- Double-check từ ngoài VPS: health dùng PostgreSQL, route thả thú không token trả `401`, callback nạp Point public trả `404`; `WEB_TOPUP_ENABLED=false` không đổi. Còn build EXE/APK và test tuần tự số lượng thú, relogin/cross-device/đóng app đột ngột trước khi đổi task sang `[x]`.
+
+## [2026-07-15] — Một ví Point và cổng nhận giao dịch nạp web
+
+### Changed
+- Gỡ UPoint khỏi `EconomyManager`, bootstrap/mutation DTO, HUD, popup sự kiện, JSON/PostgreSQL store, fresh schema và test. Cache Point dùng chuỗi 64-bit; migration mở rộng `004_single_point_currency.sql` archive UPoint legacy, không tự quy đổi và tạm giữ cột cũ để rollback release trước an toàn. Chỉ tạo migration contract xóa cột sau khi release Point-only đã deploy/verify.
+
+### Added
+- Thêm route nội bộ mặc định tắt `/internal/web/point-credit`: chỉ loopback, HMAC bằng secret riêng, timestamp ngắn hạn, transaction ID bất biến và idempotency. Cộng Point + ghi `web_topup_credit` nguyên tử; player online nhận số dư absolute qua `economy_updated`.
+- Test riêng đã pass chữ ký thiếu/sai, request quá hạn, amount sai, cộng đúng, realtime refresh, retry không cộng đôi, conflict khi cùng mã khác payload và persistence sau restart.
+- Web production đã có outbox + cron có xác thực để gửi giao dịch Point sang game; giao dịch gửi lỗi giữ trạng thái retry và luôn dùng cùng idempotency key nguồn.
+
+### Deploy và double-check ở trạng thái dormant
+- Game release `6e41be4d298ac51b0246583a14759c47ab9b47b8` đã deploy cùng migration `004/005`; PostgreSQL smoke, Point integration và security regression pass. Web outbox/cron cũng đã deploy kèm backup/rollback.
+- Hai dịch vụ đã cấu hình cùng secret nội bộ mà không in secret; backup env nằm tại `/var/backups/ywonder-point-link/dormant-20260715T043458Z`. Vẫn giữ `WEB_TOPUP_ENABLED=false` và loopback-only.
+- E2E cô lập dùng đúng web build production, bản sao SQLite và PostgreSQL schema tạm đã pass gửi lần đầu, retry không cộng đôi, giữ phần lẻ Point và xác nhận không sửa dữ liệu player production. Sau restart: web/game `200`, cron không quyền `401`, callback public `404`.
+
+### Gate
+- Chưa bật tiền thật. Callback/outbox/migration đã deploy và E2E cô lập đã đạt, nhưng bắt buộc khóa các endpoint client còn tự khai delta Point/item trước khi đổi `WEB_TOPUP_ENABLED=true`. Backend regression và biên dịch `Assembly-CSharp` độc lập bằng Unity Roslyn đã pass; còn xác nhận trực quan trên EXE/APK rằng HUD không còn UPoint.
+
 ## [2026-07-14] — Hotfix hủy cho thú ăn và vòng đời trực tiếp
 
 ### Fixed
@@ -12,7 +162,7 @@
 - Cây và thú nay chết/héo ngay trong phiên đang chơi khi thanh nước/đói về `0%`, kể cả tutorial. Trước khi xóa, code giải phóng ô cây/chuồng và lưu snapshot farm ngay để relog hoặc thiết bị khác không phục hồi vật thể đã chết.
 
 ### Verified
-- `Assembly-CSharp` compile pass bằng response file do Unity sinh; chỉ còn warning cũ không liên quan `enableStickAutoSprint`. Còn chờ Editor/EXE/APK runtime acceptance trước khi chốt `[x]`.
+- `Assembly-CSharp` compile pass bằng response file do Unity sinh. Cờ serialized auto-sprint cũ được giữ để tương thích prefab nhưng luôn chuẩn hóa về `false`, nên warning `enableStickAutoSprint` đã được dọn mà không bật lại chạy nhanh bằng joystick. Còn chờ Editor/EXE/APK runtime acceptance trước khi chốt `[x]`.
 
 ## [2026-07-14] — P0 phiên đơn và chống ghi đè farm đã deploy production
 
