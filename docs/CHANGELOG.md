@@ -6,6 +6,18 @@
 
 ---
 
+## [2026-07-17] — Candidate web debit Point -> USDT đã pass cô lập, chưa deploy
+
+### Đã thêm
+- Thêm `GamePointDebit` saga và browser intent bền cho account đã link: ID request/reservation/transaction deterministic, snapshot rate/fee/gross/net bằng micros, state reserve/capture/release, cron retry và gate canary/fee tường minh.
+- Chặn race hai chiều bằng application check và trigger SQLite chéo; một account chỉ có một operation ví chưa terminal. Transaction USDT `PENDING` được ghi trước capture nhưng chưa cộng vào số dư dùng được; chỉ settlement SQLite sau `CAPTURED` mới tăng `balanceUsdt` đúng một lần.
+- Thêm DB/runtime fault test source cho replay, khác payload, mất response reserve/capture, đổi rate, settlement fail rồi release, sai player, journal bị sửa và remote conflict. Adapter YWH vẫn tắt.
+
+### Bằng chứng và giới hạn
+- Local pass: authority safety, Point reservation, Point credit, security, Phase 1 isolated, syntax TypeScript/JavaScript/Bash, migration SQL và patch trên source production partial đã ghim hash.
+- Overlay 17 file SHA-256 `2cd12483d811b966f26c3c24db52b2254c6e8a82126ece464e5cdabe8e9e986d` pass full validator VPS trên source/SQLite production bản sao: Prisma generate/validate/migration, DB E2E, Next.js `15.5.20` build `g078J34tOR0M2Gmd1WpIp`, credit runtime fault E2E và debit saga fault E2E.
+- Prisma che mã `RAISE(ABORT)` của SQLite trigger thành lỗi FK chung; E2E đã được gia cố bằng SQL trigger, control insert hợp lệ và kiểm row bị chặn không tồn tại. Hậu kiểm: live web/DB production không đổi, service không restart, không dùng tiền thật; production debit vẫn tắt và candidate chưa deploy/link/migrate.
+
 ## [2026-07-17] — Khôi phục asset farm/city và hoàn tất rename prefab đất
 
 ### Đã khôi phục
@@ -17,7 +29,7 @@
 - Đối chiếu đủ 165 asset untracked phía stash: thiếu `0`. Sau khi Unity xóa metadata Addressables sinh tự động, audit còn 2.474 GUID asset: trùng `0`; 273 GUID duy nhất trên 33 file Unity YAML liên quan đều resolve đủ khi tính cả builtin và package metadata.
 - Unity `6000.3.15f1` batch import/compile thoát mã `0`; log không có lỗi biên dịch C#, exception, missing reference, lỗi shader/import hoặc crash.
 - Unity tự xóa lại `Assets/AddressableAssetsData/link.xml` và `.meta` trong lúc import; giữ deletion vì Addressables đã sinh bản giống hệt theo Android/iOS/Windows dưới `Library/com.unity.addressables`.
-- Chưa nghiệm thu hình ảnh/runtime FarmScene và CityScene; kết quả này mới khóa tính toàn vẹn asset và compile.
+- Chủ dự án đã mở và nghiệm thu phần nội dung khôi phục. Các thay đổi CityScene/Map2.1/material phát sinh sau đó thuộc worktree người dùng và không nằm trong tranche web debit.
 
 ## [2026-07-17] — Duyệt successor policy ví Point nhưng tiếp tục khóa migration
 

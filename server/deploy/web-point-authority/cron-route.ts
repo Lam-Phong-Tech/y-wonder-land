@@ -1,5 +1,6 @@
 import { timingSafeEqual } from "crypto";
 import { NextResponse } from "next/server";
+import { getGamePointDebitHealth, retryPendingGamePointDebits } from "@/lib/game-point-debit";
 import { getGamePointSyncHealth, retryPendingGamePointSync } from "@/lib/game-point-sync";
 
 export const runtime = "nodejs";
@@ -18,8 +19,15 @@ async function run(request: Request) {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
   const result = await retryPendingGamePointSync(50);
+  const debitResult = await retryPendingGamePointDebits(25);
   const health = await getGamePointSyncHealth();
-  return NextResponse.json({ ok: true, ...result, health });
+  const debitHealth = await getGamePointDebitHealth();
+  return NextResponse.json({
+    ok: true,
+    ...result,
+    health,
+    pointDebits: { ...debitResult, health: debitHealth },
+  });
 }
 
 export async function GET(request: Request) {

@@ -96,7 +96,7 @@
 - `player_economy.pos` là balance Point spendable duy nhất cho account đã link. `balanceGXL/lockedGXL` của account đó bị đóng băng ở `0`; web đọc balance game bằng endpoint HMAC và kiểm đúng `gamePlayerId` đã ghim.
 - Mọi credit/debit/conversion/transfer/withdrawal/reserve/reversal phải có source transaction ID unique, trạng thái rõ và audit actor/rate/before/after.
 - Candidate v3 đã version hóa tỷ giá `USDT_POINT` theo integer micros, effective time và Admin actor; conversion lưu rate version, exact source/destination micros và rounding remainder. `YWH_POINT` vẫn feature-gated tới khi BA chốt semantics.
-- Candidate game đã có state machine `reserve/capture/release` cho `Point -> USDT/YWH`; không được trừ Point bằng delta rời rạc. Web orchestrator, phí/hạn mức/phê duyệt/reconciliation bên thanh toán vẫn chưa nối production.
+- Candidate game đã có state machine `reserve/capture/release`; không được trừ Point bằng delta rời rạc. Web candidate có saga `Point -> USDT` nội bộ và đã pass full Prisma/Next/fault E2E trên bản sao, nhưng chưa deploy; phí/hạn mức/phê duyệt, rút USDT bên ngoài và reconciliation bên thanh toán vẫn chưa đạt production. `Point -> YWH` chưa có adapter.
 - Tiêu dùng game phải tạo payout hoa hồng YWH cho referrer qua cùng source transaction hoặc transactional outbox. Công thức/số tầng/refund chưa được cung cấp nên chưa chốt schema payout.
 - Số dư Point/GXL hiện hữu trên web phải được kiểm kê và migrate một lần; tuyệt đối không cộng nguyên balance web vào `player_economy.pos` nếu cả hai từng đại diện cùng giá trị.
 
@@ -133,9 +133,12 @@ Các bảng này nằm trong SQLite của web, không thay thế PostgreSQL game
 | `GamePointLinkedAccount` | `userId` PK, `gamePlayerId` UNIQUE | Một web account ghim đúng một game player; chỉ link khi legacy `balanceGXL` và `lockedGXL` đều bằng `0` |
 | `PointExchangeRateVersion` | `id` PK, một active row mỗi `pair` | Rate immutable dạng micros text; lưu effective time, Admin actor và source rate cũ; Admin đổi rate bằng deactivate + insert version mới |
 | `GamePointConversion` | `requestId`, `sourceTransactionId`, `outboxId` đều UNIQUE | Lưu `usdtMicros`, `pointMicros`, `rateVersionId`, `rateMicros`, `roundingRemainder`; retry đọc journal trước current rate; một user chỉ có một conversion chưa `SENT`/`REFUNDED` |
+| `GamePointDebit` | `requestId`, `reservationId`, `sourceTransactionId` đều UNIQUE | Saga `RESERVE_PENDING/RESERVED/CAPTURE_PENDING/CAPTURED/RELEASE_PENDING/RELEASED/REJECTED/MANUAL_REVIEW`; ghim `gamePlayerId`, whole Point, rate version, gross/fee/net micros, rounding và fingerprint; một user chỉ có một debit chưa terminal |
 | `GamePointSyncOutbox` | `sourceTransactionId` UNIQUE | Retry cùng source; trạng thái `PENDING/RETRY/SENT/FAILED`, không được làm `SENT` lùi lại |
 
-Trigger SQLite đóng băng mọi thay đổi `balanceGXL/lockedGXL` của account đã link. Point spendable duy nhất của account này nằm ở `player_economy.pos`; web đọc bằng endpoint balance ký HMAC. Candidate v3 bao phủ `USDT -> Point`, rate Admin bất biến và phía game của debit reservation; chưa bao phủ web orchestrator Point -> USDT/YWH, transfer, migration legacy hoặc payout hoa hồng YWH. Account legacy chưa link vẫn giữ nguyên và chưa tự migrate số dư cũ.
+Trigger SQLite đóng băng mọi thay đổi `balanceGXL/lockedGXL` của account đã link. Bốn trigger chéo còn cấm tạo hoặc mở lại conversion một chiều khi chiều đối diện vẫn chưa terminal. Point spendable duy nhất của account link nằm ở `player_economy.pos`; web đọc bằng endpoint balance ký HMAC.
+
+Với `Point -> USDT`, row `Transaction` USDT ở trạng thái `PENDING` được tạo trước capture để làm nghĩa vụ settlement bền vững, nhưng chưa đổi `Wallet.balanceUsdt`. Chỉ sau response game `CAPTURED`, một SQLite transaction mới tăng `balanceUsdt` và chuyển cả transaction/debit sang `SUCCESS/CAPTURED`. Vì vậy timeout không làm USDT pending trở thành tiền có thể rút; retry cùng reservation không cộng hai lần. Candidate này đã pass full isolated release validation nhưng chưa deploy; account legacy chưa link vẫn giữ nguyên, không tự migrate số dư cũ.
 
 ### `point_wallet_reservations` (migration `006`, candidate chưa deploy)
 

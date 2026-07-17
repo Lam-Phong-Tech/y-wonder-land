@@ -74,6 +74,7 @@ function patchSchema(source) {
     relationAnchor,
     "  gamePointLink GamePointLinkedAccount?",
     "  gamePointConversions GamePointConversion[]",
+    "  gamePointDebits GamePointDebit[]",
   ].join(eolFor(source)), "User Point authority relation anchor");
   const models = `
 
@@ -108,6 +109,44 @@ model GamePointConversion {
   @@index([status, createdAt])
 }
 
+model GamePointDebit {
+  id                   String   @id
+  requestId            String   @unique
+  reservationId        String   @unique
+  sourceTransactionId  String   @unique
+  userId               String
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gamePlayerId         String
+  targetCurrency       String
+  pointAmount          Int
+  pointMicros          String
+  grossTargetMicros    String
+  feeBps               Int
+  feeMicros            String
+  netTargetMicros      String
+  rateVersionId        String
+  rateVersion          PointExchangeRateVersion @relation(fields: [rateVersionId], references: [id])
+  rateMicros            String
+  roundingRemainder     String   @default("0")
+  feeRoundingRemainder  String   @default("0")
+  requestFingerprint   String
+  purpose              String
+  source               String
+  occurredAt           DateTime
+  status               String   @default("RESERVE_PENDING")
+  attempts             Int      @default(0)
+  lastError            String?
+  nextAttemptAt        DateTime @default(now())
+  reservedAt           DateTime?
+  settledAt            DateTime?
+  capturedAt           DateTime?
+  releasedAt           DateTime?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  @@index([userId, createdAt])
+  @@index([status, nextAttemptAt])
+}
+
 model PointExchangeRateVersion {
   id             String   @id @default(cuid())
   pair           String
@@ -118,6 +157,7 @@ model PointExchangeRateVersion {
   sourceRateId   String?
   createdAt      DateTime @default(now())
   conversions    GamePointConversion[]
+  debits         GamePointDebit[]
   @@index([pair, effectiveAt])
 }
 `;
@@ -148,23 +188,19 @@ function patchConvert(source) {
   pointMicrosToNumber,
   quoteUsdtToPointMicros,
 } from "@/lib/point-rate";`;
+  const debitImport = 'import { convertLinkedGamePointToUsdt } from "@/lib/game-point-debit";';
   source = replaceOnce(
     source,
     withEol(syncImport, source),
-    withEol(`${patchedSyncImport}\n${authorityImport}\n${rateImport}`, source),
+    withEol(`${patchedSyncImport}\n${authorityImport}\n${debitImport}\n${rateImport}`, source),
     "Point sync import"
   );
 
   const pointStart = source.indexOf("export async function convertPointToUsdtAction");
   const pointEnd = source.indexOf("// ---- USDT", pointStart);
   if (pointStart < 0 || pointEnd < 0) fail("Cannot isolate Point to USDT action");
-  let pointAction = source.slice(pointStart, pointEnd);
-  const userAnchor = "    const userId = me.id;";
-  pointAction = replaceOnce(pointAction, userAnchor, withEol(`${userAnchor}
-    if (await isGamePointLinkedAccount(userId)) {
-      return { ok: false, error: "GAME_POINT_TO_USDT_REQUIRES_GAME_DEBIT" };
-    }`, pointAction), "Point to USDT linked-account guard");
-  source = source.slice(0, pointStart) + pointAction + source.slice(pointEnd);
+  const pointReplacement = withEol(overlay("convert-point-to-usdt-action.tsfrag") + "\n\n", source);
+  source = source.slice(0, pointStart) + pointReplacement + source.slice(pointEnd);
 
   const actionStart = source.indexOf("export async function convertUsdtToPointAction");
   const actionEnd = source.indexOf("// ---- USDT", actionStart);
@@ -288,7 +324,12 @@ import {
   clearGamePointConversionIntent,
   getOrCreateGamePointConversionIntent,
   readGamePointConversionIntent,
-} from "@/lib/game-point-conversion-intent";`, source),
+} from "@/lib/game-point-conversion-intent";
+import {
+  clearGamePointDebitIntent,
+  getOrCreateGamePointDebitIntent,
+  readGamePointDebitIntent,
+} from "@/lib/game-point-debit-intent";`, source),
     "PointConvertActions intent import"
   );
   const firstStart = source.indexOf("export function PointConvertActions");
@@ -302,6 +343,8 @@ import {
   pointPerUsdt,
   gamePointLinked = false,
   gamePointAvailable = true,
+  gamePointDebitEnabled = false,
+  pointDebitFeePct = 0,
 }: {
   userId: string;
   locale: string;
@@ -310,6 +353,8 @@ import {
   pointPerUsdt: number;
   gamePointLinked?: boolean;
   gamePointAvailable?: boolean;
+  gamePointDebitEnabled?: boolean;
+  pointDebitFeePct?: number;
 }) {
   const t = (vi: string, en: string) => (locale === "vi" ? vi : en);
   const [open, setOpen] = useState(false);
@@ -321,7 +366,9 @@ import {
         disabled={gamePointLinked && !gamePointAvailable}
         className="btn btn-grass py-[9px] px-[14px] text-[13px] whitespace-nowrap"
       >
-        {gamePointLinked ? t("Nạp Point từ USDT", "Top up Point from USDT") : t("Đổi Point ↔ USDT", "Swap Point ↔ USDT")}
+        {gamePointLinked && !gamePointDebitEnabled
+          ? t("Nạp Point từ USDT", "Top up Point from USDT")
+          : t("Đổi Point ↔ USDT", "Swap Point ↔ USDT")}
       </button>
       {!gamePointLinked && (
         <button onClick={() => setXferOpen(true)} className="btn btn-ghost py-[9px] px-[14px] text-[13px] whitespace-nowrap">
@@ -336,6 +383,8 @@ import {
           balanceUsdt={balanceUsdt}
           pointPerUsdt={pointPerUsdt}
           gamePointLinked={gamePointLinked}
+          gamePointDebitEnabled={gamePointDebitEnabled}
+          pointDebitFeePct={pointDebitFeePct}
           onClose={() => setOpen(false)}
         />
       )}
@@ -361,6 +410,8 @@ import {
   balanceUsdt,
   pointPerUsdt,
   gamePointLinked,
+  gamePointDebitEnabled,
+  pointDebitFeePct,
   onClose,
 }: {
   userId: string;
@@ -369,6 +420,8 @@ import {
   balanceUsdt: number;
   pointPerUsdt: number;
   gamePointLinked: boolean;
+  gamePointDebitEnabled: boolean;
+  pointDebitFeePct: number;
   onClose: () => void;
 }) {
 `, modal);
@@ -382,13 +435,14 @@ import {
   modal = replaceOnce(
     modal,
     "  const out = isP2U ? amtNum * POINT_PRICE * (1 - POINT_USDT_FEE_PCT / 100) : amtNum / POINT_PRICE;",
-    "  const out = isP2U ? (amtNum / pointPerUsdt) * (1 - POINT_USDT_FEE_PCT / 100) : amtNum * pointPerUsdt;",
+    withEol(`  const activePointFeePct = gamePointLinked ? pointDebitFeePct : POINT_USDT_FEE_PCT;
+  const out = isP2U ? (amtNum / pointPerUsdt) * (1 - activePointFeePct / 100) : amtNum * pointPerUsdt;`, modal),
     "ConvertModal dynamic Point rate calculation"
   );
   modal = replaceOnce(
     modal,
     '{t(`Tỷ giá: 1 Point = ${POINT_PRICE} USDT · đổi tức thì. Phí đổi Point → USDT: 10% (chiều USDT → Point miễn phí). Muốn rút tiền: đổi Point → USDT rồi rút ở ví USDT.`,\n           `Rate: 1 Point = ${POINT_PRICE} USDT · instant. Point → USDT fee: 10% (USDT → Point is free). To cash out: convert Point → USDT then withdraw from the USDT wallet.`)}',
-    '{t(`Tỷ giá hiện tại: 1 USDT = ${pointPerUsdt} Point. Phí đổi Point → USDT: 10%.`,\n           `Current rate: 1 USDT = ${pointPerUsdt} Point. Point → USDT fee: 10%.`)}',
+    '{t(`Tỷ giá hiện tại: 1 USDT = ${pointPerUsdt} Point. Phí đổi Point → USDT: ${activePointFeePct}%.`,\n           `Current rate: 1 USDT = ${pointPerUsdt} Point. Point → USDT fee: ${activePointFeePct}%.`)}',
     "ConvertModal dynamic Point rate copy"
   );
   modal = replaceOnce(
@@ -396,9 +450,18 @@ import {
     "  const [pending, startTransition] = useTransition();",
     withEol(`  const [pending, startTransition] = useTransition();
   useEffect(() => {
-    const intent = readGamePointConversionIntent(userId);
-    if (intent) setAmt(String(intent.amount));
-  }, [userId]);`, modal),
+    const debitIntent = readGamePointDebitIntent(userId);
+    if (debitIntent && gamePointDebitEnabled) {
+      setDir("P2U");
+      setAmt(String(debitIntent.pointAmount));
+      return;
+    }
+    const conversionIntent = readGamePointConversionIntent(userId);
+    if (conversionIntent) {
+      setDir("U2P");
+      setAmt(String(conversionIntent.amount));
+    }
+  }, [userId, gamePointDebitEnabled]);`, modal),
     "ConvertModal durable intent restore"
   );
   modal = replaceRange(modal, "  const submit = () => {", "\n\n  return (", withEol(`  const submit = () => {
@@ -406,26 +469,64 @@ import {
       toast.push({ type: "warn", msg: t("Số lượng không hợp lệ", "Invalid amount") });
       return;
     }
+    const oppositeIntent = isP2U
+      ? readGamePointConversionIntent(userId)
+      : gamePointDebitEnabled ? readGamePointDebitIntent(userId) : null;
+    if (oppositeIntent) {
+      toast.push({
+        type: "warn",
+        msg: t("Hãy hoàn tất giao dịch đang chờ trước", "Finish the pending transaction first"),
+      });
+      return;
+    }
+    if (isP2U && gamePointLinked && !Number.isSafeInteger(amtNum)) {
+      toast.push({ type: "warn", msg: t("Point phải là số nguyên", "Point must be a whole number") });
+      return;
+    }
     startTransition(async () => {
-      const intent = isP2U ? null : getOrCreateGamePointConversionIntent(userId, amtNum);
-      const res = isP2U
-        ? await convertPointToUsdtAction(amtNum)
-        : await convertUsdtToPointAction(intent!.amount, intent!.requestId);
-      if (!res.ok) {
-        toast.push({ type: "warn", msg: t("Đổi thất bại", "Convert failed"), sub: res.error });
+      let debitIntent: ReturnType<typeof getOrCreateGamePointDebitIntent> | null = null;
+      let conversionIntent: ReturnType<typeof getOrCreateGamePointConversionIntent> | null = null;
+      try {
+        if (isP2U && gamePointLinked) {
+          debitIntent = getOrCreateGamePointDebitIntent(userId, amtNum);
+        } else if (!isP2U) {
+          conversionIntent = getOrCreateGamePointConversionIntent(userId, amtNum);
+        }
+      } catch (error: any) {
+        toast.push({
+          type: "warn",
+          msg: t("Giao dịch cũ đang chờ xử lý", "An earlier transaction is still pending"),
+          sub: error?.message,
+        });
         return;
       }
+      const res = isP2U
+        ? await convertPointToUsdtAction(
+            debitIntent ? debitIntent.pointAmount : amtNum,
+            debitIntent?.requestId
+          )
+        : await convertUsdtToPointAction(conversionIntent!.amount, conversionIntent!.requestId);
       if ((res as any).pending) {
         toast.push({
           type: "warn",
           msg: t("Giao dịch đang xử lý", "Conversion pending"),
-          sub: t("USDT đã được giữ chỗ; hệ thống sẽ tự thử lại cùng giao dịch.", "USDT is reserved; the same conversion will retry automatically."),
+          sub: isP2U
+            ? t("Point đã được giữ chỗ; hệ thống sẽ tự thử lại cùng giao dịch.", "Point is reserved; the same conversion will retry automatically.")
+            : t("USDT đã được giữ chỗ; hệ thống sẽ tự thử lại cùng giao dịch.", "USDT is reserved; the same conversion will retry automatically."),
         });
         onClose();
         router.refresh();
         return;
       }
-      if (intent) clearGamePointConversionIntent(userId, intent.requestId);
+      if (!res.ok) {
+        if ((res as any).terminal && debitIntent) {
+          clearGamePointDebitIntent(userId, debitIntent.requestId);
+        }
+        toast.push({ type: "warn", msg: t("Đổi thất bại", "Convert failed"), sub: res.error });
+        return;
+      }
+      if (debitIntent) clearGamePointDebitIntent(userId, debitIntent.requestId);
+      if (conversionIntent) clearGamePointConversionIntent(userId, conversionIntent.requestId);
       toast.push({
         type: "ok",
         msg: isP2U ? t("Đã đổi Point → USDT", "Converted Point → USDT") : t("Đã đổi USDT → Point", "Converted USDT → Point"),
@@ -438,7 +539,7 @@ import {
   modal = replaceOnce(
     modal,
     "] as const).map(([k, label]) => (",
-    "] as const).filter(([k]) => !gamePointLinked || k === \"U2P\").map(([k, label]) => (",
+    "] as const).filter(([k]) => !gamePointLinked || gamePointDebitEnabled || k === \"U2P\").map(([k, label]) => (",
     "ConvertModal linked direction filter"
   );
   return source.slice(0, modalStart) + modal;
@@ -555,20 +656,21 @@ function patchWalletPage(source) {
   source = replaceOnce(
     source,
     'import { db } from "@/lib/db";',
-    withEol('import { db } from "@/lib/db";\nimport { getActiveUsdtPointRate } from "@/lib/point-rate";', source),
+    withEol('import { db } from "@/lib/db";\nimport { getGamePointDebitUiConfig } from "@/lib/game-point-debit";\nimport { getActiveUsdtPointRate } from "@/lib/point-rate";', source),
     "wallet Point rate import"
   );
   source = replaceOnce(
     source,
     "const [data, transactions, rateRow, paymentNetworks, userRow, ywhLocks, commissions, earlyBonus] = await Promise.all([",
-    "const [data, transactions, rateRow, pointRate, paymentNetworks, userRow, ywhLocks, commissions, earlyBonus] = await Promise.all([",
+    "const [data, transactions, rateRow, pointRate, pointDebitConfig, paymentNetworks, userRow, ywhLocks, commissions, earlyBonus] = await Promise.all([",
     "wallet Point rate result"
   );
   source = replaceOnce(
     source,
     '    db.exchangeRate.findFirst({ where: { fromCurrency: "GXL", toCurrency: "VND", isActive: true } }),',
     withEol(`    db.exchangeRate.findFirst({ where: { fromCurrency: "GXL", toCurrency: "VND", isActive: true } }),
-    getActiveUsdtPointRate(),`, source),
+    getActiveUsdtPointRate(),
+    getGamePointDebitUiConfig(user.id),`, source),
     "wallet Point rate query"
   );
   source = replaceOnce(
@@ -590,6 +692,8 @@ function patchWalletPage(source) {
               pointPerUsdt={Number(pointRate.rateMicros) / 1_000_000}
               gamePointLinked={Boolean(data?.gamePointAuthority?.linked)}
               gamePointAvailable={data?.gamePointAuthority?.available !== false}
+              gamePointDebitEnabled={pointDebitConfig.enabled}
+              pointDebitFeePct={pointDebitConfig.feePct ?? 0}
             />`;
   return replaceOnce(source, anchor, withEol(replacement, source), "wallet PointConvertActions props");
 }
@@ -603,11 +707,15 @@ function patchWebRoot(root, migrationId) {
 
   const migrationRoot = path.join(root, "prisma", "migrations", migrationId);
   if (fs.existsSync(migrationRoot)) fail(`Migration already exists: ${migrationId}`);
-  if (fs.existsSync(path.join(root, "lib", "game-point-authority.ts"))) {
-    fail("game-point-authority.ts already exists");
-  }
-  if (fs.existsSync(path.join(root, "lib", "point-rate.ts"))) {
-    fail("point-rate.ts already exists");
+  for (const relative of [
+    "lib/game-point-authority.ts",
+    "lib/game-point-debit.ts",
+    "lib/game-point-debit-intent.ts",
+    "lib/point-rate.ts",
+  ]) {
+    if (fs.existsSync(path.join(root, relative))) {
+      fail(`${relative} already exists`);
+    }
   }
 
   write(root, "prisma/schema.prisma", patchSchema(read(root, "prisma/schema.prisma")));
@@ -619,6 +727,8 @@ function patchWebRoot(root, migrationId) {
   write(root, "app/[locale]/(app)/wallet/page.tsx", patchWalletPage(read(root, "app/[locale]/(app)/wallet/page.tsx")));
 
   write(root, "lib/game-point-authority.ts", overlay("game-point-authority.ts"));
+  write(root, "lib/game-point-debit.ts", overlay("game-point-debit.ts"));
+  write(root, "lib/game-point-debit-intent.ts", overlay("game-point-debit-intent.ts"));
   write(root, "lib/point-rate.ts", overlay("point-rate.ts"));
   write(root, "lib/game-point-conversion-intent.ts", overlay("game-point-conversion-intent.ts"));
   write(root, "lib/game-point-sync.ts", overlay("game-point-sync.ts"));
@@ -629,10 +739,13 @@ function patchWebRoot(root, migrationId) {
   write(root, `prisma/migrations/${migrationId}/migration.sql`, overlay("migration.sql"));
 
   const convert = read(root, "lib/actions/convert.ts");
-  if (!convert.includes("GAME_POINT_TO_USDT_REQUIRES_GAME_DEBIT")
+  const debit = read(root, "lib/game-point-debit.ts");
+  if (!convert.includes("convertLinkedGamePointToUsdt")
       || !convert.includes("gamePointConversion.create")
       || !convert.includes("rateVersionId")
-      || !convert.includes('status: authority.mode === "game" ? "PENDING" : "SUCCESS"')) {
+      || !convert.includes('status: authority.mode === "game" ? "PENDING" : "SUCCESS"')
+      || !debit.includes('status: "CAPTURE_PENDING"')
+      || !debit.includes("sendGamePointReservationCommand")) {
     fail("Patched conversion is missing authority invariants");
   }
 }

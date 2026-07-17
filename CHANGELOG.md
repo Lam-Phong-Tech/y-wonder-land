@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-07-17 (Point-to-USDT web debit saga candidate)
+
+### Added
+- Added a durable `GamePointDebit` saga and browser intent for linked-account `Point -> USDT`: deterministic request/reservation/transaction IDs, exact rate/fee/net micros snapshots, reserve/capture/release compensation, cron retry and explicit canary/fee gates.
+- Added SQLite cross-direction locks so one account cannot start `USDT -> Point` and `Point -> USDT` concurrently. Pending USDT is journaled before game capture but becomes spendable only in the final atomic SQLite capture settlement.
+- Added isolated DB/runtime fault tests for replay, payload conflict, reserve/capture response loss, rate changes, settlement failure/release, wrong-player responses, journal tampering and remote idempotency conflicts. YWH remains adapter-disabled.
+
+### Verified
+- `test:web-point-authority`, `test:web-point-reservation`, `test:web-point-credit`, `test:security` and `test:phase1:isolated` pass locally. Overlay TypeScript/JavaScript syntax, Bash syntax, migration SQL and the pinned partial production-source patch also pass.
+- The checksum-pinned 17-file overlay (`2cd12483d811b966f26c3c24db52b2254c6e8a82126ece464e5cdabe8e9e986d`) passed the full VPS validator on copied production source/SQLite: Prisma generate/validate/migration, DB E2E, Next.js `15.5.20` build `g078J34tOR0M2Gmd1WpIp`, credit runtime fault E2E and debit saga fault E2E.
+- The first DB E2E exposed Prisma's generic FK rendering for SQLite trigger aborts; the test now proves trigger SQL, a valid control insert and absence of blocked rows instead of trusting the masked message. Validator postflight reports `LIVE_WEB_CHANGED=no`, `PRODUCTION_DATABASE_MUTATED=no`, `PRODUCTION_SERVICES_RESTARTED=no` and `REAL_PAYMENT_USED=no`. Production debit remains disabled and no deployment, account link or balance migration occurred.
+
 ## [Unreleased] - 2026-07-17 (Unity farm and city asset recovery)
 
 ### Recovered
@@ -11,7 +23,7 @@
 - Compared all 165 stash-side untracked assets after recovery: none are missing. After Unity removed the generated Addressables metadata, the project contains 2,474 asset metadata GUIDs with zero duplicates; 273 unique references across 33 affected Unity YAML files resolve with zero missing references when Unity built-ins and package metadata are included.
 - Unity `6000.3.15f1` batch import/compile exited with code `0`; the log contained no C# compile error, exception, missing-reference, shader/import-failure or crash match.
 - Unity removed `Assets/AddressableAssetsData/link.xml` and its metadata again during import. Their tracked deletion is retained because Addressables regenerates exact platform copies under `Library/com.unity.addressables/aa/{Android,iOS,Windows}/AddressablesLink/link.xml`.
-- FarmScene/CityScene visual and runtime inspection remains pending; this recovery is not yet a visual acceptance result.
+- The project owner opened and accepted the restored content. Subsequent CityScene/Map2.1/material edits are user-owned worktree changes and are intentionally outside the web debit tranche.
 
 ## [Unreleased] - 2026-07-17 (Post-remediation Point decisions approved without migration authority)
 

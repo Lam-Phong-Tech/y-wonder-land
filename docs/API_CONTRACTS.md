@@ -140,7 +140,7 @@ Còn chặn **production/money thật**, nhưng không chặn code và test cand
 
 - Báo cáo reconciliation và phê duyệt migration riêng cho từng balance web legacy.
 - Mâu thuẫn nghiệp vụ `YWH -> Point`, hành vi chuyển Point giữa người dùng và các action web legacy đang cộng `balanceGXL`.
-- Phí, hạn mức, phê duyệt và đối soát bên thanh toán cho `Point -> USDT`.
+- Phí/hạn mức nghiệp vụ, phê duyệt rút và đối soát bên thanh toán cho `Point -> USDT`. Candidate local bắt buộc cấu hình fee BPS rõ ràng nhưng không tự coi đó là quyết định BA.
 - Công thức, số tầng, điều kiện, thời điểm và reversal hoa hồng YWH.
 
 Các endpoint dưới đây là contract candidate v3 đã có test cô lập, chưa deploy. Chúng không phải quyền bật giao dịch thật hoặc chuyển `WEB_TOPUP_MODE=open`.
@@ -216,8 +216,12 @@ POST http://127.0.0.1:3000/internal/web/point-release
 - `capture` chỉ chuyển `RESERVED -> CAPTURED`; không trừ lần hai. `release` chuyển `RESERVED -> RELEASED` và hoàn đúng một lần.
 - `CAPTURED` và `RELEASED` là terminal. Retry cùng ID/cùng payload/cùng operation trả `duplicate=true`; đổi payload hoặc đi chéo terminal state trả `409`.
 - Response thành công gồm `{ ok, duplicate, operation, player_id, economy, reservation, transaction }` và gửi realtime balance absolute cho player đang online.
-- Web orchestrator phải giữ nguyên `reservation_id` qua timeout/retry và chỉ capture sau khi nghiệp vụ web đã commit. Nếu nghiệp vụ thất bại hoặc bị hủy, nó release cùng ID; không tạo một debit/credit bù bằng ID khác.
-- Producer/orchestrator web cho luồng rút và `Point -> YWH` chưa được nối production. Flag debit phải giữ `false` cho tới khi migration, reconciliation và fault E2E của chính orchestrator đạt gate.
+- Web orchestrator phải giữ nguyên `reservation_id` qua timeout/retry và chỉ capture sau khi journal settlement web `PENDING` đã commit. USDT chưa được cộng vào số dư spendable ở trạng thái này. Sau khi game xác nhận `CAPTURED`, một SQLite transaction mới cộng `balanceUsdt`, chuyển transaction `SUCCESS` và debit `CAPTURED` đúng một lần.
+- Nếu không tạo được journal settlement web, orchestrator release cùng ID; không tạo một debit/credit bù bằng ID khác. Nếu journal đã tồn tại thì không được release, kể cả sau timeout; phải retry capture cùng reservation hoặc chuyển `MANUAL_REVIEW`.
+- Candidate local nhận intent `convertPointToUsdtAction(pointAmount, requestId)`. `requestId` là UUID v4 được browser giữ bền; journal sinh deterministic `reservationId/sourceTransactionId`, ghim player, rate version, gross/fee/net micros và rounding. Cùng ID khác amount trả `IDEMPOTENCY_CONFLICT`.
+- Mỗi account chỉ có một operation ví chưa terminal trên cả hai chiều. Action precheck và trigger SQLite chéo chặn race `USDT -> Point` với `Point -> USDT` từ nhiều tab.
+- Debit USDT chỉ hiện cho identity thỏa đồng thời `WEB_TOPUP_ENABLED`, mode/allowlist, `WEB_POINT_WALLET_DEBIT_ENABLED=true`, fee `WEB_POINT_DEBIT_FEE_BPS` hợp lệ và max `WEB_POINT_DEBIT_MAX_POINTS`. Không có fee mặc định ngầm.
+- Adapter `Point -> YWH`, payout/rút USDT bên ngoài và tiền thật chưa được nối. Web saga mới đã pass full Prisma migration/DB E2E, Next build và debit fault E2E trên source + SQLite production bản sao; flag production vẫn phải giữ `false` cho tới khi deploy candidate và migration/link account được duyệt riêng.
 
 Cập nhật bàn giao 09/07/2026 từ chat 01/07:
 - Endpoint web auth đang dùng được ngay qua SSL hợp lệ là `POST https://ywonder.net/api/game/auth`.

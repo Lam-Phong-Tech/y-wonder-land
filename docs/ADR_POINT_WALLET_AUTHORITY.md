@@ -1,7 +1,7 @@
 # ADR: One Authoritative Point Wallet
 
 Date: 2026-07-16
-Status: Candidate accepted for isolated implementation; not approved for production rollout
+Status: Candidate implemented locally; isolated release validation and production rollout are not approved yet
 
 ## Context
 
@@ -63,8 +63,10 @@ reconciliation and linking process. There is no automatic balance addition.
    the already linked `webUserId -> playerId` pair.
 7. No conversion recomputes a rate after commit. Each transaction stores an exact,
    immutable rate-version snapshot.
-8. Point arithmetic uses integer micros and `BigInt`/database integers. New wallet
-   code must not use floating-point arithmetic for value settlement.
+8. Rate, quote, fee, rounding and reconciliation arithmetic use integer micros and
+   `BigInt`/database integers. The final compatibility write to the legacy web
+   `Float` USDT column is derived once from pinned micros inside one SQLite
+   transaction; retries never recompute the amount from floating-point values.
 9. A game purchase and its Point debit remain one PostgreSQL transaction.
 10. A successful game purchase emits one durable consumption event keyed by that
     purchase transaction. Future YWH commission uses the same key and reversal key.
@@ -109,6 +111,42 @@ current rate.
 
 The current `ExchangeRate` row can seed the first version, but the fixed constants
 in `lib/tokens.ts` cannot remain settlement authority.
+
+## Web Point-to-USDT Debit Saga Candidate
+
+The local web overlay now implements the USDT target adapter as a durable saga. It
+does not implement YWH conversion or an external USDT withdrawal/payment adapter.
+
+```text
+RESERVE_PENDING -> RESERVED -> CAPTURE_PENDING -> CAPTURED
+                              -> RELEASE_PENDING -> RELEASED
+                 any non-recoverable conflict -> MANUAL_REVIEW/REJECTED
+```
+
+- One browser intent creates one UUID and keeps it in local storage until a
+  terminal response. The web journal derives deterministic reservation and
+  transaction IDs from that UUID.
+- `GamePointDebit` pins the linked player, whole Point amount, Admin rate version,
+  gross/fee/net micros, both rounding remainders and request fingerprint.
+- The web commits a `PENDING` USDT transaction journal before asking the game to
+  capture. That pending value is not added to spendable `balanceUsdt` yet.
+- After the game returns `CAPTURED`, one SQLite transaction credits spendable USDT,
+  marks the web transaction `SUCCESS` and marks the debit `CAPTURED`. A lost
+  response retries the same reservation and cannot credit twice.
+- If the web cannot create its pending settlement, it releases the same game
+  reservation. If any settlement journal already exists, release is forbidden and
+  the saga continues toward capture or operator review.
+- SQLite triggers and action checks allow only one unresolved wallet operation per
+  user across both `USDT -> Point` and `Point -> USDT` directions.
+- New debits require an explicit `WEB_POINT_DEBIT_FEE_BPS`; there is no inherited
+  10% default. The adapter is further gated by `WEB_POINT_WALLET_DEBIT_ENABLED`,
+  top-up mode and the canary allowlist.
+
+Static safety, migration SQL, reservation/credit/security and Phase 1 regression
+tests pass locally. The checksum-pinned overlay also passed full Prisma migration,
+DB E2E, Next.js build and debit fault E2E against copied production source/SQLite.
+Production has not been changed; deployment remains a separately approved gate with
+the debit kill switch kept off.
 
 ## Legacy Reconciliation
 

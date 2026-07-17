@@ -29,11 +29,15 @@ const migration = read("migration.sql");
 const authority = read("game-point-authority.ts");
 const pointRate = read("point-rate.ts");
 const browserIntent = read("game-point-conversion-intent.ts");
+const debitBrowserIntent = read("game-point-debit-intent.ts");
 const conversion = read("convert-usdt-to-point-action.tsfrag");
+const debitAction = read("convert-point-to-usdt-action.tsfrag");
+const debit = read("game-point-debit.ts");
 const dispatcher = read("game-point-sync.ts");
 const creditRoute = read("game-credit-route.ts");
 const balanceRoute = read("game-balance-route.ts");
 const runtimeE2E = read("web-point-authority-runtime-e2e.ts");
+const debitRuntimeE2E = read("web-point-debit-runtime-e2e.ts");
 const pointUi = fs.readFileSync(path.join(root, "apply-web-point-authority-patch.js"), "utf8");
 const validator = fs.readFileSync(path.join(__dirname, "validate-web-point-authority-candidate.sh"), "utf8");
 
@@ -44,6 +48,13 @@ requireText(migration, "Wallet_freeze_linked_point_update", "Linked Point freeze
 requireText(migration, "GamePointConversion_one_unresolved_per_user", "Single unresolved conversion index is missing.");
 requireText(migration, "where \"status\" not in ('SENT', 'REFUNDED')", "Resolved conversion states are not explicit.");
 requireText(migration, 'create table "PointExchangeRateVersion"', "Immutable Point rate versions are missing.");
+requireText(migration, 'create table "GamePointDebit"', "Point debit saga journal is missing.");
+requireText(migration, "GamePointDebit_one_unresolved_per_user", "Single unresolved Point debit gate is missing.");
+requireText(migration, "GamePointDebit_reservationId_key", "Game reservation IDs are not unique.");
+requireText(migration, "GamePointConversion_block_active_debit_insert",
+  "USDT-to-Point can race an unresolved Point debit.");
+requireText(migration, "GamePointDebit_block_active_conversion_insert",
+  "Point debit can race an unresolved USDT-to-Point conversion.");
 requireText(migration, "PointExchangeRateVersion_one_active_pair", "Multiple active Point rates are not prevented.");
 requireText(migration, '"rateVersionId" text not null', "Conversion journal does not pin a rate version.");
 
@@ -52,6 +63,8 @@ requireText(pointRate, "quoteUsdtToPointMicros", "Exact dynamic Point quote is m
 requireText(pointRate, "const raw = usdtMicros * rateMicros", "Point quote does not use integer arithmetic.");
 requireText(pointRate, "roundingRemainder", "Point quote does not retain its rounding remainder.");
 requireText(pointRate, "replaceActiveUsdtPointRate", "Admin rate version replacement is missing.");
+requireText(pointRate, "quotePointToUsdtMicros", "Exact Point debit quote is missing.");
+requireText(pointRate, "const raw = pointMicros * MICROS_SCALE", "Point debit quote does not use integer arithmetic.");
 
 requireText(authority, "GAME_POINT_SYNC_MUST_USE_LOOPBACK", "Balance read is not loopback-only.");
 requireText(authority, "ywonder-point-balance-v1", "Balance read does not use a domain-separated signature.");
@@ -60,6 +73,11 @@ requireText(authority, "body.player_id !== linked.gamePlayerId", "Balance read d
 requireText(authority, "GAME_POINT_IDENTITY_MISMATCH", "Balance identity mismatch lacks a stable error code.");
 requireText(authority, "INVALID_GAME_POINT_CONVERSION_REQUEST_ID", "Browser conversion request IDs are not validated.");
 requireText(authority, "normalizeUsdtMicros", "USDT conversion amount normalizer is missing.");
+requireText(authority, "ywonder-point-reservation-v1", "Point debit commands lack a domain-separated HMAC.");
+requireText(authority, "reservation?.playerId !== input.expectedPlayerId",
+  "Point debit response does not pin the reservation player.");
+requireText(authority, 'return internalEndpoint(`/internal/web/point-${operation}`)',
+  "Point debit commands do not use the internal reservation endpoints.");
 requireText(conversion, "usdtMicros", "Exact USDT micros are not written to the conversion journal.");
 requireText(conversion, "getActiveUsdtPointRate", "Conversion does not read the Admin-controlled rate.");
 requireText(conversion, "rateVersionId", "Conversion does not snapshot the rate version.");
@@ -71,9 +89,46 @@ requireBefore(
   "Conversion reads a new rate before checking an idempotent replay."
 );
 
+requireText(debitAction, "convertLinkedGamePointToUsdt", "Linked Point debit action is not orchestrated.");
+requireText(debitAction, "isGamePointLinkedAccount", "Legacy and linked debit paths are not separated.");
+requireText(debit, "RESERVE_PENDING", "Point debit reserve state is missing.");
+requireText(debit, "CAPTURE_PENDING", "Point debit capture state is missing.");
+requireText(debit, "RELEASE_PENDING", "Point debit compensation state is missing.");
+requireText(debit, "POINT_DEBIT_SETTLEMENT_IDEMPOTENCY_CONFLICT",
+  "Point debit settlement conflict is not quarantined.");
+requireText(debit, "gamePointDebitTransportAllows(row.userId)",
+  "Disabled or non-canary debit journals are not paused.");
+requireText(debit, "GAME_POINT_WALLET_OPERATION_ALREADY_PENDING",
+  "Point debit does not block the opposite conversion direction.");
+requireText(debit, "new Date(row.nextAttemptAt).getTime() > Date.now()",
+  "Point debit retry backoff is ignored.");
+const debitProgress = debit.slice(requireText(
+  debit,
+  "export async function progressGamePointDebitById",
+  "Point debit progress function is missing."
+));
+requireBefore(debitProgress, "sendReserve(row)", "settleReserved(row)",
+  "Web USDT is settled before game Point is reserved.");
+requireBefore(debitProgress, "settleReserved(row)", "sendCapture(row)",
+  "Game Point is captured before the web settlement journal exists.");
+const settleSection = debit.slice(
+  requireText(debit, "async function settleReserved", "Point debit settlement function is missing."),
+  requireText(debit, "async function sendReserve", "Point debit reserve function is missing.")
+);
+assert(!settleSection.includes("balanceUsdt: { increment"),
+  "Pending Point debit exposes USDT before game capture.");
+const captureSection = debit.slice(
+  requireText(debit, "async function sendCapture", "Point debit capture function is missing."),
+  requireText(debit, "async function sendRelease", "Point debit release function is missing.")
+);
+requireText(captureSection, "balanceUsdt: { increment: netAmount }",
+  "Captured Point debit does not credit spendable web USDT atomically.");
+
 requireText(conversion, "gamePointConversionTransactionId", "Conversion transaction ID is not deterministic.");
 requireText(conversion, "gamePointConversion.findUnique", "Conversion retry does not load the existing journal.");
 requireText(conversion, "GAME_POINT_CONVERSION_ALREADY_PENDING", "Concurrent pending conversion guard is missing.");
+requireText(conversion, "GAME_POINT_WALLET_OPERATION_ALREADY_PENDING",
+  "USDT-to-Point does not block an unresolved Point debit.");
 requireText(conversion, 'status: authority.mode === "game" ? "PENDING" : "SUCCESS"', "Game conversion is marked successful before delivery.");
 requireText(conversion, '? { balanceUsdt: { decrement: normalizedUsdt.amount } }', "Game-authoritative debit branch is missing.");
 requireText(conversion, 'balanceGXL: { increment: point }', "Legacy compatibility branch was accidentally removed.");
@@ -108,11 +163,25 @@ requireText(balanceRoute, 'pointSource: gamePoint.linked ? "game" : "legacy-web"
 
 assert((browserIntent.match(/crypto\.randomUUID\(\)/g) || []).length === 1,
   "Durable browser intent must generate exactly one idempotency request ID.");
+assert((debitBrowserIntent.match(/crypto\.randomUUID\(\)/g) || []).length === 1,
+  "Durable debit intent must generate exactly one idempotency request ID.");
+requireText(debitBrowserIntent, "window.localStorage.setItem",
+  "Browser Point debit request ID is not durable across reloads.");
+requireText(debitBrowserIntent, "GAME_POINT_DEBIT_INTENT_AMOUNT_MISMATCH",
+  "A pending debit intent can silently change amount.");
 requireText(browserIntent, "window.localStorage.setItem", "Browser conversion request ID is not durable across reloads.");
 requireText(browserIntent, "if (existing) return existing;", "Browser retry does not reuse the durable request ID.");
 assert(!pointUi.includes("crypto.randomUUID()"), "A UI entry point bypasses the durable conversion intent.");
 assert((pointUi.match(/getOrCreateGamePointConversionIntent/g) || []).length >= 3,
   "Both USDT-to-Point UI entry points must use the durable conversion intent.");
+requireText(pointUi, "getOrCreateGamePointDebitIntent",
+  "Point-to-USDT UI bypasses the durable debit intent.");
+requireText(pointUi, "debitIntent && gamePointDebitEnabled",
+  "A disabled debit rollout can restore a stale Point debit intent.");
+requireText(pointUi, "gamePointDebitEnabled ? readGamePointDebitIntent(userId) : null",
+  "A disabled debit rollout can block the USDT-to-Point direction locally.");
+requireText(pointUi, "gamePointDebitEnabled={pointDebitConfig.enabled}",
+  "Wallet UI does not receive the debit rollout gate.");
 requireText(pointUi, "gamePointLinked && !gamePointAvailable", "Linked Point UI does not fail closed on balance-read outage.");
 requireText(pointUi, '!gamePointLinked && xferOpen', "Linked Point UI still exposes legacy transfer.");
 requireText(pointUi, "if (!data) return null;", "Wallet query can infer a response without the authority contract.");
@@ -126,7 +195,7 @@ requireText(pointUi, "pointPerUsdt={Number(pointRate.rateMicros) / 1_000_000}",
 requireText(validator, "flock -n 9", "Candidate validator has no single-run lock.");
 requireText(validator, "?mode=ro", "Candidate validator does not open production SQLite read-only.");
 requireText(validator, "resource_gate", "Candidate validator has no VPS resource gate.");
-requireText(validator, "Overlay must contain exactly thirteen files.", "Candidate validator does not pin the expanded overlay.");
+requireText(validator, "Overlay must contain exactly seventeen files.", "Candidate validator does not pin the expanded overlay.");
 requireText(validator, "WEB_TOPUP_MODE=open", "Runtime E2E does not isolate dynamic synthetic identities.");
 requireText(runtimeE2E, "ISOLATED_POST_COMMIT_RESPONSE_LOSS", "Runtime E2E omits post-commit response loss.");
 requireText(runtimeE2E, "ISOLATED_CONCURRENT_RESPONSE_LOSS", "Runtime E2E omits concurrent callback settlement.");
@@ -136,6 +205,20 @@ requireText(runtimeE2E, "replacementQuote.pointAmount !== EXPECTED_POINT_AMOUNT"
 requireText(runtimeE2E, "INVALID_GAME_POINT_SYNC_RESPONSE", "Runtime E2E omits malformed success responses.");
 requireText(runtimeE2E, 'scenario = "identity-mismatch"', "Runtime E2E omits a wrong-player response.");
 requireText(runtimeE2E, 'current.outbox?.status === "FAILED"', "Runtime E2E omits permanent conflict quarantine.");
+requireText(debitRuntimeE2E, "ISOLATED_DEBIT_RESERVE_RESPONSE_LOSS",
+  "Debit runtime E2E omits reserve response loss.");
+requireText(debitRuntimeE2E, "ISOLATED_DEBIT_CAPTURE_RESPONSE_LOSS",
+  "Debit runtime E2E omits capture response loss.");
+requireText(debitRuntimeE2E, "GAME_POINT_DEBIT_ALREADY_PENDING",
+  "Debit runtime E2E omits the single-unresolved gate.");
+requireText(debitRuntimeE2E, "replacementQuote.netUsdtMicros !== originalQuote.netUsdtMicros",
+  "Debit runtime E2E omits a rate change after reservation creation.");
+requireText(debitRuntimeE2E, 'released.debitStatus === "RELEASED"',
+  "Debit runtime E2E omits compensation after web settlement failure.");
+requireText(debitRuntimeE2E, 'rejected.debitStatus === "MANUAL_REVIEW"',
+  "Debit runtime E2E omits remote conflict quarantine.");
+requireText(debitRuntimeE2E, 'quarantinedJournal.debitStatus === "MANUAL_REVIEW"',
+  "Debit runtime E2E omits settlement journal tamper quarantine.");
 requireText(validator, "nice -n 10 ionice -c 2 -n 7", "Candidate build is not low priority.");
 requireText(validator, "Production SQLite schema changed during validation.", "Live schema integrity check is missing.");
 requireText(validator, "PRODUCTION_SERVICES_RESTARTED=no", "Validator does not report service isolation.");
@@ -158,10 +241,23 @@ const patchedSchema = patchSchema(schemaFixture);
 requireText(patchedSchema, "gamePointLink GamePointLinkedAccount?", "Schema patch omitted the linked-account relation.");
 requireText(patchedSchema, "gamePlayerId String   @unique", "Schema patch omitted the unique game-player pin.");
 requireText(patchedSchema, "model GamePointConversion", "Schema patch omitted the conversion journal.");
+requireText(patchedSchema, "model GamePointDebit", "Schema patch omitted the debit saga journal.");
 requireText(patchedSchema, "model PointExchangeRateVersion", "Schema patch omitted immutable Point rates.");
 requireText(patchedSchema, "rateVersionId       String", "Schema patch omitted conversion rate pinning.");
 
-const combined = [migration, authority, pointRate, browserIntent, conversion, dispatcher, creditRoute, balanceRoute].join("\n");
+const combined = [
+  migration,
+  authority,
+  pointRate,
+  browserIntent,
+  debitBrowserIntent,
+  conversion,
+  debitAction,
+  debit,
+  dispatcher,
+  creditRoute,
+  balanceRoute,
+].join("\n");
 const nonLoopbackAddresses = (combined.match(/\b(?:\d{1,3}\.){3}\d{1,3}\b/g) || [])
   .filter((address) => address !== "127.0.0.1");
 assert(nonLoopbackAddresses.length === 0,

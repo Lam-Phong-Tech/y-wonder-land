@@ -2,8 +2,10 @@ import { db } from "@/lib/db";
 
 export const POINT_RATE_PAIR = "USDT_POINT";
 const MICROS_SCALE = BigInt(1_000_000);
+const BPS_SCALE = BigInt(10_000);
 const MAX_RATE_MICROS = BigInt("1000000000000000");
 const MAX_POINT_MICROS = BigInt(1_000_000_000) * MICROS_SCALE;
+const MAX_USDT_MICROS = BigInt(10_000_000) * MICROS_SCALE;
 
 function parsePositiveMicros(value: string, errorCode: string): bigint {
   const text = String(value || "").trim();
@@ -42,6 +44,12 @@ export function pointMicrosToNumber(value: string): number {
   return Number(micros) / Number(MICROS_SCALE);
 }
 
+export function microsTextToNumber(value: string, errorCode = "INVALID_AMOUNT_MICROS"): number {
+  const micros = parsePositiveMicros(value, errorCode);
+  if (micros > BigInt(Number.MAX_SAFE_INTEGER)) throw new Error("AMOUNT_TOO_LARGE");
+  return Number(micros) / Number(MICROS_SCALE);
+}
+
 export function quoteUsdtToPointMicros(usdtMicrosText: string, rateMicrosText: string) {
   const usdtMicros = parsePositiveMicros(usdtMicrosText, "INVALID_USDT_MICROS");
   const rateMicros = parsePositiveMicros(rateMicrosText, "INVALID_POINT_RATE");
@@ -56,6 +64,40 @@ export function quoteUsdtToPointMicros(usdtMicrosText: string, rateMicrosText: s
     pointMicros: pointMicros.toString(),
     pointAmount: pointMicrosToAmountText(pointMicros.toString()),
     roundingRemainder: roundingRemainder.toString(),
+  };
+}
+
+export function quotePointToUsdtMicros(
+  pointMicrosText: string,
+  rateMicrosText: string,
+  feeBpsValue: number
+) {
+  const pointMicros = parsePositiveMicros(pointMicrosText, "INVALID_POINT_MICROS");
+  const rateMicros = parsePositiveMicros(rateMicrosText, "INVALID_POINT_RATE");
+  const feeBps = Number(feeBpsValue);
+  if (rateMicros > MAX_RATE_MICROS) throw new Error("INVALID_POINT_RATE");
+  if (!Number.isSafeInteger(feeBps) || feeBps < 0 || feeBps >= Number(BPS_SCALE)) {
+    throw new Error("INVALID_POINT_DEBIT_FEE_BPS");
+  }
+
+  const raw = pointMicros * MICROS_SCALE;
+  const grossUsdtMicros = raw / rateMicros;
+  const roundingRemainder = raw % rateMicros;
+  if (grossUsdtMicros < BigInt(1) || grossUsdtMicros > MAX_USDT_MICROS) {
+    throw new Error("POINT_DEBIT_AMOUNT_TOO_LARGE");
+  }
+  const feeRaw = grossUsdtMicros * BigInt(feeBps);
+  const feeMicros = feeRaw / BPS_SCALE;
+  const feeRoundingRemainder = feeRaw % BPS_SCALE;
+  const netUsdtMicros = grossUsdtMicros - feeMicros;
+  if (netUsdtMicros < BigInt(1)) throw new Error("POINT_DEBIT_NET_AMOUNT_TOO_SMALL");
+
+  return {
+    grossUsdtMicros: grossUsdtMicros.toString(),
+    feeMicros: feeMicros.toString(),
+    netUsdtMicros: netUsdtMicros.toString(),
+    roundingRemainder: roundingRemainder.toString(),
+    feeRoundingRemainder: feeRoundingRemainder.toString(),
   };
 }
 

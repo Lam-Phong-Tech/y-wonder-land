@@ -50,7 +50,7 @@ Chưa được cung cấp: tỷ lệ hoa hồng, số tầng giới thiệu, đi
 2. **Chuyển Point:** nếu chuyển Point cho người khác là giao dịch trên ví Point chung thì số dư người gửi/người nhận phải thay đổi ở cả web và game. Cần chốt câu `không` đang nói không cho game nhận sự kiện hay nói giao dịch không dùng Point.
 3. **Ledger authoritative:** ADR candidate đã chọn PostgreSQL game `player_economy.pos` cho account đã link. Quyết định này đủ để code/test cô lập; vẫn cần phê duyệt rollout và reconciliation từng account trước migration production.
 4. **Tỷ giá động:** candidate đã có version bất biến cho `USDT -> Point`, integer micros, rounding remainder và audit Admin. Vẫn cần chốt cặp `YWH <-> Point`, phí và quy tắc làm tròn nghiệp vụ.
-5. **Rút Point -> USDT:** game candidate đã có reserve/capture/release idempotent; vẫn cần web orchestrator, phí, min/max, phê duyệt, reversal và đối soát giao dịch bên ngoài.
+5. **Rút Point -> USDT:** game candidate đã có reserve/capture/release idempotent; web candidate local đã có journal/orchestrator cho bước đổi sang số dư USDT nội bộ. Vẫn chưa có phí nghiệp vụ được phê duyệt, min/max chính thức, quy trình phê duyệt/rút bên ngoài, reversal vận hành hoặc đối soát với giao dịch USDT thật.
 6. **Số dư Point web hiện hữu:** cần kiểm kê và kế hoạch chuyển sang ledger duy nhất mà không nhân đôi hoặc làm mất số dư.
 7. **Hoa hồng YWH:** cần công thức và contract payout idempotent theo cùng transaction tiêu dùng game; refund/hủy phải có reversal tương ứng.
 
@@ -60,7 +60,7 @@ Chưa được cung cấp: tỷ lệ hoa hồng, số tầng giới thiệu, đi
 - Mọi credit, debit, conversion, transfer, reserve, withdrawal và reversal phải có transaction ID bất biến, idempotency và audit.
 - Một giao dịch tiêu dùng game phải trừ Point đúng một lần; sự kiện hoa hồng YWH phải dùng cùng source transaction hoặc transactional outbox để không trả thiếu/trùng.
 - Unity chỉ gửi ý định hành động. Unity không gửi số Point/YWH muốn cộng và không giữ secret ví.
-- Candidate v3 hiện bao phủ `USDT -> Point`, rate Admin bất biến, balance projection và phía game của `reserve/capture/release`; chưa bao phủ migration legacy, web orchestrator Point -> USDT/YWH, transfer hoặc hoa hồng YWH.
+- Candidate v3 hiện bao phủ `USDT -> Point`, rate Admin bất biến, balance projection, phía game của `reserve/capture/release` và web saga `Point -> USDT` nội bộ. Saga mới đã pass full Prisma/Next/fault E2E trên source + SQLite production bản sao nhưng chưa deploy; `Point -> YWH`, migration legacy, transfer, rút USDT bên ngoài và hoa hồng YWH vẫn chưa được triển khai.
 - Giữ callback public `404`, không chuyển `WEB_TOPUP_MODE=open` và không dùng tiền thật trong khi hợp đồng kỹ thuật chưa hoàn chỉnh.
 
 ## 6. Ghi chú canary hiện tại

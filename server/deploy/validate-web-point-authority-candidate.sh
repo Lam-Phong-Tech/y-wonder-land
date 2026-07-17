@@ -71,14 +71,16 @@ mkdir -p "${stage}" "${overlay_root}"
 
 tar -tzf "${archive}" | sed 's#^\./##' >"${run_root}/overlay.list"
 tar -tvzf "${archive}" >"${run_root}/overlay.verbose-list"
-[[ "$(awk 'NF && $0 !~ /\/$/ {count++} END {print count+0}' "${run_root}/overlay.list")" -eq 13 ]] \
-  || fail "Overlay must contain exactly thirteen files."
+[[ "$(awk 'NF && $0 !~ /\/$/ {count++} END {print count+0}' "${run_root}/overlay.list")" -eq 17 ]] \
+  || fail "Overlay must contain exactly seventeen files."
 for required in \
-  apply-web-point-authority-patch.js convert-usdt-to-point-action.tsfrag cron-route.ts \
+  apply-web-point-authority-patch.js convert-point-to-usdt-action.tsfrag \
+  convert-usdt-to-point-action.tsfrag cron-route.ts \
   game-balance-route.ts game-credit-route.ts game-point-authority.ts \
-  game-point-conversion-intent.ts game-point-sync.ts point-rate.ts \
+  game-point-conversion-intent.ts game-point-debit-intent.ts game-point-debit.ts \
+  game-point-sync.ts point-rate.ts \
   migration.sql notification-poll-route.ts web-point-authority-db-e2e.js \
-  web-point-authority-runtime-e2e.ts; do
+  web-point-authority-runtime-e2e.ts web-point-debit-runtime-e2e.ts; do
   grep -qx "${required}" "${run_root}/overlay.list" || fail "Overlay is missing ${required}."
 done
 awk '/^\// || /(^|\/)\.\.($|\/)/ {bad=1} END {exit bad ? 1 : 0}' "${run_root}/overlay.list" \
@@ -194,6 +196,8 @@ install -m 0600 "${overlay_root}/web-point-authority-db-e2e.js" \
   "${stage}/deploy/web-point-authority-db-e2e.js"
 install -m 0600 "${overlay_root}/web-point-authority-runtime-e2e.ts" \
   "${stage}/deploy/web-point-authority-runtime-e2e.ts"
+install -m 0600 "${overlay_root}/web-point-debit-runtime-e2e.ts" \
+  "${stage}/deploy/web-point-debit-runtime-e2e.ts"
 mkdir -p "${run_root}/npm-cache"
 chown -R "${web_user}:$(id -gn "${web_user}")" "${stage}" "${run_root}/npm-cache"
 
@@ -215,12 +219,23 @@ db = sqlite3.connect("file:" + sys.argv[1] + "?mode=ro", uri=True)
 tables = {row[0] for row in db.execute("select name from sqlite_master where type='table'")}
 triggers = {row[0] for row in db.execute("select name from sqlite_master where type='trigger'")}
 indexes = {row[0] for row in db.execute("select name from sqlite_master where type='index'")}
-required_tables = {"GamePointLinkedAccount", "GamePointConversion", "PointExchangeRateVersion"}
-required_triggers = {"GamePointLinkedAccount_require_zero_wallet", "Wallet_freeze_linked_point_update", "Wallet_require_zero_point_for_linked_insert"}
+required_tables = {"GamePointLinkedAccount", "GamePointConversion", "GamePointDebit", "PointExchangeRateVersion"}
+required_triggers = {
+    "GamePointLinkedAccount_require_zero_wallet",
+    "Wallet_freeze_linked_point_update",
+    "Wallet_require_zero_point_for_linked_insert",
+    "GamePointConversion_block_active_debit_insert",
+    "GamePointConversion_block_active_debit_update",
+    "GamePointDebit_block_active_conversion_insert",
+    "GamePointDebit_block_active_conversion_update",
+}
 required_indexes = {
     "GamePointLinkedAccount_gamePlayerId_key",
     "GamePointConversion_requestId_key",
     "GamePointConversion_one_unresolved_per_user",
+    "GamePointDebit_requestId_key",
+    "GamePointDebit_reservationId_key",
+    "GamePointDebit_one_unresolved_per_user",
     "PointExchangeRateVersion_one_active_pair",
 }
 if not required_tables.issubset(tables) or not required_triggers.issubset(triggers) or not required_indexes.issubset(indexes):
@@ -250,6 +265,9 @@ build_cron_secret="$(openssl rand -hex 48)"
     WEB_TOPUP_MODE=canary \
     WEB_TOPUP_ALLOWED_WEB_USER_IDS=authority-build-placeholder \
     WEB_TOPUP_SECRET="${build_topup_secret}" \
+    WEB_POINT_WALLET_DEBIT_ENABLED=true \
+    WEB_POINT_DEBIT_FEE_BPS=1000 \
+    WEB_POINT_DEBIT_MAX_POINTS=1000000 \
     CRON_SECRET="${build_cron_secret}" \
     GAME_POINT_SYNC_URL=http://127.0.0.1:9/internal/web/point-credit \
     NODE_OPTIONS=--max-old-space-size=1536 \
@@ -257,14 +275,18 @@ build_cron_secret="$(openssl rand -hex 48)"
 )
 unset build_topup_secret build_cron_secret
 [[ -f "${stage}/.next/BUILD_ID" ]] || fail "Candidate build did not produce BUILD_ID."
-grep -R -q 'GAME_POINT_TO_USDT_REQUIRES_GAME_DEBIT' "${stage}/.next/server" \
-  || fail "Built candidate is missing the Point-to-USDT guard."
+grep -R -q 'ywonder-game-point-debit-v1' "${stage}/.next/server" \
+  || fail "Built candidate is missing the Point-to-USDT debit journal."
+grep -R -q 'ywonder-point-reservation-v1' "${stage}/.next/server" \
+  || fail "Built candidate is missing signed Point reservation commands."
 grep -R -q 'GAME_POINT_LEDGER_IS_AUTHORITATIVE' "${stage}/.next/server" \
   || fail "Built candidate is missing the legacy credit guard."
 grep -R -q 'ywonder-point-balance-v1' "${stage}/.next/server" \
   || fail "Built candidate is missing the signed balance reader."
 grep -R -q 'ywonder:point-conversion-intent:v1:' "${stage}/.next" \
   || fail "Built candidate is missing the durable browser conversion intent."
+grep -R -q 'ywonder:point-debit-intent:v1:' "${stage}/.next" \
+  || fail "Built candidate is missing the durable browser debit intent."
 grep -R -q 'ACTIVE_POINT_RATE_NOT_CONFIGURED' "${stage}/.next/server" \
   || fail "Built candidate is missing the Admin-controlled Point rate gate."
 
@@ -277,8 +299,26 @@ runtime_topup_secret="$(openssl rand -hex 48)"
     WEB_TOPUP_ENABLED=true \
     WEB_TOPUP_MODE=open \
     WEB_TOPUP_SECRET="${runtime_topup_secret}" \
+    WEB_POINT_WALLET_DEBIT_ENABLED=true \
+    WEB_POINT_DEBIT_FEE_BPS=1000 \
+    WEB_POINT_DEBIT_MAX_POINTS=1000000 \
     GAME_POINT_SYNC_URL=http://127.0.0.1:9/internal/web/point-credit \
     ./node_modules/.bin/tsx deploy/web-point-authority-runtime-e2e.ts
+)
+
+log "running isolated Point debit saga fault E2E"
+(
+  cd "${stage}"
+  run_as_web 5m env \
+    DATABASE_URL="file:${stage_db}" \
+    WEB_TOPUP_ENABLED=true \
+    WEB_TOPUP_MODE=open \
+    WEB_TOPUP_SECRET="${runtime_topup_secret}" \
+    WEB_POINT_WALLET_DEBIT_ENABLED=true \
+    WEB_POINT_DEBIT_FEE_BPS=1000 \
+    WEB_POINT_DEBIT_MAX_POINTS=1000000 \
+    GAME_POINT_SYNC_URL=http://127.0.0.1:9/internal/web/point-credit \
+    ./node_modules/.bin/tsx deploy/web-point-debit-runtime-e2e.ts
 )
 unset runtime_topup_secret
 

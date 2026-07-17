@@ -107,6 +107,14 @@ export async function convertUsdtToPointAction(
         }
 
         if (authority.mode === "game") {
+          const activeDebit = await txdb.gamePointDebit.findFirst({
+            where: {
+              userId,
+              status: { notIn: ["CAPTURED", "RELEASED", "REJECTED"] },
+            },
+            select: { id: true },
+          });
+          if (activeDebit) throw new Error("GAME_POINT_WALLET_OPERATION_ALREADY_PENDING");
           const unresolved = await txdb.gamePointConversion.findFirst({
             where: { userId, status: { notIn: ["SENT", "REFUNDED"] } },
             select: { id: true },
@@ -190,8 +198,15 @@ export async function convertUsdtToPointAction(
       if (error?.message === "INSUFFICIENT_USDT") {
         return { ok: false, error: "Insufficient USDT balance" };
       }
-      if (["GAME_POINT_CONVERSION_ALREADY_PENDING", "IDEMPOTENCY_CONFLICT"].includes(error?.message)) {
+      if ([
+        "GAME_POINT_CONVERSION_ALREADY_PENDING",
+        "GAME_POINT_WALLET_OPERATION_ALREADY_PENDING",
+        "IDEMPOTENCY_CONFLICT",
+      ].includes(error?.message)) {
         return { ok: false, error: error.message };
+      }
+      if (String(error?.message || "").includes("GAME_POINT_WALLET_OPERATION_ALREADY_PENDING")) {
+        return { ok: false, error: "GAME_POINT_WALLET_OPERATION_ALREADY_PENDING" };
       }
       if (!await loadCommittedReplay()) {
         if (authority.mode === "game") {

@@ -1,5 +1,5 @@
 # Web -> Game Backend Journey
-# Cập nhật gần nhất: 2026-07-16
+# Cập nhật gần nhất: 2026-07-17
 
 > Mục tiêu của tài liệu này là làm rõ phần đang mơ hồ trong kịch bản: hệ thống web đã có trước, game sẽ dùng tài khoản web làm tài khoản đăng nhập game, nhưng gameplay hiện vẫn còn nhiều dữ liệu local. Tài liệu này định nghĩa hành trình cần xây, kết quả mong đợi, cách kiểm tra và các câu hỏi cần chốt.
 
@@ -31,12 +31,15 @@ ADR kỹ thuật `docs/ADR_POINT_WALLET_AUTHORITY.md` đã chốt cho candidate:
 4. Point dùng cho luồng web-side phải đi qua `reserve -> capture|release` idempotent
    trong PostgreSQL, không trừ một balance web thứ hai.
 
-Candidate authority v3 hiện đã chứng minh identity pinning, single-balance
-projection, HMAC credit/balance, Admin rate version và state machine debit
-reservation bằng test cô lập. Phần còn chặn production là migration balance legacy,
-web orchestrator cho Point -> USDT/YWH, semantics transfer/YWH và công thức payout
-hoa hồng. Candidate chưa deploy; không chạy giao dịch tiền thật và không chuyển
-`WEB_TOPUP_MODE=open`.
+Nền candidate authority v3 đã chứng minh identity pinning, single-balance
+projection, HMAC credit/balance, Admin rate version và state machine reservation
+bằng test cô lập. Ngày 17/07, extension web saga `Point -> USDT` hoàn tất durable
+request ID, pending settlement journal, capture/release retry, exact fee/rate snapshot
+và cross-direction lock; USDT pending không spendable trước capture. Overlay 17 file
+đã pass full Prisma migration/DB E2E, Next.js build và credit/debit fault E2E trên
+source + SQLite production bản sao, nhưng chưa deploy. `Point -> YWH`, migration
+legacy, transfer/rút ngoài và payout hoa hồng vẫn còn; không chạy tiền thật
+hoặc chuyển `WEB_TOPUP_MODE=open`.
 
 ---
 
