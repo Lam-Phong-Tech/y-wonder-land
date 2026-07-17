@@ -6,6 +6,20 @@
 
 ---
 
+## [2026-07-17] — Canary Point không tiền trên QA riêng đã hoàn tất
+
+### Đã thêm
+- Thêm executor link QA và funding synthetic fail-closed, kèm test apply/replay/conflict/rollback. Funding dùng loại riêng `QA_SYNTHETIC_USDT_FUNDING`, ghim tỷ giá Admin active và quote integer micros; không giả làm `USDT_DEPOSIT` và không thay tổng tiền nạp/rút thật.
+- Thêm script package `test:web-point-qa-link` và `test:web-point-qa-funding`. Tài liệu repo không lưu raw web/game identity.
+
+### Bằng chứng và giới hạn
+- Profile riêng `WalletQA2026` được link một-một. Baseline là web USDT `0`, Point game signed `5000`, remainder `0`; funding đúng `2 USDT` synthetic theo tỷ giá `26,5 Point/USDT`, replay cùng operation không cấp lần hai, real deposit count/totals vẫn `0`.
+- Chủ dự án thao tác đổi bằng chính UI ví web. Chuỗi có đúng `1` funding journal, `1` SWAP `SUCCESS`, `1` conversion `SENT`, `1` outbox `SENT/attempts=1`, `1` game ledger `+53`; web USDT về `0`, web/game cùng `5053 Point`.
+- Replay callback chính xác trả `duplicate=true`. HMAC sai/quá hạn, identity ngoài canary, cùng ID khác amount, sai expected player và amount `0` đều bị từ chối đúng mã, không đổi balance/count; callback public vẫn `404`.
+- Nghiệm thu client đạt đủ EXE logout/login, EXE -> APK, APK full close/relogin và APK -> EXE. Cả bốn bước đều hiện `5053`; client cũ bị đẩy và có toast phiên thay thế ở cả hai chiều.
+- Backup root-only: `/root/ywonder-point-backups/qa-funding-20260717T090332Z-141ec249`. Report chain/replay/fault: `/root/ywonder-point-reports/point-qa-conversion-chain-20260717T091536Z.txt`, `point-qa-duplicate-replay-20260717T091734Z.txt`, `point-qa-nondisruptive-faults-20260717T092438Z.txt`.
+- Phân loại: `technical no-money canary complete`, chưa phải `real-money canary complete`. Không restart production, không dùng tiền thật; debit vẫn tắt, rollout chỉ đúng QA và public internal route vẫn đóng.
+
 ## [2026-07-17] — Đã deploy nền ví Point v3 ở trạng thái dormant
 
 ### Đã triển khai
@@ -17,7 +31,7 @@
 - Backup root-only `/root/ywonder-point-backups/point-wallet-dormant-20260717T050203Z-a22312df` và rollback validate đều pass; manifest hậu switch có SHA-256 `473bffad9ff2199d27fcb50f02c88f44d8f2a4aafc6088e3481f33427b3ca88f`.
 - Trước lần switch cuối, rollback tự động đã chạy thật hai lần vì lỗi riêng của smoke harness: redirect dùng sai hostname TLS và định dạng thời gian `journalctl` không được hỗ trợ. Cả hai lần đều phục hồi release/env/health cũ và giữ nguyên số dư; lần chạy sửa harness nhận ra schema cộng thêm đã tồn tại nhưng rỗng rồi hoàn tất idempotent.
 - Hậu kiểm pass health, trang chủ/login/register/referral/wallet, Browser SSO redirect, cron có quyền, route dormant và ổn định tiến trình 45 giây với restart `0`; upload/stage tạm đã dọn.
-- Tổng số ví/số dư web, outbox/transaction và tổng Point game không đổi. Không dùng tiền thật, không conversion/debit/link/migrate/open/YWH. Cổng tiếp theo là tạo identity QA riêng và xin duyệt một canary không tiền; deployment dormant này chưa phải bật tính năng ví chung cho người dùng.
+- Tổng số ví/số dư web, outbox/transaction và tổng Point game không đổi tại checkpoint deploy này. Không dùng tiền thật, không conversion/debit/link/migrate/open/YWH. Canary không tiền trên QA riêng được hoàn tất sau đó và đã ghi ở mục mới hơn phía trên; deployment dormant này tự nó chưa phải bật tính năng ví chung cho người dùng.
 
 ## [2026-07-17] — Candidate web debit Point -> USDT đã pass cô lập, chưa deploy
 

@@ -1,22 +1,16 @@
 # Web Wallet -> Game Point: No-Money Canary
 
-Date: 2026-07-16
+Date: 2026-07-17
 
-> **HOLD - không chạy playbook này ở production.** Sau khi tài liệu được viết, BA/khách
-> xác nhận Point web và game là một ví, `USDT -> Point`, `YWH <-> Point`,
-> `Point -> USDT` và tỷ giá do Admin thay đổi. Giả định cố định `0.06 USDT -> 1 Point`
-> bên dưới không còn là contract chính thức. Identity canary hiện tại cũng được xác
-> nhận là tài khoản thật `Nhien345`, không phải QA. Chỉ mở lại bài test sau khi có
-> tài khoản QA riêng, rate version được chụp/audit và thiết kế ví chung tại
-> `docs/POINT_WALLET_BUSINESS_RULES.md` đã được chuyển thành API contract nhất quán.
+Status: **TECHNICAL NO-MONEY CANARY COMPLETE**
 
-## Purpose
+This run proves the deployed software path with one dedicated QA identity. It did not use a bank, blockchain network, payment provider, or real-money settlement, so it must not be described as a real-money canary.
 
-Prove the complete software path without paying a bank, blockchain network, or payment provider:
+## Scope
 
 ```text
 audited synthetic USDT funding
-  -> real web conversion action
+  -> real web wallet conversion action
   -> web Transaction + GamePointConversion + outbox
   -> authenticated cron
   -> loopback HMAC callback v2
@@ -24,71 +18,90 @@ audited synthetic USDT funding
   -> realtime/relogin EXE and APK Point HUD
 ```
 
-This test may be classified as **technical no-money canary complete** when every gate below passes. It must not be classified as a real-money canary because provider collection, settlement, callback authenticity, chargeback, and refund behavior are outside this test.
+- QA profile: `WalletQA2026`. Raw web/game identifiers are intentionally omitted from repository documents.
+- Game release: `a22312df3aee5701a31aa502d2fea3728546b2b1`.
+- Web release: `/var/www/ywonder-releases/point-v3-a22312df`.
+- Next.js build: `2rdR_xG8o4G1uonGEYEg0`.
+- Rollout remains exact-one QA canary, loopback-only. Public callback returns `404`.
+- `WEB_POINT_WALLET_DEBIT_ENABLED=false` remains set on game and web.
 
-## Preconditions
+## Baseline And Quote
 
-- Use one dedicated QA web account only. Do not use a customer account.
-- Pin exactly one `User.id -> gamePlayerId` row. Both IDs must be unique.
-- The signed game balance response must return that pinned `gamePlayerId` before linking.
-- Legacy web `balanceGXL` and `lockedGXL` must both be zero before linking.
-- There must be no unresolved `GamePointConversion` for the QA user.
-- Keep `WEB_TOPUP_MODE=canary`, one identical allowlisted web user at both ends, loopback-only callback, public callback `404`, and the scoped positive-grant block on the same user.
-- Take root-only backups of the active web release, SQLite database, service configuration, environment checksums, and game release before any production mutation.
-- Record baseline web USDT, web legacy Point, game Point, micro remainder, conversion/outbox counts, and game ledger count.
+- Web USDT: `0`.
+- Signed authoritative game Point: `5000`.
+- Point rounding remainder: `0`.
+- Active Admin rate: `26.5 Point / USDT` (`26500000` Point micros per USDT).
+- Planned synthetic funding: exactly `2 USDT`.
+- Exact quote: `2 x 26.5 = 53 Point`, with zero fractional remainder.
 
-## Test Transaction
+The funding executor rejects a stale or non-integral quote, an identity mismatch, a non-zero legacy conflict, an unresolved conversion, or any change to real deposit principal. It records `QA_SYNTHETIC_USDT_FUNDING`, never `USDT_DEPOSIT`.
 
-Use a new immutable synthetic funding ID and one browser conversion request ID:
+## Executed Chain
 
-- Synthetic funding: exactly `+0.06 USDT` to the QA web wallet.
-- Funding journal: `currency=USDT`, `status=SUCCESS`, metadata includes `synthetic=true`, operator, reason, and test run ID.
-- Block withdrawal for the QA identity during the test.
-- Conversion: use the real logged-in web wallet UI to convert exactly `0.06 USDT` to `1 Point`.
-- Expected client change for the current QA baseline: `5003 -> 5004`.
+1. Validation-only run passed without mutation.
+2. The synthetic funding operation added exactly `2 USDT` to the dedicated QA web wallet and wrote one auditable funding journal.
+3. Replaying the same funding operation produced no second credit.
+4. The project owner used the real authenticated web wallet UI to convert the full `2 USDT`.
+5. Web USDT returned to `0`; authoritative Point changed exactly once from `5000` to `5053`.
+6. The web UI and the online EXE both displayed `5053` immediately.
 
-Do not insert an outbox row directly. Direct insertion bypasses the web conversion action and cannot prove that web wallet debit, durable browser request ID, journal creation, and dispatcher are connected correctly.
+Audited operation and evidence:
 
-## Gate Loop
+- Funding operation: `point-qa-funding:141ec249b9bacb93e129abe437d6c674`.
+- Masked conversion chain reference: `59ea80c1e5e586fb428bb25e`.
+- Funding validation report: `/root/ywonder-point-reports/point-qa-funding-validate-141ec249.json`.
+- Root-only backup: `/root/ywonder-point-backups/qa-funding-20260717T090332Z-141ec249`.
+- Chain reconciliation: `/root/ywonder-point-reports/point-qa-conversion-chain-20260717T091536Z.txt`.
+- Duplicate replay: `/root/ywonder-point-reports/point-qa-duplicate-replay-20260717T091734Z.txt`.
+- Non-disruptive fault matrix: `/root/ywonder-point-reports/point-qa-nondisruptive-faults-20260717T092438Z.txt`.
 
-For every failed gate: preserve the same conversion request ID and source transaction ID, disable dispatch if needed, collect evidence, fix in an isolated candidate, rerun automated tests, then retry the same immutable transaction. Never create a new ID to hide an unresolved transaction.
+## Reconciliation Result
 
-| Gate | Action | Expected evidence |
-|---|---|---|
-| 1. Baseline | Read both databases and service state | One web user, one pinned player, no unresolved conversion, Point `5003`, web USDT baseline recorded |
-| 2. Synthetic funding | Atomically journal and add `0.06 USDT` | One synthetic USDT transaction; no Point/outbox/game-ledger change |
-| 3. Real web action | User converts `0.06 USDT` from the wallet UI | Web USDT returns to baseline; web GXL stays `0`; one pending SWAP, conversion, and outbox share one source ID |
-| 4. Delivery | Run the authenticated cron | Outbox and conversion become `SENT`; web SWAP becomes `SUCCESS`; exactly one game ledger row uses the same source ID |
-| 5. Online client | Keep EXE or APK online during delivery | HUD receives absolute Point `5004` without relogin |
-| 6. Persistence | Logout/login, full app restart, EXE -> APK -> EXE | Every client restores `5004` from PostgreSQL |
-| 7. Idempotency | Retry the same browser request and source transaction | No second USDT debit, outbox, game ledger, or Point credit |
-| 8. Response loss | Drop the success response after game commit, then retry | Web recovers `RETRY -> SENT`; game remains one ledger and Point `5004` |
-| 9. Identity rejection | Send a correctly signed v2 payload with another `expected_player_id` in isolation | `409 GAME_POINT_IDENTITY_MISMATCH`; no balance or ledger change |
-| 10. Final reconciliation | Compare all records by source transaction ID | Web funding, SWAP, conversion, outbox, game ledger, game balance, and HUD all agree |
+The final source transaction resolves to exactly:
 
-## Abort And Recovery
+| Layer | Result |
+|---|---|
+| Synthetic funding journal | `1`, `SUCCESS`, `+2 USDT` |
+| Web SWAP transaction | `1`, `SUCCESS`, `-2 USDT / +53 Point` |
+| `GamePointConversion` | `1`, `SENT` |
+| Web outbox | `1`, `SENT`, attempts `1` |
+| PostgreSQL game ledger | `1`, `web_topup_credit`, `+53 Point` |
+| Final web USDT | `0` |
+| Final authoritative Point | `5053` |
+| Final rounding remainder | `0` |
 
-- On any identity, amount, or journal mismatch, stop the canary producer/cron and keep the callback non-public.
-- Do not refund or credit manually until the exact game source transaction ID has been queried.
-- If the game ledger exists, settle/retry the web journals with the same ID; do not issue another credit.
-- If the game ledger is proven absent and dispatch is quarantined, restore the synthetic USDT in one audited `REFUNDED` transaction and mark the conversion `REFUNDED` atomically.
-- A timeout is not proof that the game did not commit.
+Real `USDT_DEPOSIT` count and real deposited/withdrawn totals remained `0`.
 
-## Current Candidate Evidence
+## Idempotency And Fault Evidence
 
-- Overlay SHA-256: `8f326cb79e0c8123712aec90217602f2428612cfa6e54d30c42aad3e804cf9fb`.
-- Isolated candidate build: `m31Ry3w4SeOT1N3oxcdJw`, Next.js `15.5.20`.
-- Backend integration passes v1 compatibility, v2 identity pinning, wrong-player rejection, balance read, decimal remainder, realtime, retry, and restart persistence.
-- The production-artifact harness also runs the PostgreSQL store smoke in a dedicated temporary database; pinned-player credit/rejection, cleanup, duplicate delivery, isolated web restart, and post-commit recovery pass without changing production.
-- Isolated web validation passes migration, database E2E, build, duplicate delivery, malformed success, wrong-player response, permanent `409`, post-commit response loss, and concurrent success/failure race.
-- Validator reports `LIVE_WEB_CHANGED=no`, `PRODUCTION_DATABASE_MUTATED=no`, `PRODUCTION_SERVICES_RESTARTED=no`, and `REAL_PAYMENT_USED=no`.
-- The candidate has not been deployed. Production remains at the prior exact-one canary state until separately approved.
+- Replaying the exact signed callback returned HTTP `200` with `duplicate=true`; web journals, game ledger and Point stayed unchanged.
+- Same transaction ID with a different amount returned `409 IDEMPOTENCY_CONFLICT`.
+- Wrong expected player returned `409 GAME_POINT_IDENTITY_MISMATCH`.
+- Bad HMAC returned `401 INVALID_WEB_TOPUP_SIGNATURE`.
+- Expired HMAC returned `401 WEB_TOPUP_REQUEST_EXPIRED`.
+- An identity outside the allowlist returned `425 WEB_TOPUP_CANARY_USER_NOT_ALLOWED` and was not created in the game database.
+- Zero Point returned `400 INVALID_POINT_AMOUNT`.
+- Public callback remained `404`.
+- All rejected cases left web balances, Point, conversion/outbox counts and game ledger unchanged.
 
-## Classification
+Backend-down and post-commit response-loss scenarios were not injected into the live production services. They passed against the production artifact in the isolated temporary-database harness, including retry with the original immutable source transaction ID.
 
-After all ten gates pass:
+## Client Acceptance
+
+The project owner completed the following matrix and observed `5053 Point` in every step:
+
+1. EXE logout/login.
+2. EXE -> APK: EXE was displaced, APK showed `5053`, and the replaced-session toast appeared.
+3. APK logout, full app close, reopen and login.
+4. APK -> EXE: APK was displaced, EXE showed `5053`, and the replaced-session toast appeared.
+
+This confirms realtime delivery, PostgreSQL persistence, cross-device consistency and single-session replacement for the dedicated QA identity.
+
+## Classification And Remaining Gates
 
 - Allowed label: `technical no-money canary complete`.
 - Not allowed label: `real-money canary complete`.
-- Keep rollout at one QA identity while real payment approval is pending.
-- Do not use `WEB_TOPUP_MODE=open` until positive gameplay grants are globally server-authoritative, reconciliation/refund tooling is operational, legacy web Point is migrated intentionally, and the web USDT Float ledger risk is removed or formally accepted.
+- The synthetic `53 Point` remains in the dedicated QA wallet with its complete audit chain. Do not manually reset it; any reversal requires a separately approved, idempotent audited operation.
+- Keep rollout limited to the exact QA identity while real payment approval is pending.
+- Keep debit disabled and public internal routes closed.
+- Before `WEB_TOPUP_MODE=open`, complete the real-provider tiny canary, legacy account migration decisions, global server-authoritative gameplay grant migration, operational reconciliation/refund alerts, and final YWH/referral commission contracts.

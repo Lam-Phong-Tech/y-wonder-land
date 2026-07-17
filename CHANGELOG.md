@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-07-17 (Dedicated QA no-money Point canary complete)
+
+### Added
+- Added fail-closed dedicated-QA link and synthetic-funding executors with replay/conflict/rollback tests. Synthetic funding uses the distinct `QA_SYNTHETIC_USDT_FUNDING` journal type, pins the active Admin rate and exact integer-micro quote, and proves that real deposit principal and deposited/withdrawn totals do not change.
+- Added `test:web-point-qa-link` and `test:web-point-qa-funding` package scripts. Raw web/game identifiers are excluded from repository reports.
+
+### Verified
+- Linked the dedicated `WalletQA2026` profile one-to-one, validated baseline web USDT `0`, authoritative Point `5000` and remainder `0`, then funded exactly `2` synthetic USDT at the active `26.5 Point/USDT` rate. Replaying the deterministic funding operation did not credit twice and real `USDT_DEPOSIT` count/totals stayed `0`.
+- The project owner used the real authenticated web wallet conversion UI. The chain reconciles to exactly one funding journal, one successful SWAP, one `SENT` conversion, one `SENT` outbox attempt and one PostgreSQL game ledger credit of `53 Point`; web USDT returned to `0` and web/game Point became `5053`.
+- Exact callback replay returned `duplicate=true` without changing any balance or count. Bad/expired HMAC, outside-canary identity, payload conflict, wrong player and zero amount were rejected with the expected status/error and no mutation; public callback remained `404`.
+- Client acceptance passed EXE logout/login, EXE -> APK, APK full close/relogin and APK -> EXE. Every step displayed `5053`; the old client was displaced and showed the replaced-session toast in both directions.
+- Root-only evidence: backup `/root/ywonder-point-backups/qa-funding-20260717T090332Z-141ec249`; chain, replay and fault reports under `/root/ywonder-point-reports/point-qa-{conversion-chain-20260717T091536Z,duplicate-replay-20260717T091734Z,nondisruptive-faults-20260717T092438Z}.txt`.
+- Classification is `technical no-money canary complete`, not `real-money canary complete`. No production service restart or real payment occurred; debit remains disabled, rollout remains exact-one QA and public internal routes remain closed.
+
 ## [Unreleased] - 2026-07-17 (Point wallet authority v3 deployed dormant)
 
 ### Deployed
@@ -11,7 +25,7 @@
 - Root-only backup `/root/ywonder-point-backups/point-wallet-dormant-20260717T050203Z-a22312df` and rollback validation passed. The post-switch manifest SHA-256 is `473bffad9ff2199d27fcb50f02c88f44d8f2a4aafc6088e3481f33427b3ca88f`.
 - Two automatic rollback paths were exercised before the final switch: the first smoke used the wrong TLS hostname after a redirect, and the second used an unsupported `journalctl --since` timestamp. Both restored the previous releases/env/health and unchanged balances; the corrected retry recognized the already-applied empty additive schemas and completed idempotently.
 - Final smoke passed health, home/login/register/referral/wallet, Browser SSO redirects, authenticated cron, dormant public routes and 45-second process stability with zero restarts. Temporary uploads/stages were removed.
-- Web wallet count/sums, outbox/transaction counts and game Point total remained unchanged. No real payment, conversion, debit, account link, balance migration, open-mode activation or YWH operation ran. The next production gate is a dedicated QA identity and a separately approved no-money canary.
+- Web wallet count/sums, outbox/transaction counts and game Point total remained unchanged at this deployment checkpoint. No real payment, conversion, debit, account link, balance migration, open-mode activation or YWH operation ran. The dedicated-QA no-money gate was completed later and is recorded in the newer section above.
 
 ## [Unreleased] - 2026-07-17 (Point-to-USDT web debit saga candidate)
 

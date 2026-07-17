@@ -29,7 +29,9 @@
     "test:web-point-remediation-plan": "node deploy/pointWalletMigrationRemediationPlanTest.js",
     "test:web-point-remediation-execution": "node deploy/pointWalletRemediationExecutionTestSuite.js",
     "test:web-point-e2e-harness": "node deploy/webPointE2EHarnessSafetyTest.js",
-    "test:web-point-canary-deploy": "node deploy/webPointCanaryDeploySafetyTest.js"
+    "test:web-point-canary-deploy": "node deploy/webPointCanaryDeploySafetyTest.js",
+    "test:web-point-qa-link": "python3 deploy/pointWalletQaLinkTest.py",
+    "test:web-point-qa-funding": "python3 deploy/pointWalletQaSyntheticFundingTest.py"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
