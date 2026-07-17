@@ -6,6 +6,19 @@
 
 ---
 
+## [2026-07-17] — Đã deploy nền ví Point v3 ở trạng thái dormant
+
+### Đã triển khai
+- Game đang chạy release `a22312df3aee5701a31aa502d2fea3728546b2b1`; web chạy release `/var/www/ywonder-releases/point-v3-a22312df`, Next.js build `2rdR_xG8o4G1uonGEYEg0`.
+- Đã áp schema cộng thêm cho PostgreSQL migration `006_point_wallet_reservations` và journal authority/debit trên SQLite web. Các bảng link/conversion/debit/reservation mới đều có `0` row; không link account và không migrate số dư legacy.
+- Cả game lẫn web đều đặt tường minh `WEB_POINT_WALLET_DEBIT_ENABLED=false`. Top-up cũ vẫn chỉ ở canary một account, remote ingress tắt; route credit/reserve public trả `404`.
+
+### Bằng chứng và giới hạn
+- Backup root-only `/root/ywonder-point-backups/point-wallet-dormant-20260717T050203Z-a22312df` và rollback validate đều pass; manifest hậu switch có SHA-256 `473bffad9ff2199d27fcb50f02c88f44d8f2a4aafc6088e3481f33427b3ca88f`.
+- Trước lần switch cuối, rollback tự động đã chạy thật hai lần vì lỗi riêng của smoke harness: redirect dùng sai hostname TLS và định dạng thời gian `journalctl` không được hỗ trợ. Cả hai lần đều phục hồi release/env/health cũ và giữ nguyên số dư; lần chạy sửa harness nhận ra schema cộng thêm đã tồn tại nhưng rỗng rồi hoàn tất idempotent.
+- Hậu kiểm pass health, trang chủ/login/register/referral/wallet, Browser SSO redirect, cron có quyền, route dormant và ổn định tiến trình 45 giây với restart `0`; upload/stage tạm đã dọn.
+- Tổng số ví/số dư web, outbox/transaction và tổng Point game không đổi. Không dùng tiền thật, không conversion/debit/link/migrate/open/YWH. Cổng tiếp theo là tạo identity QA riêng và xin duyệt một canary không tiền; deployment dormant này chưa phải bật tính năng ví chung cho người dùng.
+
 ## [2026-07-17] — Candidate web debit Point -> USDT đã pass cô lập, chưa deploy
 
 ### Đã thêm

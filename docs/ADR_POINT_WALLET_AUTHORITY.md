@@ -1,7 +1,7 @@
 # ADR: One Authoritative Point Wallet
 
 Date: 2026-07-16
-Status: Candidate implemented locally; isolated release validation and production rollout are not approved yet
+Status: Authority foundation deployed dormant; debit disabled and account linking/migration not approved
 
 ## Context
 
@@ -145,8 +145,10 @@ RESERVE_PENDING -> RESERVED -> CAPTURE_PENDING -> CAPTURED
 Static safety, migration SQL, reservation/credit/security and Phase 1 regression
 tests pass locally. The checksum-pinned overlay also passed full Prisma migration,
 DB E2E, Next.js build and debit fault E2E against copied production source/SQLite.
-Production has not been changed; deployment remains a separately approved gate with
-the debit kill switch kept off.
+The additive PostgreSQL/SQLite foundation is deployed in production with
+`WEB_POINT_WALLET_DEBIT_ENABLED=false`; all new link/conversion/debit/reservation
+tables remain empty. Account linking, legacy balance migration, no-money canary and
+any debit/open activation remain separately approved gates.
 
 ## Legacy Reconciliation
 

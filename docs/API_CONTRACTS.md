@@ -143,7 +143,7 @@ Còn chặn **production/money thật**, nhưng không chặn code và test cand
 - Phí/hạn mức nghiệp vụ, phê duyệt rút và đối soát bên thanh toán cho `Point -> USDT`. Candidate local bắt buộc cấu hình fee BPS rõ ràng nhưng không tự coi đó là quyết định BA.
 - Công thức, số tầng, điều kiện, thời điểm và reversal hoa hồng YWH.
 
-Các endpoint dưới đây là contract candidate v3 đã có test cô lập, chưa deploy. Chúng không phải quyền bật giao dịch thật hoặc chuyển `WEB_TOPUP_MODE=open`.
+Các endpoint dưới đây là contract authority v3 đã có test cô lập và đã deploy production ở trạng thái dormant. Schema/handler tồn tại nhưng debit flag vẫn `false`, route public vẫn `404` và chưa có account link; đây không phải quyền bật giao dịch thật hoặc chuyển `WEB_TOPUP_MODE=open`.
 
 ### Internal web top-up -> game Point
 
@@ -187,7 +187,7 @@ POST http://127.0.0.1:3000/internal/web/point-balance
 
 Body gồm `{ request_id, web_user_id }`, canonical domain `ywonder-point-balance-v1`. Response thành công gồm `{ ok, request_id, web_user_id, player_id, point, economy }`. Web phải so `player_id` với `GamePointLinkedAccount.gamePlayerId` và fail closed bằng `GAME_POINT_IDENTITY_MISMATCH` nếu lệch.
 
-### Internal web Point reserve/capture/release (candidate v3)
+### Internal web Point reserve/capture/release (authority v3, deployed dormant)
 
 Ba endpoint loopback dùng cùng secret/header với Point credit và mặc định không tồn tại
 cho tới khi bật riêng `WEB_POINT_WALLET_DEBIT_ENABLED=true`:

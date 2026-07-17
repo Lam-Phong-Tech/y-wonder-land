@@ -96,7 +96,7 @@
 - `player_economy.pos` là balance Point spendable duy nhất cho account đã link. `balanceGXL/lockedGXL` của account đó bị đóng băng ở `0`; web đọc balance game bằng endpoint HMAC và kiểm đúng `gamePlayerId` đã ghim.
 - Mọi credit/debit/conversion/transfer/withdrawal/reserve/reversal phải có source transaction ID unique, trạng thái rõ và audit actor/rate/before/after.
 - Candidate v3 đã version hóa tỷ giá `USDT_POINT` theo integer micros, effective time và Admin actor; conversion lưu rate version, exact source/destination micros và rounding remainder. `YWH_POINT` vẫn feature-gated tới khi BA chốt semantics.
-- Candidate game đã có state machine `reserve/capture/release`; không được trừ Point bằng delta rời rạc. Web candidate có saga `Point -> USDT` nội bộ và đã pass full Prisma/Next/fault E2E trên bản sao, nhưng chưa deploy; phí/hạn mức/phê duyệt, rút USDT bên ngoài và reconciliation bên thanh toán vẫn chưa đạt production. `Point -> YWH` chưa có adapter.
+- Game authority v3 đã có state machine `reserve/capture/release`; không được trừ Point bằng delta rời rạc. Web có saga `Point -> USDT` nội bộ, đã pass full Prisma/Next/fault E2E trên bản sao và nền schema/handler đã deploy dormant. Debit flag vẫn `false`, bảng mới vẫn rỗng; phí/hạn mức/phê duyệt, rút USDT bên ngoài và reconciliation bên thanh toán vẫn chưa đạt production. `Point -> YWH` chưa có adapter.
 - Tiêu dùng game phải tạo payout hoa hồng YWH cho referrer qua cùng source transaction hoặc transactional outbox. Công thức/số tầng/refund chưa được cung cấp nên chưa chốt schema payout.
 - Số dư Point/GXL hiện hữu trên web phải được kiểm kê và migrate một lần; tuyệt đối không cộng nguyên balance web vào `player_economy.pos` nếu cả hai từng đại diện cùng giá trị.
 
@@ -124,7 +124,7 @@
 | `status` | TEXT | `pending`, `committed`, `failed`, `reversed` |
 | `created_at` | TIMESTAMP | |
 
-### Web-side Point authority journal (candidate v3, chưa deploy)
+### Web-side Point authority journal (authority v3, deployed dormant)
 
 Các bảng này nằm trong SQLite của web, không thay thế PostgreSQL game:
 
@@ -138,9 +138,9 @@ Các bảng này nằm trong SQLite của web, không thay thế PostgreSQL game
 
 Trigger SQLite đóng băng mọi thay đổi `balanceGXL/lockedGXL` của account đã link. Bốn trigger chéo còn cấm tạo hoặc mở lại conversion một chiều khi chiều đối diện vẫn chưa terminal. Point spendable duy nhất của account link nằm ở `player_economy.pos`; web đọc bằng endpoint balance ký HMAC.
 
-Với `Point -> USDT`, row `Transaction` USDT ở trạng thái `PENDING` được tạo trước capture để làm nghĩa vụ settlement bền vững, nhưng chưa đổi `Wallet.balanceUsdt`. Chỉ sau response game `CAPTURED`, một SQLite transaction mới tăng `balanceUsdt` và chuyển cả transaction/debit sang `SUCCESS/CAPTURED`. Vì vậy timeout không làm USDT pending trở thành tiền có thể rút; retry cùng reservation không cộng hai lần. Candidate này đã pass full isolated release validation nhưng chưa deploy; account legacy chưa link vẫn giữ nguyên, không tự migrate số dư cũ.
+Với `Point -> USDT`, row `Transaction` USDT ở trạng thái `PENDING` được tạo trước capture để làm nghĩa vụ settlement bền vững, nhưng chưa đổi `Wallet.balanceUsdt`. Chỉ sau response game `CAPTURED`, một SQLite transaction mới tăng `balanceUsdt` và chuyển cả transaction/debit sang `SUCCESS/CAPTURED`. Vì vậy timeout không làm USDT pending trở thành tiền có thể rút; retry cùng reservation không cộng hai lần. Nền schema/handler đã deploy dormant sau full isolated release validation; `GamePointLinkedAccount`, conversion và debit vẫn `0` row, account legacy chưa link vẫn giữ nguyên và không tự migrate số dư cũ.
 
-### `point_wallet_reservations` (migration `006`, candidate chưa deploy)
+### `point_wallet_reservations` (migration `006`, deployed dormant)
 
 | Cột | Kiểu | Ghi chú |
 |---|---|---|

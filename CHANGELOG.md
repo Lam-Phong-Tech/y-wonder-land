@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-07-17 (Point wallet authority v3 deployed dormant)
+
+### Deployed
+- Deployed the checksum-pinned Point wallet authority foundation without enabling debit or public ingress. The game runs release `a22312df3aee5701a31aa502d2fea3728546b2b1`; the web runs `/var/www/ywonder-releases/point-v3-a22312df`, Next.js build `2rdR_xG8o4G1uonGEYEg0`.
+- Applied additive-only schemas: PostgreSQL migration `006_point_wallet_reservations` and the web SQLite authority/debit journals. `GamePointLinkedAccount`, `GamePointConversion`, `GamePointDebit` and game reservation rows remain `0`; no account was linked and no legacy balance was migrated.
+- Both services explicitly retain `WEB_POINT_WALLET_DEBIT_ENABLED=false`. Existing top-up remains one-account canary with remote ingress disabled; public credit/reserve routes return `404`.
+
+### Verified
+- Root-only backup `/root/ywonder-point-backups/point-wallet-dormant-20260717T050203Z-a22312df` and rollback validation passed. The post-switch manifest SHA-256 is `473bffad9ff2199d27fcb50f02c88f44d8f2a4aafc6088e3481f33427b3ca88f`.
+- Two automatic rollback paths were exercised before the final switch: the first smoke used the wrong TLS hostname after a redirect, and the second used an unsupported `journalctl --since` timestamp. Both restored the previous releases/env/health and unchanged balances; the corrected retry recognized the already-applied empty additive schemas and completed idempotently.
+- Final smoke passed health, home/login/register/referral/wallet, Browser SSO redirects, authenticated cron, dormant public routes and 45-second process stability with zero restarts. Temporary uploads/stages were removed.
+- Web wallet count/sums, outbox/transaction counts and game Point total remained unchanged. No real payment, conversion, debit, account link, balance migration, open-mode activation or YWH operation ran. The next production gate is a dedicated QA identity and a separately approved no-money canary.
+
 ## [Unreleased] - 2026-07-17 (Point-to-USDT web debit saga candidate)
 
 ### Added

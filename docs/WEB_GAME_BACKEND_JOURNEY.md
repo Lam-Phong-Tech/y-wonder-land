@@ -31,15 +31,23 @@ ADR kỹ thuật `docs/ADR_POINT_WALLET_AUTHORITY.md` đã chốt cho candidate:
 4. Point dùng cho luồng web-side phải đi qua `reserve -> capture|release` idempotent
    trong PostgreSQL, không trừ một balance web thứ hai.
 
-Nền candidate authority v3 đã chứng minh identity pinning, single-balance
-projection, HMAC credit/balance, Admin rate version và state machine reservation
-bằng test cô lập. Ngày 17/07, extension web saga `Point -> USDT` hoàn tất durable
-request ID, pending settlement journal, capture/release retry, exact fee/rate snapshot
-và cross-direction lock; USDT pending không spendable trước capture. Overlay 17 file
-đã pass full Prisma migration/DB E2E, Next.js build và credit/debit fault E2E trên
-source + SQLite production bản sao, nhưng chưa deploy. `Point -> YWH`, migration
-legacy, transfer/rút ngoài và payout hoa hồng vẫn còn; không chạy tiền thật
-hoặc chuyển `WEB_TOPUP_MODE=open`.
+Nền authority v3 đã chứng minh identity pinning, single-balance projection, HMAC
+credit/balance, Admin rate version và state machine reservation bằng test cô lập.
+Ngày 17/07, extension web saga `Point -> USDT` hoàn tất durable request ID, pending
+settlement journal, capture/release retry, exact fee/rate snapshot và cross-direction
+lock; USDT pending không spendable trước capture. Overlay 17 file đã pass full Prisma
+migration/DB E2E, Next.js build và credit/debit fault E2E trên source + SQLite
+production bản sao.
+
+Nền này sau đó đã deploy production ở trạng thái dormant: game release
+`a22312df3aee5701a31aa502d2fea3728546b2b1`, web release
+`/var/www/ywonder-releases/point-v3-a22312df`, build `2rdR_xG8o4G1uonGEYEg0`.
+Migration PostgreSQL `006` và schema authority/debit SQLite đã áp cộng thêm nhưng
+các bảng link/conversion/debit/reservation vẫn rỗng; cả hai service giữ
+`WEB_POINT_WALLET_DEBIT_ENABLED=false`, public credit/reserve `404`. Không có
+payment, conversion, debit, link hoặc migration balance. `Point -> YWH`, transfer,
+rút ngoài và payout hoa hồng vẫn còn; cổng tiếp theo là identity QA riêng cùng
+canary không tiền được duyệt riêng, không chuyển `WEB_TOPUP_MODE=open`.
 
 ---
 
