@@ -401,16 +401,28 @@ PrefabInstance:
       value: 0.0000051570396
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a9ce137508e66294da00c7736c03707e, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.05
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: a9ce137508e66294da00c7736c03707e, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.05
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: a9ce137508e66294da00c7736c03707e, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1.05
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: a9ce137508e66294da00c7736c03707e, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -1.1105
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a9ce137508e66294da00c7736c03707e, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.383
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a9ce137508e66294da00c7736c03707e, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.93
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a9ce137508e66294da00c7736c03707e, type: 3}
       propertyPath: m_LocalRotation.w
@@ -439,6 +451,10 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: a9ce137508e66294da00c7736c03707e, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: a9ce137508e66294da00c7736c03707e, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -2121881607255808313, guid: a9ce137508e66294da00c7736c03707e, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -640,6 +656,8 @@ MonoBehaviour:
   gravity: -9.81
   jumpHeight: 1.5
   isSwimming: 0
+  enableStickAutoSprint: 1
+  stickAutoSprintThreshold: 0.88
   animIdle: Idle
   animWalk: Walking
   animRun: Running

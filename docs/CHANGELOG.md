@@ -6,6 +6,19 @@
 
 ---
 
+## [2026-07-17] — Khôi phục asset farm/city và hoàn tất rename prefab đất
+
+### Đã khôi phục
+- Khôi phục tranche farm/scene bị thiếu từ stash đã giữ lại, không ghi đè City, Map2.1 và material mới của người dùng. Backup trước vá ở `D:\Temp\YWonder-FinalPatch-2026-07-17T02-21-02-185Z`; backup toàn đợt ở `D:\Temp\YWonder-Recovery-2026-07-17T01-51-59-432Z`.
+- Hoàn tất rename `dattrong.prefab` thành `DatDaCuoc.prefab` và giữ GUID Unity `ff37f2abcf3e24b46948abf313748dae`. Mở ignore có chọn lọc cho `Assets/Building/Map1.2` để WindMill và dependency mà FarmScene dùng được theo dõi bằng Git.
+- Giữ các asset WindMill, đất, prefab, scene, tài liệu và recovery scene đã khôi phục. Không phục hồi thay đổi ProjectSettings và output iOS sinh tự động chỉ có trong stash vì không thuộc nhóm file bị mất và có nguy cơ đè cấu hình mới.
+
+### Bằng chứng
+- Đối chiếu đủ 165 asset untracked phía stash: thiếu `0`. Sau khi Unity xóa metadata Addressables sinh tự động, audit còn 2.474 GUID asset: trùng `0`; 273 GUID duy nhất trên 33 file Unity YAML liên quan đều resolve đủ khi tính cả builtin và package metadata.
+- Unity `6000.3.15f1` batch import/compile thoát mã `0`; log không có lỗi biên dịch C#, exception, missing reference, lỗi shader/import hoặc crash.
+- Unity tự xóa lại `Assets/AddressableAssetsData/link.xml` và `.meta` trong lúc import; giữ deletion vì Addressables đã sinh bản giống hệt theo Android/iOS/Windows dưới `Library/com.unity.addressables`.
+- Chưa nghiệm thu hình ảnh/runtime FarmScene và CityScene; kết quả này mới khóa tính toàn vẹn asset và compile.
+
 ## [2026-07-17] — Duyệt successor policy ví Point nhưng tiếp tục khóa migration
 
 ### Đã thêm

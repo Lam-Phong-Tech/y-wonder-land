@@ -26,7 +26,7 @@ Transform:
   m_GameObject: {fileID: 4162658640740693904}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 58.8643, y: 0, z: -8.83627}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 82f1076d6b1e84c44bcd7ce9b7ef985f, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Environment.HarvestableResource
   resourceId: 
   type: 0
@@ -90,7 +90,7 @@ Transform:
   m_GameObject: {fileID: 8660575751522222307}
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071067}
-  m_LocalPosition: {x: -15.979847, y: -2.6976438, z: 9.685746}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 100, y: 99.999985, z: 99.999985}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -163,7 +163,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 82f1076d6b1e84c44bcd7ce9b7ef985f, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Environment.HarvestableResource
   resourceId: 
   type: 0
@@ -189,7 +189,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fac7d98278c6c1a4496c889c8235b5c0, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Environment.FarmInteractionController
   interactRange: 1
   resourceInteractRange: 1
@@ -198,7 +198,12 @@ MonoBehaviour:
   tileInteractRange: 1.75
   merchantInteractRange: 1
   waterInteractRange: 1.35
+  waterFootProbeForward: 0.9
+  waterFootProbeRadius: 0.9
   fishingInteractRange: 5
+  useDirectTapInteraction: 1
+  directTapMaxRange: 3.5
+  directTapAssistWorldRadius: 0.45
   farmTileLayer:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -206,6 +211,7 @@ MonoBehaviour:
   rockYield: 10
   resourceExp: 5
   mineExp: 15
+  dailyMiningTurns: 10
   gemstoneRewards:
   - itemId: gem_ruby_01
     displayName: "Ruby qu\xFD hi\u1EBFm"
@@ -280,7 +286,7 @@ Transform:
   m_GameObject: {fileID: 8690053073083304693}
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071067}
-  m_LocalPosition: {x: -16.11332, y: 0.98791206, z: 9.75167}
+  m_LocalPosition: {x: 0, y: 4.14, z: -0}
   m_LocalScale: {x: 100, y: 99.999985, z: 99.999985}
   m_ConstrainProportionsScale: 0
   m_Children: []

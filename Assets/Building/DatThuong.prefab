@@ -1,0 +1,104 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &1062905213786905591
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: c926a659e602d994b9254e16b2dde40d, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.95
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c926a659e602d994b9254e16b2dde40d, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.95
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c926a659e602d994b9254e16b2dde40d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 6.363145
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c926a659e602d994b9254e16b2dde40d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.020823982
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c926a659e602d994b9254e16b2dde40d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 9.63538
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c926a659e602d994b9254e16b2dde40d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c926a659e602d994b9254e16b2dde40d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c926a659e602d994b9254e16b2dde40d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c926a659e602d994b9254e16b2dde40d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c926a659e602d994b9254e16b2dde40d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c926a659e602d994b9254e16b2dde40d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c926a659e602d994b9254e16b2dde40d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: c926a659e602d994b9254e16b2dde40d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 34bd8862a8501264096e4f41198d0836, type: 2}
+    - target: {fileID: 919132149155446097, guid: c926a659e602d994b9254e16b2dde40d, type: 3}
+      propertyPath: m_Name
+      value: DatThuong
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: c926a659e602d994b9254e16b2dde40d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -1464582934674083467}
+  m_SourcePrefab: {fileID: 100100000, guid: c926a659e602d994b9254e16b2dde40d, type: 3}
+--- !u!1 &144497238127732390 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c926a659e602d994b9254e16b2dde40d, type: 3}
+  m_PrefabInstance: {fileID: 1062905213786905591}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &-1464582934674083467
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 144497238127732390}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff20914984d22154ea2955b57f677fdc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FarmTile
+  currentState: 0
+  plantedSeedId: 
+  soilVisual: {fileID: 144497238127732390}
+  plowedVisual: {fileID: 71189798042336053, guid: 211773db720a25544b204b5af1cdfa0c, type: 3}
+  seedVisual: {fileID: 0}
+  growingVisual: {fileID: 0}
+  ripeVisual: {fileID: 0}
+  tutorialGrowthTime: 5
+  useCustomCropModels: 1
+  createPrimitiveFallbackVisuals: 0
+  currentCrop: {fileID: 0}
+  tileIndex: -1
+  masterTile: {fileID: 0}

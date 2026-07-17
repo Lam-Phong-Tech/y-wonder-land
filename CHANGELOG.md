@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-07-17 (Unity farm and city asset recovery)
+
+### Recovered
+- Recovered the missing farm/scene tranche from the preserved stash without overwriting the newer City, Map2.1 or material edits. The final pre-patch backup is `D:\Temp\YWonder-FinalPatch-2026-07-17T02-21-02-185Z`; the broader recovery backup is `D:\Temp\YWonder-Recovery-2026-07-17T01-51-59-432Z`.
+- Completed the intended `dattrong.prefab` -> `DatDaCuoc.prefab` rename while preserving Unity GUID `ff37f2abcf3e24b46948abf313748dae`, and made `Assets/Building/Map1.2` versioned so the FarmScene WindMill source and dependencies are no longer hidden by the broad `Map1*` ignore rule.
+- Retained the recovered WindMill, farm terrain, scene, prefab, documentation and recovery-scene assets. Stash-only generated iOS output and ProjectSettings icon/build-layout changes were intentionally not restored because they were not part of the missing content and could overwrite newer local state.
+
+### Verified
+- Compared all 165 stash-side untracked assets after recovery: none are missing. After Unity removed the generated Addressables metadata, the project contains 2,474 asset metadata GUIDs with zero duplicates; 273 unique references across 33 affected Unity YAML files resolve with zero missing references when Unity built-ins and package metadata are included.
+- Unity `6000.3.15f1` batch import/compile exited with code `0`; the log contained no C# compile error, exception, missing-reference, shader/import-failure or crash match.
+- Unity removed `Assets/AddressableAssetsData/link.xml` and its metadata again during import. Their tracked deletion is retained because Addressables regenerates exact platform copies under `Library/com.unity.addressables/aa/{Android,iOS,Windows}/AddressablesLink/link.xml`.
+- FarmScene/CityScene visual and runtime inspection remains pending; this recovery is not yet a visual acceptance result.
+
 ## [Unreleased] - 2026-07-17 (Post-remediation Point decisions approved without migration authority)
 
 ### Added
