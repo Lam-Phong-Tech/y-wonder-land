@@ -1,5 +1,50 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-07-21 (Tree double-harvest + build-delete refund fixes)
+
+### Fixed
+- **Tree double-harvest.** `Assets/_Project/Prefabs/Tree.prefab` held two `HarvestableResource` components on one tree (root with correct `axe_01`/`wood_01` config, child `Log` left empty). Because `RealtimeClient.RegisterSharedResource` derives the network resource ID from the hierarchy path when `resourceId` is empty, one physical tree produced two network IDs and the backend could reward once per ID. Removed the root `HarvestableResource` (fileID `4668956307432685771`) from both the component list and its definition; filled the surviving `Log` component (which already owns the BoxCollider + mesh) with `requiredTool: axe_01`, `yieldItemId: wood_01`. Keeping `Log` matches the existing CityScene overrides so every tree now has exactly one authoritative resource.
+- **Build Mode delete lost materials.** Demolishing a pen/fence refunded wood/stone (`FarmInteractionController.cs:2974`), but the Build Mode context-menu Delete (`BuildModeOverlayController.DeleteBuildingAt`) destroyed the building without refunding — a stone path cost 4 stone but returned nothing. Added `BuildSurfaceCell.SumRefund(occupant, out wood, out stone)` (reads every occupied cell's stored material, mutates nothing) and made `DeleteBuildingAt` sum the refund and `inv.AddItem(..., "build_refund")` before clearing. Free tiles (empty `BuildMaterialId`) refund zero.
+
+### Verified (static only)
+- Tree prefab now has exactly one `HarvestableResource`, zero references to the removed root, and intact YAML (13 objects). FarmScene's 4 instances inherit the prefab, so they drop to one component automatically; CityScene's 14 instances already removed the root on 2026-07-20 and are unaffected (their now-stale `m_RemovedComponents` refs are harmless).
+- Refund path reuses the working pen-demolish pattern; `InventoryManager.AddItem` already syncs the delta to the server via `GameplayMutationSync`, so the refund reconciles server-side.
+
+### Pending
+- Fresh EXE/APK build + runtime acceptance: one physical tree grants wood once and the chop prompt clears when depleted; deleting a stone path / wood pen via Build Mode returns the exact materials. Not touched: the stray (self-disabling) `FarmInteractionController` on the `Log` child and the client-side defense-in-depth items (direct-tap `isHarvestable` check, clearing hover state, honoring the `duplicate=true` flag).
+
+## [Unreleased] - 2026-07-20 (The Memento Protocol)
+
+### Added
+- Added `docs/THE_MEMENTO_PROTOCOL.md`: a durable AI-session handoff contract with evidence labels, source-of-truth ranking, safety/secret rules, outgoing and incoming checklists, a reusable Memento Packet, and a copyable new-chat bootstrap prompt.
+- Added `docs/MEMENTO_PACKET_CURRENT.md`: a sanitized current-state packet that a successor AI can verify and refresh before editing.
+- Linked the protocol from `RULES.md` and clarified that `docs/CONTEXT_RECOVERY.md` is the current recovery snapshot while root `CONTEXT_RECOVERY.md` is historical journal material that requires verification.
+
+### In Progress
+- Extended the isolated PostgreSQL smoke test to apply `007_point_source_ledger` and cover concurrent event idempotency, conflict, FIFO classification, unattributed blocking, pool-restart persistence and balance non-mutation. Syntax and JSON source-ledger tests pass; the PostgreSQL run is pending a disposable non-production runtime/DSN.
+
+## [Unreleased] - 2026-07-19 (Source-aware game commission and VIP requirements)
+
+### Documented
+- Recorded the customer's direct clarification that in-game spending of USDT-funded Point pays referral commission in USDT, while re-spending Point earned from farming/products/game rewards pays commission in Point. Rates and levels follow the existing YWH system.
+- Point commission preserves fractional value (`156 x 3% = 4.68 Point`), and a refund/cancellation after payout must reverse the original commission. The technical contract will emit no payout before the purchase transaction commits successfully.
+- Recorded the corrected current rates `26.5 Point/USDT` and `1.59 Point/YWH`; Admin/legacy commission valuation also uses `26.5`. Source lots spend FIFO, transfer preserves source/rate and payout waits at least about ten minutes before opening only for a successful transaction.
+- Recorded the six-level commission schedule: direct level `8%`, levels 2-6 `1%` each, maximum aggregate `13%`. VIP progress is lifetime-cumulative spending of `2650 Point` funded by external USDT deposits.
+- Recorded the A-B unlock rule: commission is still allocated to upstream A while A or originating consumer B is not VIP, but remains unusable/non-withdrawable until both are VIP; qualification releases all historical locked shares for that eligible relationship.
+- Recorded the customer's latest correction, superseding the opposite prior answers: transferred USDT-origin Point does advance the receiver's VIP when spent, while refund reverses progress and revokes VIP if the remaining total falls below `2650 Point`.
+- Confirmed that existing source/rate lineage is sufficient for VIP attribution; no original-funding-player field is required. Remaining business gates include effects of VIP revocation on other unlocked/paid shares, exceptional refund/debt handling, decimal precision and withdrawal limits/process.
+
+### Added
+- Added the dormant `007_point_source_ledger` candidate and matching JSON/PostgreSQL store methods. A source lot records exact micro-Point amount, origin (`USDT`, `YWH`, `GAMEPLAY`, `ADMIN`, `LEGACY` or blocked `UNATTRIBUTED`), immutable source/commission rate snapshots, source event idempotency and transfer lineage.
+- Added a fail-closed FIFO planner and transfer-lineage builder. FIFO stops when it reaches an unattributed lot; a transfer child cannot be persisted through the standalone lot API because sender consumption and recipient creation must later share one atomic transaction.
+- Added `test:point-source-ledger` for replay/conflict, separate `USDT_POINT` and `YWH_POINT` snapshots, mixed-source FIFO, unattributed blocking, transfer source preservation, over-transfer rejection, restart persistence and no balance/backfill mutation.
+
+### Verified
+- `test:point-source-ledger`, `test:web-point-credit`, `test:web-point-reservation`, `test:security` and `test:phase1:isolated` pass. JavaScript syntax and targeted diff checks pass.
+
+### Current gap
+- The source ledger is local/dormant only. Migration `007` has not been applied to PostgreSQL, existing balances were not backfilled, signed web callback v1/v2 does not yet provide the new source/rate envelope, and shop/reservation/transfer do not mutate lots. This workstation has no PostgreSQL DSN/runtime, so the new migration/adapter still requires isolated temporary-schema execution before any deploy. Production still spends whole `BIGINT pos`; no service, feature flag, production database or balance was changed.
+
 ## [Unreleased] - 2026-07-17 (Dedicated QA no-money Point canary complete)
 
 ### Added

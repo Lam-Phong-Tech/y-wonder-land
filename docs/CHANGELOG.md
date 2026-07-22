@@ -6,6 +6,47 @@
 
 ---
 
+## [2026-07-21] — Sửa lỗi cây cộng gỗ hai lần (prefab) + phá Build Mode không hoàn vật liệu
+
+### Phá công trình bằng nút Delete không hoàn vật liệu (đã vá)
+- Phá chuồng/hàng rào có hoàn gỗ/đá (`FarmInteractionController.cs:2974`), nhưng nút Delete trong Build Mode (`BuildModeOverlayController.DeleteBuildingAt`) xóa công trình mà không hoàn — lát đường tốn 4 đá, xóa đi mất trắng. Không phải exploit (chỉ thiệt người chơi) nhưng bất nhất.
+- Fix: thêm `BuildSurfaceCell.SumRefund(occupant, out wood, out stone)` (đọc mọi ô occupant chiếm, không đổi state); `DeleteBuildingAt` cộng dồn rồi `inv.AddItem(..., "build_refund")` trước khi xóa ô. Ruộng miễn phí (BuildMaterialId rỗng) hoàn 0. `InventoryManager.AddItem` đã đồng bộ delta lên server qua `GameplayMutationSync` nên hoàn đối soát được. Chờ nghiệm thu runtime.
+
+### Cây cộng gỗ hai lần (prefab)
+
+- `Assets/_Project/Prefabs/Tree.prefab` chứa hai `HarvestableResource` cho cùng một cây (root cấu hình đúng `axe_01`/`wood_01`, child `Log` để rỗng). Vì `RealtimeClient.RegisterSharedResource` sinh network resource ID theo hierarchy path khi `resourceId` rỗng, một cây vật lý tạo ra hai network ID và backend có thể thưởng gỗ một lần cho mỗi ID.
+- Fix (chỉ sửa `Tree.prefab`, không đụng scene): xóa component root (fileID `4668956307432685771`) khỏi `m_Component` và định nghĩa; điền cấu hình đúng cho component `Log` (đã sẵn BoxCollider + mesh): `requiredTool: axe_01`, `yieldItemId: wood_01`. Giữ `Log` bỏ root để khớp override sẵn có trong CityScene.
+- Re-audit 21/07: FarmScene có 4 cây (inherit prefab → tự động còn một component sau fix), CityScene có 14 cây đã được xóa component root từ 20/07 (không bị ảnh hưởng, stale `m_RemovedComponents` vô hại). Verify tĩnh: prefab còn đúng một `HarvestableResource`, YAML nguyên vẹn 13 object.
+- Chờ nghiệm thu runtime trên build EXE/APK mới. Chưa đụng: `FarmInteractionController` lạc trên child `Log` và các điểm gia cố client (`isHarvestable`, xóa hover, cờ `duplicate=true`).
+
+## [2026-07-20] — The Memento Protocol cho bàn giao AI
+
+- Thêm `docs/THE_MEMENTO_PROTOCOL.md`: chuẩn bàn giao giữa hai phiên AI, gồm thứ bậc nguồn sự thật, nhãn bằng chứng, ranh giới bảo mật, checklist đóng/mở phiên, Memento Packet và prompt copy sang chat mới.
+- Thêm `docs/MEMENTO_PACKET_CURRENT.md`: snapshot đã điền của Y WONDER GREEN FARM, phải được Git/live-verify lại trước khi dùng làm cơ sở thao tác.
+- `RULES.md` bắt buộc đọc protocol khi tiếp tục/bàn giao; `docs/CONTEXT_RECOVERY.md` được chỉ rõ là snapshot hiện hành, còn root `CONTEXT_RECOVERY.md` là nhật ký lịch sử cần đối chiếu.
+- Mở rộng `server/postgresSmokeTest.js` để schema tạm áp migration `007_point_source_ledger` và kiểm idempotency đồng thời, conflict, FIFO, chặn lô chưa phân loại, persistence qua pool restart và bất biến số dư. Cú pháp/JSON test pass; PostgreSQL runtime cô lập chưa có nên chưa đánh dấu gate PostgreSQL pass.
+
+---
+
+## [2026-07-19] — Chốt tỷ giá, 6 cấp hoa hồng và điều kiện VIP
+
+### Khách đã xác nhận
+- Point đổi từ USDT rồi tiêu trong game trả hoa hồng bằng USDT; Point do nuôi trồng, sản phẩm hoặc thưởng game tạo ra rồi tái tiêu dùng trả hoa hồng bằng Point. Tỷ lệ và số tầng dùng như hệ thống YWH hiện tại.
+- Hoa hồng Point giữ số lẻ (`156 x 3% = 4,68 Point`), không làm tròn nguyên. Nếu giao dịch đã payout rồi được hoàn/hủy thì phải thu hồi payout gốc. Hướng kỹ thuật là chỉ phát hoa hồng sau khi giao dịch mua commit thành công.
+- Nguồn Point được tiêu theo FIFO; hoa hồng USDT dùng rate gốc của từng lô. Transfer giữ nguyên source/rate. Khách sửa tỷ giá áp dụng chung thành `1 USDT = 26,5 Point`, đồng thời chốt `1 YWH = 1,59 Point`; Point do Admin cấp và Point legacy cũng dùng rate `26,5` khi tính căn cứ hoa hồng.
+- Hoa hồng có 6 cấp: cấp trực tiếp `8%`, 5 cấp tiếp theo mỗi cấp `1%`, tổng tối đa `13%`. VIP tính cộng dồn toàn thời gian từ `2.650 Point` tiêu dùng có nguồn USDT nạp ngoài. Hoa hồng vẫn vào bể riêng khi A hoặc B chưa VIP, nhưng chỉ được sử dụng/rút khi cả A và B đều VIP; khi đủ điều kiện sẽ mở toàn bộ khoản lịch sử tương ứng.
+- Khách sửa lại câu trả lời trước: Point nguồn USDT do người khác chuyển tới vẫn tính VIP cho người nhận khi tiêu; refund phải trừ tiến độ và thu hồi VIP nếu tổng còn lại dưới `2.650 Point`.
+- Payout chờ ít nhất khoảng 10 phút hoặc lâu hơn và chỉ mở cho giao dịch thành công; giao dịch lỗi không sinh hoa hồng.
+
+### Nền source-lot local đã thêm, chưa deploy
+- Thêm migration candidate `007_point_source_ledger`, module domain và adapter JSON/PostgreSQL để lưu số micro-Point, nguồn `USDT/YWH/GAMEPLAY/ADMIN/LEGACY`, rate tạo Point, rate quy hoa hồng, giao dịch nguồn và lineage khi chuyển khoản.
+- FIFO chỉ lập kế hoạch, không đổi số dư; gặp lô `UNATTRIBUTED` thì dừng để chờ phân loại. API ghi lô độc lập chặn transfer vì trừ lô người gửi và tạo lô người nhận phải nằm trong cùng transaction.
+- `test:point-source-ledger`, web credit, reservation, security và Phase 1 isolated đều pass. Chưa apply migration PostgreSQL, chưa backfill 5.000 Point/số dư cũ, chưa đổi callback web, shop hay production.
+
+### Gap còn mở
+- Source/rate lineage hiện có đã đủ phân loại VIP, không cần bổ sung chủ nạp USDT gốc. Còn chốt ảnh hưởng của việc thu hồi VIP lên các hoa hồng khác đã mở/trả, cách thu hồi nếu hoa hồng đã bị tiêu, độ chính xác thập phân và phí/hạn mức/quy trình rút.
+- Backend production hiện chỉ spend `pos BIGINT` nguyên; phần lẻ web mới được carry riêng, chưa spend được và chưa có source-lot active/commission outbox/reversal/VIP pool. Candidate source-lot mới chỉ local, chưa sửa DB/service/feature flag hoặc production. Máy local hiện không có PostgreSQL DSN/runtime nên migration và adapter mới vẫn phải chạy qua schema tạm cô lập trước khi deploy.
+
 ## [2026-07-17] — Canary Point không tiền trên QA riêng đã hoàn tất
 
 ### Đã thêm

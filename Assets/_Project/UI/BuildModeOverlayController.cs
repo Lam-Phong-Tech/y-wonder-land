@@ -908,11 +908,20 @@ public class BuildModeOverlayController : MonoBehaviour
             BuildGridManager.Instance.FreeCells(originCell, size);
         }
 
+        // Ho\u00e0n v\u1eadt li\u1ec7u \u0111\u00e3 t\u1ed1n khi ph\u00e1 (\u0111\u1ecdc t\u1eeb \u00f4 TR\u01af\u1edaC khi ClearOccupant x\u00f3a d\u1eef li\u1ec7u v\u1eadt li\u1ec7u).
+        // Ru\u1ed9ng mi\u1ec5n ph\u00ed c\u00f3 BuildMaterialId r\u1ed7ng n\u00ean ho\u00e0n 0. \u0110\u1ed3ng nh\u1ea5t v\u1edbi ph\u00e1 chu\u1ed3ng.
+        YWonderLand.Environment.BuildSurfaceCell.SumRefund(building, out int refundWood, out int refundStone);
         YWonderLand.Environment.BuildSurfaceCell.ClearOccupant(building);
+        var inv = YWonderLand.Managers.InventoryManager.Instance;
+        if (inv != null)
+        {
+            if (refundWood > 0) inv.AddItem("wood_01", refundWood, "build_refund");
+            if (refundStone > 0) inv.AddItem("stone_01", refundStone, "build_refund");
+        }
         Destroy(building);
         SaveBuildState();
         ShowStatusMessage(wasFarmTile ? "\u0110\u00e3 h\u1ee7y \u00f4 tr\u1ed3ng!" : "\u0110\u00e3 x\u00f3a!", true);
-        Debug.Log($"[BuildMode] Deleted building: {buildingName}");
+        Debug.Log($"[BuildMode] Deleted building: {buildingName}, refund wood={refundWood}, stone={refundStone}");
     }
 
     private void PickUpBuilding(GameObject building)

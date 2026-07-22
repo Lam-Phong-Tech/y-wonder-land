@@ -9,7 +9,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 853460984658393045}
-  - component: {fileID: 4668956307432685771}
   m_Layer: 0
   m_Name: Tree
   m_TagString: Untagged
@@ -34,32 +33,6 @@ Transform:
   - {fileID: 4203760031724094548}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4668956307432685771
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4162658640740693904}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 82f1076d6b1e84c44bcd7ce9b7ef985f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Environment.HarvestableResource
-  resourceId: 
-  type: 0
-  requiredTool: axe_01
-  yieldItemId: wood_01
-  minYield: 1
-  maxYield: 3
-  respawnTimeSec: 20
-  harvestDuration: 3
-  interactionRange: 2
-  leafNameContains: Leaf
-  leafAttachRadius: 5
-  isHarvestable: 1
-  currentProgress: 0
-  respawnTimer: 0
 --- !u!1 &8660575751522222307
 GameObject:
   m_ObjectHideFlags: 0
@@ -167,8 +140,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Environment.HarvestableResource
   resourceId: 
   type: 0
-  requiredTool: 
-  yieldItemId: 
+  requiredTool: axe_01
+  yieldItemId: wood_01
   minYield: 1
   maxYield: 3
   respawnTimeSec: 20
