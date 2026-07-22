@@ -164,7 +164,7 @@ public class GameHUDController : MonoBehaviour
 
         // Set initial values
         SetPlayerInfo("YWonderPlayer", 1);
-        SetPlayerEXP(0.00f);
+        UpdateExpLabel();
         SetQuest("Kh\u00e1m ph\u00e1 \u0111\u1ea3o hoang v\u00e0 t\u00ecm ng\u00f4i nh\u00e0 \u0111\u1ea7u ti\u00ean!");
         UpdateAvatar();
 
@@ -183,7 +183,7 @@ public class GameHUDController : MonoBehaviour
         if (_expMgr != null)
         {
             if (playerLevel != null) playerLevel.text = $"Level: {_expMgr.Level}";
-            SetPlayerEXP(_expMgr.ExpPercent);
+            UpdateExpLabel();
             _expMgr.OnEXPChanged += OnExpChanged;
         }
         RefreshPlayerInfoFromSession(true);
@@ -207,11 +207,21 @@ public class GameHUDController : MonoBehaviour
         if (PlayerController.Instance != null) PlayerController.Instance.SetStickAutoSprint(false);
     }
 
-    // Cập nhật cấp + % EXP lên HUD khi ExperienceManager báo đổi.
+    // Cập nhật cấp + EXP lên HUD khi ExperienceManager báo đổi.
     private void OnExpChanged(int level, float percent)
     {
         if (playerLevel != null) playerLevel.text = $"Level: {level}";
-        SetPlayerEXP(percent);
+        UpdateExpLabel();
+    }
+
+    // Nhãn EXP hiện dạng SỐ "hiện tại / cần" (tester dễ test), thay vì phần trăm.
+    private void UpdateExpLabel()
+    {
+        if (playerCurrencySmall == null) return;
+        if (_expMgr == null) { playerCurrencySmall.text = "0 / 250"; return; }
+        playerCurrencySmall.text = _expMgr.IsMaxLevel
+            ? "MAX"
+            : $"{_expMgr.ExpInLevel} / {_expMgr.ExpForNextLevel}";
     }
 
     private void QueryElements(VisualElement root)
@@ -609,14 +619,6 @@ public class GameHUDController : MonoBehaviour
             else
                 playerAvatar.AddToClassList("avatar-female");
         }
-    }
-
-    /// <summary>
-    /// Update EXP display (0.00 to 100.00 = level up).
-    /// </summary>
-    public void SetPlayerEXP(float exp)
-    {
-        if (playerCurrencySmall != null) playerCurrencySmall.text = exp.ToString("F2");
     }
 
     /// <summary>

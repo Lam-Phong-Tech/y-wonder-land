@@ -32,6 +32,11 @@ public class PlayerController : MonoBehaviour
     private string currentAnimState = "";
     [Header("State")]
     public bool isSwimming = false;
+    // Độ chìm khi bơi ĐỨNG YÊN (swim idle): TĂNG = chìm sâu hơn, nước tới nách/vai (~1.6). Kéo được lúc Play.
+    [SerializeField, Range(0.5f, 2.5f)] private float swimSubmergeDepth = 1.6f;
+    // Độ chìm khi bơi DI CHUYỂN: để NHỎ cho thân (nằm ngang khi bơi) nổi sát mặt nước, tránh chìm nghỉm.
+    // Nhỏ hơn nhiều so với idle vì clip Swimming là tư thế nằm ngang, chìm 1.2 sẽ ngập cả thân.
+    [SerializeField, Range(0.2f, 2.5f)] private float swimSubmergeDepthMoving = 0.7f;
     private float waterSurfaceY = 0f;
     // Cửa sổ "bật khỏi mặt nước" sau khi bấm Nhảy lúc đang bơi: tạm ngắt lực đẩy để vọt lên trèo bờ.
     private float swimLeapTimer = 0f;
@@ -59,6 +64,7 @@ public class PlayerController : MonoBehaviour
     public string animRun = "Run";
     public string animJump = "Jump";
     public string animSwim = "Swimming";
+    public string animSwimIdle = "SwimIdle1";
 
     void Awake()
     {
@@ -298,9 +304,11 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            // Lực đẩy Archimes: Nổi trên mặt nước
-            // Giả sử tâm nhân vật (chân) cần nằm dưới mặt nước khoảng 1.2 mét để ngực vừa ngang mặt nước
-            float targetFeetY = waterSurfaceY - 1.2f;
+            // Lực đẩy Archimes: Nổi trên mặt nước.
+            // Bơi DI CHUYỂN → chìm nông (nổi cao, an toàn); ĐỨNG YÊN (idle) → chìm sâu (nước tới vai).
+            bool swimMoving = moveDirection.magnitude > 0.1f;
+            float submergeDepth = swimMoving ? swimSubmergeDepthMoving : swimSubmergeDepth;
+            float targetFeetY = waterSurfaceY - submergeDepth;
             float depth = targetFeetY - transform.position.y;
 
             // Lò xo nước: chìm càng sâu đẩy lên càng mạnh, cao quá thì rơi xuống nhẹ
@@ -315,8 +323,11 @@ public class PlayerController : MonoBehaviour
         // 5. Update Locomotion Animations
         if (isSwimming && swimLeapTimer <= 0f)
         {
-            // Nếu có di chuyển thì bơi lội, không thì bơi đứng (tạm dùng chung animation bơi)
-            CrossFadeAnim(animSwim, 0.2f);
+            // Có di chuyển → bơi lội; đứng yên dưới nước → bơi đứng (SwimIdle).
+            if (moveDirection.magnitude > 0.1f)
+                CrossFadeAnim(animSwim, 0.2f);
+            else
+                CrossFadeAnim(animSwimIdle, 0.2f);
         }
         else if (!isGrounded || playerVelocity.y > 0)
         {

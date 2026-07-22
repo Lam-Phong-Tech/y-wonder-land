@@ -1,5 +1,51 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-07-22 (Feeding animals silently broken — starvation)
+
+### Fixed
+- **Cannot feed animals → they starve.** Clicking "Cho ăn" opened the inventory at the food tab, but tapping "Sử dụng" on a food item did nothing — no feed, no item deduction, and the animal eventually died of hunger. Root cause: `FarmInteractionController` subscribes to `InventoryPopupController.OnItemUsed` only once in `Start` (`inventoryPopup.OnItemUsed += OnInventoryItemSelected`). If the popup wasn't resolvable at that moment, the subscription silently never happened; the three bag-openers (feed/plant/place-animal) re-`FindFirstObjectByType` the popup when their field was null but never (re)subscribed, so `OnItemUsed?.Invoke(...)` fired into the void. Added `EnsureInventoryPopupSubscribed()` — finds the popup if null and subscribes idempotently (`-=` then `+=`) — and call it in `Start` and before every `ShowAtTab(...)` (food/seeds/animals). This also hardens seed-planting and animal-placement, which shared the same latent failure.
+
+### Changed
+- **Feed action shortened to ~1.5s.** Replaced the hardcoded `FeedActionSpeed = 2f` (feed locked for 9.1s ÷ 2 = 4.55s) with `FeedActionDuration = 1.5f`; the 9.1s `Feed` clip is now played at `FeedClipDuration / FeedActionDuration` (~6×) so it completes in full within ~1.5s. Same target-duration pattern as scoop/watering; tune `FeedActionDuration`.
+
+### Pending
+- Fresh build + runtime check: open feed → pick the species' food → animation plays, food is deducted, hunger drops; canceling refunds; planting seeds and placing animals via the bag still work.
+
+## [Unreleased] - 2026-07-22 (Water-scoop animation + swim-idle + cancelable scoop)
+
+### Added
+- **Scoop-water is now a proper cancelable action.** `ScoopWater` previously granted the water bucket instantly with no animation. It now runs through `BeginTimedAction("ScoopWater2", ...)` — same path as chop/mine/water/feed — so the character plays the `ScoopWater2` clip, faces the pond, holds a dedicated **left-hand water bucket** (`ToolType.WaterBucket` — distinct from the right-hand watering can shown while watering), and the HUD shows the cancel (X) button + progress bar. The water is granted only in the `onComplete` callback, so canceling mid-scoop yields nothing (no state to refund). The 6.57s clip is played faster (`speed = ScoopWaterClipDuration / ScoopWaterActionDuration`) so it plays in full within `ScoopWaterActionDuration = 1.5f` instead of being cut off. Added `ToolType.WaterBucket` + `waterBucketModel` (left-hand anchor) to `EquipmentManager` with a placeholder builder; assign the `WaterBucket` object under `mixamorig:LeftHand` to the new Inspector slot.
+- **Separate swim-idle animation.** While in water the player used the single `Swimming` clip for both moving and standing still. Added `animSwimIdle = "SwimIdle1"`; the locomotion update now crossfades to `SwimIdle1` when in water with no move input (`moveDirection.magnitude <= 0.1f`) and to `Swimming` while moving.
+- **Separate swim submerge depth for idle vs moving.** The buoyancy target was hardcoded (`waterSurfaceY - 1.2f`). First made it a single `swimSubmergeDepth` (default `1.6`, water at shoulders) — but testers reported that while *swimming (moving)* the character sank too deep and looked like it was drowning. Split into two SerializeFields: `swimSubmergeDepth` (idle, `1.6`, water to shoulders) and `swimSubmergeDepthMoving` (moving). The buoyancy block now picks based on `moveDirection.magnitude > 0.1f` — the same movement test that drives `Swimming` vs `SwimIdle1`. Both tunable live in Play mode. The moving value was then lowered to `0.7` (range widened to `0.2–2.5`): because the `Swimming` clip is a **horizontal** pose, the original `1.2` (tuned for an upright "chest at surface" pose) submerged the whole flat body; `0.7` floats it near the surface.
+
+### Changed
+- **Watering shortened to ~3s.** `HandleWater` now plays the 5.6s `Watering` clip at ~1.9× (`speed = WateringClipDuration / WateringActionDuration`) so it completes in full within `WateringActionDuration = 3f`, instead of locking the player for the full 5.6s. Same played-faster technique as scoop; tune `WateringActionDuration` to change it.
+- **Planting shortened to ~2s.** `StartPlantTimedAction` now plays the 4.13s `Planting` clip faster (`speed = PlantingClipDuration / PlantingActionDuration`) so it completes within `PlantingActionDuration = 2f`. Same target-duration pattern; tune `PlantingActionDuration`.
+- **EXP bar shows raw numbers instead of percent (for testers).** The `PlayerEXP` HUD label previously showed the fill as a percentage (`exp.ToString("F2")`, e.g. `40.00`). It now shows `currentEXP / neededEXP` (e.g. `150 / 250`, or `MAX` at level 90) so testers can read exact progress. Exposed `ExpInLevel` / `ExpForNextLevel` / `IsMaxLevel` on `ExperienceManager`; added `GameHUDController.UpdateExpLabel()` and routed init + `OnExpChanged` through it; removed the now-unused `SetPlayerEXP(float)`. Also fixed the tutorial reward: `GiveTutorialRewards` painted a fake `20.00` onto the label instead of granting EXP — it now calls `ExperienceManager.AddEXP(20)` for real, and the HUD updates via the change event.
+
+### Pending
+- Fresh EXE/APK build + runtime check: scooping plays the new clip with the X-cancel button (cancel = no water); standing still in water shows `SwimIdle1`, swimming shows `Swimming`.
+
+## [Unreleased] - 2026-07-22 (Proximity foot-probe prompt for trees & rocks)
+
+### Added
+- **Walk-up interaction prompt for trees/rocks.** Previously, in the default direct-tap (mobile) mode, chopping a tree or mining a rock required tapping directly on it — unlike farm tiles / pens / water, which raise their prompt from an invisible foot probe as you approach. Added `RefreshFootResourceInteractionPrompt` + `FindHarvestableNearFoot` (an `OverlapSphere` just ahead of the player's feet, same pattern as `FindWaterSourceNearFoot`) so a "Chặt cây" / "Đào khoáng" button now appears whenever you stand near a harvestable tree/rock, with no aiming. The action reuses the existing `ClickHarvestResource`, so behavior is identical to tapping the resource. Priority: farm/pen front-cell > water > resource, so the new probe never steals a prompt from the others. Reach is tunable via new SerializeFields `resourceFootProbeForward` (1.1) and `resourceFootProbeRadius` (1.1). Depleted resources are skipped (collider disabled + `isHarvestable` guard); rocks only prompt where mining is allowed. Added `currentPromptFromFootResource` and wired it through every prompt-source reset site + `HasDirectTapPrompt`.
+
+## [Unreleased] - 2026-07-22 (Duplicate shared-resource harvest granted phantom EXP)
+
+### Fixed
+- **Phantom EXP on duplicate harvest.** When the same player re-requests a harvest on a resource they already claimed (retry / double-tap), `server/realtimeServer.js:467-473` replays the cached claim result — `accepted:true` with the original rewards — tagged `duplicate:true`. The client's `ResourceHarvestResult` never parsed `duplicate`, so `FarmInteractionController.HandleSharedResourceHarvestResult` treated the replay as a fresh success: inventory was safe (server sends an authoritative snapshot the client sets, not adds), but `ExperienceManager.AddEXP` is client-side and not idempotent, so every replay inflated EXP and showed a phantom reward toast. Added `bool duplicate` to `ResourceHarvestResult` + parsing in `ReceiveResourceHarvestResult`, and made `HandleSharedResourceHarvestResult` short-circuit on `duplicate` (only sync mining turns, then return) so no EXP/toast is granted twice.
+
+### Verified (static only)
+- Server already emitted `duplicate` on both the fresh accept (`Boolean(storeResult.duplicate)`) and the replay branch; only the client ignored it. The short-circuit sits after `minedRock` is computed, so the mining-turn sync still runs.
+
+### Pending
+- Fresh EXE/APK build + runtime acceptance: rapidly re-tapping / retrying a tree or rock does not inflate EXP and shows no repeated reward toast; the authoritative inventory stays correct.
+
+### Investigated — no change
+- The two remaining defense-in-depth items from the tree audit (direct-tap not checking `isHarvestable`; `OnSharedResourceUnavailable` not clearing `currentHoverObject`/`currentActions`) are already covered by `HarvestableResource.SetHarvestable(false)` disabling the collider + hiding visuals, so a depleted resource cannot be raycast-hovered and the hover state self-clears next frame. Left untouched to avoid churning hot hover code for negligible gain.
+- Verified the QC-audit-era economy exploits are resolved in current source: pen demolish de-dupes animal refunds via `destroyedAnimalObjects`; both death paths (`SlaughterForMeat`, `DieFromHunger`) call `ClearAnimal()` to free cells; legacy `AnimalPenSpawner` pens are fail-closed.
+
 ## [Unreleased] - 2026-07-21 (Tree double-harvest + build-delete refund fixes)
 
 ### Fixed
@@ -11,7 +57,7 @@
 - Refund path reuses the working pen-demolish pattern; `InventoryManager.AddItem` already syncs the delta to the server via `GameplayMutationSync`, so the refund reconciles server-side.
 
 ### Pending
-- Fresh EXE/APK build + runtime acceptance: one physical tree grants wood once and the chop prompt clears when depleted; deleting a stone path / wood pen via Build Mode returns the exact materials. Not touched: the stray (self-disabling) `FarmInteractionController` on the `Log` child and the client-side defense-in-depth items (direct-tap `isHarvestable` check, clearing hover state, honoring the `duplicate=true` flag).
+- Fresh EXE/APK build + runtime acceptance: one physical tree grants wood once and the chop prompt clears when depleted; deleting a stone path / wood pen via Build Mode returns the exact materials. Not touched: the stray (self-disabling) `FarmInteractionController` on the `Log` child and the client-side defense-in-depth items (direct-tap `isHarvestable` check, clearing hover state). The `duplicate=true` flag is now honored — see the 2026-07-22 entry.
 
 ## [Unreleased] - 2026-07-20 (The Memento Protocol)
 

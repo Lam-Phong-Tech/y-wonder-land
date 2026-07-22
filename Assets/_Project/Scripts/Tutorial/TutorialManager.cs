@@ -819,8 +819,8 @@ public class TutorialManager : MonoBehaviour
         if (YWonderLand.Managers.EconomyManager.Instance != null)
             YWonderLand.Managers.EconomyManager.Instance.AddPOS(50);
 
-        GameHUDController hudController = FindFirstObjectByType<GameHUDController>();
-        if (hudController != null) hudController.SetPlayerEXP(20f);
+        // Cộng EXP THẬT (trước đây chỉ vẽ giả "20.00" lên nhãn) — HUD tự cập nhật số qua OnEXPChanged.
+        YWonderLand.Managers.ExperienceManager.Instance?.AddEXP(20);
 
         if (YWonderLand.Managers.InventoryManager.Instance != null)
         {

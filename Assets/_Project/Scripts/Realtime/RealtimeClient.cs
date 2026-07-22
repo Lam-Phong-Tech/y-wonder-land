@@ -31,6 +31,7 @@ namespace YWonderLand.Realtime
         public sealed class ResourceHarvestResult
         {
             public bool accepted;
+            public bool duplicate;
             public string code;
             public string resourceId;
             public string resourceType;
@@ -762,6 +763,7 @@ namespace YWonderLand.Realtime
             var result = new ResourceHarvestResult
             {
                 accepted = data.Value<bool?>("accepted") ?? false,
+                duplicate = data.Value<bool?>("duplicate") ?? false,
                 code = data.Value<string>("code") ?? "RESOURCE_REWARD_FAILED",
                 resourceId = data.Value<string>("resourceId") ?? pending.resourceId,
                 resourceType = data.Value<string>("resourceType") ?? "",

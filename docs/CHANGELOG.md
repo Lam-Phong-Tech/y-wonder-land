@@ -6,6 +6,71 @@
 
 ---
 
+## [2026-07-22] — SỬA LỖI: không cho thú ăn được → thú chết đói
+
+### Lỗi
+- **Bấm "Cho ăn" mở túi, chọn "Sử dụng" thức ăn nhưng KHÔNG có gì xảy ra** — không cho ăn, không trừ thức ăn, con vật đói dần rồi chết. Nguyên nhân: `FarmInteractionController` chỉ đăng ký nghe `InventoryPopupController.OnItemUsed` **một lần trong `Start`**. Nếu lúc đó chưa tìm thấy popup thì đăng ký **hụt vĩnh viễn**; 3 chỗ mở túi (cho ăn / gieo hạt / thả thú) có tìm lại popup khi field null nhưng **không đăng ký lại**, nên khi bấm "Sử dụng" thì sự kiện bắn ra **không ai nghe**. 
+- **Cách sửa:** thêm helper `EnsureInventoryPopupSubscribed()` — tìm popup nếu null + đăng ký **idempotent** (`-=` rồi `+=`) — gọi ở `Start` và **trước mỗi lần `ShowAtTab(...)`** (food/seeds/animals). Nhờ vậy sửa luôn cả gieo hạt và thả thú (cùng lỗi tiềm ẩn).
+
+### Files
+- `Assets/_Project/Scripts/Environment/FarmInteractionController.cs`
+
+### Đổi kèm
+- **Cho ăn rút còn ~1.5s:** trước dùng `FeedActionSpeed = 2f` (khóa 9.1s ÷ 2 = 4.55s). Nay thay bằng `FeedActionDuration = 1.5f`; clip `Feed` 9.1s phát nhanh (~6x) cho múa trọn trong ~1.5s. Cùng pattern với múc/tưới; chỉnh `FeedActionDuration` để đổi.
+
+### Chờ build kiểm thử
+- Cho ăn → chọn đúng thức ăn của loài → múa Feed (~1.5s) + trừ thức ăn + giảm đói; hủy thì hoàn; gieo hạt & thả thú qua túi vẫn chạy.
+
+---
+
+## [2026-07-22] — Animation múc nước + bơi-đứng-yên + nút hủy khi múc nước
+
+### Tính năng mới theo yêu cầu khách
+- **Múc nước có animation + nút hủy (X):** trước đây bấm "Múc nước" là cộng nước NGAY, không có động tác. Nay `ScoopWater` chạy qua `BeginTimedAction("ScoopWater2", ...)` — cùng luồng với chặt/đào/tưới/cho ăn — nên nhân vật múa clip `ScoopWater2`, quay mặt về ao, cầm **xô múc nước ở tay TRÁI** (`ToolType.WaterBucket` — khác bình tưới tay phải khi tưới), HUD hiện nút hủy (X) + thanh tiến trình. Nước chỉ vào túi **khi múa xong** → hủy giữa chừng không nhận gì. Clip gốc 6.57s được **phát nhanh** để múa trọn trong **~1.5s** (`speed = ScoopWaterClipDuration / ScoopWaterActionDuration`); chỉnh `ScoopWaterActionDuration = 1.5f` để đổi. Thêm `ToolType.WaterBucket` + ô `waterBucketModel` (tay trái) vào `EquipmentManager`; **cần kéo object `WaterBucket` dưới `mixamorig:LeftHand` vào ô mới trong Inspector.**
+- **Bơi đứng yên (SwimIdle) riêng:** khi ở dưới nước, trước đây đứng yên hay bơi đều dùng chung clip `Swimming`. Thêm `animSwimIdle = "SwimIdle1"`; giờ ở dưới nước mà KHÔNG kéo joystick (`moveDirection.magnitude <= 0.1f`) thì phát `SwimIdle1`, có di chuyển thì `Swimming`.
+- **Độ chìm khi bơi — TÁCH idle và di chuyển:** ban đầu để 1 giá trị `swimSubmergeDepth = 1.6` (nước tới vai) cho cả hai, nhưng tester phản ánh lúc **bơi di chuyển** bị chìm nghỉm nhìn nguy hiểm. Tách 2 ô: `swimSubmergeDepth` (idle, `1.6`, nước tới vai) và `swimSubmergeDepthMoving` (di chuyển). Buoyancy chọn theo `moveDirection.magnitude > 0.1f` — cùng điều kiện phân biệt `Swimming` / `SwimIdle1`. Cả hai kéo chỉnh được lúc Play. Sau đó hạ ô di chuyển xuống `0.7` (nới thang `0.2–2.5`): vì clip `Swimming` là tư thế **nằm ngang**, để `1.2` (vốn tính cho tư thế đứng "ngực ngang mặt nước") thì ngập cả thân; `0.7` cho nổi sát mặt nước.
+- **Tưới nước rút còn ~3s:** trước khóa 5.6s (đúng độ dài clip `Watering`). Nay phát nhanh ~1.9x cho múa trọn trong `WateringActionDuration = 3f`; chỉnh số này để đổi thời gian tưới.
+- **Trồng cây rút còn ~2s:** clip `Planting` 4.13s phát nhanh cho múa trọn trong `PlantingActionDuration = 2f` (`speed = PlantingClipDuration / PlantingActionDuration`); chỉnh `PlantingActionDuration` để đổi.
+- **Thanh EXP hiện SỐ thay vì phần trăm (cho tester dễ test):** nhãn `PlayerEXP` trước ghi `exp.ToString("F2")` (vd `40.00`). Nay ghi `EXP hiện tại / EXP cần` (vd `150 / 250`, đạt cấp 90 thì `MAX`). Lộ `ExpInLevel`/`ExpForNextLevel`/`IsMaxLevel` ở `ExperienceManager`; thêm `GameHUDController.UpdateExpLabel()`; bỏ `SetPlayerEXP(float)` không còn dùng. Kèm sửa: thưởng tutorial trước vẽ giả `20.00` lên nhãn → nay cộng EXP THẬT bằng `ExperienceManager.AddEXP(20)`.
+
+### Files
+- `Assets/_Project/Scripts/Environment/FarmInteractionController.cs` — `ScoopWater` → hành động có khóa + hủy.
+- `Assets/_Project/Scripts/Player/PlayerController.cs` — thêm `animSwimIdle`, tách nhánh bơi/đứng-yên.
+
+### Chờ build kiểm thử
+- Build EXE/APK mới: múc nước phát clip mới + có nút X (hủy = không nhận nước); đứng yên dưới nước ra `SwimIdle1`, bơi ra `Swimming`.
+
+---
+
+## [2026-07-22] — Đến gần cây/đá tự hiện nút (tia mũi chân, tàng hình như nước)
+
+### Tính năng mới theo yêu cầu khách
+- **Vấn đề:** ở chế độ direct-tap (mobile, mặc định), chặt cây/đào đá phải **tap trúng** vật thể — khác với ruộng/chuồng/nước vốn tự hiện nút khi **đến gần** nhờ tia mũi chân tàng hình.
+- **Làm:** thêm `RefreshFootResourceInteractionPrompt` + `FindHarvestableNearFoot` (quét `OverlapSphere` ngay trước mũi chân, y hệt `FindWaterSourceNearFoot`) → đứng gần cây/đá là tự hiện nút **Chặt cây / Đào khoáng**, không cần ngắm. Nút dùng lại `ClickHarvestResource` nên hành vi giống hệt tap vào cây.
+- **Ưu tiên:** ruộng/chuồng (front-cell) > nước > cây/đá — probe mới không giành nút của mấy cái kia.
+- **Chỉnh số:** `resourceFootProbeForward` (1.1) + `resourceFootProbeRadius` (1.1) ở SerializeField (anh chỉnh tầm chiếu tùy ý). Cây/đá đã cạn tự bỏ qua (collider tắt + guard `isHarvestable`); đá chỉ hiện ở nơi cho đào.
+- **File:** `Assets/_Project/Scripts/Environment/FarmInteractionController.cs`. Thêm cờ `currentPromptFromFootResource`, nối qua mọi điểm reset + `HasDirectTapPrompt`.
+- **Chờ:** build EXE/APK — đến gần cây/đá thấy nút hiện; tap nút thì chặt/đào; đi xa nút tự ẩn; không tranh nút với ruộng/nước.
+
+---
+
+## [2026-07-22] — Harvest trùng tài nguyên chung cộng EXP ảo (đã vá)
+
+### Cộng EXP + toast thưởng lặp khi tap trùng cây/đá
+- Server `realtimeServer.js:467-473`: khi CÙNG người chơi request lại tài nguyên đã hái (retry/tap trùng), server phát lại kết quả cũ (`accepted:true`, rewards gốc) kèm cờ `duplicate:true`.
+- Client cũ **không đọc cờ `duplicate`** → `HandleSharedResourceHarvestResult` coi như thành công lần đầu: túi đồ an toàn (server gửi snapshot authoritative, client set-not-add), nhưng **EXP là client-side không idempotent → mỗi lần phát lại cộng EXP + toast thưởng ẢO**.
+- **Fix:** thêm `bool duplicate` vào `ResourceHarvestResult` (`RealtimeClient.cs`) + parse ở `ReceiveResourceHarvestResult`; `HandleSharedResourceHarvestResult` khi `duplicate` chỉ đồng bộ lượt đào rồi `return`, KHÔNG AddEXP/toast.
+- **Files:** `Assets/_Project/Scripts/Realtime/RealtimeClient.cs`, `Assets/_Project/Scripts/Environment/FarmInteractionController.cs`.
+- **Chờ:** build EXE/APK — tap trùng cây/đá không phồng EXP, không toast lặp; túi đồ vẫn đúng.
+
+### Rà lại các exploit kinh tế cũ (QC 22/06) — đã ổn ở source hiện tại
+- Phá chuồng: chống trả con giống 2 lần bằng `destroyedAnimalObjects`.
+- Thú chết (`SlaughterForMeat`/`DieFromHunger`) đều `ClearAnimal()` nhả ô → không kẹt ô.
+- Chuồng legacy `AnimalPenSpawner` đã fail-closed.
+- 2 điểm gia cố hover (`isHarvestable`, dọn `currentHoverObject`) đã được collider-disable che → không sửa.
+
+---
+
 ## [2026-07-21] — Sửa lỗi cây cộng gỗ hai lần (prefab) + phá Build Mode không hoàn vật liệu
 
 ### Phá công trình bằng nút Delete không hoàn vật liệu (đã vá)

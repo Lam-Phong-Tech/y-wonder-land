@@ -40,6 +40,11 @@ namespace YWonderLand.Managers
         public int Level => level;
         public float ExpPercent => level >= MAX_LEVEL ? 100f : Mathf.Clamp01((float)expInLevel / ExpForNext(level)) * 100f;
 
+        // Giá trị THÔ để HUD hiện số (tester dễ test thay vì %).
+        public int ExpInLevel => expInLevel;              // EXP đã tích trong cấp hiện tại
+        public int ExpForNextLevel => ExpForNext(level);  // EXP cần để lên cấp kế
+        public bool IsMaxLevel => level >= MAX_LEVEL;
+
         // EXP cần để lên cấp kế (khách chốt 22/06): cấp 1->2 cần 250, mỗi cấp +5.
         private static int ExpForNext(int lv) => 250 + Mathf.Max(0, lv - 1) * 5;
 
