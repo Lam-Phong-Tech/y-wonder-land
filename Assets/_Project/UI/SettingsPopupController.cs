@@ -59,7 +59,7 @@ public class SettingsPopupController : MonoBehaviour
     private Button btnDeleteAccount;
     private Button btnExitApp;
 
-    // Current settings (mockup values)
+    // Mức mặc định khi chưa có gì lưu; SetInitialValues() sẽ nạp đè bằng giá trị đã lưu.
     private float musicVolume = 0.8f;
     private float sfxVolume = 1.0f;
     private float cameraSensitivity = 0.5f;
@@ -147,8 +147,35 @@ public class SettingsPopupController : MonoBehaviour
         LocalizationSettings.SelectedLocaleChanged -= OnLocaleChanged;
     }
 
+    // ĐỘ PHÂN GIẢI dựng hình: kéo xuống thì URP render ở khung nhỏ hơn rồi phóng lên (nhẹ máy yếu),
+    // kèm hạ mip texture + LOD cho đồng bộ. KHÔNG đổi độ phân giải cửa sổ (hại trên mobile).
+    private static void ApplyRenderQuality(float t01)
+    {
+        t01 = Mathf.Clamp01(t01);
+
+        var urp = UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline
+            as UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset;
+        if (urp != null)
+            urp.renderScale = Mathf.Lerp(0.6f, 1f, t01); // dưới 0.6x thì vỡ hình, không cho thấp hơn
+
+        QualitySettings.globalTextureMipmapLimit = t01 >= 0.75f ? 0 : (t01 >= 0.5f ? 1 : 2);
+        QualitySettings.lodBias = Mathf.Lerp(0.6f, 1.2f, t01);
+    }
+
+    private static void ApplyShadow(bool on)
+    {
+        QualitySettings.shadows = on ? ShadowQuality.All : ShadowQuality.Disable;
+        QualitySettings.shadowDistance = on ? 50f : 0f;
+    }
+
     private void SetInitialValues()
     {
+        // Nạp lại các mức đã lưu để thanh trượt khớp với trạng thái thật của game.
+        var audio = YWonderLand.Managers.AudioManager.Instance;
+        if (audio != null) { musicVolume = audio.MusicVolume; sfxVolume = audio.SfxVolume; }
+        cameraZoom = PlayerPrefs.GetFloat("YW_CamZoom", cameraZoom);
+        renderQuality = PlayerPrefs.GetFloat("YW_RenderQuality", renderQuality);
+        shadowEnabled = PlayerPrefs.GetInt("YW_Shadow", shadowEnabled ? 1 : 0) == 1;
         cameraSensitivity = PlayerPrefs.GetFloat("YW_CamSensitivity", cameraSensitivity); // nạp độ nhạy đã lưu
         if (sliderMusic != null) sliderMusic.value = musicVolume * 100f;
         if (sliderSFX != null) sliderSFX.value = sfxVolume * 100f;
@@ -157,6 +184,15 @@ public class SettingsPopupController : MonoBehaviour
         if (sliderRenderQuality != null) sliderRenderQuality.value = renderQuality * 100f;
         if (toggleShadow != null) toggleShadow.value = shadowEnabled;
         if (toggleShowChat != null) toggleShowChat.value = showChatEnabled;
+
+        // ÁP các mức đã lưu vào game luôn — không chỉ dựng lại thanh trượt.
+        ApplyRenderQuality(renderQuality);
+        ApplyShadow(shadowEnabled);
+        if (ThirdPersonCamera.Instance != null)
+        {
+            ThirdPersonCamera.Instance.SetUserSensitivity(cameraSensitivity);
+            ThirdPersonCamera.Instance.SetUserZoom(cameraZoom);
+        }
 
         UpdateDropdownLanguageValue();
         UpdateAllLabels();
@@ -182,16 +218,20 @@ public class SettingsPopupController : MonoBehaviour
         {
             musicVolume = evt.newValue / 100f;
             UpdateLabel(lblMusicValue, evt.newValue);
-            Debug.Log($"[Settings] Music volume: {musicVolume:F2}");
-            // TODO: AudioManager.Instance.SetMusicVolume(musicVolume);
+            // AudioManager tự lưu vào PlayerPrefs.
+            YWonderLand.Managers.AudioManager.Instance?.SetMusicVolume(musicVolume);
         });
 
         sliderSFX?.RegisterValueChangedCallback(evt =>
         {
             sfxVolume = evt.newValue / 100f;
             UpdateLabel(lblSFXValue, evt.newValue);
-            Debug.Log($"[Settings] SFX volume: {sfxVolume:F2}");
-            // TODO: AudioManager.Instance.SetSFXVolume(sfxVolume);
+            var audio = YWonderLand.Managers.AudioManager.Instance;
+            if (audio != null)
+            {
+                audio.SetSFXVolume(sfxVolume);
+                audio.PlaySFX("click"); // nghe thử ngay mức vừa chỉnh
+            }
         });
 
         // ── Camera ──
@@ -208,8 +248,9 @@ public class SettingsPopupController : MonoBehaviour
         {
             cameraZoom = (evt.newValue - 50f) / 50f;
             UpdateLabel(lblCameraZoomValue, evt.newValue);
-            Debug.Log($"[Settings] Camera zoom: {cameraZoom:F2}");
-            // TODO: CameraController.Instance.SetZoom(cameraZoom);
+            PlayerPrefs.SetFloat("YW_CamZoom", cameraZoom);
+            if (ThirdPersonCamera.Instance != null)
+                ThirdPersonCamera.Instance.SetUserZoom(cameraZoom);
         });
 
         // ── Graphics ──
@@ -217,16 +258,16 @@ public class SettingsPopupController : MonoBehaviour
         {
             renderQuality = evt.newValue / 100f;
             UpdateLabel(lblRenderQualityValue, evt.newValue);
-            Debug.Log($"[Settings] Render quality: {renderQuality:F2}");
-            // TODO: QualitySettings.SetQualityLevel(...)
+            PlayerPrefs.SetFloat("YW_RenderQuality", renderQuality);
+            ApplyRenderQuality(renderQuality);
         });
 
         toggleShadow?.RegisterValueChangedCallback(evt =>
         {
             shadowEnabled = evt.newValue;
             UpdateShadowStatusLabel();
-            Debug.Log($"[Settings] Shadow: {(shadowEnabled ? "ON" : "OFF")}");
-            // TODO: QualitySettings.shadows = shadowEnabled ? ShadowQuality.All : ShadowQuality.Disable;
+            PlayerPrefs.SetInt("YW_Shadow", shadowEnabled ? 1 : 0);
+            ApplyShadow(shadowEnabled);
         });
 
         toggleShowChat?.RegisterValueChangedCallback(evt =>

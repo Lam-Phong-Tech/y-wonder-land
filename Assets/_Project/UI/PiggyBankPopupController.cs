@@ -15,6 +15,9 @@ public class PiggyBankPopupController : MonoBehaviour
     [Header("References")]
     [SerializeField] private UIDocument piggyDocument;
 
+    [Tooltip("ÉP SỐ để test: 1 ngày gói tiết kiệm = bao nhiêu giây. 0 = ngày thật (86400s).")]
+    [SerializeField] private float testSecondsPerDay = 0f;
+
     // ── Elements ──
     private VisualElement overlay;
     private Button btnClose;
@@ -52,7 +55,12 @@ public class PiggyBankPopupController : MonoBehaviour
     private VisualElement historyList;
 
     // ── State ──
-    private float playerBalance = 5000f;
+    // Số dư ĐỌC THẲNG từ ví Point thật, không giữ bản sao cục bộ (trước đây cứng 5000 nên gửi
+    // tiết kiệm không trừ đồng nào của người chơi).
+    private float playerBalance =>
+        YWonderLand.Managers.EconomyManager.Instance != null
+            ? YWonderLand.Managers.EconomyManager.Instance.GetPOS()
+            : 0f;
     private int selectedPackageIndex = 0; // 0=12d, 1=30d, 2=180d
     private bool hasActiveDeposit = false;
 
@@ -98,19 +106,7 @@ public class PiggyBankPopupController : MonoBehaviour
         if (piggyDocument == null)
             piggyDocument = GetComponent<UIDocument>();
 
-        // Add mock history
-        historyEntries.Add(new HistoryEntry
-        {
-            pkgName = "Gói 12 ngày (+2%)",
-            principal = 200, interest = 4,
-            status = "Đã nhận", date = "28/05/2026"
-        });
-        historyEntries.Add(new HistoryEntry
-        {
-            pkgName = "Gói 30 ngày (+6%)",
-            principal = 500, interest = 30,
-            status = "Đã nhận", date = "15/05/2026"
-        });
+        // Lịch sử bắt đầu RỖNG. (Trước đây có sẵn 2 khoản "đã nhận" bịa của tháng 5.)
     }
 
     private void OnEnable()
@@ -339,24 +335,33 @@ public class PiggyBankPopupController : MonoBehaviour
             return;
         }
 
+        // TRỪ Point thật trước khi ghi nhận khoản gửi; trừ không được thì huỷ luôn.
+        var economy = YWonderLand.Managers.EconomyManager.Instance;
+        if (economy == null || !economy.SpendPOS((long)amount, "piggybank_deposit"))
+        {
+            ShowError("Không trừ được Point. Vui lòng thử lại.");
+            return;
+        }
+
         // Execute deposit
         var pkg = packages[selectedPackageIndex];
         activePkgIndex = selectedPackageIndex;
         activePrincipal = amount;
         activeInterestAmount = amount * pkg.rate;
 
-        // For testing: use seconds instead of days (1 day = 5 seconds in test mode)
-        float testSeconds = pkg.days * 5f; // 12d=60s, 30d=150s, 180d=900s
-        activeMaturityDate = DateTime.Now.AddSeconds(testSeconds);
+        // NGÀY THẬT (khách chốt 1 ngày game = 1 ngày thật). Muốn test nhanh thì đặt
+        // 'Test Seconds Per Day' > 0 trong Inspector, nhớ trả về 0 trước khi build.
+        float secondsPerDay = testSecondsPerDay > 0f ? testSecondsPerDay : 86400f;
+        float maturitySeconds = pkg.days * secondsPerDay;
+        activeMaturityDate = DateTime.Now.AddSeconds(maturitySeconds);
 
-        playerBalance -= amount;
         hasActiveDeposit = true;
 
         UpdateBalance();
         ClearError();
         RefreshDepositView();
 
-        Debug.Log($"[PiggyBank] Gửi {amount:N0} Point vào gói {pkg.label} (+{pkg.rate * 100}%). Đáo hạn test: {testSeconds}s");
+        Debug.Log($"[PiggyBank] Gửi {amount:N0} Point vào gói {pkg.label} (+{pkg.rate * 100}%). Đáo hạn sau {maturitySeconds}s.");
     }
 
     private void RefreshDepositView()
@@ -412,7 +417,8 @@ public class PiggyBankPopupController : MonoBehaviour
     private void OnMatured()
     {
         float total = activePrincipal + activeInterestAmount;
-        playerBalance += total;
+        // Trả gốc + lãi vào ví Point thật.
+        YWonderLand.Managers.EconomyManager.Instance?.AddPOS((long)total, "piggybank_matured");
 
         // Add to history
         var pkg = packages[activePkgIndex];

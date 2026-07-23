@@ -32,6 +32,10 @@ namespace YWonderLand.Managers
         private float musicVolume = 0.5f;
         private float sfxVolume = 0.8f;
 
+        // Cho popup Cài đặt đọc để dựng đúng vị trí thanh trượt lúc mở.
+        public float MusicVolume => musicVolume;
+        public float SfxVolume => sfxVolume;
+
         private readonly Dictionary<string, AudioClip> _cache = new Dictionary<string, AudioClip>();
         private readonly HashSet<string> _missingLogged = new HashSet<string>();
 

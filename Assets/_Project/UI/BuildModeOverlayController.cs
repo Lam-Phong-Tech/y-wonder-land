@@ -70,7 +70,7 @@ public class BuildModeOverlayController : MonoBehaviour
     private GameObject contextSelectedBuilding;
     private bool lastPointerDownWasTouch;
 
-    // ── Mock Data ──
+    // ── Dữ liệu menu Build (chi phí lấy từ SerializeField bên dưới, không phải số giả) ──
 
     private struct BuildItemData
     {

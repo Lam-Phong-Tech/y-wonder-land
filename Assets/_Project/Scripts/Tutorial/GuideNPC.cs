@@ -52,6 +52,9 @@ public class GuideNPC : MonoBehaviour
     private float chatSpamTimer = 0f;
     private float CHAT_SPAM_INTERVAL = 8f; // Gọi người chơi mỗi 8 giây nếu họ đứng yên hoặc chưa tới
 
+    // Hạn chờ người chơi tới gần ở màn CHÀO. Quá giờ thì vào tuyến luôn (chống treo tutorial).
+    private const float GREETING_WAIT_TIMEOUT = 25f;
+
     void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -173,12 +176,22 @@ public class GuideNPC : MonoBehaviour
         // 1. NPC đứng vẫy tay chào
         PlayAnimation(waveAnimName);
 
-        // 2. Chờ người chơi tới gần (khoảng cách > 5m)
+        // 2. Chờ người chơi tới gần (khoảng cách > 5m). CÓ HẠN GIỜ: người chơi vào lại game (resume)
+        // có thể đang đứng cách NPC rất xa hoặc không tìm được đường tới; hết giờ thì cứ vào tuyến
+        // chứ không đứng vẫy tay vĩnh viễn làm chết cả tutorial.
         if (playerTransform != null)
         {
+            float waitedGreeting = 0f;
             while (Vector3.Distance(transform.position, playerTransform.position) > 5.0f)
             {
                 LookAtPlayer(); // Liên tục quay mặt nhìn theo người chơi
+                waitedGreeting += Time.deltaTime;
+                if (waitedGreeting >= GREETING_WAIT_TIMEOUT)
+                {
+                    Debug.LogWarning("[GuideNPC] Người chơi không tới gần sau "
+                        + GREETING_WAIT_TIMEOUT + "s -> bỏ qua màn chào, vào thẳng tuyến hướng dẫn.");
+                    break;
+                }
                 yield return null;
             }
         }

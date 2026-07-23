@@ -87,6 +87,7 @@ public class TutorialManager : MonoBehaviour
     private string activeTutorialScopeId = "";
     private bool tutorialRunStarted;
     private bool authEventsSubscribed;
+    private bool nodesBuilt;
 
     private float harvestCountdown = 5f;
     private Coroutine countdownCoroutine;
@@ -138,41 +139,48 @@ public class TutorialManager : MonoBehaviour
     void Start()
     {
         SubscribeAuthEvents();
-
-        if (guideNPC != null)
-        {
-            guideNPC.OnDialogueTriggered += ShowSubtitle;
-
-            var nodes = new List<YWonderLand.Tutorial.TutorialNode>();
-
-            // Node 0: CÂY (chặt cây)
-            nodes.Add(BuildNode("TutorialNode_Tree", targetTreeArea, new Vector3(12f, 0.5f, 8f),
-                walk: new[] { "Đi theo tôi, đừng có lề mề!", "Tôi đi trước, cậu bám theo sau." },
-                wait: new[] { "Nhanh cái chân lên cậu ơi, tôi đợi mốc cả người rồi!", "Cậu vừa đi vừa ngắm cảnh à? Lẹ lên!" },
-                action: new[] { "Thấy cái cây kia chứ? Cầm rìu bổ cho tôi vài nhát. Đừng bảo là chưa cầm rìu bao giờ đấy!" },
-                idle: new[] { "Cậu đứng đực ra đó làm gì? Tay chân để làm cảnh à?", "Cây nó không tự đổ đâu, vung rìu lên!" },
-                OnTreeArrived));
-
-            // Node 1: BÃI RUỘNG (xây ruộng + canh tác)
-            nodes.Add(BuildNode("TutorialNode_FarmPlot", targetFarmPlotArea, new Vector3(8f, 0.5f, 8f),
-                walk: new[] { "Có gỗ rồi. Theo tôi ra bãi đất trống.", "Đi nào, tới lúc làm nông thật sự." },
-                wait: new[] { "Nhanh lên, đất đang chờ cậu kìa!", "Lại đây, tôi chỉ cho cách trồng trọt." },
-                action: new[] { "Giờ mở Xây Dựng (phím B), chọn Ruộng và đặt một ô đất xuống đây cho tôi." },
-                idle: new[] { "Mở phím B lên đi cậu, đứng đó hoài!", "Ruộng không tự mọc ra đâu, xây đi!" },
-                OnFarmPlotArrived));
-
-            // Node 2: BÃI CHUỒNG (chỉ hướng dẫn xây chuồng)
-            nodes.Add(BuildNode("TutorialNode_Pen", targetPenArea, new Vector3(5f, 0.5f, 14f),
-                walk: new[] { "Trồng trọt xong rồi, giờ tới chăn nuôi. Theo tôi!", "Đi nào, qua khu chuồng trại." },
-                wait: new[] { "Lẹ chân lên, khu chuồng trại ở ngay đây!", "Cậu lại la cà nữa à?" },
-                action: new[] { "Mở Xây Dựng, chọn một cái Chuồng và đặt xuống đây nhé." },
-                idle: new[] { "Chuồng đâu? Xây đi cậu!", "Đứng nhìn tôi làm gì, mở phím B xây chuồng đi!" },
-                OnPenArrived));
-
-            guideNPC.tutorialNodes = nodes.ToArray();
-        }
-
+        EnsureTutorialNodesBuilt();
         StartCoroutine(SetupHUDReferences());
+    }
+
+    // Dựng 3 trạm dừng cho NPC. Tách khỏi Start() vì luồng RESUME (người chơi cũ vào thẳng game)
+    // gọi StartTutorial() ngay trong GameManager.Start() — thứ tự Start() giữa 2 script là KHÔNG
+    // xác định, nên nếu Start() của bé chạy sau thì NPC chưa có node nào và tutorial chết ngay.
+    private void EnsureTutorialNodesBuilt()
+    {
+        if (nodesBuilt) return;
+        if (guideNPC == null) return;
+        nodesBuilt = true;
+
+        guideNPC.OnDialogueTriggered += ShowSubtitle;
+
+        var nodes = new List<YWonderLand.Tutorial.TutorialNode>();
+
+        // Node 0: CÂY (chặt cây)
+        nodes.Add(BuildNode("TutorialNode_Tree", targetTreeArea, new Vector3(12f, 0.5f, 8f),
+            walk: new[] { "Đi theo tôi, đừng có lề mề!", "Tôi đi trước, cậu bám theo sau." },
+            wait: new[] { "Nhanh cái chân lên cậu ơi, tôi đợi mốc cả người rồi!", "Cậu vừa đi vừa ngắm cảnh à? Lẹ lên!" },
+            action: new[] { "Thấy cái cây kia chứ? Cầm rìu bổ cho tôi vài nhát. Đừng bảo là chưa cầm rìu bao giờ đấy!" },
+            idle: new[] { "Cậu đứng đực ra đó làm gì? Tay chân để làm cảnh à?", "Cây nó không tự đổ đâu, vung rìu lên!" },
+            OnTreeArrived));
+
+        // Node 1: BÃI RUỘNG (xây ruộng + canh tác)
+        nodes.Add(BuildNode("TutorialNode_FarmPlot", targetFarmPlotArea, new Vector3(8f, 0.5f, 8f),
+            walk: new[] { "Có gỗ rồi. Theo tôi ra bãi đất trống.", "Đi nào, tới lúc làm nông thật sự." },
+            wait: new[] { "Nhanh lên, đất đang chờ cậu kìa!", "Lại đây, tôi chỉ cho cách trồng trọt." },
+            action: new[] { "Giờ mở Xây Dựng (phím B), chọn Ruộng và đặt một ô đất xuống đây cho tôi." },
+            idle: new[] { "Mở phím B lên đi cậu, đứng đó hoài!", "Ruộng không tự mọc ra đâu, xây đi!" },
+            OnFarmPlotArrived));
+
+        // Node 2: BÃI CHUỒNG (chỉ hướng dẫn xây chuồng)
+        nodes.Add(BuildNode("TutorialNode_Pen", targetPenArea, new Vector3(5f, 0.5f, 14f),
+            walk: new[] { "Trồng trọt xong rồi, giờ tới chăn nuôi. Theo tôi!", "Đi nào, qua khu chuồng trại." },
+            wait: new[] { "Lẹ chân lên, khu chuồng trại ở ngay đây!", "Cậu lại la cà nữa à?" },
+            action: new[] { "Mở Xây Dựng, chọn một cái Chuồng và đặt xuống đây nhé." },
+            idle: new[] { "Chuồng đâu? Xây đi cậu!", "Đứng nhìn tôi làm gì, mở phím B xây chuồng đi!" },
+            OnPenArrived));
+
+        guideNPC.tutorialNodes = nodes.ToArray();
     }
 
     private void OnDestroy()
@@ -383,17 +391,53 @@ public class TutorialManager : MonoBehaviour
             return;
         }
 
+        // RESUME: node phải có TRƯỚC khi chào, kẻo NPC không biết dẫn đi đâu (xem EnsureTutorialNodesBuilt).
+        EnsureTutorialNodesBuilt();
+
         SetStep(TutorialStep.FollowToTree);
         UpdateQuestHUD("[1/11] Đi theo NPC Tân Thủ tới chỗ cái cây");
         Debug.Log("[TutorialManager] Onboarding Tutorial (flow mới) bắt đầu.");
 
         // Lời chào của ông lão khi người chơi mới lên đảo, rồi dẫn tới node 0 (Cây).
+        WarpGuideNearPlayerIfFar();
         if (guideNPC != null) guideNPC.StartGreetingSequence(0);
 
         ShowSubtitle("Hừ! Lại một cậu trẻ thành phố lên đảo. Tôi trông coi nông trại này. Đi theo tôi, đừng có lề mề!", 9f);
         ShowInstructionBanner("Chào mừng tới đảo!", "Đi theo ông lão (NPC) tới chỗ cái cây.");
 
         CreateNPCExclamationMark();
+    }
+
+    // Người chơi thoát giữa chừng rồi vào lại (RESUME) thì được thả ở VỊ TRÍ CŨ, có thể cách NPC
+    // rất xa. Màn chào của NPC lại đứng chờ tới khi người chơi vào trong 5m -> treo vĩnh viễn.
+    // Nên khi bắt đầu tutorial mà NPC ở xa thì dời ông lão tới ngay cạnh người chơi.
+    private const float GUIDE_TELEPORT_DIST = 15f;
+
+    private void WarpGuideNearPlayerIfFar()
+    {
+        if (guideNPC == null) return;
+
+        GameObject player = GameObject.FindWithTag("Player");
+        if (player == null) return;
+
+        Vector3 playerPos = player.transform.position;
+        if (Vector3.Distance(guideNPC.transform.position, playerPos) <= GUIDE_TELEPORT_DIST) return;
+
+        Vector3 want = playerPos + player.transform.forward * 2.5f + player.transform.right * 1.5f;
+        Vector3 dest = want;
+        if (UnityEngine.AI.NavMesh.SamplePosition(want, out var hit, 8f, UnityEngine.AI.NavMesh.AllAreas))
+            dest = hit.position;
+
+        var agent = guideNPC.GetComponent<UnityEngine.AI.NavMeshAgent>();
+        if (agent != null && agent.enabled) agent.Warp(dest);
+        else guideNPC.transform.position = dest;
+
+        Vector3 faceDir = playerPos - dest;
+        faceDir.y = 0f;
+        if (faceDir.sqrMagnitude > 0.001f)
+            guideNPC.transform.rotation = Quaternion.LookRotation(faceDir.normalized);
+
+        Debug.Log($"[TutorialManager] NPC Tân Thủ ở xa -> dời tới cạnh người chơi tại {dest}.");
     }
 
     // ═══════════════ HANDLERS THEO FLOW MỚI ═══════════════

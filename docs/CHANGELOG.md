@@ -6,6 +6,61 @@
 
 ---
 
+## [2026-07-23] — Sửa tutorial chết ở luồng RESUME · thay dữ liệu GIẢ trong UI bằng số thật
+
+### Tutorial không chạy lại sau khi thoát giữa chừng (tài khoản mới)
+Triệu chứng: người chơi mới tải game, chơi tutorial dở rồi thoát → vào lại **tutorial im lặng không chạy**.
+Không phải cờ `tutorialCompleted` (cờ vẫn `false`, game **vẫn gọi** `StartTutorial()` mỗi lần vào) —
+mà là luồng RESUME làm nó chết ngay, chết y hệt nhau mọi lần nên trông như "đã tắt vĩnh viễn".
+
+- **NPC đứng chờ vĩnh viễn.** `GuideNPC.GreetingRoutine` có `while (khoảng cách > 5m) yield` không hạn giờ.
+  Luồng thường thì người chơi vừa xuống thuyền là đứng cạnh NPC. RESUME lại thả người chơi về **vị trí đã lưu**,
+  có thể cách NPC cả bản đồ → ông lão vẫy tay mãi, tutorial đứng ở bước 0.
+  ➜ Thêm `WarpGuideNearPlayerIfFar()`: bắt đầu tutorial mà NPC xa >15m thì **dời ông lão tới cạnh người chơi**
+  (bám NavMesh, quay mặt về phía người chơi). ➜ Kèm **hạn giờ 25s** ở màn chào làm hàng rào cuối.
+- **NPC chưa có trạm dừng nào lúc bị gọi.** 3 node dựng trong `TutorialManager.Start()`, nhưng RESUME gọi
+  `StartTutorial()` ngay trong `GameManager.Start()` — **thứ tự `Start()` giữa 2 script là không xác định**
+  (project không cài Script Execution Order). GameManager chạy trước thì `tutorialNodes` rỗng → `StartNode(0)`
+  rơi vào nhánh "đã hoàn thành toàn bộ tuyến" và **tự tắt component NPC**.
+  ➜ Tách ra `EnsureTutorialNodesBuilt()` (idempotent), gọi từ **cả** `Start()` lẫn `StartTutorial()`.
+
+**Files:** `Scripts/Tutorial/TutorialManager.cs`, `Scripts/Tutorial/GuideNPC.cs`
+
+### UI: bỏ dữ liệu GIẢ, nối vào hệ thống thật
+- **Thanh EXP trong Hồ sơ luôn đứng 0%.** HUD truyền `expStr` lấy từ *text của label* (`"120 / 250"`),
+  popup `float.TryParse` **fail → 0**, rồi chia cho `maxExp = 100` cứng. ➜ `ProfilePopupController.Show(name)`
+  đọc thẳng `ExperienceManager` (`Level`, `ExpInLevel`, `ExpForNextLevel`, `ExpPercent`, "Cấp tối đa" khi đạt 90).
+- **Thống kê nông trại là số Random** (mở popup 2 lần ra 2 số khác nhau), ngày tham gia cứng `"02/06/2026"`.
+  ➜ Thêm `Managers/PlayerStats.cs` đếm THẬT theo từng tài khoản (`PlayerScopedPrefs`): "cây đã trồng" cộng ở
+  `FarmTile` khi gieo, "đã bán" cộng ở `ShopPopupController` khi bán, ngày tham gia ghi lần đầu rồi giữ nguyên.
+  Cả hai chỗ đếm gọi **trực tiếp**, không qua event chung (một handler lỗi ở event chung chặn cả chuỗi).
+  "Bạn bè" để **0** — chưa có backend thì không bịa số.
+- **Heo đất không nối ví.** `playerBalance = 5000f` cứng → gửi tiết kiệm **không trừ Point thật**.
+  ➜ Đọc thẳng `EconomyManager.GetPOS()`; gửi = `SpendPOS`, đáo hạn = `AddPOS` (gốc + lãi).
+  Bỏ 2 dòng lịch sử bịa. Kỳ hạn đổi từ *1 ngày = 5 giây* sang **ngày thật**, thêm `Test Seconds Per Day` để test.
+- **Cài đặt kéo thanh không có tác dụng** (4 chỗ còn `// TODO`). ➜ Nhạc/SFX nối `AudioManager`
+  (kéo SFX phát tiếng click nghe thử), zoom camera nối `ThirdPersonCamera.SetUserZoom()` (mới),
+  chất lượng hình chỉnh `renderScale` của URP + mip + LOD, bóng chỉnh `QualitySettings.shadows`.
+  Tất cả lưu PlayerPrefs và **áp lại lúc vào game**, không chỉ dựng lại thanh trượt.
+- Sửa 3 comment lỗi thời (`GameHUDController` "Mockup only", `SettingsPopupController` "mockup values",
+  `BuildModeOverlayController` "Mock Data") — code ở đó vốn đã thật.
+
+**Files:** `Scripts/Managers/PlayerStats.cs` (mới), `Scripts/Managers/AudioManager.cs`,
+`Scripts/Camera/ThirdPersonCamera.cs`, `Scripts/Environment/FarmTile.cs`, `UI/ProfilePopupController.cs`,
+`UI/GameHUDController.cs`, `UI/PiggyBankPopupController.cs`, `UI/SettingsPopupController.cs`,
+`UI/ShopPopupController.cs`, `UI/BuildModeOverlayController.cs`
+
+> ⚠️ **Còn là dữ liệu giả (chưa làm, chờ backend):** Bảng xếp hạng · Bạn bè · Hòm thư · Nhiệm vụ ·
+> Sự kiện (số nguyên liệu + gói bán) · Quên mật khẩu (luôn báo thành công) · AI chat giả khi chưa nối realtime.
+
+### Hệ bệnh: sếp chốt GIỮ NGUYÊN số khách
+Sếp trả lời 23/07: *"số liệu vắc-xin và thuốc là do khách họ muốn, mình cứ làm theo"* → đóng cả 4 câu hỏi,
+**không đổi số nào**. 🔒 Hai dòng trông như gõ nhầm — **dê 10 liều thuốc y hệt bò** và **ngỗng 4 mũi vắc-xin**
+(con duy nhất mà tiêm phòng lỗ hơn chịu bệnh) — là số khách chốt, **đừng "sửa"**.
+Chi tiết + bảng chứng minh: `docs/CAU_HOI_KHACH_CON_TREO.md` §6.
+
+---
+
 ## [2026-07-22] — Hệ BỆNH + VẮC-XIN cho thú nuôi · chuyển sang THỜI GIAN THỰC
 
 ### Hệ bệnh / vắc-xin (trước đây là khung rỗng)

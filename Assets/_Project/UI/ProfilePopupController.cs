@@ -79,18 +79,22 @@ public class ProfilePopupController : MonoBehaviour
     }
 
     /// <summary>
-    /// Show the profile popup with dynamic data passed from GameHUD.
+    /// Mở hồ sơ. Chỉ nhận TÊN từ HUD; cấp/EXP/thống kê đọc thẳng từ manager để khỏi phải
+    /// bóc ngược chuỗi trên label (cách cũ parse "120 / 250" luôn ra 0 nên thanh EXP đứng im).
     /// </summary>
-    public void Show(string name, string levelStr, string expStr)
+    public void Show(string name)
     {
         if (profileOverlay != null)
         {
             profileOverlay.style.display = DisplayStyle.Flex;
         }
 
+        var exp = YWonderLand.Managers.ExperienceManager.Instance;
+
         // Set dynamic texts
         if (profileName != null) profileName.text = name;
-        if (profileLevel != null) profileLevel.text = levelStr;
+        if (profileLevel != null)
+            profileLevel.text = exp != null ? $"Level: {exp.Level}" : "Level: 1";
 
         if (profileAvatarLarge != null)
         {
@@ -104,27 +108,23 @@ public class ProfilePopupController : MonoBehaviour
                 profileAvatarLarge.AddToClassList("avatar-female");
         }
 
-        // Calculate and set EXP progress bar width
-        float expVal = 0f;
-        float.TryParse(expStr, out expVal);
-        
-        // Let's assume level up requires 100.00 EXP in this mockup
-        float maxExp = 100.00f;
-        float pct = (expVal / maxExp) * 100f;
-        pct = Mathf.Clamp(pct, 0f, 100f);
-
+        // Thanh EXP — lấy số thật của cấp hiện tại.
+        float pct = exp != null ? exp.ExpPercent : 0f;
         if (profileExpFill != null)
-        {
-            profileExpFill.style.width = Length.Percent(pct);
-        }
+            profileExpFill.style.width = Length.Percent(Mathf.Clamp(pct, 0f, 100f));
+
         if (profileExpText != null)
         {
-            profileExpText.text = $"{expVal:F2} / {maxExp:F2} ({pct:F0}%)";
+            if (exp == null)
+                profileExpText.text = "0 / 0";
+            else if (exp.IsMaxLevel)
+                profileExpText.text = "Cấp tối đa";
+            else
+                profileExpText.text = $"{exp.ExpInLevel} / {exp.ExpForNextLevel} ({pct:F0}%)";
         }
 
-        // Generate or load farm stats
-        UpdateFarmStatsMock();
-        
+        UpdateFarmStats();
+
         Debug.Log($"[Profile] Opened profile details for player: '{name}'");
     }
 
@@ -136,17 +136,20 @@ public class ProfilePopupController : MonoBehaviour
         }
     }
 
-    private void UpdateFarmStatsMock()
+    // Số THẬT, cộng dồn qua các phiên chơi (xem PlayerStats). Trước đây là Random nên mở
+    // popup 2 lần ra 2 con số khác nhau.
+    private void UpdateFarmStats()
     {
-        // Seed random stats to make it look dynamic and alive
-        int planted = Random.Range(100, 300);
-        int sold = planted + Random.Range(50, 200);
-        int friendsCount = Random.Range(3, 10);
+        if (statPlanted != null)
+            statPlanted.text = YWonderLand.Managers.PlayerStats.Planted.ToString("N0");
+        if (statSold != null)
+            statSold.text = YWonderLand.Managers.PlayerStats.Sold.ToString("N0");
 
-        if (statPlanted != null) statPlanted.text = planted.ToString();
-        if (statSold != null) statSold.text = sold.ToString();
-        if (statFriends != null) statFriends.text = friendsCount.ToString();
-        if (statJoinedDate != null) statJoinedDate.text = "02/06/2026";
+        // Hệ bạn bè chưa có backend -> để 0 chứ không bịa số.
+        if (statFriends != null) statFriends.text = "0";
+
+        if (statJoinedDate != null)
+            statJoinedDate.text = YWonderLand.Managers.PlayerStats.JoinedDate.ToString("dd/MM/yyyy");
     }
 }
 

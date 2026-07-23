@@ -18,8 +18,7 @@ public struct InteractionAction
 
 /// <summary>
 /// Controller for the In-Game HUD.
-/// Mockup only — logs button clicks for testing.
-/// Hook up with actual game systems later.
+/// Số hiển thị là THẬT: Point từ EconomyManager, cấp/EXP từ ExperienceManager.
 /// </summary>
 public class GameHUDController : MonoBehaviour
 {
@@ -372,10 +371,10 @@ public class GameHUDController : MonoBehaviour
         {
             if (profilePopup != null)
             {
+                // Chỉ truyền TÊN. Cấp/EXP popup tự đọc từ ExperienceManager — bóc ngược chuỗi
+                // trên label ("120 / 250") parse không ra số nên thanh EXP luôn đứng 0%.
                 string name = playerName != null ? playerName.text : "Player";
-                string levelStr = playerLevel != null ? playerLevel.text : "Level: 1";
-                string expStr = playerCurrencySmall != null ? playerCurrencySmall.text : "0.00";
-                profilePopup.Show(name, levelStr, expStr);
+                profilePopup.Show(name);
             }
             else
                 Debug.Log("[GameHUD] Player Info / Avatar clicked (no profile popup assigned)");

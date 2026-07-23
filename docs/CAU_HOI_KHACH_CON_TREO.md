@@ -120,17 +120,24 @@ từng tầng, ghi nhận theo **upline–downline trực tiếp**, tối đa 6 
 
 ---
 
-## 6. HỆ BỆNH THÚ — 2 chỗ tài liệu chưa nói rõ (23/07)
+## 6. HỆ BỆNH THÚ — ĐÃ CHỐT: GIỮ NGUYÊN SỐ KHÁCH (23/07)
+
+> ✅ **Sếp trả lời 23/07: "số liệu vắc-xin và thuốc là do khách họ muốn, mình cứ làm theo."**
+> Cả 4 câu hỏi bên dưới **đóng lại, không đổi số**. Giữ lại phần phân tích để sau này ai đọc
+> code khỏi tưởng là bug rồi "sửa" nhầm.
 
 Đã áp **nguyên số** 4 cột bệnh của `VatNuoi2.md` vào game (thời điểm phát bệnh · tỉ lệ phát bệnh ·
-số mũi vắc-xin · số liều thuốc). Còn 2 chỗ bảng tính không ghi rõ, bé chọn cách hiểu **khớp công thức
-chi phí của `CachTinh.md`** — cần khách gật đầu:
+số mũi vắc-xin · số liều thuốc).
 
-1. **"Thời điểm phát bệnh" = 0.3 — nhân với cái gì?**
-   Bé hiểu là **× Số ngày nuôi** → bò 0.3 × 270 = đổ bệnh ở **ngày thứ 81** của vòng nuôi. Đúng không ạ?
-2. **"Số lượng thuốc trị bệnh cần" = 10 (bò)** — là **10 liều cho MỘT lần chữa** hay **tổng cả vòng nuôi**?
-   Bé hiểu là *cả vòng nuôi chỉ bệnh 1 lần, lần đó tốn 10 liều* — vì công thức `CachTinh` chỉ cộng tiền
-   thuốc **đúng một lần** rồi nhân với tỉ lệ phát bệnh.
+Hai chỗ bảng tính không ghi rõ, bé chọn cách hiểu **khớp công thức chi phí của `CachTinh.md`**.
+Khách không phản hồi khác nên **chốt theo cách hiểu này**:
+
+1. **"Thời điểm phát bệnh" = 0.3** → hiểu là **× Số ngày nuôi**; bò 0.3 × 270 = đổ bệnh ở **ngày thứ 81**.
+2. **"Số lượng thuốc trị bệnh cần" = 10 (bò)** → hiểu là *cả vòng nuôi chỉ bệnh 1 lần, lần đó tốn 10 liều*,
+   vì công thức `CachTinh` chỉ cộng tiền thuốc **đúng một lần** rồi nhân với tỉ lệ phát bệnh.
+
+⚠️ Đây là **suy luận của bên mình**, khách chưa xác nhận bằng văn bản. Nếu sau này khách nói khác
+thì chỉ phải sửa 1 dòng trong `ItemDataGenerator.SetAnimalDisease(...)`, không đụng logic.
 
 ### 6.b Ý đồ thiết kế: thuốc đắt là để ÉP người chơi tiêm phòng
 
@@ -155,21 +162,24 @@ So "tiền vắc-xin cả vòng" với "kỳ vọng tiền thuốc" (= tỉ lệ
 → 9/10 con, tiêm phòng rẻ hơn chịu rủi ro bệnh. Đây gần như chắc chắn là **cố ý**: vắc-xin là khoản
 chi bắt buộc về mặt kinh tế, thuốc chỉ là hình phạt cho ai lười tiêm. **Không cần hỏi lại chỗ này.**
 
-Chỉ còn 2 dòng nhìn như gõ nhầm:
+Hai dòng nhìn như gõ nhầm — **đã hỏi, sếp bảo giữ nguyên theo ý khách**:
 
 1. **Ngỗng** — con DUY NHẤT ngược quy luật (tiêm 120, thuốc kỳ vọng chỉ 56 → tiêm phòng là lỗ).
-   Nhiều khả năng cột "SL vắc-xin = 4" bị copy từ nhóm gia súc; gà/vịt/thỏ đều chỉ 2–3 mũi.
+   Cột "SL vắc-xin = 4" cao bất thường so với gà/vịt/thỏ (2–3 mũi). ➜ **GIỮ NGUYÊN.**
 2. **Dê tốn 10 liều thuốc y hệt bò**, trong khi giá giống dê chỉ bằng ~1/6 bò và tiền thức ăn cả vòng
-   chỉ 540 (thuốc chiếm 9.7% tổng CP, các con khác 1.6–2.1%). Nhìn như **dòng dê copy từ dòng bò**.
+   chỉ 540 (thuốc chiếm 9.7% tổng CP, các con khác 1.6–2.1%). ➜ **GIỮ NGUYÊN.**
+
+🔒 **Đừng "sửa" 2 dòng này.** Trông như lỗi copy nhưng là số khách chốt. Ai thấy lạ thì đọc mục này
+trước khi đụng vào `ItemDataGenerator`.
 
 > 📝 Bé từng ghi ở đây là "gà chữa 210 > mua mới 156 nên không ai chữa" — **sai, đã bỏ**. Tính thiếu
 > thức ăn đã đổ vào: gà bệnh ở ngày 13.5/90, thức ăn đã tiêu ~162 → thay mới thật ra tốn 156+162 =
 > **318**, vẫn đắt hơn chữa 210. Thỏ cũng vậy (thay ~598 vs chữa 140). Chữa luôn có lợi.
 
-⚠️ **Hệ quả cần khách biết:** với thời gian thực (1 ngày game = 1 ngày thật), theo đúng bảng thì
-**vịt bệnh sớm nhất ở ngày thứ ~7, gà ~13, bò ~81, hươu ~54** kể từ lúc thả. Nghĩa là người chơi mới
-gần như **không thấy hệ bệnh trong tuần đầu**. Nếu khách muốn bệnh xuất hiện sớm hơn để người chơi
-cảm nhận được thì phải **đổi cột "Thời điểm phát bệnh"**, chứ không phải lỗi code.
+⚠️ **Hệ quả đã chấp nhận:** với thời gian thực (1 ngày game = 1 ngày thật), theo đúng bảng thì
+**vịt bệnh sớm nhất ở ngày thứ ~7, gà ~13, hươu ~54, bò ~81** kể từ lúc thả. Nghĩa là người chơi mới
+gần như **không thấy hệ bệnh trong tuần đầu** — đây là **hệ quả của số khách**, KHÔNG phải lỗi code.
+Muốn demo/QC thấy bệnh ngay thì đặt `Sickness Onset Sec = 30` trên prefab con vật, xong trả về 0.
 
 ---
 

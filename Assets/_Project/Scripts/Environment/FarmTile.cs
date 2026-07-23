@@ -433,6 +433,10 @@ public class FarmTile : MonoBehaviour
         }
         UpdateVisuals();
 
+        // Đếm cho thống kê hồ sơ. Gọi TRỰC TIẾP, không đi qua event chung (một handler lỗi
+        // ở event chung có thể chặn cả chuỗi đăng ký phía sau).
+        YWonderLand.Managers.PlayerStats.AddPlanted();
+
         OnTilePlanted?.Invoke(this);
         return true;
     }

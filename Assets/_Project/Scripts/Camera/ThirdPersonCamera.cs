@@ -102,6 +102,17 @@ public class ThirdPersonCamera : MonoBehaviour
         touchVerticalSensitivity = baseTV * mult;
     }
 
+    /// <summary>Đặt khoảng cách camera từ Settings (slider -1..1, 0 = mức gốc trong Inspector).</summary>
+    public void SetUserZoom(float t)
+    {
+        t = Mathf.Clamp(t, -1f, 1f);
+        if (baseDistance <= 0f) baseDistance = distance; // chốt mức gốc lần đầu được gọi
+        // t=-1 -> sát vai (0.6x), t=0 -> gốc, t=+1 -> lùi xa (1.8x)
+        distance = baseDistance * Mathf.Lerp(0.6f, 1.8f, (t + 1f) * 0.5f);
+    }
+
+    private float baseDistance = 0f;
+
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;

@@ -924,7 +924,11 @@ public class ShopPopupController : MonoBehaviour
             YWonderLand.Managers.AudioManager.Instance?.PlaySFX("coin");
 
             if (sellMode)
+            {
+                // Đếm cho thống kê hồ sơ TRƯỚC khi bắn event chung, kẻo handler nào lỗi thì mất số.
+                YWonderLand.Managers.PlayerStats.AddSold(quantity);
                 OnItemSold?.Invoke(item.id, quantity);
+            }
 
             UpdateBalance();
             if (currentShopId == requestedShopId)
