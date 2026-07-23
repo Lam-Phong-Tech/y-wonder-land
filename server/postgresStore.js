@@ -1,6 +1,11 @@
 const crypto = require("crypto");
 const { Pool } = require("pg");
 const { prepareAnimalPlacement } = require("./farmAnimalPlacement");
+const {
+  normalizePointSourceLot,
+  pointSourceLotRequestSignature,
+  planPointSourceFifo,
+} = require("./pointSourceLedger");
 
 function nowISO() {
   return new Date().toISOString();
@@ -176,6 +181,43 @@ function pointReservationFromRow(row) {
     status: row.status,
     capturedAt: row.captured_at ? new Date(row.captured_at).toISOString() : null,
     releasedAt: row.released_at ? new Date(row.released_at).toISOString() : null,
+    createdAt: new Date(row.created_at).toISOString(),
+    updatedAt: new Date(row.updated_at).toISOString(),
+  };
+}
+
+function pointSourceLotFromRow(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    playerId: row.player_id,
+    sourceEventId: row.source_event_id,
+    sourceEventIndex: toSafeInteger(row.source_event_index, "point_source_lot.source_event_index"),
+    originType: row.origin_type,
+    acquisitionType: row.acquisition_type,
+    commissionAsset: row.commission_asset || "",
+    pointAmountMicros: toSafeInteger(row.point_amount_micros, "point_source_lot.point_amount_micros"),
+    remainingPointMicros: toSafeInteger(
+      row.remaining_point_micros,
+      "point_source_lot.remaining_point_micros"
+    ),
+    sourceRatePair: row.source_rate_pair || "",
+    sourceRateVersionId: row.source_rate_version_id || "",
+    pointMicrosPerSourceUnit: row.point_micros_per_source_unit == null
+      ? null
+      : toSafeInteger(
+        row.point_micros_per_source_unit,
+        "point_source_lot.point_micros_per_source_unit"
+      ),
+    commissionRateVersionId: row.commission_rate_version_id || "",
+    pointMicrosPerUsdt: row.point_micros_per_usdt == null
+      ? null
+      : toSafeInteger(row.point_micros_per_usdt, "point_source_lot.point_micros_per_usdt"),
+    parentLotId: row.parent_lot_id || "",
+    rootLotId: row.root_lot_id,
+    occurredAt: new Date(row.occurred_at).toISOString(),
+    metadata: clone(row.metadata_json) || {},
+    requestSignature: row.request_signature,
     createdAt: new Date(row.created_at).toISOString(),
     updatedAt: new Date(row.updated_at).toISOString(),
   };
@@ -490,6 +532,18 @@ class PostgresStore {
     });
   }
 
+  /// Đặt lại mật khẩu cho MỘT account. Chỉ dùng cho seed tài khoản demo — luồng
+  /// người chơi thật không gọi tới, và hàm này không nhận mật khẩu thô, chỉ nhận hash.
+  async setAccountPassword(accountId, passwordHash) {
+    if (!accountId || !passwordHash) return null;
+    const result = await this.pool.query(
+      `update game_accounts set password_hash = $2, updated_at = now()
+       where id = $1 and soft_deleted = false returning *`,
+      [accountId, passwordHash]
+    );
+    return accountFromRow(result.rows[0]);
+  }
+
   async getOrCreatePlayerForWebUserWithClient(client, webUser) {
     await client.query("select pg_advisory_xact_lock(hashtext($1)::bigint)", [`web:${webUser.id}`]);
     const existing = await client.query(
@@ -543,6 +597,101 @@ class PostgresStore {
       if (!economy) return null;
       return { player, economy };
     });
+  }
+
+  async recordPointSourceLotWithClient(client, playerId, input) {
+    await this.ensurePlayerStateWithClient(client, playerId);
+
+    let lot;
+    let requestSignature;
+    try {
+      lot = normalizePointSourceLot({ ...(input || {}), playerId });
+      requestSignature = pointSourceLotRequestSignature(lot);
+    } catch (error) {
+      return { ok: false, error: error.message || "INVALID_POINT_SOURCE_LOT" };
+    }
+    if (lot.acquisitionType === "TRANSFER") {
+      return { ok: false, error: "POINT_TRANSFER_REQUIRES_ATOMIC_OPERATION" };
+    }
+
+    const eventLock = `point_source_lot:${playerId}:${lot.sourceEventId}:${lot.sourceEventIndex}`;
+    await this.lockIdempotency(client, eventLock);
+    const existingResult = await client.query(
+      `select * from point_source_lots
+       where player_id=$1 and source_event_id=$2 and source_event_index=$3`,
+      [playerId, lot.sourceEventId, lot.sourceEventIndex]
+    );
+    if (existingResult.rowCount > 0) {
+      const existing = pointSourceLotFromRow(existingResult.rows[0]);
+      if (existing.requestSignature !== requestSignature) {
+        return { ok: false, error: "POINT_SOURCE_IDEMPOTENCY_CONFLICT" };
+      }
+      return { ok: true, duplicate: true, lot: existing };
+    }
+
+    const idResult = await client.query("select * from point_source_lots where id=$1", [lot.id]);
+    if (idResult.rowCount > 0) {
+      return { ok: false, error: "POINT_SOURCE_IDEMPOTENCY_CONFLICT" };
+    }
+
+    const inserted = await client.query(
+      `insert into point_source_lots
+       (id,player_id,source_event_id,source_event_index,origin_type,acquisition_type,
+        commission_asset,point_amount_micros,remaining_point_micros,source_rate_pair,
+        source_rate_version_id,point_micros_per_source_unit,commission_rate_version_id,
+        point_micros_per_usdt,parent_lot_id,root_lot_id,occurred_at,request_signature,
+        metadata_json,created_at,updated_at)
+       values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19::jsonb,now(),now())
+       returning *`,
+      [
+        lot.id,
+        lot.playerId,
+        lot.sourceEventId,
+        lot.sourceEventIndex,
+        lot.originType,
+        lot.acquisitionType,
+        lot.commissionAsset || null,
+        lot.pointAmountMicros,
+        lot.remainingPointMicros,
+        lot.sourceRatePair || null,
+        lot.sourceRateVersionId || null,
+        lot.pointMicrosPerSourceUnit,
+        lot.commissionRateVersionId || null,
+        lot.pointMicrosPerUsdt,
+        lot.parentLotId || null,
+        lot.rootLotId,
+        lot.occurredAt,
+        requestSignature,
+        JSON.stringify(lot.metadata),
+      ]
+    );
+    return { ok: true, duplicate: false, lot: pointSourceLotFromRow(inserted.rows[0]) };
+  }
+
+  async recordPointSourceLot(playerId, input) {
+    return this.withTransaction((client) => this.recordPointSourceLotWithClient(client, playerId, input));
+  }
+
+  async getPointSourceLotsWithClient(client, playerId, options = {}) {
+    const includeDepleted = options.includeDepleted !== false;
+    const result = await client.query(
+      `select * from point_source_lots
+       where player_id=$1${includeDepleted ? "" : " and remaining_point_micros > 0"}
+       order by occurred_at,created_at,id`,
+      [playerId]
+    );
+    return result.rows.map(pointSourceLotFromRow);
+  }
+
+  async getPointSourceLots(playerId, options = {}) {
+    return this.withTransaction((client) => this.getPointSourceLotsWithClient(client, playerId, options));
+  }
+
+  async previewPointSourceFifo(playerId, pointAmountMicros) {
+    return this.withTransaction(async (client) => planPointSourceFifo(
+      await this.getPointSourceLotsWithClient(client, playerId, { includeDepleted: false }),
+      pointAmountMicros
+    ));
   }
 
   async createBrowserAuthRequest(record) {

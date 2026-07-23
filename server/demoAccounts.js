@@ -1,6 +1,18 @@
+const { catalog } = require("./shopCatalog");
+
 const DEMO_RICH_ACCOUNTS = ["DemoRich01", "DemoRich02", "DemoRich03", "DemoRich04", "DemoRich05"];
 const DEMO_REALTIME_ACCOUNTS = ["DemoRealtime01", "DemoRealtime02", "DemoRealtime03", "DemoRealtime04", "DemoRealtime05"];
-const DEMO_ACCOUNTS = [...DEMO_RICH_ACCOUNTS, ...DEMO_REALTIME_ACCOUNTS];
+
+// Tài khoản trình diễn cho khách: tên ngắn, mật khẩu chung, kho đầy sẵn mọi thứ,
+// KHÔNG cần email thật và KHÔNG phải tạo nhân vật (characterCreated = true).
+const DEMO_STARTER_ACCOUNTS = ["R1", "R2", "R3", "R4", "R5"];
+
+// Mật khẩu demo dùng chung — CỐ Ý công khai, chỉ dành cho 5 tài khoản trình diễn ở trên.
+// Đổi bằng biến môi trường DEMO_STARTER_PASSWORD, không sửa file.
+const STARTER_PASSWORD = process.env.DEMO_STARTER_PASSWORD || "demo123@";
+const STARTER_STACK = Math.max(1, Number(process.env.DEMO_STARTER_STACK) || 1000);
+
+const DEMO_ACCOUNTS = [...DEMO_RICH_ACCOUNTS, ...DEMO_REALTIME_ACCOUNTS, ...DEMO_STARTER_ACCOUNTS];
 const DEMO_ACCOUNT_SET = new Set(DEMO_ACCOUNTS.map((name) => name.toLowerCase()));
 
 function nowISO() {
@@ -25,10 +37,27 @@ function canonicalDemoName(username) {
   return DEMO_ACCOUNTS.find((name) => normalizeIdentity(name) === key) || "";
 }
 
+function isStarterDemoAccount(username) {
+  const key = normalizeIdentity(username);
+  return DEMO_STARTER_ACCOUNTS.some((name) => normalizeIdentity(name) === key);
+}
+
+/// Tài khoản được nạp sẵn đồ (giàu hoặc trình diễn) -> lên cấp sẵn, bỏ qua tạo nhân vật.
+function isLoadedDemoAccount(username) {
+  return isRichDemoAccount(username) || isStarterDemoAccount(username);
+}
+
+/// Mật khẩu THẬT sẽ được bcrypt và ghi vào DB. Bản production không có đường tắt nào
+/// khác, nên đây là thứ duy nhất quyết định đăng nhập được hay không.
+function demoPasswordFor(username) {
+  return isStarterDemoAccount(username) ? STARTER_PASSWORD : canonicalDemoName(username) || String(username || "");
+}
+
 function isAllowedDemoPassword(username, password) {
   if (!isDemoAccount(username)) return false;
   const canonicalName = canonicalDemoName(username);
   const pass = String(password || "");
+  if (isStarterDemoAccount(username) && pass === STARTER_PASSWORD) return true;
   return pass === "demo" || pass.toLowerCase() === canonicalName.toLowerCase();
 }
 
@@ -38,8 +67,8 @@ function makeProfile(name) {
     name,
     gender: "male",
     avatarId: "",
-    level: isRichDemoAccount(name) ? 12 : 1,
-    exp: isRichDemoAccount(name) ? 45 : 0,
+    level: isLoadedDemoAccount(name) ? 12 : 1,
+    exp: isLoadedDemoAccount(name) ? 45 : 0,
     characterCreated: true,
     tutorialCompleted: true,
     createdAt: nowISO(),
@@ -48,6 +77,14 @@ function makeProfile(name) {
 }
 
 function makeEconomy(name) {
+  if (isStarterDemoAccount(name)) {
+    return {
+      version: 1,
+      pos: 1000000,
+      updatedAt: nowISO(),
+    };
+  }
+
   if (isRichDemoAccount(name)) {
     return {
       version: 1,
@@ -63,7 +100,30 @@ function makeEconomy(name) {
   };
 }
 
+/// Kho "đủ mọi thứ" cho tài khoản trình diễn. Danh sách item lấy THẲNG từ
+/// shopCatalog.json (sinh ra từ asset Unity) chứ không gõ tay, để mỗi lần chạy
+/// `npm run catalog:generate` là tài khoản demo tự có luôn item mới.
+function makeStarterInventory(name) {
+  const items = (catalog && catalog.items) || {};
+  const slots = Object.keys(items)
+    .sort()
+    .map((itemId) => ({
+      itemId,
+      // Dụng cụ là đồ nghề, không phải tài nguyên -> 1 cái là đủ, cầm 1000 cái cuốc vô nghĩa.
+      quantity: items[itemId] && items[itemId].category === "tools" ? 1 : STARTER_STACK,
+    }));
+
+  return {
+    version: 1,
+    maxSlots: Math.max(80, slots.length + 20),
+    slots,
+    updatedAt: nowISO(),
+  };
+}
+
 function makeInventory(name) {
+  if (isStarterDemoAccount(name)) return makeStarterInventory(name);
+
   const baseSlots = [
     { itemId: "hoe_01", quantity: 1 },
     { itemId: "axe_01", quantity: 1 },
@@ -151,7 +211,7 @@ function upsertDemoUser(db, bcrypt, name) {
   }
 
   if (!user.password_hash || process.env.DEMO_ACCOUNT_RESET_PASSWORD !== "false") {
-    user.password_hash = bcrypt.hashSync(name, 8);
+    user.password_hash = bcrypt.hashSync(demoPasswordFor(name), 8);
     user.updated_at = nowISO();
     changed = true;
   }
@@ -171,7 +231,7 @@ function upsertDemoUser(db, bcrypt, name) {
   }
 
   db.economies[user.id] = makeEconomy(name);
-  if (!db.inventories[user.id] || isRichDemoAccount(name)) {
+  if (!db.inventories[user.id] || isLoadedDemoAccount(name)) {
     db.inventories[user.id] = makeInventory(name);
   }
   if (!db.farmStates[user.id]) db.farmStates[user.id] = makeFarmState();
@@ -190,6 +250,7 @@ async function ensureDemoAccounts(store, bcrypt) {
     }
 
     for (const name of DEMO_ACCOUNTS) {
+      const passwordHash = bcrypt.hashSync(demoPasswordFor(name), 8);
       let user = await store.findUserByName(name);
       if (!user) {
         user = await store.createUser({
@@ -197,10 +258,15 @@ async function ensureDemoAccounts(store, bcrypt) {
           username: name,
           email: "",
           phone: "",
-          password_hash: bcrypt.hashSync(name, 8),
+          password_hash: passwordHash,
           created_at: nowISO(),
           updated_at: nowISO(),
         });
+      } else if (process.env.DEMO_ACCOUNT_RESET_PASSWORD !== "false" &&
+                 typeof store.setAccountPassword === "function") {
+        // Account đã tồn tại từ đợt seed trước có thể còn mật khẩu cũ -> đặt lại,
+        // kẻo đổi DEMO_STARTER_PASSWORD xong vẫn không đăng nhập được.
+        await store.setAccountPassword(user.id, passwordHash);
       }
       const playerId = user.player_id || user.id;
       await store.setProfile(playerId, makeProfile(name));
@@ -256,7 +322,9 @@ async function canonicalizeDemoAuthPayload(payload, store) {
 
 module.exports = {
   DEMO_ACCOUNTS,
+  DEMO_STARTER_ACCOUNTS,
   isDemoAccount,
+  isStarterDemoAccount,
   isAllowedDemoPassword,
   ensureDemoAccounts,
   canonicalizeDemoAuthPayload,

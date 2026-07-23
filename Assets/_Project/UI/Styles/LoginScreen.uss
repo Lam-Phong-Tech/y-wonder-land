@@ -254,7 +254,50 @@
     margin-left: 6px;
 }
 
+/* -- Chế độ chỉ-đăng-nhập-qua-web (BackendConfig.localAuthEnabled = false) -- */
+.login-web-hint {
+    font-size: 14px;
+    color: var(--color-bright-grey);
+    -unity-text-align: middle-center;
+    white-space: normal;
+    margin-top: 8px;
+    margin-bottom: 16px;
+}
+
+.login-web-solo {
+    font-size: 16px;
+    padding: 0 12px;
+}
+
+/* Nút chính: nền đặc cho nổi hơn nút Đăng ký (viền rỗng) */
+.login-web-primary {
+    background-color: var(--color-brand-blue);
+    border-color: var(--color-brand-blue);
+    color: var(--color-text-white);
+}
+
+.login-web-primary:hover {
+    background-color: #2FA9D6;
+}
+
+.login-web-primary:active {
+    background-color: #1F7E9F;
+}
+
+.login-demo-link {
+    font-size: 13px;
+    color: var(--color-brand-blue);
+    -unity-text-align: middle-center;
+    -unity-font-style: bold;
+    margin-top: 14px;
+}
+
+.login-demo-link:hover {
+    color: var(--color-text-white);
+}
+
 /* -- Status Message -- */
-.status-message { font-size: 14px; -unity-text-align: middle-center; margin-top: 16px; padding: 12px; border-radius: 12px; display: none; }
+/* white-space: normal để câu nhắc "lỡ đóng tab..." xuống dòng thay vì tràn ngang */
+.status-message { font-size: 14px; -unity-text-align: middle-center; margin-top: 16px; padding: 12px; border-radius: 12px; display: none; white-space: normal; }
 .status-success { color: var(--color-mystic-black); background-color: var(--color-success); display: flex; }
 .status-error { color: var(--color-text-white); background-color: var(--color-danger); display: flex; }

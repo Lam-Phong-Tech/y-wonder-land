@@ -20,7 +20,7 @@
                 </ui:VisualElement>
 
                 <!-- Tab Bar -->
-                <ui:VisualElement class="login-tab-bar">
+                <ui:VisualElement name="LoginTabBar" class="login-tab-bar">
                     <ui:Button name="TabLogin" text="Đăng Nhập" class="login-tab login-tab-active" />
                     <ui:Button name="TabRegister" text="Đăng Ký" class="login-tab" />
                 </ui:VisualElement>
@@ -50,7 +50,7 @@
                     </ui:VisualElement>
 
                     <!-- Options Row -->
-                    <ui:VisualElement class="options-row">
+                    <ui:VisualElement name="LoginOptionsRow" class="options-row">
                         <ui:VisualElement class="remember-row">
                             <ui:Toggle name="RememberToggle" class="remember-toggle" />
                             <ui:Label text="Ghi nhớ" class="remember-label" />
@@ -58,10 +58,16 @@
                         <ui:Label name="ForgotPassword" text="Quên mật khẩu?" class="forgot-password" />
                     </ui:VisualElement>
 
-                    <ui:VisualElement class="login-actions-row">
+                    <!-- Chỉ hiện khi TẮT đăng nhập trong game (BackendConfig.localAuthEnabled = false) -->
+                    <ui:Label name="WebOnlyHint" text="Đăng nhập bằng tài khoản YWonder trên website." class="login-web-hint hidden" />
+
+                    <ui:VisualElement name="LoginActionsRow" class="login-actions-row">
                         <ui:Button name="BtnLogin" text="ĐĂNG NHẬP TRONG GAME" class="btn-login login-action-btn login-action-local" />
                         <ui:Button name="BtnLoginWeb" text="ĐĂNG NHẬP WEBSITE" class="btn-web-auth login-action-btn login-action-web" />
                     </ui:VisualElement>
+
+                    <!-- Lối vào tài khoản trình diễn R1..R5 (chỉ hiện ở chế độ web-only) -->
+                    <ui:Label name="DemoLoginLink" text="Đăng nhập tài khoản demo" class="login-demo-link hidden" />
 
                     <!-- Status Message -->
                     <ui:Label name="LoginStatus" class="status-message" text="" />
