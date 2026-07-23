@@ -5,6 +5,539 @@
 > Nếu QC/khách hàng không duyệt → sẽ sửa lại theo feedback.
 
 ---
+
+## [2026-07-23] — Sửa tutorial chết ở luồng RESUME · thay dữ liệu GIẢ trong UI bằng số thật
+
+### Tutorial không chạy lại sau khi thoát giữa chừng (tài khoản mới)
+Triệu chứng: người chơi mới tải game, chơi tutorial dở rồi thoát → vào lại **tutorial im lặng không chạy**.
+Không phải cờ `tutorialCompleted` (cờ vẫn `false`, game **vẫn gọi** `StartTutorial()` mỗi lần vào) —
+mà là luồng RESUME làm nó chết ngay, chết y hệt nhau mọi lần nên trông như "đã tắt vĩnh viễn".
+
+- **NPC đứng chờ vĩnh viễn.** `GuideNPC.GreetingRoutine` có `while (khoảng cách > 5m) yield` không hạn giờ.
+  Luồng thường thì người chơi vừa xuống thuyền là đứng cạnh NPC. RESUME lại thả người chơi về **vị trí đã lưu**,
+  có thể cách NPC cả bản đồ → ông lão vẫy tay mãi, tutorial đứng ở bước 0.
+  ➜ Thêm `WarpGuideNearPlayerIfFar()`: bắt đầu tutorial mà NPC xa >15m thì **dời ông lão tới cạnh người chơi**
+  (bám NavMesh, quay mặt về phía người chơi). ➜ Kèm **hạn giờ 25s** ở màn chào làm hàng rào cuối.
+- **NPC chưa có trạm dừng nào lúc bị gọi.** 3 node dựng trong `TutorialManager.Start()`, nhưng RESUME gọi
+  `StartTutorial()` ngay trong `GameManager.Start()` — **thứ tự `Start()` giữa 2 script là không xác định**
+  (project không cài Script Execution Order). GameManager chạy trước thì `tutorialNodes` rỗng → `StartNode(0)`
+  rơi vào nhánh "đã hoàn thành toàn bộ tuyến" và **tự tắt component NPC**.
+  ➜ Tách ra `EnsureTutorialNodesBuilt()` (idempotent), gọi từ **cả** `Start()` lẫn `StartTutorial()`.
+
+**Files:** `Scripts/Tutorial/TutorialManager.cs`, `Scripts/Tutorial/GuideNPC.cs`
+
+### UI: bỏ dữ liệu GIẢ, nối vào hệ thống thật
+- **Thanh EXP trong Hồ sơ luôn đứng 0%.** HUD truyền `expStr` lấy từ *text của label* (`"120 / 250"`),
+  popup `float.TryParse` **fail → 0**, rồi chia cho `maxExp = 100` cứng. ➜ `ProfilePopupController.Show(name)`
+  đọc thẳng `ExperienceManager` (`Level`, `ExpInLevel`, `ExpForNextLevel`, `ExpPercent`, "Cấp tối đa" khi đạt 90).
+- **Thống kê nông trại là số Random** (mở popup 2 lần ra 2 số khác nhau), ngày tham gia cứng `"02/06/2026"`.
+  ➜ Thêm `Managers/PlayerStats.cs` đếm THẬT theo từng tài khoản (`PlayerScopedPrefs`): "cây đã trồng" cộng ở
+  `FarmTile` khi gieo, "đã bán" cộng ở `ShopPopupController` khi bán, ngày tham gia ghi lần đầu rồi giữ nguyên.
+  Cả hai chỗ đếm gọi **trực tiếp**, không qua event chung (một handler lỗi ở event chung chặn cả chuỗi).
+  "Bạn bè" để **0** — chưa có backend thì không bịa số.
+- **Heo đất không nối ví.** `playerBalance = 5000f` cứng → gửi tiết kiệm **không trừ Point thật**.
+  ➜ Đọc thẳng `EconomyManager.GetPOS()`; gửi = `SpendPOS`, đáo hạn = `AddPOS` (gốc + lãi).
+  Bỏ 2 dòng lịch sử bịa. Kỳ hạn đổi từ *1 ngày = 5 giây* sang **ngày thật**, thêm `Test Seconds Per Day` để test.
+- **Cài đặt kéo thanh không có tác dụng** (4 chỗ còn `// TODO`). ➜ Nhạc/SFX nối `AudioManager`
+  (kéo SFX phát tiếng click nghe thử), zoom camera nối `ThirdPersonCamera.SetUserZoom()` (mới),
+  chất lượng hình chỉnh `renderScale` của URP + mip + LOD, bóng chỉnh `QualitySettings.shadows`.
+  Tất cả lưu PlayerPrefs và **áp lại lúc vào game**, không chỉ dựng lại thanh trượt.
+- Sửa 3 comment lỗi thời (`GameHUDController` "Mockup only", `SettingsPopupController` "mockup values",
+  `BuildModeOverlayController` "Mock Data") — code ở đó vốn đã thật.
+
+**Files:** `Scripts/Managers/PlayerStats.cs` (mới), `Scripts/Managers/AudioManager.cs`,
+`Scripts/Camera/ThirdPersonCamera.cs`, `Scripts/Environment/FarmTile.cs`, `UI/ProfilePopupController.cs`,
+`UI/GameHUDController.cs`, `UI/PiggyBankPopupController.cs`, `UI/SettingsPopupController.cs`,
+`UI/ShopPopupController.cs`, `UI/BuildModeOverlayController.cs`
+
+> ⚠️ **Còn là dữ liệu giả (chưa làm, chờ backend):** Bảng xếp hạng · Bạn bè · Hòm thư · Nhiệm vụ ·
+> Sự kiện (số nguyên liệu + gói bán) · Quên mật khẩu (luôn báo thành công) · AI chat giả khi chưa nối realtime.
+
+### Hệ bệnh: sếp chốt GIỮ NGUYÊN số khách
+Sếp trả lời 23/07: *"số liệu vắc-xin và thuốc là do khách họ muốn, mình cứ làm theo"* → đóng cả 4 câu hỏi,
+**không đổi số nào**. 🔒 Hai dòng trông như gõ nhầm — **dê 10 liều thuốc y hệt bò** và **ngỗng 4 mũi vắc-xin**
+(con duy nhất mà tiêm phòng lỗ hơn chịu bệnh) — là số khách chốt, **đừng "sửa"**.
+Chi tiết + bảng chứng minh: `docs/CAU_HOI_KHACH_CON_TREO.md` §6.
+
+---
+
+## [2026-07-22] — Hệ BỆNH + VẮC-XIN cho thú nuôi · chuyển sang THỜI GIAN THỰC
+
+### Hệ bệnh / vắc-xin (trước đây là khung rỗng)
+- **Phát hiện:** `AnimalState.Sick`, `canGetSick`, item `vaccine_01`/`medicine_01`, nút `BtnHeal`/`BtnVaccine` đều CÓ SẴN — nhưng **không dòng code nào cho thú bị bệnh**, nút Vắc-xin **chưa nối handler**, `Heal()` **không trừ item**. Cả vòng chăm sóc chết cứng.
+- **Đã dựng:** `FarmAnimal` thêm mốc `vaccineUntilUnix` (hạn vắc-xin) + `sickRefUnix` (mốc ủ bệnh) theo **đồng hồ thật** (sống qua các phiên); `Update()` cho thú **đổ bệnh** khi loài `canGetSick`, hết hạn vắc-xin và ủ đủ lâu (miễn trong Tutorial). **Thú bệnh ngừng ra sản phẩm.**
+- `Vaccinate()` = phòng bệnh (từ chối khi đang bệnh) · `Heal()` = chữa bệnh (bỏ 2 tác dụng phụ tạm bợ cũ: tự bật `isVaccinated` và tự làm no).
+- **Trừ item thật:** popup nối `BtnVaccine`, bật/tắt nút theo trạng thái, tốn `medicine_01` (chữa) / `vaccine_01` (tiêm), hụt thì hoàn lại. **Bịt lỗ hổng:** `HealAnimal` trong `FarmInteractionController` trước chữa **MIỄN PHÍ** → nay tốn 1 Thuốc; thêm hành động **"Tiêm vắc-xin"**.
+- **Lưu/khôi phục:** `BuildPersistence` lưu thêm hạn vắc-xin + mốc ủ bệnh + trạng thái bệnh. Save cũ (thiếu field) đếm ủ bệnh lại từ lúc load → thú đang nuôi không bị bệnh oan ngay khi mở game.
+- ✅ **Đã thay số tạm bằng SỐ TÀI LIỆU** (xem mục ngay dưới) — không còn 3 ngày / 7 ngày bịa.
+
+### Số bệnh đổ theo CÔNG THỨC tài liệu (`VatNuoi2.md` + `CachTinh.md`)
+Trước đó bé dùng số tạm tự đặt (ủ bệnh 3 ngày, vắc-xin 7 ngày, **bệnh chắc chắn 100%**, thuốc luôn 1 liều).
+Rà lại thì tài liệu CÓ đủ 4 cột cho từng con → nay đọc thẳng từ bảng:
+
+| Con | Số ngày nuôi | Hệ số mốc bệnh | Tỉ lệ bệnh | Mũi vắc-xin | Liều thuốc |
+|---|---|---|---|---|---|
+| Gà mái | 90 | 0.15 | 0.6 | 3 | 3 |
+| Bò sữa | 270 | 0.30 | 0.4 | 4 | 10 |
+| Heo con | 180 | 0.50 | 0.3 | 4 | 9 |
+| Đà điểu | 180 | 0.30 | 0.4 | 4 | 10 |
+| Hươu | 360 | 0.15 | 0.6 | 4 | 9 |
+| Dê con | 180 | 0.30 | 0.3 | 4 | 10 |
+| Thỏ con | 80 | 0.40 | 0.5 | 2 | 2 |
+| Ngỗng con | 90 | 0.15 | 0.4 | 4 | 2 |
+| Vịt | 45 | 0.15 | 0.6 | 2 | 2 |
+| Rùa con | 300 | 0.50 | 0.6 | 4 | 10 |
+
+**Công thức áp vào code:**
+- **Mốc phát bệnh = hệ số × số ngày nuôi** (bò: 0.3 × 270 = **ngày thứ 81**), thay cho "3 ngày" cứng.
+- Tới mốc thì **gieo xác suất "tỉ lệ phát bệnh"** — thay cho việc bệnh 100%. Gieo **MỘT lần cho cả vòng nuôi**,
+  khớp công thức chi phí của `CachTinh` (tiền thuốc chỉ nhân với tỉ lệ bệnh đúng 1 lần).
+- **Một mũi vắc-xin phòng = số ngày nuôi ÷ số mũi** (bò: 270 ÷ 4 = **67,5 ngày/mũi**). Đang có vắc-xin che
+  đúng lúc tới mốc = **thoát bệnh cả vòng nuôi**.
+- **Chữa bệnh tốn đúng số liều theo loài** (bò 10 · heo 9 · vịt 2...), không còn cứng 1 liều. Thiếu thuốc thì
+  báo rõ "Cần N Thuốc", không trừ gì.
+
+**Đã sửa 1 lỗ hổng:** `Vaccinate()` trước reset luôn mốc ủ bệnh → tiêm 1 mũi là né bệnh vĩnh viễn. Nay mốc phát
+bệnh là điểm **cố định** trong vòng nuôi, tiêm chỉ dời hạn *bảo vệ*.
+
+**Files:** `AnimalDefinition.cs` (+5 field bệnh) · `ItemDataGenerator.cs` (`SetAnimalDisease` × 10 con) ·
+`FarmAnimal.cs` · `BuildPersistence.cs` (lưu thêm `sicknessRolled`) · `FarmInteractionController.cs` ·
+`AnimalInteractionPopupController.cs`.
+
+⚠️ **2 chỗ tài liệu chưa nói rõ, bé chọn cách hiểu hợp công thức nhất — cần khách xác nhận:**
+1. "Thời điểm phát bệnh 0.3" không ghi nhân với cái gì → bé hiểu là **× số ngày nuôi**.
+2. "Số lượng thuốc 10" → bé hiểu là **chi phí cả vòng nuôi cho 1 lần bệnh** (vì `CachTinh` chỉ tính 1 lần).
+
+### Thời gian thực
+- `GameTimeConfig.SecondsPerGameDay` **60 → 86400** (1 ngày game = 1 ngày thật, đúng khách chốt). Cây/thú vốn đã chạy theo mốc đồng hồ thật nên **lớn-bù / đói-bù offline vẫn đúng**.
+- **Hiển thị theo ngày/giờ/phút/giây:** thêm `GameTimeConfig.FormatDuration()` → "3 ngày 4 giờ" / "5 giờ 12 phút" / "2 phút 30 giây" / "45 giây" (lấy 2 mốc lớn nhất cho gọn). Gộp 2 bộ format cũ của cây và thú về dùng chung (nếu không sẽ hiện số vô nghĩa kiểu "40320m").
+
+### ⚠️ VIỆC ANH PHẢI LÀM TRONG UNITY
+Chạy lại **2 generator** để số trong `.asset` ăn theo mốc ngày mới:
+1. `Y WONDER GREEN FARM/Tools/Generate Crop Data`
+2. `YWonderLand/Generate Animal Data`
+
+Generator **load asset cũ rồi chỉ ghi đè field số** → `cropPrefab` / `modelGroundOffset` / `seedlingScale` **giữ nguyên**, không mất model cây. **Không chạy thì cây/thú vẫn giữ số theo mốc 60s cũ.**
+
+### Đã chốt
+- **Cây lâu năm KHÔNG tưới thì CHẾT — giữ nguyên (chủ dự án chốt 22/07).** Cửa sổ nước 14 ngày thật, chu kỳ lớn 28 ngày → buộc phải vào tưới giữa chừng, không tưới kịp thì mất cây. Đây là hành vi MONG MUỐN, code hiện tại đã đúng, **không sửa gì**.
+- Muốn test nhanh: tạm để `SecondsPerGameDay = 60f` rồi chạy lại 2 generator, xong đổi lại 86400.
+
+---
+
+## [2026-07-22] — Vốn khởi đầu tài khoản mới = 0 Point (khách chốt)
+
+- **Khách chốt 22/07:** tài khoản mới bắt đầu với **0 Point**. Con số `5000` cũ trong `EconomyManager.LoadBalances` chỉ là **số tạm lúc dựng thử**, không phải khoản tặng của khách (chính nó gây hiểu nhầm ở Câu 18). Đã đổi mặc định về `0`.
+- **Khuyến mãi thật (khách xác nhận):** 10 USDT/tháng = **265 Point** qua **nhiệm vụ + điểm danh**; tiêu bình thường trong game nhưng **KHÔNG trả hoa hồng**.
+- **Chờ kiểm thử:** đầu game còn chơi được từ 0 Point không (tutorial cho +50 Point + hạt/dụng cụ khởi đầu).
+
+---
+
+## [2026-07-22] — Ẩn 8 cây lâu năm khách CHƯA chốt số liệu (khỏi shop + túi đồ)
+
+### Tính năng theo yêu cầu
+- **Ẩn tạm hạt giống + sản phẩm của 8 cây lâu năm chưa chốt số liệu** (theo `SoLieu_CanKhachChot.md` mục 2): Chuối, Dừa, Cau, Chà là, Trà, Măng tây, Hồng sâm, Sâm tiến vua. 3 cây đã chốt (Sa Chi / Sầu Riêng / Chanh dây) GIỮ nguyên.
+- **Cách làm (không xoá data):** thêm `Assets/_Project/Scripts/Data/HiddenItems.cs` — 1 `HashSet` chứa 16 ID (mỗi cây 1 hạt + 1 sản phẩm) + `IsHidden(id)`. Cắm filter ở 2 điểm hiển thị: `ShopPopupController.RefreshGrid()` (1 dòng `continue` lọc cả grid MUA lẫn BÁN) và `InventoryPopupController.RefreshGrid()` (lọc mọi tab; gieo hạt dùng chung tab seeds nên cũng ẩn theo).
+- **Bật lại khi khách chốt:** chỉ cần bỏ 2 ID (hạt + sản phẩm) của cây đó khỏi `HiddenItems.Ids`.
+
+### Files
+- `Assets/_Project/Scripts/Data/HiddenItems.cs` (mới) · `Assets/_Project/UI/ShopPopupController.cs` · `Assets/_Project/UI/InventoryPopupController.cs`
+
+---
+
+## [2026-07-22] — SỬA LỖI: không cho thú ăn được → thú chết đói
+
+### Lỗi
+- **Bấm "Cho ăn" mở túi, chọn "Sử dụng" thức ăn nhưng KHÔNG có gì xảy ra** — không cho ăn, không trừ thức ăn, con vật đói dần rồi chết. Nguyên nhân: `FarmInteractionController` chỉ đăng ký nghe `InventoryPopupController.OnItemUsed` **một lần trong `Start`**. Nếu lúc đó chưa tìm thấy popup thì đăng ký **hụt vĩnh viễn**; 3 chỗ mở túi (cho ăn / gieo hạt / thả thú) có tìm lại popup khi field null nhưng **không đăng ký lại**, nên khi bấm "Sử dụng" thì sự kiện bắn ra **không ai nghe**. 
+- **Cách sửa:** thêm helper `EnsureInventoryPopupSubscribed()` — tìm popup nếu null + đăng ký **idempotent** (`-=` rồi `+=`) — gọi ở `Start` và **trước mỗi lần `ShowAtTab(...)`** (food/seeds/animals). Nhờ vậy sửa luôn cả gieo hạt và thả thú (cùng lỗi tiềm ẩn).
+
+### Files
+- `Assets/_Project/Scripts/Environment/FarmInteractionController.cs`
+
+### Đổi kèm
+- **Cho ăn rút còn ~1.5s:** trước dùng `FeedActionSpeed = 2f` (khóa 9.1s ÷ 2 = 4.55s). Nay thay bằng `FeedActionDuration = 1.5f`; clip `Feed` 9.1s phát nhanh (~6x) cho múa trọn trong ~1.5s. Cùng pattern với múc/tưới; chỉnh `FeedActionDuration` để đổi.
+
+### Chờ build kiểm thử
+- Cho ăn → chọn đúng thức ăn của loài → múa Feed (~1.5s) + trừ thức ăn + giảm đói; hủy thì hoàn; gieo hạt & thả thú qua túi vẫn chạy.
+
+---
+
+## [2026-07-22] — Animation múc nước + bơi-đứng-yên + nút hủy khi múc nước
+
+### Tính năng mới theo yêu cầu khách
+- **Múc nước có animation + nút hủy (X):** trước đây bấm "Múc nước" là cộng nước NGAY, không có động tác. Nay `ScoopWater` chạy qua `BeginTimedAction("ScoopWater2", ...)` — cùng luồng với chặt/đào/tưới/cho ăn — nên nhân vật múa clip `ScoopWater2`, quay mặt về ao, cầm **xô múc nước ở tay TRÁI** (`ToolType.WaterBucket` — khác bình tưới tay phải khi tưới), HUD hiện nút hủy (X) + thanh tiến trình. Nước chỉ vào túi **khi múa xong** → hủy giữa chừng không nhận gì. Clip gốc 6.57s được **phát nhanh** để múa trọn trong **~1.5s** (`speed = ScoopWaterClipDuration / ScoopWaterActionDuration`); chỉnh `ScoopWaterActionDuration = 1.5f` để đổi. Thêm `ToolType.WaterBucket` + ô `waterBucketModel` (tay trái) vào `EquipmentManager`; **cần kéo object `WaterBucket` dưới `mixamorig:LeftHand` vào ô mới trong Inspector.**
+- **Bơi đứng yên (SwimIdle) riêng:** khi ở dưới nước, trước đây đứng yên hay bơi đều dùng chung clip `Swimming`. Thêm `animSwimIdle = "SwimIdle1"`; giờ ở dưới nước mà KHÔNG kéo joystick (`moveDirection.magnitude <= 0.1f`) thì phát `SwimIdle1`, có di chuyển thì `Swimming`.
+- **Độ chìm khi bơi — TÁCH idle và di chuyển:** ban đầu để 1 giá trị `swimSubmergeDepth = 1.6` (nước tới vai) cho cả hai, nhưng tester phản ánh lúc **bơi di chuyển** bị chìm nghỉm nhìn nguy hiểm. Tách 2 ô: `swimSubmergeDepth` (idle, `1.6`, nước tới vai) và `swimSubmergeDepthMoving` (di chuyển). Buoyancy chọn theo `moveDirection.magnitude > 0.1f` — cùng điều kiện phân biệt `Swimming` / `SwimIdle1`. Cả hai kéo chỉnh được lúc Play. Sau đó hạ ô di chuyển xuống `0.7` (nới thang `0.2–2.5`): vì clip `Swimming` là tư thế **nằm ngang**, để `1.2` (vốn tính cho tư thế đứng "ngực ngang mặt nước") thì ngập cả thân; `0.7` cho nổi sát mặt nước.
+- **Tưới nước rút còn ~3s:** trước khóa 5.6s (đúng độ dài clip `Watering`). Nay phát nhanh ~1.9x cho múa trọn trong `WateringActionDuration = 3f`; chỉnh số này để đổi thời gian tưới.
+- **Trồng cây rút còn ~2s:** clip `Planting` 4.13s phát nhanh cho múa trọn trong `PlantingActionDuration = 2f` (`speed = PlantingClipDuration / PlantingActionDuration`); chỉnh `PlantingActionDuration` để đổi.
+- **Thanh EXP hiện SỐ thay vì phần trăm (cho tester dễ test):** nhãn `PlayerEXP` trước ghi `exp.ToString("F2")` (vd `40.00`). Nay ghi `EXP hiện tại / EXP cần` (vd `150 / 250`, đạt cấp 90 thì `MAX`). Lộ `ExpInLevel`/`ExpForNextLevel`/`IsMaxLevel` ở `ExperienceManager`; thêm `GameHUDController.UpdateExpLabel()`; bỏ `SetPlayerEXP(float)` không còn dùng. Kèm sửa: thưởng tutorial trước vẽ giả `20.00` lên nhãn → nay cộng EXP THẬT bằng `ExperienceManager.AddEXP(20)`.
+
+### Files
+- `Assets/_Project/Scripts/Environment/FarmInteractionController.cs` — `ScoopWater` → hành động có khóa + hủy.
+- `Assets/_Project/Scripts/Player/PlayerController.cs` — thêm `animSwimIdle`, tách nhánh bơi/đứng-yên.
+
+### Chờ build kiểm thử
+- Build EXE/APK mới: múc nước phát clip mới + có nút X (hủy = không nhận nước); đứng yên dưới nước ra `SwimIdle1`, bơi ra `Swimming`.
+
+---
+
+## [2026-07-22] — Đến gần cây/đá tự hiện nút (tia mũi chân, tàng hình như nước)
+
+### Tính năng mới theo yêu cầu khách
+- **Vấn đề:** ở chế độ direct-tap (mobile, mặc định), chặt cây/đào đá phải **tap trúng** vật thể — khác với ruộng/chuồng/nước vốn tự hiện nút khi **đến gần** nhờ tia mũi chân tàng hình.
+- **Làm:** thêm `RefreshFootResourceInteractionPrompt` + `FindHarvestableNearFoot` (quét `OverlapSphere` ngay trước mũi chân, y hệt `FindWaterSourceNearFoot`) → đứng gần cây/đá là tự hiện nút **Chặt cây / Đào khoáng**, không cần ngắm. Nút dùng lại `ClickHarvestResource` nên hành vi giống hệt tap vào cây.
+- **Ưu tiên:** ruộng/chuồng (front-cell) > nước > cây/đá — probe mới không giành nút của mấy cái kia.
+- **Chỉnh số:** `resourceFootProbeForward` (1.1) + `resourceFootProbeRadius` (1.1) ở SerializeField (anh chỉnh tầm chiếu tùy ý). Cây/đá đã cạn tự bỏ qua (collider tắt + guard `isHarvestable`); đá chỉ hiện ở nơi cho đào.
+- **File:** `Assets/_Project/Scripts/Environment/FarmInteractionController.cs`. Thêm cờ `currentPromptFromFootResource`, nối qua mọi điểm reset + `HasDirectTapPrompt`.
+- **Chờ:** build EXE/APK — đến gần cây/đá thấy nút hiện; tap nút thì chặt/đào; đi xa nút tự ẩn; không tranh nút với ruộng/nước.
+
+---
+
+## [2026-07-22] — Harvest trùng tài nguyên chung cộng EXP ảo (đã vá)
+
+### Cộng EXP + toast thưởng lặp khi tap trùng cây/đá
+- Server `realtimeServer.js:467-473`: khi CÙNG người chơi request lại tài nguyên đã hái (retry/tap trùng), server phát lại kết quả cũ (`accepted:true`, rewards gốc) kèm cờ `duplicate:true`.
+- Client cũ **không đọc cờ `duplicate`** → `HandleSharedResourceHarvestResult` coi như thành công lần đầu: túi đồ an toàn (server gửi snapshot authoritative, client set-not-add), nhưng **EXP là client-side không idempotent → mỗi lần phát lại cộng EXP + toast thưởng ẢO**.
+- **Fix:** thêm `bool duplicate` vào `ResourceHarvestResult` (`RealtimeClient.cs`) + parse ở `ReceiveResourceHarvestResult`; `HandleSharedResourceHarvestResult` khi `duplicate` chỉ đồng bộ lượt đào rồi `return`, KHÔNG AddEXP/toast.
+- **Files:** `Assets/_Project/Scripts/Realtime/RealtimeClient.cs`, `Assets/_Project/Scripts/Environment/FarmInteractionController.cs`.
+- **Chờ:** build EXE/APK — tap trùng cây/đá không phồng EXP, không toast lặp; túi đồ vẫn đúng.
+
+### Rà lại các exploit kinh tế cũ (QC 22/06) — đã ổn ở source hiện tại
+- Phá chuồng: chống trả con giống 2 lần bằng `destroyedAnimalObjects`.
+- Thú chết (`SlaughterForMeat`/`DieFromHunger`) đều `ClearAnimal()` nhả ô → không kẹt ô.
+- Chuồng legacy `AnimalPenSpawner` đã fail-closed.
+- 2 điểm gia cố hover (`isHarvestable`, dọn `currentHoverObject`) đã được collider-disable che → không sửa.
+
+---
+
+## [2026-07-21] — Sửa lỗi cây cộng gỗ hai lần (prefab) + phá Build Mode không hoàn vật liệu
+
+### Phá công trình bằng nút Delete không hoàn vật liệu (đã vá)
+- Phá chuồng/hàng rào có hoàn gỗ/đá (`FarmInteractionController.cs:2974`), nhưng nút Delete trong Build Mode (`BuildModeOverlayController.DeleteBuildingAt`) xóa công trình mà không hoàn — lát đường tốn 4 đá, xóa đi mất trắng. Không phải exploit (chỉ thiệt người chơi) nhưng bất nhất.
+- Fix: thêm `BuildSurfaceCell.SumRefund(occupant, out wood, out stone)` (đọc mọi ô occupant chiếm, không đổi state); `DeleteBuildingAt` cộng dồn rồi `inv.AddItem(..., "build_refund")` trước khi xóa ô. Ruộng miễn phí (BuildMaterialId rỗng) hoàn 0. `InventoryManager.AddItem` đã đồng bộ delta lên server qua `GameplayMutationSync` nên hoàn đối soát được. Chờ nghiệm thu runtime.
+
+### Cây cộng gỗ hai lần (prefab)
+
+- `Assets/_Project/Prefabs/Tree.prefab` chứa hai `HarvestableResource` cho cùng một cây (root cấu hình đúng `axe_01`/`wood_01`, child `Log` để rỗng). Vì `RealtimeClient.RegisterSharedResource` sinh network resource ID theo hierarchy path khi `resourceId` rỗng, một cây vật lý tạo ra hai network ID và backend có thể thưởng gỗ một lần cho mỗi ID.
+- Fix (chỉ sửa `Tree.prefab`, không đụng scene): xóa component root (fileID `4668956307432685771`) khỏi `m_Component` và định nghĩa; điền cấu hình đúng cho component `Log` (đã sẵn BoxCollider + mesh): `requiredTool: axe_01`, `yieldItemId: wood_01`. Giữ `Log` bỏ root để khớp override sẵn có trong CityScene.
+- Re-audit 21/07: FarmScene có 4 cây (inherit prefab → tự động còn một component sau fix), CityScene có 14 cây đã được xóa component root từ 20/07 (không bị ảnh hưởng, stale `m_RemovedComponents` vô hại). Verify tĩnh: prefab còn đúng một `HarvestableResource`, YAML nguyên vẹn 13 object.
+- Chờ nghiệm thu runtime trên build EXE/APK mới. Chưa đụng: `FarmInteractionController` lạc trên child `Log` và các điểm gia cố client (`isHarvestable`, xóa hover, cờ `duplicate=true`).
+
+## [2026-07-20] — The Memento Protocol cho bàn giao AI
+
+- Thêm `docs/THE_MEMENTO_PROTOCOL.md`: chuẩn bàn giao giữa hai phiên AI, gồm thứ bậc nguồn sự thật, nhãn bằng chứng, ranh giới bảo mật, checklist đóng/mở phiên, Memento Packet và prompt copy sang chat mới.
+- Thêm `docs/MEMENTO_PACKET_CURRENT.md`: snapshot đã điền của Y WONDER GREEN FARM, phải được Git/live-verify lại trước khi dùng làm cơ sở thao tác.
+- `RULES.md` bắt buộc đọc protocol khi tiếp tục/bàn giao; `docs/CONTEXT_RECOVERY.md` được chỉ rõ là snapshot hiện hành, còn root `CONTEXT_RECOVERY.md` là nhật ký lịch sử cần đối chiếu.
+- Mở rộng `server/postgresSmokeTest.js` để schema tạm áp migration `007_point_source_ledger` và kiểm idempotency đồng thời, conflict, FIFO, chặn lô chưa phân loại, persistence qua pool restart và bất biến số dư. Cú pháp/JSON test pass; PostgreSQL runtime cô lập chưa có nên chưa đánh dấu gate PostgreSQL pass.
+
+---
+
+## [2026-07-19] — Chốt tỷ giá, 6 cấp hoa hồng và điều kiện VIP
+
+### Khách đã xác nhận
+- Point đổi từ USDT rồi tiêu trong game trả hoa hồng bằng USDT; Point do nuôi trồng, sản phẩm hoặc thưởng game tạo ra rồi tái tiêu dùng trả hoa hồng bằng Point. Tỷ lệ và số tầng dùng như hệ thống YWH hiện tại.
+- Hoa hồng Point giữ số lẻ (`156 x 3% = 4,68 Point`), không làm tròn nguyên. Nếu giao dịch đã payout rồi được hoàn/hủy thì phải thu hồi payout gốc. Hướng kỹ thuật là chỉ phát hoa hồng sau khi giao dịch mua commit thành công.
+- Nguồn Point được tiêu theo FIFO; hoa hồng USDT dùng rate gốc của từng lô. Transfer giữ nguyên source/rate. Khách sửa tỷ giá áp dụng chung thành `1 USDT = 26,5 Point`, đồng thời chốt `1 YWH = 1,59 Point`; Point do Admin cấp và Point legacy cũng dùng rate `26,5` khi tính căn cứ hoa hồng.
+- Hoa hồng có 6 cấp: cấp trực tiếp `8%`, 5 cấp tiếp theo mỗi cấp `1%`, tổng tối đa `13%`. VIP tính cộng dồn toàn thời gian từ `2.650 Point` tiêu dùng có nguồn USDT nạp ngoài. Hoa hồng vẫn vào bể riêng khi A hoặc B chưa VIP, nhưng chỉ được sử dụng/rút khi cả A và B đều VIP; khi đủ điều kiện sẽ mở toàn bộ khoản lịch sử tương ứng.
+- Khách sửa lại câu trả lời trước: Point nguồn USDT do người khác chuyển tới vẫn tính VIP cho người nhận khi tiêu; refund phải trừ tiến độ và thu hồi VIP nếu tổng còn lại dưới `2.650 Point`.
+- Payout chờ ít nhất khoảng 10 phút hoặc lâu hơn và chỉ mở cho giao dịch thành công; giao dịch lỗi không sinh hoa hồng.
+
+### Nền source-lot local đã thêm, chưa deploy
+- Thêm migration candidate `007_point_source_ledger`, module domain và adapter JSON/PostgreSQL để lưu số micro-Point, nguồn `USDT/YWH/GAMEPLAY/ADMIN/LEGACY`, rate tạo Point, rate quy hoa hồng, giao dịch nguồn và lineage khi chuyển khoản.
+- FIFO chỉ lập kế hoạch, không đổi số dư; gặp lô `UNATTRIBUTED` thì dừng để chờ phân loại. API ghi lô độc lập chặn transfer vì trừ lô người gửi và tạo lô người nhận phải nằm trong cùng transaction.
+- `test:point-source-ledger`, web credit, reservation, security và Phase 1 isolated đều pass. Chưa apply migration PostgreSQL, chưa backfill 5.000 Point/số dư cũ, chưa đổi callback web, shop hay production.
+
+### Gap còn mở
+- Source/rate lineage hiện có đã đủ phân loại VIP, không cần bổ sung chủ nạp USDT gốc. Còn chốt ảnh hưởng của việc thu hồi VIP lên các hoa hồng khác đã mở/trả, cách thu hồi nếu hoa hồng đã bị tiêu, độ chính xác thập phân và phí/hạn mức/quy trình rút.
+- Backend production hiện chỉ spend `pos BIGINT` nguyên; phần lẻ web mới được carry riêng, chưa spend được và chưa có source-lot active/commission outbox/reversal/VIP pool. Candidate source-lot mới chỉ local, chưa sửa DB/service/feature flag hoặc production. Máy local hiện không có PostgreSQL DSN/runtime nên migration và adapter mới vẫn phải chạy qua schema tạm cô lập trước khi deploy.
+
+## [2026-07-17] — Canary Point không tiền trên QA riêng đã hoàn tất
+
+### Đã thêm
+- Thêm executor link QA và funding synthetic fail-closed, kèm test apply/replay/conflict/rollback. Funding dùng loại riêng `QA_SYNTHETIC_USDT_FUNDING`, ghim tỷ giá Admin active và quote integer micros; không giả làm `USDT_DEPOSIT` và không thay tổng tiền nạp/rút thật.
+- Thêm script package `test:web-point-qa-link` và `test:web-point-qa-funding`. Tài liệu repo không lưu raw web/game identity.
+
+### Bằng chứng và giới hạn
+- Profile riêng `WalletQA2026` được link một-một. Baseline là web USDT `0`, Point game signed `5000`, remainder `0`; funding đúng `2 USDT` synthetic theo tỷ giá `26,5 Point/USDT`, replay cùng operation không cấp lần hai, real deposit count/totals vẫn `0`.
+- Chủ dự án thao tác đổi bằng chính UI ví web. Chuỗi có đúng `1` funding journal, `1` SWAP `SUCCESS`, `1` conversion `SENT`, `1` outbox `SENT/attempts=1`, `1` game ledger `+53`; web USDT về `0`, web/game cùng `5053 Point`.
+- Replay callback chính xác trả `duplicate=true`. HMAC sai/quá hạn, identity ngoài canary, cùng ID khác amount, sai expected player và amount `0` đều bị từ chối đúng mã, không đổi balance/count; callback public vẫn `404`.
+- Nghiệm thu client đạt đủ EXE logout/login, EXE -> APK, APK full close/relogin và APK -> EXE. Cả bốn bước đều hiện `5053`; client cũ bị đẩy và có toast phiên thay thế ở cả hai chiều.
+- Backup root-only: `/root/ywonder-point-backups/qa-funding-20260717T090332Z-141ec249`. Report chain/replay/fault: `/root/ywonder-point-reports/point-qa-conversion-chain-20260717T091536Z.txt`, `point-qa-duplicate-replay-20260717T091734Z.txt`, `point-qa-nondisruptive-faults-20260717T092438Z.txt`.
+- Phân loại: `technical no-money canary complete`, chưa phải `real-money canary complete`. Không restart production, không dùng tiền thật; debit vẫn tắt, rollout chỉ đúng QA và public internal route vẫn đóng.
+
+## [2026-07-17] — Đã deploy nền ví Point v3 ở trạng thái dormant
+
+### Đã triển khai
+- Game đang chạy release `a22312df3aee5701a31aa502d2fea3728546b2b1`; web chạy release `/var/www/ywonder-releases/point-v3-a22312df`, Next.js build `2rdR_xG8o4G1uonGEYEg0`.
+- Đã áp schema cộng thêm cho PostgreSQL migration `006_point_wallet_reservations` và journal authority/debit trên SQLite web. Các bảng link/conversion/debit/reservation mới đều có `0` row; không link account và không migrate số dư legacy.
+- Cả game lẫn web đều đặt tường minh `WEB_POINT_WALLET_DEBIT_ENABLED=false`. Top-up cũ vẫn chỉ ở canary một account, remote ingress tắt; route credit/reserve public trả `404`.
+
+### Bằng chứng và giới hạn
+- Backup root-only `/root/ywonder-point-backups/point-wallet-dormant-20260717T050203Z-a22312df` và rollback validate đều pass; manifest hậu switch có SHA-256 `473bffad9ff2199d27fcb50f02c88f44d8f2a4aafc6088e3481f33427b3ca88f`.
+- Trước lần switch cuối, rollback tự động đã chạy thật hai lần vì lỗi riêng của smoke harness: redirect dùng sai hostname TLS và định dạng thời gian `journalctl` không được hỗ trợ. Cả hai lần đều phục hồi release/env/health cũ và giữ nguyên số dư; lần chạy sửa harness nhận ra schema cộng thêm đã tồn tại nhưng rỗng rồi hoàn tất idempotent.
+- Hậu kiểm pass health, trang chủ/login/register/referral/wallet, Browser SSO redirect, cron có quyền, route dormant và ổn định tiến trình 45 giây với restart `0`; upload/stage tạm đã dọn.
+- Tổng số ví/số dư web, outbox/transaction và tổng Point game không đổi tại checkpoint deploy này. Không dùng tiền thật, không conversion/debit/link/migrate/open/YWH. Canary không tiền trên QA riêng được hoàn tất sau đó và đã ghi ở mục mới hơn phía trên; deployment dormant này tự nó chưa phải bật tính năng ví chung cho người dùng.
+
+## [2026-07-17] — Candidate web debit Point -> USDT đã pass cô lập, chưa deploy
+
+### Đã thêm
+- Thêm `GamePointDebit` saga và browser intent bền cho account đã link: ID request/reservation/transaction deterministic, snapshot rate/fee/gross/net bằng micros, state reserve/capture/release, cron retry và gate canary/fee tường minh.
+- Chặn race hai chiều bằng application check và trigger SQLite chéo; một account chỉ có một operation ví chưa terminal. Transaction USDT `PENDING` được ghi trước capture nhưng chưa cộng vào số dư dùng được; chỉ settlement SQLite sau `CAPTURED` mới tăng `balanceUsdt` đúng một lần.
+- Thêm DB/runtime fault test source cho replay, khác payload, mất response reserve/capture, đổi rate, settlement fail rồi release, sai player, journal bị sửa và remote conflict. Adapter YWH vẫn tắt.
+
+### Bằng chứng và giới hạn
+- Local pass: authority safety, Point reservation, Point credit, security, Phase 1 isolated, syntax TypeScript/JavaScript/Bash, migration SQL và patch trên source production partial đã ghim hash.
+- Overlay 17 file SHA-256 `2cd12483d811b966f26c3c24db52b2254c6e8a82126ece464e5cdabe8e9e986d` pass full validator VPS trên source/SQLite production bản sao: Prisma generate/validate/migration, DB E2E, Next.js `15.5.20` build `g078J34tOR0M2Gmd1WpIp`, credit runtime fault E2E và debit saga fault E2E.
+- Prisma che mã `RAISE(ABORT)` của SQLite trigger thành lỗi FK chung; E2E đã được gia cố bằng SQL trigger, control insert hợp lệ và kiểm row bị chặn không tồn tại. Hậu kiểm: live web/DB production không đổi, service không restart, không dùng tiền thật; production debit vẫn tắt và candidate chưa deploy/link/migrate.
+
+## [2026-07-17] — Khôi phục asset farm/city và hoàn tất rename prefab đất
+
+### Đã khôi phục
+- Khôi phục tranche farm/scene bị thiếu từ stash đã giữ lại, không ghi đè City, Map2.1 và material mới của người dùng. Backup trước vá ở `D:\Temp\YWonder-FinalPatch-2026-07-17T02-21-02-185Z`; backup toàn đợt ở `D:\Temp\YWonder-Recovery-2026-07-17T01-51-59-432Z`.
+- Hoàn tất rename `dattrong.prefab` thành `DatDaCuoc.prefab` và giữ GUID Unity `ff37f2abcf3e24b46948abf313748dae`. Mở ignore có chọn lọc cho `Assets/Building/Map1.2` để WindMill và dependency mà FarmScene dùng được theo dõi bằng Git.
+- Giữ các asset WindMill, đất, prefab, scene, tài liệu và recovery scene đã khôi phục. Không phục hồi thay đổi ProjectSettings và output iOS sinh tự động chỉ có trong stash vì không thuộc nhóm file bị mất và có nguy cơ đè cấu hình mới.
+
+### Bằng chứng
+- Đối chiếu đủ 165 asset untracked phía stash: thiếu `0`. Sau khi Unity xóa metadata Addressables sinh tự động, audit còn 2.474 GUID asset: trùng `0`; 273 GUID duy nhất trên 33 file Unity YAML liên quan đều resolve đủ khi tính cả builtin và package metadata.
+- Unity `6000.3.15f1` batch import/compile thoát mã `0`; log không có lỗi biên dịch C#, exception, missing reference, lỗi shader/import hoặc crash.
+- Unity tự xóa lại `Assets/AddressableAssetsData/link.xml` và `.meta` trong lúc import; giữ deletion vì Addressables đã sinh bản giống hệt theo Android/iOS/Windows dưới `Library/com.unity.addressables`.
+- Chủ dự án đã mở và nghiệm thu phần nội dung khôi phục. Các thay đổi CityScene/Map2.1/material phát sinh sau đó thuộc worktree người dùng và không nằm trong tranche web debit.
+
+## [2026-07-17] — Duyệt successor policy ví Point nhưng tiếp tục khóa migration
+
+### Đã thêm
+- Thêm policy checksum-pinned `docs/QA/POINT_WALLET_MIGRATION_POST_REMEDIATION_POLICY_2026-07-17.json`, chỉ gồm ba lựa chọn còn hiệu lực sau remediation: opening seed và legacy web balance tiếp tục `DEFER_ACCOUNT_LINK`; zero-balance history dùng `ARCHIVE_HISTORY_WITH_NO_BALANCE_MIGRATION`.
+- Policy không cấp quyền ghi DB, deploy, migrate balance hoặc chạy lại synthetic reversal; mọi operational change vẫn phải xin duyệt riêng.
+
+### Bằng chứng
+- Full migration/remediation execution suite pass local. Policy SHA-256 là `89fcdc1b22d8ac9d20d5bf4761b5696c4d0503b0962eb7f7bd9f28af6d88aacc`.
+- Applicator production được ghim checksum tạo artifact root-only `point-wallet-migration-approved-post-remediation-20260716T173254Z-84042119.{json,md}`, SHA-256 `aa371bd52ef22ef473d390b2d14cf44d53f62f0b23b216f1ef74f02503c96ca8` / `9fa41f3f5d9fa70a6a0957f8d518ad936a3e4dc51efb3e64eb26cf9dd7f00891`: `17/17` decision approved, pending `0`, source blocked `0`, nhưng migration vẫn `BLOCKED_NO_BALANCE_MIGRATION_AUTHORIZED`.
+- SQLite SHA-256 `a4f0ffa570071c9799c3c3c915519b65bea434b0bfe886f1a59f2b572ac22467`, PID game/web `186418/186434`, health `200/200`, web root `307` và callback public `404` giữ nguyên. Không deploy/restart/DB mutation/link/migrate/reversal/normalization/tiền thật; source tạm đã xóa.
+
+## [2026-07-17] — Reconciliation ví Point sau remediation đã khóa chống đảo trùng
+
+### Đã thêm
+- Game snapshot read-only nay xuất evidence remediation có kiểm tra operation/idempotency, checksum, source ref ẩn danh và phép tính Point/remainder. Report đối chiếu đủ nguồn, tổng micros và cặp apply/rollback; evidence thiếu, trùng, dùng lại, sai account/credit hoặc sai số tiền đều fail-closed.
+- Worksheet tách synthetic chưa xử lý với synthetic đã reversal. Chỉ reversal hợp lệ và chưa rollback mới loại quyết định đảo lại; artifact cũ checksum-pinned vẫn giữ tương thích.
+
+### Bằng chứng
+- Targeted test, full migration suite và hai remediation execution suite đều pass local; candidate test trên VPS pass trong thư mục tạm không chứa secret rồi được dọn.
+- Production double-snapshot chỉ đọc tạo report `point-wallet-migration-post-remediation-20260716T172353Z-c62f14df.json`, SHA-256 `7397b05d18780cc056dea7c3727aedcc80400570d421caa58072c92d4bf6fd2a`: `BLOCKED=0`, residual `0`, ba outbox synthetic tổng `3000000` micros đã reversal và không còn yêu cầu đảo lần hai.
+- Worksheet mới có 16 account review và 17 decision: 6 opening seed, 10 legacy balance, 1 zero-balance history; synthetic chưa xử lý và residual pending đều `0`. JSON/Markdown SHA-256 là `e223c85ddd26233f0478ae5f02a2b02b2318d5ee050f0c5343174d843a238e0f` / `5c76c718cc636514ad731afb42bc8f8de2a90723c2508d8cbb06b6224abffc73`.
+- SQLite checksum, PID game/web `186418/186434`, health `200/307/404`, file mode `0600` giữ nguyên; không restart/deploy/mutation/link/migrate hoặc dùng tiền thật. Source/raw tạm đã xóa.
+
+## [2026-07-16] — Remediation ví Point đã chạy và đối soát production
+
+### Đã thêm
+- Thêm validator approval/checksum, executor SQLite chuẩn hóa residual có audit append-only, executor PostgreSQL đảo synthetic credit bằng transaction serializable/idempotent, nhánh rollback bù và suite test chung. Tooling được khóa ở commit `7aeec648`.
+- Hai executor fail-closed khi plan/source/account drift, audit dở dang, idempotency conflict, target còn phiên active, credit sai player hoặc phép tính số dư không khớp; artifact approval không chứa identity thô.
+
+### Bằng chứng
+- Local/full migration suite và execution suite pass. Bản sao SQLite/PostgreSQL trên VPS pass apply, replay, rollback bù, phục hồi logical checksum và hậu kiểm. Planner ghim approved artifact cũ dừng bằng `SOURCE_STATUS_COUNTS_DRIFT` sau khi normalization là hành vi đúng; báo cáo nền mới là cổng hậu kiểm và xác nhận `BLOCKED=0`, residual value `0`.
+- Backup production `/root/ywonder-point-backups/point-remediation-20260716T163736Z-7aeec648` có manifest SHA-256 `7c5dc5272cc791e1632f1a4738ed3a2b73ef89d4ba6b3544848360fff8977954`. Fresh preflight khớp tuyệt đối 3 account/6 residual, 3 synthetic source và `3000000` micros đã duyệt.
+- Production residual normalization tạo đúng `NORMALIZE=6`, `ROLLBACK=0`; replay không ghi thêm, báo cáo mới đưa `BLOCKED 3 -> 0` và residual value `6 -> 0`.
+- Ba Point canary không tiền lịch sử đã được đảo đúng một lần sau các chi tiêu gameplay: balance tại thời điểm operation là `4370`, không còn là ảnh HUD cũ `5003`; số dư PostgreSQL hiện là `4367 Point`, có đúng một ledger `delta_pos=-3`, không có rollback ledger và replay idempotent.
+- Nghiệm thu client thủ công sau reversal đã đạt. EXE đăng nhập mới hiển thị `4367`; đăng nhập APK khi EXE còn mở đẩy EXE ra và APK vẫn là `4367`; đăng nhập lại EXE đẩy APK ra và EXE tiếp tục là `4367`. Cả hai client bị thay phiên đều hiện toast đúng; không mua đồ hoặc nhận thưởng trong vòng kiểm tra.
+- Validation summary cuối có SHA-256 `e31f737bc0177fcceb6fa3f6b1c980a6c5ad379ac4ee7f13352ef50b2e46c37d`. PID game/web vẫn `186418/186434`, health `200/307/404`, outbox pending và warning log đều `0`; không restart/deploy/link/migrate, không dùng tiền thật, không mở mode `open`. Canary vẫn đúng một account, remote ingress tắt; PostgreSQL clone và raw snapshot tạm đã xóa.
+
+## [2026-07-16] — Remediation dry-run ví Point đã sẵn sàng xin duyệt riêng
+
+### Đã thêm
+- Planner fail-closed đọc approved artifact đã ghim checksum và snapshot kép hiện tại, đối chiếu lại toàn bộ account/fact/status trước khi lập kế hoạch. Tool xác minh từng source synthetic với đúng một game credit và tính chính xác từng residual signed atto-Point; không sinh SQL hoặc lệnh đổi số dư.
+- Reversal synthetic và residual normalization chỉ có operation ID đề xuất, điều kiện vận hành và trạng thái `NOT_AUTHORIZED`. Account link, balance migration và deploy tiếp tục defer/cấm; identity thô chỉ nằm trong temp `0700` rồi bị xóa.
+
+### Bằng chứng
+- Syntax, unit/full migration suite, Point authority, credit, reservation và security smoke đều pass local; candidate pass Node `24.18.0`, Python và `bash -n` trên VPS.
+- Production tạo JSON/Markdown root-only `point-wallet-remediation-dry-run-20260716T155640Z-4677eae4.*`, SHA-256 `fdd118a89f0ac70a60a96eb587d5f7a89b8dd731f02a9922d96410fda2b65357` / `975342dc9bec62f6166e7ef62d9fb657ff36d78a0f3028f902470320dd279416`: reversal plan đúng `3 Point` từ 3 source; residual có 3 account/6 giá trị; nếu operation residual được duyệt và thực hiện đúng thì projection `BLOCKED 3 -> 0`.
+- Lượt candidate tạm đầu tiên dừng trước khi sinh plan vì user game không traverse được thư mục source root-only; cleanup xác nhận raw/upload/output đều 0 và PID/health không đổi. Lượt sau chỉ mở quyền đọc source không nhạy cảm cho service user, còn raw vẫn root-only, rồi pass.
+- Hậu kiểm cuối giữ PID game/web `186418/186434`, health `200/200`, web root `307 -> 200`, callback public `404`, critical log `0`, temp `0`. Chưa sửa DB/Point, chưa reversal/normalize, chưa link/migrate, deploy hoặc restart.
+
+## [2026-07-16] — Policy ví Point đã duyệt, migration vẫn khóa
+
+### Đã thêm
+- Generator fail-closed biến report HMAC production thành worksheet JSON/Markdown root-only. Tool từ chối identity thô, schema/flag/checksum sai, HMAC ref trùng và không ghi đè output; mọi decision mặc định `PENDING`, không có SQL hay số tiền migrate đề xuất.
+- Phân loại riêng phần lẻ legacy dưới micro, opening balance game, synthetic credit không có nguồn web, balance web legacy đã/chưa map và lịch sử legacy balance 0.
+- Thêm policy JSON đã được chủ dự án duyệt và applicator fail-closed. Tool bắt buộc checksum đúng, đủ đúng decision key, giá trị thuộc whitelist, không có field/constraint thừa và không được cấp quyền DB/deploy/migration/reversal.
+
+### Bằng chứng
+- Unit test và full suite dry-run pass. Hai worksheet mode `0600` chứa 16 account ẩn danh, 21 decision key, tổng opening seed `30000 Point`, synthetic canary `3 Point` và web legacy `3422.666667 Point` trong phạm vi review.
+- Generator SHA-256 `923017f8f6574b8d036ca7045a70f2982897aa22d8e8e1d1d00df0d2a812906e`; JSON SHA-256 `d3cf5dbb9d4eabcae3e4c9e9f97e7c0146440d3eb13f9495626bbefb115cf455`; Markdown SHA-256 `8a3f52381c3b4f2008f2e3aceeeead10178ed009c5d82e083738e990928c8cd9`.
+- Policy chọn defer account link cho seed/balance legacy, reversal có audit cho synthetic `3 Point`, archive không migrate lịch sử balance 0 và `ROUND_HALF_EVEN` kèm residual audit. Applicator/policy SHA-256 cuối là `84042119984beda631d4c3f9305ce5756998e60ac127778dbafac3d98aa00107` / `ab262f7f532df2bc008ce9e0ca0769a7a8f78cb0b1ad747309b4e09d0af19e63`.
+- Artifact approved JSON/Markdown root-only cuối có SHA-256 `76c3368cc5937db5c93d8adbebb23d5abe2f2a8c279dd9f8d1daada5ddc7ca37` / `dd7a6190cdf7e5d8fe4c55a3b59275adb08921173e70eb1330ced3c863355282`: 21 approved, 0 pending, migration gate vẫn `BLOCKED_NO_BALANCE_MIGRATION_AUTHORIZED`. Artifact trung gian trước hardening chỉ giữ làm audit và đã bị supersede.
+- Hậu kiểm giữ PID game/web `186418/186434`, health `200/200`, web root `307 -> 200`, callback public `404`, temp `0`. Không gọi DB, không deploy/restart/đổi balance, không link/migrate, chưa reversal hoặc normalize residual.
+
+## [2026-07-16] — Production migration dry-run ví Point đã chạy, chưa được migrate
+
+### Đã thêm
+- Exporter web SQLite chỉ đọc (`mode=ro`, `query_only`, foreign-key check) và exporter game PostgreSQL `REPEATABLE READ READ ONLY`; dữ liệu tiền dùng integer micros, không dùng float để quyết định migration.
+- Báo cáo ẩn danh từng account phát hiện mapping/transaction trùng, identity mồ côi, thiếu wallet, balance âm/locked, outbox chưa settle hoặc lệch game ledger. Report luôn cấm auto-migration và không sinh SQL/số tiền đề xuất.
+- Runner chụp hai ledger hai lượt, dừng nếu dữ liệu đổi giữa lúc capture, chỉ giữ raw ID trong temp `0700` rồi xóa; file cuối dùng HMAC ref và quyền `0600`. Runbook nằm tại `docs/QA/POINT_WALLET_MIGRATION_DRY_RUN.md`.
+- SQLite REAL legacy được làm tròn về micro gần nhất chỉ trong snapshot tạm, giữ residual chính xác bằng atto-Point và gắn blocker cho mọi account bị ảnh hưởng; outbox settlement vẫn từ chối sub-micro. Runner hỗ trợ PostgreSQL peer auth bằng cách hạ riêng game exporter sang user service và loại HMAC key/`PGPASSWORD` khỏi child.
+
+### Bằng chứng
+- Suite migration dry-run, Point authority/reservation/credit, security, Phase 1 cô lập và animal placement đều pass; Bash syntax và `git diff --check` pass.
+- Lượt production read-only `2026-07-16T13:48:26Z` từ commit `7dffc8b5` đã pass snapshot kép và sinh report SHA-256 `3ef6343bbef65bcfd35bce78aab10408df24c71c3c5fa90acd800788f3f14f16`: 159 account gồm `143 NO_ACTION`, `7 UNMAPPED_LEGACY_REVIEW`, `6 MANUAL_RECONCILIATION_REQUIRED`, `3 BLOCKED`.
+- Ba outbox canary, mỗi row `1 Point`, đều `SENT` và khớp đúng một game credit; tổng gửi/nhận `3 Point`, không duplicate. Ba blocker chứa 6 giá trị SWAP/ví legacy dưới 1 micro-Point; 6 mapping game đều có opening seed `5000 Point` cần phân loại.
+- Hậu kiểm giữ nguyên PID game/web `186418/186434`, health `200/200`, release/build/env checksum và callback public `404`; upload/raw temp đều `0`. Không restart, không sửa DB/mapping/balance, không dùng tiền thật và chưa được phép migrate.
+
+## [2026-07-16] — Candidate ví Point authoritative v3, chưa deploy
+
+### Đã triển khai cô lập
+- Chốt ADR dùng `player_economy.pos` trong PostgreSQL game làm số dư Point spendable duy nhất cho account đã link. Web đóng băng Point legacy của account link ở `0` và đọc balance ký HMAC; account chưa link phải đối soát từng trường hợp, tuyệt đối không cộng dồn hàng loạt.
+- Thêm route nội bộ ký HMAC `point-reserve/capture/release` sau kill switch riêng mặc định tắt. Reserve trừ đúng một lần, capture không trừ lại, release hoàn đúng một lần; retry cùng payload idempotent và conflict fail closed.
+- Thêm migration `006_point_wallet_reservations.sql`, state machine JSON/PostgreSQL, realtime balance absolute và test restart/race.
+- Overlay web v3 dùng rate `USDT_POINT` do Admin tạo thành version bất biến, tính bằng integer micros và ghim `rateVersionId/rateMicros/roundingRemainder` vào conversion journal. Retry sau đổi rate vẫn dùng quote đã commit.
+
+### Bằng chứng
+- Các suite reservation, credit, security, authority, phase-one cô lập và animal placement pass; PostgreSQL smoke pass trong schema VPS tạm đã tự xóa.
+- Overlay 13 file có SHA-256 `99a901958f4fb65379c32cf9e128cda9244ffa162f71e85333df635672a6cb2b`; validator pass migration/DB E2E, Next.js `15.5.20` build `S7-EGQjdX4Wv8vxyDOlU8` và fault E2E đổi rate sau commit.
+- Chốt `LIVE_WEB_CHANGED=no`, `PRODUCTION_DATABASE_MUTATED=no`, `PRODUCTION_SERVICES_RESTARTED=no`, `REAL_PAYMENT_USED=no`. Còn thiếu web debit orchestrator, migration legacy, YWH conversion/hoa hồng và phê duyệt rollout.
+
+## [2026-07-16] — Ghi nhận hợp đồng nghiệp vụ ví Point từ BA/khách
+
+### Đã xác nhận
+- Point web và Point game là cùng loại/cùng một số dư như một ví; USDT -> Point, YWH <-> Point, Point -> USDT và tỷ giá do Admin thay đổi.
+- Tiêu dùng game phải trả hoa hồng YWH cho người giới thiệu tương tự HUB, gồm vật nuôi, cây dài/ngắn ngày, mồi câu, lượt vòng quay, lượt đào khoáng và mọi tiêu dùng game.
+
+### Còn chặn triển khai
+- Câu `YWH -> Point` và chuyển Point không làm đổi Point game mâu thuẫn với yêu cầu một ví; chưa tự suy diễn. Còn phải chốt ledger authoritative, migration Point/GXL cũ, rate version/rounding, transfer/rút/reversal và công thức hoa hồng YWH.
+- Đặt playbook fixed-rate `0,06 USDT -> 1 Point` ở trạng thái HOLD; candidate authority v2 chưa deploy và không được coi là thiết kế ví cuối.
+- Sửa bản ghi identity: `Nhien345` là tài khoản thật, không phải QA. Log xác nhận scoped grant block gây `403`/shop lock trên account này; đối chứng `senh2026` nhận nước và mua bình thường, không có `403/409/503`. Chưa đổi cấu hình production.
+
+## [2026-07-16] — Vá client farm, chưa build artifact
+
+### Fixed
+- Xác nhận `FarmScene` active map Chuồng sang `Fence.prefab` có `FenceAutoConnect`; ba prefab `AnimalPenSpawner` cũ không được scene/build catalog tham chiếu. Hành vi `7 -> 7` khớp client enclosure cũ chỉ spawn + save farm mà không trừ túi; hai file client atomic vẫn đang là thay đổi chưa commit nên artifact EXE/APK đã test chưa được chứng minh có fix.
+- Kết quả placement authoritative nay mang số lượng con giống còn lại từ snapshot inventory server. Unity áp snapshot đó và hiện số còn lại ngay trong toast thành công. Nhánh pen legacy chuyển sang fail-closed, không còn trừ inventory và spawn local bằng hai mutation rời nhau.
+- Cây nhiều ô chặn ô slave trước khi mở túi, trừ hạt hoặc chạy animation. Việc chọn ô phụ đổi sang flood-fill 4 hướng theo lưới `BuildSurfaceCell`, nên cụm chanh dây không thể lấy ô đã cuốc rời rạc ở nơi khác trong scene. Mọi ca state sai/đổi giữa chừng/thiếu ô/action bận đều có toast và giữ hoặc hoàn hạt.
+- Audit source chi phí xây không thấy bypass theo account Rich: scene active giữ ruộng miễn phí, đường `4 đá`, chuồng `4 gỗ`. Placement nay bắt buộc `RemoveItem` thành công, gắn reason `build_place` và log chính xác số lượng trước/sau để đối soát runtime/DB. Trừ vật liệu và lưu công trình vẫn chưa nằm trong cùng một transaction server.
+- Bổ sung entry batch `BuildWindows` và `BuildAndroid` vào build script Unity hiện có; đường dẫn artifact nhận qua `UNITY_WINDOWS_PATH`/`UNITY_ANDROID_PATH` để build lặp lại cùng một source.
+- Sửa blocker ở lượt test P0 đầu tiên trước cả bước thả thú. `Player.log` chứng minh backend vẫn khỏe và request shop chưa được gửi: scoped canary trả `403` cho reward item dương, queue đã bỏ mutation lỗi vĩnh viễn nhưng giữ `reconciliationRequired`, nên shop sau đó tự trả `PENDING_STATE_SYNC_FAILED (503)`. Shop nay chỉ khi queue đã rỗng mới dùng bootstrap authoritative có guard để đối soát rồi tiếp tục transaction; queue thật còn pending vẫn fail-closed và không mở lại API delta dương. Toast lỗi đồng bộ/đối soát cũng được tách khỏi thông báo mất kết nối chung.
+
+### Verified
+- Roslyn của Unity `6000.3.15f1` compile sạch cả runtime lẫn Editor assembly theo response file Standalone Windows và Android; `Assembly-CSharp` sau hotfix shop cũng compile pass vào output tạm riêng.
+- `test:farm-animal-placement`, `test:security`, `test:phase1:isolated` và `test:web-point-authority` đều pass trong tranche này. Vẫn phải build và nghiệm thu runtime EXE/APK; không đổi hoặc deploy service production.
+
+## [2026-07-16] — Candidate web Point authoritative, chưa deploy
+
+### Gia cố định danh và single ledger
+- Thêm khóa duy nhất `User.id -> gamePlayerId` ở web. Dispatcher ký `expected_player_id` trong contract `ywonder-point-credit-v2`; game trả `409 GAME_POINT_IDENTITY_MISMATCH` trước khi cộng Point/ghi ledger nếu mapping không tồn tại hoặc lệch. Contract v1 tạm thời vẫn tương thích để nâng release theo thứ tự an toàn.
+- Web account đã link đọc Point từ endpoint balance ký HMAC và fail closed nếu `player_id` trả về khác identity đã ghim. Legacy Point web của account link bị giữ ở `0`; account cũ chưa link không bị đổi dữ liệu.
+- Bổ sung test từ chối hai web account cùng ghim một game player, sai player trên JSON/PostgreSQL store, response HTTP 200 sai player, duplicate, `409`, mất response sau commit và race callback.
+
+### Bằng chứng cô lập
+- Backend integration và authority safety test pass. Overlay 12 file có SHA-256 `8f326cb79e0c8123712aec90217602f2428612cfa6e54d30c42aad3e804cf9fb`.
+- Validator VPS pass migration/DB E2E, Prisma, Next.js `15.5.20` build `m31Ry3w4SeOT1N3oxcdJw` và runtime fault E2E; chốt `LIVE_WEB_CHANGED=no`, `PRODUCTION_DATABASE_MUTATED=no`, `PRODUCTION_SERVICES_RESTARTED=no`, `REAL_PAYMENT_USED=no`.
+- Harness production-artifact nay chạy thêm `postgresSmokeTest` trong PostgreSQL database tạm riêng. Lượt VPS pass nhánh ghim player trên store thật, canary rejection, first dispatch, duplicate, restart web cô lập và mất response sau commit; database tạm đã xóa, service/player data production không đổi.
+- Thêm `docs/QA/WEB_POINT_NO_MONEY_CANARY.md`: cổng còn lại không cần tiền thật là cấp synthetic có audit đúng `0,06 USDT`, thao tác đổi thật trên UI web, rồi đối soát cùng source transaction qua web journal/outbox, game ledger và HUD EXE/APK. Candidate chưa deploy.
+
+## [2026-07-16] — Canary production ví web -> Point không dùng tiền
+
+### Kích hoạt có giới hạn
+- Thêm `server/deploy/activate-web-point-canary.sh` với allowlist đúng một web identity QA, backup root-only, ghi env nguyên tử, rollback tự động, health-check và cổng bắt buộc callback public vẫn `404`. Production đang chạy `WEB_TOPUP_MODE=canary`; khóa grant dương từ client chỉ áp dụng cho đúng identity canary, người chơi khác vẫn giữ luồng legacy hiện tại.
+- Gia cố script bật bằng lock `flock` dùng chung và chế độ validate-only không đổi cấu hình. Thêm `server/deploy/deactivate-web-point-canary.sh` để đưa hai service về dormant nguyên tử, xóa hai allowlist/scoped block, giữ remote ingress tắt và tự phục hồi env canary nếu restart/health/guard bất kỳ không đạt.
+- Browser SSO đã tạo đúng một mapping web account -> `playerId`. Baseline trước test: mọi số dư ví web bằng `0`, outbox web trống, game có `5000 Point` khởi tạo và chưa có ledger top-up.
+
+### Nghiệm thu không tiền
+- Sau SQLite online-backup, đã queue đúng một outbox synthetic `+1.000000 Point`, không tạo nạp tiền và không đổi ví web. Cron production có xác thực gửi HMAC qua loopback; outbox thành `SENT`, PostgreSQL thành `5001 Point`, có đúng một `web_topup_credit`.
+- Ép retry lại cùng payload: attempts `1 -> 2`, Point vẫn `5001`, ledger vẫn một dòng. Ví web tiếp tục toàn `0`, không có outbox chưa gửi và SQLite `quick_check=ok`.
+- Ba ảnh Windows EXE xác nhận HUD là `5,001` ngay khi đang online, sau logout/login và sau thoát hẳn/mở lại app. Đối soát cuối vẫn đúng một mapping, một player và một ledger.
+- Android APK khôi phục `5,001`, xác nhận `5,002` sau relogin, rồi nhận realtime riêng `5,002 -> 5,003` ngay trong game. Retry cùng nguồn giữ `5,003` và một ledger; APK relogin/full process restart và lần đăng nhập Windows EXE tiếp theo đều đọc cùng `5,003`.
+- Phiên đơn pass đủ hai chiều trên cùng account QA: đăng nhập EXE đẩy APK đang mở ra, đăng nhập lại APK đẩy EXE đang mở ra; cả hai client cũ đều hiện toast phiên bị thay thế. Vì vậy số dư giống nhau xuyên thiết bị không phải do hai phiên cũ cùng tiếp tục hoạt động.
+- Restart có kiểm soát riêng game backend làm PID game đổi nhưng giữ nguyên PID web, hash hai env, `5,003 Point`, phần lẻ `0`, ba ledger và ba outbox `SENT`. Health game nội bộ/public cùng web đều về `200`; guard tiếp tục `401/404/401` và service game không có log mức warning.
+- Fault drill dùng lại transaction synthetic realtime APK đã credit, không tạo Point mới: khi backend tắt, cron có xác thực giữ row ở `RETRY` và attempts `2 -> 3`; sau khi backend phục hồi, đúng row đó về `SENT` ở attempt `4`. Point vẫn `5,003`, ledger vẫn ba dòng và transaction nguồn vẫn đúng một ledger; tổng attempts outbox chỉ đổi `5 -> 7`.
+- Rollback preflight trên VPS pass mà không đổi production: backup dormant root-only dùng default an toàn khi thiếu khóa (`enabled=false`, `mode=canary`), allowlist/block rỗng và env ngoài nhóm canary khớp live. `bash -n` Linux cùng validate-only bật/tắt đều đạt; PID game/web, hash env, số backup và public `404` không đổi. Lượt live được duyệt riêng đã chạy ở mốc bên dưới.
+- Anh đã đăng nhập client sau các lần restart/fault có kiểm soát và xác nhận khôi phục đúng số dư authoritative `5,003 Point`.
+- Mở rộng E2E không tiền bằng restart web process cô lập và fault proxy chỉ bind loopback. Proxy cho game tạm commit transaction thứ hai nhưng giữ response thành công tới khi web tạm timeout và ghi `RETRY`; lượt gửi lại dùng nguyên transaction ID rồi về `SENT` ở attempt hai, trong khi game tạm vẫn chỉ có đúng hai ledger, không mất hoặc cộng đôi Point.
+- Gia cố runner để lấy đúng `WorkingDirectory` đang chạy của `greenxland.service`, không còn vô tình build cây rollback Next.js 14. Runner chỉ chấp nhận root web chuẩn hoặc release versioned an toàn, bắt buộc `.env` active trỏ về env production chuẩn và fingerprint source/build active, PID, service identity cùng env trước/sau.
+- Lượt VPS đã sửa build đúng release active Next.js `15.5.20` và pass canary rejection, first dispatch, duplicate retry, isolated web restart, post-commit response loss cùng idempotent recovery. PostgreSQL database tạm, bản sao SQLite, process/stage/upload đều được dọn; PID production game/web giữ `181238/177260`, build `O-PUYMkTlVdeNCYQWp2gJ`, health `200/200`, exact-one canary và callback guard không đổi.
+- Hậu kiểm chỉ đọc vẫn là Point QA `5,003`, phần lẻ `0`, ba ledger `web_topup_credit`, ba outbox `SENT`, tổng attempts `7`. Fault run cô lập không đổi ví web, outbox, ledger, service hoặc build production.
+- Sau khi được duyệt, production đã chạy đủ exact-one canary -> dormant -> exact-one canary. Lượt tắt tạo backup `/var/backups/ywonder-point-link/deactivate-20260715T204412Z`, đưa callback loopback về `404` và restart hai service; lượt bật tạo backup `/var/backups/ywonder-point-link/canary-20260715T204455Z`, khôi phục hai env khớp byte-for-byte baseline, restart hai service và đưa loopback thiếu chữ ký về `401`; callback public luôn `404`.
+- Hậu kiểm độc lập chốt PID game/web cuối `186418/186434`, đúng release/build cũ, health `200/200`, allowlist đúng một identity, scoped block khớp, remote ingress tắt và không có critical log match. Point vẫn `5,003`, phần lẻ `0`, ledger `3`; outbox vẫn `3 SENT / 7 attempts / 0 pending`; database và thư mục E2E tạm đều bằng `0`.
+- Hai thư mục backup live thuộc `root:root` mode `0700`; file env bên trong giữ owner/mode production nhưng service account không thể đọc xuyên thư mục cha. Một archive source E2E cũ, không chứa `.env`/secret/dữ liệu người chơi và không process nào dùng, đã được xóa khỏi `/tmp` mà không đụng service hoặc dữ liệu production.
+- Nghiệm thu client sau live double restart đã đạt: anh đăng xuất rồi đăng nhập lại và ảnh HUD hiển thị `5,003`. Hậu kiểm chỉ đọc tương ứng thấy đúng một phiên QA active, Point `5,003`, remainder `0`, ba ledger và outbox không đổi `3 SENT / 7 attempts / 0 pending`.
+- Hậu kiểm đạt web/game `200`, request loopback/cron thiếu auth `401`, callback public `404`, không warning service. Chưa dùng tiền thật.
+
+### Cổng còn lại
+- Canary vẫn chỉ dành cho identity QA đã chọn, chưa bật đại trà. Live dormant -> canary và relogin client sau double restart đều đã đạt. Cổng nghiệp vụ còn lại là giao dịch ví web thật cực nhỏ có đối soát transaction ID đầu-cuối và phải được duyệt riêng; chưa bắt đầu.
+
+## [2026-07-16] — Nâng web production lên Next.js 15 đã vá
+
+### Deploy và rollback
+- Đã deploy release versioned `/var/www/ywonder-releases/next15-49ee6f3-hardened` bằng systemd drop-in `next15-release.conf`. Build active `O-PUYMkTlVdeNCYQWp2gJ` chạy Next.js `15.5.20`, React/ReactDOM `19.2.7`; source Next.js `14.2.18` cũ tại `/var/www/ywonder` vẫn sạch và nguyên vẹn để rollback.
+- Backup root-only `/var/backups/ywonder-web/next15-pre-20260716T002949+0700` đã pass checksum, gồm SQLite/env/unit/source, build/audit/smoke và rollback script. Commit nguồn backup `b2510d4ad38eef89881931609ede60010ac50a83` có parent `49ee6f3b9f9c1547bb8dbfcfc0dbec6d6502ca24`, đúng 7 file và bundle/patch khớp byte với active release.
+- Rollback script, checksum drop-in và bản Next.js `14.2.18` cũ đã pass loopback smoke. Không cố ý restart production thêm hai lần chỉ để drill sau khi upgrade đã thành công; rollback target cũ vẫn sẵn sàng.
+
+### Regression và hậu kiểm
+- Build/runtime cô lập đạt home/login/session `200`, cron Point thiếu quyền `401`, Browser SSO callback thiếu request `400`, wallet chưa đăng nhập `307`; `npm audit --omit=dev` có `0 vulnerabilities`.
+- Regression đăng nhập production bằng một MEMBER synthetic đạt login `302`, session `200`, wallet authenticated `200`. User cùng wallet/session/account/notification/audit/outbox liên quan đã xóa hết; SQLite integrity và foreign key đều sạch.
+- Hậu kiểm cuối đạt web/login/game `200`, cron `401`, top-up public `404`, outbox web `0`, ledger PostgreSQL `web_topup_credit=0`, không còn marker synthetic, process/listener candidate hay warning/error service.
+- Top-up web/game vẫn tắt, allowlist/scoped block đều rỗng và `CLIENT_ASSET_GRANTS_ENABLED` vẫn unset/default-true. Không dùng tiền thật hoặc cộng Point. Cổng tiếp theo là tạo/chọn identity QA riêng và xác minh chính xác `User.id -> playerId`.
+
+## [2026-07-15] — Gate an toàn canary ví web -> Point
+
+### Security
+- Khóa `PUT /player/inventory` bằng `405 INVENTORY_SERVER_AUTHORITATIVE`; thêm strict mode chặn delta Point/item dương bằng `403` nhưng vẫn giữ debit hợp lệ.
+- Production startup từ chối `WEB_TOPUP_ENABLED=true` nếu `CLIENT_ASSET_GRANTS_ENABLED` chưa là `false`.
+- Thêm `WEB_TOPUP_MODE=canary` và allowlist web user dùng chung ở web/game. Account ngoài danh sách nhận `425` để outbox tiếp tục retry; cron không lấy các hàng ngoài canary nên không làm nghẽn account thử.
+- Thêm khóa grant theo đúng web user canary bằng `CLIENT_ASSET_GRANTS_BLOCKED_WEB_USER_IDS`. Khi vẫn giữ reward legacy cho người chơi thường, danh sách khóa phải khớp tuyệt đối allowlist top-up; endpoint kiểm cả JWT đã ký và mapping player authoritative. Mode `open` vẫn bắt buộc strict toàn cục và danh sách khóa riêng phải rỗng.
+
+### Verified local và VPS
+- Pass `node --check`, `test:security`, `test:web-point-credit`, `test:phase1:isolated` và `test:farm-animal-placement`. Audit source xác nhận outbox nằm trong cùng SQLite transaction với SWAP `SUCCESS`; Browser SSO và top-up đều map cùng web `User.id` sang `game_players.web_user_id`.
+- Đã gia cố E2E không dùng tiền cho lần chạy VPS kế tiếp: game/web bắt buộc chạy từ stage dưới `/tmp`; PostgreSQL dùng database tạm riêng thay vì schema trong `ywonder_game`; build có cổng RAM/disk/load, `nice`/`ionice`, timeout, lock một lượt và cleanup tiến trình có marker. Chỉ in `PRODUCTION_PLAYER_DATA_MUTATED=no` sau khi xóa database tạm, xác minh test ID không lọt vào hai DB thật, service PID/health và hash source/env production không đổi, callback thật vẫn `404`. `test:web-point-e2e-harness` và Bash syntax pass local.
+- Ngày 15/07/2026 runner mới đã pass trên VPS production bằng candidate có SHA-256 cố định dưới `/tmp`, bản sao SQLite web và PostgreSQL database `yw_point_e2e_*` riêng. Canary rejection, gửi lần đầu, retry idempotent và phần lẻ Point đều pass; DB/process/stage tạm được dọn sạch, PID/active time/hash env production không đổi, health vẫn `200` và callback dormant vẫn `404`.
+- Test khóa grant canary đã pass startup gate, account canary bị `403`, account đối chứng vẫn nhận reward, debit vẫn chạy và mapping store authoritative thắng claim JWT không thuộc canary. Point-credit, Phase 1, animal placement và E2E harness regression cũng pass; security suite tương tự đã pass trực tiếp từ artifact Linux live.
+- Đã deploy backend hardening thành release `f573721533c0a65a3f2fc49fa6a2673b224f8bea` sau backup `/var/backups/ywonder-point-hardening/pre-f5737215-20260715T153753Z`; migration `001`-`005` đã có sẵn, PostgreSQL smoke và health đều pass.
+- Follow-up khóa grant scoped đã deploy thành backend release active `32adf45fd4edb4b13b4ac3ed6c1bb69c7afbc2dc` sau backup đã xác thực `/var/backups/ywonder-point-hardening/pre-32adf45f-20260715T161547Z`; PostgreSQL smoke pass, migration `001`-`005` skip đúng.
+- Đã deploy guard canary web từ commit `82e20e3ed31dc3d3aea631c7c57cbdc3e9ba8e94` sau build production cô lập. Build live `YVgCFF1Bwu_XJc4sfVpo3`, rollback tại `/var/backups/ywonder-web/point-canary-hardening-20260715T154611Z`; chỉ web restart, game PID và hai env không đổi.
+- Hậu kiểm độc lập đạt game/web `200`, cron thiếu quyền `401`, callback `404`, guard canary có trong live build, không còn DB/schema/stage/process E2E, outbox Point web có `0` hàng và hai service không có warning/restart. Không dùng tiền thật.
+- Production vẫn cố ý giữ `WEB_TOPUP_ENABLED=false`, allowlist web/game rỗng và `CLIENT_ASSET_GRANTS_ENABLED` chưa set nên positive grant gameplay legacy còn hoạt động. Startup interlock vẫn chặn bật top-up; chưa được chạy canary cho tới khi cô lập đường reward dương hợp lệ và chốt đúng web user/player QA.
+- Hậu kiểm release `32adf45f...` đạt health local/public, web PID và env hash không đổi, callback `404`, cron `401`, guard scoped có trong live source, startup gate synthetic pass, outbox/ledger đều `0`, không còn DB/schema tạm và không có warning service. Cơ chế cô lập đã sẵn sàng nhưng scoped list vẫn rỗng cho tới khi chọn QA identity; không dùng tiền thật.
+- Audit source Unity chỉ còn một HUD Point, không còn binding UPoint active; tham chiếu runtime còn lại chỉ dùng để xóa PlayerPrefs legacy. `Assembly-CSharp` compile sạch vào output tạm riêng bằng Unity `6000.3.15f1`. Chưa chạy batch build tranh project vì Editor đang mở; EXE/APK visual acceptance vẫn còn.
+- Audit identity chỉ đọc thấy 5 mapping web-browser active, đều đã có dữ liệu player và không account nào được đánh dấu QA. Không ghi web ID đầy đủ/secret vào repo. Ưu tiên tạo web account QA riêng; nếu dùng account hiện hữu phải do owner chỉ định rõ trước khi đổi allowlist/env.
+- Đã dựng candidate web cô lập từ clean HEAD `49ee6f3b9f9c`, nâng Next.js lên `15.5.20`, React/ReactDOM `19.2.7`, vá PostCSS/form-data và dùng alias Nodemailer `9.0.3` tương thích peer contract của Auth.js beta hiện tại. Candidate chỉ đổi đúng 7 file source/lock/config.
+- Candidate đạt `npm audit --omit=dev` với `0 vulnerabilities`, production build, guard route không đăng nhập, credential login/session, trang ví có đăng nhập, referral và smoke API gửi mail trên bản sao SQLite. User/process synthetic đã được dọn; PID/active timestamp của web production không đổi.
+- Artifact `/var/backups/ywonder-web/candidates/next15-hardened-49ee6f3b9f9c-20260715T165605Z.tar.gz`, SHA-256 `a31e4192463b9ef75718c851e9e31b3e6ce85543145f2072d2b65d61db122165`, sau đó đã được deploy và nghiệm thu ở release ngày 16/07 phía trên; top-up vẫn tắt.
+
+## [2026-07-15] — Thả vật nuôi nguyên tử với túi đồ và farm
+
+### Fixed
+- Thay luồng sinh thú local bằng `POST /player/farm/animals/place`. JSON/PostgreSQL store kiểm revision farm, item trong túi, số ô theo loài, ô thuộc chuồng và chưa bị chiếm; sau đó trừ đúng `1` con giống và thêm đúng một animal do server cấp `instanceId` trong cùng transaction/idempotency.
+- Unity flush chuồng mới nhất trước khi thả, áp lại inventory + farm authoritative từ response và không có fallback thả local khi mất mạng. Đã bỏ helper tự cấp thú demo mỗi lần mở túi vì helper này che lỗi số lượng.
+- Collider hàng rào đặt bằng Build Mode được ưu tiên nhận diện qua `BuildSurfaceCell`/`PenEnclosure`, không đi nhầm nhánh `AnimalPenSpawner` legacy.
+
+### Verified
+- Pass `test:farm-animal-placement`, `test:security`, `test:phase1:isolated`, `test:web-point-credit` và `node --check` các file server liên quan. Unity Editor đã compile lại `Assembly-CSharp.dll` sau thay đổi, không ghi nhận lỗi C#.
+- Release production versioned `9c5bd9d1066637b6f176fcd09781358d22a73de4` đã deploy sau backup PostgreSQL/env/unit và PostgreSQL smoke trên schema tạm. Local regression cùng public Phase 1 HTTP/WSS đều pass; các lần thử chưa đạt trước đó đã rollback về release khỏe.
+- Double-check từ ngoài VPS: health dùng PostgreSQL, route thả thú không token trả `401`, callback nạp Point public trả `404`; `WEB_TOPUP_ENABLED=false` không đổi. Còn build EXE/APK và test tuần tự số lượng thú, relogin/cross-device/đóng app đột ngột trước khi đổi task sang `[x]`.
+
+## [2026-07-15] — Một ví Point và cổng nhận giao dịch nạp web
+
+### Changed
+- Gỡ UPoint khỏi `EconomyManager`, bootstrap/mutation DTO, HUD, popup sự kiện, JSON/PostgreSQL store, fresh schema và test. Cache Point dùng chuỗi 64-bit; migration mở rộng `004_single_point_currency.sql` archive UPoint legacy, không tự quy đổi và tạm giữ cột cũ để rollback release trước an toàn. Chỉ tạo migration contract xóa cột sau khi release Point-only đã deploy/verify.
+
+### Added
+- Thêm route nội bộ mặc định tắt `/internal/web/point-credit`: chỉ loopback, HMAC bằng secret riêng, timestamp ngắn hạn, transaction ID bất biến và idempotency. Cộng Point + ghi `web_topup_credit` nguyên tử; player online nhận số dư absolute qua `economy_updated`.
+- Test riêng đã pass chữ ký thiếu/sai, request quá hạn, amount sai, cộng đúng, realtime refresh, retry không cộng đôi, conflict khi cùng mã khác payload và persistence sau restart.
+- Web production đã có outbox + cron có xác thực để gửi giao dịch Point sang game; giao dịch gửi lỗi giữ trạng thái retry và luôn dùng cùng idempotency key nguồn.
+
+### Deploy và double-check ở trạng thái dormant
+- Game release `6e41be4d298ac51b0246583a14759c47ab9b47b8` đã deploy cùng migration `004/005`; PostgreSQL smoke, Point integration và security regression pass. Web outbox/cron cũng đã deploy kèm backup/rollback.
+- Hai dịch vụ đã cấu hình cùng secret nội bộ mà không in secret; backup env nằm tại `/var/backups/ywonder-point-link/dormant-20260715T043458Z`. Vẫn giữ `WEB_TOPUP_ENABLED=false` và loopback-only.
+- E2E cô lập dùng đúng web build production, bản sao SQLite và PostgreSQL schema tạm đã pass gửi lần đầu, retry không cộng đôi, giữ phần lẻ Point và xác nhận không sửa dữ liệu player production. Sau restart: web/game `200`, cron không quyền `401`, callback public `404`.
+
+### Gate
+- Chưa bật tiền thật. Callback/outbox/migration đã deploy và E2E cô lập đã đạt, nhưng bắt buộc khóa các endpoint client còn tự khai delta Point/item trước khi đổi `WEB_TOPUP_ENABLED=true`. Backend regression và biên dịch `Assembly-CSharp` độc lập bằng Unity Roslyn đã pass; còn xác nhận trực quan trên EXE/APK rằng HUD không còn UPoint.
+
+## [2026-07-14] — Hotfix hủy cho thú ăn và vòng đời trực tiếp
+
+### Fixed
+- Chặn component `FarmInteractionController` legacy trên các instance `Tree.prefab` chiếm singleton của controller thật trên `FarmManager`. Nút hủy HUD nay đi đúng timed coroutine: dừng thao tác cho ăn, mở khóa nhân vật/cursor và hoàn thức ăn đã giữ, không còn hủy animation nhưng vẫn cho thú ăn.
+- Cây và thú nay chết/héo ngay trong phiên đang chơi khi thanh nước/đói về `0%`, kể cả tutorial. Trước khi xóa, code giải phóng ô cây/chuồng và lưu snapshot farm ngay để relog hoặc thiết bị khác không phục hồi vật thể đã chết.
+
+### Verified
+- `Assembly-CSharp` compile pass bằng response file do Unity sinh. Cờ serialized auto-sprint cũ được giữ để tương thích prefab nhưng luôn chuẩn hóa về `false`, nên warning `enableStickAutoSprint` đã được dọn mà không bật lại chạy nhanh bằng joystick. Còn chờ Editor/EXE/APK runtime acceptance trước khi chốt `[x]`.
+
 ## [2026-07-14] — P0 phiên đơn và chống ghi đè farm đã deploy production
 
 ### Fixed
@@ -24,8 +557,10 @@
 - PostgreSQL smoke trong schema tạm và public Phase 1 REST/WSS smoke đều pass: rotate/revoke session, token cũ `401`, socket cũ `4008`, farm stale write `409`, persistence/relogin. Account smoke đã được dọn khỏi DB.
 - Kiểm tra độc lập từ Windows xác nhận health `storage.mode=postgres`; chỉ `80/443` public, còn `3000/5432/8080` đóng.
 
-### Pending client acceptance
-- JWT cũ thiếu `sid` phải đăng nhập lại. Dùng EXE/APK chứa checkpoint `21cc20d2` để lặp A → B → A, thay phiên ngay khi app cũ vẫn mở, xác nhận farm/cây/nước/túi không rollback và kiểm tra đóng app đột ngột rồi retry outbox trước khi tick hoàn tất toàn luồng.
+### Nghiệm thu client sau deploy
+- Đã đăng nhập mới trên EXE/APK chứa checkpoint `21cc20d2` và pass thay phiên ngay khi app cũ vẫn mở.
+- Ca A → B → A giữ đúng bố cục farm, đất đã cuốc, cây/nước, xây dựng, túi đồ, chuồng/thú và thời gian bù; không còn rollback về cache cũ.
+- Ca đóng app đột ngột cũng pass: outbox retry đúng khi đăng nhập lại và server giữ snapshot authoritative. Cổng P0 đồng bộ tài khoản/farm trên production được chốt `[x]`.
 
 ## [2026-07-13] — Hotfix đồng bộ nông trại xuyên thiết bị
 

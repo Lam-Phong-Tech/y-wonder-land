@@ -1,7 +1,74 @@
 # Web -> Game Backend Journey
-# Cập nhật: 2026-07-06
+# Cập nhật gần nhất: 2026-07-17
 
 > Mục tiêu của tài liệu này là làm rõ phần đang mơ hồ trong kịch bản: hệ thống web đã có trước, game sẽ dùng tài khoản web làm tài khoản đăng nhập game, nhưng gameplay hiện vẫn còn nhiều dữ liệu local. Tài liệu này định nghĩa hành trình cần xây, kết quả mong đợi, cách kiểm tra và các câu hỏi cần chốt.
+
+## Cập nhật quyết định BA/khách 16/07/2026
+
+Nguồn chuẩn: `docs/POINT_WALLET_BUSINESS_RULES.md`. Mục này thay thế giả định cũ
+rằng web chỉ gửi một khoản top-up để cộng thêm vào ví Point riêng của game:
+
+- Point web và Point game là cùng một loại tiền, phải hiển thị cùng một số dư như
+  hai giao diện của một ví.
+- Người dùng đổi `USDT -> Point`, `YWH <-> Point` và `Point -> USDT`; tỷ giá do
+  Admin thay đổi.
+- Point hiện hữu trên web không được copy/cộng thêm vào game. Cần chọn một ledger
+  authoritative và migrate/link sao cho chỉ còn một balance spendable.
+- Mọi tiêu dùng game phải phát sinh hoa hồng YWH cho người giới thiệu tương tự HUB;
+  tối thiểu gồm vật nuôi, cây dài/ngắn ngày, mồi câu, lượt vòng quay, lượt đào khoáng
+  và mọi giao dịch được phân loại là tiêu dùng game.
+- Debit Point và payout YWH phải liên kết bằng source transaction ID/transactional
+  outbox để retry, refund hoặc timeout không trừ/trả hai lần.
+
+ADR kỹ thuật `docs/ADR_POINT_WALLET_AUTHORITY.md` đã chốt cho candidate:
+
+1. PostgreSQL game `player_economy.pos` là ledger Point spendable duy nhất của
+   account đã link; web đóng băng balance Point legacy ở `0` và đọc balance ký HMAC.
+2. Account legacy chưa link không tự cộng vào game. Mỗi account phải có báo cáo
+   reconciliation và phê duyệt migration riêng.
+3. Tỷ giá Admin tạo version bất biến; settlement dùng integer micros và lưu rate
+   snapshot/rounding remainder. Retry không đọc lại tỷ giá mới.
+4. Point dùng cho luồng web-side phải đi qua `reserve -> capture|release` idempotent
+   trong PostgreSQL, không trừ một balance web thứ hai.
+
+Nền authority v3 đã chứng minh identity pinning, single-balance projection, HMAC
+credit/balance, Admin rate version và state machine reservation bằng test cô lập.
+Ngày 17/07, extension web saga `Point -> USDT` hoàn tất durable request ID, pending
+settlement journal, capture/release retry, exact fee/rate snapshot và cross-direction
+lock; USDT pending không spendable trước capture. Overlay 17 file đã pass full Prisma
+migration/DB E2E, Next.js build và credit/debit fault E2E trên source + SQLite
+production bản sao.
+
+Nền này sau đó đã deploy production ở trạng thái dormant: game release
+`a22312df3aee5701a31aa502d2fea3728546b2b1`, web release
+`/var/www/ywonder-releases/point-v3-a22312df`, build `2rdR_xG8o4G1uonGEYEg0`.
+Migration PostgreSQL `006` và schema authority/debit SQLite đã áp cộng thêm nhưng
+các bảng link/conversion/debit/reservation vẫn rỗng; cả hai service giữ
+`WEB_POINT_WALLET_DEBIT_ENABLED=false`, public credit/reserve `404`. Không có
+payment, conversion, debit, link hoặc migration balance. `Point -> YWH`, transfer,
+rút ngoài và payout hoa hồng vẫn còn; cổng tiếp theo là identity QA riêng cùng
+canary không tiền được duyệt riêng, không chuyển `WEB_TOPUP_MODE=open`.
+
+---
+
+## Cập nhật quyết định 15/07/2026
+
+Phần roadmap ngày 06/07 bên dưới được giữ làm lịch sử hình thành MVP. Các quyết định
+mới sau đây thay thế những câu hỏi cũ về tiền tệ và phạm vi nạp:
+
+- Game chỉ còn một tiền tệ là `Point`; `UPoint` nghỉ khỏi runtime, HUD, API và
+  schema active. Dữ liệu UPoint cũ chỉ được archive để đối soát, không tự quy đổi.
+- Web là nguồn xác nhận giao dịch nạp; PostgreSQL game giữ số dư Point dùng trong
+  gameplay. Website gửi callback server-to-server tới game-server sau khi giao dịch
+  đạt trạng thái thành công cuối cùng.
+- Callback dùng transaction ID bất biến, HMAC, timestamp và idempotency. Unity
+  không biết secret và không gửi số Point cần cộng.
+- Hạ tầng nhận top-up phía game-server đã được triển khai local và kiểm thử; mặc
+  định vẫn tắt. Chưa bật tiền thật cho tới khi audit đúng điểm duyệt giao dịch web,
+  triển khai retry/outbox và khóa các endpoint client còn có thể tự cộng Point/item.
+- Browser SSO, PostgreSQL, HTTPS/WSS, phiên đơn và farm xuyên thiết bị đã qua các
+  cổng MVP được ghi trong `task.md` và `docs/CONTEXT_RECOVERY.md`; các đoạn
+  "chưa có" phía dưới phải được hiểu theo mốc lịch sử 06/07.
 
 ---
 
@@ -39,16 +106,14 @@ Quy ước cần chốt để hết mơ hồ:
 - 1 tài khoản = 1 nhân vật game trong MVP.
 - MVP online/realtime ưu tiên account bridge, token, realtime public islands và trạng thái online tối thiểu. Tiền game, inventory, shop, daily limit, farm/animal state chuyển dần sang server-authoritative sau lát realtime.
 - Unity không giữ `GAME_API_SECRET`, không gọi thẳng API web nội bộ.
-- Nạp/rút và web wallet chưa nằm trong MVP sắp tới. Khi làm phase tiền thật sau này, tiền nạp từ web phải đi qua API web/server-side wallet; Unity không được tự cộng ví nạp.
+- Theo mốc 06/07, nạp/rút chưa nằm trong MVP đầu tiên. Quyết định 15/07 đã mở luồng nạp web -> Point; Unity vẫn tuyệt đối không được tự cộng ví.
 - Realtime trước mắt chỉ áp dụng cho đảo công cộng như `city`/`mine`; farm không share realtime công cộng. Client rời room public khi vào farm nhưng vẫn giữ WebSocket để nhận/gửi chat global.
 
 Quyết định 06/07/2026 từ trao đổi với anh: `Point` là tiền trong game và cũng là tiền có thể nạp từ web để dùng trong game, nhưng MVP sắp tới chưa làm nạp/rút. Trong MVP online/realtime, nếu cần hiển thị hoặc test shop thì `Point` tạm là game-server currency có transaction/idempotency; phần web wallet/top-up/spend chuyển sang phase sau. Unity vẫn chỉ gọi game-server.
 
-Điểm còn cần chốt cho phase sau MVP online/realtime:
-
-- `UPoint` có còn là ví riêng/premium currency không, hay tạm chưa dùng trong MVP.
-- Web đang là chủ ví `Point` tuyệt đối hay game-server là chủ ledger gameplay và chỉ đồng bộ top-up/spend với web.
-- Web hiện có `balance` và `credit`; phase sau cần thêm hoặc xác nhận API trừ tiền/spend/reserve khi người chơi mua vật phẩm bằng tiền nạp.
+Các điểm trên đã được chốt ngày 15/07: không còn UPoint; web xác nhận giao dịch
+nạp, còn PostgreSQL game giữ số dư Point gameplay. Điểm chưa chốt là nơi/trạng thái
+duyệt giao dịch thật trên web và cơ chế outbox/retry để chuyển giao dịch sang game.
 
 ---
 
@@ -363,7 +428,7 @@ Quyết định 06/07/2026 từ anh: mất mạng thì không cho mua/bán. Vì 
 
 | Câu hỏi | Vì sao cần chốt | Khuyến nghị của bé |
 |---|---|---|
-| `UPoint` còn vai trò gì không? | Tránh dùng nhầm ví premium/khuyến mãi/điểm sự kiện | Đưa sang phase sau MVP online/realtime |
+| `UPoint` còn vai trò gì không? | Đã chốt ngày 15/07 | Không; archive legacy để audit, không dùng trong sản phẩm |
 | Web đã có API trừ tiền/spend/reserve chưa? | Mua vật phẩm bằng tiền nạp cần trừ ví an toàn | Chưa cần cho MVP sắp tới; hỏi để chuẩn bị phase nạp/rút sau |
 | Web hay game-server là ledger cuối cùng của `Point`? | Quyết định nơi tính số dư chính thức | MVP online/realtime chưa cần chốt đến mức block; nếu test shop thì game-server làm ledger demo trước |
 | Tên miền API public là gì? | Unity cần base URL ổn định | Đã chốt `https://api.ywonder.net/game-api` cho REST và `wss://api.ywonder.net/game-api/realtime` cho realtime; `/api/game/*` vẫn dành cho web API cũ |
@@ -565,11 +630,11 @@ Kiểm tra:
 - Cùng chuyển sang `mine`, vẫn thấy nhau/chat được.
 - Vào `farm`, client không join room shared/không thấy remote player; chat global vẫn nhận/gửi được nếu WebSocket còn kết nối.
 
-### Phase C - State sync tối thiểu, chưa làm nạp/rút
+### Phase C - State sync tối thiểu (mốc lịch sử trước quyết định nạp 15/07)
 
 Việc làm:
 
-- Unity load `Point`, `UPoint`, inventory từ `/player/bootstrap`.
+- Unity load `Point` và inventory từ `/player/bootstrap`; UPoint đã nghỉ sau quyết định 15/07.
 - Ưu tiên đọc đúng dữ liệu sau login để nhiều máy cùng account không lệch trạng thái cơ bản.
 - Nếu test shop trong MVP, shop gọi game-server và dùng `Point` game-server demo, không gọi web wallet.
 - Không làm nạp/rút, không gọi `debit/spend/reserve` trong MVP online/realtime.

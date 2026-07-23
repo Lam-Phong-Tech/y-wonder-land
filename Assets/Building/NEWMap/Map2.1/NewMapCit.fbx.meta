@@ -1,0 +1,305 @@
+fileFormatVersion: 2
+guid: 06d90fc95861bc94e9ceeb79ccd7e993
+ModelImporter:
+  serializedVersion: 24200
+  internalIDToNameTable: []
+  externalObjects:
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: 001056f92409440a9ffa120f415a472a_RGB_Airbrush-IMAGE-ENHANCER-1769041177715-1769041177716
+    second: {fileID: 2800000, guid: d52a0a68058f0004089744e5f95229fd, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: 0c7078496c414ba3b6f7e86cac40f0b2__PeatPot_BaseColor
+    second: {fileID: 2800000, guid: 78767fdc44ae99e40952a83a70633c08, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: 1571c18215054d3195165d65888ec1eb_A_20260124_073305
+    second: {fileID: 2800000, guid: 6f1a06a2ed1014a4f968e3ca4609e68e, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: 1f42e2a516324aee868bc25b13bee7da_N_gs25_new_n
+    second: {fileID: 2800000, guid: 40a9204744de5da45b3c6808e2f46ab1, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: 42123cd880f643eb9c3e98e8303941dd_A_BeetrootBox_BaseColor
+    second: {fileID: 2800000, guid: faff5bd5829908c4d8c1dfc2a1455b82, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: 64ad5b27f994405fa96c46abedea5972_RGB_UrbanAtlas
+    second: {fileID: 2800000, guid: 2a60bf1c9afe4334fb31bd62e05abc8f, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: 72fe2feee74c4707af2a8c0feb792c35__Bench_BaseColor
+    second: {fileID: 2800000, guid: df9cf39d0cc50ef4198fbccd3a26b6d4, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: 82048a2e12d54225845edc578840d942__FlowerPots_BaseColor
+    second: {fileID: 2800000, guid: 45708e285d7969f4a8f32d379786a6b1, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: 8e875c400be045cea64a61e52f0bc03b_RGB_Meetopia
+    second: {fileID: 2800000, guid: 44a75e817c80b6e4683027a7ace2091c, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Black_Metal_Plate_029_Base_Color
+    second: {fileID: 2800000, guid: a08cc8e938438f94696e64c35a0b046e, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Black_Metal_Plate_029_Metallic
+    second: {fileID: 2800000, guid: daaaf16495f10da4587186e257253418, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Black_Metal_Plate_029_Roughness
+    second: {fileID: 2800000, guid: 60347317b4ba7824aae8db02465a05ff, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Gemini_Generated_Image_d8mepkd8mepkd8me
+    second: {fileID: 2800000, guid: 2a3a718780ff107439954916428cc4a3, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: MINI
+    second: {fileID: 2800000, guid: db1641534e411ed4d8d0211d0e114946, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: STR EEE
+    second: {fileID: 2800000, guid: f4742e2f4673b054fb19d9e2e47c7c17, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: ben do
+    second: {fileID: 2800000, guid: e92539ecf747de24e8931b380d77c1d6, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: cat
+    second: {fileID: 2800000, guid: 2f2fbb0873ead47428b804261fd131e6, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: cec3ecf7467d4ea689b9057c4fd9f401__GardenGloves_BaseColor
+    second: {fileID: 2800000, guid: e25db7bf74e89674d94547030444dc4e, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: d53da08127b544eaa2942f2f05405c49_RGB_spiral_texture
+    second: {fileID: 2800000, guid: b5ef6af79880520439e56f7299c31c29, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: d5666087af76467888e79bfc6876e7f1_A_AppleBox_BaseColor
+    second: {fileID: 2800000, guid: 4cc5ff520527c5e46af8d131ee0d03ef, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: d7798d0922004741b5dbaa04e5c0c972_RGB_cube design 002_d
+    second: {fileID: 2800000, guid: 5929ec36f4520f241a97848026d1d113, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: ef82dc901b144c85992a9c1ae12f401f__GardenHose_BaseColor
+    second: {fileID: 2800000, guid: 2a427268cfd0b3543a1fab7b973b2e3e, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: hai lua
+    second: {fileID: 2800000, guid: ea1557e94c6f3bc48b5ca686ee815f52, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: iteemshop
+    second: {fileID: 2800000, guid: ac817cb92be149b429391b788047e257, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: "kh\xF4ng gian qu\xE1n g\xE0"
+    second: {fileID: 2800000, guid: c19f68ee726067047ac8cab6dfd8fb7f, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: knx
+    second: {fileID: 2800000, guid: 62237b0adb9e6384293f5d0f56c9b5a1, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: "logo g\xE0 hh"
+    second: {fileID: 2800000, guid: fd6adf3c33cea724c823acd2b96c7462, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: maid
+    second: {fileID: 2800000, guid: 502f33fa4d7d69844ae458ec7cde6fa8, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: mapsua
+    second: {fileID: 2800000, guid: 68f1046da6a6d32478609e7ffaed12af, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: mapsua22
+    second: {fileID: 2800000, guid: 5360aac9872fc494ea81dd388e1c8695, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: mini garden
+    second: {fileID: 2800000, guid: 95fef15e218b4c3409148af9dc760ebf, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: paving_22_albedo
+    second: {fileID: 2800000, guid: 24f4ff49190befe498a71ecd4aba27d6, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: paving_22_normal
+    second: {fileID: 2800000, guid: 0ed3e4c55ab979e42bae3976e69e97db, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: paving_22_rough
+    second: {fileID: 2800000, guid: 3dbd2e10d62209e49b7907cf5f7514f5, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: pet
+    second: {fileID: 2800000, guid: 9215f643864bb664f8360b2b4b3af9ad, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: pettt
+    second: {fileID: 2800000, guid: 68f30b1e3d2c6b043ae66256a885fe23, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: shop qao
+    second: {fileID: 2800000, guid: 9754a89b9a2fbf141b231b0fde8089b3, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: ws
+    second: {fileID: 2800000, guid: abaf4226ae9e88945a9dda6f57c101b7, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: ywg
+    second: {fileID: 2800000, guid: 663c20bf3a3f1174a9860264fa739d88, type: 3}
+  materials:
+    materialImportMode: 2
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    removeConstantScaleCurves: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 0
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
+    importPhysicalCameras: 1
+    importVisibility: 1
+    importBlendShapes: 1
+    importCameras: 1
+    importLights: 1
+    nodeNameCollisionStrategy: 1
+    fileIdsGeneration: 2
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    keepQuads: 0
+    weldVertices: 1
+    bakeAxisConversion: 0
+    preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    optimizeBones: 1
+    generateMeshLods: 0
+    meshLodGenerationFlags: 0
+    maximumMeshLod: -1
+    meshOptimizationFlags: -1
+    indexFormat: 0
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVMarginMethod: 1
+    secondaryUVMinLightmapResolution: 40
+    secondaryUVMinObjectScale: 1
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+    strictVertexDataChecks: 0
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  referencedClips: []
+  importAnimation: 1
+  humanDescription:
+    serializedVersion: 3
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    globalScale: 1
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  autoGenerateAvatarMappingIfUnspecified: 1
+  animationType: 2
+  humanoidOversampling: 1
+  avatarSetup: 0
+  addHumanoidExtraRootOnlyWhenUsingAvatar: 1
+  importBlendShapeDeformPercent: 1
+  remapMaterialsIfMaterialImportModeIsNone: 0
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

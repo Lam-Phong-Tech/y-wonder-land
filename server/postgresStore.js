@@ -1,5 +1,11 @@
 const crypto = require("crypto");
 const { Pool } = require("pg");
+const { prepareAnimalPlacement } = require("./farmAnimalPlacement");
+const {
+  normalizePointSourceLot,
+  pointSourceLotRequestSignature,
+  planPointSourceFifo,
+} = require("./pointSourceLedger");
 
 function nowISO() {
   return new Date().toISOString();
@@ -48,7 +54,7 @@ function periodKey(date = new Date()) {
 }
 
 function makeDefaultEconomy() {
-  return { version: 1, pos: 5000, upos: 0, updatedAt: nowISO() };
+  return { version: 1, pos: 5000, updatedAt: nowISO() };
 }
 
 function makeDefaultInventory() {
@@ -129,7 +135,6 @@ function economyFromRow(row) {
   return {
     version: toInt(row.version, 1),
     pos: toSafeInteger(row.pos, "economy.pos"),
-    upos: toSafeInteger(row.upos, "economy.upos"),
     updatedAt: new Date(row.updated_at).toISOString(),
   };
 }
@@ -156,10 +161,65 @@ function transactionFromRow(row) {
     idempotencyKey: row.idempotency_key || "",
     requestSignature: row.request_signature || "",
     deltaPos: toSafeInteger(row.delta_pos, "transaction.delta_pos"),
-    deltaUpos: toSafeInteger(row.delta_upos, "transaction.delta_upos"),
     itemId: row.item_id || undefined,
     quantityDelta: row.quantity_delta == null ? undefined : toInt(row.quantity_delta, 0),
     createdAt: new Date(row.created_at).toISOString(),
+  };
+}
+
+function pointReservationFromRow(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    playerId: row.player_id,
+    webUserId: row.web_user_id,
+    expectedPlayerId: row.expected_player_id,
+    pointAmount: toSafeInteger(row.point_amount, "point_reservation.point_amount"),
+    purpose: row.purpose,
+    source: row.source,
+    occurredAt: new Date(row.occurred_at).toISOString(),
+    status: row.status,
+    capturedAt: row.captured_at ? new Date(row.captured_at).toISOString() : null,
+    releasedAt: row.released_at ? new Date(row.released_at).toISOString() : null,
+    createdAt: new Date(row.created_at).toISOString(),
+    updatedAt: new Date(row.updated_at).toISOString(),
+  };
+}
+
+function pointSourceLotFromRow(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    playerId: row.player_id,
+    sourceEventId: row.source_event_id,
+    sourceEventIndex: toSafeInteger(row.source_event_index, "point_source_lot.source_event_index"),
+    originType: row.origin_type,
+    acquisitionType: row.acquisition_type,
+    commissionAsset: row.commission_asset || "",
+    pointAmountMicros: toSafeInteger(row.point_amount_micros, "point_source_lot.point_amount_micros"),
+    remainingPointMicros: toSafeInteger(
+      row.remaining_point_micros,
+      "point_source_lot.remaining_point_micros"
+    ),
+    sourceRatePair: row.source_rate_pair || "",
+    sourceRateVersionId: row.source_rate_version_id || "",
+    pointMicrosPerSourceUnit: row.point_micros_per_source_unit == null
+      ? null
+      : toSafeInteger(
+        row.point_micros_per_source_unit,
+        "point_source_lot.point_micros_per_source_unit"
+      ),
+    commissionRateVersionId: row.commission_rate_version_id || "",
+    pointMicrosPerUsdt: row.point_micros_per_usdt == null
+      ? null
+      : toSafeInteger(row.point_micros_per_usdt, "point_source_lot.point_micros_per_usdt"),
+    parentLotId: row.parent_lot_id || "",
+    rootLotId: row.root_lot_id,
+    occurredAt: new Date(row.occurred_at).toISOString(),
+    metadata: clone(row.metadata_json) || {},
+    requestSignature: row.request_signature,
+    createdAt: new Date(row.created_at).toISOString(),
+    updatedAt: new Date(row.updated_at).toISOString(),
   };
 }
 
@@ -263,7 +323,6 @@ class PostgresStore {
     delete details.idempotencyKey;
     delete details.requestSignature;
     delete details.deltaPos;
-    delete details.deltaUpos;
     delete details.itemId;
     delete details.quantityDelta;
     delete details.createdAt;
@@ -271,8 +330,8 @@ class PostgresStore {
     await client.query(
       `insert into game_transactions
        (id, player_id, type, ref, idempotency_key, request_signature,
-        delta_pos, delta_upos, item_id, quantity_delta, details_json, result_json, created_at)
-       values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12::jsonb,$13)`,
+        delta_pos, item_id, quantity_delta, details_json, result_json, created_at)
+       values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10::jsonb,$11::jsonb,$12)`,
       [
         transaction.id,
         transaction.playerId,
@@ -281,7 +340,6 @@ class PostgresStore {
         transaction.idempotencyKey || null,
         transaction.requestSignature || "",
         transaction.deltaPos || 0,
-        transaction.deltaUpos || 0,
         transaction.itemId || null,
         transaction.quantityDelta == null ? null : transaction.quantityDelta,
         JSON.stringify(details),
@@ -296,8 +354,8 @@ class PostgresStore {
     if (player.rowCount === 0) throw new Error(`PLAYER_NOT_FOUND:${playerId}`);
 
     await client.query(
-      `insert into player_economy (player_id, version, pos, upos)
-       values ($1,1,5000,0) on conflict (player_id) do nothing`,
+      `insert into player_economy (player_id, version, pos)
+       values ($1,1,5000) on conflict (player_id) do nothing`,
       [playerId]
     );
 
@@ -474,43 +532,166 @@ class PostgresStore {
     });
   }
 
+  /// Đặt lại mật khẩu cho MỘT account. Chỉ dùng cho seed tài khoản demo — luồng
+  /// người chơi thật không gọi tới, và hàm này không nhận mật khẩu thô, chỉ nhận hash.
+  async setAccountPassword(accountId, passwordHash) {
+    if (!accountId || !passwordHash) return null;
+    const result = await this.pool.query(
+      `update game_accounts set password_hash = $2, updated_at = now()
+       where id = $1 and soft_deleted = false returning *`,
+      [accountId, passwordHash]
+    );
+    return accountFromRow(result.rows[0]);
+  }
+
+  async getOrCreatePlayerForWebUserWithClient(client, webUser) {
+    await client.query("select pg_advisory_xact_lock(hashtext($1)::bigint)", [`web:${webUser.id}`]);
+    const existing = await client.query(
+      "select * from game_players where web_user_id = $1 for update",
+      [webUser.id]
+    );
+    let row;
+    if (existing.rowCount === 0) {
+      const playerId = makeId("p");
+      const username = webUser.username || webUser.email || webUser.phone || webUser.id;
+      const displayName = webUser.displayName || webUser.username || "Player";
+      const inserted = await client.query(
+        `insert into game_players
+         (id, web_user_id, username, display_name, auth_source)
+         values ($1,$2,$3,$4,$5) returning *`,
+        [playerId, webUser.id, username, displayName, webUser.authSource || "web"]
+      );
+      row = inserted.rows[0];
+    } else {
+      const current = existing.rows[0];
+      const updated = await client.query(
+        `update game_players set username=$2, display_name=$3, auth_source=$4, updated_at=now()
+         where id=$1 returning *`,
+        [
+          current.id,
+          webUser.username || webUser.email || webUser.phone || current.username,
+          webUser.displayName || webUser.username || current.display_name || "Player",
+          webUser.authSource || current.auth_source || "web",
+        ]
+      );
+      row = updated.rows[0];
+    }
+    await this.ensurePlayerStateWithClient(client, row.id);
+    return playerFromRow(row);
+  }
+
   async getOrCreatePlayerForWebUser(webUser) {
     if (!webUser || !webUser.id) throw new Error("webUser.id is required");
+    return this.withTransaction((client) => this.getOrCreatePlayerForWebUserWithClient(client, webUser));
+  }
+
+  async getWebPointBalance(webUserId) {
     return this.withTransaction(async (client) => {
-      await client.query("select pg_advisory_xact_lock(hashtext($1)::bigint)", [`web:${webUser.id}`]);
-      const existing = await client.query(
-        "select * from game_players where web_user_id = $1 for update",
-        [webUser.id]
+      const playerResult = await client.query(
+        "select * from game_players where web_user_id = $1",
+        [String(webUserId || "").trim()]
       );
-      let row;
-      if (existing.rowCount === 0) {
-        const playerId = makeId("p");
-        const username = webUser.username || webUser.email || webUser.phone || webUser.id;
-        const displayName = webUser.displayName || webUser.username || "Player";
-        const inserted = await client.query(
-          `insert into game_players
-           (id, web_user_id, username, display_name, auth_source)
-           values ($1,$2,$3,$4,$5) returning *`,
-          [playerId, webUser.id, username, displayName, webUser.authSource || "web"]
-        );
-        row = inserted.rows[0];
-      } else {
-        const current = existing.rows[0];
-        const updated = await client.query(
-          `update game_players set username=$2, display_name=$3, auth_source=$4, updated_at=now()
-           where id=$1 returning *`,
-          [
-            current.id,
-            webUser.username || webUser.email || webUser.phone || current.username,
-            webUser.displayName || webUser.username || current.display_name || "Player",
-            webUser.authSource || current.auth_source || "web",
-          ]
-        );
-        row = updated.rows[0];
-      }
-      await this.ensurePlayerStateWithClient(client, row.id);
-      return playerFromRow(row);
+      if (playerResult.rowCount === 0) return null;
+      const player = playerFromRow(playerResult.rows[0]);
+      const economy = await this.getEconomyWithClient(client, player.id);
+      if (!economy) return null;
+      return { player, economy };
     });
+  }
+
+  async recordPointSourceLotWithClient(client, playerId, input) {
+    await this.ensurePlayerStateWithClient(client, playerId);
+
+    let lot;
+    let requestSignature;
+    try {
+      lot = normalizePointSourceLot({ ...(input || {}), playerId });
+      requestSignature = pointSourceLotRequestSignature(lot);
+    } catch (error) {
+      return { ok: false, error: error.message || "INVALID_POINT_SOURCE_LOT" };
+    }
+    if (lot.acquisitionType === "TRANSFER") {
+      return { ok: false, error: "POINT_TRANSFER_REQUIRES_ATOMIC_OPERATION" };
+    }
+
+    const eventLock = `point_source_lot:${playerId}:${lot.sourceEventId}:${lot.sourceEventIndex}`;
+    await this.lockIdempotency(client, eventLock);
+    const existingResult = await client.query(
+      `select * from point_source_lots
+       where player_id=$1 and source_event_id=$2 and source_event_index=$3`,
+      [playerId, lot.sourceEventId, lot.sourceEventIndex]
+    );
+    if (existingResult.rowCount > 0) {
+      const existing = pointSourceLotFromRow(existingResult.rows[0]);
+      if (existing.requestSignature !== requestSignature) {
+        return { ok: false, error: "POINT_SOURCE_IDEMPOTENCY_CONFLICT" };
+      }
+      return { ok: true, duplicate: true, lot: existing };
+    }
+
+    const idResult = await client.query("select * from point_source_lots where id=$1", [lot.id]);
+    if (idResult.rowCount > 0) {
+      return { ok: false, error: "POINT_SOURCE_IDEMPOTENCY_CONFLICT" };
+    }
+
+    const inserted = await client.query(
+      `insert into point_source_lots
+       (id,player_id,source_event_id,source_event_index,origin_type,acquisition_type,
+        commission_asset,point_amount_micros,remaining_point_micros,source_rate_pair,
+        source_rate_version_id,point_micros_per_source_unit,commission_rate_version_id,
+        point_micros_per_usdt,parent_lot_id,root_lot_id,occurred_at,request_signature,
+        metadata_json,created_at,updated_at)
+       values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19::jsonb,now(),now())
+       returning *`,
+      [
+        lot.id,
+        lot.playerId,
+        lot.sourceEventId,
+        lot.sourceEventIndex,
+        lot.originType,
+        lot.acquisitionType,
+        lot.commissionAsset || null,
+        lot.pointAmountMicros,
+        lot.remainingPointMicros,
+        lot.sourceRatePair || null,
+        lot.sourceRateVersionId || null,
+        lot.pointMicrosPerSourceUnit,
+        lot.commissionRateVersionId || null,
+        lot.pointMicrosPerUsdt,
+        lot.parentLotId || null,
+        lot.rootLotId,
+        lot.occurredAt,
+        requestSignature,
+        JSON.stringify(lot.metadata),
+      ]
+    );
+    return { ok: true, duplicate: false, lot: pointSourceLotFromRow(inserted.rows[0]) };
+  }
+
+  async recordPointSourceLot(playerId, input) {
+    return this.withTransaction((client) => this.recordPointSourceLotWithClient(client, playerId, input));
+  }
+
+  async getPointSourceLotsWithClient(client, playerId, options = {}) {
+    const includeDepleted = options.includeDepleted !== false;
+    const result = await client.query(
+      `select * from point_source_lots
+       where player_id=$1${includeDepleted ? "" : " and remaining_point_micros > 0"}
+       order by occurred_at,created_at,id`,
+      [playerId]
+    );
+    return result.rows.map(pointSourceLotFromRow);
+  }
+
+  async getPointSourceLots(playerId, options = {}) {
+    return this.withTransaction((client) => this.getPointSourceLotsWithClient(client, playerId, options));
+  }
+
+  async previewPointSourceFifo(playerId, pointAmountMicros) {
+    return this.withTransaction(async (client) => planPointSourceFifo(
+      await this.getPointSourceLotsWithClient(client, playerId, { includeDepleted: false }),
+      pointAmountMicros
+    ));
   }
 
   async createBrowserAuthRequest(record) {
@@ -719,13 +900,12 @@ class PostgresStore {
       const current = await this.getEconomyWithClient(client, playerId, true);
       const incoming = economy || {};
       const result = await client.query(
-        `update player_economy set version=$2, pos=$3, upos=$4, updated_at=now()
+        `update player_economy set version=$2, pos=$3, updated_at=now()
          where player_id=$1 returning *`,
         [
           playerId,
           toInt(incoming.version, current.version || 1),
           toSafeInteger(incoming.pos == null ? current.pos : incoming.pos, "economy.pos"),
-          toSafeInteger(incoming.upos == null ? current.upos : incoming.upos, "economy.upos"),
         ]
       );
       return economyFromRow(result.rows[0]);
@@ -736,31 +916,295 @@ class PostgresStore {
     return this.withTransaction(async (client) => {
       await this.ensurePlayerStateWithClient(client, playerId);
       const deltaPos = toSafeInteger(toNumber(delta && delta.pos, 0), "delta.pos");
-      const deltaUpos = toSafeInteger(toNumber(delta && delta.upos, 0), "delta.upos");
       const idempotencyKey = String(meta.idempotencyKey || "").trim();
-      const requestSignature = JSON.stringify({ op: "economy", playerId, deltaPos, deltaUpos, type: meta.type || "adjust", ref: meta.ref || "" });
+      const requestSignature = JSON.stringify({ op: "economy", playerId, deltaPos, type: meta.type || "adjust", ref: meta.ref || "" });
       await this.lockIdempotency(client, idempotencyKey);
       const existing = await this.findStoredTransaction(client, idempotencyKey);
       if (existing) return this.duplicateResult(existing, requestSignature);
 
       const economy = await this.getEconomyWithClient(client, playerId, true);
-      if (economy.pos + deltaPos < 0 || economy.upos + deltaUpos < 0) {
+      if (economy.pos + deltaPos < 0) {
         return { ok: false, error: "INSUFFICIENT_BALANCE", economy };
       }
       const updated = await client.query(
-        `update player_economy set pos=pos+$2, upos=upos+$3, updated_at=now()
+        `update player_economy set pos=pos+$2, updated_at=now()
          where player_id=$1 returning *`,
-        [playerId, deltaPos, deltaUpos]
+        [playerId, deltaPos]
       );
       const economyAfter = economyFromRow(updated.rows[0]);
       const transaction = {
         id: makeId("tx"), playerId, type: meta.type || "adjust", ref: meta.ref || "",
-        idempotencyKey, requestSignature, deltaPos, deltaUpos,
-        economyAfter: { pos: economyAfter.pos, upos: economyAfter.upos }, createdAt: nowISO(),
+        idempotencyKey, requestSignature, deltaPos,
+        economyAfter: { pos: economyAfter.pos }, createdAt: nowISO(),
       };
       const response = { ok: true, economy: economyAfter, duplicate: false };
       await this.insertTransaction(client, transaction, response);
       return { ...response, transaction };
+    });
+  }
+
+  async creditWebTopup(webUser, pointAmountMicros, meta = {}) {
+    if (!webUser || !webUser.id) return { ok: false, error: "INVALID_WEB_TOPUP" };
+    const amountMicros = toSafeInteger(pointAmountMicros, "web_topup.point_amount_micros");
+    const pointAmount = String(meta.pointAmount || "").trim();
+    const transactionId = String(meta.transactionId || "").trim();
+    const source = String(meta.source || "ywonder-web").trim();
+    const expectedPlayerId = String(meta.expectedPlayerId || "").trim();
+    if (!transactionId || !pointAmount || amountMicros < 1) {
+      return { ok: false, error: "INVALID_WEB_TOPUP" };
+    }
+
+    return this.withTransaction(async (client) => {
+      let player;
+      if (expectedPlayerId) {
+        const mapped = await client.query(
+          "select * from game_players where web_user_id = $1 for update",
+          [webUser.id]
+        );
+        if (mapped.rowCount !== 1 || mapped.rows[0].id !== expectedPlayerId) {
+          return { ok: false, error: "GAME_POINT_IDENTITY_MISMATCH" };
+        }
+        player = playerFromRow(mapped.rows[0]);
+        await this.ensurePlayerStateWithClient(client, player.id);
+      } else {
+        player = await this.getOrCreatePlayerForWebUserWithClient(client, webUser);
+      }
+      const idempotencyKey = `web_topup:${source}:${transactionId}`;
+      const requestSignature = JSON.stringify({
+        op: "web_topup_credit",
+        source,
+        transactionId,
+        webUserId: webUser.id,
+        expectedPlayerId,
+        pointAmount,
+        pointAmountMicros: amountMicros,
+        occurredAt: String(meta.occurredAt || ""),
+      });
+      await this.lockIdempotency(client, idempotencyKey);
+      const existing = await this.findStoredTransaction(client, idempotencyKey);
+      if (existing) {
+        const duplicate = this.duplicateResult(existing, requestSignature);
+        if (!duplicate.ok) return duplicate;
+        const currentEconomy = await this.getEconomyWithClient(client, player.id);
+        return { ...duplicate, player, economy: currentEconomy };
+      }
+
+      const locked = await client.query(
+        "select * from player_economy where player_id=$1 for update",
+        [player.id]
+      );
+      const economy = economyFromRow(locked.rows[0]);
+      const remainderBefore = toSafeInteger(
+        locked.rows[0].web_point_micros_remainder,
+        "economy.web_point_micros_remainder"
+      );
+      const totalMicros = remainderBefore + amountMicros;
+      if (!Number.isSafeInteger(totalMicros)) {
+        return { ok: false, error: "POINT_BALANCE_OVERFLOW" };
+      }
+      const deltaPos = Math.floor(totalMicros / 1_000_000);
+      const remainderAfter = totalMicros % 1_000_000;
+      if (economy.pos > Number.MAX_SAFE_INTEGER - deltaPos) {
+        return { ok: false, error: "POINT_BALANCE_OVERFLOW" };
+      }
+      const updated = await client.query(
+        `update player_economy
+         set pos=pos+$2, web_point_micros_remainder=$3, updated_at=now()
+         where player_id=$1 returning *`,
+        [player.id, deltaPos, remainderAfter]
+      );
+      const economyAfter = economyFromRow(updated.rows[0]);
+      const transaction = {
+        id: makeId("wtx"),
+        playerId: player.id,
+        type: "web_topup_credit",
+        ref: transactionId,
+        idempotencyKey,
+        requestSignature,
+        source,
+        webUserId: webUser.id,
+        expectedPlayerId: expectedPlayerId || undefined,
+        occurredAt: String(meta.occurredAt || ""),
+        pointAmount,
+        pointAmountMicros: amountMicros,
+        pointMicrosRemainderBefore: remainderBefore,
+        pointMicrosRemainderAfter: remainderAfter,
+        deltaPos,
+        economyAfter,
+        createdAt: nowISO(),
+      };
+      const response = { ok: true, duplicate: false, economy: economyAfter };
+      await this.insertTransaction(client, transaction, response);
+      return { ...response, player, transaction };
+    });
+  }
+
+  async applyWebPointReservation(operation, input) {
+    const op = String(operation || "").trim().toLowerCase();
+    const reservationId = String(input && input.reservationId || "").trim();
+    const webUserId = String(input && input.webUserId || "").trim();
+    const expectedPlayerId = String(input && input.expectedPlayerId || "").trim();
+    const pointAmount = Number(input && input.pointAmount);
+    const purpose = String(input && input.purpose || "").trim();
+    const source = String(input && input.source || "").trim();
+    const occurredAt = String(input && input.occurredAt || "").trim();
+    if (!["reserve", "capture", "release"].includes(op)
+        || !reservationId || !webUserId || !expectedPlayerId || !purpose || !source
+        || !Number.isSafeInteger(pointAmount) || pointAmount < 1) {
+      return { ok: false, error: "INVALID_POINT_RESERVATION" };
+    }
+
+    const requestSignature = JSON.stringify({
+      reservationId,
+      webUserId,
+      expectedPlayerId,
+      pointAmount,
+      purpose,
+      source,
+      occurredAt,
+    });
+
+    return this.withTransaction(async (client) => {
+      await this.lockIdempotency(client, `point_reservation:${reservationId}`);
+      const playerResult = await client.query(
+        "select * from game_players where web_user_id=$1 for update",
+        [webUserId]
+      );
+      if (playerResult.rowCount !== 1 || playerResult.rows[0].id !== expectedPlayerId) {
+        return { ok: false, error: "GAME_POINT_IDENTITY_MISMATCH" };
+      }
+      const player = playerFromRow(playerResult.rows[0]);
+      await this.ensurePlayerStateWithClient(client, player.id);
+
+      const storedResult = await client.query(
+        "select * from point_wallet_reservations where id=$1 for update",
+        [reservationId]
+      );
+      let stored = storedResult.rows[0] || null;
+      if (stored && (stored.player_id !== player.id
+          || stored.web_user_id !== webUserId
+          || stored.expected_player_id !== expectedPlayerId
+          || stored.request_signature !== requestSignature)) {
+        return { ok: false, error: "IDEMPOTENCY_CONFLICT" };
+      }
+
+      const economy = await this.getEconomyWithClient(client, player.id, true);
+      const idempotencyKey = `web_point_${op}:${source}:${reservationId}`;
+      const existingTransaction = await this.findStoredTransaction(client, idempotencyKey);
+      const duplicateResult = (reservation) => ({
+        ok: true,
+        duplicate: true,
+        player,
+        economy,
+        reservation: pointReservationFromRow(reservation),
+        transaction: transactionFromRow(existingTransaction),
+      });
+
+      if (op === "reserve") {
+        if (stored) return duplicateResult(stored);
+        if (economy.pos < pointAmount) {
+          return { ok: false, error: "INSUFFICIENT_BALANCE", economy };
+        }
+
+        const updatedEconomyResult = await client.query(
+          `update player_economy set pos=pos-$2, updated_at=now()
+           where player_id=$1 returning *`,
+          [player.id, pointAmount]
+        );
+        const economyAfter = economyFromRow(updatedEconomyResult.rows[0]);
+        const inserted = await client.query(
+          `insert into point_wallet_reservations
+           (id,player_id,web_user_id,expected_player_id,point_amount,purpose,source,
+            occurred_at,request_signature,status,created_at,updated_at)
+           values ($1,$2,$3,$4,$5,$6,$7,$8,$9,'RESERVED',now(),now()) returning *`,
+          [
+            reservationId,
+            player.id,
+            webUserId,
+            expectedPlayerId,
+            pointAmount,
+            purpose,
+            source,
+            occurredAt,
+            requestSignature,
+          ]
+        );
+        stored = inserted.rows[0];
+        const transaction = {
+          id: makeId("wpr"),
+          playerId: player.id,
+          type: "web_point_reserve",
+          ref: reservationId,
+          idempotencyKey,
+          requestSignature: JSON.stringify({ op, requestSignature }),
+          deltaPos: -pointAmount,
+          economyAfter,
+          createdAt: nowISO(),
+        };
+        const response = {
+          ok: true,
+          duplicate: false,
+          economy: economyAfter,
+          reservation: pointReservationFromRow(stored),
+        };
+        await this.insertTransaction(client, transaction, response);
+        return { ...response, player, transaction };
+      }
+
+      if (!stored) return { ok: false, error: "POINT_RESERVATION_NOT_FOUND" };
+      const targetStatus = op === "capture" ? "CAPTURED" : "RELEASED";
+      if (stored.status === targetStatus) return duplicateResult(stored);
+      if (stored.status !== "RESERVED") {
+        return { ok: false, error: "POINT_RESERVATION_STATE_CONFLICT" };
+      }
+
+      let economyAfter = economy;
+      let deltaPos = 0;
+      if (op === "release") {
+        if (economy.pos > Number.MAX_SAFE_INTEGER - pointAmount) {
+          return { ok: false, error: "POINT_BALANCE_OVERFLOW" };
+        }
+        const updatedEconomyResult = await client.query(
+          `update player_economy set pos=pos+$2, updated_at=now()
+           where player_id=$1 returning *`,
+          [player.id, pointAmount]
+        );
+        economyAfter = economyFromRow(updatedEconomyResult.rows[0]);
+        deltaPos = pointAmount;
+      }
+
+      const transitioned = await client.query(
+        `update point_wallet_reservations
+         set status=$2,
+             captured_at=case when $2='CAPTURED' then now() else captured_at end,
+             released_at=case when $2='RELEASED' then now() else released_at end,
+             updated_at=now()
+         where id=$1 and status='RESERVED' returning *`,
+        [reservationId, targetStatus]
+      );
+      if (transitioned.rowCount !== 1) {
+        throw new Error("POINT_RESERVATION_TRANSITION_RACE");
+      }
+      stored = transitioned.rows[0];
+      const transaction = {
+        id: makeId("wpr"),
+        playerId: player.id,
+        type: `web_point_${op}`,
+        ref: reservationId,
+        idempotencyKey,
+        requestSignature: JSON.stringify({ op, requestSignature }),
+        deltaPos,
+        economyAfter,
+        createdAt: nowISO(),
+      };
+      const response = {
+        ok: true,
+        duplicate: false,
+        economy: economyAfter,
+        reservation: pointReservationFromRow(stored),
+      };
+      await this.insertTransaction(client, transaction, response);
+      return { ...response, player, transaction };
     });
   }
 
@@ -1077,6 +1521,133 @@ class PostgresStore {
           updatedAt: new Date(row.updated_at).toISOString(),
         },
       };
+    });
+  }
+
+  async placeFarmAnimal(playerId, placement, options = {}) {
+    const itemId = String(placement && placement.itemId || "").trim();
+    const cellKeys = Array.isArray(placement && placement.cellKeys)
+      ? placement.cellKeys.map((key) => String(key || "").trim())
+      : [];
+    const rule = placement && placement.rule;
+    const idempotencyKey = String(options.idempotencyKey || "").trim();
+    const expectedVersion = toInt(options.expectedVersion, 0);
+    const requestSignature = JSON.stringify({
+      op: "farm_animal_place",
+      playerId,
+      itemId,
+      cellKeys,
+      expectedVersion,
+    });
+
+    return this.withTransaction(async (client) => {
+      await this.ensurePlayerStateWithClient(client, playerId);
+      await this.lockIdempotency(client, idempotencyKey);
+      const existing = await this.findStoredTransaction(client, idempotencyKey);
+      if (existing) return this.duplicateResult(existing, requestSignature);
+
+      const inventory = await this.getInventoryWithClient(client, playerId, true);
+      const slotResult = await client.query(
+        "select * from player_inventory where player_id=$1 and item_id=$2 for update",
+        [playerId, itemId]
+      );
+      const slot = slotResult.rows[0];
+
+      const farmResult = await client.query(
+        "select * from player_farm_state where player_id=$1 for update",
+        [playerId]
+      );
+      const farmRow = farmResult.rows[0];
+      const currentFarm = {
+        ...(farmRow.state_json || {}),
+        version: toInt(farmRow.version, 1),
+        updatedAt: new Date(farmRow.updated_at).toISOString(),
+      };
+
+      if (currentFarm.version !== expectedVersion) {
+        return {
+          ok: false,
+          error: "FARM_STATE_CONFLICT",
+          inventory,
+          farm_state: currentFarm,
+        };
+      }
+      if (!slot || toInt(slot.quantity, 0) < 1) {
+        return {
+          ok: false,
+          error: "INSUFFICIENT_ITEM",
+          inventory,
+          farm_state: currentFarm,
+        };
+      }
+
+      const prepared = prepareAnimalPlacement(currentFarm, { itemId, cellKeys }, rule);
+      if (!prepared.ok) {
+        return {
+          ok: false,
+          error: prepared.error,
+          inventory,
+          farm_state: currentFarm,
+        };
+      }
+
+      const nextQuantity = toInt(slot.quantity, 0) - 1;
+      if (nextQuantity === 0) {
+        await client.query(
+          "delete from player_inventory where player_id=$1 and item_id=$2",
+          [playerId, itemId]
+        );
+      } else {
+        await client.query(
+          "update player_inventory set quantity=$3,updated_at=now() where player_id=$1 and item_id=$2",
+          [playerId, itemId, nextQuantity]
+        );
+      }
+      await client.query(
+        `update player_inventory_meta
+         set version=version+1,updated_at=now()
+         where player_id=$1`,
+        [playerId]
+      );
+
+      const storedState = { ...prepared.farmState };
+      delete storedState.version;
+      delete storedState.updatedAt;
+      const updatedFarmResult = await client.query(
+        `update player_farm_state
+         set version=version+1,state_json=$2::jsonb,updated_at=now()
+         where player_id=$1 returning *`,
+        [playerId, JSON.stringify(storedState)]
+      );
+      const updatedFarmRow = updatedFarmResult.rows[0];
+      const inventoryAfter = await this.getInventoryWithClient(client, playerId);
+      const farmStateAfter = {
+        ...(updatedFarmRow.state_json || {}),
+        version: toInt(updatedFarmRow.version, 1),
+        updatedAt: new Date(updatedFarmRow.updated_at).toISOString(),
+      };
+      const response = {
+        ok: true,
+        duplicate: false,
+        inventory: inventoryAfter,
+        farm_state: farmStateAfter,
+        animal: prepared.animal,
+      };
+      const transaction = {
+        id: makeId("fatx"),
+        playerId,
+        type: "farm_animal_place",
+        ref: prepared.animal.instanceId,
+        idempotencyKey,
+        requestSignature,
+        itemId,
+        quantityDelta: -1,
+        cellKeys,
+        animal: prepared.animal,
+        createdAt: nowISO(),
+      };
+      await this.insertTransaction(client, transaction, response);
+      return { ...response, transaction };
     });
   }
 

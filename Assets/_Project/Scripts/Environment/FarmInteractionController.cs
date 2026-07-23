@@ -18,18 +18,33 @@ namespace YWonderLand.Environment
         private const float DefaultInteractionRange = 1f;
         private const float DefaultGroundInteractRange = 1.35f;
         private const float DefaultTileInteractRange = 1.75f;
-        private const float DefaultFishingInteractRange = 5f;
-        private const float MaxFishingInteractRange = 5f;
+        // Khách chốt 23/07: câu cá phải đứng SÁT mép nước như mọi tương tác khác, không
+        // đứng xa 5m quăng cần. Đặt Max = 1.5 để trần cứng: giá trị 5 đã lỡ lưu trong
+        // scene/asset FishingSpot cũng bị kẹp xuống, khỏi phải sửa tay từng chỗ.
+        private const float DefaultFishingInteractRange = 1.5f;
+        private const float MaxFishingInteractRange = 1.5f;
         private const float SolidHitPassthroughTolerance = 0.75f;
         private const float DirectTapSurfaceTolerance = 0.05f;
+        private const float DefaultFarmSlotSpacing = 0.8f;
+        private static readonly Vector2Int[] FarmSlotDirections =
+        {
+            new Vector2Int(1, 0),
+            new Vector2Int(-1, 0),
+            new Vector2Int(0, 1),
+            new Vector2Int(0, -1)
+        };
         private const float ResourceExecuteRangePadding = 0.25f;
         private const float FarmTileAimFallbackRadius = 0.45f;
         private const float TreeCuttingClipDuration = 2.26f;
         private const float MiningClipDuration = 0.967f;
-        private const float PlantingClipDuration = 4.13f;
-        private const float WateringClipDuration = 5.6f;
+        private const float PlantingClipDuration = 4.13f;   // độ dài thật của clip Planting
+        private const float PlantingActionDuration = 2f;    // thời gian TRỒNG mong muốn (phát nhanh clip cho vừa)
+        private const float WateringClipDuration = 5.6f;   // độ dài thật của clip Watering
+        private const float WateringActionDuration = 3f;   // thời gian TƯỚI MONG MUỐN (phát nhanh clip cho vừa)
         private const float FeedClipDuration = 9.1f;
-        private const float FeedActionSpeed = 2f;
+        private const float ScoopWaterClipDuration = 6.57f;   // độ dài thật của clip ScoopWater2
+        private const float ScoopWaterActionDuration = 1.5f;  // thời gian MÚC MONG MUỐN (phát nhanh clip cho vừa)
+        private const float FeedActionDuration = 1.5f;  // thời gian CHO ĂN mong muốn (phát nhanh clip cho vừa)
         private const float HoeingFallbackDuration = 3f;
 
         [Header("Interaction Settings")]
@@ -51,8 +66,16 @@ namespace YWonderLand.Environment
         [SerializeField, Range(0.2f, 2f)] private float waterFootProbeForward = 0.9f;
         [Tooltip("Ban kinh quet quanh diem mui chan de bat vung ho nuoc, khong hien vien trang.")]
         [SerializeField, Range(0.2f, 2f)] private float waterFootProbeRadius = 0.9f;
-        [Tooltip("Khoảng cách tương tác khi câu cá")]
-        [SerializeField] private float fishingInteractRange = DefaultFishingInteractRange;
+        [Tooltip("Khoang cach diem mui chan chieu ra de tu hien nut Chat cay / Dao khoang (tang hinh giong nuoc).")]
+        [SerializeField, Range(0.2f, 3f)] private float resourceFootProbeForward = 1.1f;
+        [Tooltip("Ban kinh quet quanh diem mui chan de bat cay/da gan, khong hien vien trang.")]
+        [SerializeField, Range(0.2f, 3f)] private float resourceFootProbeRadius = 1.1f;
+        [Tooltip("Khoảng cách tương tác khi câu cá (đo tới mép nước gần nhất). Trần cứng 1.5m.")]
+        [SerializeField, Range(0.5f, MaxFishingInteractRange)] private float fishingInteractRange = DefaultFishingInteractRange;
+        [Tooltip("Khoang cach diem mui chan chieu ra de tu hien nut Cau ca (giong nuoc/cay da).")]
+        [SerializeField, Range(0.2f, 2f)] private float fishingFootProbeForward = 0.9f;
+        [Tooltip("Ban kinh quet quanh diem mui chan de bat ho cau ca, khong hien vien trang.")]
+        [SerializeField, Range(0.2f, 2f)] private float fishingFootProbeRadius = 0.9f;
         [Tooltip("Flow moi: tap/click truc tiep len vat the de hien UI tuong tac, khong quet theo tam man hinh.")]
         [SerializeField] private bool useDirectTapInteraction = true;
         [Tooltip("Tam click truc tiep len cay, da, nuoc, chuong. Khach yeu cau khoang 3.5m.")]
@@ -113,6 +136,7 @@ namespace YWonderLand.Environment
         private YWonderLand.Environment.AnimalPenSpawner pendingPen; // Chuồng đang chờ chọn con vật từ túi
         private FarmAnimal pendingFeedAnimal; // Con vật đang chờ chọn thức ăn từ túi
         private List<BuildSurfaceCell> pendingEnclosure; // Vùng quây (rào) đang chờ thả thú
+        private bool animalPlacementInFlight;
         private List<BuildSurfaceCell> pendingDemolishEnclosure;
         private FarmTile pendingDemolishTile;
         private float demolishConfirmTimer;
@@ -126,6 +150,20 @@ namespace YWonderLand.Environment
 
         void Awake()
         {
+            // Tree.prefab still carries a legacy copy of this controller. It must not
+            // replace the FarmManager controller that owns timed-action coroutines.
+            if (GetComponent<HarvestableResource>() != null)
+            {
+                enabled = false;
+                return;
+            }
+
+            if (Instance != null && Instance != this)
+            {
+                enabled = false;
+                return;
+            }
+
             Instance = this;
         }
 
@@ -147,11 +185,21 @@ namespace YWonderLand.Environment
             if (mainCamera == null)
                 mainCamera = Camera.main;
 
-            inventoryPopup = Object.FindFirstObjectByType<InventoryPopupController>();
+            // Tìm túi đồ + đăng ký sự kiện "Sử dụng". Nếu lúc này popup chưa sẵn sàng,
+            // các chỗ mở túi (cho ăn/gieo/thả thú) sẽ gọi lại helper này để đăng ký cho chắc.
+            EnsureInventoryPopupSubscribed();
+        }
 
-            // Subscribe to inventory item used event
+        // Đảm bảo đã tìm thấy túi đồ VÀ đã đăng ký nghe sự kiện "Sử dụng" (idempotent, không sợ trùng).
+        // BẮT BUỘC gọi trước mọi lần mở túi — vì nếu đăng ký lúc Start bị hụt (popup chưa tạo/chưa active)
+        // thì bấm "Sử dụng" sẽ không phản hồi (không cho ăn được, thú chết đói).
+        private void EnsureInventoryPopupSubscribed()
+        {
+            if (inventoryPopup == null)
+                inventoryPopup = Object.FindFirstObjectByType<InventoryPopupController>();
             if (inventoryPopup != null)
             {
+                inventoryPopup.OnItemUsed -= OnInventoryItemSelected; // gỡ trước để tránh đăng ký trùng
                 inventoryPopup.OnItemUsed += OnInventoryItemSelected;
             }
         }
@@ -280,6 +328,17 @@ namespace YWonderLand.Environment
             string yieldId = minedRock ? "stone_01" : "wood_01";
             int gained = 0;
             GemstoneMiningReward gemstoneReward = null;
+
+            // Server phát lại kết quả cũ khi cùng người chơi request trùng (retry/tap trùng): túi đồ đã được
+            // RealtimeClient áp snapshot authoritative, nhưng EXP là client-side không idempotent. Nếu vẫn xử lý
+            // như lần đầu sẽ cộng EXP + toast thưởng ẢO nhiều lần. Với bản phát lại: bỏ EXP/toast, chỉ đồng bộ lượt đào.
+            if (result.duplicate)
+            {
+                if (minedRock && result.miningTurnsRemaining >= 0)
+                    SetServerMiningTurns(result.miningTurnsRemaining);
+                Debug.Log($"[FarmInteraction] Bỏ qua thưởng trùng (duplicate) cho tài nguyên '{result.resourceId}'.");
+                return;
+            }
 
             foreach (var reward in result.rewards)
             {
@@ -438,7 +497,7 @@ namespace YWonderLand.Environment
 
         public bool CancelTimedActionFromHUD()
         {
-            if (!timedActionActive) return false;
+            if (!timedActionActive && timedActionRoutine == null) return false;
             CancelTimedAction("Đã hủy thao tác.");
             return true;
         }
@@ -498,6 +557,8 @@ namespace YWonderLand.Environment
                 return false;
             }
 
+            // The controller that starts the coroutine must receive the HUD cancel.
+            Instance = this;
             timedActionToken++;
             int token = timedActionToken;
             timedActionActive = true;
@@ -508,6 +569,8 @@ namespace YWonderLand.Environment
             currentActions.Clear();
             currentPromptFromFrontCell = false;
             currentPromptFromFootWater = false;
+            currentPromptFromFootResource = false;
+            currentPromptFromFootFishing = false;
             GameHUDController.Instance?.HideInteractionPrompt();
             if (YWonderLand.UI.ResourceInteractionUIController.Instance != null)
                 YWonderLand.UI.ResourceInteractionUIController.Instance.Hide();
@@ -759,14 +822,17 @@ namespace YWonderLand.Environment
         {
             if (tile == null || actions == null) return;
 
-            string actName = "T\u01b0\u01a1ng t\u00e1c";
-            switch (tile.currentState)
+            string actName = tile.masterTile != null ? "\u00d4 thu\u1ed9c gi\u00e0n" : "T\u01b0\u01a1ng t\u00e1c";
+            if (tile.masterTile == null)
             {
-                case FarmTile.TileState.Soil: actName = "Cu\u1ed1c \u0111\u1ea5t"; break;
-                case FarmTile.TileState.Plowed: actName = "Gieo h\u1ea1t"; break;
-                case FarmTile.TileState.Planted: actName = "T\u01b0\u1edbi n\u01b0\u1edbc"; break;
-                case FarmTile.TileState.Watered: actName = "T\u01b0\u1edbi n\u01b0\u1edbc"; break;
-                case FarmTile.TileState.Ripe: actName = "Thu ho\u1ea1ch"; break;
+                switch (tile.currentState)
+                {
+                    case FarmTile.TileState.Soil: actName = "Cu\u1ed1c \u0111\u1ea5t"; break;
+                    case FarmTile.TileState.Plowed: actName = "Gieo h\u1ea1t"; break;
+                    case FarmTile.TileState.Planted: actName = "T\u01b0\u1edbi n\u01b0\u1edbc"; break;
+                    case FarmTile.TileState.Watered: actName = "T\u01b0\u1edbi n\u01b0\u1edbc"; break;
+                    case FarmTile.TileState.Ripe: actName = "Thu ho\u1ea1ch"; break;
+                }
             }
 
             actions.Add(new InteractionAction { keyName = "Click", actionName = actName, onClick = () => PerformTileAction(tile) });
@@ -908,23 +974,24 @@ namespace YWonderLand.Environment
         {
             float configuredRange = spot != null && spot.interactionRange > 0f
                 ? spot.interactionRange
-                : Mathf.Max(NormalizeRange(fishingInteractRange), DefaultFishingInteractRange);
-            configuredRange = Mathf.Max(configuredRange, DefaultFishingInteractRange);
+                : NormalizeRange(fishingInteractRange);
             return Mathf.Clamp(configuredRange, 0.5f, MaxFishingInteractRange);
         }
 
         private bool IsFishingSpotInRange(FishingSpot spot, Vector3 hitPoint)
         {
             if (spot == null) return false;
-            Vector3 playerPos = PlayerController.Instance != null ? PlayerController.Instance.transform.position : transform.position;
-            return HorizontalDistance(playerPos, hitPoint) <= GetFishingRange(spot);
+            // Đo tới MÉP nước gần nhất, giống mọi tương tác khác — không đo tới chỗ vừa
+            // chạm. Mặt hồ rất rộng: đo tới điểm chạm thì đứng sát bờ mà chạm ra giữa hồ
+            // vẫn bị tính là đứng xa.
+            return HorizontalDistanceToClosestColliderPoint(spot.gameObject, hitPoint) <= GetFishingRange(spot);
         }
 
         private bool IsFishingSpotInRange(FishingSpot spot, Vector3 hitPoint, bool directTap)
         {
-            if (!directTap) return IsFishingSpotInRange(spot, hitPoint);
-            if (spot == null) return false;
-            return IsDirectTapObjectInRange(spot.gameObject, hitPoint, GetFishingRange(spot), fishingInteractRange);
+            // CỐ Ý không đi qua GetDirectTapRange: hàm đó bỏ qua tầm riêng của từng loại và
+            // luôn trả directTapMaxRange (3.5m). Câu cá phải giữ đúng 1.5m khách yêu cầu.
+            return IsFishingSpotInRange(spot, hitPoint);
         }
 
         private bool CanPriorityScanPassThrough(RaycastHit hit)
@@ -981,6 +1048,11 @@ namespace YWonderLand.Environment
                 actions.Add(new InteractionAction { keyName = "R", actionName = "Thu hoạch", onClick = () => HarvestAnimal(animal) });
             if (animal.currentState == FarmAnimal.AnimalState.Sick)
                 actions.Add(new InteractionAction { keyName = "H", actionName = "Chữa bệnh", onClick = () => HealAnimal(animal) });
+            // Tiêm phòng: chỉ hiện với loài có thể bệnh, đang KHÔNG bệnh và vắc-xin cũ đã hết hạn.
+            else if (animal.currentState != FarmAnimal.AnimalState.Dead
+                     && animal.data != null && animal.data.canGetSick
+                     && !animal.IsVaccineActive)
+                actions.Add(new InteractionAction { keyName = "V", actionName = "Tiêm vắc-xin", onClick = () => VaccinateAnimal(animal) });
 
             actions.Add(new InteractionAction { keyName = "Click", actionName = "Thông tin", onClick = () => { if (AnimalInteractionPopupController.Instance != null) AnimalInteractionPopupController.Instance.Show(animal); } });
         }
@@ -1279,6 +1351,8 @@ namespace YWonderLand.Environment
             currentActions.Clear();
             currentPromptFromFrontCell = false;
             currentPromptFromFootWater = false;
+            currentPromptFromFootResource = false;
+            currentPromptFromFootFishing = false;
             pendingDemolishEnclosure = null;
             pendingDemolishTile = null;
             demolishConfirmTimer = 0f;
@@ -1314,16 +1388,36 @@ namespace YWonderLand.Environment
             if (currentPromptFromFrontCell)
             {
                 currentPromptFromFootWater = false;
+                currentPromptFromFootResource = false;
+                currentPromptFromFootFishing = false;
+                return;
+            }
+
+            RefreshFootFishingInteractionPrompt();
+            if (currentPromptFromFootFishing)
+            {
+                currentPromptFromFootWater = false;
+                currentPromptFromFootResource = false;
                 return;
             }
 
             RefreshFootWaterInteractionPrompt();
+            if (currentPromptFromFootWater)
+            {
+                currentPromptFromFootResource = false;
+                currentPromptFromFootFishing = false;
+                return;
+            }
+
+            RefreshFootResourceInteractionPrompt();
         }
 
         private bool HasDirectTapPrompt()
         {
             return !currentPromptFromFrontCell &&
                    !currentPromptFromFootWater &&
+                   !currentPromptFromFootResource &&
+                   !currentPromptFromFootFishing &&
                    currentHoverObject != null &&
                    currentActions != null &&
                    currentActions.Count > 0;
@@ -1377,6 +1471,8 @@ namespace YWonderLand.Environment
             currentActions = foundActions;
             currentPromptFromFrontCell = true;
             currentPromptFromFootWater = false;
+            currentPromptFromFootResource = false;
+            currentPromptFromFootFishing = false;
 
             if (shouldRefreshPrompt && GameHUDController.Instance != null)
                 GameHUDController.Instance.ShowInteractionPrompts(foundActions);
@@ -1447,6 +1543,8 @@ namespace YWonderLand.Environment
             currentActions = foundActions;
             currentPromptFromFrontCell = false;
             currentPromptFromFootWater = true;
+            currentPromptFromFootResource = false;
+            currentPromptFromFootFishing = false;
 
             if (shouldRefreshPrompt && GameHUDController.Instance != null)
                 GameHUDController.Instance.ShowInteractionPrompts(foundActions);
@@ -1522,6 +1620,139 @@ namespace YWonderLand.Environment
             return best;
         }
 
+        // Đến GẦN mép nước câu được là tự hiện nút Câu cá, y như Múc nước / Chặt cây.
+        // Đặt TRƯỚC nhánh múc nước: hồ câu ở thành phố có thể trùng luôn vùng WaterSource,
+        // để sau thì "Múc nước" giành mất nút và không bao giờ câu được. Nhánh này tự tắt
+        // ở nông trại vì IsFishingAllowedHere() chỉ đúng ở thành phố.
+        private void RefreshFootFishingInteractionPrompt()
+        {
+            if (!useDirectTapInteraction || timedActionActive)
+                return;
+
+            if (HasDirectTapPrompt() || currentPromptFromFrontCell)
+                return;
+
+            FishingSpot spot = IsFishingAllowedHere() ? FindFishingSpotNearFoot() : null;
+            if (spot == null)
+            {
+                ClearFootFishingInteractionPrompt();
+                return;
+            }
+
+            var foundActions = new List<InteractionAction>();
+            var target = spot;
+            Vector3 castPoint = ClosestFishingPoint(spot);
+            foundActions.Add(new InteractionAction
+            {
+                keyName = "F",
+                actionName = "Câu cá",
+                onClick = () => StartFishing(target, castPoint)
+            });
+
+            string actionSignature = BuildActionSignature(foundActions);
+            bool hadNoCurrentActions = currentActions == null || currentActions.Count == 0;
+            bool shouldRefreshPrompt =
+                hadNoCurrentActions ||
+                !currentPromptFromFootFishing ||
+                spot.gameObject != currentHoverObject ||
+                actionSignature != lastActionSignature;
+
+            currentHoverObject = spot.gameObject;
+            lastAnimalState = FarmAnimal.AnimalState.Healthy;
+            lastAnimalProductReady = false;
+            lastActionSignature = actionSignature;
+            currentActions = foundActions;
+            currentPromptFromFrontCell = false;
+            currentPromptFromFootWater = false;
+            currentPromptFromFootResource = false;
+            currentPromptFromFootFishing = true;
+
+            if (shouldRefreshPrompt && GameHUDController.Instance != null)
+                GameHUDController.Instance.ShowInteractionPrompts(foundActions);
+        }
+
+        /// <summary>Điểm trên mặt nước gần người chơi nhất — chỗ để quăng cần.</summary>
+        private Vector3 ClosestFishingPoint(FishingSpot spot)
+        {
+            if (spot == null) return transform.position;
+            Vector3 playerPos = PlayerController.Instance != null
+                ? PlayerController.Instance.transform.position
+                : transform.position;
+
+            Vector3 best = spot.transform.position;
+            float bestDistance = HorizontalDistance(playerPos, best);
+
+            colliderDistanceBuffer.Clear();
+            spot.gameObject.GetComponentsInChildren(false, colliderDistanceBuffer);
+            foreach (var col in colliderDistanceBuffer)
+            {
+                if (col == null || !col.enabled) continue;
+                Vector3 point = SafeClosestPoint(col, playerPos);
+                float distance = HorizontalDistance(playerPos, point);
+                if (distance < bestDistance)
+                {
+                    bestDistance = distance;
+                    best = point;
+                }
+            }
+            colliderDistanceBuffer.Clear();
+            return best;
+        }
+
+        private FishingSpot FindFishingSpotNearFoot()
+        {
+            Transform player = PlayerController.Instance != null ? PlayerController.Instance.transform : transform;
+            Vector3 forward = player.forward;
+            forward.y = 0f;
+            if (forward.sqrMagnitude < 0.0001f)
+                forward = transform.forward;
+            forward.Normalize();
+
+            Vector3 center = player.position + forward * Mathf.Max(0.1f, fishingFootProbeForward) + Vector3.up * 0.2f;
+            float radius = Mathf.Max(0.2f, fishingFootProbeRadius);
+
+            int hitCount = Physics.OverlapSphereNonAlloc(
+                center,
+                radius,
+                frontCellOverlapResults,
+                InteractionLayerMask,
+                QueryTriggerInteraction.Collide);
+
+            FishingSpot best = null;
+            float bestDistance = float.PositiveInfinity;
+            for (int i = 0; i < hitCount; i++)
+            {
+                Collider col = frontCellOverlapResults[i];
+                if (col == null) continue;
+
+                FishingSpot spot = col.GetComponentInParent<FishingSpot>();
+                if (spot == null || !IsFishingSpotInRange(spot, spot.transform.position))
+                    continue;
+
+                float distance = HorizontalDistance(center, SafeClosestPoint(col, center));
+                if (distance < bestDistance)
+                {
+                    bestDistance = distance;
+                    best = spot;
+                }
+            }
+
+            return best;
+        }
+
+        private void ClearFootFishingInteractionPrompt()
+        {
+            if (!currentPromptFromFootFishing)
+                return;
+
+            currentHoverObject = null;
+            lastActionSignature = "";
+            currentActions.Clear();
+            currentPromptFromFootFishing = false;
+            if (GameHUDController.Instance != null)
+                GameHUDController.Instance.HideInteractionPrompt();
+        }
+
         private void ClearFootWaterInteractionPrompt()
         {
             if (!currentPromptFromFootWater)
@@ -1548,6 +1779,118 @@ namespace YWonderLand.Environment
                 GameHUDController.Instance.HideInteractionPrompt();
         }
 
+        // Đến GẦN cây/đá là tự hiện nút Chặt cây / Đào khoáng — tia bắn từ mũi chân (tàng hình, không cần ngắm tâm),
+        // y như nút múc nước. Ưu tiên đứng sau ruộng/chuồng và ao nước để không tranh nút với chúng.
+        private void RefreshFootResourceInteractionPrompt()
+        {
+            if (!useDirectTapInteraction || timedActionActive)
+                return;
+
+            if (HasDirectTapPrompt() || currentPromptFromFrontCell || currentPromptFromFootWater)
+                return;
+
+            HarvestableResource resource = FindHarvestableNearFoot();
+            if (resource == null)
+            {
+                ClearFootResourceInteractionPrompt();
+                return;
+            }
+
+            var foundActions = new List<InteractionAction>();
+            AddFootResourceAction(resource, foundActions);
+
+            string actionSignature = BuildActionSignature(foundActions);
+            bool hadNoCurrentActions = currentActions == null || currentActions.Count == 0;
+            bool shouldRefreshPrompt =
+                hadNoCurrentActions ||
+                !currentPromptFromFootResource ||
+                resource.gameObject != currentHoverObject ||
+                actionSignature != lastActionSignature;
+
+            currentHoverObject = resource.gameObject;
+            lastAnimalState = FarmAnimal.AnimalState.Healthy;
+            lastAnimalProductReady = false;
+            lastActionSignature = actionSignature;
+            currentActions = foundActions;
+            currentPromptFromFrontCell = false;
+            currentPromptFromFootWater = false;
+            currentPromptFromFootResource = true;
+            currentPromptFromFootFishing = false;
+
+            if (shouldRefreshPrompt && GameHUDController.Instance != null)
+                GameHUDController.Instance.ShowInteractionPrompts(foundActions);
+        }
+
+        private void AddFootResourceAction(HarvestableResource resource, List<InteractionAction> actions)
+        {
+            if (resource == null || actions == null) return;
+
+            var res = resource;
+            string actionStr = resource.type == HarvestableResource.ResourceType.Tree ? "Chặt cây" : "Đào khoáng";
+            actions.Add(new InteractionAction { keyName = "Click", actionName = actionStr, onClick = () => ClickHarvestResource(res) });
+        }
+
+        // Quét OverlapSphere ngay trước mũi chân, trả cây/đá GẦN NHẤT còn khai thác được và trong tầm hành động.
+        // Đá chỉ tính ở nơi cho đào (City/Mine). Không hiện viền trắng — probe tàng hình như nước.
+        private HarvestableResource FindHarvestableNearFoot()
+        {
+            Transform player = PlayerController.Instance != null ? PlayerController.Instance.transform : transform;
+            Vector3 forward = player.forward;
+            forward.y = 0f;
+            if (forward.sqrMagnitude < 0.0001f)
+                forward = transform.forward;
+            forward.Normalize();
+
+            Vector3 center = player.position + forward * Mathf.Max(0.1f, resourceFootProbeForward) + Vector3.up * 0.2f;
+            float radius = Mathf.Max(0.2f, resourceFootProbeRadius);
+
+            int hitCount = Physics.OverlapSphereNonAlloc(
+                center,
+                radius,
+                frontCellOverlapResults,
+                InteractionLayerMask,
+                QueryTriggerInteraction.Collide);
+
+            HarvestableResource best = null;
+            float bestDistance = float.PositiveInfinity;
+            for (int i = 0; i < hitCount; i++)
+            {
+                Collider col = frontCellOverlapResults[i];
+                if (col == null) continue;
+
+                HarvestableResource res = col.GetComponentInParent<HarvestableResource>();
+                if (res == null || !res.isHarvestable)
+                    continue;
+                if (res.type == HarvestableResource.ResourceType.Rock && !IsMiningAllowedHere())
+                    continue;
+                if (GetResourceDistanceToPlayer(res) > GetResourceActionRange(res))
+                    continue;
+
+                float distance = HorizontalDistance(center, SafeClosestPoint(col, center));
+                if (distance < bestDistance)
+                {
+                    bestDistance = distance;
+                    best = res;
+                }
+            }
+
+            return best;
+        }
+
+        private void ClearFootResourceInteractionPrompt()
+        {
+            if (!currentPromptFromFootResource)
+                return;
+
+            currentHoverObject = null;
+            lastActionSignature = "";
+            currentActions.Clear();
+            currentPromptFromFootResource = false;
+            currentPromptFromFootFishing = false;
+            if (GameHUDController.Instance != null)
+                GameHUDController.Instance.HideInteractionPrompt();
+        }
+
         private bool IsDirectTapTargetStillInRange(GameObject target)
         {
             if (target == null) return false;
@@ -1566,7 +1909,8 @@ namespace YWonderLand.Environment
 
             var fishingSpot = target.GetComponentInParent<FishingSpot>();
             if (fishingSpot != null)
-                return HorizontalDistanceToClosestColliderPoint(fishingSpot.gameObject, fishingSpot.transform.position) <= GetDirectTapRange(GetFishingRange(fishingSpot), fishingInteractRange);
+                // Dùng thẳng tầm câu cá (1.5m), không dùng tầm chạm chung 3.5m.
+                return IsFishingSpotInRange(fishingSpot, fishingSpot.transform.position);
 
             var merchant = target.GetComponentInParent<MerchantNPC>();
             if (merchant != null)
@@ -1603,6 +1947,8 @@ namespace YWonderLand.Environment
         private GameObject currentHoverObject = null;
         private bool currentPromptFromFrontCell;
         private bool currentPromptFromFootWater;
+        private bool currentPromptFromFootResource;
+        private bool currentPromptFromFootFishing;
         private FarmAnimal.AnimalState lastAnimalState;
         private bool lastAnimalProductReady;
         private string lastActionSignature = "";
@@ -1736,16 +2082,6 @@ namespace YWonderLand.Environment
                     foundActions.Add(new InteractionAction { keyName = "Click", actionName = merchant.GetInteractionLabel(), onClick = () => merchant.Interact() });
                     break;
                 }
-                else if (hit.collider.GetComponentInParent<YWonderLand.Environment.AnimalPenSpawner>() != null)
-                {
-                    var penS = hit.collider.GetComponentInParent<YWonderLand.Environment.AnimalPenSpawner>();
-                    if (penS.HasSpace && IsPenSpawnerInRange(penS, directTap))
-                    {
-                        foundObj = penS.gameObject;
-                        foundActions.Add(new InteractionAction { keyName = "Click", actionName = "Thả thú", onClick = () => { if (IsPenSpawnerInRange(penS, useDirectTapInteraction)) OpenPenAnimalPicker(penS); } });
-                    }
-                    break;
-                }
                 else if (ResolveBuildSurfaceCellFromHit(hit) is BuildSurfaceCell directPenCell && directPenCell != null && directPenCell.HasFence)
                 {
                     if (directPenCell != hoverEnclosureSeed)
@@ -1761,6 +2097,19 @@ namespace YWonderLand.Environment
                             foundObj = directPenCell.gameObject;
                             AddEnclosureActions(encl, foundActions);
                         }
+                    }
+                    break;
+                }
+                else if (hit.collider.GetComponentInParent<YWonderLand.Environment.AnimalPenSpawner>() != null)
+                {
+                    // Legacy static pens have no BuildSurfaceCell snapshot. Keep this fallback
+                    // after the authoritative enclosure path so placed fence prefabs cannot
+                    // bypass the atomic inventory + farm transaction.
+                    var penS = hit.collider.GetComponentInParent<YWonderLand.Environment.AnimalPenSpawner>();
+                    if (penS.HasSpace && IsPenSpawnerInRange(penS, directTap))
+                    {
+                        foundObj = penS.gameObject;
+                        foundActions.Add(new InteractionAction { keyName = "Click", actionName = "Thả thú", onClick = () => { if (IsPenSpawnerInRange(penS, useDirectTapInteraction)) OpenPenAnimalPicker(penS); } });
                     }
                     break;
                 }
@@ -1855,6 +2204,8 @@ namespace YWonderLand.Environment
                 currentActions = foundActions;
                 currentPromptFromFrontCell = false;
                 currentPromptFromFootWater = false;
+                currentPromptFromFootResource = false;
+            currentPromptFromFootFishing = false;
 
                 if (shouldRefreshPrompt)
                 {
@@ -1870,6 +2221,8 @@ namespace YWonderLand.Environment
                     currentActions.Clear();
                     currentPromptFromFrontCell = false;
                     currentPromptFromFootWater = false;
+                    currentPromptFromFootResource = false;
+            currentPromptFromFootFishing = false;
                     if (GameHUDController.Instance != null) GameHUDController.Instance.HideInteractionPrompt();
                 }
             }
@@ -1982,6 +2335,8 @@ namespace YWonderLand.Environment
             currentActions.Clear();
             currentPromptFromFrontCell = false;
             currentPromptFromFootWater = false;
+            currentPromptFromFootResource = false;
+            currentPromptFromFootFishing = false;
             GameHUDController.Instance?.HideInteractionPrompt();
 
             PlayerController player = PlayerController.Instance;
@@ -2018,8 +2373,7 @@ namespace YWonderLand.Environment
 
             EnsureStarterFeed(animal); // demo: cấp ĐÚNG thức ăn của loài (theo tài liệu) để chọn
 
-            if (inventoryPopup == null)
-                inventoryPopup = Object.FindFirstObjectByType<InventoryPopupController>();
+            EnsureInventoryPopupSubscribed();
             if (inventoryPopup != null)
             {
                 inventoryPopup.ShowAtTab("food");
@@ -2064,6 +2418,8 @@ namespace YWonderLand.Environment
 
             if (inventoryPopup != null) inventoryPopup.Hide();
 
+            // Phát clip nhanh hơn để múa TRỌN trong ~FeedActionDuration (khóa = clip/speed).
+            float feedSpeed = FeedClipDuration / Mathf.Max(0.1f, FeedActionDuration);
             bool started = BeginTimedAction(
                 "Feed",
                 FeedClipDuration,
@@ -2087,7 +2443,7 @@ namespace YWonderLand.Environment
                     if (inv != null)
                         inv.AddItem(itemId, required);
                 },
-                FeedActionSpeed);
+                feedSpeed);
 
             if (!started && inv != null)
                 inv.AddItem(itemId, required);
@@ -2158,13 +2514,74 @@ namespace YWonderLand.Environment
             return m ?? a ?? "—";
         }
 
+        // Chữa bệnh TỐN 1 Thuốc (medicine_01) — trước đây chữa miễn phí, thành lỗ hổng kinh tế.
         private void HealAnimal(FarmAnimal animal)
         {
+            if (animal == null) return;
+            if (animal.currentState != FarmAnimal.AnimalState.Sick)
+            {
+                ScreenToast.Show("Con vật không bị bệnh, chưa cần dùng thuốc.");
+                return;
+            }
+
+            // Số LIỀU thuốc theo loài (VatNuoi2: bò 10 · heo 9 · vịt 2...), không còn cứng 1 liều.
+            int doses = animal.MedicineDosesPerCure;
+            var inv = YWonderLand.Managers.InventoryManager.Instance;
+            if (inv == null || inv.GetItemQuantity("medicine_01") < doses)
+            {
+                ScreenToast.Show($"Cần {doses} Thuốc để chữa {animal.data?.animalName}! Mua thêm ở Cửa hàng vật phẩm.");
+                return;
+            }
+            if (!inv.RemoveItem("medicine_01", doses)) return;
+
             PlayerController player = PlayerController.Instance;
             // Chưa có animation "tiêm/chữa bệnh" riêng -> tạm dùng "Feed" (động tác đưa tay) cho đỡ trống
             if (player != null) player.PlayActionAnimation("Feed", 0f);
-            animal.Heal();
-            FarmStateSync.SaveBuildState();
+            if (animal.Heal())
+            {
+                ScreenToast.Show($"Đã chữa khỏi bệnh (tốn {doses} Thuốc)!");
+                FarmStateSync.SaveBuildState();
+            }
+            else
+            {
+                inv.AddItem("medicine_01", doses); // không chữa được thì hoàn đủ số thuốc
+            }
+        }
+
+        // Tiêm vắc-xin PHÒNG bệnh — tốn 1 vaccine_01. Không chữa được thú đang bệnh.
+        private void VaccinateAnimal(FarmAnimal animal)
+        {
+            if (animal == null) return;
+            if (animal.currentState == FarmAnimal.AnimalState.Sick)
+            {
+                ScreenToast.Show("Con vật đang bệnh — phải dùng Thuốc chữa trước, rồi mới tiêm phòng.");
+                return;
+            }
+            if (animal.IsVaccineActive)
+            {
+                ScreenToast.Show("Vắc-xin còn hiệu lực, chưa cần tiêm lại.");
+                return;
+            }
+
+            var inv = YWonderLand.Managers.InventoryManager.Instance;
+            if (inv == null || inv.GetItemQuantity("vaccine_01") <= 0)
+            {
+                ScreenToast.Show("Hết Vắc-xin! Mua thêm ở Cửa hàng vật phẩm.");
+                return;
+            }
+            if (!inv.RemoveItem("vaccine_01", 1)) return;
+
+            PlayerController player = PlayerController.Instance;
+            if (player != null) player.PlayActionAnimation("Feed", 0f); // chưa có animation tiêm riêng
+            if (animal.Vaccinate())
+            {
+                ScreenToast.Show("Đã tiêm vắc-xin — con vật được phòng bệnh.");
+                FarmStateSync.SaveBuildState();
+            }
+            else
+            {
+                inv.AddItem("vaccine_01", 1); // tiêm hụt thì hoàn lại
+            }
         }
 
         private void HarvestAnimal(FarmAnimal animal)
@@ -2564,14 +2981,26 @@ namespace YWonderLand.Environment
 
         private void HandleOpenSeedSelection(FarmTile tile)
         {
+            if (tile == null || tile.masterTile != null)
+            {
+                pendingPlantTile = null;
+                ScreenToast.Show("\u00d4 \u0111\u1ea5t n\u00e0y \u0111ang thu\u1ed9c m\u1ed9t gi\u00e0n c\u00e2y. H\u00e3y ch\u1ecdn \u00f4 \u0111\u1ea5t tr\u1ed1ng kh\u00e1c.");
+                return;
+            }
+            if (tile.currentState != FarmTile.TileState.Plowed)
+            {
+                pendingPlantTile = null;
+                ScreenToast.Show("\u00d4 \u0111\u1ea5t kh\u00f4ng c\u00f2n s\u1eb5n s\u00e0ng \u0111\u1ec3 gieo h\u1ea1t.");
+                return;
+            }
+
             // Ghi nhớ ô đất đang chờ gieo, rồi mở Túi đồ ở tab Hạt giống để người chơi CHỌN loại cây.
             pendingPlantTile = tile;
 
             // Demo helper: nếu chưa có hạt nào thì tặng gói hạt khởi đầu để có cái mà chọn.
             EnsureStarterSeeds();
 
-            if (inventoryPopup == null)
-                inventoryPopup = Object.FindFirstObjectByType<InventoryPopupController>();
+            EnsureInventoryPopupSubscribed();
 
             if (inventoryPopup != null)
             {
@@ -2607,20 +3036,12 @@ namespace YWonderLand.Environment
         private void OpenPenAnimalPicker(YWonderLand.Environment.AnimalPenSpawner pen)
         {
             if (pen == null) return;
-            pendingPen = pen;
+            pendingPen = null;
             pendingPlantTile = null; // tránh nhầm với luồng gieo hạt
             pendingEnclosure = null;
-            if (PlayerController.Instance != null) PlayerController.Instance.FaceTowards(pen.transform.position);
-
-            EnsureStarterAnimals(); // demo: chắc chắn có vài con vật để test (production: mua từ shop)
-
-            if (inventoryPopup == null)
-                inventoryPopup = Object.FindFirstObjectByType<InventoryPopupController>();
-            if (inventoryPopup != null)
-            {
-                inventoryPopup.ShowAtTab("animals");
-                Debug.Log("[FarmInteraction] Mở Túi đồ (Thú nuôi) để chọn con vật thả vào chuồng.");
-            }
+            pendingFeedAnimal = null;
+            ScreenToast.Show("Chuồng kiểu cũ chưa hỗ trợ đồng bộ. Hãy dùng chuồng hàng rào.");
+            Debug.LogWarning($"[AnimalPlacement] Blocked legacy local pen '{pen.name}'.");
         }
 
         // Mở túi đồ (tab Thú nuôi) để chọn con vật thả vào VÙNG QUÂY (chuồng từ hàng rào).
@@ -2632,10 +3053,7 @@ namespace YWonderLand.Environment
             pendingFeedAnimal = null;
             pendingPlantTile = null;
 
-            EnsureStarterAnimals(); // demo: có sẵn vài con để test
-
-            if (inventoryPopup == null)
-                inventoryPopup = Object.FindFirstObjectByType<InventoryPopupController>();
+            EnsureInventoryPopupSubscribed();
             if (inventoryPopup != null)
             {
                 inventoryPopup.ShowAtTab("animals");
@@ -2644,15 +3062,25 @@ namespace YWonderLand.Environment
             }
         }
 
-        // Người chơi chọn con vật từ túi cho VÙNG QUÂY -> validate số ô rồi thả hoặc báo lỗi.
-        private void HandleEnclosureAnimalSelected(string itemId)
+        // Server atomically consumes the inventory item and appends the animal to the farm snapshot.
+        private async Awaitable HandleEnclosureAnimalSelectedAsync(string itemId)
         {
             var interior = pendingEnclosure;
             pendingEnclosure = null;
-            if (interior == null) return;
+            if (interior == null || animalPlacementInFlight) return;
 
             var def = YWonderLand.Managers.AnimalManager.LookupDefinition(itemId);
-            int need = def != null ? Mathf.Max(1, def.penSlots) : 1;
+            var inventory = YWonderLand.Managers.InventoryManager.Instance;
+            if (def == null || inventory == null || inventory.GetItemQuantity(itemId) < 1)
+            {
+                ScreenToast.Show("Không có con giống này trong túi.");
+                if (inventoryPopup != null) inventoryPopup.Hide();
+                return;
+            }
+
+            int quantityBefore = inventory.GetItemQuantity(itemId);
+
+            int need = Mathf.Max(1, def.penSlots);
             int free = PenEnclosure.AvailableCount(interior);
 
             if (free < need)
@@ -2668,48 +3096,74 @@ namespace YWonderLand.Environment
             {
                 if (c != null && !c.HasAnimal) { cells.Add(c); if (cells.Count >= need) break; }
             }
-            if (cells.Count < need) { ScreenToast.Show("Chuồng không đủ chỗ!"); return; }
-
-            Vector3 pos = cells[0].SurfaceCenter;
-            if (AnimalPrefabLibrary.Instance != null)
-                pos.y += AnimalPrefabLibrary.Instance.GetSpawnHeightOffset(itemId); // chỉnh cao theo pivot từng loài
-            GameObject prefab = AnimalPrefabLibrary.Instance != null ? AnimalPrefabLibrary.Instance.GetPrefab(itemId) : null;
-            GameObject go;
-            if (prefab != null)
+            if (cells.Count < need)
             {
-                go = Instantiate(prefab, pos, Quaternion.identity);
-                go.name = prefab.name;
-                // Gắn logic vật nuôi (đói/sản phẩm theo mốc thời gian) lên CHÍNH model thật.
-                // false = không sinh khối primitive, chỉ thêm thanh HP nổi trên đầu.
-                var fa = go.GetComponent<FarmAnimal>();
-                if (fa == null) fa = go.AddComponent<FarmAnimal>();
-                if (def != null) fa.Initialize(def, false);
-            }
-            else
-            {
-                go = new GameObject($"Animal_{itemId}");
-                go.transform.position = pos;
-                var faNew = go.AddComponent<FarmAnimal>();
-                if (def != null) faNew.Initialize(def);
+                ScreenToast.Show("Chuồng không đủ chỗ!");
+                if (inventoryPopup != null) inventoryPopup.Hide();
+                return;
             }
 
-            // Ô ĐẦU = ô neo: giữ tham chiếu con vật + itemId (để trả con giống khi phá chuồng).
-            // Các ô còn lại chỉ "mượn chỗ" (HasAnimal=true, không giữ GameObject).
-            cells[0].SetAnimalOccupant(go, itemId);
-            for (int i = 1; i < cells.Count; i++) cells[i].SetAnimal(true);
+            var cellKeys = new List<string>(cells.Count);
+            foreach (var cell in cells)
+                cellKeys.Add(FarmStateSync.CellKey(cell.transform.position));
 
-            // Cho con vật biết nó chiếm ô nào → tự trả ô về trống khi làm thịt vụ cuối.
-            var spawned = go.GetComponent<FarmAnimal>();
-            if (spawned != null)
-            {
-                spawned.occupiedCells = new List<BuildSurfaceCell>(cells);
-                FarmAnimal.RaiseSpawned(spawned); // báo tutorial: đã thả thú (flow mới)
-            }
-
-            FarmStateSync.SaveBuildState();
-
-            ScreenToast.ShowInfo($"Đã thả {(def != null ? def.animalName : itemId)} ({need} ô).");
             if (inventoryPopup != null) inventoryPopup.Hide();
+
+            animalPlacementInFlight = true;
+            try
+            {
+                var result = await FarmStateSync.PlaceAnimalAsync(itemId, cellKeys);
+                if (!result.ok)
+                {
+                    string message;
+                    switch (result.errorCode)
+                    {
+                        case "INSUFFICIENT_ITEM":
+                            message = "Con giống đã hết trong túi.";
+                            break;
+                        case "PEN_CELL_OCCUPIED":
+                        case "FARM_STATE_CONFLICT":
+                            message = "Chuồng vừa thay đổi. Hãy chọn lại vị trí thả thú.";
+                            break;
+                        case "INVALID_PEN_CELL":
+                        case "INVALID_PEN_SLOT_COUNT":
+                            message = "Vị trí chuồng không hợp lệ.";
+                            break;
+                        default:
+                            message = "Không thể thả thú khi chưa kết nối máy chủ. Hãy thử lại.";
+                            break;
+                    }
+                    ScreenToast.Show(message);
+                    return;
+                }
+
+                int appliedQuantity = inventory.GetItemQuantity(itemId);
+                if (appliedQuantity != result.remainingQuantity)
+                {
+                    Debug.LogWarning(
+                        $"[AnimalPlacement] Inventory snapshot mismatch for '{itemId}': " +
+                        $"response={result.remainingQuantity}, applied={appliedQuantity}.");
+                }
+                if (result.remainingQuantity >= quantityBefore)
+                {
+                    Debug.LogWarning(
+                        $"[AnimalPlacement] Accepted placement did not reduce the visible quantity for '{itemId}': " +
+                        $"before={quantityBefore}, remaining={result.remainingQuantity}, duplicate={result.duplicate}.");
+                }
+
+                // The authoritative snapshot rebuilds the enclosure on the following frames.
+                await Awaitable.NextFrameAsync();
+                await Awaitable.NextFrameAsync();
+                var spawned = cells[0] != null && cells[0].AnimalObject != null
+                    ? cells[0].AnimalObject.GetComponent<FarmAnimal>()
+                    : null;
+                if (spawned != null) FarmAnimal.RaiseSpawned(spawned);
+                ScreenToast.ShowInfo($"Đã thả {def.animalName}. Còn {result.remainingQuantity} trong túi.");
+            }
+            finally
+            {
+                animalPlacementInFlight = false;
+            }
         }
 
         private void RequestDemolishEnclosure(List<BuildSurfaceCell> encl)
@@ -2792,6 +3246,8 @@ namespace YWonderLand.Environment
             lastActionSignature = "";
             currentPromptFromFrontCell = false;
             currentPromptFromFootWater = false;
+            currentPromptFromFootResource = false;
+            currentPromptFromFootFishing = false;
             GameHUDController.Instance?.HideInteractionPrompt();
             if (YWonderLand.UI.ResourceInteractionUIController.Instance != null)
                 YWonderLand.UI.ResourceInteractionUIController.Instance.Hide();
@@ -2927,6 +3383,8 @@ namespace YWonderLand.Environment
             lastActionSignature = "";
             currentPromptFromFrontCell = false;
             currentPromptFromFootWater = false;
+            currentPromptFromFootResource = false;
+            currentPromptFromFootFishing = false;
             if (GameHUDController.Instance != null) GameHUDController.Instance.HideInteractionPrompt();
             if (YWonderLand.UI.ResourceInteractionUIController.Instance != null)
                 YWonderLand.UI.ResourceInteractionUIController.Instance.Hide();
@@ -2943,47 +3401,15 @@ namespace YWonderLand.Environment
             persistence?.SaveBuildings();
         }
 
-        // Demo helper: đảm bảo túi có sẵn vài con vật để test thả chuồng (production: mua từ shop).
-        private void EnsureStarterAnimals()
-        {
-            var inv = YWonderLand.Managers.InventoryManager.Instance;
-            if (inv == null) return;
-
-            string[] starterAnimals = { "chicken_01", "rabbit_01", "ostrich_01", "goat_01", "cow_01", "deer_01" };
-            foreach (var a in starterAnimals)
-            {
-                if (inv.GetItemQuantity(a) <= 0)
-                {
-                    inv.AddItem(a, 2);
-                    Debug.Log($"[FarmInteraction] Bổ sung con vật cho demo: {a} +2");
-                }
-            }
-        }
-
         // Người chơi chọn 1 con vật trong túi khi đang đứng ở chuồng -> kiểm tra + thả.
         private void HandlePenAnimalSelected(string itemId)
         {
             var pen = pendingPen;
-            pendingPen = null; // dùng 1 lần — chọn sai loài thì bấm "Thả thú" lại
+            pendingPen = null;
             if (pen == null) return;
-
-            if (!pen.CanAccept(itemId))
-            {
-                Debug.Log($"[FarmInteraction] Chuồng '{pen.name}' KHÔNG nhận '{itemId}'. Danh sách cho phép: {pen.AllowedIdsText()} | Còn chỗ: {pen.HasSpace}");
-                return;
-            }
-
-            var inv = YWonderLand.Managers.InventoryManager.Instance;
-            if (inv != null && !inv.RemoveItem(itemId, 1))
-            {
-                Debug.Log($"[FarmInteraction] Không có '{itemId}' trong túi để thả.");
-                return;
-            }
-
-            if (PlayerController.Instance != null) PlayerController.Instance.FaceTowards(pen.transform.position);
-            pen.SpawnByItem(itemId);
-
             if (inventoryPopup != null) inventoryPopup.Hide();
+            ScreenToast.Show("Chuồng kiểu cũ chưa hỗ trợ đồng bộ. Hãy dùng chuồng hàng rào.");
+            Debug.LogWarning($"[AnimalPlacement] Rejected legacy selection '{itemId}' for pen '{pen.name}'.");
         }
 
         private void OnInventoryItemSelected(string itemId)
@@ -2998,7 +3424,7 @@ namespace YWonderLand.Environment
             // Ưu tiên: đang chờ thả thú vào VÙNG QUÂY (chuồng từ hàng rào).
             if (pendingEnclosure != null)
             {
-                HandleEnclosureAnimalSelected(itemId);
+                _ = HandleEnclosureAnimalSelectedAsync(itemId);
                 return;
             }
 
@@ -3012,6 +3438,12 @@ namespace YWonderLand.Environment
             // Only handle seed selection when we have a pending tile
             if (pendingPlantTile == null) return;
             if (!itemId.Contains("seed")) return; // Only accept seed items
+
+            if (!TryValidatePlanting(pendingPlantTile, itemId, out string plantingError))
+            {
+                ScreenToast.Show(plantingError);
+                return;
+            }
 
             pendingSeedId = itemId;
 
@@ -3044,10 +3476,16 @@ namespace YWonderLand.Environment
         // Múa động tác Planting xong MỚI thật sự gieo hạt xuống ô đất.
         private bool StartPlantTimedAction(FarmTile tile, string seedId, bool seedConsumed, int seedConsumedAmount = 1)
         {
-            if (tile == null || string.IsNullOrEmpty(seedId)) return false;
+            if (!TryValidatePlanting(tile, seedId, out string plantingError))
+            {
+                ScreenToast.Show(plantingError);
+                return false;
+            }
 
             var inv = YWonderLand.Managers.InventoryManager.Instance;
-            return BeginTimedAction(
+            // Phát clip nhanh hơn để múa TRỌN trong ~PlantingActionDuration (khóa = clip/speed).
+            float plantSpeed = PlantingClipDuration / Mathf.Max(0.1f, PlantingActionDuration);
+            bool started = BeginTimedAction(
                 "Planting",
                 PlantingClipDuration,
                 YWonderLand.Player.ToolType.SeedBag,
@@ -3068,7 +3506,12 @@ namespace YWonderLand.Environment
                 {
                     if (seedConsumed && inv != null)
                         inv.AddItem(seedId, Mathf.Max(1, seedConsumedAmount));
-                });
+                },
+                plantSpeed);
+
+            if (!started)
+                ScreenToast.Show("Ch\u01b0a th\u1ec3 gieo h\u1ea1t l\u00fac n\u00e0y. H\u00e3y ch\u1edd thao t\u00e1c hi\u1ec7n t\u1ea1i k\u1ebft th\u00fac.");
+            return started;
         }
 
         private int GetSeedCostForPlanting(string seedId)
@@ -3083,12 +3526,23 @@ namespace YWonderLand.Environment
         // Trồng cây có thể CHIẾM NHIỀU Ô (giàn): cây nhiều ô (vd chanh dây 20 ô) cần thêm ô trống gần nhất.
         private bool PlantWithSlots(FarmTile master, string seedId)
         {
+            if (!TryValidatePlanting(master, seedId, out string plantingError))
+            {
+                ScreenToast.Show(plantingError);
+                return false;
+            }
+
             int slots = 1;
             var cropDb = Resources.Load<CropDatabase>("CropDatabase");
             var crop = cropDb != null ? cropDb.GetCropBySeedId(seedId) : null;
             if (crop != null) slots = Mathf.Max(1, crop.plotSlots);
 
-            if (slots <= 1) return master.InteractPlant(seedId);
+            if (slots <= 1)
+            {
+                if (master.InteractPlant(seedId)) return true;
+                ScreenToast.Show("\u00d4 \u0111\u1ea5t v\u1eeba thay \u0111\u1ed5i. H\u00e3y ch\u1ecdn l\u1ea1i \u00f4 gieo h\u1ea1t.");
+                return false;
+            }
 
             // Cây nhiều ô: cần thêm (slots-1) ô ĐÃ CUỐC & còn trống gần nhất.
             var extras = FindNearbyPlowedTiles(master, slots - 1);
@@ -3098,33 +3552,104 @@ namespace YWonderLand.Environment
                 return false;
             }
 
-            if (!master.InteractPlant(seedId)) return false;
+            if (!master.InteractPlant(seedId))
+            {
+                ScreenToast.Show("\u00d4 \u0111\u1ea5t v\u1eeba thay \u0111\u1ed5i. H\u00e3y ch\u1ecdn l\u1ea1i \u00f4 gieo h\u1ea1t.");
+                return false;
+            }
             foreach (var t in extras) t.OccupyAsSlot(master);
             master.RegisterSlaves(extras);
             Debug.Log($"[FarmInteraction] Trồng {seedId} chiếm {slots} ô (1 master + {extras.Count} ô giàn).");
             return true;
         }
 
-        // Tìm 'count' ô đã cuốc & còn trống GẦN NHẤT quanh master (theo khoảng cách thế giới).
-        private System.Collections.Generic.List<FarmTile> FindNearbyPlowedTiles(FarmTile master, int count)
+        private bool TryValidatePlanting(FarmTile tile, string seedId, out string error)
         {
-            var all = new System.Collections.Generic.List<FarmTile>(
-                FindObjectsByType<FarmTile>(FindObjectsSortMode.None));
-            Vector3 origin = master.transform.position;
-            all.Sort((a, b) =>
-                (a.transform.position - origin).sqrMagnitude.CompareTo((b.transform.position - origin).sqrMagnitude));
-
-            var result = new System.Collections.Generic.List<FarmTile>();
-            foreach (var t in all)
+            error = "";
+            if (tile == null || string.IsNullOrWhiteSpace(seedId))
             {
-                if (t == master) continue;
-                if (t.IsPlowedFree)
+                error = "Kh\u00f4ng x\u00e1c \u0111\u1ecbnh \u0111\u01b0\u1ee3c \u00f4 \u0111\u1ea5t ho\u1eb7c h\u1ea1t gi\u1ed1ng.";
+                return false;
+            }
+            if (tile.masterTile != null)
+            {
+                error = "\u00d4 \u0111\u1ea5t n\u00e0y \u0111ang thu\u1ed9c m\u1ed9t gi\u00e0n c\u00e2y. H\u00e3y ch\u1ecdn \u00f4 \u0111\u1ea5t tr\u1ed1ng kh\u00e1c.";
+                return false;
+            }
+            if (tile.currentState != FarmTile.TileState.Plowed)
+            {
+                error = "\u00d4 \u0111\u1ea5t kh\u00f4ng c\u00f2n s\u1eb5n s\u00e0ng \u0111\u1ec3 gieo h\u1ea1t.";
+                return false;
+            }
+
+            var cropDb = Resources.Load<CropDatabase>("CropDatabase");
+            var crop = cropDb != null ? cropDb.GetCropBySeedId(seedId) : null;
+            int slots = crop != null ? Mathf.Max(1, crop.plotSlots) : 1;
+            if (slots <= 1) return true;
+
+            int availableExtras = FindNearbyPlowedTiles(tile, slots - 1).Count;
+            if (availableExtras >= slots - 1) return true;
+
+            error = $"C\u1ea7n {slots} \u00f4 \u0111\u1ea5t \u0111\u00e3 cu\u1ed1c li\u1ec1n nhau \u0111\u1ec3 tr\u1ed3ng {GetItemDisplayName(seedId)}; " +
+                    $"c\u1ee5m hi\u1ec7n t\u1ea1i c\u00f2n thi\u1ebfu {slots - 1 - availableExtras} \u00f4.";
+            return false;
+        }
+
+        // Only connected, cardinally adjacent plowed tiles may belong to one multi-slot crop.
+        private List<FarmTile> FindNearbyPlowedTiles(FarmTile master, int count)
+        {
+            var result = new List<FarmTile>();
+            if (master == null || count <= 0) return result;
+
+            Vector2 spacing = GetFarmSlotSpacing(master);
+            Vector3 origin = master.transform.position;
+            var map = new Dictionary<Vector2Int, FarmTile>();
+            foreach (var tile in FindObjectsByType<FarmTile>(FindObjectsSortMode.None))
+            {
+                if (tile == null || tile == master || !tile.IsPlowedFree) continue;
+
+                Vector3 position = tile.transform.position;
+                float gridX = (position.x - origin.x) / spacing.x;
+                float gridZ = (position.z - origin.z) / spacing.y;
+                int x = Mathf.RoundToInt(gridX);
+                int z = Mathf.RoundToInt(gridZ);
+                if (Mathf.Abs(gridX - x) > 0.2f || Mathf.Abs(gridZ - z) > 0.2f) continue;
+                if (Mathf.Abs(position.y - origin.y) > Mathf.Max(spacing.x, spacing.y)) continue;
+
+                var key = new Vector2Int(x, z);
+                if (key == Vector2Int.zero || map.ContainsKey(key)) continue;
+                map[key] = tile;
+            }
+
+            var visited = new HashSet<Vector2Int> { Vector2Int.zero };
+            var queue = new Queue<Vector2Int>();
+            queue.Enqueue(Vector2Int.zero);
+            while (queue.Count > 0 && result.Count < count)
+            {
+                Vector2Int current = queue.Dequeue();
+                foreach (Vector2Int direction in FarmSlotDirections)
                 {
-                    result.Add(t);
+                    Vector2Int next = current + direction;
+                    if (!visited.Add(next) || !map.TryGetValue(next, out FarmTile tile)) continue;
+                    result.Add(tile);
+                    queue.Enqueue(next);
                     if (result.Count >= count) break;
                 }
             }
+
             return result;
+        }
+
+        private Vector2 GetFarmSlotSpacing(FarmTile tile)
+        {
+            GameObject building = ResolvePlacedBuildingRoot(tile);
+            BuildSurfaceCell cell = BuildSurfaceCell.FindByOccupant(building != null ? building : tile.gameObject);
+            Vector2 spacing = cell != null
+                ? cell.FootprintSize
+                : new Vector2(DefaultFarmSlotSpacing, DefaultFarmSlotSpacing);
+            if (spacing.x < 0.05f) spacing.x = DefaultFarmSlotSpacing;
+            if (spacing.y < 0.05f) spacing.y = DefaultFarmSlotSpacing;
+            return spacing;
         }
 
         private void HandleWater(FarmTile tile)
@@ -3148,6 +3673,8 @@ namespace YWonderLand.Environment
             bool waterReserved = inv.RemoveItem("watering_water_01", 1); // giữ 1 xô nước; hủy thì trả lại.
             if (!waterReserved) return;
 
+            // Phát clip nhanh hơn để múa TRỌN trong ~WateringActionDuration (khóa = clip/speed).
+            float wateringSpeed = WateringClipDuration / Mathf.Max(0.1f, WateringActionDuration);
             bool started = BeginTimedAction(
                 "Watering",
                 WateringClipDuration,
@@ -3164,13 +3691,16 @@ namespace YWonderLand.Environment
                     else
                         inv.AddItem("watering_water_01", 1);
                 },
-                () => inv.AddItem("watering_water_01", 1));
+                () => inv.AddItem("watering_water_01", 1),
+                wateringSpeed);
 
             if (!started)
                 inv.AddItem("watering_water_01", 1);
         }
 
-        // Múc nước ở ao (vùng WaterSource) → +xô nước vào túi. KHÔNG animation (khách không yêu cầu).
+        // Múc nước ở ao (vùng WaterSource) → +xô nước vào túi.
+        // Có animation "ScoopWater2" + khóa hành động + nút hủy (X) giống chặt/đào/tưới/cho ăn.
+        // Nước chỉ vào túi KHI MÚA XONG — hủy giữa chừng thì không nhận.
         private void ScoopWater(WaterSource src)
         {
             if (src != null && !IsWaterSourceInRange(src, useDirectTapInteraction))
@@ -3179,12 +3709,29 @@ namespace YWonderLand.Environment
                 return;
             }
 
+            // CHẶN SPAM: đang múa động tác khác thì bỏ qua (BeginTimedAction cũng chặn, guard sớm cho gọn).
+            if (PlayerController.Instance != null && PlayerController.Instance.IsBusy) return;
+
             var inv = YWonderLand.Managers.InventoryManager.Instance;
             if (inv == null) return;
             int amt = src != null ? Mathf.Max(10, src.amountPerScoop) : 10;
-            inv.AddItem("watering_water_01", amt);
-            int total = inv.GetItemQuantity("watering_water_01");
-            ScreenToast.ShowItemReward("watering_water_01", amt, "Múc nước", $"(Tổng: {total})");
+
+            Vector3 facePoint = src != null ? src.transform.position : transform.position;
+            // Phát clip nhanh hơn để múa TRỌN trong ~ScoopWaterActionDuration (khóa = clip/speed).
+            float scoopSpeed = ScoopWaterClipDuration / Mathf.Max(0.1f, ScoopWaterActionDuration);
+            BeginTimedAction(
+                "ScoopWater2",
+                ScoopWaterClipDuration,
+                YWonderLand.Player.ToolType.WaterBucket, // XÔ tay TRÁI (khác bình tưới tay phải)
+                facePoint,
+                () =>
+                {
+                    inv.AddItem("watering_water_01", amt);
+                    int total = inv.GetItemQuantity("watering_water_01");
+                    ScreenToast.ShowItemReward("watering_water_01", amt, "Múc nước", $"(Tổng: {total})");
+                },
+                null,
+                scoopSpeed);
         }
 
         private void HandleHarvest(FarmTile tile)

@@ -1,0 +1,91 @@
+export async function convertPointToUsdtAction(
+  point: number,
+  requestId?: string
+): Promise<Result & {
+  usdt?: number;
+  pending?: boolean;
+  duplicate?: boolean;
+  terminal?: boolean;
+  debitStatus?: string;
+}> {
+  try {
+    const me = await getActiveUser();
+    if ("error" in me) return { ok: false, error: me.error };
+    const userId = me.id;
+    const rl = checkRateLimit(
+      `conv:${userId}`,
+      POLICIES.paymentCreate.limit,
+      POLICIES.paymentCreate.windowMs
+    );
+    if (!rl.allowed) {
+      return { ok: false, error: "POINT_DEBIT_RATE_LIMITED" };
+    }
+
+    if (await isGamePointLinkedAccount(userId)) {
+      const result = await convertLinkedGamePointToUsdt({
+        userId,
+        pointAmount: point,
+        requestId,
+      });
+      if (result.ok || result.pending) {
+        revalidatePath("/wallet");
+        revalidatePath("/", "layout");
+      }
+      return result;
+    }
+
+    if (!Number.isFinite(point) || point <= 0) {
+      return { ok: false, error: "INVALID_POINT_AMOUNT" };
+    }
+    const usdtGross = pointToUsdt(point);
+    if (usdtGross > MAX_CONVERT_USDT) {
+      return { ok: false, error: "POINT_DEBIT_AMOUNT_TOO_LARGE" };
+    }
+    const fee = (usdtGross * POINT_TO_USDT_FEE_PCT) / 100;
+    const usdt = usdtGross - fee;
+
+    try {
+      await db.$transaction(async (txdb) => {
+        const debit = await txdb.wallet.updateMany({
+          where: { userId, balanceGXL: { gte: point } },
+          data: {
+            balanceGXL: { decrement: point },
+            balanceUsdt: { increment: usdt },
+          },
+        });
+        if (debit.count === 0) throw new Error("INSUFFICIENT_POINT");
+        await txdb.transaction.create({
+          data: {
+            userId,
+            type: "SWAP",
+            amount: usdt,
+            currency: "USDT",
+            status: "SUCCESS",
+            metadata: JSON.stringify({
+              from: "POINT",
+              to: "USDT",
+              point,
+              usdtGross,
+              fee,
+              feePct: POINT_TO_USDT_FEE_PCT,
+              usdt,
+              priceUsdt: POINT_PRICE_USDT,
+              authority: "legacy-web",
+            }),
+          },
+        });
+      });
+    } catch (error: any) {
+      if (error?.message === "INSUFFICIENT_POINT") {
+        return { ok: false, error: "INSUFFICIENT_POINT", terminal: true };
+      }
+      throw error;
+    }
+
+    revalidatePath("/wallet");
+    revalidatePath("/", "layout");
+    return { ok: true, usdt };
+  } catch (error: any) {
+    return { ok: false, error: error?.message || "POINT_DEBIT_FAILED" };
+  }
+}

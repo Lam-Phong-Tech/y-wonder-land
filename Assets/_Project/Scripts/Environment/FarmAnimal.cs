@@ -1,6 +1,7 @@
 using UnityEngine;
 using System;
 using YWonderLand.Data;
+using YWonderLand.Backend;
 
 namespace YWonderLand.Environment
 {
@@ -41,6 +42,70 @@ namespace YWonderLand.Environment
         public bool hasProductReady = false;
         public bool isVaccinated = false;
         public bool LastHarvestWasFinal { get; private set; }
+
+        // ── BỆNH / VẮC-XIN — theo CÔNG THỨC VatNuoi2 + CachTinh ──
+        // Mốc phát bệnh = "Thời điểm phát bệnh" (hệ số 0.15–0.5) × "Số ngày nuôi".
+        // Tới mốc thì GIEO XÁC SUẤT "Tỉ lệ phát bệnh" (0.3–0.6) — MỘT lần cho cả vòng nuôi,
+        // khớp công thức chi phí của CachTinh (thuốc chỉ tính 1 lần, nhân với tỉ lệ phát bệnh).
+        // Một mũi vắc-xin phòng được = Số ngày nuôi ÷ "Số lượng Vắc-xin cần".
+        // 2 field dưới chỉ để ÉP số khi test — >0 là đè lên số của loài.
+        [Header("Bệnh / Vắc-xin — ÉP SỐ để test (0 = theo VatNuoi2)")]
+        [Tooltip("ÉP mốc phát bệnh (giây). 0 = tính theo loài: hệ số × số ngày nuôi.")]
+        [SerializeField] private float sicknessOnsetSec = 0f;
+        [Tooltip("ÉP thời gian một mũi vắc-xin (giây). 0 = tính theo loài: số ngày nuôi ÷ số mũi.")]
+        [SerializeField] private float vaccineProtectSec = 0f;
+
+        /// <summary>Mốc HẾT HẠN vắc-xin (unix giây). now &lt; mốc này = đang được bảo vệ.</summary>
+        private double vaccineUntilUnix = 0.0;
+        /// <summary>Mốc bắt đầu vòng nuôi (để đếm tới thời điểm phát bệnh). Đặt khi thả, KHÔNG reset khi tiêm.</summary>
+        private double sickRefUnix = 0.0;
+        /// <summary>Đã gieo xác suất phát bệnh cho vòng nuôi này chưa (mỗi vòng chỉ gieo MỘT lần).</summary>
+        private bool sicknessRolled = false;
+
+        // Số ngày nuôi cả vòng đời. Loài chưa đổ số (asset cũ) → 90 ngày cho khỏi chia 0.
+        private float RaisingDays => (data != null && data.raisingDays > 0f) ? data.raisingDays : 90f;
+
+        private float SicknessOnsetSec
+        {
+            get
+            {
+                if (sicknessOnsetSec > 0f) return sicknessOnsetSec;
+                float ratio = (data != null && data.sicknessOnsetRatio > 0f) ? data.sicknessOnsetRatio : 0.3f;
+                return YWonderLand.Core.GameTimeConfig.Days(RaisingDays * ratio);
+            }
+        }
+
+        private float VaccineProtectSec
+        {
+            get
+            {
+                if (vaccineProtectSec > 0f) return vaccineProtectSec;
+                int doses = (data != null && data.vaccineDosesPerCycle > 0) ? data.vaccineDosesPerCycle : 4;
+                return YWonderLand.Core.GameTimeConfig.Days(RaisingDays / doses);
+            }
+        }
+
+        /// <summary>Xác suất phát bệnh khi tới mốc (VatNuoi2 "Tỉ lệ phát bệnh").</summary>
+        private float SicknessChance => (data != null && data.sicknessChance > 0f) ? data.sicknessChance : 0.4f;
+
+        /// <summary>Số LIỀU thuốc tốn để chữa khỏi con này (VatNuoi2: bò 10, vịt 2...).</summary>
+        public int MedicineDosesPerCure => Mathf.Max(1, data != null ? data.medicineDosesPerCure : 1);
+
+        /// <summary>Vắc-xin còn hiệu lực (đang được phòng bệnh).</summary>
+        public bool IsVaccineActive => RealNow() < vaccineUntilUnix;
+        /// <summary>Số giây vắc-xin còn hiệu lực (0 = hết/chưa tiêm).</summary>
+        public float VaccineRemainingSec => Mathf.Max(0f, (float)(vaccineUntilUnix - RealNow()));
+        /// <summary>Số giây còn lại tới mốc gieo bệnh (float.MaxValue = đã qua mốc / loài không bệnh).</summary>
+        public float SicknessRemainingSec
+        {
+            get
+            {
+                if (data == null || !data.canGetSick) return float.MaxValue;
+                if (currentState == AnimalState.Sick || currentState == AnimalState.Dead) return 0f;
+                if (sicknessRolled) return float.MaxValue; // đã qua mốc, cả vòng nuôi không bệnh nữa
+                return Mathf.Max(0f, SicknessOnsetSec - (float)(RealNow() - sickRefUnix));
+            }
+        }
 
         // ── MỐC THỜI GIAN (đồng hồ toàn cục) ──
         // No đầy lại từ lúc này; đói dần tới khi (now - feedRefTime) >= cửa sổ sống (noFeedDeathSec chưa ăn / fedLifeSec đã ăn).
@@ -112,6 +177,9 @@ namespace YWonderLand.Environment
             feedRefTime = RealNow();
             produceRefTime = RealNow();
             hasBeenFed = false;
+            vaccineUntilUnix = 0.0;   // thả ra là chưa tiêm
+            sickRefUnix = RealNow();  // mốc bắt đầu vòng nuôi (gốc tính thời điểm phát bệnh)
+            sicknessRolled = false;   // chưa gieo xác suất bệnh cho vòng nuôi này
 
             ownsPrimitiveBody = createPrimitiveBody;
             if (createPrimitiveBody) CreatePrimitiveBody();
@@ -134,7 +202,7 @@ namespace YWonderLand.Environment
             feedTimer = (float)(now - feedRefTime); // cache cho save cũ
 
             // ── CHẾT ĐÓI khi thanh máu cạn (khách chốt thanh-máu). 'Bệnh' nay là hệ RIÊNG, KHÔNG set từ đói. ──
-            if (window > 0f && (now - feedRefTime) >= window && !IsTutorialActive())
+            if (window > 0f && (now - feedRefTime) >= window)
             {
                 DieFromHunger(); // khách chốt: chết là BIẾN MẤT + trả ô chuồng, không để xác
                 return;
@@ -151,6 +219,19 @@ namespace YWonderLand.Environment
                     UpdateVisuals();
                     OnAnimalStateChanged?.Invoke(this);
                 }
+            }
+
+            // ── MỐC PHÁT BỆNH (VatNuoi2): tới "hệ số × số ngày nuôi" thì GIEO XÁC SUẤT một lần.
+            // Đang có vắc-xin che ở đúng mốc này = thoát bệnh cả vòng nuôi (đó là công dụng của vắc-xin).
+            if (!sicknessRolled
+                && currentState != AnimalState.Sick
+                && data.canGetSick
+                && !IsTutorialActive()
+                && (now - sickRefUnix) >= SicknessOnsetSec)
+            {
+                sicknessRolled = true; // mỗi vòng nuôi chỉ gieo MỘT lần, khớp công thức chi phí CachTinh
+                if (!IsVaccineActive && UnityEngine.Random.value < SicknessChance)
+                    BecomeSick();
             }
 
             // ── RA SẢN PHẨM theo mốc thời gian (độc lập với đói; chỉ dừng khi Bệnh/Chết) ──
@@ -298,6 +379,12 @@ namespace YWonderLand.Environment
             if (data != null)
                 ScreenToast.Show($"{data.animalName} đã chết đói! Nhớ cho ăn đúng giờ.");
 
+            if (currentPen != null)
+            {
+                currentPen.RemoveAnimal(this);
+                currentPen = null;
+            }
+
             // Trả ô chuồng về trống (rào vẫn còn) để thả con mới — không để xác kẹt ô.
             if (occupiedCells != null)
             {
@@ -308,6 +395,7 @@ namespace YWonderLand.Environment
 
             currentState = AnimalState.Dead;
             OnAnimalStateChanged?.Invoke(this); // báo popup/listener cập nhật trước khi xoá
+            FarmStateSync.SaveRuntimeState();
             Destroy(gameObject);
         }
 
@@ -317,18 +405,49 @@ namespace YWonderLand.Environment
             return true;
         }
 
+        /// <summary>Thú đổ bệnh: ngừng ra sản phẩm (CanProduce chặn) cho tới khi chữa bằng thuốc.</summary>
+        private void BecomeSick()
+        {
+            if (currentState == AnimalState.Sick || currentState == AnimalState.Dead) return;
+
+            currentState = AnimalState.Sick;
+            UpdateVisuals();
+            OnAnimalStateChanged?.Invoke(this);
+            if (data != null)
+                ScreenToast.Show($"{data.animalName} bị bệnh! Dùng Thuốc để chữa, rồi tiêm Vắc-xin phòng tiếp.");
+            FarmStateSync.SaveRuntimeState();
+        }
+
+        /// <summary>TIÊM VẮC-XIN (phòng bệnh) — KHÔNG chữa được thú đang bệnh (phải dùng Thuốc trước).
+        /// Caller (UI) chịu trách nhiệm trừ item vaccine_01 khi hàm này trả true.</summary>
+        public bool Vaccinate()
+        {
+            if (currentState == AnimalState.Dead) return false;
+            if (currentState == AnimalState.Sick) return false; // đang bệnh thì phải chữa trước
+
+            // CHỈ dời hạn bảo vệ. KHÔNG reset sickRefUnix — mốc phát bệnh là điểm CỐ ĐỊNH trong vòng nuôi
+            // (hệ số × số ngày nuôi); reset đi thì 1 mũi tiêm né được bệnh vĩnh viễn.
+            vaccineUntilUnix = RealNow() + VaccineProtectSec;
+            isVaccinated = true;
+
+            UpdateVisuals();
+            OnAnimalStateChanged?.Invoke(this);
+            FarmStateSync.SaveRuntimeState();
+            return true;
+        }
+
+        /// <summary>CHỮA BỆNH bằng thuốc — chỉ có tác dụng khi đang Bệnh. KHÔNG tạo miễn dịch
+        /// (muốn phòng tiếp thì tiêm vắc-xin). Caller (UI) trừ item medicine_01 khi trả true.</summary>
         public bool Heal()
         {
             if (currentState != AnimalState.Sick) return false;
 
             currentState = AnimalState.Healthy;
-            feedRefTime = RealNow(); // chữa cũng cho no lại tạm
-            feedTimer = 0f;
-            hasBeenFed = true;
-            isVaccinated = true;
+            sicknessRolled = true; // đã tiêu tiền thuốc cho vòng nuôi này → không gieo bệnh lại (đúng CachTinh)
 
             UpdateVisuals();
             OnAnimalStateChanged?.Invoke(this);
+            FarmStateSync.SaveRuntimeState();
             return true;
         }
 
@@ -595,6 +714,11 @@ namespace YWonderLand.Environment
             hasProductReady = ready;
             isVaccinated = vacc;
             hasBeenFed = true; // con vật load lại → coi như đã cho ăn (dùng fedLifeSec)
+            // Save kiểu CŨ chỉ có cờ bool: cờ bật → cấp lại 1 kỳ bảo vệ; đếm ủ bệnh lại từ bây giờ
+            // (tránh vừa load đã đổ bệnh oan).
+            vaccineUntilUnix = vacc ? RealNow() + VaccineProtectSec : 0.0;
+            sickRefUnix = RealNow();
+            sicknessRolled = false;
 
             // Quy đổi tiến trình đã lưu (giây) về mốc thời gian tương đương để chạy tiếp mượt.
             feedRefTime = RealNow() - fTimer;
@@ -615,10 +739,14 @@ namespace YWonderLand.Environment
         public double FeedRefUnix => feedRefTime;
         public double ProduceRefUnix => produceRefTime;
         public bool HasBeenFed => hasBeenFed;
+        public double VaccineUntilUnix => vaccineUntilUnix;
+        public double SickRefUnix => sickRefUnix;
+        public bool SicknessRolled => sicknessRolled;
 
         /// <summary>Khôi phục trạng thái thú từ save (persistence): set thẳng mốc Unix → Update tự đói-bù/chết-bù
         /// theo thời gian thực đã trôi (gọi SAU Initialize, đè lại mốc no/sản phẩm).</summary>
-        public void RestoreAnimalState(double feedRefUnix, double produceRefUnix, bool fed, int harvests, bool product, bool vacc)
+        public void RestoreAnimalState(double feedRefUnix, double produceRefUnix, bool fed, int harvests, bool product, bool vacc,
+            double vaccineUntil = 0.0, double sickRef = 0.0, int stateInt = -1, bool rolled = false)
         {
             feedRefTime = feedRefUnix;
             produceRefTime = produceRefUnix;
@@ -626,6 +754,15 @@ namespace YWonderLand.Environment
             harvestsRemaining = harvests;
             hasProductReady = product;
             isVaccinated = vacc;
+            // Save CŨ chưa có 2 mốc này → mốc vòng nuôi tính từ bây giờ để không giết oan thú đang nuôi.
+            vaccineUntilUnix = vaccineUntil;
+            sickRefUnix = sickRef > 0.0 ? sickRef : RealNow();
+            sicknessRolled = rolled;
+            if (stateInt >= 0 && stateInt <= (int)AnimalState.Dead)
+            {
+                var saved = (AnimalState)stateInt;
+                if (saved == AnimalState.Sick) currentState = AnimalState.Sick; // giữ nguyên đang bệnh qua các phiên
+            }
             feedTimer = (float)(RealNow() - feedRefTime);
             produceTimer = (float)(RealNow() - produceRefTime);
             UpdateVisuals();

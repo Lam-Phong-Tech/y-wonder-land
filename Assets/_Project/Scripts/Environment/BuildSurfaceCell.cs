@@ -116,6 +116,23 @@ namespace YWonderLand.Environment
             return cleared;
         }
 
+        /// <summary>Tính tổng vật liệu đã tốn để xây occupant (đọc mọi ô occupant chiếm), để hoàn khi phá.
+        /// Chỉ đọc, KHÔNG đổi trạng thái ô. Ô miễn phí (vd ruộng) có BuildMaterialId rỗng nên trả về 0.</summary>
+        public static void SumRefund(GameObject occupant, out int wood, out int stone)
+        {
+            wood = 0;
+            stone = 0;
+            if (occupant == null) return;
+
+            foreach (var cell in All)
+            {
+                if (cell == null || !MatchesOccupant(cell.Occupant, occupant)) continue;
+
+                if (cell.BuildMaterialId == "wood_01") wood += cell.BuildCost;
+                else if (cell.BuildMaterialId == "stone_01") stone += cell.BuildCost;
+            }
+        }
+
         private static bool MatchesOccupant(GameObject stored, GameObject target)
         {
             if (stored == null || target == null) return false;

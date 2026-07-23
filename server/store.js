@@ -3,6 +3,7 @@
 // the PostgreSQL adapter while preserving the same API contract.
 const fs = require("fs");
 const path = require("path");
+const { prepareAnimalPlacement } = require("./farmAnimalPlacement");
 
 const STORE_MODE = (process.env.STORE_MODE || "json").toLowerCase();
 const DB_PATH = process.env.YW_DATA_PATH || path.join(__dirname, "data.json");
@@ -23,6 +24,8 @@ function emptyDb() {
     playersByWebUserId: {},
     playerSessions: {},
     economies: {},
+    webTopupPointMicrosRemainders: {},
+    pointWalletReservations: {},
     inventories: {},
     farmStates: {},
     dailyLimits: {},
@@ -36,6 +39,24 @@ function normalizeObject(value) {
   return value && typeof value === "object" && !Array.isArray(value) ? value : {};
 }
 
+function normalizeEconomy(value) {
+  const economy = normalizeObject(value);
+  return {
+    version: toInt(economy.version, 1),
+    pos: toNumber(economy.pos, 5000),
+    updatedAt: economy.updatedAt || nowISO(),
+  };
+}
+
+function normalizeTransaction(value) {
+  const transaction = { ...normalizeObject(value) };
+  delete transaction.deltaUpos;
+  if (transaction.economyAfter) {
+    transaction.economyAfter = normalizeEconomy(transaction.economyAfter);
+  }
+  return transaction;
+}
+
 function normalizeDb(db) {
   const source = db || {};
   return {
@@ -46,11 +67,18 @@ function normalizeDb(db) {
     players: normalizeObject(source.players),
     playersByWebUserId: normalizeObject(source.playersByWebUserId),
     playerSessions: normalizeObject(source.playerSessions),
-    economies: normalizeObject(source.economies),
+    economies: Object.fromEntries(
+      Object.entries(normalizeObject(source.economies))
+        .map(([playerId, economy]) => [playerId, normalizeEconomy(economy)])
+    ),
+    webTopupPointMicrosRemainders: normalizeObject(source.webTopupPointMicrosRemainders),
+    pointWalletReservations: normalizeObject(source.pointWalletReservations),
     inventories: normalizeObject(source.inventories),
     farmStates: normalizeObject(source.farmStates),
     dailyLimits: normalizeObject(source.dailyLimits),
-    transactions: Array.isArray(source.transactions) ? source.transactions : [],
+    transactions: Array.isArray(source.transactions)
+      ? source.transactions.map(normalizeTransaction)
+      : [],
     sessions: Array.isArray(source.sessions) ? source.sessions : [],
     browserAuthRequests: normalizeObject(source.browserAuthRequests),
   };
@@ -87,7 +115,6 @@ function makeDefaultEconomy() {
   return {
     version: 1,
     pos: 5000,
-    upos: 0,
     updatedAt: nowISO(),
   };
 }
@@ -161,6 +188,10 @@ class JsonStore {
 
   ensurePlayerStateInDb(db, playerId) {
     if (!db.economies[playerId]) db.economies[playerId] = makeDefaultEconomy();
+    const remainder = Number(db.webTopupPointMicrosRemainders[playerId]);
+    if (!Number.isSafeInteger(remainder) || remainder < 0 || remainder >= 1_000_000) {
+      db.webTopupPointMicrosRemainders[playerId] = 0;
+    }
     if (!db.inventories[playerId]) db.inventories[playerId] = makeDefaultInventory();
     if (!db.farmStates[playerId]) db.farmStates[playerId] = makeDefaultFarmState();
     if (!db.dailyLimits[playerId]) db.dailyLimits[playerId] = makeDefaultDailyLimits();
@@ -276,6 +307,146 @@ class JsonStore {
     this.ensurePlayerStateInDb(db, playerId);
     this.writeAll(db);
     return db.players[playerId];
+  }
+
+  getWebPointBalance(webUserId) {
+    const db = this.readAll();
+    const playerId = db.playersByWebUserId[String(webUserId || "").trim()];
+    if (!playerId) return null;
+    const player = db.players[playerId];
+    const economy = db.economies[playerId];
+    if (!player || !economy) return null;
+    return {
+      player: JSON.parse(JSON.stringify(player)),
+      economy: normalizeEconomy(economy),
+    };
+  }
+
+  applyWebPointReservation(operation, input) {
+    const op = String(operation || "").trim().toLowerCase();
+    const reservationId = String(input && input.reservationId || "").trim();
+    const webUserId = String(input && input.webUserId || "").trim();
+    const expectedPlayerId = String(input && input.expectedPlayerId || "").trim();
+    const pointAmount = Number(input && input.pointAmount);
+    const purpose = String(input && input.purpose || "").trim();
+    const source = String(input && input.source || "").trim();
+    const occurredAt = String(input && input.occurredAt || "").trim();
+    if (!["reserve", "capture", "release"].includes(op)
+        || !reservationId || !webUserId || !expectedPlayerId || !purpose || !source
+        || !Number.isSafeInteger(pointAmount) || pointAmount < 1) {
+      return { ok: false, error: "INVALID_POINT_RESERVATION" };
+    }
+
+    const db = this.readAll();
+    const mappedPlayerId = db.playersByWebUserId[webUserId];
+    if (mappedPlayerId !== expectedPlayerId || !db.players[mappedPlayerId]) {
+      return { ok: false, error: "GAME_POINT_IDENTITY_MISMATCH" };
+    }
+    this.ensurePlayerStateInDb(db, mappedPlayerId);
+    const player = JSON.parse(JSON.stringify(db.players[mappedPlayerId]));
+    const economy = db.economies[mappedPlayerId];
+    const requestSignature = JSON.stringify({
+      reservationId,
+      webUserId,
+      expectedPlayerId,
+      pointAmount,
+      purpose,
+      source,
+      occurredAt,
+    });
+    let reservation = db.pointWalletReservations[reservationId];
+    if (reservation && (reservation.playerId !== mappedPlayerId
+        || reservation.requestSignature !== requestSignature)) {
+      return { ok: false, error: "IDEMPOTENCY_CONFLICT" };
+    }
+
+    const transactionFor = (currentOperation) => findTransactionByIdempotency(
+      db,
+      `web_point_${currentOperation}:${source}:${reservationId}`
+    );
+    const result = (duplicate, transaction) => ({
+      ok: true,
+      duplicate,
+      player,
+      economy: normalizeEconomy(economy),
+      reservation: JSON.parse(JSON.stringify(reservation)),
+      transaction: transaction || null,
+    });
+
+    if (op === "reserve") {
+      if (reservation) return result(true, transactionFor("reserve"));
+      if (economy.pos < pointAmount) {
+        return { ok: false, error: "INSUFFICIENT_BALANCE", economy: normalizeEconomy(economy) };
+      }
+
+      economy.pos -= pointAmount;
+      economy.updatedAt = nowISO();
+      reservation = {
+        id: reservationId,
+        playerId: mappedPlayerId,
+        webUserId,
+        expectedPlayerId,
+        pointAmount,
+        purpose,
+        source,
+        occurredAt,
+        requestSignature,
+        status: "RESERVED",
+        createdAt: nowISO(),
+        updatedAt: nowISO(),
+      };
+      db.pointWalletReservations[reservationId] = reservation;
+      const transaction = {
+        id: generateId("wpr"),
+        playerId: mappedPlayerId,
+        type: "web_point_reserve",
+        ref: reservationId,
+        idempotencyKey: `web_point_reserve:${source}:${reservationId}`,
+        requestSignature: JSON.stringify({ op, requestSignature }),
+        deltaPos: -pointAmount,
+        economyAfter: { pos: economy.pos },
+        createdAt: nowISO(),
+      };
+      db.transactions.push(transaction);
+      this.writeAll(db);
+      return result(false, transaction);
+    }
+
+    if (!reservation) return { ok: false, error: "POINT_RESERVATION_NOT_FOUND" };
+    const targetStatus = op === "capture" ? "CAPTURED" : "RELEASED";
+    if (reservation.status === targetStatus) return result(true, transactionFor(op));
+    if (reservation.status !== "RESERVED") {
+      return { ok: false, error: "POINT_RESERVATION_STATE_CONFLICT" };
+    }
+
+    let deltaPos = 0;
+    if (op === "release") {
+      if (economy.pos > Number.MAX_SAFE_INTEGER - pointAmount) {
+        return { ok: false, error: "POINT_BALANCE_OVERFLOW" };
+      }
+      economy.pos += pointAmount;
+      economy.updatedAt = nowISO();
+      deltaPos = pointAmount;
+      reservation.releasedAt = nowISO();
+    } else {
+      reservation.capturedAt = nowISO();
+    }
+    reservation.status = targetStatus;
+    reservation.updatedAt = nowISO();
+    const transaction = {
+      id: generateId("wpr"),
+      playerId: mappedPlayerId,
+      type: `web_point_${op}`,
+      ref: reservationId,
+      idempotencyKey: `web_point_${op}:${source}:${reservationId}`,
+      requestSignature: JSON.stringify({ op, requestSignature }),
+      deltaPos,
+      economyAfter: { pos: economy.pos },
+      createdAt: nowISO(),
+    };
+    db.transactions.push(transaction);
+    this.writeAll(db);
+    return result(false, transaction);
   }
 
   createBrowserAuthRequest(record) {
@@ -438,11 +609,8 @@ class JsonStore {
     const current = db.economies[playerId] || makeDefaultEconomy();
     const incoming = economy || {};
     db.economies[playerId] = {
-      ...current,
-      ...incoming,
       version: toInt(incoming.version, current.version || 1),
       pos: toNumber(incoming.pos, current.pos || 0),
-      upos: toNumber(incoming.upos, current.upos || 0),
       updatedAt: nowISO(),
     };
     this.writeAll(db);
@@ -454,8 +622,19 @@ class JsonStore {
     this.ensurePlayerStateInDb(db, playerId);
 
     const idempotencyKey = meta && meta.idempotencyKey;
+    const deltaPos = toNumber(delta && delta.pos, 0);
+    const requestSignature = JSON.stringify({
+      op: "economy",
+      playerId,
+      deltaPos,
+      type: (meta && meta.type) || "adjust",
+      ref: (meta && meta.ref) || "",
+    });
     const existing = findTransactionByIdempotency(db, idempotencyKey);
     if (existing) {
+      if (existing.playerId !== playerId || (existing.requestSignature && existing.requestSignature !== requestSignature)) {
+        return { ok: false, error: "IDEMPOTENCY_CONFLICT" };
+      }
       return {
         ok: true,
         economy: existing.economyAfter || db.economies[playerId],
@@ -465,15 +644,12 @@ class JsonStore {
     }
 
     const economy = db.economies[playerId];
-    const deltaPos = toNumber(delta && delta.pos, 0);
-    const deltaUpos = toNumber(delta && delta.upos, 0);
 
-    if (economy.pos + deltaPos < 0 || economy.upos + deltaUpos < 0) {
+    if (economy.pos + deltaPos < 0) {
       return { ok: false, error: "INSUFFICIENT_BALANCE", economy };
     }
 
     economy.pos += deltaPos;
-    economy.upos += deltaUpos;
     economy.updatedAt = nowISO();
 
     const transaction = {
@@ -482,14 +658,103 @@ class JsonStore {
       type: (meta && meta.type) || "adjust",
       ref: (meta && meta.ref) || "",
       idempotencyKey: idempotencyKey || "",
+      requestSignature,
       deltaPos,
-      deltaUpos,
-      economyAfter: { pos: economy.pos, upos: economy.upos },
+      economyAfter: { pos: economy.pos },
       createdAt: nowISO(),
     };
     db.transactions.push(transaction);
     this.writeAll(db);
     return { ok: true, economy, transaction };
+  }
+
+  creditWebTopup(webUser, pointAmountMicros, meta = {}) {
+    const amountMicros = Number(pointAmountMicros);
+    const pointAmount = String(meta.pointAmount || "").trim();
+    const transactionId = String(meta.transactionId || "").trim();
+    const source = String(meta.source || "ywonder-web").trim();
+    const expectedPlayerId = String(meta.expectedPlayerId || "").trim();
+    if (!webUser || !webUser.id || !transactionId || !pointAmount
+      || !Number.isSafeInteger(amountMicros) || amountMicros < 1) {
+      return { ok: false, error: "INVALID_WEB_TOPUP" };
+    }
+
+    let player;
+    let db;
+    if (expectedPlayerId) {
+      db = this.readAll();
+      const mappedPlayerId = db.playersByWebUserId[webUser.id];
+      if (mappedPlayerId !== expectedPlayerId || !db.players[mappedPlayerId]) {
+        return { ok: false, error: "GAME_POINT_IDENTITY_MISMATCH" };
+      }
+      player = JSON.parse(JSON.stringify(db.players[mappedPlayerId]));
+    } else {
+      player = this.getOrCreatePlayerForWebUser(webUser);
+      db = this.readAll();
+    }
+    this.ensurePlayerStateInDb(db, player.id);
+    const idempotencyKey = `web_topup:${source}:${transactionId}`;
+    const requestSignature = JSON.stringify({
+      op: "web_topup_credit",
+      source,
+      transactionId,
+      webUserId: webUser.id,
+      expectedPlayerId,
+      pointAmount,
+      pointAmountMicros: amountMicros,
+      occurredAt: String(meta.occurredAt || ""),
+    });
+    const existing = findTransactionByIdempotency(db, idempotencyKey);
+    if (existing) {
+      if (existing.playerId !== player.id || existing.requestSignature !== requestSignature) {
+        return { ok: false, error: "IDEMPOTENCY_CONFLICT" };
+      }
+      return {
+        ok: true,
+        duplicate: true,
+        player,
+        economy: db.economies[player.id],
+        transaction: existing,
+      };
+    }
+
+    const economy = db.economies[player.id];
+    const remainderBefore = db.webTopupPointMicrosRemainders[player.id];
+    const totalMicros = remainderBefore + amountMicros;
+    if (!Number.isSafeInteger(totalMicros)) {
+      return { ok: false, error: "POINT_BALANCE_OVERFLOW" };
+    }
+    const deltaPos = Math.floor(totalMicros / 1_000_000);
+    const remainderAfter = totalMicros % 1_000_000;
+    if (!Number.isSafeInteger(economy.pos) || economy.pos > Number.MAX_SAFE_INTEGER - deltaPos) {
+      return { ok: false, error: "POINT_BALANCE_OVERFLOW" };
+    }
+    economy.pos += deltaPos;
+    economy.updatedAt = nowISO();
+    db.webTopupPointMicrosRemainders[player.id] = remainderAfter;
+
+    const transaction = {
+      id: generateId("wtx"),
+      playerId: player.id,
+      type: "web_topup_credit",
+      ref: transactionId,
+      idempotencyKey,
+      requestSignature,
+      source,
+      webUserId: webUser.id,
+      expectedPlayerId: expectedPlayerId || undefined,
+      occurredAt: String(meta.occurredAt || ""),
+      pointAmount,
+      pointAmountMicros: amountMicros,
+      pointMicrosRemainderBefore: remainderBefore,
+      pointMicrosRemainderAfter: remainderAfter,
+      deltaPos,
+      economyAfter: JSON.parse(JSON.stringify(economy)),
+      createdAt: nowISO(),
+    };
+    db.transactions.push(transaction);
+    this.writeAll(db);
+    return { ok: true, duplicate: false, player, economy, transaction };
   }
 
   getInventory(playerId) {
@@ -820,6 +1085,110 @@ class JsonStore {
     };
   }
 
+  placeFarmAnimal(playerId, placement, options = {}) {
+    const db = this.readAll();
+    this.ensurePlayerStateInDb(db, playerId);
+
+    const itemId = String(placement && placement.itemId || "").trim();
+    const cellKeys = Array.isArray(placement && placement.cellKeys)
+      ? placement.cellKeys.map((key) => String(key || "").trim())
+      : [];
+    const idempotencyKey = String(options.idempotencyKey || "").trim();
+    const expectedVersion = toInt(options.expectedVersion, 0);
+    const rule = placement && placement.rule;
+    const requestSignature = JSON.stringify({
+      op: "farm_animal_place",
+      playerId,
+      itemId,
+      cellKeys,
+      expectedVersion,
+    });
+
+    const existing = findTransactionByIdempotency(db, idempotencyKey);
+    if (existing) {
+      if (existing.playerId !== playerId || existing.requestSignature !== requestSignature) {
+        return { ok: false, error: "IDEMPOTENCY_CONFLICT" };
+      }
+      return {
+        ...(JSON.parse(JSON.stringify(existing.result || {}))),
+        ok: true,
+        transaction: existing,
+        duplicate: true,
+      };
+    }
+
+    const inventory = db.inventories[playerId];
+    const currentFarm = db.farmStates[playerId];
+    const currentVersion = Math.max(1, toInt(currentFarm.version, 1));
+    if (currentVersion !== expectedVersion) {
+      return {
+        ok: false,
+        error: "FARM_STATE_CONFLICT",
+        inventory: JSON.parse(JSON.stringify(inventory)),
+        farm_state: JSON.parse(JSON.stringify(currentFarm)),
+      };
+    }
+
+    const slot = findSlot(inventory, itemId);
+    if (!slot || slot.quantity < 1) {
+      return {
+        ok: false,
+        error: "INSUFFICIENT_ITEM",
+        inventory: JSON.parse(JSON.stringify(inventory)),
+        farm_state: JSON.parse(JSON.stringify(currentFarm)),
+      };
+    }
+
+    const prepared = prepareAnimalPlacement(currentFarm, { itemId, cellKeys }, rule);
+    if (!prepared.ok) {
+      return {
+        ok: false,
+        error: prepared.error,
+        inventory: JSON.parse(JSON.stringify(inventory)),
+        farm_state: JSON.parse(JSON.stringify(currentFarm)),
+      };
+    }
+
+    slot.quantity -= 1;
+    inventory.slots = inventory.slots.filter((entry) => entry.quantity > 0);
+    inventory.version = Math.max(1, toInt(inventory.version, 1)) + 1;
+    inventory.updatedAt = nowISO();
+
+    db.farmStates[playerId] = {
+      ...prepared.farmState,
+      version: currentVersion + 1,
+      updatedAt: nowISO(),
+    };
+
+    const inventoryAfter = JSON.parse(JSON.stringify(inventory));
+    const farmStateAfter = JSON.parse(JSON.stringify(db.farmStates[playerId]));
+    const response = {
+      ok: true,
+      duplicate: false,
+      inventory: inventoryAfter,
+      farm_state: farmStateAfter,
+      animal: prepared.animal,
+    };
+    const transaction = {
+      id: generateId("fatx"),
+      playerId,
+      type: "farm_animal_place",
+      ref: prepared.animal.instanceId,
+      idempotencyKey,
+      requestSignature,
+      itemId,
+      quantityDelta: -1,
+      cellKeys,
+      inventoryAfter,
+      farmStateAfter,
+      result: JSON.parse(JSON.stringify(response)),
+      createdAt: nowISO(),
+    };
+    db.transactions.push(transaction);
+    this.writeAll(db);
+    return { ...response, transaction };
+  }
+
   getDailyLimits(playerId) {
     const db = this.readAll();
     this.ensurePlayerStateInDb(db, playerId);
@@ -909,6 +1278,7 @@ class JsonStore {
     db.users = db.users.filter((user) => user.id !== playerId);
     delete db.profiles[playerId];
     delete db.economies[playerId];
+    delete db.webTopupPointMicrosRemainders[playerId];
     delete db.inventories[playerId];
     delete db.farmStates[playerId];
     delete db.dailyLimits[playerId];
@@ -951,6 +1321,8 @@ module.exports = {
   findUserById: activeStore.findUserById.bind(activeStore),
   createUser: activeStore.createUser.bind(activeStore),
   getOrCreatePlayerForWebUser: activeStore.getOrCreatePlayerForWebUser.bind(activeStore),
+  getWebPointBalance: activeStore.getWebPointBalance.bind(activeStore),
+  applyWebPointReservation: activeStore.applyWebPointReservation.bind(activeStore),
   createBrowserAuthRequest: activeStore.createBrowserAuthRequest.bind(activeStore),
   approveBrowserAuthRequest: activeStore.approveBrowserAuthRequest.bind(activeStore),
   exchangeBrowserAuthRequest: activeStore.exchangeBrowserAuthRequest.bind(activeStore),
@@ -964,6 +1336,7 @@ module.exports = {
   getEconomy: activeStore.getEconomy.bind(activeStore),
   setEconomy: activeStore.setEconomy.bind(activeStore),
   applyEconomyDelta: activeStore.applyEconomyDelta.bind(activeStore),
+  creditWebTopup: activeStore.creditWebTopup.bind(activeStore),
   getInventory: activeStore.getInventory.bind(activeStore),
   setInventory: activeStore.setInventory.bind(activeStore),
   adjustInventoryItem: activeStore.adjustInventoryItem.bind(activeStore),
@@ -972,6 +1345,7 @@ module.exports = {
   getFarmState: activeStore.getFarmState.bind(activeStore),
   setFarmState: activeStore.setFarmState.bind(activeStore),
   compareAndSetFarmState: activeStore.compareAndSetFarmState.bind(activeStore),
+  placeFarmAnimal: activeStore.placeFarmAnimal.bind(activeStore),
   getDailyLimits: activeStore.getDailyLimits.bind(activeStore),
   consumeDailyLimit: activeStore.consumeDailyLimit.bind(activeStore),
   setDailyLimits: activeStore.setDailyLimits.bind(activeStore),

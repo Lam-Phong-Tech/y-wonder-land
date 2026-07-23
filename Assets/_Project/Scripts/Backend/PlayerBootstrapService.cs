@@ -30,7 +30,6 @@ namespace YWonderLand.Backend
         {
             public int version = 1;
             public long pos;
-            public long upos;
             public string updatedAt;
         }
 
@@ -189,7 +188,7 @@ namespace YWonderLand.Backend
                 PlayerProfileService.Instance?.AcceptServerProfile(payload.player_profile);
 
             if (payload.economy != null)
-                EconomyManager.Instance?.ApplyServerState(payload.economy.pos, payload.economy.upos);
+                EconomyManager.Instance?.ApplyServerState(payload.economy.pos);
 
             if (payload.inventory != null)
                 InventoryManager.Instance?.ApplyServerState(payload.inventory.maxSlots, ToManagerSlots(payload.inventory.slots));

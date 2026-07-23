@@ -78,6 +78,10 @@ Thumbs.db
 .gemini/
 
 Assets/Building/Map1*
+# WindMill source assets are required by FarmScene and must be versioned.
+!Assets/Building/Map1.2.meta
+!Assets/Building/Map1.2/
+!Assets/Building/Map1.2/**
 
 # ============================================
 # Build temp + texture NPC gốc nặng (391MB) — extract lại được từ .glb (22/06)
@@ -88,3 +92,12 @@ Assets/Building/Map1*
 
 # File khóa tạm của Word/Office (~$...) khi đang mở .docx
 ~$*
+
+# Local test, handoff, and helper artifacts (not source)
+/outputs/
+/.tools/
+/.claude/settings.local.json
+
+# Python test cache
+__pycache__/
+*.py[cod]

@@ -353,8 +353,8 @@
     position: absolute;
     right: 112px;
     bottom: 184px;
-    width: 392px;
-    min-height: 190px;
+    width: 416px;
+    min-height: 240px;
     background-color: rgba(21, 26, 39, 0.82);
     border-width: 1px;
     border-color: rgba(255, 255, 255, 0.18);
@@ -390,7 +390,7 @@
 }
 
 .build-popup-panel .build-item-scroll {
-    height: 132px;
+    height: 174px;
     flex-grow: 0;
 }
 
@@ -399,14 +399,35 @@
     align-items: stretch;
 }
 
-.build-popup-panel .build-item-scroll .unity-scroller--horizontal {
+/* Giấu CẢ HAI thanh cuộn. Chỉ giấu thanh ngang là chưa đủ: lúc rê chuột thẻ phóng to
+   1.05, ScrollView tưởng nội dung tràn nên bật thanh cuộn DỌC, thanh đó ăn mất bề
+   ngang và xén cụt thẻ "Chuồng" ở cuối hàng. */
+.build-popup-panel .build-item-scroll .unity-scroller--horizontal,
+.build-popup-panel .build-item-scroll .unity-scroller--vertical {
     display: none;
 }
 
+/* Rê/bấm KHÔNG phóng to nữa — phóng to là thứ đẻ ra thanh cuộn nói trên. Đổi màu nền
+   và viền là đủ để biết đang trỏ vào thẻ nào, mà không đụng gì tới bố cục. */
+.build-popup-panel .build-item-card:hover,
+.build-popup-panel .build-item-card:active {
+    scale: 1;
+}
+
+.build-popup-panel .build-item-card:active {
+    background-color: rgba(255, 255, 255, 0.18);
+    border-color: var(--color-accent-yellow);
+}
+
+/* Chiều cao thẻ đã CHỪA SẴN chỗ cho hàng nút ✓/X (xem .build-card-actions).
+   Nếu bóp lại vừa khít lúc chưa chọn thì khi chọn hàng nút chen vào, flexbox co
+   các con lại -> icon chuồng bị dẹp/méo. */
+/* 3 thẻ = 3 x (114 + 6) = 360, còn dư ~36px so với lòng bảng (416 - 20 padding).
+   Chừa dư thật rộng để có lỡ hiện thanh cuộn cũng không xén mất thẻ cuối. */
 .build-popup-panel .build-item-card {
-    width: 112px;
-    height: 126px;
-    margin-right: 8px;
+    width: 114px;
+    height: 164px;
+    margin-right: 6px;
     padding: 8px 6px;
     border-radius: 8px;
     justify-content: flex-start;
@@ -416,42 +437,50 @@
     width: 38px;
     height: 38px;
     margin-bottom: 4px;
+    flex-shrink: 0; /* cấm co -> icon luôn vuông, không méo */
 }
 
 .build-popup-panel .build-item-name {
     font-size: 12px;
-    max-width: 100px;
+    max-width: 102px; /* = bề ngang thẻ 114 trừ padding 6 mỗi bên */
     white-space: normal;
     min-height: 30px;
+    flex-shrink: 0;
 }
 
 .build-popup-panel .build-item-price-row {
     height: 22px;
     margin-top: 2px;
+    flex-shrink: 0;
 }
 
+/* Dùng visibility chứ KHÔNG dùng display:none — display:none rút hàng nút khỏi
+   layout, nên lúc chọn thẻ nó chen vào và làm co icon. visibility giữ nguyên chỗ,
+   thẻ không đổi kích thước khi chọn. (Phần tử hidden cũng không nhận được click.) */
 .build-card-actions {
-    display: none;
+    visibility: hidden;
     flex-direction: row;
     align-items: center;
     justify-content: center;
     margin-top: 6px;
+    flex-shrink: 0;
 }
 
 .build-item-selected .build-card-actions {
-    display: flex;
+    visibility: visible;
 }
 
 .build-card-action-btn {
-    width: 34px;
-    height: 30px;
+    width: 46px;
+    height: 42px;
     border-width: 0;
     border-radius: 8px;
-    margin: 0 4px;
+    margin: 0 3px;
     padding: 0;
-    font-size: 16px;
+    font-size: 22px;
     -unity-font-style: bold;
     color: var(--color-text-white);
+    flex-shrink: 0;
 }
 
 .build-card-confirm {
@@ -478,8 +507,8 @@
     top: auto;
     left: auto;
     right: 112px;
-    bottom: 382px;
-    width: 392px;
+    bottom: 432px; /* nằm ngay trên panel: 184 (bottom panel) + 240 (cao panel) + 8 */
+    width: 416px;
     font-size: 15px;
     letter-spacing: 0;
     white-space: normal;
@@ -488,5 +517,5 @@
 
 .build-info-tooltip {
     right: 112px;
-    bottom: 382px;
+    bottom: 432px;
 }

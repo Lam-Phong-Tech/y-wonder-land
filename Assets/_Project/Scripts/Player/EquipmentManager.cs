@@ -12,7 +12,8 @@ namespace YWonderLand.Player
         SeedBag,
         Pickaxe,
         AnimalFeed,
-        Hammer
+        Hammer,
+        WaterBucket
     }
 
     /// <summary>
@@ -47,6 +48,9 @@ namespace YWonderLand.Player
 
         [Tooltip("Model cái Búa (gõ ô / xây dựng) gắn trên tay phải")]
         public GameObject hammerModel;
+
+        [Tooltip("Model cái XÔ MÚC NƯỚC gắn trên tay TRÁI (khác bình tưới tay phải). Kéo 'WaterBucket' dưới mixamorig:LeftHand vào đây.")]
+        public GameObject waterBucketModel;
 
         [Header("Placeholder tự sinh (khi CHƯA có model 3D thật)")]
         [Tooltip("Tự tạo dụng cụ tạm bằng khối primitive nếu ô model còn trống")]
@@ -121,6 +125,7 @@ namespace YWonderLand.Player
             if (seedBagModel == null) seedBagModel = BuildSeedBag(lh);
             if (feedModel == null) feedModel = BuildFeed(rh);
             if (hammerModel == null) hammerModel = BuildHammer(rh);
+            if (waterBucketModel == null) waterBucketModel = BuildWaterBucket(lh); // XÔ múc nước — tay TRÁI
         }
 
         private GameObject NewToolRoot(string name, Transform hand)
@@ -217,6 +222,16 @@ namespace YWonderLand.Player
             return root;
         }
 
+        private GameObject BuildWaterBucket(Transform hand)
+        {
+            var root = NewToolRoot("Placeholder_WaterBucket", hand);
+            Color tin = new Color(0.45f, 0.5f, 0.55f); // màu xô thiếc xám
+            Prim(root.transform, PrimitiveType.Cylinder, new Vector3(0, 0.08f, 0), Vector3.zero, new Vector3(0.11f, 0.09f, 0.11f), tin);              // thân xô
+            Prim(root.transform, PrimitiveType.Cylinder, new Vector3(0, 0.17f, 0), Vector3.zero, new Vector3(0.12f, 0.01f, 0.12f), METAL);            // miệng xô
+            Prim(root.transform, PrimitiveType.Cylinder, new Vector3(0, 0.24f, 0), new Vector3(90, 0, 0), new Vector3(0.014f, 0.075f, 0.014f), METAL);// quai xách
+            return root;
+        }
+
         /// <summary>
         /// Gọi hàm này để hiện một công cụ cụ thể lên tay
         /// </summary>
@@ -251,6 +266,9 @@ namespace YWonderLand.Player
                 case ToolType.Hammer:
                     if (hammerModel != null) hammerModel.SetActive(true);
                     break;
+                case ToolType.WaterBucket:
+                    if (waterBucketModel != null) waterBucketModel.SetActive(true);
+                    break;
             }
         }
 
@@ -267,6 +285,7 @@ namespace YWonderLand.Player
             if (pickaxeModel != null) pickaxeModel.SetActive(false);
             if (feedModel != null) feedModel.SetActive(false);
             if (hammerModel != null) hammerModel.SetActive(false);
+            if (waterBucketModel != null) waterBucketModel.SetActive(false);
         }
     }
 }

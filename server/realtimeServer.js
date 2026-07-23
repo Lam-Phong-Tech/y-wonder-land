@@ -84,6 +84,18 @@ function attachRealtimeServer(server, options) {
     }
   }
 
+  function notifyPlayer(playerId, payload) {
+    if (!playerId || !payload) return 0;
+    let delivered = 0;
+    for (const [ws, client] of clients.entries()) {
+      if (!client || client.playerId !== playerId) continue;
+      if (ws.readyState !== WebSocket.OPEN) continue;
+      send(ws, payload);
+      delivered += 1;
+    }
+    return delivered;
+  }
+
   function getRoomResources(room) {
     if (!resourcesByRoom.has(room)) resourcesByRoom.set(room, new Map());
     return resourcesByRoom.get(room);
@@ -724,6 +736,7 @@ function attachRealtimeServer(server, options) {
     close,
     replacePlayerSession,
     disconnectPlayerSession,
+    notifyPlayer,
   };
 }
 

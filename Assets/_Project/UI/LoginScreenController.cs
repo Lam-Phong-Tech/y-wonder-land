@@ -33,6 +33,10 @@ public class LoginScreenController : MonoBehaviour
     private Button btnLoginWeb;
     private Button btnQuitApp;
     private Label loginStatus;
+    private Label demoLoginLink;
+    private bool demoFormRevealed;
+    private int browserAuthUiAttempt;
+    private bool isBrowserAuthWaiting;
 
     // Register form elements
     private TextField regUsernameField;
@@ -78,7 +82,8 @@ public class LoginScreenController : MonoBehaviour
         QueryElements(rootElement);
         RegisterCallbacks();
         SetupPlaceholders();
-        
+        ApplyAuthModeLayout();
+
         // Disable register button by default until validated
         if (btnRegister != null)
         {
@@ -122,6 +127,7 @@ public class LoginScreenController : MonoBehaviour
         btnLoginWeb = root.Q<Button>("BtnLoginWeb");
         btnQuitApp = root.Q<Button>("BtnQuitApp");
         loginStatus = root.Q<Label>("LoginStatus");
+        demoLoginLink = root.Q<Label>("DemoLoginLink");
 
         // Register elements
         regUsernameField = root.Q<TextField>("RegUsernameField");
@@ -168,6 +174,9 @@ public class LoginScreenController : MonoBehaviour
 
         // Forgot password
         forgotPassword?.RegisterCallback<ClickEvent>(evt => OnForgotPasswordClicked());
+
+        // Lối vào tài khoản trình diễn
+        demoLoginLink?.RegisterCallback<ClickEvent>(evt => ShowDemoLoginForm());
 
         // Input focus styling
         RegisterInputFocusEvents(usernameField, "UsernameGroup");
@@ -218,6 +227,104 @@ public class LoginScreenController : MonoBehaviour
         // Unity UI Toolkit uses the 'viewDataKey' or we set via textEdition
         // For broad compatibility, use the label or a manual approach
         field.textEdition.placeholder = placeholder;
+    }
+
+    /// <summary>
+    /// Dựng lại màn Login theo BackendConfig.localAuthEnabled.
+    /// TẮT (mặc định) = mọi tài khoản đăng nhập qua website: giấu tab, giấu ô nhập
+    /// tài khoản/mật khẩu và 2 nút "trong game", chỉ chừa ĐĂNG NHẬP + ĐĂNG KÝ mở web.
+    /// Lý do giấu cả form: khi browserAuthEnabled bật, luồng web KHÔNG đọc chữ người
+    /// chơi gõ trong game — để ô đó lại chỉ khiến họ gõ thừa rồi bị trình duyệt hỏi lại.
+    /// BẬT lại cờ là mọi thứ trở về như cũ, không cần sửa code.
+    /// </summary>
+    private void ApplyAuthModeLayout()
+    {
+        var config = BackendConfig.Active;
+        if (config != null && config.localAuthEnabled) return;
+        if (rootElement == null) return;
+
+        demoFormRevealed = false; // OnEnable có thể chạy lại -> phải mở lại được form demo
+
+        SetHidden(rootElement.Q<VisualElement>("LoginTabBar"), true);
+        SetHidden(rootElement.Q<VisualElement>("UsernameGroup"), true);
+        SetHidden(rootElement.Q<VisualElement>("PasswordGroup"), true);
+        SetHidden(rootElement.Q<VisualElement>("LoginOptionsRow"), true);
+        SetHidden(rootElement.Q<VisualElement>("RegUsernameGroup"), true);
+        SetHidden(rootElement.Q<VisualElement>("RegEmailGroup"), true);
+        SetHidden(rootElement.Q<VisualElement>("RegPasswordGroup"), true);
+        SetHidden(rootElement.Q<VisualElement>("RegConfirmGroup"), true);
+        SetHidden(btnLogin, true);
+        SetHidden(btnRegister, true);
+        SetHidden(rootElement.Q<Label>("WebOnlyHint"), false);
+
+        if (btnLoginWeb != null)
+        {
+            btnLoginWeb.text = "ĐĂNG NHẬP";
+            btnLoginWeb.RemoveFromClassList("login-action-web");
+            btnLoginWeb.AddToClassList("login-action-local"); // giờ nó là nút TRÁI
+            btnLoginWeb.AddToClassList("login-web-solo");
+            btnLoginWeb.AddToClassList("login-web-primary");
+        }
+
+        // Kéo nút đăng ký sang cùng hàng với nút đăng nhập; form Đăng Ký không còn dùng tới.
+        var actionsRow = rootElement.Q<VisualElement>("LoginActionsRow");
+        if (btnOpenWebRegistration != null && actionsRow != null)
+        {
+            btnOpenWebRegistration.text = "ĐĂNG KÝ";
+            btnOpenWebRegistration.RemoveFromClassList("register-action-web");
+            btnOpenWebRegistration.AddToClassList("login-action-btn");
+            btnOpenWebRegistration.AddToClassList("login-action-web");
+            btnOpenWebRegistration.AddToClassList("login-web-solo");
+            actionsRow.Add(btnOpenWebRegistration);
+        }
+
+        // Lối vào demo mặc định ẨN: R1..R5 nằm ở DB game-server, chưa seed lên production
+        // nên người chơi thường bấm vào chỉ gặp "sai tài khoản". Bật lại bằng
+        // BackendConfig.demoLoginLinkEnabled khi cần trình diễn.
+        SetHidden(demoLoginLink, config == null || !config.demoLoginLinkEnabled);
+    }
+
+    /// <summary>
+    /// Mở form gõ tay cho các tài khoản trình diễn R1..R5. Chúng nằm ở DB game-server
+    /// (không phải DB website) nên phải đi đường /auth/login, không đi qua trình duyệt.
+    /// </summary>
+    private void ShowDemoLoginForm()
+    {
+        if (demoFormRevealed) return;
+        demoFormRevealed = true;
+
+        // Đang chờ trình duyệt mà quay sang đăng nhập demo -> huỷ lượt chờ, kẻo nút
+        // VÀO GAME DEMO trông bấm được nhưng bị isAuthRequestInProgress chặn im lặng.
+        if (isBrowserAuthWaiting)
+        {
+            browserAuthUiAttempt++;
+            AuthService.Instance?.CancelBrowserLogin();
+            isBrowserAuthWaiting = false;
+            SetAuthControlsEnabled(true);
+            ClearStatus(loginStatus);
+        }
+
+        SetHidden(rootElement.Q<VisualElement>("UsernameGroup"), false);
+        SetHidden(rootElement.Q<VisualElement>("PasswordGroup"), false);
+        SetHidden(btnLogin, false);
+        SetHidden(demoLoginLink, true);
+        SetHidden(rootElement.Q<Label>("WebOnlyHint"), true);
+
+        if (btnLogin != null)
+        {
+            btnLogin.text = "VÀO GAME DEMO";
+            btnLogin.SetEnabled(true);
+        }
+
+        SetPlaceholder(usernameField, "Tên tài khoản demo");
+        usernameField?.Focus();
+    }
+
+    private void SetHidden(VisualElement element, bool hidden)
+    {
+        if (element == null) return;
+        if (hidden) element.AddToClassList(HIDDEN_CLASS);
+        else element.RemoveFromClassList(HIDDEN_CLASS);
     }
 
     // ── Tab Switching ──
@@ -313,7 +420,9 @@ public class LoginScreenController : MonoBehaviour
         // Validation
         if (string.IsNullOrWhiteSpace(username))
         {
-            ShowStatus(loginStatus, "Vui lòng nhập Email, SĐT hoặc ID đăng nhập", false);
+            ShowStatus(loginStatus,
+                demoFormRevealed ? "Vui lòng nhập tên tài khoản demo" : "Vui lòng nhập Email, SĐT hoặc ID đăng nhập",
+                false);
             return;
         }
         if (username.Length > LOGIN_IDENTITY_MAX_LENGTH)
@@ -361,12 +470,18 @@ public class LoginScreenController : MonoBehaviour
 
     private async void OnWebsiteAuthClicked(string intent)
     {
-        if (isAuthRequestInProgress) return;
+        // Đang chờ trình duyệt thì VẪN cho bấm lại: người chơi hay quên mất là đã bấm,
+        // hoặc lỡ đóng tab web. Bấm lại = mở tab mới. Lượt cũ bị AuthService tự huỷ
+        // (LoginWithBrowserAsync tăng browserAuthAttempt ngay đầu hàm) nên không chồng chéo.
+        // Chỉ chặn khi đang có request đăng nhập TRONG GAME chạy dở.
+        if (isAuthRequestInProgress && !isBrowserAuthWaiting) return;
 
         var config = BackendConfig.Active;
         if (config == null || !config.browserAuthEnabled)
         {
-            if (string.Equals(intent, "register", System.StringComparison.OrdinalIgnoreCase))
+            // Không có form trong game thì không có gì để gửi đi -> chỉ mở được trang web.
+            bool hasLocalForm = config != null && config.localAuthEnabled;
+            if (!hasLocalForm || string.Equals(intent, "register", System.StringComparison.OrdinalIgnoreCase))
                 OpenRegistrationPage();
             else
                 OnLoginClicked(true);
@@ -380,12 +495,26 @@ public class LoginScreenController : MonoBehaviour
             return;
         }
 
+        int myAttempt = ++browserAuthUiAttempt;
+        isBrowserAuthWaiting = true;
+
         SetAuthControlsEnabled(false);
+        // ...nhưng chừa lại 2 nút web để còn mở lại trang được.
+        btnLoginWeb?.SetEnabled(true);
+        btnOpenWebRegistration?.SetEnabled(true);
+
         ShowStatus(loginStatus, "Đang tạo phiên xác thực website...", true);
         bool success = await auth.LoginWithBrowserAsync(intent, message =>
         {
-            if (loginStatus != null) ShowStatus(loginStatus, message, true);
+            if (myAttempt != browserAuthUiAttempt) return; // lượt cũ, đừng ghi đè trạng thái lượt mới
+            if (loginStatus != null)
+                ShowStatus(loginStatus, message + "\nLỡ đóng tab? Bấm lại nút bên dưới để mở lại trang.", true);
         });
+
+        // Người chơi đã bấm lại -> lượt này hết hiệu lực, bỏ qua kết quả của nó.
+        if (myAttempt != browserAuthUiAttempt) return;
+
+        isBrowserAuthWaiting = false;
         if (!success)
         {
             SetAuthControlsEnabled(true);

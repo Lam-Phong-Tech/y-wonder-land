@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -57,6 +58,40 @@ namespace YWonderLand.Backend
         {
             public bool ok;
             public PlayerBootstrapService.FarmStatePayload farm_state;
+        }
+
+        [Serializable]
+        private sealed class AnimalPlacementRequest
+        {
+            [JsonProperty("item_id")]
+            public string itemId;
+
+            [JsonProperty("cell_keys")]
+            public List<string> cellKeys;
+
+            [JsonProperty("expected_version")]
+            public int expectedVersion;
+
+            [JsonProperty("idempotency_key")]
+            public string idempotencyKey;
+        }
+
+        [Serializable]
+        private sealed class AnimalPlacementResponse
+        {
+            public bool ok;
+            public bool duplicate;
+            public PlayerBootstrapService.InventoryPayload inventory;
+            public PlayerBootstrapService.FarmStatePayload farm_state;
+        }
+
+        public sealed class AnimalPlacementResult
+        {
+            public bool ok;
+            public bool duplicate;
+            public long status;
+            public string errorCode;
+            public int remainingQuantity;
         }
 
         private static PendingUpload pending;
@@ -209,6 +244,85 @@ namespace YWonderLand.Backend
             bool completed = pending == null && !processing;
             if (!completed && string.IsNullOrEmpty(LastError)) LastError = "FARM_SYNC_TIMEOUT";
             return completed && string.IsNullOrEmpty(LastError);
+        }
+
+        /// <summary>
+        /// Atomically consumes one animal item and appends the animal to the
+        /// authoritative build snapshot. There is intentionally no offline fallback.
+        /// </summary>
+        public static async Awaitable<AnimalPlacementResult> PlaceAnimalAsync(
+            string itemId,
+            List<string> cellKeys)
+        {
+            var auth = AuthService.Instance;
+            if (auth == null || !auth.IsSignedIn || string.IsNullOrEmpty(auth.Token))
+                return PlacementFailure(0, "NO_AUTH_TOKEN");
+            if (!IsCurrentPlayerReconciled)
+                return PlacementFailure(409, "FARM_STATE_NOT_RECONCILED");
+            if (string.IsNullOrWhiteSpace(itemId) || cellKeys == null || cellKeys.Count == 0)
+                return PlacementFailure(400, "INVALID_ANIMAL_PLACEMENT");
+
+            // The pen may have been built immediately before selecting the animal.
+            // Flush it first so the server can validate every requested pen cell.
+            SaveBuildState();
+            if (!await FlushAsync())
+                return PlacementFailure(0, string.IsNullOrEmpty(LastError) ? "FARM_SYNC_FAILED" : LastError);
+
+            var request = new AnimalPlacementRequest
+            {
+                itemId = itemId.Trim(),
+                cellKeys = new List<string>(cellKeys),
+                expectedVersion = Mathf.Max(1, serverVersion),
+                idempotencyKey = Guid.NewGuid().ToString("N")
+            };
+
+            ApiResult<AnimalPlacementResponse> response = await SendAnimalPlacementAsync(request, auth.Token);
+            if (!response.ok && IsTransient(response.status))
+            {
+                await Awaitable.NextFrameAsync();
+                response = await SendAnimalPlacementAsync(request, auth.Token);
+            }
+
+            if (response.ok && response.data != null
+                && response.data.inventory != null
+                && response.data.farm_state != null)
+            {
+                int remainingQuantity = GetInventoryQuantity(response.data.inventory, itemId);
+                serverVersion = Mathf.Max(serverVersion, response.data.farm_state.version);
+                ApplyInventorySnapshot(response.data.inventory);
+                ApplyServerSnapshot(response.data.farm_state);
+                LastError = "";
+                return new AnimalPlacementResult
+                {
+                    ok = true,
+                    duplicate = response.data.duplicate,
+                    status = response.status,
+                    errorCode = "",
+                    remainingQuantity = remainingQuantity
+                };
+            }
+
+            if (response.data != null)
+            {
+                if (response.data.inventory != null)
+                    ApplyInventorySnapshot(response.data.inventory);
+                if (response.data.farm_state != null)
+                {
+                    serverVersion = Mathf.Max(1, response.data.farm_state.version);
+                    ApplyServerSnapshot(response.data.farm_state);
+                }
+            }
+
+            string errorCode = !string.IsNullOrWhiteSpace(response.errorCode)
+                ? response.errorCode
+                : (!string.IsNullOrWhiteSpace(response.error) ? response.error : "ANIMAL_PLACEMENT_FAILED");
+            LastError = errorCode;
+            return PlacementFailure(response.status, errorCode);
+        }
+
+        public static string CellKey(Vector3 position)
+        {
+            return $"{Mathf.RoundToInt(position.x * 10f)}_{Mathf.RoundToInt(position.z * 10f)}";
         }
 
         private static void ApplyServerSnapshot(PlayerBootstrapService.FarmStatePayload state)
@@ -366,6 +480,60 @@ namespace YWonderLand.Backend
                     farm_state = upload.payload
                 },
                 upload.token);
+        }
+
+        private static Awaitable<ApiResult<AnimalPlacementResponse>> SendAnimalPlacementAsync(
+            AnimalPlacementRequest request,
+            string token)
+        {
+            return ApiClient.PostAsync<AnimalPlacementResponse>(
+                "/player/farm/animals/place",
+                request,
+                token);
+        }
+
+        private static AnimalPlacementResult PlacementFailure(long status, string errorCode)
+        {
+            return new AnimalPlacementResult
+            {
+                ok = false,
+                duplicate = false,
+                status = status,
+                errorCode = errorCode
+            };
+        }
+
+        private static void ApplyInventorySnapshot(PlayerBootstrapService.InventoryPayload inventory)
+        {
+            if (inventory == null || InventoryManager.Instance == null) return;
+
+            var slots = new List<InventorySlot>();
+            if (inventory.slots != null)
+            {
+                foreach (var slot in inventory.slots)
+                {
+                    if (slot == null || string.IsNullOrWhiteSpace(slot.itemId) || slot.quantity <= 0)
+                        continue;
+                    slots.Add(new InventorySlot(slot.itemId, slot.quantity));
+                }
+            }
+
+            InventoryManager.Instance.ApplyServerState(inventory.maxSlots, slots);
+        }
+
+        private static int GetInventoryQuantity(
+            PlayerBootstrapService.InventoryPayload inventory,
+            string itemId)
+        {
+            if (inventory?.slots == null || string.IsNullOrWhiteSpace(itemId)) return 0;
+
+            foreach (var slot in inventory.slots)
+            {
+                if (slot != null && string.Equals(slot.itemId, itemId, StringComparison.Ordinal))
+                    return Mathf.Max(0, slot.quantity);
+            }
+
+            return 0;
         }
 
         private static bool HasPersistedOutbox()

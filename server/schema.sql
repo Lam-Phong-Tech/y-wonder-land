@@ -55,8 +55,17 @@ create table if not exists player_economy (
     player_id text primary key references game_players(id) on delete cascade,
     version integer not null default 1,
     pos bigint not null default 5000 check (pos >= 0),
-    upos bigint not null default 0 check (upos >= 0),
+    web_point_micros_remainder bigint not null default 0
+        check (web_point_micros_remainder >= 0 and web_point_micros_remainder < 1000000),
     updated_at timestamptz not null default now()
+);
+
+-- Audit-only archive populated by migration 004 when upgrading legacy UPoint data.
+-- It is never read as an active wallet and is not converted to Point automatically.
+create table if not exists legacy_upoint_balances (
+    player_id text primary key references game_players(id) on delete cascade,
+    upoint_balance bigint not null,
+    archived_at timestamptz not null default now()
 );
 
 create table if not exists player_inventory_meta (
@@ -103,7 +112,6 @@ create table if not exists game_transactions (
     idempotency_key text null,
     request_signature text not null default '',
     delta_pos bigint not null default 0,
-    delta_upos bigint not null default 0,
     item_id text null,
     quantity_delta integer null,
     details_json jsonb not null default '{}'::jsonb,
@@ -121,6 +129,29 @@ create index if not exists idx_game_players_active_session_id
 create index if not exists idx_player_inventory_player_id on player_inventory(player_id);
 create index if not exists idx_player_daily_limits_player_id on player_daily_limits(player_id);
 create index if not exists idx_game_transactions_player_id on game_transactions(player_id);
+
+create table if not exists point_wallet_reservations (
+    id text primary key,
+    player_id text not null references game_players(id) on delete cascade,
+    web_user_id text not null,
+    expected_player_id text not null,
+    point_amount bigint not null check (point_amount > 0),
+    purpose text not null,
+    source text not null,
+    occurred_at timestamptz not null,
+    request_signature text not null,
+    status text not null default 'RESERVED'
+        check (status in ('RESERVED', 'CAPTURED', 'RELEASED')),
+    captured_at timestamptz null,
+    released_at timestamptz null,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now()
+);
+
+create index if not exists idx_point_wallet_reservations_player
+    on point_wallet_reservations (player_id, created_at);
+create index if not exists idx_point_wallet_reservations_status
+    on point_wallet_reservations (status, updated_at);
 
 create table if not exists browser_auth_requests (
     request_id_hash char(64) primary key,

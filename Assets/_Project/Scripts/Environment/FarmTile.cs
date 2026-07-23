@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using YWonderLand.Data;
 using YWonderLand.Environment; // ScreenToast (toast báo cây chết)
+using YWonderLand.Backend;
 
 /// <summary>
 /// FarmTile nâng cấp: tích hợp CropDefinition, visual stages theo loại cây,
@@ -178,11 +179,10 @@ public class FarmTile : MonoBehaviour
     void Update()
     {
         // CHẾT vì THIẾU NƯỚC (khách chốt): thanh nước = THANH MÁU. Áp cho CẢ lúc chưa tưới (Planted, đồng hồ 8h)
-        // lẫn đang lớn (Watered, đồng hồ 20h từ lần tưới). Cạn về 0 = chết. Bỏ qua trong Tutorial (người mới khỏi nản).
+        // lẫn đang lớn (Watered, đồng hồ 20h từ lần tưới). Cạn về 0 = chết, kể cả trong Tutorial.
         if (currentCrop != null
             && (currentState == TileState.Planted || currentState == TileState.Watered)
-            && GetWaterFraction() <= 0f
-            && !IsTutorialActive())
+            && GetWaterFraction() <= 0f)
         {
             DieFromDrought();
             return;
@@ -433,6 +433,10 @@ public class FarmTile : MonoBehaviour
         }
         UpdateVisuals();
 
+        // Đếm cho thống kê hồ sơ. Gọi TRỰC TIẾP, không đi qua event chung (một handler lỗi
+        // ở event chung có thể chặn cả chuỗi đăng ký phía sau).
+        YWonderLand.Managers.PlayerStats.AddPlanted();
+
         OnTilePlanted?.Invoke(this);
         return true;
     }
@@ -523,6 +527,7 @@ public class FarmTile : MonoBehaviour
         if (cropInfoRoot != null) { Destroy(cropInfoRoot.gameObject); cropInfoRoot = null; cropInfoTM = null; cropInfoMF = null; }
         if (cropModelInstance != null) { Destroy(cropModelInstance); cropModelInstance = null; }
         UpdateVisuals();
+        FarmStateSync.SaveTileState(this);
 
         ScreenToast.Show("Cây đã héo chết vì thiếu nước! Nhớ tưới đúng giờ nhé.");
     }
@@ -940,11 +945,8 @@ public class FarmTile : MonoBehaviour
         }
     }
 
-    private static string FormatSec(float s)
-    {
-        if (s >= 60f) return $"{Mathf.FloorToInt(s / 60f)}m{Mathf.RoundToInt(s % 60f):00}s";
-        return $"{Mathf.RoundToInt(s)}s";
-    }
+    // Dùng CHUNG bộ format với thú nuôi: "x ngày x giờ" / "x giờ x phút" / "x phút x giây" / "x giây".
+    private static string FormatSec(float s) => YWonderLand.Core.GameTimeConfig.FormatDuration(s);
 
     public float GetGrowthPercentage()
     {

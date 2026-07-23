@@ -65,8 +65,24 @@ namespace YWonderLand.Backend
 
             // Keep shop's atomic economy+inventory snapshot ordered after any
             // gameplay deltas (planting, water, harvest, build, rewards).
-            if (!await GameplayMutationSync.FlushAsync())
-                return Failure(503, "PENDING_STATE_SYNC_FAILED");
+            bool mutationsFlushed = await GameplayMutationSync.FlushAsync();
+            if (!mutationsFlushed)
+            {
+                if (GameplayMutationSync.PendingCount > 0)
+                    return Failure(503, "PENDING_STATE_SYNC_FAILED");
+
+                // A permanent 4xx drops the rejected local delta and requires an
+                // authoritative snapshot before another economy operation. Reuse
+                // bootstrap's guarded reconciliation instead of blocking shops for
+                // the rest of the session.
+                var bootstrap = PlayerBootstrapService.Instance;
+                if (bootstrap == null || !await bootstrap.LoadBootstrapAsync())
+                {
+                    if (bootstrap != null && bootstrap.LastStatus == 401)
+                        return Failure(401, "AUTH_EXPIRED");
+                    return Failure(503, "STATE_RECONCILIATION_FAILED");
+                }
+            }
 
             var request = new ShopTransactionRequest
             {
@@ -99,9 +115,7 @@ namespace YWonderLand.Backend
                 return Failure(response.status, "INCOMPLETE_SHOP_RESPONSE");
             }
 
-            EconomyManager.Instance?.ApplyServerState(
-                response.data.economy.pos,
-                response.data.economy.upos);
+            EconomyManager.Instance?.ApplyServerState(response.data.economy.pos);
             InventoryManager.Instance?.ApplyServerState(
                 response.data.inventory.maxSlots,
                 ToManagerSlots(response.data.inventory.slots));

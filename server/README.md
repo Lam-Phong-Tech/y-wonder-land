@@ -356,14 +356,99 @@ Endpoint moi:
 |---|---|---|
 | POST | `/auth/web-login` | Mock/adapter login web -> tra game token + playerId |
 | GET | `/player/bootstrap` | Lay profile + economy + inventory + farm_state |
-| GET/PUT | `/player/economy` | Vi game rieng trong MVP |
-| POST | `/player/economy/apply` | Apply delta Point/UPoint game, co idempotency key |
-| GET/PUT | `/player/inventory` | Doc/ghi inventory MVP |
-| POST | `/player/inventory/adjust` | Cong/tru item, co idempotency key |
+| GET | `/player/economy` | Doc vi Point authoritative; `PUT` bi khoa voi `405 ECONOMY_SERVER_AUTHORITATIVE` |
+| POST | `/player/economy/apply` | Delta am van hop le; delta duong bi `403` khi `CLIENT_ASSET_GRANTS_ENABLED=false` |
+| GET | `/player/inventory` | Doc inventory authoritative; `PUT` bi khoa voi `405 INVENTORY_SERVER_AUTHORITATIVE` |
+| POST | `/player/inventory/adjust` | Delta am van hop le; item duong bi `403` khi strict mode |
 | POST | `/player/shop/transaction` | Mua/ban nguyen tu; server tu tra catalog gia + whitelist shop |
 | GET | `/player/daily-limits` | Doc gioi han ngay cho fishing/mining |
 | POST | `/player/daily-limits/consume` | Tru luot server-side, mac dinh 10 luot/ngay |
 | GET/PUT | `/player/farm-state` | Doc/ghi farm-state JSON MVP |
+
+### Web top-up -> Point
+
+Game chi con mot tien te la `Point`. Web khong goi endpoint public `/game-api` va
+Unity khong duoc gui so Point can cong. Sau khi giao dich nap duoc web xac nhan,
+web server goi truc tiep qua loopback:
+
+```text
+POST http://127.0.0.1:3000/internal/web/point-credit
+X-YWonder-Timestamp: <unix-seconds>
+X-YWonder-Signature: <HMAC-SHA256>
+```
+
+Body chuan:
+
+```json
+{
+  "transaction_id": "web-transaction-id-on-dinh",
+  "web_user_id": "web-user-id-on-dinh",
+  "point_amount": 1000,
+  "occurred_at": "2026-07-15T00:00:00.000Z",
+  "source": "ywonder-web",
+  "username": "optional-login-id",
+  "display_name": "optional-display-name"
+}
+```
+
+`transaction_id + source` la idempotency key: retry cung payload tra
+`duplicate=true` va khong cong lan hai; cung ma nhung body khac tra `409
+IDEMPOTENCY_CONFLICT`. Chu ky dung canonical payload version
+`ywonder-point-credit-v1` trong `webPointCredit.js`. Route mac dinh tat, chi cho
+loopback va chi bat khi co `WEB_TOPUP_SECRET` rieng toi thieu 32 ky tu; khong
+dung lai secret login/browser auth. Nginx khong proxy
+`/internal/*` ra Internet. Player dang online nhan lai balance absolute qua
+WebSocket `economy_updated`; bootstrap/relogin van la nguon khoi phuc cuoi cung.
+
+Production khong the khoi dong voi `WEB_TOPUP_ENABLED=true` neu
+`CLIENT_ASSET_GRANTS_ENABLED` chua la `false`. Rollout mac dinh dung
+`WEB_TOPUP_MODE=canary` va `WEB_TOPUP_ALLOWED_WEB_USER_IDS`; giao dich cua account
+ngoai allowlist tra `425 WEB_TOPUP_CANARY_USER_NOT_ALLOWED` de outbox giu retry,
+khong danh dau that bai. Chi dung `WEB_TOPUP_MODE=open` sau khi canary va cac
+gameplay reward server-authoritative da duoc nghiem thu.
+
+Bien moi truong nam trong `.env.example`. Test doc lap:
+
+```powershell
+npm.cmd run test:web-point-credit
+npm.cmd run test:web-point-e2e-harness
+```
+
+No-money production-artifact E2E on Linux uses
+`deploy/run-web-point-sync-e2e-isolated.sh`. The runner accepts checksum-pinned game
+and two-file web-overlay archives, copies/builds both candidates below `/tmp`, and
+never replaces the live web build or restarts production services. It refuses to run
+unless production top-up is dormant, both health checks pass, and RAM/disk/load gates
+pass. PostgreSQL work happens in a dedicated `yw_point_e2e_*` database; web writes use
+a copied SQLite file. The final success output requires cleanup plus explicit live-data,
+service and file-integrity verification. Run this only in an approved VPS test window;
+local safety tests do not count as VPS E2E acceptance.
+
+The hardened runner passed its approved VPS window on 2026-07-15: canary rejection,
+first dispatch, duplicate retry and decimal remainder passed, temporary data was removed,
+and the production PID/active time, env hashes, health and dormant callback were unchanged.
+No live build was replaced, no service restarted and no real payment was used.
+
+The hardening was then deployed in dormant mode. The active backend release is
+`32adf45fd4edb4b13b4ac3ed6c1bb69c7afbc2dc` and the web build is
+`YVgCFF1Bwu_XJc4sfVpo3`. Independent postflight kept the callback at `404`, the
+unauthenticated cron at `401`, both allowlists empty, the web Point outbox empty,
+and the game PID/env unchanged. `CLIENT_ASSET_GRANTS_ENABLED` is still unset in
+production because legitimate Unity rewards use the generic positive-delta path;
+the startup interlock therefore continues to block real top-up enablement.
+
+For a single-identity canary, set
+`CLIENT_ASSET_GRANTS_BLOCKED_WEB_USER_IDS` to exactly the same stable IDs as
+`WEB_TOPUP_ALLOWED_WEB_USER_IDS`. Positive generic Point/item deltas are then
+blocked only for those players, using both the signed token and the authoritative
+player mapping; other players retain legacy rewards and all debits remain valid.
+`WEB_TOPUP_MODE=open` still requires `CLIENT_ASSET_GRANTS_ENABLED=false` and an
+empty scoped block list. This code path passed the Linux artifact security suite,
+production startup-gate probes and dormant postflight. Both live lists remain
+empty until the exact QA identity is selected.
+
+The production web build also warns that Next.js `14.2.18` needs a security
+upgrade before real-money traffic is opened.
 
 `/player/bootstrap` nay tra:
 

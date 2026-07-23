@@ -24,7 +24,7 @@ Cập nhật gameplay delta 10/07: runtime của anh xác nhận crop/time và P
 |---|---|---|---|---|
 | Tài khoản local demo | `/auth/register`, `/auth/login`, bcrypt hash, chặn trùng username/email | Có | Có khi đăng ký | Đạt Phase 1 |
 | Hồ sơ/nhân vật/tutorial | `GET/PUT /player/profile`, có trong bootstrap | Có | Có qua `SaveProfileAsync` | Đạt MVP |
-| Point/UPoint | bootstrap, `economy/apply`, shop transaction, idempotency | Có, rồi cache vào PlayerPrefs | Shop ghi nguyên tử; mọi `AddPOS/SpendPOS/AddUPOS/SpendUPOS` gameplay nay xếp hàng delta idempotent | Đạt lát runtime, còn regression rộng |
+| Point | bootstrap, `economy/apply`, shop transaction, idempotency | Có, rồi cache 64-bit vào PlayerPrefs | Shop ghi nguyên tử; gameplay Point hiện còn xếp hàng delta idempotent. UPoint đã nghỉ ngày 15/07 | Đạt sync MVP; chưa đủ chống cheat tiền thật vì client còn gửi delta gameplay |
 | Túi đồ | bootstrap, `inventory/adjust`, shop transaction, `applyResourceHarvest`, idempotency | Có, rồi cache vào PlayerPrefs | Shop/claim public ghi nguyên tử; mọi `AddItem/RemoveItem` khác nay xếp hàng delta idempotent | Đạt lát runtime, còn regression rộng |
 | Shop mua/bán | `POST /player/shop/transaction`, catalog giá server, một lần `writeAll` | Có; áp economy + inventory từ response | Có; không còn tự trừ/cộng local trong ShopPopup | Đạt Phase 1 runtime |
 | Farm/build/crop/animal | `GET/PUT /player/farm-state` và JSON mẫu | Payload được tải nhưng Unity không áp dụng | Chưa; gameplay dùng nhiều key PlayerPrefs | Chưa đồng bộ |

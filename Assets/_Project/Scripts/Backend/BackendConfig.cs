@@ -19,6 +19,14 @@ namespace YWonderLand.Backend
         [Tooltip("Bật browser SSO: game mở website, chờ callback một lần và không nhận mật khẩu web.")]
         public bool browserAuthEnabled = false;
 
+        [Tooltip("Bật form nhập tài khoản/mật khẩu NGAY TRONG GAME. Tắt (mặc định) -> màn Login chỉ còn " +
+                 "2 nút mở website, mọi tài khoản (kể cả tài khoản demo cấp sẵn) đều đăng nhập qua web.")]
+        public bool localAuthEnabled = false;
+
+        [Tooltip("Hiện link \"Đăng nhập tài khoản demo\" (R1..R5) ở màn Login. Tắt (mặc định) -> người " +
+                 "chơi thường không thấy lối vào này. Chỉ bật khi cần trình diễn bằng tài khoản cấp sẵn.")]
+        public bool demoLoginLinkEnabled = false;
+
         [Tooltip("Thời gian tối đa chờ người dùng hoàn tất đăng nhập/đăng ký trên website.")]
         public int browserAuthTimeoutSec = 600;
 

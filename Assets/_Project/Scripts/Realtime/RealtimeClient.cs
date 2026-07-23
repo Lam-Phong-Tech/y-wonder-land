@@ -31,6 +31,7 @@ namespace YWonderLand.Realtime
         public sealed class ResourceHarvestResult
         {
             public bool accepted;
+            public bool duplicate;
             public string code;
             public string resourceId;
             public string resourceType;
@@ -570,6 +571,12 @@ namespace YWonderLand.Realtime
                 case "resource_harvest_result":
                     ReceiveResourceHarvestResult(msg);
                     break;
+                case "economy_updated":
+                    JObject economy = msg["economy"] as JObject;
+                    long? pointBalance = economy?.Value<long?>("pos");
+                    if (pointBalance.HasValue)
+                        YWonderLand.Managers.EconomyManager.Instance?.ApplyServerState(pointBalance.Value);
+                    break;
                 case "error":
                     string errorCode = msg.Value<string>("code") ?? "";
                     Debug.LogWarning($"[Realtime] Server error: {errorCode} {msg.Value<string>("message")}");
@@ -756,6 +763,7 @@ namespace YWonderLand.Realtime
             var result = new ResourceHarvestResult
             {
                 accepted = data.Value<bool?>("accepted") ?? false,
+                duplicate = data.Value<bool?>("duplicate") ?? false,
                 code = data.Value<string>("code") ?? "RESOURCE_REWARD_FAILED",
                 resourceId = data.Value<string>("resourceId") ?? pending.resourceId,
                 resourceType = data.Value<string>("resourceType") ?? "",

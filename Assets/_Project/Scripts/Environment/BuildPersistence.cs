@@ -146,6 +146,7 @@ namespace YWonderLand.Environment
 
                 data.animals.Add(new AnimalSave
                 {
+                    instanceId = fa.animalInstanceId,
                     itemId = cell.AnimalItemId,
                     cellKeys = cellKeys,
                     feedRefUnix = fa.FeedRefUnix,
@@ -153,7 +154,11 @@ namespace YWonderLand.Environment
                     hasBeenFed = fa.HasBeenFed,
                     harvestsRemaining = fa.harvestsRemaining,
                     hasProductReady = fa.hasProductReady,
-                    isVaccinated = fa.isVaccinated
+                    isVaccinated = fa.isVaccinated,
+                    vaccineUntilUnix = fa.VaccineUntilUnix,
+                    sickRefUnix = fa.SickRefUnix,
+                    sicknessRolled = fa.SicknessRolled,
+                    state = (int)fa.currentState
                 });
             }
 
@@ -262,9 +267,12 @@ namespace YWonderLand.Environment
             var spawned = go.GetComponent<FarmAnimal>();
             if (spawned != null)
             {
+                if (!string.IsNullOrWhiteSpace(a.instanceId))
+                    spawned.animalInstanceId = a.instanceId;
                 spawned.occupiedCells = new List<BuildSurfaceCell>(cells);
                 spawned.RestoreAnimalState(a.feedRefUnix, a.produceRefUnix, a.hasBeenFed,
-                    a.harvestsRemaining, a.hasProductReady, a.isVaccinated);
+                    a.harvestsRemaining, a.hasProductReady, a.isVaccinated,
+                    a.vaccineUntilUnix, a.sickRefUnix, a.state, a.sicknessRolled);
             }
             return true;
         }
@@ -306,6 +314,7 @@ namespace YWonderLand.Environment
         [System.Serializable]
         private class AnimalSave
         {
+            public string instanceId;
             public string itemId;
             public List<string> cellKeys; // ô chuồng con vật chiếm (ô đầu = ô neo)
             public double feedRefUnix;
@@ -314,6 +323,10 @@ namespace YWonderLand.Environment
             public int harvestsRemaining;
             public bool hasProductReady;
             public bool isVaccinated;
+            public double vaccineUntilUnix; // mốc hết hạn vắc-xin
+            public double sickRefUnix;      // mốc bắt đầu vòng nuôi (gốc tính thời điểm phát bệnh)
+            public bool sicknessRolled;     // đã gieo xác suất phát bệnh cho vòng nuôi này chưa
+            public int state;               // giữ trạng thái Bệnh qua các phiên
         }
     }
 }

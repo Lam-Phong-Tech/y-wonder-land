@@ -390,9 +390,42 @@ namespace YWonderLand.EditorScripts
             SetAnimalGameplay("duck_01", "duck_egg_01", 1, 45, 1000, "duck_meat_01", 5, Days(1f), Days(0.5f), Days(1f), Days(2f)); // gia cầm: trứng theo chu kỳ, thịt ở vụ cuối (đói từ 12h = thanh 50%)
             SetAnimalGameplay("turtle_01", "turtle_shell_01", 1, 1, 20000, "turtle_meat_01", 10, Days(300f), Days(7f), Days(5f), Days(10f)); // rùa: chưa ăn 5 ngày chết / cho ăn 10 ngày
 
+            // ── BỆNH / VẮC-XIN: số lấy NGUYÊN từ VatNuoi2 (Thời điểm phát bệnh · Tỉ lệ phát bệnh ·
+            // SL vắc-xin · SL thuốc) + cột "Số ngày nuôi". KHÔNG tự bịa. ──
+            //                    id            ngàyNuôi  hệSốMốcBệnh  tỉLệBệnh  sốMũiVắcXin  sốLiềuThuốc
+            SetAnimalDisease("chicken_01",  90f,  0.15f, 0.6f, 3,  3);  // Gà mái V2
+            SetAnimalDisease("cow_01",     270f,  0.30f, 0.4f, 4, 10);  // Bò sữa
+            SetAnimalDisease("pig_01",     180f,  0.50f, 0.3f, 4,  9);  // Heo con
+            SetAnimalDisease("ostrich_01", 180f,  0.30f, 0.4f, 4, 10);  // Đà điểu V2
+            SetAnimalDisease("deer_01",    360f,  0.15f, 0.6f, 4,  9);  // Hươu
+            SetAnimalDisease("goat_01",    180f,  0.30f, 0.3f, 4, 10);  // Dê con V2
+            SetAnimalDisease("rabbit_01",   80f,  0.40f, 0.5f, 2,  2);  // Thỏ con V2
+            SetAnimalDisease("goose_01",    90f,  0.15f, 0.4f, 4,  2);  // Ngỗng con V2
+            SetAnimalDisease("duck_01",     45f,  0.15f, 0.6f, 2,  2);  // Vịt V3
+            SetAnimalDisease("turtle_01",  300f,  0.50f, 0.6f, 4, 10);  // Rùa con
+
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            Debug.Log("[AnimalData] Generated/updated 10 animal definitions (kèm thông tin chăn nuôi + logic VatNuoi)!");
+            Debug.Log("[AnimalData] Generated/updated 10 animal definitions (kèm thông tin chăn nuôi + logic VatNuoi + hệ bệnh)!");
+        }
+
+        // Đổ số hệ BỆNH theo VatNuoi2. Chỉ ghi đè đúng 5 field bệnh, không đụng field khác.
+        private static void SetAnimalDisease(string id, float raisingDays, float onsetRatio, float chance,
+            int vaccineDoses, int medicineDoses)
+        {
+            string path = "Assets/Resources/Items/Animal_" + id + ".asset";
+            var a = AssetDatabase.LoadAssetAtPath<YWonderLand.Data.AnimalDefinition>(path);
+            if (a == null)
+            {
+                Debug.LogWarning($"[AnimalData] Chưa có asset Animal_{id} để set hệ bệnh.");
+                return;
+            }
+            a.raisingDays = raisingDays;
+            a.sicknessOnsetRatio = onsetRatio;
+            a.sicknessChance = chance;
+            a.vaccineDosesPerCycle = vaccineDoses;
+            a.medicineDosesPerCure = medicineDoses;
+            EditorUtility.SetDirty(a);
         }
 
         // Set logic gameplay theo VatNuoi (giữ nguyên phần hiển thị do SetHusbandry set trước đó).

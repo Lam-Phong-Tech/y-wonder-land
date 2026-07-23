@@ -575,12 +575,21 @@ public class GhostPlacementController : MonoBehaviour
         if (currentItemPrice > 0 && !string.IsNullOrEmpty(currentMaterialId))
         {
             var inv = YWonderLand.Managers.InventoryManager.Instance;
-            if (inv == null || inv.GetItemQuantity(currentMaterialId) < currentItemPrice)
+            int quantityBefore = inv != null ? inv.GetItemQuantity(currentMaterialId) : 0;
+            if (inv == null || quantityBefore < currentItemPrice)
             {
                 YWonderLand.Environment.ScreenToast.Show($"Không đủ vật liệu! Cần {currentItemPrice} {MatLabel(currentMaterialId)} để xây.");
                 return false;
             }
-            inv.RemoveItem(currentMaterialId, currentItemPrice);
+            if (!inv.RemoveItem(currentMaterialId, currentItemPrice, "build_place"))
+            {
+                YWonderLand.Environment.ScreenToast.Show("Túi đồ vừa thay đổi. Hãy thử đặt công trình lại.");
+                return false;
+            }
+
+            Debug.Log(
+                $"[BuildCost] item='{currentItemName}', material='{currentMaterialId}', " +
+                $"cost={currentItemPrice}, before={quantityBefore}, after={inv.GetItemQuantity(currentMaterialId)}.");
         }
 
         if (ghostIsPrefab && currentEntry != null)
