@@ -14,6 +14,10 @@ public struct InteractionAction
     // Việc lặp hành động mỗi frame do logic bên ngoài lo (đặt cờ lúc Start, xử lý trong Update).
     public Action onHoldStart;
     public Action onHoldEnd;
+
+    // Tên file icon trong Resources/UI/InteractionIcons (không có đuôi .png). Để trống
+    // thì HUD tự tra theo actionName — xem InteractionIconByAction trong GameHUDController.
+    public string iconName;
 }
 
 /// <summary>
@@ -1007,40 +1011,174 @@ public class GameHUDController : MonoBehaviour
             lookPointerId = -1;
     }
 
+    // ── Cụm nút tương tác hình VÒNG CUNG quanh nút Nhảy (kiểu MOBA, khách chốt 23/07) ──
+    // Tâm cung = tâm nút Nhảy. Mấy số này suy ra từ GameHUD.uss:
+    //   .hud-bottom-right { bottom: 90px; right: 24px; }  .jump-btn { 96x96 }
+    // Sửa USS thì phải sửa luôn ở đây, không thì nút lệch khỏi ngón cái.
+    private const float ArcAnchorRight = 24f + 48f;
+    private const float ArcAnchorBottom = 90f + 48f;
+
+    private const float ArcStartDeg = 115f;   // đầu cung, phía TRÊN nút Nhảy
+    private const float ArcEndDeg = 190f;     // cuối cung, phía TRÁI nút Nhảy (gần ngón cái nhất)
+    private const float ArcSingleDeg = 168f;  // chỉ có 1 hành động thì đặt ngay tầm với
+    // 175 chứ không phải 150: bán kính ngắn hơn thì nút trên cùng của cung đè lên nút Búa
+    // (tâm cách nhau chỉ ~70px trong khi hai nút cộng lại đã 72px). Cuối cung cũng phải
+    // dừng ở 190° để nhãn chữ của nút thấp nhất không bị mép dưới màn hình cắt mất.
+    private const float ArcMinRadius = 175f;
+    private const float ArcLabelHeight = 18f; // chỗ chừa cho dòng chữ dưới nút
+    private const float ArcLabelGap = 8f;     // khớp margin-top của .interaction-arc-label
+
+    /// <summary>
+    /// Nút to hay nhỏ tuỳ số hành động. Giữ nguyên 72px cho mọi trường hợp thì cụm 5 nút
+    /// (vật nuôi: cho ăn/thu hoạch/chữa bệnh/tiêm/thông tin) buộc bán kính phải nở tới
+    /// ~360px — vượt tầm với của ngón cái. Thu nhỏ một chút vẫn thừa to để chạm.
+    /// </summary>
+    private static float ArcButtonSizeFor(int count)
+    {
+        if (count >= 5) return 56f;
+        if (count == 4) return 64f;
+        return 72f;
+    }
+
+    /// <summary>
+    /// Bảng tra icon theo tên hành động. Cố ý tra bằng TÊN thay vì bắt mọi nơi gọi phải
+    /// truyền icon: nhãn động (chặt cây/đào khoáng, nhãn NPC) tự khớp mà không phải sửa
+    /// FarmInteractionController. Muốn ép icon riêng thì set InteractionAction.iconName.
+    /// </summary>
+    private static readonly Dictionary<string, string> InteractionIconByAction =
+        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    {
+        { "Cuốc đất", "Icon_Hoe" },
+        { "Gieo hạt", "Icon_Seed" },
+        { "Tưới nước", "Icon_WateringCan" },
+        { "Thu hoạch", "Icon_Basket" },
+        { "Hủy ô trồng", "Icon_Cancel" },
+        { "Cho ăn", "Icon_FeedBowl" },
+        { "Chữa bệnh", "Icon_Cross" },
+        { "Tiêm vắc-xin", "Icon_Syringe" },
+        { "Thông tin", "Icon_Info" },
+        { "Xem chuồng", "Icon_Eye" },
+        { "Thả thú", "Icon_HandRelease" },
+        { "Hủy chuồng", "Icon_Cancel" },
+        { "Múc nước", "Icon_WaterBucket" },
+        { "Chặt cây", "Icon_Axe" },
+        { "Đào khoáng", "Icon_Pickaxe" },
+        { "Câu cá", "Icon_FishingRod" },
+        { "Mua hàng", "Icon_Shop" },
+        { "Bán đồ", "Icon_Shop" },
+        { "Nâng cấp", "Icon_Anvil" },
+        { "Gửi tiết kiệm", "Icon_PiggyBank" },
+        { "Giao thương", "Icon_Shop" },
+    };
+
+    private const string InteractionIconFolder = "UI/InteractionIcons/";
+    private const string InteractionIconFallback = "Icon_Hand";
+    private static readonly Dictionary<string, Texture2D> interactionIconCache =
+        new Dictionary<string, Texture2D>();
+
+    private static Texture2D LoadInteractionIcon(string key)
+    {
+        if (string.IsNullOrEmpty(key)) return null;
+        if (interactionIconCache.TryGetValue(key, out Texture2D cached)) return cached;
+        Texture2D tex = Resources.Load<Texture2D>(InteractionIconFolder + key);
+        interactionIconCache[key] = tex; // cache cả khi null -> khỏi Resources.Load lại mỗi lần rê chuột
+        return tex;
+    }
+
+    private static Texture2D ResolveInteractionIcon(InteractionAction action)
+    {
+        Texture2D tex = LoadInteractionIcon(action.iconName);
+        if (tex == null && !string.IsNullOrEmpty(action.actionName) &&
+            InteractionIconByAction.TryGetValue(action.actionName.Trim(), out string mapped))
+        {
+            tex = LoadInteractionIcon(mapped);
+        }
+        return tex != null ? tex : LoadInteractionIcon(InteractionIconFallback);
+    }
+
     public void ShowInteractionPrompts(List<InteractionAction> actions)
     {
         if (interactionContainer == null) return;
-        
+
         interactionContainer.Clear();
-        
+
         if (actions == null || actions.Count == 0)
         {
             interactionContainer.style.display = DisplayStyle.None;
             return;
         }
 
-        interactionContainer.pickingMode = PickingMode.Position;
+        // Khung phủ full màn nhưng KHÔNG bắt chuột — chỉ mấy nút tròn con mới bắt.
+        interactionContainer.pickingMode = PickingMode.Ignore;
         interactionContainer.style.display = DisplayStyle.Flex;
 
-        foreach (var action in actions)
+        int count = actions.Count;
+        float btnSize = ArcButtonSizeFor(count);
+        float itemWidth = btnSize + 24f;
+        // Khoảng cách tối thiểu giữa 2 tâm nút. Dòng chữ nằm LỌT GIỮA nút của nó và nút
+        // kế trên, nên phải chừa khe ở CẢ HAI đầu: nửa nút + khe + chữ + khe + nửa nút.
+        // Chỉ tính một khe là chữ chạm vành nút trên (đã thấy khi dựng thử 5 hành động).
+        float pitch = btnSize + ArcLabelHeight + 2f * ArcLabelGap;
+
+        float radius = ArcMinRadius;
+        float stepDeg = 0f;
+        if (count > 1)
         {
+            stepDeg = (ArcEndDeg - ArcStartDeg) / (count - 1);
+            radius = Mathf.Max(ArcMinRadius, pitch / (stepDeg * Mathf.Deg2Rad));
+        }
+
+        for (int i = 0; i < count; i++)
+        {
+            var action = actions[i];
+
+            // Hành động đầu tiên (quan trọng nhất) nằm ở cuối cung = sát ngón cái nhất.
+            float angleDeg = count == 1 ? ArcSingleDeg : ArcEndDeg - i * stepDeg;
+            float angleRad = angleDeg * Mathf.Deg2Rad;
+
+            VisualElement item = new VisualElement();
+            item.pickingMode = PickingMode.Ignore;
+            item.AddToClassList("interaction-arc-item");
+            item.style.width = itemWidth;
+            item.style.height = btnSize;
+            // Cos âm -> lệch sang trái, tức là "right" tăng lên. Sin dương -> lên cao.
+            item.style.right = ArcAnchorRight - radius * Mathf.Cos(angleRad) - itemWidth * 0.5f;
+            item.style.bottom = ArcAnchorBottom + radius * Mathf.Sin(angleRad) - btnSize * 0.5f;
+
             VisualElement btn = new VisualElement();
             btn.pickingMode = PickingMode.Position;
-            btn.AddToClassList("interaction-action-btn");
-            
-            // Add key hint if PC
-            if (!string.IsNullOrEmpty(action.keyName))
+            btn.AddToClassList("interaction-arc-btn");
+            // Kích thước đặt từ C# (không để USS quyết) vì công thức toạ độ ở trên phụ
+            // thuộc thẳng vào nó — tách ra hai nơi là sớm muộn cũng lệch.
+            btn.style.width = btnSize;
+            btn.style.height = btnSize;
+
+            VisualElement icon = new VisualElement();
+            icon.pickingMode = PickingMode.Ignore;
+            icon.AddToClassList("interaction-arc-icon");
+            icon.style.width = Mathf.Round(btnSize * 0.56f);
+            icon.style.height = Mathf.Round(btnSize * 0.56f);
+            Texture2D iconTex = ResolveInteractionIcon(action);
+            if (iconTex != null) icon.style.backgroundImage = new StyleBackground(iconTex);
+            btn.Add(icon);
+
+            // Phím tắt cho bản PC: gắn thành huy hiệu nhỏ ở góc nút, không chiếm chỗ.
+            if (!string.IsNullOrEmpty(action.keyName) &&
+                !string.Equals(action.keyName, "Click", StringComparison.OrdinalIgnoreCase))
             {
                 Label keyLabel = new Label(action.keyName);
                 keyLabel.pickingMode = PickingMode.Ignore;
-                keyLabel.AddToClassList("interaction-key-label");
+                keyLabel.AddToClassList("interaction-arc-key");
                 btn.Add(keyLabel);
             }
-            
+
+            item.Add(btn);
+
             Label actionLabel = new Label(action.actionName);
             actionLabel.pickingMode = PickingMode.Ignore;
-            actionLabel.AddToClassList("interaction-action-label");
-            btn.Add(actionLabel);
+            actionLabel.AddToClassList("interaction-arc-label");
+            if (count >= 4) actionLabel.style.fontSize = 12f; // nút nhỏ lại thì chữ cũng phải nhỏ theo
+            item.Add(actionLabel);
 
             // Gán sự kiện: GIỮ-ĐỂ-LẶP (vd chặt cây) hoặc click thường.
             if (action.onHoldStart != null || action.onHoldEnd != null)
@@ -1097,7 +1235,7 @@ public class GameHUDController : MonoBehaviour
                 btn.RegisterCallback<ClickEvent>(evt => evt.StopImmediatePropagation(), TrickleDown.TrickleDown);
             }
 
-            interactionContainer.Add(btn);
+            interactionContainer.Add(item);
         }
     }
 

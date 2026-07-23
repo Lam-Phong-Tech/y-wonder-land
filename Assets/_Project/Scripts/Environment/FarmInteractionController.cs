@@ -18,8 +18,11 @@ namespace YWonderLand.Environment
         private const float DefaultInteractionRange = 1f;
         private const float DefaultGroundInteractRange = 1.35f;
         private const float DefaultTileInteractRange = 1.75f;
-        private const float DefaultFishingInteractRange = 5f;
-        private const float MaxFishingInteractRange = 5f;
+        // Khách chốt 23/07: câu cá phải đứng SÁT mép nước như mọi tương tác khác, không
+        // đứng xa 5m quăng cần. Đặt Max = 1.5 để trần cứng: giá trị 5 đã lỡ lưu trong
+        // scene/asset FishingSpot cũng bị kẹp xuống, khỏi phải sửa tay từng chỗ.
+        private const float DefaultFishingInteractRange = 1.5f;
+        private const float MaxFishingInteractRange = 1.5f;
         private const float SolidHitPassthroughTolerance = 0.75f;
         private const float DirectTapSurfaceTolerance = 0.05f;
         private const float DefaultFarmSlotSpacing = 0.8f;
@@ -67,8 +70,12 @@ namespace YWonderLand.Environment
         [SerializeField, Range(0.2f, 3f)] private float resourceFootProbeForward = 1.1f;
         [Tooltip("Ban kinh quet quanh diem mui chan de bat cay/da gan, khong hien vien trang.")]
         [SerializeField, Range(0.2f, 3f)] private float resourceFootProbeRadius = 1.1f;
-        [Tooltip("Khoảng cách tương tác khi câu cá")]
-        [SerializeField] private float fishingInteractRange = DefaultFishingInteractRange;
+        [Tooltip("Khoảng cách tương tác khi câu cá (đo tới mép nước gần nhất). Trần cứng 1.5m.")]
+        [SerializeField, Range(0.5f, MaxFishingInteractRange)] private float fishingInteractRange = DefaultFishingInteractRange;
+        [Tooltip("Khoang cach diem mui chan chieu ra de tu hien nut Cau ca (giong nuoc/cay da).")]
+        [SerializeField, Range(0.2f, 2f)] private float fishingFootProbeForward = 0.9f;
+        [Tooltip("Ban kinh quet quanh diem mui chan de bat ho cau ca, khong hien vien trang.")]
+        [SerializeField, Range(0.2f, 2f)] private float fishingFootProbeRadius = 0.9f;
         [Tooltip("Flow moi: tap/click truc tiep len vat the de hien UI tuong tac, khong quet theo tam man hinh.")]
         [SerializeField] private bool useDirectTapInteraction = true;
         [Tooltip("Tam click truc tiep len cay, da, nuoc, chuong. Khach yeu cau khoang 3.5m.")]
@@ -563,6 +570,7 @@ namespace YWonderLand.Environment
             currentPromptFromFrontCell = false;
             currentPromptFromFootWater = false;
             currentPromptFromFootResource = false;
+            currentPromptFromFootFishing = false;
             GameHUDController.Instance?.HideInteractionPrompt();
             if (YWonderLand.UI.ResourceInteractionUIController.Instance != null)
                 YWonderLand.UI.ResourceInteractionUIController.Instance.Hide();
@@ -966,23 +974,24 @@ namespace YWonderLand.Environment
         {
             float configuredRange = spot != null && spot.interactionRange > 0f
                 ? spot.interactionRange
-                : Mathf.Max(NormalizeRange(fishingInteractRange), DefaultFishingInteractRange);
-            configuredRange = Mathf.Max(configuredRange, DefaultFishingInteractRange);
+                : NormalizeRange(fishingInteractRange);
             return Mathf.Clamp(configuredRange, 0.5f, MaxFishingInteractRange);
         }
 
         private bool IsFishingSpotInRange(FishingSpot spot, Vector3 hitPoint)
         {
             if (spot == null) return false;
-            Vector3 playerPos = PlayerController.Instance != null ? PlayerController.Instance.transform.position : transform.position;
-            return HorizontalDistance(playerPos, hitPoint) <= GetFishingRange(spot);
+            // Đo tới MÉP nước gần nhất, giống mọi tương tác khác — không đo tới chỗ vừa
+            // chạm. Mặt hồ rất rộng: đo tới điểm chạm thì đứng sát bờ mà chạm ra giữa hồ
+            // vẫn bị tính là đứng xa.
+            return HorizontalDistanceToClosestColliderPoint(spot.gameObject, hitPoint) <= GetFishingRange(spot);
         }
 
         private bool IsFishingSpotInRange(FishingSpot spot, Vector3 hitPoint, bool directTap)
         {
-            if (!directTap) return IsFishingSpotInRange(spot, hitPoint);
-            if (spot == null) return false;
-            return IsDirectTapObjectInRange(spot.gameObject, hitPoint, GetFishingRange(spot), fishingInteractRange);
+            // CỐ Ý không đi qua GetDirectTapRange: hàm đó bỏ qua tầm riêng của từng loại và
+            // luôn trả directTapMaxRange (3.5m). Câu cá phải giữ đúng 1.5m khách yêu cầu.
+            return IsFishingSpotInRange(spot, hitPoint);
         }
 
         private bool CanPriorityScanPassThrough(RaycastHit hit)
@@ -1343,6 +1352,7 @@ namespace YWonderLand.Environment
             currentPromptFromFrontCell = false;
             currentPromptFromFootWater = false;
             currentPromptFromFootResource = false;
+            currentPromptFromFootFishing = false;
             pendingDemolishEnclosure = null;
             pendingDemolishTile = null;
             demolishConfirmTimer = 0f;
@@ -1379,6 +1389,15 @@ namespace YWonderLand.Environment
             {
                 currentPromptFromFootWater = false;
                 currentPromptFromFootResource = false;
+                currentPromptFromFootFishing = false;
+                return;
+            }
+
+            RefreshFootFishingInteractionPrompt();
+            if (currentPromptFromFootFishing)
+            {
+                currentPromptFromFootWater = false;
+                currentPromptFromFootResource = false;
                 return;
             }
 
@@ -1386,6 +1405,7 @@ namespace YWonderLand.Environment
             if (currentPromptFromFootWater)
             {
                 currentPromptFromFootResource = false;
+                currentPromptFromFootFishing = false;
                 return;
             }
 
@@ -1397,6 +1417,7 @@ namespace YWonderLand.Environment
             return !currentPromptFromFrontCell &&
                    !currentPromptFromFootWater &&
                    !currentPromptFromFootResource &&
+                   !currentPromptFromFootFishing &&
                    currentHoverObject != null &&
                    currentActions != null &&
                    currentActions.Count > 0;
@@ -1451,6 +1472,7 @@ namespace YWonderLand.Environment
             currentPromptFromFrontCell = true;
             currentPromptFromFootWater = false;
             currentPromptFromFootResource = false;
+            currentPromptFromFootFishing = false;
 
             if (shouldRefreshPrompt && GameHUDController.Instance != null)
                 GameHUDController.Instance.ShowInteractionPrompts(foundActions);
@@ -1522,6 +1544,7 @@ namespace YWonderLand.Environment
             currentPromptFromFrontCell = false;
             currentPromptFromFootWater = true;
             currentPromptFromFootResource = false;
+            currentPromptFromFootFishing = false;
 
             if (shouldRefreshPrompt && GameHUDController.Instance != null)
                 GameHUDController.Instance.ShowInteractionPrompts(foundActions);
@@ -1597,6 +1620,139 @@ namespace YWonderLand.Environment
             return best;
         }
 
+        // Đến GẦN mép nước câu được là tự hiện nút Câu cá, y như Múc nước / Chặt cây.
+        // Đặt TRƯỚC nhánh múc nước: hồ câu ở thành phố có thể trùng luôn vùng WaterSource,
+        // để sau thì "Múc nước" giành mất nút và không bao giờ câu được. Nhánh này tự tắt
+        // ở nông trại vì IsFishingAllowedHere() chỉ đúng ở thành phố.
+        private void RefreshFootFishingInteractionPrompt()
+        {
+            if (!useDirectTapInteraction || timedActionActive)
+                return;
+
+            if (HasDirectTapPrompt() || currentPromptFromFrontCell)
+                return;
+
+            FishingSpot spot = IsFishingAllowedHere() ? FindFishingSpotNearFoot() : null;
+            if (spot == null)
+            {
+                ClearFootFishingInteractionPrompt();
+                return;
+            }
+
+            var foundActions = new List<InteractionAction>();
+            var target = spot;
+            Vector3 castPoint = ClosestFishingPoint(spot);
+            foundActions.Add(new InteractionAction
+            {
+                keyName = "F",
+                actionName = "Câu cá",
+                onClick = () => StartFishing(target, castPoint)
+            });
+
+            string actionSignature = BuildActionSignature(foundActions);
+            bool hadNoCurrentActions = currentActions == null || currentActions.Count == 0;
+            bool shouldRefreshPrompt =
+                hadNoCurrentActions ||
+                !currentPromptFromFootFishing ||
+                spot.gameObject != currentHoverObject ||
+                actionSignature != lastActionSignature;
+
+            currentHoverObject = spot.gameObject;
+            lastAnimalState = FarmAnimal.AnimalState.Healthy;
+            lastAnimalProductReady = false;
+            lastActionSignature = actionSignature;
+            currentActions = foundActions;
+            currentPromptFromFrontCell = false;
+            currentPromptFromFootWater = false;
+            currentPromptFromFootResource = false;
+            currentPromptFromFootFishing = true;
+
+            if (shouldRefreshPrompt && GameHUDController.Instance != null)
+                GameHUDController.Instance.ShowInteractionPrompts(foundActions);
+        }
+
+        /// <summary>Điểm trên mặt nước gần người chơi nhất — chỗ để quăng cần.</summary>
+        private Vector3 ClosestFishingPoint(FishingSpot spot)
+        {
+            if (spot == null) return transform.position;
+            Vector3 playerPos = PlayerController.Instance != null
+                ? PlayerController.Instance.transform.position
+                : transform.position;
+
+            Vector3 best = spot.transform.position;
+            float bestDistance = HorizontalDistance(playerPos, best);
+
+            colliderDistanceBuffer.Clear();
+            spot.gameObject.GetComponentsInChildren(false, colliderDistanceBuffer);
+            foreach (var col in colliderDistanceBuffer)
+            {
+                if (col == null || !col.enabled) continue;
+                Vector3 point = SafeClosestPoint(col, playerPos);
+                float distance = HorizontalDistance(playerPos, point);
+                if (distance < bestDistance)
+                {
+                    bestDistance = distance;
+                    best = point;
+                }
+            }
+            colliderDistanceBuffer.Clear();
+            return best;
+        }
+
+        private FishingSpot FindFishingSpotNearFoot()
+        {
+            Transform player = PlayerController.Instance != null ? PlayerController.Instance.transform : transform;
+            Vector3 forward = player.forward;
+            forward.y = 0f;
+            if (forward.sqrMagnitude < 0.0001f)
+                forward = transform.forward;
+            forward.Normalize();
+
+            Vector3 center = player.position + forward * Mathf.Max(0.1f, fishingFootProbeForward) + Vector3.up * 0.2f;
+            float radius = Mathf.Max(0.2f, fishingFootProbeRadius);
+
+            int hitCount = Physics.OverlapSphereNonAlloc(
+                center,
+                radius,
+                frontCellOverlapResults,
+                InteractionLayerMask,
+                QueryTriggerInteraction.Collide);
+
+            FishingSpot best = null;
+            float bestDistance = float.PositiveInfinity;
+            for (int i = 0; i < hitCount; i++)
+            {
+                Collider col = frontCellOverlapResults[i];
+                if (col == null) continue;
+
+                FishingSpot spot = col.GetComponentInParent<FishingSpot>();
+                if (spot == null || !IsFishingSpotInRange(spot, spot.transform.position))
+                    continue;
+
+                float distance = HorizontalDistance(center, SafeClosestPoint(col, center));
+                if (distance < bestDistance)
+                {
+                    bestDistance = distance;
+                    best = spot;
+                }
+            }
+
+            return best;
+        }
+
+        private void ClearFootFishingInteractionPrompt()
+        {
+            if (!currentPromptFromFootFishing)
+                return;
+
+            currentHoverObject = null;
+            lastActionSignature = "";
+            currentActions.Clear();
+            currentPromptFromFootFishing = false;
+            if (GameHUDController.Instance != null)
+                GameHUDController.Instance.HideInteractionPrompt();
+        }
+
         private void ClearFootWaterInteractionPrompt()
         {
             if (!currentPromptFromFootWater)
@@ -1659,6 +1815,7 @@ namespace YWonderLand.Environment
             currentPromptFromFrontCell = false;
             currentPromptFromFootWater = false;
             currentPromptFromFootResource = true;
+            currentPromptFromFootFishing = false;
 
             if (shouldRefreshPrompt && GameHUDController.Instance != null)
                 GameHUDController.Instance.ShowInteractionPrompts(foundActions);
@@ -1729,6 +1886,7 @@ namespace YWonderLand.Environment
             lastActionSignature = "";
             currentActions.Clear();
             currentPromptFromFootResource = false;
+            currentPromptFromFootFishing = false;
             if (GameHUDController.Instance != null)
                 GameHUDController.Instance.HideInteractionPrompt();
         }
@@ -1751,7 +1909,8 @@ namespace YWonderLand.Environment
 
             var fishingSpot = target.GetComponentInParent<FishingSpot>();
             if (fishingSpot != null)
-                return HorizontalDistanceToClosestColliderPoint(fishingSpot.gameObject, fishingSpot.transform.position) <= GetDirectTapRange(GetFishingRange(fishingSpot), fishingInteractRange);
+                // Dùng thẳng tầm câu cá (1.5m), không dùng tầm chạm chung 3.5m.
+                return IsFishingSpotInRange(fishingSpot, fishingSpot.transform.position);
 
             var merchant = target.GetComponentInParent<MerchantNPC>();
             if (merchant != null)
@@ -1789,6 +1948,7 @@ namespace YWonderLand.Environment
         private bool currentPromptFromFrontCell;
         private bool currentPromptFromFootWater;
         private bool currentPromptFromFootResource;
+        private bool currentPromptFromFootFishing;
         private FarmAnimal.AnimalState lastAnimalState;
         private bool lastAnimalProductReady;
         private string lastActionSignature = "";
@@ -2045,6 +2205,7 @@ namespace YWonderLand.Environment
                 currentPromptFromFrontCell = false;
                 currentPromptFromFootWater = false;
                 currentPromptFromFootResource = false;
+            currentPromptFromFootFishing = false;
 
                 if (shouldRefreshPrompt)
                 {
@@ -2061,6 +2222,7 @@ namespace YWonderLand.Environment
                     currentPromptFromFrontCell = false;
                     currentPromptFromFootWater = false;
                     currentPromptFromFootResource = false;
+            currentPromptFromFootFishing = false;
                     if (GameHUDController.Instance != null) GameHUDController.Instance.HideInteractionPrompt();
                 }
             }
@@ -2174,6 +2336,7 @@ namespace YWonderLand.Environment
             currentPromptFromFrontCell = false;
             currentPromptFromFootWater = false;
             currentPromptFromFootResource = false;
+            currentPromptFromFootFishing = false;
             GameHUDController.Instance?.HideInteractionPrompt();
 
             PlayerController player = PlayerController.Instance;
@@ -3084,6 +3247,7 @@ namespace YWonderLand.Environment
             currentPromptFromFrontCell = false;
             currentPromptFromFootWater = false;
             currentPromptFromFootResource = false;
+            currentPromptFromFootFishing = false;
             GameHUDController.Instance?.HideInteractionPrompt();
             if (YWonderLand.UI.ResourceInteractionUIController.Instance != null)
                 YWonderLand.UI.ResourceInteractionUIController.Instance.Hide();
@@ -3220,6 +3384,7 @@ namespace YWonderLand.Environment
             currentPromptFromFrontCell = false;
             currentPromptFromFootWater = false;
             currentPromptFromFootResource = false;
+            currentPromptFromFootFishing = false;
             if (GameHUDController.Instance != null) GameHUDController.Instance.HideInteractionPrompt();
             if (YWonderLand.UI.ResourceInteractionUIController.Instance != null)
                 YWonderLand.UI.ResourceInteractionUIController.Instance.Hide();

@@ -269,55 +269,84 @@
 .crosshair { display: none; position: absolute; left: 0; top: 0; right: 0; bottom: 0; align-items: center; justify-content: center; }
 .crosshair-dot { width: 8px; height: 8px; border-radius: 4px; background-color: rgba(255, 255, 255, 0.9); border-width: 1px; border-color: rgba(0, 0, 0, 0.5); }
 
-/* ── 9. INTERACTION MENU (Nút nổi Mobile & PC) ── */
+/* ── 9. INTERACTION MENU — cụm nút TRÒN xếp vòng cung quanh nút Nhảy ── */
+/* Khung phủ kín màn nhưng picking-mode=Ignore (đặt trong GameHUDController), nên nó
+   KHÔNG chặn xoay camera; chỉ mấy nút tròn con mới ăn chạm.
+   Vị trí từng nút do C# tính (ShowInteractionPrompts) vì phải lượng giác theo số nút. */
 .interaction-container {
     position: absolute;
-    top: 55%; /* Floating action prompt sau khi tap/click vật thể */
-    left: 50%;
-    translate: -50% 0; /* Co theo nội dung + căn giữa màn hình, không full-width để khỏi chặn cả dải ngang */
-    align-items: center;
-    flex-direction: row; /* Xếp ngang các nút */
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
 }
 
-.interaction-action-btn {
-    background-color: rgba(18, 22, 32, 0.86); /* tối + ĐẶC hơn -> chữ luôn nổi rõ trên mọi nền (sáng/tối) */
-    border-radius: var(--radius-lg);
-    border-width: 1px;
-    border-color: rgba(255, 255, 255, 0.32);
-    padding: 9px 16px;
-    margin: 0 4px;
-    flex-direction: row;
+/* Bọc ngoài mỗi nút. Kích thước do C# set để khớp đúng công thức tính toạ độ. */
+.interaction-arc-item {
+    position: absolute;
     align-items: center;
+    justify-content: center;
+}
+
+/* Rộng/cao do GameHUDController set theo số hành động — ở đây chỉ lo phần nhìn. */
+.interaction-arc-btn {
+    border-radius: 50%;
+    background-color: rgba(18, 22, 32, 0.86); /* tối + ĐẶC -> icon nổi rõ trên mọi nền */
+    border-width: 2px;
+    border-color: rgba(255, 255, 255, 0.38);
+    align-items: center;
+    justify-content: center;
+    transition-property: background-color, border-color, scale;
     transition-duration: var(--transition-fast);
+}
+
+.interaction-arc-btn:hover {
+    background-color: var(--color-surface-hover);
+    border-color: var(--color-primary);
+    scale: 1.06;
+}
+
+.interaction-arc-btn:active {
+    background-color: var(--color-primary);
+    scale: 0.94;
+}
+
+.interaction-arc-icon {
+    -unity-background-scale-mode: scale-to-fit;
     -unity-background-image-tint-color: white;
 }
 
-.interaction-action-btn:hover {
-    background-color: var(--color-surface-hover);
-    scale: 1.05;
-}
-
-.interaction-action-btn:active {
-    background-color: var(--color-primary);
-    scale: 0.95;
-}
-
-.interaction-key-label {
-    background-color: rgba(253, 239, 112, 0.18);
+/* Huy hiệu phím tắt (bản PC). Absolute nên không đẩy icon lệch tâm. */
+.interaction-arc-key {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 24px;
+    height: 24px;
+    background-color: rgba(20, 24, 34, 0.95);
+    border-width: 2px;
+    border-color: var(--color-accent-yellow);
+    border-radius: 12px;
     color: var(--color-accent-yellow);
     -unity-font-style: bold;
-    font-size: 17px;
-    padding: 3px 8px;
-    border-radius: 6px;
-    margin-right: 6px;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    -unity-text-align: middle-center;
+    font-size: 13px;
+    padding: 0 5px;
 }
 
-.interaction-action-label {
-    color: rgb(255, 252, 247); /* trắng kem — sáng rõ */
+/* Nhãn nằm NGOÀI luồng (absolute) để chữ dài ngắn không làm nút xê dịch trên cung. */
+.interaction-arc-label {
+    position: absolute;
+    top: 100%;
+    left: -18px;
+    right: -18px;
+    margin-top: 8px; /* khớp ArcLabelGap trong GameHUDController */
+    color: rgb(255, 252, 247);
     -unity-font-style: bold;
-    font-size: 15px;
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9); /* viền đổ bóng -> đọc được cả trên nền sáng */
+    -unity-text-align: middle-center;
+    font-size: 14px;
+    white-space: normal;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.95); /* đọc được cả trên nền cỏ sáng */
 }
 
 /* Mobile density pass: applied by GameHUDController only on phone/tablet builds. */
@@ -369,6 +398,8 @@
 .hud-mobile .jump-btn { width: 108px; height: 108px; }
 .hud-mobile .jump-btn-icon { width: 66px; height: 66px; }
 
-.hud-mobile .interaction-action-btn { padding: 12px 20px; margin: 0 6px; }
-.hud-mobile .interaction-key-label { font-size: 20px; padding: 4px 10px; margin-right: 8px; }
-.hud-mobile .interaction-action-label { font-size: 18px; }
+/* Mobile: không phóng to nút tròn — C# tính toạ độ cung theo ArcButtonSize cố định,
+   đổi kích thước ở đây là nút lệch khỏi cung. Chỉ nới chữ cho dễ đọc, và bỏ huy hiệu
+   phím tắt vì điện thoại làm gì có bàn phím. */
+.hud-mobile .interaction-arc-label { font-size: 15px; }
+.hud-mobile .interaction-arc-key { display: none; }
