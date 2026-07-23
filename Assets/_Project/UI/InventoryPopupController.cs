@@ -229,7 +229,8 @@ public class InventoryPopupController : MonoBehaviour
         foreach (var slot in allSlots)
         {
             var def = itemDatabase.GetItem(slot.itemId);
-            if (def != null && def.category == activeCategory)
+            // Ẩn cây lâu năm khách CHƯA chốt số liệu (áp cho mọi tab + màn chọn hạt để gieo).
+            if (def != null && def.category == activeCategory && !YWonderLand.Data.HiddenItems.IsHidden(def.id))
             {
                 categoryItems.Add(new InventoryItem
                 {

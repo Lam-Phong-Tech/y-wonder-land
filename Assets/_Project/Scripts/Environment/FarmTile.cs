@@ -941,11 +941,8 @@ public class FarmTile : MonoBehaviour
         }
     }
 
-    private static string FormatSec(float s)
-    {
-        if (s >= 60f) return $"{Mathf.FloorToInt(s / 60f)}m{Mathf.RoundToInt(s % 60f):00}s";
-        return $"{Mathf.RoundToInt(s)}s";
-    }
+    // Dùng CHUNG bộ format với thú nuôi: "x ngày x giờ" / "x giờ x phút" / "x phút x giây" / "x giây".
+    private static string FormatSec(float s) => YWonderLand.Core.GameTimeConfig.FormatDuration(s);
 
     public float GetGrowthPercentage()
     {

@@ -621,6 +621,8 @@ public class ShopPopupController : MonoBehaviour
         var filtered = new List<ShopItem>();
         foreach (var item in itemsToDisplay)
         {
+            // Ẩn cây lâu năm khách CHƯA chốt số liệu (hạt + sản phẩm) — bỏ khỏi cả grid MUA lẫn BÁN.
+            if (YWonderLand.Data.HiddenItems.IsHidden(item.id)) continue;
             if (activeCategory == "all" || item.category == activeCategory)
             {
                 filtered.Add(item);

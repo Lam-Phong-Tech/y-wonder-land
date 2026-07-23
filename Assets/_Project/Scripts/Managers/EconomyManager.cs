@@ -55,8 +55,9 @@ namespace YWonderLand.Managers
 
         private void LoadBalances()
         {
-            // Nếu chưa có data, tặng 5000 Point làm vốn khởi nghiệp
-            long legacyBalance = PlayerScopedPrefs.GetInt(LEGACY_POS_KEY, 5000);
+            // Vốn khởi đầu tài khoản mới = 0 Point (KHÁCH CHỐT 22/07). Con số 5000 cũ chỉ là
+            // số tạm lúc dựng thử, không phải khoản tặng — đã bỏ.
+            long legacyBalance = PlayerScopedPrefs.GetInt(LEGACY_POS_KEY, 0);
             string cachedBalance = PlayerScopedPrefs.GetString(POS_KEY, "");
             if (!long.TryParse(cachedBalance, NumberStyles.Integer, CultureInfo.InvariantCulture, out currentPOS))
                 currentPOS = legacyBalance;

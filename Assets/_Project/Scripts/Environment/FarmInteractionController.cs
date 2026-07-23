@@ -1039,6 +1039,11 @@ namespace YWonderLand.Environment
                 actions.Add(new InteractionAction { keyName = "R", actionName = "Thu hoạch", onClick = () => HarvestAnimal(animal) });
             if (animal.currentState == FarmAnimal.AnimalState.Sick)
                 actions.Add(new InteractionAction { keyName = "H", actionName = "Chữa bệnh", onClick = () => HealAnimal(animal) });
+            // Tiêm phòng: chỉ hiện với loài có thể bệnh, đang KHÔNG bệnh và vắc-xin cũ đã hết hạn.
+            else if (animal.currentState != FarmAnimal.AnimalState.Dead
+                     && animal.data != null && animal.data.canGetSick
+                     && !animal.IsVaccineActive)
+                actions.Add(new InteractionAction { keyName = "V", actionName = "Tiêm vắc-xin", onClick = () => VaccinateAnimal(animal) });
 
             actions.Add(new InteractionAction { keyName = "Click", actionName = "Thông tin", onClick = () => { if (AnimalInteractionPopupController.Instance != null) AnimalInteractionPopupController.Instance.Show(animal); } });
         }
@@ -2346,13 +2351,74 @@ namespace YWonderLand.Environment
             return m ?? a ?? "—";
         }
 
+        // Chữa bệnh TỐN 1 Thuốc (medicine_01) — trước đây chữa miễn phí, thành lỗ hổng kinh tế.
         private void HealAnimal(FarmAnimal animal)
         {
+            if (animal == null) return;
+            if (animal.currentState != FarmAnimal.AnimalState.Sick)
+            {
+                ScreenToast.Show("Con vật không bị bệnh, chưa cần dùng thuốc.");
+                return;
+            }
+
+            // Số LIỀU thuốc theo loài (VatNuoi2: bò 10 · heo 9 · vịt 2...), không còn cứng 1 liều.
+            int doses = animal.MedicineDosesPerCure;
+            var inv = YWonderLand.Managers.InventoryManager.Instance;
+            if (inv == null || inv.GetItemQuantity("medicine_01") < doses)
+            {
+                ScreenToast.Show($"Cần {doses} Thuốc để chữa {animal.data?.animalName}! Mua thêm ở Cửa hàng vật phẩm.");
+                return;
+            }
+            if (!inv.RemoveItem("medicine_01", doses)) return;
+
             PlayerController player = PlayerController.Instance;
             // Chưa có animation "tiêm/chữa bệnh" riêng -> tạm dùng "Feed" (động tác đưa tay) cho đỡ trống
             if (player != null) player.PlayActionAnimation("Feed", 0f);
-            animal.Heal();
-            FarmStateSync.SaveBuildState();
+            if (animal.Heal())
+            {
+                ScreenToast.Show($"Đã chữa khỏi bệnh (tốn {doses} Thuốc)!");
+                FarmStateSync.SaveBuildState();
+            }
+            else
+            {
+                inv.AddItem("medicine_01", doses); // không chữa được thì hoàn đủ số thuốc
+            }
+        }
+
+        // Tiêm vắc-xin PHÒNG bệnh — tốn 1 vaccine_01. Không chữa được thú đang bệnh.
+        private void VaccinateAnimal(FarmAnimal animal)
+        {
+            if (animal == null) return;
+            if (animal.currentState == FarmAnimal.AnimalState.Sick)
+            {
+                ScreenToast.Show("Con vật đang bệnh — phải dùng Thuốc chữa trước, rồi mới tiêm phòng.");
+                return;
+            }
+            if (animal.IsVaccineActive)
+            {
+                ScreenToast.Show("Vắc-xin còn hiệu lực, chưa cần tiêm lại.");
+                return;
+            }
+
+            var inv = YWonderLand.Managers.InventoryManager.Instance;
+            if (inv == null || inv.GetItemQuantity("vaccine_01") <= 0)
+            {
+                ScreenToast.Show("Hết Vắc-xin! Mua thêm ở Cửa hàng vật phẩm.");
+                return;
+            }
+            if (!inv.RemoveItem("vaccine_01", 1)) return;
+
+            PlayerController player = PlayerController.Instance;
+            if (player != null) player.PlayActionAnimation("Feed", 0f); // chưa có animation tiêm riêng
+            if (animal.Vaccinate())
+            {
+                ScreenToast.Show("Đã tiêm vắc-xin — con vật được phòng bệnh.");
+                FarmStateSync.SaveBuildState();
+            }
+            else
+            {
+                inv.AddItem("vaccine_01", 1); // tiêm hụt thì hoàn lại
+            }
         }
 
         private void HarvestAnimal(FarmAnimal animal)

@@ -16,13 +16,35 @@ namespace YWonderLand.Core
     /// </summary>
     public static class GameTimeConfig
     {
-        /// <summary>Bao nhiêu GIÂY THỰC = 1 NGÀY GAME. Demo 60f · Thật 86400f.</summary>
-        public const float SecondsPerGameDay = 60f;
+        /// <summary>Bao nhiêu GIÂY THỰC = 1 NGÀY GAME. Demo 60f · THẬT 86400f.
+        /// ⭐ ĐANG BẬT THỜI GIAN THỰC (86400). Muốn test nhanh thì đổi tạm về 60f rồi đổi lại.</summary>
+        public const float SecondsPerGameDay = 86400f;
 
         /// <summary>Đổi số NGÀY game → giây thực.</summary>
         public static float Days(float gameDays) => gameDays * SecondsPerGameDay;
 
         /// <summary>Đổi số GIỜ game → giây thực (24 giờ = 1 ngày).</summary>
         public static float Hours(float gameHours) => gameHours * (SecondsPerGameDay / 24f);
+
+        /// <summary>
+        /// Đổi GIÂY còn lại → chuỗi dễ đọc cho người chơi: "3 ngày 4 giờ", "5 giờ 12 phút",
+        /// "2 phút 30 giây", "45 giây". Chỉ hiện 2 mốc lớn nhất cho gọn — vì chạy thời gian thực
+        /// thì thời gian còn lại có thể lên tới vài chục ngày, ghi đủ 4 mốc sẽ quá dài.
+        /// </summary>
+        public static string FormatDuration(float seconds)
+        {
+            if (seconds < 0f) seconds = 0f;
+            int total = (int)System.Math.Ceiling((double)seconds);
+
+            int days = total / 86400;
+            int hours = (total % 86400) / 3600;
+            int minutes = (total % 3600) / 60;
+            int secs = total % 60;
+
+            if (days > 0) return hours > 0 ? $"{days} ngày {hours} giờ" : $"{days} ngày";
+            if (hours > 0) return minutes > 0 ? $"{hours} giờ {minutes} phút" : $"{hours} giờ";
+            if (minutes > 0) return secs > 0 ? $"{minutes} phút {secs} giây" : $"{minutes} phút";
+            return $"{secs} giây";
+        }
     }
 }

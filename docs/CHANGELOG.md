@@ -6,6 +6,90 @@
 
 ---
 
+## [2026-07-22] — Hệ BỆNH + VẮC-XIN cho thú nuôi · chuyển sang THỜI GIAN THỰC
+
+### Hệ bệnh / vắc-xin (trước đây là khung rỗng)
+- **Phát hiện:** `AnimalState.Sick`, `canGetSick`, item `vaccine_01`/`medicine_01`, nút `BtnHeal`/`BtnVaccine` đều CÓ SẴN — nhưng **không dòng code nào cho thú bị bệnh**, nút Vắc-xin **chưa nối handler**, `Heal()` **không trừ item**. Cả vòng chăm sóc chết cứng.
+- **Đã dựng:** `FarmAnimal` thêm mốc `vaccineUntilUnix` (hạn vắc-xin) + `sickRefUnix` (mốc ủ bệnh) theo **đồng hồ thật** (sống qua các phiên); `Update()` cho thú **đổ bệnh** khi loài `canGetSick`, hết hạn vắc-xin và ủ đủ lâu (miễn trong Tutorial). **Thú bệnh ngừng ra sản phẩm.**
+- `Vaccinate()` = phòng bệnh (từ chối khi đang bệnh) · `Heal()` = chữa bệnh (bỏ 2 tác dụng phụ tạm bợ cũ: tự bật `isVaccinated` và tự làm no).
+- **Trừ item thật:** popup nối `BtnVaccine`, bật/tắt nút theo trạng thái, tốn `medicine_01` (chữa) / `vaccine_01` (tiêm), hụt thì hoàn lại. **Bịt lỗ hổng:** `HealAnimal` trong `FarmInteractionController` trước chữa **MIỄN PHÍ** → nay tốn 1 Thuốc; thêm hành động **"Tiêm vắc-xin"**.
+- **Lưu/khôi phục:** `BuildPersistence` lưu thêm hạn vắc-xin + mốc ủ bệnh + trạng thái bệnh. Save cũ (thiếu field) đếm ủ bệnh lại từ lúc load → thú đang nuôi không bị bệnh oan ngay khi mở game.
+- ✅ **Đã thay số tạm bằng SỐ TÀI LIỆU** (xem mục ngay dưới) — không còn 3 ngày / 7 ngày bịa.
+
+### Số bệnh đổ theo CÔNG THỨC tài liệu (`VatNuoi2.md` + `CachTinh.md`)
+Trước đó bé dùng số tạm tự đặt (ủ bệnh 3 ngày, vắc-xin 7 ngày, **bệnh chắc chắn 100%**, thuốc luôn 1 liều).
+Rà lại thì tài liệu CÓ đủ 4 cột cho từng con → nay đọc thẳng từ bảng:
+
+| Con | Số ngày nuôi | Hệ số mốc bệnh | Tỉ lệ bệnh | Mũi vắc-xin | Liều thuốc |
+|---|---|---|---|---|---|
+| Gà mái | 90 | 0.15 | 0.6 | 3 | 3 |
+| Bò sữa | 270 | 0.30 | 0.4 | 4 | 10 |
+| Heo con | 180 | 0.50 | 0.3 | 4 | 9 |
+| Đà điểu | 180 | 0.30 | 0.4 | 4 | 10 |
+| Hươu | 360 | 0.15 | 0.6 | 4 | 9 |
+| Dê con | 180 | 0.30 | 0.3 | 4 | 10 |
+| Thỏ con | 80 | 0.40 | 0.5 | 2 | 2 |
+| Ngỗng con | 90 | 0.15 | 0.4 | 4 | 2 |
+| Vịt | 45 | 0.15 | 0.6 | 2 | 2 |
+| Rùa con | 300 | 0.50 | 0.6 | 4 | 10 |
+
+**Công thức áp vào code:**
+- **Mốc phát bệnh = hệ số × số ngày nuôi** (bò: 0.3 × 270 = **ngày thứ 81**), thay cho "3 ngày" cứng.
+- Tới mốc thì **gieo xác suất "tỉ lệ phát bệnh"** — thay cho việc bệnh 100%. Gieo **MỘT lần cho cả vòng nuôi**,
+  khớp công thức chi phí của `CachTinh` (tiền thuốc chỉ nhân với tỉ lệ bệnh đúng 1 lần).
+- **Một mũi vắc-xin phòng = số ngày nuôi ÷ số mũi** (bò: 270 ÷ 4 = **67,5 ngày/mũi**). Đang có vắc-xin che
+  đúng lúc tới mốc = **thoát bệnh cả vòng nuôi**.
+- **Chữa bệnh tốn đúng số liều theo loài** (bò 10 · heo 9 · vịt 2...), không còn cứng 1 liều. Thiếu thuốc thì
+  báo rõ "Cần N Thuốc", không trừ gì.
+
+**Đã sửa 1 lỗ hổng:** `Vaccinate()` trước reset luôn mốc ủ bệnh → tiêm 1 mũi là né bệnh vĩnh viễn. Nay mốc phát
+bệnh là điểm **cố định** trong vòng nuôi, tiêm chỉ dời hạn *bảo vệ*.
+
+**Files:** `AnimalDefinition.cs` (+5 field bệnh) · `ItemDataGenerator.cs` (`SetAnimalDisease` × 10 con) ·
+`FarmAnimal.cs` · `BuildPersistence.cs` (lưu thêm `sicknessRolled`) · `FarmInteractionController.cs` ·
+`AnimalInteractionPopupController.cs`.
+
+⚠️ **2 chỗ tài liệu chưa nói rõ, bé chọn cách hiểu hợp công thức nhất — cần khách xác nhận:**
+1. "Thời điểm phát bệnh 0.3" không ghi nhân với cái gì → bé hiểu là **× số ngày nuôi**.
+2. "Số lượng thuốc 10" → bé hiểu là **chi phí cả vòng nuôi cho 1 lần bệnh** (vì `CachTinh` chỉ tính 1 lần).
+
+### Thời gian thực
+- `GameTimeConfig.SecondsPerGameDay` **60 → 86400** (1 ngày game = 1 ngày thật, đúng khách chốt). Cây/thú vốn đã chạy theo mốc đồng hồ thật nên **lớn-bù / đói-bù offline vẫn đúng**.
+- **Hiển thị theo ngày/giờ/phút/giây:** thêm `GameTimeConfig.FormatDuration()` → "3 ngày 4 giờ" / "5 giờ 12 phút" / "2 phút 30 giây" / "45 giây" (lấy 2 mốc lớn nhất cho gọn). Gộp 2 bộ format cũ của cây và thú về dùng chung (nếu không sẽ hiện số vô nghĩa kiểu "40320m").
+
+### ⚠️ VIỆC ANH PHẢI LÀM TRONG UNITY
+Chạy lại **2 generator** để số trong `.asset` ăn theo mốc ngày mới:
+1. `Y WONDER GREEN FARM/Tools/Generate Crop Data`
+2. `YWonderLand/Generate Animal Data`
+
+Generator **load asset cũ rồi chỉ ghi đè field số** → `cropPrefab` / `modelGroundOffset` / `seedlingScale` **giữ nguyên**, không mất model cây. **Không chạy thì cây/thú vẫn giữ số theo mốc 60s cũ.**
+
+### Đã chốt
+- **Cây lâu năm KHÔNG tưới thì CHẾT — giữ nguyên (chủ dự án chốt 22/07).** Cửa sổ nước 14 ngày thật, chu kỳ lớn 28 ngày → buộc phải vào tưới giữa chừng, không tưới kịp thì mất cây. Đây là hành vi MONG MUỐN, code hiện tại đã đúng, **không sửa gì**.
+- Muốn test nhanh: tạm để `SecondsPerGameDay = 60f` rồi chạy lại 2 generator, xong đổi lại 86400.
+
+---
+
+## [2026-07-22] — Vốn khởi đầu tài khoản mới = 0 Point (khách chốt)
+
+- **Khách chốt 22/07:** tài khoản mới bắt đầu với **0 Point**. Con số `5000` cũ trong `EconomyManager.LoadBalances` chỉ là **số tạm lúc dựng thử**, không phải khoản tặng của khách (chính nó gây hiểu nhầm ở Câu 18). Đã đổi mặc định về `0`.
+- **Khuyến mãi thật (khách xác nhận):** 10 USDT/tháng = **265 Point** qua **nhiệm vụ + điểm danh**; tiêu bình thường trong game nhưng **KHÔNG trả hoa hồng**.
+- **Chờ kiểm thử:** đầu game còn chơi được từ 0 Point không (tutorial cho +50 Point + hạt/dụng cụ khởi đầu).
+
+---
+
+## [2026-07-22] — Ẩn 8 cây lâu năm khách CHƯA chốt số liệu (khỏi shop + túi đồ)
+
+### Tính năng theo yêu cầu
+- **Ẩn tạm hạt giống + sản phẩm của 8 cây lâu năm chưa chốt số liệu** (theo `SoLieu_CanKhachChot.md` mục 2): Chuối, Dừa, Cau, Chà là, Trà, Măng tây, Hồng sâm, Sâm tiến vua. 3 cây đã chốt (Sa Chi / Sầu Riêng / Chanh dây) GIỮ nguyên.
+- **Cách làm (không xoá data):** thêm `Assets/_Project/Scripts/Data/HiddenItems.cs` — 1 `HashSet` chứa 16 ID (mỗi cây 1 hạt + 1 sản phẩm) + `IsHidden(id)`. Cắm filter ở 2 điểm hiển thị: `ShopPopupController.RefreshGrid()` (1 dòng `continue` lọc cả grid MUA lẫn BÁN) và `InventoryPopupController.RefreshGrid()` (lọc mọi tab; gieo hạt dùng chung tab seeds nên cũng ẩn theo).
+- **Bật lại khi khách chốt:** chỉ cần bỏ 2 ID (hạt + sản phẩm) của cây đó khỏi `HiddenItems.Ids`.
+
+### Files
+- `Assets/_Project/Scripts/Data/HiddenItems.cs` (mới) · `Assets/_Project/UI/ShopPopupController.cs` · `Assets/_Project/UI/InventoryPopupController.cs`
+
+---
+
 ## [2026-07-22] — SỬA LỖI: không cho thú ăn được → thú chết đói
 
 ### Lỗi

@@ -154,7 +154,11 @@ namespace YWonderLand.Environment
                     hasBeenFed = fa.HasBeenFed,
                     harvestsRemaining = fa.harvestsRemaining,
                     hasProductReady = fa.hasProductReady,
-                    isVaccinated = fa.isVaccinated
+                    isVaccinated = fa.isVaccinated,
+                    vaccineUntilUnix = fa.VaccineUntilUnix,
+                    sickRefUnix = fa.SickRefUnix,
+                    sicknessRolled = fa.SicknessRolled,
+                    state = (int)fa.currentState
                 });
             }
 
@@ -267,7 +271,8 @@ namespace YWonderLand.Environment
                     spawned.animalInstanceId = a.instanceId;
                 spawned.occupiedCells = new List<BuildSurfaceCell>(cells);
                 spawned.RestoreAnimalState(a.feedRefUnix, a.produceRefUnix, a.hasBeenFed,
-                    a.harvestsRemaining, a.hasProductReady, a.isVaccinated);
+                    a.harvestsRemaining, a.hasProductReady, a.isVaccinated,
+                    a.vaccineUntilUnix, a.sickRefUnix, a.state, a.sicknessRolled);
             }
             return true;
         }
@@ -318,6 +323,10 @@ namespace YWonderLand.Environment
             public int harvestsRemaining;
             public bool hasProductReady;
             public bool isVaccinated;
+            public double vaccineUntilUnix; // mốc hết hạn vắc-xin
+            public double sickRefUnix;      // mốc bắt đầu vòng nuôi (gốc tính thời điểm phát bệnh)
+            public bool sicknessRolled;     // đã gieo xác suất phát bệnh cho vòng nuôi này chưa
+            public int state;               // giữ trạng thái Bệnh qua các phiên
         }
     }
 }

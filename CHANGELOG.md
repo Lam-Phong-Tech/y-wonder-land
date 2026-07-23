@@ -1,5 +1,49 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-07-22 (Animal sickness + vaccine system; switch to real time)
+
+### Added
+- **Sickness / vaccine loop for animals (was an empty shell).** `AnimalState.Sick` existed, `AnimalDefinition.canGetSick` existed, `vaccine_01`/`medicine_01` items existed and were sold in shops, and the popup had `BtnHeal`/`BtnVaccine` — but **nothing ever set an animal to `Sick`**, `BtnVaccine` had no click handler, and `Heal()` consumed no item. Built the real loop:
+  - `FarmAnimal` gained `vaccineUntilUnix` (protection expiry) and `sickRefUnix` (incubation start), both wall-clock (`RealNow`) so they survive app restarts, plus `IsVaccineActive` / `VaccineRemainingSec` / `SicknessRemainingSec` for UI.
+  - `Update()` now turns an animal `Sick` when its species `canGetSick`, no vaccine is active, and the incubation window elapsed (skipped during the tutorial). A sick animal stops producing — `CanProduce()` already gated on `Sick`.
+  - `Vaccinate()` (preventive; refuses while sick) and a cleaned `Heal()` (cure only — it no longer silently set `isVaccinated` or top up hunger, which were placeholder side effects).
+  - Timings now come from the design data (see below); the `SerializeField`s (`sicknessOnsetSec`, `vaccineProtectSec`) remain only as per-instance test overrides, `0` = use the species numbers.
+- **Disease numbers driven by the documented formula (`VatNuoi2.md` + `CachTinh.md`).** The first pass used invented placeholders (3-day incubation, 7-day vaccine, sickness guaranteed at 100%, always 1 medicine). The spreadsheets in fact carry four per-species columns — *Thời điểm phát bệnh* (0.15–0.5), *Tỉ lệ phát bệnh* (0.3–0.6), *Số lượng Vắc-xin cần* (2–4), *Số lượng thuốc trị bệnh cần* (2–10) — plus *Số ngày nuôi* (45–360). Those are now the source of truth:
+  - `AnimalDefinition` gained `raisingDays`, `sicknessOnsetRatio`, `sicknessChance`, `vaccineDosesPerCycle`, `medicineDosesPerCure`; `ItemDataGenerator.SetAnimalDisease` bakes the table for all 10 species.
+  - **Onset = ratio × raisingDays** (cow: 0.3 × 270 = day 81) instead of a flat 3 days.
+  - On reaching that point the animal **rolls against `sicknessChance`** instead of falling ill unconditionally — rolled **once per raising cycle**, which is what `CachTinh`'s cost formula assumes (medicine cost is multiplied by the sickness rate exactly once).
+  - **One vaccine dose covers raisingDays ÷ vaccineDosesPerCycle** (cow: 270 ÷ 4 = 67.5 days). Being covered *at the onset checkpoint* means the animal skips illness for the whole cycle.
+  - **Curing costs the species' dose count** (cow 10, pig 9, duck 2 …), not a flat 1. Insufficient stock reports "Cần N Thuốc" and consumes nothing.
+  - Fixed an exploit introduced in the first pass: `Vaccinate()` used to reset the incubation reference, so a single shot deferred illness forever. The onset checkpoint is now a fixed point in the raising cycle and vaccination only extends the *protection* window.
+  - `BuildPersistence` additionally stores `sicknessRolled` so the once-per-cycle roll survives reloads.
+  - **Two ambiguities in the source data**, resolved with the reading that fits the cost formula, pending customer confirmation: what "Thời điểm phát bệnh 0.3" multiplies (taken as *Số ngày nuôi*), and whether "Số lượng thuốc 10" is per cure or per cycle (taken as one cure per cycle).
+- **Care items are now actually consumed.** `AnimalInteractionPopupController` wires `BtnVaccine`, enables `BtnHeal` only while sick and `BtnVaccine` only while not sick with no active vaccine, and spends `medicine_01` / `vaccine_01` (refunding on failure). `FarmInteractionController.HealAnimal` previously healed **for free** — an economy hole — and now costs 1 `medicine_01`; added a matching `VaccinateAnimal` + "Tiêm vắc-xin" interaction action.
+- **Persistence:** `BuildPersistence` now stores `vaccineUntilUnix`, `sickRefUnix` and the animal's `state`, so vaccine protection and an ongoing illness survive save/reload. Old saves (missing these fields) start their incubation clock at load time so existing animals aren't struck sick the moment the game opens.
+
+### Changed
+- **Switched the game to REAL time.** `GameTimeConfig.SecondsPerGameDay` 60 → **86400** (1 game day = 1 real day, the customer's decision). Crops and animals already run on wall-clock reference timestamps, so offline growth/hunger still compensates correctly.
+- **Durations now read as days/hours/minutes/seconds.** Added `GameTimeConfig.FormatDuration(seconds)` producing "3 ngày 4 giờ" / "5 giờ 12 phút" / "2 phút 30 giây" / "45 giây" (two most-significant units, since real-time remainders can run to tens of days). `FarmTile.FormatSec` and `AnimalInteractionPopupController.FormatDuration` — two separate `m`/`s`/`h` formatters that would have shown useless values like "40320m" — now both delegate to it.
+
+### Required manual step
+- **Re-run the two Editor generators in Unity** so the baked `.asset` numbers pick up the new day length: `Y WONDER GREEN FARM/Tools/Generate Crop Data` and `YWonderLand/Generate Animal Data`. The generators `LoadAssetAtPath` first and only overwrite numeric fields, so `cropPrefab` / `modelGroundOffset` / `seedlingScale` assignments are preserved. Without this, crop/animal timings stay on the old 60s-per-day values.
+
+### Pending
+- Crop/animal balance under real time — notably the perennial water window (`wateredLifeSec` = 14 game-days) is now 14 **real** days while first growth is 28, so a perennial still dies if nobody logs in to re-water within the window (see the earlier perennial investigation). Needs a customer decision.
+- To test quickly, temporarily set `SecondsPerGameDay` back to `60f` (single constant) and re-run the generators.
+
+## [Unreleased] - 2026-07-22 (New-account starting balance = 0 Point)
+
+### Changed
+- **New players now start with 0 Point (customer decision 22/07).** `EconomyManager.LoadBalances` seeded a fresh account with `5000` Point ("vốn khởi nghiệp"). That figure was never a customer rule — it was a placeholder from early prototyping, and it caused confusion when we asked the customer about it (Câu 18). The customer confirmed: new accounts start at **0 Point**; the only real promo is 10 USDT/month = 265 Point earned via quests + daily check-in, spendable normally but paying **no commission**. Changed the default seed to `0`.
+
+### Pending
+- Verify the early game is still playable from 0 Point (tutorial grants +50 Point and starter seeds/tools).
+
+## [Unreleased] - 2026-07-22 (Hide unfinalized perennial crops from shop/inventory)
+
+### Added
+- **Central `HiddenItems` set to hide crops the customer hasn't finalized.** Per `SoLieu_CanKhachChot.md` §2, 8 perennial crops still lack finalized data (seed price / growth time / yield / sell price): banana, coconut, areca, date, tea, asparagus, red_ginseng, royal_ginseng. Added `Assets/_Project/Scripts/Data/HiddenItems.cs` — a static `HashSet<string>` of their 16 IDs (seed + product each) plus `IsHidden(id)`. Wired it into the two display chokepoints: `ShopPopupController.RefreshGrid()` (one `continue` filters both the buy grid and the sell grid) and `InventoryPopupController.RefreshGrid()` (filters every inventory tab; planting reuses the seeds tab, so it's hidden there too). No data/assets deleted — when the customer finalizes a crop, remove its 2 IDs from the set to re-enable. The 3 finalized perennials (Sa Chi / Sầu Riêng / Chanh dây) are unaffected.
+
 ## [Unreleased] - 2026-07-22 (Feeding animals silently broken — starvation)
 
 ### Fixed

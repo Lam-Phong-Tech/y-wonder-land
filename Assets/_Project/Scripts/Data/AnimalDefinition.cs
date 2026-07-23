@@ -74,6 +74,27 @@ namespace YWonderLand.Data
         [Tooltip("Có thể bị bệnh nếu không tiêm vaccine")]
         public bool canGetSick = true;
 
+        [Header("Bệnh / Vắc-xin (số theo VatNuoi2 + CachTinh)")]
+        [Tooltip("Tổng SỐ NGÀY NUÔI cả vòng đời (cột 'Số ngày nuôi' của VatNuoi2). " +
+                 "Là gốc để quy ra mốc phát bệnh và lịch tiêm.")]
+        public float raisingDays = 0f;
+
+        [Tooltip("HỆ SỐ thời điểm phát bệnh (cột 'Thời điểm phát bệnh', 0.15–0.5). " +
+                 "Mốc phát bệnh = hệ số × số ngày nuôi. VD bò 0.3 × 270 = ngày thứ 81.")]
+        [Range(0f, 1f)] public float sicknessOnsetRatio = 0f;
+
+        [Tooltip("XÁC SUẤT phát bệnh khi tới mốc (cột 'Tỉ lệ phát bệnh', 0.3–0.6). " +
+                 "Gieo MỘT lần cho cả vòng nuôi — trượt thì con đó nuôi hết vòng không bệnh.")]
+        [Range(0f, 1f)] public float sicknessChance = 0f;
+
+        [Tooltip("Số MŨI vắc-xin cần trong cả vòng nuôi (cột 'Số lượng Vắc-xin cần'). " +
+                 "Một mũi phòng được = số ngày nuôi ÷ số mũi. VD bò 270 ÷ 4 = 67,5 ngày/mũi.")]
+        public int vaccineDosesPerCycle = 0;
+
+        [Tooltip("Số LIỀU thuốc tốn để chữa khỏi (cột 'Số lượng thuốc trị bệnh cần'). " +
+                 "VD bò 10 liều, vịt 2 liều. Theo CachTinh thì đây là chi phí thuốc CẢ vòng nuôi.")]
+        public int medicineDosesPerCure = 1;
+
         [Header("Visual (Primitive Fallback)")]
         [Tooltip("Loại primitive shape: 0=Capsule (gà), 1=Cube (bò), 2=Sphere (heo)")]
         public int primitiveType = 0;

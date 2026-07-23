@@ -90,6 +90,7 @@ public class AnimalInteractionPopupController : MonoBehaviour
         if (btnFeed != null) btnFeed.clicked += OnFeedClicked;
         if (btnHarvest != null) btnHarvest.clicked += OnHarvestClicked;
         if (btnHeal != null) btnHeal.clicked += OnHealClicked;
+        if (btnVaccine != null) btnVaccine.clicked += OnVaccineClicked;
         if (btnAddAnimal != null) btnAddAnimal.clicked += OnAddAnimalClicked;
 
         Hide();
@@ -386,12 +387,8 @@ public class AnimalInteractionPopupController : MonoBehaviour
         return when + " · " + count;
     }
 
-    private static string FormatDuration(float sec)
-    {
-        if (sec < 60f) return Mathf.CeilToInt(sec) + "s";
-        if (sec < 3600f) return Mathf.FloorToInt(sec / 60f) + "m" + Mathf.CeilToInt(sec % 60f) + "s";
-        return Mathf.FloorToInt(sec / 3600f) + "h" + Mathf.FloorToInt((sec % 3600f) / 60f) + "m";
-    }
+    // Dùng CHUNG bộ format với cây trồng: "x ngày x giờ" / "x giờ x phút" / "x phút x giây" / "x giây".
+    private static string FormatDuration(float sec) => YWonderLand.Core.GameTimeConfig.FormatDuration(sec);
 
     public void Hide()
     {
@@ -466,15 +463,19 @@ public class AnimalInteractionPopupController : MonoBehaviour
             btnHarvest.style.display = DisplayStyle.Flex;
             btnHarvest.SetEnabled(animal.hasProductReady && !isDead);
         }
+        // CHỮA BỆNH: chỉ bật khi con vật ĐANG BỆNH (tốn 1 Thuốc).
         if (btnHeal != null)
         {
             btnHeal.style.display = DisplayStyle.Flex;
-            btnHeal.SetEnabled(false);
+            btnHeal.SetEnabled(!isDead && animal.currentState == FarmAnimal.AnimalState.Sick);
         }
+        // TIÊM VẮC-XIN: phòng bệnh — bật khi KHÔNG bệnh và vắc-xin cũ đã hết hạn (tốn 1 Vắc-xin).
         if (btnVaccine != null)
         {
             btnVaccine.style.display = DisplayStyle.Flex;
-            btnVaccine.SetEnabled(false);
+            btnVaccine.SetEnabled(!isDead
+                && animal.currentState != FarmAnimal.AnimalState.Sick
+                && !animal.IsVaccineActive);
         }
     }
 
@@ -533,16 +534,75 @@ public class AnimalInteractionPopupController : MonoBehaviour
         }
     }
 
+    // ID item dùng cho chữa bệnh / phòng bệnh (đã có sẵn trong ItemDatabase + bán ở shop).
+    private const string MedicineItemId = "medicine_01";
+    private const string VaccineItemId = "vaccine_01";
+
+    /// <summary>CHỮA BỆNH: tốn số Thuốc theo loài (VatNuoi2), chỉ dùng được khi con vật đang bệnh.</summary>
     private void OnHealClicked()
     {
         if (currentAnimal == null) return;
 
-        // TODO: Chờ khách chốt vaccine/thuốc chữa bệnh để trừ item đúng thiết kế.
+        if (currentAnimal.currentState != FarmAnimal.AnimalState.Sick)
+        {
+            ScreenToast.Show("Con vật không bị bệnh, chưa cần dùng thuốc.");
+            return;
+        }
+        // Số LIỀU thuốc theo loài (VatNuoi2: bò 10 · heo 9 · vịt 2...), không còn cứng 1 liều.
+        int doses = currentAnimal.MedicineDosesPerCure;
+        if (!ConsumeCareItem(MedicineItemId, "Thuốc", doses)) return;
+
         if (currentAnimal.Heal())
         {
-            Debug.Log("[AnimalPopup] Healed the animal.");
+            ScreenToast.Show($"Đã chữa khỏi bệnh (tốn {doses} Thuốc)!");
             RefreshUI(currentAnimal);
             if (IsEnclosureMode) RefreshEnclosureUI();
         }
+        else
+        {
+            InventoryManager.Instance?.AddItem(MedicineItemId, doses); // không chữa được thì hoàn đủ
+        }
+    }
+
+    /// <summary>TIÊM VẮC-XIN: tốn 1 Vắc-xin, phòng bệnh một thời gian. Không chữa được thú đang bệnh.</summary>
+    private void OnVaccineClicked()
+    {
+        if (currentAnimal == null) return;
+
+        if (currentAnimal.currentState == FarmAnimal.AnimalState.Sick)
+        {
+            ScreenToast.Show("Con vật đang bệnh — phải dùng Thuốc chữa trước, rồi mới tiêm phòng.");
+            return;
+        }
+        if (currentAnimal.IsVaccineActive)
+        {
+            ScreenToast.Show("Vắc-xin còn hiệu lực, chưa cần tiêm lại.");
+            return;
+        }
+        if (!ConsumeCareItem(VaccineItemId, "Vắc-xin")) return;
+
+        if (currentAnimal.Vaccinate())
+        {
+            ScreenToast.Show("Đã tiêm vắc-xin — con vật được phòng bệnh.");
+            RefreshUI(currentAnimal);
+            if (IsEnclosureMode) RefreshEnclosureUI();
+        }
+        else
+        {
+            InventoryManager.Instance?.AddItem(VaccineItemId, 1); // tiêm hụt thì hoàn lại
+        }
+    }
+
+    /// <summary>Trừ item chăm sóc theo SỐ LIỀU; thiếu thì báo và trả false (KHÔNG trừ).</summary>
+    private bool ConsumeCareItem(string itemId, string displayName, int amount = 1)
+    {
+        var inv = InventoryManager.Instance;
+        if (inv == null) return false;
+        if (inv.GetItemQuantity(itemId) < amount)
+        {
+            ScreenToast.Show($"Cần {amount} {displayName}! Mua thêm ở Cửa hàng vật phẩm.");
+            return false;
+        }
+        return inv.RemoveItem(itemId, amount);
     }
 }
