@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.CropDefinition
   seedItemId: grass_seed_01
   harvestItemId: grass_01
-  growthTimeSec: 60
-  waterIntervalSec: 15
-  noWaterDeathSec: 20
-  wateredLifeSec: 50
+  growthTimeSec: 86400
+  waterIntervalSec: 21600
+  noWaterDeathSec: 28800
+  wateredLifeSec: 72000
   harvestYield: 2
   expReward: 175
   posReward: 0
@@ -28,6 +28,7 @@ MonoBehaviour:
   modelGroundOffset: 0
   seedlingScale: 0.25
   plotSlots: 1
+  seedItemCost: 1
   maxHarvests: 1
   reHarvestCycleSec: 0
   finalProductItemId: 

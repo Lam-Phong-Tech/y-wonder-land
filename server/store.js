@@ -4,6 +4,11 @@
 const fs = require("fs");
 const path = require("path");
 const { prepareAnimalPlacement } = require("./farmAnimalPlacement");
+const {
+  normalizePointSourceLot,
+  pointSourceLotRequestSignature,
+  planPointSourceFifo,
+} = require("./pointSourceLedger");
 
 const STORE_MODE = (process.env.STORE_MODE || "json").toLowerCase();
 const DB_PATH = process.env.YW_DATA_PATH || path.join(__dirname, "data.json");
@@ -26,6 +31,7 @@ function emptyDb() {
     economies: {},
     webTopupPointMicrosRemainders: {},
     pointWalletReservations: {},
+    pointSourceLots: {},
     inventories: {},
     farmStates: {},
     dailyLimits: {},
@@ -73,6 +79,7 @@ function normalizeDb(db) {
     ),
     webTopupPointMicrosRemainders: normalizeObject(source.webTopupPointMicrosRemainders),
     pointWalletReservations: normalizeObject(source.pointWalletReservations),
+    pointSourceLots: normalizeObject(source.pointSourceLots),
     inventories: normalizeObject(source.inventories),
     farmStates: normalizeObject(source.farmStates),
     dailyLimits: normalizeObject(source.dailyLimits),
@@ -151,6 +158,17 @@ function makeDefaultDailyLimits() {
     version: 1,
     limits: {},
     updatedAt: nowISO(),
+  };
+}
+
+function pointSourceLotFromStored(value) {
+  const source = normalizeObject(value);
+  const lot = normalizePointSourceLot(source);
+  return {
+    ...lot,
+    requestSignature: String(source.requestSignature || pointSourceLotRequestSignature(lot)),
+    createdAt: source.createdAt || lot.occurredAt,
+    updatedAt: source.updatedAt || source.createdAt || lot.occurredAt,
   };
 }
 
@@ -320,6 +338,71 @@ class JsonStore {
       player: JSON.parse(JSON.stringify(player)),
       economy: normalizeEconomy(economy),
     };
+  }
+
+  recordPointSourceLot(playerId, input) {
+    const db = this.readAll();
+    const knownPlayer = Boolean(db.players[playerId])
+      || db.users.some((user) => user && user.id === playerId);
+    if (!knownPlayer) return { ok: false, error: "PLAYER_NOT_FOUND" };
+
+    let lot;
+    let requestSignature;
+    try {
+      lot = normalizePointSourceLot({ ...(input || {}), playerId });
+      requestSignature = pointSourceLotRequestSignature(lot);
+    } catch (error) {
+      return { ok: false, error: error.message || "INVALID_POINT_SOURCE_LOT" };
+    }
+    if (lot.acquisitionType === "TRANSFER") {
+      return { ok: false, error: "POINT_TRANSFER_REQUIRES_ATOMIC_OPERATION" };
+    }
+
+    const existingRaw = Object.values(db.pointSourceLots).find((candidate) => (
+      candidate
+      && candidate.playerId === lot.playerId
+      && candidate.sourceEventId === lot.sourceEventId
+      && Number(candidate.sourceEventIndex || 0) === lot.sourceEventIndex
+    ));
+    if (existingRaw) {
+      const existing = pointSourceLotFromStored(existingRaw);
+      if (existing.requestSignature !== requestSignature) {
+        return { ok: false, error: "POINT_SOURCE_IDEMPOTENCY_CONFLICT" };
+      }
+      return { ok: true, duplicate: true, lot: existing };
+    }
+    if (db.pointSourceLots[lot.id]) {
+      return { ok: false, error: "POINT_SOURCE_IDEMPOTENCY_CONFLICT" };
+    }
+
+    const timestamp = nowISO();
+    const stored = {
+      ...lot,
+      requestSignature,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    };
+    db.pointSourceLots[stored.id] = stored;
+    this.writeAll(db);
+    return { ok: true, duplicate: false, lot: pointSourceLotFromStored(stored) };
+  }
+
+  getPointSourceLots(playerId, options = {}) {
+    const includeDepleted = options.includeDepleted !== false;
+    return Object.values(this.readAll().pointSourceLots)
+      .filter((candidate) => candidate && candidate.playerId === playerId)
+      .map(pointSourceLotFromStored)
+      .filter((lot) => includeDepleted || lot.remainingPointMicros > 0)
+      .sort((left, right) => left.occurredAt.localeCompare(right.occurredAt)
+        || left.createdAt.localeCompare(right.createdAt)
+        || left.id.localeCompare(right.id));
+  }
+
+  previewPointSourceFifo(playerId, pointAmountMicros) {
+    return planPointSourceFifo(
+      this.getPointSourceLots(playerId, { includeDepleted: false }),
+      pointAmountMicros
+    );
   }
 
   applyWebPointReservation(operation, input) {
@@ -1279,6 +1362,9 @@ class JsonStore {
     delete db.profiles[playerId];
     delete db.economies[playerId];
     delete db.webTopupPointMicrosRemainders[playerId];
+    for (const [lotId, lot] of Object.entries(db.pointSourceLots)) {
+      if (lot && lot.playerId === playerId) delete db.pointSourceLots[lotId];
+    }
     delete db.inventories[playerId];
     delete db.farmStates[playerId];
     delete db.dailyLimits[playerId];
@@ -1323,6 +1409,9 @@ module.exports = {
   getOrCreatePlayerForWebUser: activeStore.getOrCreatePlayerForWebUser.bind(activeStore),
   getWebPointBalance: activeStore.getWebPointBalance.bind(activeStore),
   applyWebPointReservation: activeStore.applyWebPointReservation.bind(activeStore),
+  recordPointSourceLot: activeStore.recordPointSourceLot.bind(activeStore),
+  getPointSourceLots: activeStore.getPointSourceLots.bind(activeStore),
+  previewPointSourceFifo: activeStore.previewPointSourceFifo.bind(activeStore),
   createBrowserAuthRequest: activeStore.createBrowserAuthRequest.bind(activeStore),
   approveBrowserAuthRequest: activeStore.approveBrowserAuthRequest.bind(activeStore),
   exchangeBrowserAuthRequest: activeStore.exchangeBrowserAuthRequest.bind(activeStore),

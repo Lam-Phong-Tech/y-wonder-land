@@ -26,15 +26,20 @@ MonoBehaviour:
   productAltAmount: 40
   produceItemId: deer_velvet_01
   produceAmount: 2
-  produceCycleTimeSec: 10800
+  produceCycleTimeSec: 15552000
   maxHarvests: 2
   expReward: 15000
   meatItemId: deer_meat_01
   meatAmount: 40
-  feedIntervalSec: 60
-  noFeedDeathSec: 60
-  fedLifeSec: 120
+  feedIntervalSec: 86400
+  noFeedDeathSec: 86400
+  fedLifeSec: 172800
   canGetSick: 1
+  raisingDays: 360
+  sicknessOnsetRatio: 0.15
+  sicknessChance: 0.6
+  vaccineDosesPerCycle: 4
+  medicineDosesPerCure: 9
   primitiveType: 0
   animalColor: {r: 1, g: 1, b: 1, a: 1}
   animalScale: {x: 0.5, y: 0.5, z: 0.5}

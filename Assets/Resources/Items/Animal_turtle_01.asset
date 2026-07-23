@@ -26,15 +26,20 @@ MonoBehaviour:
   productAltAmount: 10
   produceItemId: turtle_shell_01
   produceAmount: 1
-  produceCycleTimeSec: 18000
+  produceCycleTimeSec: 25920000
   maxHarvests: 1
   expReward: 20000
   meatItemId: turtle_meat_01
   meatAmount: 10
-  feedIntervalSec: 420
-  noFeedDeathSec: 300
-  fedLifeSec: 600
+  feedIntervalSec: 604800
+  noFeedDeathSec: 432000
+  fedLifeSec: 864000
   canGetSick: 1
+  raisingDays: 300
+  sicknessOnsetRatio: 0.5
+  sicknessChance: 0.6
+  vaccineDosesPerCycle: 4
+  medicineDosesPerCure: 10
   primitiveType: 0
   animalColor: {r: 1, g: 1, b: 1, a: 1}
   animalScale: {x: 0.5, y: 0.5, z: 0.5}

@@ -3,7 +3,7 @@
 > Lược đồ DB thật theo **REST API riêng** (thay blueprint UGS cũ trong `docs/DATA_SCHEMA.md`).
 > Phiên bản: 0.1 — 16/06/2026. **Đợt 1** (users, profiles) đã hiện thực ở server stub bằng file JSON; phần còn lại là **đề xuất** cho PostgreSQL production.
 > Quy ước: mọi bảng dữ liệu người chơi có `version` (migration) + `updated_at`. Tiền & số lượng dùng `BIGINT` (tránh tràn `int`).
-> Cập nhật 16/07/2026: BA/khách xác nhận Point web và Point game là cùng một ví/số dư; USDT -> Point, YWH <-> Point, Point -> USDT và tỷ giá do Admin thay đổi. ADR candidate chọn PostgreSQL game làm ledger Point authoritative cho account đã link; migration số dư web cũ vẫn phải đối soát/phê duyệt theo từng account. Xem `docs/POINT_WALLET_BUSINESS_RULES.md` và `docs/ADR_POINT_WALLET_AUTHORITY.md`.
+> Cập nhật 19/07/2026: tỷ giá hiện tại được khách chốt `1 USDT = 26,5 Point`, `1 YWH = 1,59 Point`; hoa hồng 6 cấp là `8% + 5 x 1%`, người nhận cần VIP tiêu dùng `2.650 Point`, chưa đủ thì share vào bể khóa riêng. Hoa hồng vẫn phụ thuộc nguồn Point, giữ số lẻ, FIFO/rate version, chờ tối thiểu khoảng 10 phút và reversal khi hoàn/hủy. ADR chọn PostgreSQL game làm ledger Point authoritative; migration source-lot `007` mới là candidate local, chưa apply production và chưa có commission/VIP pool.
 
 ---
 
@@ -86,18 +86,21 @@
 | Cột | Kiểu | Ghi chú |
 |---|---|---|
 | `user_id` | FK PK | |
-| `point` / `pos` | BIGINT | Ví duy nhất `Point`, gồm cả tiền gameplay và tiền nạp web; code/API hiện giữ tên nội bộ `pos` |
+| `point` / `pos` | BIGINT | Số Point nguyên spendable hiện tại; code/API giữ tên nội bộ `pos` |
+| `web_point_micros_remainder` | BIGINT | Phần lẻ `0..999999` hiện chỉ được carry trong credit web; shop/HUD chưa coi đây là Point spendable chung |
 | `version` / `updated_at` | INT / TIMESTAMP | |
 
 > Client KHÔNG ghi đè trực tiếp. Giao dịch nạp đã duyệt đi từ web server tới game-server bằng chữ ký + transaction ID, rồi tăng `player_economy.pos` và ghi ledger trong cùng PostgreSQL transaction. UPoint legacy được lưu vào `legacy_upoint_balances` để audit, không tự quy đổi. Migration mở rộng `004` chưa xóa cột cũ để release trước vẫn rollback được; migration contract xóa cột chỉ chạy sau khi release Point-only đã deploy/verify.
 
-#### Ràng buộc một ví Point theo xác nhận BA/khách 16/07
+#### Ràng buộc một ví Point theo xác nhận BA/khách 16-19/07
 
 - `player_economy.pos` là balance Point spendable duy nhất cho account đã link. `balanceGXL/lockedGXL` của account đó bị đóng băng ở `0`; web đọc balance game bằng endpoint HMAC và kiểm đúng `gamePlayerId` đã ghim.
 - Mọi credit/debit/conversion/transfer/withdrawal/reserve/reversal phải có source transaction ID unique, trạng thái rõ và audit actor/rate/before/after.
 - Candidate v3 đã version hóa tỷ giá `USDT_POINT` theo integer micros, effective time và Admin actor; conversion lưu rate version, exact source/destination micros và rounding remainder. `YWH_POINT` vẫn feature-gated tới khi BA chốt semantics.
+- Candidate local `007_point_source_ledger` thêm bảng `point_source_lots`: exact micro-Point, origin, source event/index unique, source conversion rate riêng (`USDT_POINT`/`YWH_POINT`), commission valuation rate `USDT_POINT`, remaining amount và parent/root lineage. `UNATTRIBUTED` không có commission asset/rate và FIFO phải dừng; transfer chỉ được persist sau khi có transaction đồng thời trừ sender/tạo recipient. Bản quyết định VIP mới nhất tính Point nguồn USDT nhận qua transfer cho người tiêu dùng, nên origin/rate lineage hiện có đủ phân loại và không cần lưu chủ nạp gốc. Bảng chưa apply PostgreSQL, không tự backfill balance cũ và chưa được mutation runtime sử dụng.
 - Game authority v3 đã có state machine `reserve/capture/release`; không được trừ Point bằng delta rời rạc. Web có saga `Point -> USDT` nội bộ, đã pass full Prisma/Next/fault E2E trên bản sao và nền schema/handler đã deploy dormant. Debit flag vẫn `false`, bảng mới vẫn rỗng; phí/hạn mức/phê duyệt, rút USDT bên ngoài và reconciliation bên thanh toán vẫn chưa đạt production. `Point -> YWH` chưa có adapter.
-- Tiêu dùng game phải tạo payout hoa hồng YWH cho referrer qua cùng source transaction hoặc transactional outbox. Công thức/số tầng/refund chưa được cung cấp nên chưa chốt schema payout.
+- Tiêu dùng game thành công phải khóa source lot FIFO và ghi allocation trong cùng transaction. Rate hiện tại `26,5 Point/USDT`, `1,59 Point/YWH`; transfer giữ source/rate; Admin/legacy valuation dùng `26,5`. Payout giữ phần lẻ, bắt đầu `PENDING`, có `eligible_at` tối thiểu khoảng 10 phút và refund/hủy reversal payout gốc. Mỗi purchase tạo tối đa 6 share (`8%`, rồi `1% x 5`); recipient chưa đạt VIP tiêu dùng `2.650 Point` đi vào `LOCKED_VIP`. Schema chưa final cho tới khi chốt chủ thể mở khóa, cách tính ngưỡng và vòng đời bể khóa.
+- Quy tắc `4,68 Point` yêu cầu mọi balance/debit/payout dùng fixed-point micros hoặc cấu trúc tương đương. Cặp `pos + web_point_micros_remainder` hiện chưa đủ vì shop chỉ so sánh/trừ `pos`; đây là gap cần migration/API/client riêng, chưa deploy.
 - Số dư Point/GXL hiện hữu trên web phải được kiểm kê và migrate một lần; tuyệt đối không cộng nguyên balance web vào `player_economy.pos` nếu cả hai từng đại diện cùng giá trị.
 
 ### `inventory` — túi đồ (1-N)

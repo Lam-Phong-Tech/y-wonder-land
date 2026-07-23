@@ -26,15 +26,20 @@ MonoBehaviour:
   productAltAmount: 50
   produceItemId: milk_01
   produceAmount: 10
-  produceCycleTimeSec: 420
+  produceCycleTimeSec: 604800
   maxHarvests: 38
   expReward: 10000
   meatItemId: beef_01
   meatAmount: 50
-  feedIntervalSec: 60
-  noFeedDeathSec: 60
-  fedLifeSec: 120
+  feedIntervalSec: 86400
+  noFeedDeathSec: 86400
+  fedLifeSec: 172800
   canGetSick: 1
+  raisingDays: 270
+  sicknessOnsetRatio: 0.3
+  sicknessChance: 0.4
+  vaccineDosesPerCycle: 4
+  medicineDosesPerCure: 10
   primitiveType: 0
   animalColor: {r: 1, g: 1, b: 1, a: 1}
   animalScale: {x: 0.5, y: 0.5, z: 0.5}
