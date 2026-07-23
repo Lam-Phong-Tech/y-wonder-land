@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.CropDefinition
   seedItemId: passion_fruit_seed_01
   harvestItemId: passion_fruit_01
-  growthTimeSec: 5400
-  waterIntervalSec: 840
-  noWaterDeathSec: 840
-  wateredLifeSec: 840
+  growthTimeSec: 7776000
+  waterIntervalSec: 1209600
+  noWaterDeathSec: 1209600
+  wateredLifeSec: 1209600
   harvestYield: 10
   expReward: 3000
   posReward: 0
@@ -30,6 +30,6 @@ MonoBehaviour:
   plotSlots: 20
   seedItemCost: 1
   maxHarvests: 2
-  reHarvestCycleSec: 5400
+  reHarvestCycleSec: 7776000
   finalProductItemId: passion_fruit_01
   finalProductAmount: 35

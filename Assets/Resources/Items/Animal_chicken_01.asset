@@ -26,15 +26,20 @@ MonoBehaviour:
   productAltAmount: 5
   produceItemId: egg_01
   produceAmount: 1
-  produceCycleTimeSec: 120
+  produceCycleTimeSec: 172800
   maxHarvests: 45
   expReward: 3000
   meatItemId: chicken_meat_01
   meatAmount: 5
-  feedIntervalSec: 60
-  noFeedDeathSec: 60
-  fedLifeSec: 120
+  feedIntervalSec: 86400
+  noFeedDeathSec: 86400
+  fedLifeSec: 172800
   canGetSick: 1
+  raisingDays: 90
+  sicknessOnsetRatio: 0.15
+  sicknessChance: 0.6
+  vaccineDosesPerCycle: 3
+  medicineDosesPerCure: 3
   primitiveType: 0
   animalColor: {r: 1, g: 1, b: 1, a: 1}
   animalScale: {x: 0.5, y: 0.5, z: 0.5}

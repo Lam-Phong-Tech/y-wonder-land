@@ -26,15 +26,20 @@ MonoBehaviour:
   productAltAmount: 20
   produceItemId: goat_milk_01
   produceAmount: 2
-  produceCycleTimeSec: 180
+  produceCycleTimeSec: 259200
   maxHarvests: 60
   expReward: 8000
   meatItemId: goat_meat_01
   meatAmount: 20
-  feedIntervalSec: 60
-  noFeedDeathSec: 60
-  fedLifeSec: 120
+  feedIntervalSec: 86400
+  noFeedDeathSec: 86400
+  fedLifeSec: 172800
   canGetSick: 1
+  raisingDays: 180
+  sicknessOnsetRatio: 0.3
+  sicknessChance: 0.3
+  vaccineDosesPerCycle: 4
+  medicineDosesPerCure: 10
   primitiveType: 0
   animalColor: {r: 1, g: 1, b: 1, a: 1}
   animalScale: {x: 0.5, y: 0.5, z: 0.5}

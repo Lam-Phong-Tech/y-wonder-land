@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.CropDefinition
   seedItemId: asparagus_seed_01
   harvestItemId: asparagus_01
-  growthTimeSec: 120
-  waterIntervalSec: 25
-  noWaterDeathSec: 20
-  wateredLifeSec: 50
+  growthTimeSec: 172800
+  waterIntervalSec: 36000
+  noWaterDeathSec: 28800
+  wateredLifeSec: 72000
   harvestYield: 4
   expReward: 150
   posReward: 0
@@ -28,6 +28,7 @@ MonoBehaviour:
   modelGroundOffset: 0
   seedlingScale: 0.25
   plotSlots: 1
+  seedItemCost: 1
   maxHarvests: 1
   reHarvestCycleSec: 0
   finalProductItemId: 

@@ -26,15 +26,20 @@ MonoBehaviour:
   productAltAmount: 5
   produceItemId: rabbit_fur_01
   produceAmount: 8
-  produceCycleTimeSec: 2400
+  produceCycleTimeSec: 3456000
   maxHarvests: 2
   expReward: 1500
   meatItemId: rabbit_meat_01
   meatAmount: 5
-  feedIntervalSec: 60
-  noFeedDeathSec: 60
-  fedLifeSec: 120
+  feedIntervalSec: 86400
+  noFeedDeathSec: 86400
+  fedLifeSec: 172800
   canGetSick: 1
+  raisingDays: 80
+  sicknessOnsetRatio: 0.4
+  sicknessChance: 0.5
+  vaccineDosesPerCycle: 2
+  medicineDosesPerCure: 2
   primitiveType: 0
   animalColor: {r: 1, g: 1, b: 1, a: 1}
   animalScale: {x: 0.5, y: 0.5, z: 0.5}

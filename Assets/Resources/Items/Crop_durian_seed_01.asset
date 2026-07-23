@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.CropDefinition
   seedItemId: durian_seed_01
   harvestItemId: durian_01
-  growthTimeSec: 1680
-  waterIntervalSec: 840
-  noWaterDeathSec: 840
-  wateredLifeSec: 840
+  growthTimeSec: 2419200
+  waterIntervalSec: 1209600
+  noWaterDeathSec: 1209600
+  wateredLifeSec: 1209600
   harvestYield: 5
   expReward: 16800
   posReward: 0
@@ -28,7 +28,8 @@ MonoBehaviour:
   modelGroundOffset: 0
   seedlingScale: 0.25
   plotSlots: 1
+  seedItemCost: 1
   maxHarvests: 12
-  reHarvestCycleSec: 1680
+  reHarvestCycleSec: 2419200
   finalProductItemId: durian_01
   finalProductAmount: 29

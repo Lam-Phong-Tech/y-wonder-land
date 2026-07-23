@@ -26,15 +26,20 @@ MonoBehaviour:
   productAltAmount: 5
   produceItemId: duck_egg_01
   produceAmount: 1
-  produceCycleTimeSec: 60
+  produceCycleTimeSec: 86400
   maxHarvests: 45
   expReward: 1000
   meatItemId: duck_meat_01
   meatAmount: 5
-  feedIntervalSec: 30
-  noFeedDeathSec: 60
-  fedLifeSec: 120
+  feedIntervalSec: 43200
+  noFeedDeathSec: 86400
+  fedLifeSec: 172800
   canGetSick: 1
+  raisingDays: 45
+  sicknessOnsetRatio: 0.15
+  sicknessChance: 0.6
+  vaccineDosesPerCycle: 2
+  medicineDosesPerCure: 2
   primitiveType: 0
   animalColor: {r: 1, g: 1, b: 1, a: 1}
   animalScale: {x: 0.5, y: 0.5, z: 0.5}
