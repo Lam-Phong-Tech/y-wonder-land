@@ -39,6 +39,7 @@ async function main() {
     "004_single_point_currency.sql",
     "005_web_topup_point_remainder.sql",
     "006_point_wallet_reservations.sql",
+    "007_point_source_ledger.sql",
   ]
     .map((file) => fs.readFileSync(path.join(__dirname, "migrations", file), "utf8"))
     .join("\n");
@@ -73,6 +74,84 @@ async function main() {
     });
 
     const startEconomy = await store.getEconomy(userId);
+
+    const sourceLotInput = (overrides = {}) => ({
+      sourceEventId: `pg-source-usdt-${suffix}`,
+      sourceEventIndex: 0,
+      originType: "USDT",
+      acquisitionType: "ORIGIN",
+      pointAmountMicros: 100_000_000,
+      commissionAsset: "USDT",
+      sourceRatePair: "USDT_POINT",
+      sourceRateVersionId: "rate-usdt-point-26.5-v1",
+      pointMicrosPerSourceUnit: 26_500_000,
+      commissionRateVersionId: "rate-usdt-point-26.5-v1",
+      pointMicrosPerUsdt: 26_500_000,
+      occurredAt: "2026-07-20T01:00:00.000Z",
+      metadata: { quote: "26.5", fixture: "postgres-smoke" },
+      ...overrides,
+    });
+    const sourceRace = await Promise.all([
+      store.recordPointSourceLot(userId, sourceLotInput()),
+      store.recordPointSourceLot(userId, sourceLotInput()),
+    ]);
+    assert(sourceRace.every((entry) => entry.ok)
+      && sourceRace.filter((entry) => entry.duplicate).length === 1,
+    "Concurrent PostgreSQL source event did not persist exactly once.");
+    const sourceFirst = sourceRace.find((entry) => !entry.duplicate);
+    assert(sourceFirst.lot.remainingPointMicros === 100_000_000,
+      "PostgreSQL source lot did not preserve its micro-Point balance.");
+    const sourceConflict = await store.recordPointSourceLot(userId, sourceLotInput({
+      pointAmountMicros: 101_000_000,
+    }));
+    assert(!sourceConflict.ok && sourceConflict.error === "POINT_SOURCE_IDEMPOTENCY_CONFLICT",
+      "PostgreSQL source event accepted a changed payload.");
+    const gameplaySource = await store.recordPointSourceLot(userId, sourceLotInput({
+      sourceEventId: `pg-source-gameplay-${suffix}`,
+      originType: "GAMEPLAY",
+      pointAmountMicros: 100_000_000,
+      commissionAsset: "POINT",
+      sourceRatePair: "",
+      sourceRateVersionId: "",
+      pointMicrosPerSourceUnit: null,
+      commissionRateVersionId: "",
+      pointMicrosPerUsdt: null,
+      occurredAt: "2026-07-20T02:00:00.000Z",
+      metadata: { fixture: "postgres-smoke-gameplay" },
+    }));
+    assert(gameplaySource.ok && gameplaySource.lot.commissionAsset === "POINT",
+      "PostgreSQL gameplay source did not retain Point commission classification.");
+    const unattributedSource = await store.recordPointSourceLot(userId, sourceLotInput({
+      sourceEventId: `pg-source-unattributed-${suffix}`,
+      originType: "UNATTRIBUTED",
+      pointAmountMicros: 1_000_000,
+      commissionAsset: "",
+      sourceRatePair: "",
+      sourceRateVersionId: "",
+      pointMicrosPerSourceUnit: null,
+      commissionRateVersionId: "",
+      pointMicrosPerUsdt: null,
+      occurredAt: "2026-07-20T03:00:00.000Z",
+      metadata: { fixture: "postgres-smoke-unattributed" },
+    }));
+    assert(unattributedSource.ok && unattributedSource.lot.commissionAsset === "",
+      "PostgreSQL unattributed source was assigned a commission asset.");
+    const sourceFifo = await store.previewPointSourceFifo(userId, 150_000_000);
+    assert(sourceFifo.ok && sourceFifo.allocations.length === 2
+      && sourceFifo.allocations[0].lotId === sourceFirst.lot.id
+      && sourceFifo.allocations[0].allocatedPointMicros === 100_000_000
+      && sourceFifo.allocations[1].lotId === gameplaySource.lot.id
+      && sourceFifo.allocations[1].allocatedPointMicros === 50_000_000,
+    "PostgreSQL source FIFO did not preserve oldest-first classification.");
+    const sourceBlocked = await store.previewPointSourceFifo(userId, 201_000_000);
+    assert(!sourceBlocked.ok
+      && sourceBlocked.error === "POINT_SOURCE_CLASSIFICATION_REQUIRED"
+      && sourceBlocked.blockedLotId === unattributedSource.lot.id,
+    "PostgreSQL FIFO consumed an unattributed source lot.");
+    const economyAfterSourceLots = await store.getEconomy(userId);
+    assert(economyAfterSourceLots.pos === startEconomy.pos,
+      "Dormant PostgreSQL source lots changed the authoritative Point balance.");
+
     const economyKey = `pg-economy-${suffix}`;
     const economyResults = await Promise.all([
       store.applyEconomyDelta(userId, { pos: 125 }, { idempotencyKey: economyKey, type: "smoke" }),
@@ -326,6 +405,7 @@ async function main() {
     const restoredInventory = await store.getInventory(userId);
     const restoredFarm = await store.getFarmState(userId);
     const restoredLimits = await store.getDailyLimits(userId);
+    const restoredSourceLots = await store.getPointSourceLots(userId);
     const browserReplay = await store.exchangeBrowserAuthRequest(browserRequestHash, browserChallenge);
     const topupReplayAfterRestart = await store.creditWebTopup(topupIdentity, 750_500_000, {
       pointAmount: "750.500000",
@@ -347,6 +427,11 @@ async function main() {
       "Atomic animal farm state did not survive pool restart.");
     assert(restoredLimits.limits.mining.used === 1, "Mining daily limit did not survive pool restart.");
     assert(restoredLimits.limits.fishing.used === 1, "Fishing daily limit did not survive pool restart.");
+    assert(restoredSourceLots.length === 3
+      && restoredSourceLots[0].id === sourceFirst.lot.id
+      && restoredSourceLots[1].id === gameplaySource.lot.id
+      && restoredSourceLots[2].id === unattributedSource.lot.id,
+    "PostgreSQL source lots did not survive pool restart in FIFO order.");
     assert(browserReplay.error === "BROWSER_AUTH_CONSUMED",
       "Consumed browser auth request did not survive pool restart.");
     assert(topupReplayAfterRestart.ok && topupReplayAfterRestart.duplicate

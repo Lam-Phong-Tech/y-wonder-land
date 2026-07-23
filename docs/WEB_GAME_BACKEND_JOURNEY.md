@@ -1,9 +1,9 @@
 # Web -> Game Backend Journey
-# Cập nhật gần nhất: 2026-07-17
+# Cập nhật gần nhất: 2026-07-19
 
 > Mục tiêu của tài liệu này là làm rõ phần đang mơ hồ trong kịch bản: hệ thống web đã có trước, game sẽ dùng tài khoản web làm tài khoản đăng nhập game, nhưng gameplay hiện vẫn còn nhiều dữ liệu local. Tài liệu này định nghĩa hành trình cần xây, kết quả mong đợi, cách kiểm tra và các câu hỏi cần chốt.
 
-## Cập nhật quyết định BA/khách 16/07/2026
+## Cập nhật quyết định BA/khách 16-19/07/2026
 
 Nguồn chuẩn: `docs/POINT_WALLET_BUSINESS_RULES.md`. Mục này thay thế giả định cũ
 rằng web chỉ gửi một khoản top-up để cộng thêm vào ví Point riêng của game:
@@ -14,10 +14,10 @@ rằng web chỉ gửi một khoản top-up để cộng thêm vào ví Point ri
   Admin thay đổi.
 - Point hiện hữu trên web không được copy/cộng thêm vào game. Cần chọn một ledger
   authoritative và migrate/link sao cho chỉ còn một balance spendable.
-- Mọi tiêu dùng game phải phát sinh hoa hồng YWH cho người giới thiệu tương tự HUB;
-  tối thiểu gồm vật nuôi, cây dài/ngắn ngày, mồi câu, lượt vòng quay, lượt đào khoáng
-  và mọi giao dịch được phân loại là tiêu dùng game.
-- Debit Point và payout YWH phải liên kết bằng source transaction ID/transactional
+- Mọi tiêu dùng game phải phát sinh hoa hồng theo nguồn Point: nguồn USDT trả USDT,
+  nguồn gameplay trả Point; tối thiểu gồm vật nuôi, cây dài/ngắn ngày, mồi câu,
+  lượt vòng quay, lượt đào khoáng và mọi giao dịch được phân loại là tiêu dùng game.
+- Debit Point và payout USDT/Point phải liên kết bằng source transaction ID/transactional
   outbox để retry, refund hoặc timeout không trừ/trả hai lần.
 
 ADR kỹ thuật `docs/ADR_POINT_WALLET_AUTHORITY.md` đã chốt cho candidate:
@@ -45,9 +45,11 @@ Nền này sau đó đã deploy production ở trạng thái dormant: game relea
 Migration PostgreSQL `006` và schema authority/debit SQLite đã áp cộng thêm nhưng
 các bảng link/conversion/debit/reservation vẫn rỗng; cả hai service giữ
 `WEB_POINT_WALLET_DEBIT_ENABLED=false`, public credit/reserve `404`. Không có
-payment, conversion, debit, link hoặc migration balance. `Point -> YWH`, transfer,
-rút ngoài và payout hoa hồng vẫn còn; cổng tiếp theo là identity QA riêng cùng
-canary không tiền được duyệt riêng, không chuyển `WEB_TOPUP_MODE=open`.
+payment, conversion, debit, link hoặc migration balance. Canary không tiền trên
+identity QA riêng sau đó đã đạt `5000 -> 5053`; source-lot candidate local đã pass
+và source/rate lineage hiện đủ cho quy tắc VIP mới, nhưng chưa chạy PostgreSQL cô lập
+hoặc nối runtime. `Point -> YWH`, transfer, rút ngoài và payout hoa hồng vẫn còn; không chuyển
+`WEB_TOPUP_MODE=open`.
 
 ---
 

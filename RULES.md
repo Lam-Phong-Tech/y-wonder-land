@@ -143,13 +143,15 @@
 
 ## TRƯỚC KHI BẮT ĐẦU SESSION
 1. Đọc RULES.md (file này)
-2. Đọc docs/MEMORY.md — bài học kinh nghiệm, sai lầm cần tránh
-3. Đọc docs/DESIGN.md — hệ thống thiết kế UI
-4. Đọc docs/ARCHITECTURE.md — kiến trúc hệ thống tổng quan
-5. Đọc docs/DATA_SCHEMA.md nếu liên quan đến dữ liệu người chơi / Cloud Save
-6. Đọc docs/API_CONTRACTS.md nếu tích hợp UGS service
-7. Kiểm tra GameManager.cs nếu liên quan đến state/flow
-8. Kiểm tra DesignSystem.uss nếu liên quan đến UI styling
+2. Đọc docs/THE_MEMENTO_PROTOCOL.md khi tiếp tục hoặc bàn giao phiên chat AI
+3. Đọc docs/MEMENTO_PACKET_CURRENT.md khi có, sau đó Git baseline trước khi tin snapshot
+4. Đọc docs/MEMORY.md — bài học kinh nghiệm, sai lầm cần tránh
+5. Đọc docs/DESIGN.md — hệ thống thiết kế UI
+6. Đọc docs/ARCHITECTURE.md — kiến trúc hệ thống tổng quan
+7. Đọc docs/DATA_SCHEMA.md nếu liên quan đến dữ liệu người chơi / Cloud Save
+8. Đọc docs/API_CONTRACTS.md nếu tích hợp UGS service
+9. Kiểm tra GameManager.cs nếu liên quan đến state/flow
+10. Kiểm tra DesignSystem.uss nếu liên quan đến UI styling
 
 ## AI WORKFLOW REFERENCE
 > Thư mục `unity-ai-workflow/` chứa bộ quy trình phát triển chi tiết đã customize cho dự án.

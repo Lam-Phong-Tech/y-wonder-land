@@ -119,15 +119,19 @@ Game-server gọi web, Unity KHÔNG gọi trực tiếp và KHÔNG giữ `GAME_A
 
 `/api/game/credit` là contract cũ để cộng ledger phía web, không được coi là callback nạp tiền vào game. Luồng top-up mới chỉ chạy sau khi web xác nhận giao dịch thành công và gọi endpoint loopback bên dưới.
 
-### Hợp đồng nghiệp vụ ví Point được xác nhận 16/07/2026
+### Hợp đồng nghiệp vụ ví Point được xác nhận 16-18/07/2026
 
 Nguồn chuẩn: `docs/POINT_WALLET_BUSINESS_RULES.md`.
 
 - Point web và Point game là cùng một loại tiền và phải hiển thị cùng số dư như một ví.
-- Người dùng đổi `USDT -> Point`, `YWH <-> Point` và có thể đổi `Point -> USDT`; tỷ giá do Admin thay đổi, không cố định `0,06 USDT/Point` hoặc `25 Point/USDT`.
-- Tiêu dùng game phải phát sinh payout hoa hồng bằng YWH cho người giới thiệu tương tự HUB. Phạm vi ít nhất gồm vật nuôi, cây dài/ngắn ngày, mồi câu, lượt vòng quay, lượt đào khoáng và mọi tiêu dùng game.
+- Tỷ giá hiện tại là `1 USDT = 26,5 Point` và `1 YWH = 1,59 Point`; transaction ghim rate version để Admin đổi sau không sửa lịch sử. Người dùng có thể `USDT -> Point`, `YWH <-> Point` và `Point -> USDT`.
+- Tiêu dùng game dùng Point có nguồn USDT phải trả hoa hồng USDT; tái tiêu dùng Point kiếm từ nuôi trồng/sản phẩm/thưởng game phải trả hoa hồng Point. Tỷ lệ/số tầng giống hệ thống YWH, Point commission giữ phần lẻ và hoàn/hủy phải reversal payout gốc.
+- Debit nhiều nguồn dùng FIFO theo source lot. Hoa hồng USDT dùng rate gốc đã ghim trên lô Point lúc conversion, không đọc rate Admin hiện tại khi mua hoặc retry.
+- Point transfer giữ nguyên source/rate lot của người gửi. Point nguồn YWH, Admin/legacy khi tính hoa hồng USDT đều dùng rate version hiện tại `1 USDT = 26,5 Point`; `YWH -> Point` dùng `1 YWH = 1,59 Point`.
+- Payout bắt đầu `PENDING`, chờ ít nhất khoảng 10 phút hoặc lâu hơn theo policy có version rồi mới trả nếu giao dịch gốc vẫn thành công. Hoàn sau payout vẫn dùng reversal idempotent.
+- Một giao dịch đủ điều kiện tạo tối đa 6 share: cấp trực tiếp `8%`, cấp 2-6 mỗi cấp `1%`. Người nhận chưa đạt VIP tiêu dùng `2.650 Point` nhận share vào bể `LOCKED_VIP`, chưa cộng số dư spendable.
 - Hai bề mặt không được giữ hai balance Point spendable độc lập. Mọi mutation Point phải đi vào một ledger authoritative và trả số dư absolute cho cả web lẫn game.
-- Giao dịch tiêu dùng Point và sự kiện/payout YWH phải chia sẻ source transaction ID hoặc transactional outbox để retry không trừ/cộng/trả hoa hồng hai lần.
+- Chỉ giao dịch mua đã commit thành công mới phát sự kiện hoa hồng. Giao dịch tiêu dùng Point và payout phải chia sẻ source transaction ID hoặc transactional outbox để retry không trừ/cộng/trả hoa hồng hai lần.
 
 Quyết định kỹ thuật candidate đã chốt trong `docs/ADR_POINT_WALLET_AUTHORITY.md`:
 
@@ -135,13 +139,15 @@ Quyết định kỹ thuật candidate đã chốt trong `docs/ADR_POINT_WALLET_
 - Web account đã link đóng băng `balanceGXL/lockedGXL` ở `0` và đọc balance bằng request HMAC; account legacy chưa link không tự migrate hoặc cộng dồn.
 - Settlement mới dùng integer micros, rate version bất biến và lưu rate snapshot/rounding remainder trong conversion journal.
 - Point dùng cho thao tác web-side đi qua state machine `reserve -> capture|release`; không ghi một delta âm rời rạc vào bản sao balance web.
+- Candidate local source-lot lưu riêng `sourceRatePair/sourceRateVersionId/pointMicrosPerSourceUnit` và `commissionRateVersionId/pointMicrosPerUsdt`. Ghi lô dùng `sourceEventId + sourceEventIndex` idempotent; `UNATTRIBUTED` chặn FIFO. Đây là store contract nội bộ, chưa có endpoint client/public và chưa nối callback v1/v2.
 
 Còn chặn **production/money thật**, nhưng không chặn code và test candidate cô lập:
 
 - Báo cáo reconciliation và phê duyệt migration riêng cho từng balance web legacy.
-- Mâu thuẫn nghiệp vụ `YWH -> Point`, hành vi chuyển Point giữa người dùng và các action web legacy đang cộng `balanceGXL`.
+- Xác nhận ai phải kích hoạt VIP để mở bể khóa trong ví dụ A tuyến trên/B tuyến dưới; định nghĩa mốc tiêu dùng `2.650 Point` và vòng đời khoản khóa.
 - Phí/hạn mức nghiệp vụ, phê duyệt rút và đối soát bên thanh toán cho `Point -> USDT`. Candidate local bắt buộc cấu hình fee BPS rõ ràng nhưng không tự coi đó là quyết định BA.
-- Công thức, số tầng, điều kiện, thời điểm và reversal hoa hồng YWH.
+- Định nghĩa payout thành final sau thời gian chờ và cách thu hồi khi người nhận đã tiêu. Chưa công bố endpoint payout cho tới khi các gate VIP/finality này được chốt.
+- Balance/shop/reservation fractional Point end-to-end; hiện API credit nhận micros nhưng `pos`, shop debit và reserve vẫn là Point nguyên.
 
 Các endpoint dưới đây là contract authority v3 đã có test cô lập và đã deploy production ở trạng thái dormant. Schema/handler tồn tại nhưng debit flag vẫn `false`, route public vẫn `404` và chưa có account link; đây không phải quyền bật giao dịch thật hoặc chuyển `WEB_TOPUP_MODE=open`.
 
@@ -241,8 +247,9 @@ Cập nhật bàn giao 09/07/2026 từ chat 01/07:
 - Chặn các action quest/commission/investment/gift/staking/transfer legacy ghi Point
   đối với account đã link; action chưa có contract phải fail closed.
 - Mọi cộng/trừ ví web phải có `ref` hoặc `idempotency_key` để retry không nhân đôi.
-- Mỗi giao dịch tiêu dùng game phải tạo sự kiện hoa hồng YWH idempotent; cần endpoint
-  hoặc outbox cho payout/reversal sau khi BA chốt công thức.
+- Mỗi giao dịch tiêu dùng game đã commit phải ghi allocation theo nguồn và tạo sự kiện
+  hoa hồng idempotent; cần outbox/payout/reversal contract sau khi chốt các gate nguồn,
+  tỷ giá và finality ở trên.
 - Field trạng thái account rõ ràng để game-server chặn `locked`/`soft_deleted`.
 - Trang đăng ký hiện bắt nhập mã giới thiệu nhưng chưa kiểm tra mã có tồn tại. Trước
   khi public cần BA/web chốt một mã chính thức cho người chơi đến từ game hoặc sửa web

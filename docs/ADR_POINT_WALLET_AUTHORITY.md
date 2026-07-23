@@ -67,9 +67,35 @@ reconciliation and linking process. There is no automatic balance addition.
    `BigInt`/database integers. The final compatibility write to the legacy web
    `Float` USDT column is derived once from pinned micros inside one SQLite
    transaction; retries never recompute the amount from floating-point values.
-9. A game purchase and its Point debit remain one PostgreSQL transaction.
-10. A successful game purchase emits one durable consumption event keyed by that
-    purchase transaction. Future YWH commission uses the same key and reversal key.
+9. A game purchase, its Point debit and the exact allocation of that debit by Point
+   source remain one PostgreSQL transaction.
+10. Only a committed game purchase emits one durable consumption event keyed by the
+    purchase transaction. Commission payout and any later reversal use that same key.
+11. Commission currency is derived from the consumed Point source: USDT-funded Point
+    produces USDT commission; Point earned in the game produces Point commission.
+12. Point balance, debit, payout and reversal preserve fractional value with integer
+    fixed-point arithmetic. The current whole-Point `pos` contract is transitional.
+13. Source lots are consumed FIFO. USDT commission uses the immutable conversion-rate
+    snapshot of each consumed lot, never the current Admin rate at spend or retry time.
+14. Commission starts `PENDING` with a versioned hold policy of at least about ten
+    minutes (`600` seconds candidate default), and pays only while the source purchase
+    remains successful. A later refund still requires an idempotent reversal.
+15. A Point transfer preserves and moves the sender's source lots and rate snapshots;
+    it never reclassifies game-earned Point into a USDT-funded source.
+16. The current official rate version is `26.5 Point/USDT` and `1.59 Point/YWH`.
+    Transactions pin that version; a later Admin change never rewrites history.
+17. Eligible consumption creates at most six commission shares: level 1 gets `8%`;
+    levels 2 through 6 get `1%` each, for a maximum aggregate of `13%`.
+18. VIP progress is lifetime-cumulative consumption of `2650 Point` from USDT-origin
+    source lots. It does not require one purchase and must be derived idempotently from
+    committed source-lot allocations, never from the current wallet balance. A transfer
+    preserves origin, so transferred USDT-origin Point qualifies its receiver when spent.
+19. A commission share records both its upstream recipient A and originating consumer
+    B. It remains in an auditable `LOCKED_VIP` pool while either party is not VIP and
+    becomes spendable/withdrawable only after both are VIP. Qualification releases all
+    historical locked shares for that eligible A-B relationship.
+20. A refund reverses its qualifying VIP progress idempotently. If the remaining progress
+    falls below `2650 Point`, achieved VIP is revoked and eligibility is recalculated.
 
 ## Internal Wallet Contract
 
@@ -180,16 +206,48 @@ data has no unexplained difference; identity approval, rollback and a separate
 write release are still required. This implementation has passed local isolated
 tests but has not yet been run against production.
 
+## Local Source-Lot Candidate
+
+Migration candidate `007_point_source_ledger` and the JSON/PostgreSQL adapters add
+an additive, dormant source-lot model. Each lot stores exact micro-Point amount,
+source event/index, origin classification, remaining amount and immutable rate
+snapshots. `USDT` and `YWH` lots pin both their conversion rate (`USDT_POINT` or
+`YWH_POINT`) and the `USDT_POINT` rate used for USDT commission valuation;
+Admin/legacy lots pin the commission valuation only, while gameplay lots carry
+Point commission and no currency rate.
+
+The local FIFO planner is fail-closed: it does not skip an older `UNATTRIBUTED`
+lot to consume a newer classified lot. Transfer lineage preserves parent/root and
+all source/rate fields, but the standalone persistence API rejects transfer children;
+sender consumption and recipient creation must be implemented in one transaction.
+The candidate does not backfill existing balances, change `player_economy.pos`, or
+attach to current credit/shop/reservation routes. Migration `007` is not deployed.
+
 ## Business Gates
 
-The customer answers are sufficient to build the shared-wallet foundation, but the
-following operations stay feature-gated until their conflicting rules are resolved:
-
-- `YWH -> Point`: allowed in one answer but also listed as not changing game Point.
-- Point P2P transfer: a real transfer must change the shared sender/receiver balance.
-- Legacy web quest, commission, investment, gift and staking actions: they currently
-  mutate `balanceGXL`, while the customer said they must not change game Point.
-- Point withdrawal fee/min/max/approval and YWH commission rates/levels/reversals.
+The customer answers are sufficient to keep building the shared-wallet foundation.
+`YWH -> Point` updates the shared balance, mixed-source spending is FIFO, USDT
+commission uses each lot's original rate, and P2P transfer preserves source/rate.
+The current official rates are `26.5 Point/USDT` and `1.59 Point/YWH`; Admin/legacy
+commission valuation also uses `26.5`. Commission pays `8%` at level 1 and `1%` at
+levels 2-6. The customer's latest correction confirms that VIP progress is lifetime-
+cumulative consumption of `2650 Point` from USDT-origin lots. Transferred USDT-origin
+Point qualifies its receiver when spent; refund reverses progress and revokes VIP when
+the remaining total falls below the threshold. A share is created for A even if A or the
+originating consumer B is not VIP, remains locked until both are VIP, and then all
+historical locked shares for that eligible relationship are released. Existing source/rate
+lineage is sufficient for this VIP source rule; no original-funding-player field is needed.
+The following operations remain feature-gated:
+- Consequences of VIP revocation for other commission shares that were previously
+  unlocked or paid, beyond reversing the refunded purchase's own commission.
+- Commission finality after the minimum hold window and recovery when a paid
+  commission is spent before a later refund. The hold reduces risk but cannot replace
+  reversal unless refunds are forbidden after finalization.
+- General fractional Point spending. Current top-up credit carries micros, but shop
+  and reservation contracts still spend whole `pos` only.
+- Point withdrawal fee/min/max/approval and external settlement/reconciliation.
+- Legacy web quest, commission, investment, gift and staking actions until each is
+  mapped to a confirmed asset and source classification.
 
 For linked users these legacy Point mutation paths must fail closed, not silently
 write a second balance.
