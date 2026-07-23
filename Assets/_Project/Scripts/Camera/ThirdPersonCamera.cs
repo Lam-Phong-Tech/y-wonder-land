@@ -106,7 +106,9 @@ public class ThirdPersonCamera : MonoBehaviour
     public void SetUserZoom(float t)
     {
         t = Mathf.Clamp(t, -1f, 1f);
-        if (baseDistance <= 0f) baseDistance = distance; // chốt mức gốc lần đầu được gọi
+        // Chờ Start() chốt base. Nếu chốt base bằng 'distance' hiện tại thì mỗi lần áp lại (vd đăng
+        // nhập lại) sẽ lấy mức ĐÃ zoom làm gốc mới -> camera lùi xa dần sau mỗi lần.
+        if (!baseCaptured) return;
         // t=-1 -> sát vai (0.6x), t=0 -> gốc, t=+1 -> lùi xa (1.8x)
         distance = baseDistance * Mathf.Lerp(0.6f, 1.8f, (t + 1f) * 0.5f);
     }
@@ -137,8 +139,10 @@ public class ThirdPersonCamera : MonoBehaviour
         // Chốt mức "1x" (base) sau khi clamp, rồi áp độ nhạy người chơi đã lưu (Settings — 1 slider).
         baseH = horizontalSensitivity; baseV = verticalSensitivity;
         baseTH = touchHorizontalSensitivity; baseTV = touchVerticalSensitivity;
+        baseDistance = distance; // mức "1x" gốc — chốt DUY NHẤT ở đây, không chốt lại về sau
         baseCaptured = true;
         SetUserSensitivity(PlayerPrefs.GetFloat("YW_CamSensitivity", 0.5f));
+        SetUserZoom(PlayerPrefs.GetFloat("YW_CamZoom", 0f));
 
         // Find Look action from any PlayerInput in scene
         PlayerInput playerInput = null;

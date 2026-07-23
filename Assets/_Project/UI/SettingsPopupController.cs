@@ -63,7 +63,7 @@ public class SettingsPopupController : MonoBehaviour
     private float musicVolume = 0.8f;
     private float sfxVolume = 1.0f;
     private float cameraSensitivity = 0.5f;
-    private float cameraZoom = 0.75f;
+    private float cameraZoom = 0f; // 0 = ĐÚNG mức camera trong Inspector. (Cũ để 0.75 -> lùi xa 1.65x.)
     private float renderQuality = 1.0f;
     private bool shadowEnabled = true;
     private bool showChatEnabled = true;
