@@ -266,7 +266,11 @@ public class FishingOverlayController : MonoBehaviour
     {
         if (state != FishingState.Idle) return false;
 
-        // Còn lượt free HOẶC còn mồi trong kho thì câu được.
+        // ONLINE: server là bên nắm lượt free + mồi (chống lệch với state local đã cũ).
+        // Cho phép bắt đầu; server sẽ tự quyết cấp cá / trừ mồi / trả NO_FISHING_TURN.
+        if (IsServerAuthoritative()) return true;
+
+        // OFFLINE (demo): còn lượt free HOẶC còn mồi trong kho thì câu được.
         if (freeTurns > 0 || BaitCount() > 0) return true;
 
         if (showToast)
@@ -575,9 +579,12 @@ public class FishingOverlayController : MonoBehaviour
             PlayerScopedPrefs.Save();
 
             string fishName = ResolveFishName(result.fishItemId);
+            string turnInfo = result.usedBait
+                ? $"Dùng 1 mồi (còn {result.baitRemaining})"
+                : $"Còn {result.freeRemaining} lượt free hôm nay";
             YWonderLand.Environment.ScreenToast.ShowInfoForItem(
                 result.fishItemId,
-                $"Câu được: +1 {fishName} ({result.fishPointValue} Point)",
+                $"Câu được: +1 {fishName} ({result.fishPointValue} Point) · {turnInfo}",
                 fallbackText: "Fish");
             Debug.Log($"[Fishing] Server catch: {result.fishItemId} ({result.fishPointValue} Point), free còn {result.freeRemaining}, mồi còn {result.baitRemaining}.");
         }
@@ -618,9 +625,11 @@ public class FishingOverlayController : MonoBehaviour
     {
         state = FishingState.Idle;
 
-        // Cast của minigame căn-giờ đã chạy hết animation (trượt vẫn tính "hoàn thành"),
-        // nên vẫn trừ 1 lượt/mồi — trừ im lặng để không chồng toast với thông báo trượt.
-        TryConsumeFishingTurn(showToast: false);
+        // ONLINE: server chỉ đếm khi câu ĐƯỢC cá (qua endpoint); cú trượt không gọi server
+        // nên KHÔNG trừ local kẻo xóa nhầm mồi/lượt. OFFLINE mới trừ như cũ.
+        // Cast của minigame căn-giờ đã chạy hết animation (trượt vẫn tính "hoàn thành").
+        if (!IsServerAuthoritative())
+            TryConsumeFishingTurn(showToast: false);
 
         YWonderLand.Environment.ScreenToast.Show(reason);
         Debug.Log($"[Fishing] Miss: {reason}");
