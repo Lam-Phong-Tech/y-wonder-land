@@ -39,7 +39,7 @@ namespace YWonderLand.EditorTools
 
             // 2) Item Shop — vật tư trồng trọt/chăn nuôi (BuyOnly)
             CreateShop("Shop_ItemShop", "Cửa hàng Vật phẩm", ShopDefinition.AccessMode.BuyOnly,
-                buy: new List<string> { "fertilizer_01", "vaccine_01", "medicine_01", "bait_01", "mine_ticket_01" });
+                buy: new List<string> { "fertilizer_01", "vaccine_01", "medicine_01", "bait_01", "mine_ticket_01", "spin_ticket_01" });
 
             // 3) Fish Shop — mua mồi, thu mua cá (Both)
             CreateShop("Shop_FishShop", "Siêu thị Cá", ShopDefinition.AccessMode.Both,

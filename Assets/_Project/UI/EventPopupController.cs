@@ -212,6 +212,16 @@ public class EventPopupController : MonoBehaviour
     private const string SpinCountKey = "YW_WheelSpinCount";
     private int spinsUsedToday = 0;
 
+    // Vé vòng quay: hết 3 lượt free/ngày thì mỗi vé = 1 lượt quay thêm (giống mồi câu ở câu cá).
+    private const string SpinTicketItemId = "spin_ticket_01";
+    private const string OutOfSpinsMessage = "Hết lượt quay free hôm nay. Mua Vé vòng quay ở shop để quay tiếp nhé!";
+
+    private static int SpinTicketCount()
+    {
+        var inv = YWonderLand.Managers.InventoryManager.Instance;
+        return inv != null ? inv.GetItemQuantity(SpinTicketItemId) : 0;
+    }
+
     // ── Lifecycle ──
 
     private void Awake()
@@ -880,11 +890,18 @@ public class EventPopupController : MonoBehaviour
     private void RefreshWheel()
     {
         LoadSpins();
-        int left = Mathf.Max(0, MaxSpinsPerDay - spinsUsedToday);
-        if (lblSpinsLeft != null) lblSpinsLeft.text = $"Lượt còn: {left}/{MaxSpinsPerDay}";
+        int free = Mathf.Max(0, MaxSpinsPerDay - spinsUsedToday);
+        int tickets = SpinTicketCount();
+        if (lblSpinsLeft != null)
+        {
+            lblSpinsLeft.text = free > 0
+                ? $"Lượt còn: {free}/{MaxSpinsPerDay}"
+                : (tickets > 0 ? $"Hết free — vé vòng quay: {tickets}" : "Hết lượt quay hôm nay");
+        }
         if (btnSpin != null)
         {
-            btnSpin.SetEnabled(left > 0);
+            // Còn lượt free HOẶC còn vé thì quay được.
+            btnSpin.SetEnabled(free > 0 || tickets > 0);
             btnSpin.text = string.Empty;
         }
     }
@@ -893,7 +910,14 @@ public class EventPopupController : MonoBehaviour
     {
         if (isSpinning) return;
         LoadSpins();
-        if (spinsUsedToday >= MaxSpinsPerDay) return;
+
+        // Còn lượt free thì dùng free; hết free mà còn vé thì sẽ trừ vé (kiểm sau khi chốt quà).
+        bool useFreeSpin = spinsUsedToday < MaxSpinsPerDay;
+        if (!useFreeSpin && SpinTicketCount() <= 0)
+        {
+            YWonderLand.Environment.ScreenToast.Show(OutOfSpinsMessage);
+            return;
+        }
 
         // Chọn quà theo TRỌNG SỐ.
         int total = 0;
@@ -908,10 +932,25 @@ public class EventPopupController : MonoBehaviour
         }
         WheelPrize won = wheelPrizes[idx];
 
-        // Trừ lượt (lưu ngay).
-        spinsUsedToday++;
-        PlayerScopedPrefs.SetInt(SpinCountKey, spinsUsedToday);
-        PlayerScopedPrefs.Save();
+        // Trừ lượt: ưu tiên lượt free trong ngày; hết free thì ăn 1 Vé vòng quay.
+        if (useFreeSpin)
+        {
+            spinsUsedToday++;
+            PlayerScopedPrefs.SetInt(SpinCountKey, spinsUsedToday);
+            PlayerScopedPrefs.Save();
+        }
+        else
+        {
+            var inv = YWonderLand.Managers.InventoryManager.Instance;
+            if (inv == null || !inv.RemoveItem(SpinTicketItemId, 1, "wheel_spin_ticket"))
+            {
+                YWonderLand.Environment.ScreenToast.Show(OutOfSpinsMessage);
+                return;
+            }
+            int leftTickets = inv.GetItemQuantity(SpinTicketItemId);
+            YWonderLand.Environment.ScreenToast.ShowInfoForItem(
+                SpinTicketItemId, $"Dùng 1 vé vòng quay để quay tiếp (còn {leftTickets} vé).");
+        }
 
         isSpinning = true;
         if (btnSpin != null) { btnSpin.SetEnabled(false); btnSpin.text = string.Empty; }

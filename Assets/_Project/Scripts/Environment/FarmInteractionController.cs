@@ -3435,6 +3435,15 @@ namespace YWonderLand.Environment
                 return;
             }
 
+            // Bấm "Sử dụng" VÉ trong túi (khi KHÔNG ở chế độ chờ chọn cho ăn/thả/gieo).
+            if (itemId == "mine_ticket_01") { UseMineTicket(); return; }
+            if (itemId == "spin_ticket_01") { UseSpinTicket(); return; }
+            if (itemId == "bait_01")
+            {
+                ScreenToast.Show("Mồi câu sẽ TỰ trừ khi câu cá (sau khi hết 10 lượt free trong ngày).");
+                return;
+            }
+
             // Only handle seed selection when we have a pending tile
             if (pendingPlantTile == null) return;
             if (!itemId.Contains("seed")) return; // Only accept seed items
@@ -3471,6 +3480,55 @@ namespace YWonderLand.Environment
 
             pendingPlantTile = null;
             pendingSeedId = null;
+        }
+
+        /// <summary>
+        /// "Sử dụng" Vé đào mỏ trong túi: trừ 1 vé -> +1 lượt đào (LOCAL).
+        /// LƯU Ý: ở Thành phố/Hầm mỏ khi ONLINE, lượt đào do SERVER quản (giới hạn ngày server-side);
+        /// vé cộng lượt local chỉ có tác dụng ở bản OFFLINE. Muốn vé cộng lượt cả khi online thì phải
+        /// làm 1 endpoint server cấp lượt đào theo vé (chưa làm ở đây).
+        /// </summary>
+        private void UseMineTicket()
+        {
+            var inv = YWonderLand.Managers.InventoryManager.Instance;
+            if (inv == null || inv.GetItemQuantity("mine_ticket_01") <= 0)
+            {
+                ScreenToast.Show("Bạn không có Vé đào mỏ.");
+                return;
+            }
+
+            EnsureMiningDailyTurns();
+            if (!inv.RemoveItem("mine_ticket_01", 1, "use_mine_ticket")) return;
+
+            miningTurnsLeft = Mathf.Max(0, miningTurnsLeft) + 1;
+            PlayerScopedPrefs.SetInt(MiningTurnsLeftKey, miningTurnsLeft);
+            PlayerScopedPrefs.Save();
+            ScreenToast.Show($"Đã dùng 1 Vé đào mỏ (+1 lượt đào, còn {miningTurnsLeft} lượt).");
+        }
+
+        /// <summary>
+        /// "Sử dụng" Vé vòng quay trong túi: mở Vòng quay may mắn. Vé sẽ bị trừ KHI quay quá lượt
+        /// free trong ngày (logic trừ nằm ở EventPopupController.OnSpin), không trừ lúc chỉ mở ra.
+        /// </summary>
+        private void UseSpinTicket()
+        {
+            var inv = YWonderLand.Managers.InventoryManager.Instance;
+            if (inv == null || inv.GetItemQuantity("spin_ticket_01") <= 0)
+            {
+                ScreenToast.Show("Bạn không có Vé vòng quay.");
+                return;
+            }
+
+            // Chỉ lấy bản ĐANG ACTIVE (đã bind UI) để ShowLuckyWheel chạy được; nếu không có thì báo mở qua Sự kiện.
+            var eventPopup = Object.FindFirstObjectByType<EventPopupController>();
+            if (eventPopup == null)
+            {
+                ScreenToast.Show("Chưa mở được Vòng quay. Vào mục Sự kiện để quay nhé.");
+                return;
+            }
+
+            if (inventoryPopup != null) inventoryPopup.Hide();
+            eventPopup.ShowLuckyWheel();
         }
 
         // Múa động tác Planting xong MỚI thật sự gieo hạt xuống ô đất.

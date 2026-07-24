@@ -20,4 +20,5 @@ MonoBehaviour:
   - medicine_01
   - bait_01
   - mine_ticket_01
+  - spin_ticket_01
   sellItemIds: []
