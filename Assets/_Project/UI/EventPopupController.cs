@@ -901,7 +901,10 @@ public class EventPopupController : MonoBehaviour
 
     private void RefreshWheel()
     {
-        LoadSpins();
+        // ONLINE: giữ spinsUsedToday đã đồng bộ từ server (SyncSpinsFromServerAsync / OnSpinServerAsync).
+        // OFFLINE: đọc đếm local. (Nếu online mà gọi LoadSpins sẽ đè lại số local -> hiển thị sai.)
+        if (!IsSpinServerAuthoritative())
+            LoadSpins();
         int free = Mathf.Max(0, MaxSpinsPerDay - spinsUsedToday);
         int tickets = SpinTicketCount();
         if (lblSpinsLeft != null)
@@ -975,6 +978,9 @@ public class EventPopupController : MonoBehaviour
         if (!result.ok)
         {
             isSpinning = false;
+            // NO_SPIN_TURN = hết cả free lẫn vé -> phản ánh lên hiển thị (free = 0).
+            if (result.errorCode == "NO_SPIN_TURN")
+                spinsUsedToday = MaxSpinsPerDay;
             YWonderLand.Environment.ScreenToast.Show(
                 result.errorCode == "NO_SPIN_TURN" ? OutOfSpinsMessage : "Mất kết nối, chưa quay được. Thử lại nhé.");
             RefreshWheel();
