@@ -723,6 +723,28 @@ api.post("/player/mining/redeem-ticket", auth, asyncRoute(async (req, res) => {
   res.json(result);
 }));
 
+api.post("/player/wheel/spin", auth, asyncRoute(async (req, res) => {
+  const body = req.body || {};
+  const idempotencyKey = String(body.idempotency_key || body.idempotencyKey || "").trim();
+  if (!idempotencyKey) return res.status(400).json({ error: "MISSING_IDEMPOTENCY_KEY" });
+
+  const result = await store.resolveWheelSpin(req.userId, {
+    idempotencyKey,
+    periodKey: body.period_key || body.periodKey || "",
+  });
+
+  if (!result.ok) {
+    const status = result.error === "NO_SPIN_TURN" ? 409 : 400;
+    return res.status(status).json({
+      error: result.error,
+      inventory: result.inventory,
+      daily_limits: result.daily_limits,
+      limit: result.limit,
+    });
+  }
+  res.json(result);
+}));
+
 api.post("/player/farm/animals/place", auth, asyncRoute(async (req, res) => {
   const body = req.body || {};
   const itemId = String(body.item_id || body.itemId || "").trim();

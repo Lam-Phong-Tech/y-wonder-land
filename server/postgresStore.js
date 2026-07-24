@@ -1636,6 +1636,89 @@ class PostgresStore {
     });
   }
 
+  // 1 lượt quay: 3 free/ngày (daily-limit "spin") rồi trừ 1 spin_ticket_01. Server đếm theo ngày server. Idempotent.
+  async resolveWheelSpin(playerId, options = {}) {
+    const SPIN_TICKET_ID = "spin_ticket_01";
+    const SPIN_FREE_PER_DAY = 3;
+
+    const idempotencyKey = String(options.idempotencyKey || "").trim();
+    if (!idempotencyKey) return { ok: false, error: "MISSING_IDEMPOTENCY_KEY" };
+    const currentPeriod = String(options.periodKey || periodKey());
+    const requestSignature = JSON.stringify({ op: "wheel_spin", playerId });
+
+    return this.withTransaction(async (client) => {
+      await this.ensurePlayerStateWithClient(client, playerId);
+      await this.lockIdempotency(client, idempotencyKey);
+      const existing = await this.findStoredTransaction(client, idempotencyKey);
+      if (existing) return this.duplicateResult(existing, requestSignature);
+
+      const inventory = await this.getInventoryWithClient(client, playerId, true);
+      const limit = await this.lockDailyLimit(client, playerId, "spin", currentPeriod, SPIN_FREE_PER_DAY);
+
+      let usedTicket = false;
+      if (limit.used < limit.maxCount) {
+        await client.query(
+          `update player_daily_limits set used_count=used_count+1,max_count=$4,updated_at=now()
+           where player_id=$1 and limit_key=$2 and period_key=$3`,
+          [playerId, "spin", currentPeriod, SPIN_FREE_PER_DAY]
+        );
+      } else {
+        const ticketRes = await client.query(
+          "select * from player_inventory where player_id=$1 and item_id=$2 for update",
+          [playerId, SPIN_TICKET_ID]
+        );
+        const ticketQty = ticketRes.rows[0] ? toInt(ticketRes.rows[0].quantity, 0) : 0;
+        if (ticketQty < 1) {
+          return {
+            ok: false,
+            error: "NO_SPIN_TURN",
+            inventory,
+            daily_limits: await this.getDailyLimitsWithClient(client, playerId, currentPeriod),
+            limit,
+          };
+        }
+        if (ticketQty - 1 <= 0) {
+          await client.query("delete from player_inventory where player_id=$1 and item_id=$2", [playerId, SPIN_TICKET_ID]);
+        } else {
+          await client.query(
+            "update player_inventory set quantity=quantity-1,updated_at=now() where player_id=$1 and item_id=$2",
+            [playerId, SPIN_TICKET_ID]
+          );
+        }
+        usedTicket = true;
+      }
+
+      const inventoryAfter = await this.getInventoryWithClient(client, playerId);
+      const dailyLimitsAfter = await this.getDailyLimitsWithClient(client, playerId, currentPeriod);
+      const limitAfter = dailyLimitsAfter.limits.spin || limit;
+      const spinsRemaining = limitAfter
+        ? Math.max(0, toInt(limitAfter.maxCount, 0) - toInt(limitAfter.used, 0))
+        : 0;
+      const ticketSlotAfter = inventoryAfter.slots.find((s) => s.itemId === SPIN_TICKET_ID);
+      const ticketRemaining = ticketSlotAfter ? toInt(ticketSlotAfter.quantity, 0) : 0;
+
+      const response = {
+        ok: true,
+        usedTicket,
+        spinsRemaining,
+        ticketRemaining,
+        inventory: inventoryAfter,
+        daily_limits: dailyLimitsAfter,
+        limit: limitAfter,
+        duplicate: false,
+      };
+      const transaction = {
+        id: makeId("stx"), playerId, type: "wheel_spin", ref: usedTicket ? SPIN_TICKET_ID : "free",
+        idempotencyKey, requestSignature,
+        usedTicket, spinsRemaining, ticketRemaining,
+        inventoryAfter: clone(inventoryAfter), dailyLimitsAfter: clone(dailyLimitsAfter),
+        limitAfter: limitAfter ? { ...limitAfter } : null, createdAt: nowISO(),
+      };
+      await this.insertTransaction(client, transaction, response);
+      return { ...response, transaction };
+    });
+  }
+
   async getFarmStateWithClient(client, playerId) {
     const result = await client.query("select * from player_farm_state where player_id=$1", [playerId]);
     const row = result.rows[0];

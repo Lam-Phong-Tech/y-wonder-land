@@ -1286,6 +1286,88 @@ class JsonStore {
     };
   }
 
+  // 1 lượt quay Vòng quay may mắn: ưu tiên 3 lượt free/ngày (daily-limit "spin"), hết free thì trừ 1
+  // spin_ticket_01. Server đếm theo NGÀY SERVER (bền qua login, không lệch scope client). Idempotent.
+  // Server KHÔNG bốc quà (client tự bốc + áp), chỉ nắm lượt/vé.
+  resolveWheelSpin(playerId, options = {}) {
+    const SPIN_TICKET_ID = "spin_ticket_01";
+    const SPIN_FREE_PER_DAY = 3;
+
+    const db = this.readAll();
+    this.ensurePlayerStateInDb(db, playerId);
+
+    const idempotencyKey = String(options.idempotencyKey || "").trim();
+    if (!idempotencyKey) return { ok: false, error: "MISSING_IDEMPOTENCY_KEY" };
+
+    const existing = findTransactionByIdempotency(db, idempotencyKey);
+    if (existing) {
+      return {
+        ok: true,
+        usedTicket: !!existing.usedTicket,
+        spinsRemaining: toInt(existing.spinsRemaining, 0),
+        ticketRemaining: toInt(existing.ticketRemaining, 0),
+        inventory: existing.inventoryAfter || db.inventories[playerId],
+        daily_limits: existing.dailyLimitsAfter || db.dailyLimits[playerId],
+        limit: existing.limitAfter || null,
+        duplicate: true,
+      };
+    }
+
+    const inventory = db.inventories[playerId];
+    const dailyLimits = db.dailyLimits[playerId];
+    const periodKey = String(options.periodKey || todayKey());
+    const limit = this.ensureDefaultDailyLimit(dailyLimits, "spin", SPIN_FREE_PER_DAY, periodKey);
+
+    let usedTicket = false;
+    if (limit.used < limit.maxCount) {
+      limit.used += 1;
+      limit.remaining = Math.max(0, limit.maxCount - limit.used);
+      limit.updatedAt = nowISO();
+      dailyLimits.updatedAt = nowISO();
+    } else {
+      const ticketSlot = findSlot(inventory, SPIN_TICKET_ID);
+      if (!ticketSlot || ticketSlot.quantity < 1) {
+        return { ok: false, error: "NO_SPIN_TURN", inventory, daily_limits: dailyLimits, limit };
+      }
+      ticketSlot.quantity -= 1;
+      inventory.slots = inventory.slots.filter((entry) => entry.quantity > 0);
+      inventory.updatedAt = nowISO();
+      usedTicket = true;
+    }
+
+    const spinsRemaining = Math.max(0, limit.maxCount - limit.used);
+    const ticketAfter = findSlot(inventory, SPIN_TICKET_ID);
+    const ticketRemaining = ticketAfter ? ticketAfter.quantity : 0;
+
+    const transaction = {
+      id: generateId("stx"),
+      playerId,
+      type: "wheel_spin",
+      ref: usedTicket ? SPIN_TICKET_ID : "free",
+      idempotencyKey,
+      usedTicket,
+      spinsRemaining,
+      ticketRemaining,
+      inventoryAfter: JSON.parse(JSON.stringify(inventory)),
+      dailyLimitsAfter: JSON.parse(JSON.stringify(dailyLimits)),
+      limitAfter: { ...limit },
+      createdAt: nowISO(),
+    };
+    db.transactions.push(transaction);
+    this.writeAll(db);
+
+    return {
+      ok: true,
+      usedTicket,
+      spinsRemaining,
+      ticketRemaining,
+      inventory,
+      daily_limits: dailyLimits,
+      limit,
+      duplicate: false,
+    };
+  }
+
   getFarmState(playerId) {
     const db = this.readAll();
     this.ensurePlayerStateInDb(db, playerId);
@@ -1598,6 +1680,7 @@ module.exports = {
   applyResourceHarvest: activeStore.applyResourceHarvest.bind(activeStore),
   resolveFishingCatch: activeStore.resolveFishingCatch.bind(activeStore),
   resolveMineTicketRedeem: activeStore.resolveMineTicketRedeem.bind(activeStore),
+  resolveWheelSpin: activeStore.resolveWheelSpin.bind(activeStore),
   getFarmState: activeStore.getFarmState.bind(activeStore),
   setFarmState: activeStore.setFarmState.bind(activeStore),
   compareAndSetFarmState: activeStore.compareAndSetFarmState.bind(activeStore),
