@@ -26,6 +26,8 @@ namespace YWonderLand.Data
             "asparagus_seed_01",    "asparagus_01",     // Măng tây
             "red_ginseng_seed_01",  "red_ginseng_01",   // Hồng sâm
             "royal_ginseng_seed_01","royal_ginseng_01", // Sâm tiến vua
+
+            "fertilizer_01",                            // Phân bón — ẩn tạm khỏi shop/túi theo yêu cầu
         };
 
         /// <summary>True nếu vật phẩm đang bị ẩn tạm (chưa chốt số liệu).</summary>

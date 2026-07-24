@@ -310,7 +310,16 @@ namespace YWonderLand.Environment
                 else if (code == "DAILY_LIMIT_EXCEEDED")
                 {
                     SetServerMiningTurns(0);
-                    ScreenToast.Show("Hết lượt đào hôm nay rồi! Mai quay lại nhé.");
+                    // TỰ dùng Vé đào mỏ (nếu có) để đào tiếp — không cần bấm "Sử dụng", giống vé vòng quay.
+                    if (IsMiningServerAuthoritative() && !_autoRedeemInFlight && HasMineTicket())
+                    {
+                        _autoRedeemInFlight = true;
+                        AutoRedeemMineTicketThenRetry(resource);
+                    }
+                    else
+                    {
+                        ScreenToast.Show("Hết lượt đào hôm nay rồi! Mua Vé đào mỏ để đào thêm nhé.");
+                    }
                 }
                 else if (code == "RESOURCE_TOO_FAR")
                     ScreenToast.Show("Hãy đứng gần tài nguyên hơn để khai thác.");
@@ -318,6 +327,9 @@ namespace YWonderLand.Environment
                     ScreenToast.Show("Mất kết nối máy chủ. Chưa nhận tài nguyên.");
                 return;
             }
+
+            // Đào thành công -> mở lại chốt auto-đổi-vé cho lần hết lượt kế tiếp.
+            _autoRedeemInFlight = false;
 
             bool minedRock = resource != null
                 ? resource.type == HarvestableResource.ResourceType.Rock
@@ -3537,6 +3549,40 @@ namespace YWonderLand.Environment
             {
                 ScreenToast.Show("Mất kết nối, chưa dùng được vé. Thử lại nhé.");
             }
+        }
+
+        // Chốt tránh auto-đổi vé lặp vô hạn (mỗi lần đào-lại chỉ đổi tối đa 1 vé; reset khi đào thành công).
+        private bool _autoRedeemInFlight = false;
+
+        private static bool HasMineTicket()
+        {
+            var inv = YWonderLand.Managers.InventoryManager.Instance;
+            return inv != null && inv.GetItemQuantity("mine_ticket_01") > 0;
+        }
+
+        // Online hết lượt + còn vé -> tự đổi 1 vé (server) rồi đào lại chính tài nguyên đó. Không cần bấm "Sử dụng".
+        private async void AutoRedeemMineTicketThenRetry(HarvestableResource resource)
+        {
+            var result = await YWonderLand.Backend.MiningService.RedeemTicketAsync();
+            if (!result.ok)
+            {
+                _autoRedeemInFlight = false;
+                ScreenToast.Show(result.errorCode == "NO_MINE_TICKET"
+                    ? "Hết lượt đào hôm nay rồi! Mua Vé đào mỏ để đào thêm nhé."
+                    : "Mất kết nối, chưa dùng được vé. Thử lại nhé.");
+                return;
+            }
+
+            SetServerMiningTurns(result.miningTurnsRemaining);
+            ScreenToast.Show($"Tự dùng 1 Vé đào mỏ (+1 lượt, còn {result.miningTurnsRemaining}). Đào lại...");
+
+            // Đào lại tài nguyên đó bằng lượt vừa cấp. _autoRedeemInFlight giữ true tới khi đào thành công
+            // (reset trong HandleSharedResourceHarvestResult) -> nếu vẫn hết lượt thì KHÔNG đổi vé lần nữa.
+            var realtime = YWonderLand.Realtime.RealtimeClient.Instance;
+            if (resource != null && resource.isHarvestable && realtime != null)
+                realtime.TryRequestResourceHarvest(resource, r => HandleSharedResourceHarvestResult(resource, r));
+            else
+                _autoRedeemInFlight = false;
         }
 
         /// <summary>

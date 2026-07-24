@@ -335,6 +335,18 @@ public class EventPopupController : MonoBehaviour
 
         wheelOverlay.style.display = DisplayStyle.Flex;
         Debug.Log("[Event] Opened NPC Lucky Wheel popup");
+
+        // Online: lấy lượt free CÒN LẠI theo server để hiển thị đúng (không tin đếm local).
+        if (IsSpinServerAuthoritative())
+            SyncSpinsFromServerAsync();
+    }
+
+    private async void SyncSpinsFromServerAsync()
+    {
+        int remaining = await YWonderLand.Backend.WheelService.GetFreeSpinsRemainingAsync(MaxSpinsPerDay);
+        if (remaining < 0) return; // không lấy được -> giữ hiển thị hiện tại
+        spinsUsedToday = Mathf.Clamp(MaxSpinsPerDay - remaining, 0, MaxSpinsPerDay);
+        RefreshWheel();
     }
 
     public void Hide()
@@ -906,33 +918,32 @@ public class EventPopupController : MonoBehaviour
         }
     }
 
+    // Online: server đếm lượt/vé (theo NGÀY SERVER, bền qua đăng nhập lại — hết lỗi reset-mỗi-login).
+    private static bool IsSpinServerAuthoritative()
+    {
+        var auth = YWonderLand.Backend.AuthService.Instance;
+        return auth != null && auth.IsSignedIn && !string.IsNullOrWhiteSpace(auth.Token);
+    }
+
     private void OnSpin()
     {
         if (isSpinning) return;
-        LoadSpins();
 
-        // Còn lượt free thì dùng free; hết free mà còn vé thì sẽ trừ vé (kiểm sau khi chốt quà).
+        // ONLINE: để server quyết free/vé (chống reset-mỗi-login + trừ vé thật). Client chỉ bốc quà.
+        if (IsSpinServerAuthoritative())
+        {
+            OnSpinServerAsync();
+            return;
+        }
+
+        // OFFLINE (demo): đếm lượt local.
+        LoadSpins();
         bool useFreeSpin = spinsUsedToday < MaxSpinsPerDay;
         if (!useFreeSpin && SpinTicketCount() <= 0)
         {
             YWonderLand.Environment.ScreenToast.Show(OutOfSpinsMessage);
             return;
         }
-
-        // Chọn quà theo TRỌNG SỐ.
-        int total = 0;
-        foreach (var p in wheelPrizes) total += p.weight;
-        if (total <= 0) return;
-        int roll = UnityEngine.Random.Range(0, total);
-        int acc = 0, idx = wheelPrizes.Count - 1;
-        for (int i = 0; i < wheelPrizes.Count; i++)
-        {
-            acc += wheelPrizes[i].weight;
-            if (roll < acc) { idx = i; break; }
-        }
-        WheelPrize won = wheelPrizes[idx];
-
-        // Trừ lượt: ưu tiên lượt free trong ngày; hết free thì ăn 1 Vé vòng quay.
         if (useFreeSpin)
         {
             spinsUsedToday++;
@@ -951,6 +962,48 @@ public class EventPopupController : MonoBehaviour
             YWonderLand.Environment.ScreenToast.ShowInfoForItem(
                 SpinTicketItemId, $"Dùng 1 vé vòng quay để quay tiếp (còn {leftTickets} vé).");
         }
+
+        StartSpinVisual();
+    }
+
+    private async void OnSpinServerAsync()
+    {
+        isSpinning = true;
+        if (btnSpin != null) btnSpin.SetEnabled(false);
+
+        var result = await YWonderLand.Backend.WheelService.SpinAsync();
+        if (!result.ok)
+        {
+            isSpinning = false;
+            YWonderLand.Environment.ScreenToast.Show(
+                result.errorCode == "NO_SPIN_TURN" ? OutOfSpinsMessage : "Mất kết nối, chưa quay được. Thử lại nhé.");
+            RefreshWheel();
+            return;
+        }
+
+        // Đồng bộ lượt free hiển thị theo server.
+        spinsUsedToday = Mathf.Clamp(MaxSpinsPerDay - result.spinsRemaining, 0, MaxSpinsPerDay);
+        if (result.usedTicket)
+            YWonderLand.Environment.ScreenToast.ShowInfoForItem(
+                SpinTicketItemId, $"Dùng 1 vé vòng quay để quay tiếp (còn {result.ticketRemaining} vé).");
+
+        StartSpinVisual();
+    }
+
+    // Bốc quà theo trọng số + quay + trao thưởng. Gọi SAU khi đã chốt được 1 lượt (free/vé).
+    private void StartSpinVisual()
+    {
+        int total = 0;
+        foreach (var p in wheelPrizes) total += p.weight;
+        if (total <= 0) { isSpinning = false; return; }
+        int roll = UnityEngine.Random.Range(0, total);
+        int acc = 0, idx = wheelPrizes.Count - 1;
+        for (int i = 0; i < wheelPrizes.Count; i++)
+        {
+            acc += wheelPrizes[i].weight;
+            if (roll < acc) { idx = i; break; }
+        }
+        WheelPrize won = wheelPrizes[idx];
 
         isSpinning = true;
         if (btnSpin != null) { btnSpin.SetEnabled(false); btnSpin.text = string.Empty; }
