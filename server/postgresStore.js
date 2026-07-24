@@ -1,6 +1,7 @@
 const crypto = require("crypto");
 const { Pool } = require("pg");
 const { prepareAnimalPlacement } = require("./farmAnimalPlacement");
+const { FISHING_FREE_PER_DAY, FISHING_BAIT_ID, rollFish } = require("./fishingTable");
 const {
   normalizePointSourceLot,
   pointSourceLotRequestSignature,
@@ -1455,6 +1456,102 @@ class PostgresStore {
         createdAt: nowISO(),
       };
       const response = { ok: true, inventory: inventoryAfter, daily_limits: dailyLimitsAfter, limit, rewards: normalizedRewards, duplicate: false };
+      await this.insertTransaction(client, transaction, response);
+      return { ...response, transaction };
+    });
+  }
+
+  // Câu cá SERVER-AUTHORITATIVE (prod). Server tự bốc cá + tự quản lượt free/mồi; idempotent.
+  async resolveFishingCatch(playerId, options = {}) {
+    const idempotencyKey = String(options.idempotencyKey || "").trim();
+    if (!idempotencyKey) return { ok: false, error: "MISSING_IDEMPOTENCY_KEY" };
+    const currentPeriod = String(options.periodKey || periodKey());
+    // Thưởng NGẪU NHIÊN nên KHÔNG đưa cá vào signature; replay trả nguyên result_json (đã có cá).
+    const requestSignature = JSON.stringify({ op: "fishing", playerId });
+
+    return this.withTransaction(async (client) => {
+      await this.ensurePlayerStateWithClient(client, playerId);
+      await this.lockIdempotency(client, idempotencyKey);
+      const existing = await this.findStoredTransaction(client, idempotencyKey);
+      if (existing) return this.duplicateResult(existing, requestSignature);
+
+      const inventory = await this.getInventoryWithClient(client, playerId, true);
+      const limit = await this.lockDailyLimit(client, playerId, "fishing", currentPeriod, FISHING_FREE_PER_DAY);
+
+      let usedBait = false;
+      if (limit.used < limit.maxCount) {
+        await client.query(
+          `update player_daily_limits set used_count=used_count+1,max_count=$4,updated_at=now()
+           where player_id=$1 and limit_key=$2 and period_key=$3`,
+          [playerId, "fishing", currentPeriod, FISHING_FREE_PER_DAY]
+        );
+      } else {
+        // Hết free -> phải có 1 mồi bait_01.
+        const baitRes = await client.query(
+          "select * from player_inventory where player_id=$1 and item_id=$2 for update",
+          [playerId, FISHING_BAIT_ID]
+        );
+        const baitQty = baitRes.rows[0] ? toInt(baitRes.rows[0].quantity, 0) : 0;
+        if (baitQty < 1) {
+          return {
+            ok: false,
+            error: "NO_FISHING_TURN",
+            inventory,
+            daily_limits: await this.getDailyLimitsWithClient(client, playerId, currentPeriod),
+            limit,
+          };
+        }
+        if (baitQty - 1 <= 0) {
+          await client.query("delete from player_inventory where player_id=$1 and item_id=$2", [playerId, FISHING_BAIT_ID]);
+        } else {
+          await client.query(
+            "update player_inventory set quantity=quantity-1,updated_at=now() where player_id=$1 and item_id=$2",
+            [playerId, FISHING_BAIT_ID]
+          );
+        }
+        usedBait = true;
+      }
+
+      // Server tự bốc cá (client không quyết được).
+      const fish = rollFish();
+      await client.query(
+        `insert into player_inventory (player_id,item_id,quantity,updated_at)
+         values ($1,$2,1,now())
+         on conflict (player_id,item_id) do update
+         set quantity=player_inventory.quantity+1,updated_at=now()`,
+        [playerId, fish.itemId]
+      );
+      await client.query(
+        `update player_inventory_meta
+         set max_slots=greatest(max_slots,(select count(*)::integer from player_inventory where player_id=$1)),
+             updated_at=now()
+         where player_id=$1`,
+        [playerId]
+      );
+
+      const inventoryAfter = await this.getInventoryWithClient(client, playerId);
+      const dailyLimitsAfter = await this.getDailyLimitsWithClient(client, playerId, currentPeriod);
+      const limitAfter = dailyLimitsAfter.limits.fishing || limit;
+      const baitAfterSlot = inventoryAfter.slots.find((s) => s.itemId === FISHING_BAIT_ID);
+      const baitRemaining = baitAfterSlot ? toInt(baitAfterSlot.quantity, 0) : 0;
+
+      const response = {
+        ok: true,
+        fish,
+        inventory: inventoryAfter,
+        daily_limits: dailyLimitsAfter,
+        limit: limitAfter,
+        usedBait,
+        baitRemaining,
+        duplicate: false,
+      };
+      const transaction = {
+        id: makeId("ftx"), playerId, type: "fishing_catch", ref: fish.itemId,
+        idempotencyKey, requestSignature,
+        fish, usedBait, baitRemaining,
+        inventoryAfter: clone(inventoryAfter), dailyLimitsAfter: clone(dailyLimitsAfter),
+        limitAfter: limitAfter ? { ...limitAfter } : null, createdAt: nowISO(),
+      };
       await this.insertTransaction(client, transaction, response);
       return { ...response, transaction };
     });

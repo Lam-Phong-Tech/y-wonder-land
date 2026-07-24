@@ -4,6 +4,7 @@
 const fs = require("fs");
 const path = require("path");
 const { prepareAnimalPlacement } = require("./farmAnimalPlacement");
+const { FISHING_FREE_PER_DAY, FISHING_BAIT_ID, rollFish } = require("./fishingTable");
 const {
   normalizePointSourceLot,
   pointSourceLotRequestSignature,
@@ -1123,6 +1124,95 @@ class JsonStore {
     };
   }
 
+  // Câu cá SERVER-AUTHORITATIVE: server tự bốc cá + tự quản lượt free/mồi. Client KHÔNG
+  // gửi phần thưởng. 10 lượt free/ngày; hết free thì ăn 1 bait_01. Idempotent theo key.
+  resolveFishingCatch(playerId, options = {}) {
+    const db = this.readAll();
+    this.ensurePlayerStateInDb(db, playerId);
+
+    const idempotencyKey = String(options.idempotencyKey || "").trim();
+    if (!idempotencyKey) return { ok: false, error: "MISSING_IDEMPOTENCY_KEY" };
+
+    const existing = findTransactionByIdempotency(db, idempotencyKey);
+    if (existing) {
+      return {
+        ok: true,
+        fish: existing.fish || null,
+        inventory: existing.inventoryAfter || db.inventories[playerId],
+        daily_limits: existing.dailyLimitsAfter || db.dailyLimits[playerId],
+        limit: existing.limitAfter || null,
+        usedBait: !!existing.usedBait,
+        baitRemaining: toInt(existing.baitRemaining, 0),
+        duplicate: true,
+      };
+    }
+
+    const inventory = db.inventories[playerId];
+    const dailyLimits = db.dailyLimits[playerId];
+    const periodKey = String(options.periodKey || todayKey());
+    const limit = this.ensureDefaultDailyLimit(dailyLimits, "fishing", FISHING_FREE_PER_DAY, periodKey);
+
+    // Ưu tiên lượt free; hết free thì phải có mồi.
+    let usedBait = false;
+    if (limit.used < limit.maxCount) {
+      limit.used += 1;
+      limit.remaining = Math.max(0, limit.maxCount - limit.used);
+      limit.updatedAt = nowISO();
+      dailyLimits.updatedAt = nowISO();
+    } else {
+      const baitSlot = findSlot(inventory, FISHING_BAIT_ID);
+      if (!baitSlot || baitSlot.quantity < 1) {
+        return { ok: false, error: "NO_FISHING_TURN", inventory, daily_limits: dailyLimits, limit };
+      }
+      baitSlot.quantity -= 1;
+      usedBait = true;
+    }
+
+    // Server tự bốc cá (không tin client).
+    const fish = rollFish();
+
+    let slot = findSlot(inventory, fish.itemId);
+    if (!slot) {
+      if (inventory.slots.length >= inventory.maxSlots) inventory.maxSlots += 1;
+      slot = { itemId: fish.itemId, quantity: 0 };
+      inventory.slots.push(slot);
+    }
+    slot.quantity += 1;
+    inventory.slots = inventory.slots.filter((entry) => entry.quantity > 0);
+    inventory.updatedAt = nowISO();
+
+    const baitSlotAfter = findSlot(inventory, FISHING_BAIT_ID);
+    const baitRemaining = baitSlotAfter ? baitSlotAfter.quantity : 0;
+
+    const transaction = {
+      id: generateId("ftx"),
+      playerId,
+      type: "fishing_catch",
+      ref: fish.itemId,
+      idempotencyKey,
+      fish,
+      usedBait,
+      baitRemaining,
+      inventoryAfter: JSON.parse(JSON.stringify(inventory)),
+      dailyLimitsAfter: JSON.parse(JSON.stringify(dailyLimits)),
+      limitAfter: { ...limit },
+      createdAt: nowISO(),
+    };
+    db.transactions.push(transaction);
+    this.writeAll(db);
+
+    return {
+      ok: true,
+      fish,
+      inventory,
+      daily_limits: dailyLimits,
+      limit,
+      usedBait,
+      baitRemaining,
+      duplicate: false,
+    };
+  }
+
   getFarmState(playerId) {
     const db = this.readAll();
     this.ensurePlayerStateInDb(db, playerId);
@@ -1433,6 +1523,7 @@ module.exports = {
   adjustInventoryItem: activeStore.adjustInventoryItem.bind(activeStore),
   transactShop: activeStore.transactShop.bind(activeStore),
   applyResourceHarvest: activeStore.applyResourceHarvest.bind(activeStore),
+  resolveFishingCatch: activeStore.resolveFishingCatch.bind(activeStore),
   getFarmState: activeStore.getFarmState.bind(activeStore),
   setFarmState: activeStore.setFarmState.bind(activeStore),
   compareAndSetFarmState: activeStore.compareAndSetFarmState.bind(activeStore),
