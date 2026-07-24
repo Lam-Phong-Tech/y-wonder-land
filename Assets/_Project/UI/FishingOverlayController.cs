@@ -539,7 +539,7 @@ public class FishingOverlayController : MonoBehaviour
         if (IsServerAuthoritative())
         {
             // Server quyết cá + trừ lượt/mồi; client KHÔNG tự cộng. Xử lý bất đồng bộ.
-            _ = HandleCatchServerAsync();
+            HandleCatchServerAsync();
             return;
         }
 
