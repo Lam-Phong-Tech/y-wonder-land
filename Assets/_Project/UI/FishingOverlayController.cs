@@ -524,12 +524,27 @@ public class FishingOverlayController : MonoBehaviour
         return "fish_ca_com_01";
     }
 
+    // Câu cá là SERVER-AUTHORITATIVE khi đã đăng nhập: server tự bốc cá + trừ lượt/mồi.
+    // Offline (chưa đăng nhập, bản demo) thì rơi về luồng LOCAL cũ.
+    private static bool IsServerAuthoritative()
+    {
+        var auth = AuthService.Instance;
+        return auth != null && auth.IsSignedIn && !string.IsNullOrWhiteSpace(auth.Token);
+    }
+
     private void HandleCatch()
     {
         state = FishingState.Idle;
 
+        if (IsServerAuthoritative())
+        {
+            // Server quyết cá + trừ lượt/mồi; client KHÔNG tự cộng. Xử lý bất đồng bộ.
+            _ = HandleCatchServerAsync();
+            return;
+        }
+
+        // ── LOCAL (offline/demo) ──
         // HOÀN THÀNH hoạt ảnh câu -> giờ mới trừ 1 lượt free (hoặc 1 mồi nếu hết free).
-        // Đã CanStartFishing() chặn lúc bắt đầu nên ở đây gần như luôn trừ được.
         TryConsumeFishingTurn();
 
         // Customer table 29/06: pick tier first, then a random fish inside that tier.
@@ -545,7 +560,52 @@ public class FishingOverlayController : MonoBehaviour
             fallbackText: "Fish");
         Debug.Log($"[Fishing] Caught {caught.name}.");
 
-        // Thu dây câu + phao về (vì StartFishing đã quăng dây ra).
+        FinishCatchCommon();
+    }
+
+    private async void HandleCatchServerAsync()
+    {
+        var result = await FishingService.CatchAsync();
+
+        if (result.ok)
+        {
+            // Server đã cấp cá + trừ lượt/mồi + áp snapshot kho. Đồng bộ lượt free hiển thị theo server.
+            freeTurns = Mathf.Max(0, result.freeRemaining);
+            PlayerScopedPrefs.SetInt("FishingFreeTurns", freeTurns);
+            PlayerScopedPrefs.Save();
+
+            string fishName = ResolveFishName(result.fishItemId);
+            YWonderLand.Environment.ScreenToast.ShowInfoForItem(
+                result.fishItemId,
+                $"Câu được: +1 {fishName} ({result.fishPointValue} Point)",
+                fallbackText: "Fish");
+            Debug.Log($"[Fishing] Server catch: {result.fishItemId} ({result.fishPointValue} Point), free còn {result.freeRemaining}, mồi còn {result.baitRemaining}.");
+        }
+        else if (result.errorCode == "NO_FISHING_TURN")
+        {
+            freeTurns = 0;
+            PlayerScopedPrefs.SetInt("FishingFreeTurns", 0);
+            PlayerScopedPrefs.Save();
+            YWonderLand.Environment.ScreenToast.Show(OutOfTurnsMessage);
+        }
+        else
+        {
+            YWonderLand.Environment.ScreenToast.Show("Mất kết nối, chưa nhận được cá. Thử lại nhé.");
+            Debug.LogWarning($"[Fishing] Server catch failed: {result.errorCode} ({result.status}).");
+        }
+
+        FinishCatchCommon();
+    }
+
+    private string ResolveFishName(string itemId)
+    {
+        var def = itemDatabase != null ? itemDatabase.GetItem(itemId) : null;
+        return def != null && !string.IsNullOrEmpty(def.itemName) ? def.itemName : itemId;
+    }
+
+    // Thu dây + dọn UI sau khi câu xong (dùng chung cho cả luồng server lẫn local).
+    private void FinishCatchCommon()
+    {
         if (YWonderLand.Environment.FishingLineController.Instance != null)
             YWonderLand.Environment.FishingLineController.Instance.Reel();
 
