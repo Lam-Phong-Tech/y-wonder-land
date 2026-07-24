@@ -185,6 +185,7 @@ public class ShopPopupController : MonoBehaviour
         lblShopDesc = root.Q<Label>("LblShopDesc");
         lblOwned = root.Q<Label>("LblOwned");
         txtQty = root.Q<TextField>("TxtQty");
+        UiInputUtil.ConfigureNumeric(txtQty); // ô số lượng: chỉ nhập được chữ số
         lblTotal = root.Q<Label>("LblTotal");
         btnQtyMinus = root.Q<Button>("BtnQtyMinus");
         btnQtyPlus = root.Q<Button>("BtnQtyPlus");
@@ -850,9 +851,10 @@ public class ShopPopupController : MonoBehaviour
     {
         if (!selectedItem.HasValue) return;
 
-        if (int.TryParse(newValue, out int parsed))
+        // Lọc ký tự lạ + ghi lại bản chỉ-chữ-số vào ô (newValue có thể chứa chữ tester gõ).
+        int maxQty = isSellMode ? selectedItem.Value.maxAvailable : 999;
+        if (UiInputUtil.TrySanitizeInt(txtQty, out int parsed))
         {
-            int maxQty = isSellMode ? selectedItem.Value.maxAvailable : 999;
             selectedQty = maxQty <= 0 ? 0 : Mathf.Clamp(parsed, 1, maxQty);
         }
         else
