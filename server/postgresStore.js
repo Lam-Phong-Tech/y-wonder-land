@@ -1557,6 +1557,85 @@ class PostgresStore {
     });
   }
 
+  // Đổi 1 Vé đào mỏ (mine_ticket_01) -> +1 lượt đào (tăng max_count daily-limit "mining"). Idempotent.
+  async resolveMineTicketRedeem(playerId, options = {}) {
+    const MINE_TICKET_ID = "mine_ticket_01";
+    const MINING_MAX_PER_DAY = 10;
+
+    const idempotencyKey = String(options.idempotencyKey || "").trim();
+    if (!idempotencyKey) return { ok: false, error: "MISSING_IDEMPOTENCY_KEY" };
+    const currentPeriod = String(options.periodKey || periodKey());
+    const requestSignature = JSON.stringify({ op: "mine_ticket_redeem", playerId });
+
+    return this.withTransaction(async (client) => {
+      await this.ensurePlayerStateWithClient(client, playerId);
+      await this.lockIdempotency(client, idempotencyKey);
+      const existing = await this.findStoredTransaction(client, idempotencyKey);
+      if (existing) return this.duplicateResult(existing, requestSignature);
+
+      const inventory = await this.getInventoryWithClient(client, playerId, true);
+
+      // Cần 1 vé đào mine_ticket_01.
+      const ticketRes = await client.query(
+        "select * from player_inventory where player_id=$1 and item_id=$2 for update",
+        [playerId, MINE_TICKET_ID]
+      );
+      const ticketQty = ticketRes.rows[0] ? toInt(ticketRes.rows[0].quantity, 0) : 0;
+      if (ticketQty < 1) {
+        return {
+          ok: false,
+          error: "NO_MINE_TICKET",
+          inventory,
+          daily_limits: await this.getDailyLimitsWithClient(client, playerId, currentPeriod),
+        };
+      }
+      if (ticketQty - 1 <= 0) {
+        await client.query("delete from player_inventory where player_id=$1 and item_id=$2", [playerId, MINE_TICKET_ID]);
+      } else {
+        await client.query(
+          "update player_inventory set quantity=quantity-1,updated_at=now() where player_id=$1 and item_id=$2",
+          [playerId, MINE_TICKET_ID]
+        );
+      }
+
+      // +1 lượt đào: đảm bảo có row rồi tăng max_count.
+      await this.lockDailyLimit(client, playerId, "mining", currentPeriod, MINING_MAX_PER_DAY);
+      await client.query(
+        `update player_daily_limits set max_count=max_count+1,updated_at=now()
+         where player_id=$1 and limit_key=$2 and period_key=$3`,
+        [playerId, "mining", currentPeriod]
+      );
+
+      const inventoryAfter = await this.getInventoryWithClient(client, playerId);
+      const dailyLimitsAfter = await this.getDailyLimitsWithClient(client, playerId, currentPeriod);
+      const limitAfter = dailyLimitsAfter.limits.mining || null;
+      const miningTurnsRemaining = limitAfter
+        ? Math.max(0, toInt(limitAfter.maxCount, 0) - toInt(limitAfter.used, 0))
+        : 0;
+      const ticketSlotAfter = inventoryAfter.slots.find((s) => s.itemId === MINE_TICKET_ID);
+      const ticketRemaining = ticketSlotAfter ? toInt(ticketSlotAfter.quantity, 0) : 0;
+
+      const response = {
+        ok: true,
+        miningTurnsRemaining,
+        ticketRemaining,
+        inventory: inventoryAfter,
+        daily_limits: dailyLimitsAfter,
+        limit: limitAfter,
+        duplicate: false,
+      };
+      const transaction = {
+        id: makeId("mtx"), playerId, type: "mine_ticket_redeem", ref: MINE_TICKET_ID,
+        idempotencyKey, requestSignature,
+        miningTurnsRemaining, ticketRemaining,
+        inventoryAfter: clone(inventoryAfter), dailyLimitsAfter: clone(dailyLimitsAfter),
+        limitAfter: limitAfter ? { ...limitAfter } : null, createdAt: nowISO(),
+      };
+      await this.insertTransaction(client, transaction, response);
+      return { ...response, transaction };
+    });
+  }
+
   async getFarmStateWithClient(client, playerId) {
     const result = await client.query("select * from player_farm_state where player_id=$1", [playerId]);
     const row = result.rows[0];

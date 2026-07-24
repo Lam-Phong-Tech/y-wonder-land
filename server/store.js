@@ -1213,6 +1213,79 @@ class JsonStore {
     };
   }
 
+  // Đổi 1 Vé đào mỏ (mine_ticket_01) -> +1 lượt đào trong ngày (tăng maxCount daily-limit "mining").
+  // Server-authoritative để khớp với đào realtime (server mới là bên chặn daily-limit). Idempotent theo key.
+  resolveMineTicketRedeem(playerId, options = {}) {
+    const MINE_TICKET_ID = "mine_ticket_01";
+    const MINING_MAX_PER_DAY = 10;
+
+    const db = this.readAll();
+    this.ensurePlayerStateInDb(db, playerId);
+
+    const idempotencyKey = String(options.idempotencyKey || "").trim();
+    if (!idempotencyKey) return { ok: false, error: "MISSING_IDEMPOTENCY_KEY" };
+
+    const existing = findTransactionByIdempotency(db, idempotencyKey);
+    if (existing) {
+      return {
+        ok: true,
+        miningTurnsRemaining: toInt(existing.miningTurnsRemaining, 0),
+        ticketRemaining: toInt(existing.ticketRemaining, 0),
+        inventory: existing.inventoryAfter || db.inventories[playerId],
+        daily_limits: existing.dailyLimitsAfter || db.dailyLimits[playerId],
+        limit: existing.limitAfter || null,
+        duplicate: true,
+      };
+    }
+
+    const inventory = db.inventories[playerId];
+    const dailyLimits = db.dailyLimits[playerId];
+    const periodKey = String(options.periodKey || todayKey());
+
+    const ticketSlot = findSlot(inventory, MINE_TICKET_ID);
+    if (!ticketSlot || ticketSlot.quantity < 1) {
+      return { ok: false, error: "NO_MINE_TICKET", inventory, daily_limits: dailyLimits };
+    }
+    ticketSlot.quantity -= 1;
+    inventory.slots = inventory.slots.filter((entry) => entry.quantity > 0);
+    inventory.updatedAt = nowISO();
+
+    const limit = this.ensureDefaultDailyLimit(dailyLimits, "mining", MINING_MAX_PER_DAY, periodKey);
+    limit.maxCount += 1;
+    limit.remaining = Math.max(0, limit.maxCount - limit.used);
+    limit.updatedAt = nowISO();
+    dailyLimits.updatedAt = nowISO();
+
+    const ticketAfter = findSlot(inventory, MINE_TICKET_ID);
+    const ticketRemaining = ticketAfter ? ticketAfter.quantity : 0;
+
+    const transaction = {
+      id: generateId("mtx"),
+      playerId,
+      type: "mine_ticket_redeem",
+      ref: MINE_TICKET_ID,
+      idempotencyKey,
+      miningTurnsRemaining: limit.remaining,
+      ticketRemaining,
+      inventoryAfter: JSON.parse(JSON.stringify(inventory)),
+      dailyLimitsAfter: JSON.parse(JSON.stringify(dailyLimits)),
+      limitAfter: { ...limit },
+      createdAt: nowISO(),
+    };
+    db.transactions.push(transaction);
+    this.writeAll(db);
+
+    return {
+      ok: true,
+      miningTurnsRemaining: limit.remaining,
+      ticketRemaining,
+      inventory,
+      daily_limits: dailyLimits,
+      limit,
+      duplicate: false,
+    };
+  }
+
   getFarmState(playerId) {
     const db = this.readAll();
     this.ensurePlayerStateInDb(db, playerId);
@@ -1524,6 +1597,7 @@ module.exports = {
   transactShop: activeStore.transactShop.bind(activeStore),
   applyResourceHarvest: activeStore.applyResourceHarvest.bind(activeStore),
   resolveFishingCatch: activeStore.resolveFishingCatch.bind(activeStore),
+  resolveMineTicketRedeem: activeStore.resolveMineTicketRedeem.bind(activeStore),
   getFarmState: activeStore.getFarmState.bind(activeStore),
   setFarmState: activeStore.setFarmState.bind(activeStore),
   compareAndSetFarmState: activeStore.compareAndSetFarmState.bind(activeStore),
