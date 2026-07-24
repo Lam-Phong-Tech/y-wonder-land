@@ -7,6 +7,11 @@ namespace YWonderLand.Backend
     /// <summary>
     /// Serializes gameplay economy/inventory deltas so local interactions remain
     /// responsive while the same changes are persisted by the authenticated server.
+    ///
+    /// Hàng đợi delta được LƯU XUỐNG ĐĨA (per-player, KHÔNG lưu token) nên nếu app
+    /// đóng/mất kết nối lúc còn delta chưa gửi thì KHÔNG mất: lần chạy sau (khi có phiên
+    /// đăng nhập) sẽ nạp lại và flush TRƯỚC khi bootstrap kéo snapshot server về. Server
+    /// dedup theo idempotency_key nên gửi lại delta cũ không bị nhân đôi.
     /// </summary>
     public static class GameplayMutationSync
     {
@@ -19,7 +24,6 @@ namespace YWonderLand.Backend
         private sealed class PendingMutation
         {
             public MutationKind kind;
-            public string token;
             public string scopeId;
             public string itemId;
             public int quantityDelta;
@@ -52,10 +56,33 @@ namespace YWonderLand.Backend
             public bool duplicate;
         }
 
+        // ── Lưu đĩa (per-player qua PlayerScopedPrefs). KHÔNG bao giờ ghi token vào đây. ──
+        private const string PersistKey = "PendingMutationQueue_v1";
+
+        [Serializable]
+        private sealed class PersistedMutation
+        {
+            public int kind;
+            public string scopeId;
+            public string itemId;
+            public int quantityDelta;
+            public long posDelta;
+            public string reason;
+            public string idempotencyKey;
+        }
+
+        [Serializable]
+        private sealed class PersistedQueue
+        {
+            public List<PersistedMutation> items = new List<PersistedMutation>();
+        }
+
         private static readonly Queue<PendingMutation> Pending = new Queue<PendingMutation>();
         private static bool processing;
         private static bool blockedByTransientFailure;
         private static bool reconciliationRequired;
+        // scope mà hàng đợi in-memory đang thuộc về; null = chưa nạp từ đĩa lần nào.
+        private static string restoredScopeId;
 
         public static int PendingCount => Pending.Count;
         public static bool RequiresAuthoritativeSnapshot => reconciliationRequired;
@@ -64,10 +91,12 @@ namespace YWonderLand.Backend
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetRuntimeState()
         {
+            // Chỉ xoá TRẠNG THÁI RAM; KHÔNG đụng bản lưu đĩa (đó là chỗ để khôi phục sau restart).
             Pending.Clear();
             processing = false;
             blockedByTransientFailure = false;
             reconciliationRequired = false;
+            restoredScopeId = null;
             LastError = "";
         }
 
@@ -80,45 +109,48 @@ namespace YWonderLand.Backend
         public static void QueueInventoryDelta(string itemId, int quantityDelta, string reason)
         {
             if (string.IsNullOrWhiteSpace(itemId) || quantityDelta == 0) return;
-            if (!TryCaptureSession(out string token, out string scopeId)) return;
+            if (!TryCaptureScope(out string scopeId)) return;
 
+            EnsureRestoredForCurrentScope();
             Pending.Enqueue(new PendingMutation
             {
                 kind = MutationKind.Inventory,
-                token = token,
                 scopeId = scopeId,
                 itemId = itemId,
                 quantityDelta = quantityDelta,
                 reason = NormalizeReason(reason, "gameplay_inventory"),
                 idempotencyKey = Guid.NewGuid().ToString("N")
             });
+            Persist();
             StartProcessing();
         }
 
         public static void QueueEconomyDelta(long posDelta, string reason)
         {
             if (posDelta == 0) return;
-            if (!TryCaptureSession(out string token, out string scopeId)) return;
+            if (!TryCaptureScope(out string scopeId)) return;
 
+            EnsureRestoredForCurrentScope();
             Pending.Enqueue(new PendingMutation
             {
                 kind = MutationKind.Economy,
-                token = token,
                 scopeId = scopeId,
                 posDelta = posDelta,
                 reason = NormalizeReason(reason, "gameplay_economy"),
                 idempotencyKey = Guid.NewGuid().ToString("N")
             });
+            Persist();
             StartProcessing();
         }
 
         /// <summary>
         /// Waits for mutations already queued by gameplay. Call before bootstrap,
         /// shop transactions, and sign-out so a later server snapshot cannot restore
-        /// stale quantities.
+        /// stale quantities. Nạp lại delta đã lưu đĩa TRƯỚC khi flush.
         /// </summary>
         public static async Awaitable<bool> FlushAsync(float timeoutSeconds = 12f)
         {
+            EnsureRestoredForCurrentScope();
             if (Pending.Count == 0 && !processing) return !reconciliationRequired;
 
             blockedByTransientFailure = false;
@@ -134,15 +166,75 @@ namespace YWonderLand.Backend
             return completed;
         }
 
-        private static bool TryCaptureSession(out string token, out string scopeId)
+        // Chỉ cần có phiên (đăng nhập + scope) để ghi delta. Token lấy TƯƠI lúc gửi (không lưu).
+        private static bool TryCaptureScope(out string scopeId)
         {
             var auth = AuthService.Instance;
-            token = auth != null ? auth.Token : "";
             scopeId = AuthService.GetCurrentPlayerScopeId();
-            return auth != null
-                   && auth.IsSignedIn
-                   && !string.IsNullOrWhiteSpace(token)
-                   && !string.IsNullOrWhiteSpace(scopeId);
+            return auth != null && auth.IsSignedIn && !string.IsNullOrWhiteSpace(scopeId);
+        }
+
+        // Nạp lại hàng đợi từ đĩa cho scope hiện tại (1 lần/scope). Đổi scope -> nạp lại đúng người.
+        private static void EnsureRestoredForCurrentScope()
+        {
+            if (processing) return; // đừng đụng hàng đợi khi đang gửi dở
+
+            string scope = PlayerScopedPrefs.CurrentScopeId ?? "";
+            if (scope == restoredScopeId) return;
+
+            // Delta của scope cũ đã nằm ở đĩa (theo key scope cũ) nên xoá RAM an toàn, rồi nạp scope mới.
+            Pending.Clear();
+            restoredScopeId = scope;
+
+            string json = PlayerScopedPrefs.GetString(PersistKey, "");
+            if (string.IsNullOrEmpty(json)) return;
+
+            try
+            {
+                var dto = JsonUtility.FromJson<PersistedQueue>(json);
+                if (dto?.items == null) return;
+                foreach (var p in dto.items)
+                {
+                    if (p == null || string.IsNullOrWhiteSpace(p.idempotencyKey)) continue;
+                    Pending.Enqueue(new PendingMutation
+                    {
+                        kind = (MutationKind)p.kind,
+                        scopeId = p.scopeId,
+                        itemId = p.itemId,
+                        quantityDelta = p.quantityDelta,
+                        posDelta = p.posDelta,
+                        reason = p.reason,
+                        idempotencyKey = p.idempotencyKey
+                    });
+                }
+                if (Pending.Count > 0)
+                    Debug.Log($"[StateSync] Khôi phục {Pending.Count} delta chưa gửi từ phiên trước cho '{scope}'.");
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"[StateSync] Không đọc được hàng đợi đã lưu: {ex.Message}");
+            }
+        }
+
+        // Ghi toàn bộ hàng đợi hiện tại xuống đĩa (theo scope hiện tại). KHÔNG kèm token.
+        private static void Persist()
+        {
+            var dto = new PersistedQueue();
+            foreach (var m in Pending)
+            {
+                dto.items.Add(new PersistedMutation
+                {
+                    kind = (int)m.kind,
+                    scopeId = m.scopeId,
+                    itemId = m.itemId,
+                    quantityDelta = m.quantityDelta,
+                    posDelta = m.posDelta,
+                    reason = m.reason,
+                    idempotencyKey = m.idempotencyKey
+                });
+            }
+            PlayerScopedPrefs.SetString(PersistKey, JsonUtility.ToJson(dto));
+            PlayerScopedPrefs.Save();
         }
 
         private static void StartProcessing()
@@ -162,20 +254,30 @@ namespace YWonderLand.Backend
             {
                 while (Pending.Count > 0)
                 {
+                    // Token lấy TƯƠI mỗi lần (không dùng token đã lưu). Chưa có phiên -> giữ hàng đợi, thử lại sau.
+                    string token = AuthService.Instance != null ? AuthService.Instance.Token : "";
+                    if (string.IsNullOrWhiteSpace(token))
+                    {
+                        blockedByTransientFailure = true;
+                        LastError = "NO_SESSION";
+                        break;
+                    }
+
                     PendingMutation mutation = Pending.Peek();
-                    ApiResult<MutationResponse> result = await SendAsync(mutation);
+                    ApiResult<MutationResponse> result = await SendAsync(mutation, token);
 
                     if (!result.ok && IsTransient(result.status))
                     {
                         // Retry once with the same key. If the first request committed
                         // but its response was lost, the server returns the same result.
                         await Awaitable.NextFrameAsync();
-                        result = await SendAsync(mutation);
+                        result = await SendAsync(mutation, token);
                     }
 
                     if (result.ok)
                     {
                         Pending.Dequeue();
+                        Persist();
                         continue;
                     }
 
@@ -194,6 +296,7 @@ namespace YWonderLand.Backend
                     // later valid changes are not blocked; the next bootstrap reconciles
                     // the local cache with the authoritative server snapshot.
                     Pending.Dequeue();
+                    Persist();
                     reconciliationRequired = true;
                     Debug.LogError($"[StateSync] Rejected {Describe(mutation)} for '{mutation.scopeId}': {LastError}");
                 }
@@ -213,7 +316,7 @@ namespace YWonderLand.Backend
                 StartProcessing();
         }
 
-        private static Awaitable<ApiResult<MutationResponse>> SendAsync(PendingMutation mutation)
+        private static Awaitable<ApiResult<MutationResponse>> SendAsync(PendingMutation mutation, string token)
         {
             if (mutation.kind == MutationKind.Inventory)
             {
@@ -226,7 +329,7 @@ namespace YWonderLand.Backend
                         type = mutation.reason,
                         idempotency_key = mutation.idempotencyKey
                     },
-                    mutation.token);
+                    token);
             }
 
             return ApiClient.PostAsync<MutationResponse>(
@@ -237,7 +340,7 @@ namespace YWonderLand.Backend
                     type = mutation.reason,
                     idempotency_key = mutation.idempotencyKey
                 },
-                mutation.token);
+                token);
         }
 
         private static bool IsTransient(long status) => status == 0 || status >= 500;
