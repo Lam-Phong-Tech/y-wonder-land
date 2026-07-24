@@ -27,7 +27,7 @@ public class InventoryPopupController : MonoBehaviour
     private Button tabMaterials;
     private Button tabSeeds;
     private Button tabFood;
-    private Button tabOutfit;
+    private Button tabItems;
     private Button tabAnimals;
     private Button tabSpecial;
 
@@ -101,7 +101,7 @@ public class InventoryPopupController : MonoBehaviour
         tabMaterials = root.Q<Button>("TabMaterials");
         tabSeeds = root.Q<Button>("TabSeeds");
         tabFood = root.Q<Button>("TabFood");
-        tabOutfit = root.Q<Button>("TabOutfit");
+        tabItems = root.Q<Button>("TabItems");
         tabAnimals = root.Q<Button>("TabAnimals");
         tabSpecial = root.Q<Button>("TabSpecial");
 
@@ -167,7 +167,10 @@ public class InventoryPopupController : MonoBehaviour
         tabMaterials?.RegisterCallback<ClickEvent>(evt => SetActiveTab(tabMaterials, "materials", "Nguyên liệu"));
         tabSeeds?.RegisterCallback<ClickEvent>(evt => SetActiveTab(tabSeeds, "seeds", "Hạt giống"));
         tabFood?.RegisterCallback<ClickEvent>(evt => SetActiveTab(tabFood, "food", "Thực phẩm"));
-        tabOutfit?.RegisterCallback<ClickEvent>(evt => SetActiveTab(tabOutfit, "outfit", "Trang phục"));
+        // "Đồ dùng" = category items (mồi câu, phân bón, thuốc, vaccine, vé mỏ, hộp quà...).
+        // Trước đây tab này là "Trang phục"/outfit nhưng KHÔNG có item nào category outfit,
+        // nên đồ mua thuộc "items" (vd bait_01) vào kho mà không tab nào hiện -> tester tưởng mất.
+        tabItems?.RegisterCallback<ClickEvent>(evt => SetActiveTab(tabItems, "items", "Đồ dùng"));
         tabAnimals?.RegisterCallback<ClickEvent>(evt => SetActiveTab(tabAnimals, "animals", "Thú nuôi"));
         tabSpecial?.RegisterCallback<ClickEvent>(evt => SetActiveTab(tabSpecial, "products", "Sản phẩm"));
 
@@ -455,7 +458,7 @@ public class InventoryPopupController : MonoBehaviour
 
     /// <summary>
     /// Open inventory directly at a specific tab. Used by tutorial system.
-    /// Valid tab names: "tools", "materials", "seeds", "food", "outfit", "special"
+    /// Valid tab names: "tools", "materials", "seeds", "food", "items", "animals", "special"
     /// </summary>
     public void ShowAtTab(string tabName)
     {
@@ -476,8 +479,8 @@ public class InventoryPopupController : MonoBehaviour
             case "food":
                 SetActiveTab(tabFood, "food", "Th\u1ef1c ph\u1ea9m");
                 break;
-            case "outfit":
-                SetActiveTab(tabOutfit, "outfit", "Trang ph\u1ee5c");
+            case "items":
+                SetActiveTab(tabItems, "items", "\u0110\u1ed3 d\u00f9ng");
                 break;
             case "animals":
                 SetActiveTab(tabAnimals, "animals", "Th\u00fa nu\u00f4i");
