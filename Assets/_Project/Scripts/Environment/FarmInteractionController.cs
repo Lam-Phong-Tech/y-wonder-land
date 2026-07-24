@@ -3488,6 +3488,13 @@ namespace YWonderLand.Environment
         /// vé cộng lượt local chỉ có tác dụng ở bản OFFLINE. Muốn vé cộng lượt cả khi online thì phải
         /// làm 1 endpoint server cấp lượt đào theo vé (chưa làm ở đây).
         /// </summary>
+        // Online: server nắm daily-limit "mining" (đào realtime kiểm), nên vé phải đổi qua server.
+        private static bool IsMiningServerAuthoritative()
+        {
+            var auth = YWonderLand.Backend.AuthService.Instance;
+            return auth != null && auth.IsSignedIn && !string.IsNullOrWhiteSpace(auth.Token);
+        }
+
         private void UseMineTicket()
         {
             var inv = YWonderLand.Managers.InventoryManager.Instance;
@@ -3497,6 +3504,14 @@ namespace YWonderLand.Environment
                 return;
             }
 
+            // ONLINE: server tự trừ vé + +1 lượt daily-limit "mining"; client KHÔNG tự trừ/cộng.
+            if (IsMiningServerAuthoritative())
+            {
+                RedeemMineTicketServerAsync();
+                return;
+            }
+
+            // OFFLINE (demo): cộng lượt local.
             EnsureMiningDailyTurns();
             if (!inv.RemoveItem("mine_ticket_01", 1, "use_mine_ticket")) return;
 
@@ -3504,6 +3519,24 @@ namespace YWonderLand.Environment
             PlayerScopedPrefs.SetInt(MiningTurnsLeftKey, miningTurnsLeft);
             PlayerScopedPrefs.Save();
             ScreenToast.Show($"Đã dùng 1 Vé đào mỏ (+1 lượt đào, còn {miningTurnsLeft} lượt).");
+        }
+
+        private async void RedeemMineTicketServerAsync()
+        {
+            var result = await YWonderLand.Backend.MiningService.RedeemTicketAsync();
+            if (result.ok)
+            {
+                SetServerMiningTurns(result.miningTurnsRemaining);
+                ScreenToast.Show($"Đã dùng 1 Vé đào mỏ (+1 lượt, còn {result.miningTurnsRemaining} lượt hôm nay).");
+            }
+            else if (result.errorCode == "NO_MINE_TICKET")
+            {
+                ScreenToast.Show("Bạn không có Vé đào mỏ.");
+            }
+            else
+            {
+                ScreenToast.Show("Mất kết nối, chưa dùng được vé. Thử lại nhé.");
+            }
         }
 
         /// <summary>
