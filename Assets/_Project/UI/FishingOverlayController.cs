@@ -7,9 +7,12 @@ using YWonderLand.Backend;
 /// <summary>
 /// Controller overlay Câu Cá — bản GỌN (khách 21/06).
 /// Chỉ còn 1 popup "căn thời gian" ở góc phải: hiện số lượt câu trong ngày + nút X.
-/// Bỏ: chọn mồi, test cheat, chỉ số mồi, panel kết quả (báo bằng ScreenToast).
+/// Bỏ: panel chọn mồi giữa lúc câu, test cheat, panel kết quả (báo bằng ScreenToast).
 /// Luồng: bấm F (hoặc nút Quăng cần) -> cửa sổ căn cá ~8.7s -> giật đúng vùng xanh
 ///        -> +1 cá vào túi + toast. Trượt/hết giờ -> toast "sẩy cá".
+/// Lượt câu (theo kịch bản, khách chốt): 10 lượt MIỄN PHÍ/ngày; hết free thì mỗi lần
+///        HOÀN THÀNH hoạt ảnh câu sẽ trừ 1 Mồi câu (bait_01). Chỉ CHẶN lúc bắt đầu khi
+///        hết cả free lẫn mồi; hủy/đóng giữa chừng KHÔNG mất lượt/mồi.
 /// </summary>
 public class FishingOverlayController : MonoBehaviour
 {
@@ -249,25 +252,67 @@ public class FishingOverlayController : MonoBehaviour
         BeginAutoFishing(castDuration);
     }
 
+    // ID Mồi câu trong ItemDatabase/shop. Hết lượt free -> mỗi lần câu ăn 1 con mồi này.
+    private const string BaitItemId = "bait_01";
+    private const string OutOfTurnsMessage = "Hết lượt câu free hôm nay. Mua Mồi câu ở shop để câu tiếp nhé!";
+
+    private static int BaitCount()
+    {
+        var inv = YWonderLand.Managers.InventoryManager.Instance;
+        return inv != null ? inv.GetItemQuantity(BaitItemId) : 0;
+    }
+
     public bool CanStartFishing(bool showToast = true)
     {
         if (state != FishingState.Idle) return false;
 
-        if (freeTurns > 0) return true;
+        // Còn lượt free HOẶC còn mồi trong kho thì câu được.
+        if (freeTurns > 0 || BaitCount() > 0) return true;
 
         if (showToast)
-            YWonderLand.Environment.ScreenToast.Show("Hết lượt câu hôm nay rồi! Mai quay lại nhé.");
+            YWonderLand.Environment.ScreenToast.Show(OutOfTurnsMessage);
+        return false;
+    }
+
+    /// <summary>
+    /// Trừ 1 lượt câu khi HOÀN THÀNH 1 lần câu. Ưu tiên lượt free trong ngày; hết free
+    /// thì ăn 1 Mồi câu (bait_01). Trả false + toast khi hết cả hai. GỌI ĐÚNG 1 LẦN/lần câu.
+    /// </summary>
+    private bool TryConsumeFishingTurn(bool showToast = true)
+    {
+        if (freeTurns > 0)
+        {
+            freeTurns--;
+            PlayerScopedPrefs.SetInt("FishingFreeTurns", freeTurns);
+            PlayerScopedPrefs.Save();
+            return true;
+        }
+
+        var inv = YWonderLand.Managers.InventoryManager.Instance;
+        if (inv != null && inv.RemoveItem(BaitItemId, 1, "fishing_bait_consume"))
+        {
+            if (showToast)
+            {
+                int left = inv.GetItemQuantity(BaitItemId);
+                YWonderLand.Environment.ScreenToast.ShowInfoForItem(
+                    BaitItemId, $"Dùng 1 mồi câu để câu tiếp (còn {left} mồi).");
+            }
+            return true;
+        }
+
+        if (showToast)
+            YWonderLand.Environment.ScreenToast.Show(OutOfTurnsMessage);
         return false;
     }
 
     public bool BeginAutoFishing(float durationSec)
     {
+        if (state != FishingState.Idle) return false;
+        // CHỈ CHẶN lúc bắt đầu (còn free hoặc còn mồi); trừ 1 lượt/mồi khi HOÀN THÀNH
+        // hoạt ảnh (HandleCatch) theo đúng ý khách — hủy giữa chừng thì không mất gì.
         if (!CanStartFishing()) return false;
 
         castDuration = Mathf.Max(0.1f, durationSec);
-        freeTurns--;
-        PlayerScopedPrefs.SetInt("FishingFreeTurns", freeTurns);
-        PlayerScopedPrefs.Save();
 
         if (fishingDocument != null && fishingDocument.rootVisualElement != null)
             fishingDocument.rootVisualElement.style.display = DisplayStyle.None;
@@ -359,16 +404,13 @@ public class FishingOverlayController : MonoBehaviour
     {
         if (state != FishingState.Idle) return;
 
-        if (freeTurns <= 0)
+        // Minigame căn-giờ (dormant): cũng chỉ CHẶN lúc bắt đầu, trừ khi cast kết thúc
+        // (HandleCatch/HandleMiss) — thống nhất với luồng auto.
+        if (!CanStartFishing())
         {
-            YWonderLand.Environment.ScreenToast.Show("Hết lượt câu hôm nay rồi! Mai quay lại nhé.");
             UpdateUI();
             return;
         }
-
-        freeTurns--;
-        PlayerScopedPrefs.SetInt("FishingFreeTurns", freeTurns);
-        PlayerScopedPrefs.Save();
 
         if (playAnim && PlayerController.Instance != null)
             PlayerController.Instance.PlayActionAnimation("Fishing", castDuration, YWonderLand.Player.ToolType.FishingRod);
@@ -486,6 +528,10 @@ public class FishingOverlayController : MonoBehaviour
     {
         state = FishingState.Idle;
 
+        // HOÀN THÀNH hoạt ảnh câu -> giờ mới trừ 1 lượt free (hoặc 1 mồi nếu hết free).
+        // Đã CanStartFishing() chặn lúc bắt đầu nên ở đây gần như luôn trừ được.
+        TryConsumeFishingTurn();
+
         // Customer table 29/06: pick tier first, then a random fish inside that tier.
         FishItem caught = PickCaughtFish();
 
@@ -511,6 +557,11 @@ public class FishingOverlayController : MonoBehaviour
     private void HandleMiss(string reason)
     {
         state = FishingState.Idle;
+
+        // Cast của minigame căn-giờ đã chạy hết animation (trượt vẫn tính "hoàn thành"),
+        // nên vẫn trừ 1 lượt/mồi — trừ im lặng để không chồng toast với thông báo trượt.
+        TryConsumeFishingTurn(showToast: false);
+
         YWonderLand.Environment.ScreenToast.Show(reason);
         Debug.Log($"[Fishing] Miss: {reason}");
         GameHUDController.Instance?.HideFishingCancelProgress();
@@ -520,15 +571,23 @@ public class FishingOverlayController : MonoBehaviour
 
     private void UpdateUI()
     {
-        if (lblFreeTurns != null) lblFreeTurns.text = $"Lượt câu hôm nay: {freeTurns}/{dailyTurns}";
+        int bait = BaitCount();
+        if (lblFreeTurns != null)
+        {
+            lblFreeTurns.text = freeTurns > 0
+                ? $"Lượt câu hôm nay: {freeTurns}/{dailyTurns}"
+                : (bait > 0 ? $"Hết lượt free — mồi câu: {bait} con"
+                            : "Hết lượt câu hôm nay");
+        }
 
         bool timing = state == FishingState.Timing;
+        bool canFish = freeTurns > 0 || bait > 0;
 
         if (btnAction != null)
         {
             btnAction.text = timing ? "GIẬT CẦN!" : "QUĂNG CẦN";
             btnAction.EnableInClassList("fish-action-btn--pull", timing);
-            btnAction.SetEnabled(timing || freeTurns > 0); // hết lượt + đang Idle -> mờ nút
+            btnAction.SetEnabled(timing || canFish); // hết lượt + hết mồi + đang Idle -> mờ nút
         }
 
         if (lblHint != null)
@@ -537,8 +596,10 @@ public class FishingOverlayController : MonoBehaviour
                 lblHint.text = "Canh phao vào VÙNG XANH rồi Giật (F / Space)!";
             else if (freeTurns > 0)
                 lblHint.text = "Bấm Quăng cần (F) để bắt đầu";
+            else if (bait > 0)
+                lblHint.text = "Hết lượt free — mỗi lần câu sẽ dùng 1 mồi câu";
             else
-                lblHint.text = "Hết lượt câu hôm nay — mai quay lại nhé!";
+                lblHint.text = "Hết lượt free — mua Mồi câu ở shop để câu tiếp!";
         }
 
         // Cập nhật vị trí kim; thanh giờ về đầy khi không trong lúc căn cá.
