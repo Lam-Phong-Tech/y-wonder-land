@@ -49,7 +49,8 @@ function normalizeEconomy(value) {
   const economy = normalizeObject(value);
   return {
     version: toInt(economy.version, 1),
-    pos: toNumber(economy.pos, 5000),
+    // Khách chốt: KHÔNG cấp tiền cho người chơi (chỉ kiếm trong game hoặc nạp) -> mặc định 0.
+    pos: toNumber(economy.pos, 0),
     updatedAt: economy.updatedAt || nowISO(),
   };
 }
@@ -119,9 +120,10 @@ function findTransactionByIdempotency(db, idempotencyKey) {
 }
 
 function makeDefaultEconomy() {
+  // Tài khoản mới KHÔNG được cấp tiền (khách yêu cầu). Trước đây mặc định 5000 -> đã sửa 0.
   return {
     version: 1,
-    pos: 5000,
+    pos: 0,
     updatedAt: nowISO(),
   };
 }

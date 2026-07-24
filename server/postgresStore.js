@@ -54,7 +54,8 @@ function periodKey(date = new Date()) {
 }
 
 function makeDefaultEconomy() {
-  return { version: 1, pos: 5000, updatedAt: nowISO() };
+  // Tài khoản mới KHÔNG được cấp tiền (khách yêu cầu). Trước đây mặc định 5000 -> đã sửa 0.
+  return { version: 1, pos: 0, updatedAt: nowISO() };
 }
 
 function makeDefaultInventory() {
@@ -354,8 +355,9 @@ class PostgresStore {
     if (player.rowCount === 0) throw new Error(`PLAYER_NOT_FOUND:${playerId}`);
 
     await client.query(
+      // Khách chốt: tài khoản mới bắt đầu với 0 Point (không cấp tiền). Trước là 5000.
       `insert into player_economy (player_id, version, pos)
-       values ($1,1,5000) on conflict (player_id) do nothing`,
+       values ($1,1,0) on conflict (player_id) do nothing`,
       [playerId]
     );
 

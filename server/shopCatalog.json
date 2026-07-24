@@ -40,8 +40,8 @@
     },
     "bait_01": {
       "category": "items",
-      "buyPrice": 20,
-      "sellPrice": 10,
+      "buyPrice": 2,
+      "sellPrice": 1,
       "canSell": true
     },
     "banana_01": {
@@ -430,7 +430,7 @@
     },
     "mine_ticket_01": {
       "category": "items",
-      "buyPrice": 100,
+      "buyPrice": 2,
       "sellPrice": 0,
       "canSell": false
     },
@@ -571,6 +571,12 @@
       "buyPrice": 7020,
       "sellPrice": 30,
       "canSell": true
+    },
+    "spin_ticket_01": {
+      "category": "items",
+      "buyPrice": 5,
+      "sellPrice": 0,
+      "canSell": false
     },
     "stone_01": {
       "category": "materials",
@@ -743,7 +749,8 @@
         "vaccine_01",
         "medicine_01",
         "bait_01",
-        "mine_ticket_01"
+        "mine_ticket_01",
+        "spin_ticket_01"
       ],
       "sellItemIds": []
     },
