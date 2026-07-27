@@ -313,6 +313,14 @@ public class GameHUDController : MonoBehaviour
         btnSettings = root.Q<Button>("BtnSettings");
         btnSprint = root.Q<Button>("BtnSprint");
         interactionContainer = root.Q<VisualElement>("InteractionContainer");
+        if (interactionContainer != null)
+        {
+            // An toàn: khung tương tác phủ full màn nhưng KHÔNG được bắt chuột (chỉ nút con bắt),
+            // và ẩn tới khi có gợi ý. Nếu để Position + hiện thì nó nuốt hover/click của mọi nút HUD
+            // + joystick lúc khởi động (chỉ Sprint lọt vì nằm sau nó trong cây) -> bug "phải bấm 1 nút mới mở khoá".
+            interactionContainer.pickingMode = PickingMode.Ignore;
+            interactionContainer.style.display = DisplayStyle.None;
+        }
         joystickOuter = root.Q<VisualElement>("Joystick");
         joystickKnob = joystickOuter?.Q<VisualElement>(className: "joystick-inner");
         sprintHint = root.Q<VisualElement>("SprintHint");
