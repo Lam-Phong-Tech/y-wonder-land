@@ -117,8 +117,15 @@ public class ThirdPersonCamera : MonoBehaviour
 
     void Start()
     {
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        // MOBILE: KHÔNG khóa con trỏ chuột. Trên Android/iOS con trỏ chuột bị khóa về giữa màn
+        // hình và bị trộn với touch qua "unified pointer" của InputSystemUIInputModule -> vị trí
+        // chạm sai/bị nuốt -> nút/joystick UI Toolkit không bấm được. Camera mobile xoay bằng
+        // lookZone (touch) nên không cần khóa chuột. Chỉ khóa trên PC.
+        if (!Application.isMobilePlatform)
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
 
         // Initialize yaw from current camera direction
         yaw = transform.eulerAngles.y;
@@ -176,7 +183,9 @@ public class ThirdPersonCamera : MonoBehaviour
     // Chuột chỉ thực sự khóa khi: người chơi muốn khóa VÀ không có popup nào đang mở.
     private bool IsEffectivelyLocked()
     {
-        return cursorLocked && !UIPopupTracker.AnyOpen;
+        // Mobile không bao giờ khóa chuột (xem Start): tránh khóa con trỏ về giữa màn hình
+        // làm hỏng touch UI. Camera mobile xoay qua AddTouchLook (lookZone), không qua path này.
+        return cursorLocked && !UIPopupTracker.AnyOpen && !Application.isMobilePlatform;
     }
 
     private void ApplyCursorState()
