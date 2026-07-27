@@ -157,11 +157,49 @@ public class GameHUDController : MonoBehaviour
         // Đảm bảo GameHUD luôn nằm dưới các Popup để popup block được thao tác chuột
         uiDocument.sortingOrder = -10;
 
+        // FIX MOBILE (APK kh\u00f4ng b\u1ea5m \u0111\u01b0\u1ee3c n\u00fat/joystick): tr\u00ean GameObject "GameHUD", th\u1ee9 t\u1ef1
+        // component l\u00e0 GameHUDController \u0110\u1ee8NG TR\u01af\u1edaC UIDocument, n\u00ean OnEnable c\u1ee7a script n\u00e0y
+        // ch\u1ea1y TR\u01af\u1edaC UIDocument.OnEnable. Trong b\u1ea3n build (Android), UIDocument ch\u01b0a k\u1ecbp d\u1ef1ng
+        // c\u00e2y UI -> rootVisualElement = null -> n\u1ebfu n\u1ed1i n\u00fat l\u00fac n\u00e0y th\u00ec QueryElements/
+        // RegisterCallbacks ch\u1ea1y tr\u00ean c\u00e2y r\u1ed7ng, KH\u00d4NG n\u00fat/joystick n\u00e0o \u0111\u01b0\u1ee3c n\u1ed1i (Editor kh\u00f4ng
+        // d\u00ednh v\u00ec panel \u0111\u00e3 d\u1ef1ng s\u1eb5n \u1edf edit-mode). => \u0110\u1ee3i root s\u1eb5n s\u00e0ng r\u1ed3i m\u1edbi n\u1ed1i.
+        if (uiDocument.rootVisualElement == null)
+        {
+            StartCoroutine(WireHudWhenRootReady());
+            return;
+        }
+
+        WireHud();
+    }
+
+    // \u0110\u1ee3i UIDocument d\u1ef1ng xong c\u00e2y UI r\u1ed3i m\u1edbi n\u1ed1i HUD (fix n\u00fat/joystick kh\u00f4ng b\u1ea5m \u0111\u01b0\u1ee3c tr\u00ean APK).
+    private System.Collections.IEnumerator WireHudWhenRootReady()
+    {
+        float timeout = 5f;
+        while (uiDocument != null && uiDocument.rootVisualElement == null && timeout > 0f)
+        {
+            timeout -= Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        if (!isActiveAndEnabled || uiDocument == null || uiDocument.rootVisualElement == null)
+        {
+            Debug.LogError("[GameHUD] rootVisualElement v\u1eabn null sau khi ch\u1edd \u2014 HUD kh\u00f4ng n\u1ed1i \u0111\u01b0\u1ee3c n\u00fat/joystick.");
+            yield break;
+        }
+
+        WireHud();
+    }
+
+    // N\u1ed1i to\u00e0n b\u1ed9 HUD: query element + \u0111\u0103ng k\u00fd callback n\u00fat/joystick + set gi\u00e1 tr\u1ecb ban \u0111\u1ea7u.
+    private void WireHud()
+    {
         var root = uiDocument.rootVisualElement;
         ApplyPlatformLayoutClass(root);
         QueryElements(root);
         SetupGuidanceDots();
         RegisterCallbacks();
+        EnsureMultiTouchUI();
 
 
 
@@ -193,6 +231,18 @@ public class GameHUDController : MonoBehaviour
 
         // Nhạc nền (tự tạo AudioManager; thiếu file Resources/Audio/bgm thì im, không lỗi).
         YWonderLand.Managers.AudioManager.Instance?.PlayMusic("bgm");
+    }
+
+    // Mobile đa chạm: mặc định InputSystemUIInputModule là SingleUnifiedPointer -> gộp mọi
+    // ngón thành 1 pointer, nên đang GIỮ joystick mà bấm nút thì nút không ăn. Đặt AllPointersAsIs
+    // để mỗi ngón là 1 pointer riêng (di chuyển + bấm nút cùng lúc). Chuột trên Editor vẫn chạy bình thường.
+    private void EnsureMultiTouchUI()
+    {
+        var es = UnityEngine.EventSystems.EventSystem.current;
+        if (es == null) es = FindFirstObjectByType<UnityEngine.EventSystems.EventSystem>();
+        var module = es != null ? es.GetComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>() : null;
+        if (module != null)
+            module.pointerBehavior = UnityEngine.InputSystem.UI.UIPointerBehavior.AllPointersAsIs;
     }
 
     void OnDisable()
