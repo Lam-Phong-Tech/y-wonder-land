@@ -52,13 +52,12 @@
 > là của 19/07 và **đã bị supersede**: từ 22/07 tới nay dự án làm gameplay/client, ví Point đứng yên ở trạng
 > thái dormant. Thứ tự hiện hành:
 >
-> 1. `[ ]` **Deploy server câu cá + giá vé/mồi + economy mặc định 0 Point** — code đã push từ 24/07, runbook
->    `server/RUNBOOK_deploy_fishing.md`. Chủ dự án tự chạy trên VPS; AI không deploy. Gate đạt:
->    `/player/fishing/catch` không còn `404`, health `200`, account demo câu được cá. **Chưa deploy thì đừng
->    ship client đăng-nhập.**
+> 1. `[x]` ~~Deploy server câu cá + vé đào + vòng quay~~ — **ĐÃ DEPLOY**, xác minh 29/07 bằng probe read-only
+>    không token: 3 route trả `401` (route có) chứ không phải `404`, health `200` mode `postgres`. Còn treo
+>    nhẹ: chưa có bằng chứng trực tiếp cho `account mới = 0 Point` và `giá bait_01 = 2` trên prod.
 > 2. `[~]` **Build EXE/APK mới rồi nghiệm thu**: punch-list khách T1–T7 (ma trận ở cuối mục 29/07 trong
 >    `CHANGELOG.md`), P0 thả thú `7 → 6`, hotfix hủy cho ăn / cây-thú chết ngay ở `0%`, chặt cây không cộng
->    gỗ hai lần.
+>    gỗ hai lần, và **câu cá/vòng quay/đổi vé đào khi đang đăng nhập** (server đã sẵn sàng, giờ kiểm client).
 > 3. `[ ]` Rủi ro dời chuồng: `PUT /player/farm-state` chỉ chép nguyên `build_state_json`; nếu upload
 >    fail/`409` thì server giữ chuồng ở chỗ cũ. Chỉ gia cố (cho `Confirm()` chờ flush) nếu bước 2 tái hiện.
 > 4. `[~]` Ví Point (canary tiền thật, migration số dư cũ, hoa hồng/VIP, source-lot PostgreSQL): giữ nguyên

@@ -80,6 +80,14 @@ ghi tài liệu > recovery/task/changelog > chat cũ. Chưa đủ bằng chứng
   (hàm này xoá luôn `BuildMaterialId/BuildCost` của ô) rồi đặt lại với vật liệu rỗng → công trình đã DỜI một
   lần thì hủy hoàn 0. Đã vá bằng `GhostPlacementController.ActivateCarried`. Ba đường hủy còn lại hoàn đúng
   từ trước.
+- **Endpoint server-authoritative của đợt 24/07 ĐÃ CÓ TRÊN PRODUCTION** — probe read-only không token lúc
+  `2026-07-29T03:56Z`: `GET /game-api/health` → `200` (`storage.mode = postgres`);
+  `POST /player/fishing/catch`, `POST /player/mining/redeem-ticket`, `POST /player/wheel/spin` → **`401`**
+  (route tồn tại, chỉ thiếu token) chứ không phải `404`. Suy ra bản deploy chứa ít nhất `193258bc`.
+  ⚠️ Vì `4c0dd8eb` (account mới = 0 Point) và `b0bdff22` (giá mồi/vé) là **tổ tiên** của `193258bc` trên cùng
+  nhánh nên nhiều khả năng cũng đã lên, **nhưng chưa có bằng chứng trực tiếp**: `/health` không trả version
+  và không có route public đọc shop catalog. Muốn chắc thì đăng nhập một account mới và xem số dư `0` +
+  giá `bait_01` = `2`.
 - **22–29/07 đã làm (xem `CHANGELOG.md` + `git log`):** hệ bệnh/vắc-xin vật nuôi theo `VatNuoi2`; đổi
   `SecondsPerGameDay` 60 → 86400 (1 ngày game = 1 ngày thật); câu cá/vòng quay/vé đào server-authoritative;
   account mới = 0 Point; hàng đợi delta lưu đĩa; tab "Đồ dùng" trong túi; loạt fix mobile/HUD (joystick, cursor
@@ -96,9 +104,8 @@ ghi tài liệu > recovery/task/changelog > chat cũ. Chưa đủ bằng chứng
 
 ### IN_PROGRESS
 
-- **Deploy server câu cá + giá vé + economy 0 Point** — code đã push từ 24/07, runbook ở
-  `server/RUNBOOK_deploy_fishing.md`. **Chưa có bằng chứng đã deploy.** Nếu ship client đăng-nhập trước khi
-  deploy thì `/player/fishing/catch` trả 404. Chủ dự án tự chạy; AI không deploy.
+- ~~Deploy server câu cá~~ — **ĐÃ DEPLOY, xác minh 29/07** (xem mục VERIFIED). Runbook
+  `server/RUNBOOK_deploy_fishing.md` giữ lại làm tham khảo, không còn là việc phải làm.
 - **Nghiệm thu runtime punch-list T1–T7** — ma trận test nằm cuối mục 29/07 trong `CHANGELOG.md`.
 - **P0 thả thú `7 → 6` trên artifact thật** — code atomic đã có từ 16/07, chờ build mới nghiệm thu.
 - **Retest hotfix gameplay** (hủy cho ăn hoàn thức ăn; cây/thú chết ngay ở 0%) — source đã re-verify 21/07,
@@ -125,7 +132,8 @@ ghi tài liệu > recovery/task/changelog > chat cũ. Chưa đủ bằng chứng
 | **Compile C# KHÔNG cần mở Unity** | Roslyn của Unity: `D:\Du_lieu_Unity\6000.3.15f1\Editor\Data\NetCoreRuntime\dotnet.exe` chạy `...\DotNetSdkRoslyn\csc.dll` với response file | `csc exit code: 0` |
 | Test server (JSON store) | `npm.cmd run test:point-source-ledger --prefix server` | pass |
 | Gate PostgreSQL | `npm.cmd run test:postgres --prefix server` | **chạy không được trên máy này** — thiếu runtime |
-| Sức khoẻ prod (read-only) | `irm https://api.ywonder.net/game-api/health` | xem `server/RUNBOOK_deploy_fishing.md` |
+| Sức khoẻ prod (read-only) | `irm https://api.ywonder.net/game-api/health` | `ok:true`, `storage.mode = postgres` |
+| **Route đã lên prod chưa** (read-only, không token) | `Invoke-WebRequest -Method POST <url> -UseBasicParsing` rồi bắt `catch { [int]$_.Exception.Response.StatusCode }` | `401` = route ĐÃ có; `404` = chưa deploy. ⚠️ `curl` trong PowerShell là alias của `Invoke-WebRequest` nên cú pháp `curl -s -o /dev/null -w` sẽ lỗi |
 
 **Công thức compile-check:** gom mọi `.cs` trong `Assets/` trừ thư mục `Editor` và thư mục có `.asmdef`
 (~123 file); tham chiếu `Editor\Data\Managed\UnityEngine\*.dll` + `Library\ScriptAssemblies\*.dll` (bỏ
@@ -134,12 +142,14 @@ phiên 29/07 kiểm 4 lượt sửa mà không cần chủ dự án mở Editor.
 
 ## 7. Bước tiếp theo, đúng thứ tự
 
-1. **Deploy server câu cá/vé/economy** theo `server/RUNBOOK_deploy_fishing.md` — chủ dự án tự chạy trên VPS.
-   Gate đạt: `/player/fishing/catch` không còn 404, health `200`, account demo câu được cá.
+0. ~~Deploy server câu cá/vé/economy~~ — **ĐÃ XONG**, xác minh bằng probe 29/07 (3 route trả `401`).
 2. **Build EXE/APK mới** rồi nghiệm thu punch-list T1–T7 + P0 thả thú `7 → 6` + hotfix cho ăn / cây chết 0%.
    Gate đạt: đủ ma trận trong `CHANGELOG.md`; fail thì ghi lại log và số liệu thật, không sửa mù.
+   Nhớ test cả câu cá/vòng quay/đổi vé đào khi ĐANG ĐĂNG NHẬP — server đã sẵn sàng, giờ là kiểm client.
+2. Xác nhận nốt: account mới có đúng `0 Point` và giá `bait_01 = 2` trên production hay không (hai commit
+   cùng đợt 24/07 chưa có bằng chứng trực tiếp đã lên).
 3. Xử lý rủi ro snapshot khi dời chuồng (cho `Confirm()` chờ flush xong mới báo thành công) — chỉ làm nếu
-   bước 2 thấy chuồng nhảy về chỗ cũ sau relogin.
+   bước 1 thấy chuồng nhảy về chỗ cũ sau relogin.
 4. Ví Point (canary tiền thật, migration số dư cũ, hoa hồng/VIP): **chỉ khi có phê duyệt riêng**, kèm backup
    và rollback. Không tự mở.
 
