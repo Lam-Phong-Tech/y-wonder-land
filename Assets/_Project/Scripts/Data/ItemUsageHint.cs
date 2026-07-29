@@ -100,7 +100,8 @@ namespace YWonderLand.Data
             }
 
             if (def.id == "watering_water_01")
-                return $"{name}: múc miễn phí ở nguồn nước, dùng để tưới cây đang trồng.";
+                return $"{name}: thứ dùng để tưới cây đang trồng, mỗi lần tưới tốn 1 xô. " +
+                       "Hết thì ra ao/hồ trên đảo bấm \"Múc nước\" để lấy thêm — miễn phí.";
 
             return SellHint(def, name);
         }
@@ -108,13 +109,17 @@ namespace YWonderLand.Data
         // ── Dụng cụ: tự động dùng khi tương tác, không cần bấm trong túi ────────
         private static string ToolHint(ItemDefinition def, string name)
         {
+            // Xô là dụng cụ MÚC, không phải thứ tưới: tưới cây tốn "Nước tưới" chứ không tốn xô.
+            if (def.id == "watering_can_01")
+                return $"{name}: dụng cụ múc nước — ra ao/hồ trên đảo bấm \"Múc nước\" để lấy Nước tưới, " +
+                       "rồi mới dùng nước đó tưới cây.";
+
             string job;
             switch (def.id)
             {
                 case "axe_01":          job = "chặt cây lấy gỗ"; break;
                 case "pickaxe_01":      job = "đập đá lấy đá"; break;
                 case "hoe_01":          job = "cuốc đất làm ruộng"; break;
-                case "watering_can_01": job = "tưới cây"; break;
                 case "fishing_rod_01":  job = "câu cá ở bờ nước"; break;
                 default:                job = "làm việc trên nông trại"; break;
             }
