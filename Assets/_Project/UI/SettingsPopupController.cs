@@ -41,6 +41,9 @@ public class SettingsPopupController : MonoBehaviour
     // Camera
     private Slider sliderCameraSens;
     private Slider sliderCameraZoom;
+    private Slider sliderUIScale;
+    private Label lblUIScale;
+    private Label lblUIScaleValue;
     private Label lblCameraSensValue;
     private Label lblCameraZoomValue;
 
@@ -64,6 +67,7 @@ public class SettingsPopupController : MonoBehaviour
     private float sfxVolume = 1.0f;
     private float cameraSensitivity = 0.5f;
     private float cameraZoom = 0f; // 0 = ĐÚNG mức camera trong Inspector. (Cũ để 0.75 -> lùi xa 1.65x.)
+    private float uiScale = 1f;    // 1 = 100% cỡ chữ/nút gốc; khách chốt 29/07 cho kéo 50% – 200%.
     private float renderQuality = 1.0f;
     private bool shadowEnabled = true;
     private bool showChatEnabled = true;
@@ -98,6 +102,9 @@ public class SettingsPopupController : MonoBehaviour
         // Graphics
         sliderRenderQuality = root.Q<Slider>("SliderRenderQuality");
         lblRenderQualityValue = root.Q<Label>("LblRenderQualityValue");
+        sliderUIScale = root.Q<Slider>("SliderUIScale");
+        lblUIScaleValue = root.Q<Label>("LblUIScaleValue");
+        lblUIScale = root.Q<Label>("LblUIScale");
         toggleShadow = root.Q<Toggle>("ToggleShadow");
         lblShadowStatus = root.Q<Label>("LblShadowStatus");
         toggleShowChat = root.Q<Toggle>("ToggleShowChat");
@@ -177,10 +184,12 @@ public class SettingsPopupController : MonoBehaviour
         renderQuality = PlayerPrefs.GetFloat("YW_RenderQuality", renderQuality);
         shadowEnabled = PlayerPrefs.GetInt("YW_Shadow", shadowEnabled ? 1 : 0) == 1;
         cameraSensitivity = PlayerPrefs.GetFloat("YW_CamSensitivity", cameraSensitivity); // nạp độ nhạy đã lưu
+        uiScale = PlayerPrefs.GetFloat(UIScaleManager.PrefKey, uiScale);
         if (sliderMusic != null) sliderMusic.value = musicVolume * 100f;
         if (sliderSFX != null) sliderSFX.value = sfxVolume * 100f;
         if (sliderCameraSens != null) sliderCameraSens.value = cameraSensitivity * 100f;
-        if (sliderCameraZoom != null) sliderCameraZoom.value = 50f + cameraZoom * 50f;
+        if (sliderCameraZoom != null) sliderCameraZoom.value = CameraZoomToPercent(cameraZoom);
+        if (sliderUIScale != null) sliderUIScale.value = uiScale * 100f;
         if (sliderRenderQuality != null) sliderRenderQuality.value = renderQuality * 100f;
         if (toggleShadow != null) toggleShadow.value = shadowEnabled;
         if (toggleShowChat != null) toggleShowChat.value = showChatEnabled;
@@ -188,6 +197,7 @@ public class SettingsPopupController : MonoBehaviour
         // ÁP các mức đã lưu vào game luôn — không chỉ dựng lại thanh trượt.
         ApplyRenderQuality(renderQuality);
         ApplyShadow(shadowEnabled);
+        UIScaleManager.Apply(uiScale);
         if (ThirdPersonCamera.Instance != null)
         {
             ThirdPersonCamera.Instance.SetUserSensitivity(cameraSensitivity);
@@ -246,11 +256,20 @@ public class SettingsPopupController : MonoBehaviour
 
         sliderCameraZoom?.RegisterValueChangedCallback(evt =>
         {
-            cameraZoom = (evt.newValue - 50f) / 50f;
+            cameraZoom = PercentToCameraZoom(evt.newValue);
             UpdateLabel(lblCameraZoomValue, evt.newValue);
             PlayerPrefs.SetFloat("YW_CamZoom", cameraZoom);
             if (ThirdPersonCamera.Instance != null)
                 ThirdPersonCamera.Instance.SetUserZoom(cameraZoom);
+        });
+
+        // Cỡ chữ & nút (UI Toolkit): 50% – 200%. Khách chốt 29/07 để người lớn tuổi nhìn rõ.
+        sliderUIScale?.RegisterValueChangedCallback(evt =>
+        {
+            uiScale = Mathf.Clamp(evt.newValue / 100f, UIScaleManager.MinScale, UIScaleManager.MaxScale);
+            UpdateLabel(lblUIScaleValue, evt.newValue);
+            PlayerPrefs.SetFloat(UIScaleManager.PrefKey, uiScale);
+            UIScaleManager.Apply(uiScale);
         });
 
         // ── Graphics ──
@@ -371,8 +390,24 @@ public class SettingsPopupController : MonoBehaviour
         UpdateLabel(lblMusicValue, musicVolume * 100f);
         UpdateLabel(lblSFXValue, sfxVolume * 100f);
         UpdateLabel(lblCameraSensValue, cameraSensitivity * 100f);
-        UpdateLabel(lblCameraZoomValue, 50f + cameraZoom * 50f);
+        UpdateLabel(lblCameraZoomValue, CameraZoomToPercent(cameraZoom));
+        UpdateLabel(lblUIScaleValue, uiScale * 100f);
         UpdateLabel(lblRenderQualityValue, renderQuality * 100f);
+    }
+
+    // ── Quy đổi thanh Zoom camera (khách chốt 29/07: dải 50% – 200%) ──
+    // 100% = đúng mức camera gốc; 200% = zoom sát nhất (cảnh to nhất); 50% = lùi xa nhất.
+    // ThirdPersonCamera.SetUserZoom nhận t ∈ [-1, 1] với -1 = sát vai, +1 = lùi xa.
+    private static float PercentToCameraZoom(float percent)
+    {
+        if (percent >= 100f) return -Mathf.Clamp01((percent - 100f) / 100f);
+        return Mathf.Clamp01((100f - percent) / 50f);
+    }
+
+    private static float CameraZoomToPercent(float t)
+    {
+        t = Mathf.Clamp(t, -1f, 1f);
+        return t <= 0f ? 100f + (-t) * 100f : 100f - t * 50f;
     }
 
     // ── Public API ──
@@ -467,6 +502,7 @@ public class SettingsPopupController : MonoBehaviour
             if (lblCameraZoom != null) lblCameraZoom.text = GetLocalizedString(table, "camera_zoom", "Zoom");
             if (lblGraphicsSection != null) lblGraphicsSection.text = GetLocalizedString(table, "graphics_title", "ĐỒ HỌA");
             if (lblQuality != null) lblQuality.text = GetLocalizedString(table, "quality", "Chất lượng");
+            if (lblUIScale != null) lblUIScale.text = GetLocalizedString(table, "ui_scale", "Cỡ chữ & nút");
             if (lblShadow != null) lblShadow.text = GetLocalizedString(table, "shadow", "Bóng đổ");
             if (lblGeneralSection != null) lblGeneralSection.text = GetLocalizedString(table, "general_title", "CHUNG");
             if (lblLanguage != null) lblLanguage.text = GetLocalizedString(table, "language", "Ngôn ngữ");

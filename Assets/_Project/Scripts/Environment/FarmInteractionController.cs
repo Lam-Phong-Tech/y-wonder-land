@@ -208,6 +208,8 @@ namespace YWonderLand.Environment
         void OnDestroy()
         {
             CancelTimedAction(null);
+            // Đổi scene / thoát khi đang dời chuồng: trả chuồng về chỗ cũ để không lưu nhầm vị trí.
+            if (PenMoveController.IsActive) PenMoveController.Cancel();
             if (Instance == this) Instance = null;
 
             if (AuthService.Instance != null)
@@ -886,7 +888,8 @@ namespace YWonderLand.Environment
             actions.Add(new InteractionAction { keyName = "Click", actionName = actName, onClick = () => PerformTileAction(tile) });
 
             FarmTile demolishTile = tile.masterTile != null ? tile.masterTile : tile;
-            if (CanDemolishFarmTile(demolishTile))
+            // Khách chốt 29/07: ô ĐÃ TRỒNG cây thì KHÔNG hiện nút hủy — chỉ hủy được ô còn trống.
+            if (CanDemolishFarmTile(demolishTile) && !HasCropOnFarmTile(demolishTile))
             {
                 actions.Add(new InteractionAction
                 {
@@ -900,6 +903,40 @@ namespace YWonderLand.Environment
         private bool CanDemolishFarmTile(FarmTile tile)
         {
             return ResolvePlacedBuildingRoot(tile) != null;
+        }
+
+        /// <summary>Ô đang có cây (đã gieo / đang lớn / chín) — dùng để KHÔNG cho hủy ô trồng.
+        /// Quét mọi FarmTile của cùng công trình để cây nhiều ô (giàn) cũng chặn đúng.</summary>
+        private bool HasCropOnFarmTile(FarmTile tile)
+        {
+            if (tile == null) return false;
+            if (IsCropState(tile.currentState)) return true;
+
+            var building = ResolvePlacedBuildingRoot(tile);
+            if (building == null) return false;
+
+            var tiles = building.GetComponentsInChildren<FarmTile>(true);
+            for (int i = 0; i < tiles.Length; i++)
+                if (tiles[i] != null && IsCropState(tiles[i].currentState)) return true;
+
+            return false;
+        }
+
+        private static bool IsCropState(FarmTile.TileState state)
+        {
+            return state == FarmTile.TileState.Planted ||
+                   state == FarmTile.TileState.Watered ||
+                   state == FarmTile.TileState.Ripe;
+        }
+
+        /// <summary>Chuồng còn vật nuôi hay không. Đọc AnimalObject (tham chiếu thật) thay vì cờ HasAnimal
+        /// để thú đã chết/bị hủy không làm ô "kẹt" không hủy được.</summary>
+        private static bool EnclosureHasAnimal(List<BuildSurfaceCell> pen)
+        {
+            if (pen == null) return false;
+            for (int i = 0; i < pen.Count; i++)
+                if (pen[i] != null && pen[i].AnimalObject != null) return true;
+            return false;
         }
 
         private GameObject ResolvePlacedBuildingRoot(FarmTile tile)
@@ -1180,8 +1217,30 @@ namespace YWonderLand.Environment
                 actions.Add(new InteractionAction { keyName = "E", actionName = "Thả thú", onClick = () => { if (IsEnclosureInRange(addEnclosure, useDirectTapInteraction)) OpenEnclosurePicker(addEnclosure); } });
             }
 
-            var demolishEnclosure = new List<BuildSurfaceCell>(enclosure);
-            actions.Add(new InteractionAction { keyName = "G", actionName = "Hủy chuồng", onClick = () => { if (IsEnclosureInRange(demolishEnclosure, useDirectTapInteraction)) RequestDemolishEnclosure(demolishEnclosure); } });
+            // Khách chốt 29/07: cho DỜI nguyên cụm chuồng sang chỗ khác (thú đi theo, không tốn vật liệu).
+            var moveEnclosure = new List<BuildSurfaceCell>(enclosure);
+            actions.Add(new InteractionAction
+            {
+                keyName = "M",
+                actionName = "Dời chuồng",
+                onClick = () =>
+                {
+                    if (!IsEnclosureInRange(moveEnclosure, useDirectTapInteraction)) return;
+                    if (PenMoveController.Begin(moveEnclosure))
+                    {
+                        ClearWorldInteractionState();
+                        ScreenToast.ShowInfo($"Đang dời chuồng ({PenMoveController.CellCount} ô) — đi tới chỗ mới rồi bấm Đặt chuồng.");
+                    }
+                    else ScreenToast.Show("Không dời được chuồng này.");
+                }
+            });
+
+            // Khách chốt 29/07: chuồng CÒN THÚ thì KHÔNG hiện nút hủy — chỉ hủy được chuồng trống.
+            if (!EnclosureHasAnimal(enclosure))
+            {
+                var demolishEnclosure = new List<BuildSurfaceCell>(enclosure);
+                actions.Add(new InteractionAction { keyName = "G", actionName = "Hủy chuồng", onClick = () => { if (IsEnclosureInRange(demolishEnclosure, useDirectTapInteraction)) RequestDemolishEnclosure(demolishEnclosure); } });
+            }
         }
 
         private bool TryShowAnimalEnclosurePopup(FarmAnimal animal)
@@ -1252,6 +1311,8 @@ namespace YWonderLand.Environment
             if (GameManager.Instance != null && GameManager.Instance.currentState != GameManager.GameState.Gameplay) return;
             if (IsBuildModeOpen())
             {
+                // Mở Build Mode giữa chừng thì bỏ dở việc dời chuồng, trả chuồng về chỗ cũ.
+                if (PenMoveController.IsActive) PenMoveController.Cancel();
                 ClearWorldInteractionState();
                 return;
             }
@@ -1298,6 +1359,14 @@ namespace YWonderLand.Environment
                 }
                 if (!timedActionActive && useDirectTapInteraction)
                     RefreshFacingInteractionPrompts();
+                return;
+            }
+
+            // Đang DỜI CHUỒNG: chỉ dùng 2 nút Đặt/Hủy dời, không cho chạm vật khác trong thế giới
+            // (kẻo prompt bị thay và người chơi kẹt trong chế độ dời).
+            if (PenMoveController.IsActive)
+            {
+                RefreshFacingInteractionPrompts();
                 return;
             }
 
@@ -1471,6 +1540,13 @@ namespace YWonderLand.Environment
 
         private void RefreshFacingInteractionPrompts()
         {
+            // Đang dời chuồng: chỉ hiện đúng 2 lựa chọn Đặt / Hủy dời, không cho tương tác thứ khác.
+            if (PenMoveController.IsActive)
+            {
+                RefreshPenMovePrompt();
+                return;
+            }
+
             RefreshFrontCellInteractionPrompt();
             if (currentPromptFromFrontCell)
             {
@@ -1508,6 +1584,68 @@ namespace YWonderLand.Environment
                    currentHoverObject != null &&
                    currentActions != null &&
                    currentActions.Count > 0;
+        }
+
+        /// <summary>Gợi ý khi đang DỜI CHUỒNG: rê cụm chuồng theo ô trước mặt, hiện nút Đặt / Hủy dời.</summary>
+        private void RefreshPenMovePrompt()
+        {
+            var selector = FrontBuildCellSelector.Instance;
+            var cell = selector != null ? selector.CurrentCell : null;
+
+            PenMoveController.UpdatePreview(cell);
+            bool canPlace = PenMoveController.CanPlaceAt(cell);
+
+            var actions = new List<InteractionAction>();
+            if (canPlace)
+            {
+                var target = cell;
+                actions.Add(new InteractionAction
+                {
+                    keyName = "Click",
+                    actionName = "Đặt chuồng ở đây",
+                    onClick = () =>
+                    {
+                        if (PenMoveController.Confirm(target)) ScreenToast.ShowInfo("Đã dời chuồng sang chỗ mới.");
+                        else ScreenToast.Show("Chỗ này không đặt được chuồng.");
+                        ClearWorldInteractionState();
+                    }
+                });
+            }
+            else
+            {
+                actions.Add(new InteractionAction
+                {
+                    keyName = "Click",
+                    actionName = "Chưa đặt được — cần đủ ô trống",
+                    onClick = () => ScreenToast.Show("Cần đủ ô đất trống bằng số ô của chuồng.")
+                });
+            }
+
+            actions.Add(new InteractionAction
+            {
+                keyName = "G",
+                actionName = "Hủy dời",
+                onClick = () =>
+                {
+                    PenMoveController.Cancel();
+                    ScreenToast.Show("Đã hủy dời chuồng — chuồng về chỗ cũ.");
+                    ClearWorldInteractionState();
+                }
+            });
+
+            string signature = BuildActionSignature(actions);
+            bool shouldRefreshPrompt = signature != lastActionSignature || currentActions == null || currentActions.Count == 0;
+
+            currentHoverObject = cell != null ? cell.gameObject : null;
+            lastActionSignature = signature;
+            currentActions = actions;
+            currentPromptFromFrontCell = true;
+            currentPromptFromFootWater = false;
+            currentPromptFromFootResource = false;
+            currentPromptFromFootFishing = false;
+
+            if (shouldRefreshPrompt && GameHUDController.Instance != null)
+                GameHUDController.Instance.ShowInteractionPrompts(actions);
         }
 
         private void RefreshFrontCellInteractionPrompt()
@@ -3353,6 +3491,14 @@ namespace YWonderLand.Environment
 
             building ??= ResolvePlacedBuildingRoot(tile);
             if (building == null) return;
+
+            // Chốt 29/07: chỉ hủy ô TRỐNG. Chặn ở đây phòng khi lời gọi tới từ đường khác (phím tắt, prompt cũ).
+            if (HasCropOnFarmTile(tile))
+            {
+                ScreenToast.Show("Ô đang có cây — thu hoạch xong mới hủy được.");
+                return;
+            }
+
             string buildingName = building.name;
 
             bool hadCrop = tile.currentState == FarmTile.TileState.Planted ||
@@ -3505,6 +3651,13 @@ namespace YWonderLand.Environment
             if (pen == null || pen.Count == 0) return;
             pendingDemolishEnclosure = null;
             demolishConfirmTimer = 0f;
+
+            // Chốt 29/07: chuồng còn thú thì không cho hủy (nút đã ẩn; chặn thêm ở đây cho mọi đường gọi).
+            if (EnclosureHasAnimal(pen))
+            {
+                ScreenToast.Show("Chuồng còn vật nuôi — hãy bán hoặc dời thú trước khi hủy.");
+                return;
+            }
 
             var inv = YWonderLand.Managers.InventoryManager.Instance;
             int refundWood = 0;

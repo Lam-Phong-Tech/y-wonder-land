@@ -57,8 +57,8 @@
 
                         <ui:VisualElement class="settings-slider-row">
                             <ui:Label name="LblCameraZoom" text="Zoom" class="settings-label" />
-                            <ui:Label name="LblCameraZoomValue" text="75%" class="settings-slider-value" />
-                            <ui:Slider name="SliderCameraZoom" low-value="50" high-value="100" value="75" class="settings-slider" />
+                            <ui:Label name="LblCameraZoomValue" text="100%" class="settings-slider-value" />
+                            <ui:Slider name="SliderCameraZoom" low-value="50" high-value="200" value="100" class="settings-slider" />
                         </ui:VisualElement>
 
                     </ui:VisualElement>
@@ -76,6 +76,12 @@
                             <ui:Label name="LblQuality" text="Chất lượng" class="settings-label" />
                             <ui:Label name="LblRenderQualityValue" text="100%" class="settings-slider-value" />
                             <ui:Slider name="SliderRenderQuality" low-value="0" high-value="100" value="100" class="settings-slider" />
+                        </ui:VisualElement>
+
+                        <ui:VisualElement class="settings-slider-row">
+                            <ui:Label name="LblUIScale" text="Cỡ chữ &amp; nút" class="settings-label" />
+                            <ui:Label name="LblUIScaleValue" text="100%" class="settings-slider-value" />
+                            <ui:Slider name="SliderUIScale" low-value="50" high-value="200" value="100" class="settings-slider" />
                         </ui:VisualElement>
 
                         <ui:VisualElement class="settings-toggle-row">

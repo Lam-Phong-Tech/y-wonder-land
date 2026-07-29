@@ -1,5 +1,50 @@
 # CHANGELOG
 
+## [Unreleased] - 2026-07-29 (Punch-list khách 29/07: T1–T7)
+
+Khách gửi 6 ảnh chụp trong game ngày 29/07 kèm 7 yêu cầu. Tất cả đã code xong, biên dịch
+`Assembly-CSharp` bằng Roslyn của Unity 6000.3.15f1 sạch (exit 0). **Chưa nghiệm thu runtime** —
+cần mở Unity, build EXE/APK và test theo ma trận ở cuối mục này.
+
+### Changed / Fixed
+
+- **T1 — Chỉ hủy được ô TRỐNG.** `FarmInteractionController.AddTileAction` chỉ thêm nút "Hủy ô trồng"
+  khi ô không có cây (`Planted/Watered/Ripe`), quét mọi `FarmTile` thuộc cùng công trình nên cây nhiều ô
+  (giàn chanh dây) cũng chặn đúng. `AddEnclosureActions` chỉ thêm "Hủy chuồng" khi chuồng không còn thú —
+  kiểm qua `AnimalObject` (tham chiếu thật) chứ không qua cờ `HasAnimal`, để thú đã chết không làm kẹt ô.
+  `DemolishFarmTile` / `DemolishEnclosure` có chốt chặn thứ hai + toast. `BuildModeOverlayController.DeleteBuildingAt`
+  cũng chặn xóa ô đang có cây cho đồng nhất.
+- **T2 — Không còn mất gỗ khi hủy chuồng.** Nguyên nhân gốc: `PickUpBuilding` (nhấc công trình để dời)
+  gọi `BuildSurfaceCell.ClearOccupant` — hàm này xóa luôn `BuildMaterialId/BuildCost` của ô — rồi đặt lại
+  bằng `Activate(..., "", 0)`, nên sau khi DỜI, công trình mất sạch thông tin vật liệu và lần hủy sau hoàn 0.
+  Nay `PickUpBuilding` đọc vật liệu từ `PlacedBuilding` trước, đặt lại qua `GhostPlacementController.ActivateCarried`
+  (đóng dấu vật liệu cũ lên ô mới nhưng KHÔNG trừ lần hai), và hoàn vật liệu về túi nếu người chơi bỏ dở
+  (bấm ✗, Esc, thoát Build Mode). Ba đường hủy còn lại (hủy chuồng, hủy đường, nút Xóa) đã hoàn đúng từ trước.
+- **T3 — Dời nguyên cụm chuồng.** Thêm `PenMoveController` (`Assets/_Project/Scripts/Environment/`):
+  nhấc cả chuồng giữ nguyên hình dạng, thú đi theo, không tốn/không hoàn vật liệu. Bấm "Dời chuồng" →
+  cả cụm rê theo ô trước mặt nhân vật → "Đặt chuồng ở đây" (chỉ hiện khi đủ ô đất trống) hoặc "Hủy dời".
+  Dữ liệu ô chỉ đổi lúc chốt, nên bỏ dở/đổi scene/mở Build Mode giữa chừng đều trả chuồng về chỗ cũ.
+- **T4 — Bỏ bước xác nhận ✓/✗.** Cờ mới `instantPlaceOnSelect` (mặc định bật): bấm mục Ruộng/Đường đá/Chuồng
+  là nhân vật cuốc/lát/xây luôn; cặp nút ✓/✗ trên thẻ không còn dựng. Tắt cờ để quay lại luồng 2 bước.
+- **T5 — Shop hiện thông tin vật nuôi/cây.** `ShopPopupController` bổ sung vào phần mô tả: chu kỳ thu +
+  sản lượng mỗi lần, tổng số lần × sản lượng, số ngày nuôi cả vòng đời, sản phẩm vụ cuối và EXP (vật nuôi);
+  thời gian lớn, sản lượng, số lần thu, chu kỳ thu lại, vụ cuối và EXP (hạt giống, tra qua `CropDatabase`).
+- **T6 — Zoom 50–200%.** Thanh "Zoom" camera trong Settings đổi dải `50–100` → `50–200`, mốc `100%` = đúng
+  mức gốc, `200%` = sát nhất, `50%` = xa nhất. Thêm thanh "Cỡ chữ & nút" (`UIScaleManager`) phóng to/thu nhỏ
+  toàn bộ UI Toolkit 50–200% bằng cách chia Reference Resolution của PanelSettings; lưu ở `YW_UIScale`,
+  tự áp lúc vào game và mỗi lần đổi scene, trả PanelSettings về gốc khi thoát để không dính vào file asset.
+- **T7 — Đổi tên 2 đảo.** "Đảo Hải Phú" → **"Đảo Nam Du"**, "Đảo Mộc Nhi" → **"Đảo Phú Quốc"** ở `MapPopupController`,
+  `MapPopup.uxml`, `LevelUpOverlayController` (kể cả tên vé). Giữ nguyên `id`/`sceneName` cũ để không vỡ save/scene.
+
+### Còn phải nghiệm thu (runtime, trên build mới)
+
+- Ô có cây / chuồng có thú: không thấy nút hủy; ô trống thì hủy được bình thường.
+- Xây chuồng → dời chỗ → hủy: gỗ về kho đủ 4/ô. Nhấc rồi bấm ✗ hoặc thoát Build Mode: gỗ cũng về đủ.
+- Dời chuồng có thú: hình dạng giữ nguyên, thú theo cùng, thoát/vào lại vẫn đúng vị trí mới.
+- Bấm mục là xây luôn, không còn ✓/✗; thiếu vật liệu vẫn báo và không trừ.
+- Shop: mỗi vật nuôi/hạt giống hiện đủ chu kỳ, tổng sản lượng, EXP.
+- Settings: kéo Zoom 50→200%, kéo Cỡ chữ 50→200%, thoát vào lại vẫn giữ mức đã chọn.
+
 ## [Unreleased] - 2026-07-22 (Animal sickness + vaccine system; switch to real time)
 
 ### Added

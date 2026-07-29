@@ -63,25 +63,25 @@
                         </ui:VisualElement>
                     </ui:VisualElement>
 
-                    <!-- ═══ ISLAND: Đảo Hải Phú (bottom-left) ═══ -->
+                    <!-- ═══ ISLAND: Đảo Nam Du (bottom-left) ═══ -->
                     <ui:VisualElement name="IslandHaiphu" class="map-island map-island--haiphu">
                         <ui:VisualElement class="map-island-land map-island-land--haiphu" />
                         <ui:VisualElement class="map-island-pin">
                             <ui:Label text="🏝️" class="map-island-icon" />
                         </ui:VisualElement>
-                        <ui:Label text="Đảo Hải Phú" class="map-island-name" />
+                        <ui:Label text="Đảo Nam Du" class="map-island-name" />
                         <ui:VisualElement name="LockHaiphu" class="map-island-lock">
                             <ui:Label text="🔒" class="map-island-lock-icon" />
                         </ui:VisualElement>
                     </ui:VisualElement>
 
-                    <!-- ═══ ISLAND: Đảo Mộc Nhi (bottom-right) ═══ -->
+                    <!-- ═══ ISLAND: Đảo Phú Quốc (bottom-right) ═══ -->
                     <ui:VisualElement name="IslandMocnhi" class="map-island map-island--mocnhi">
                         <ui:VisualElement class="map-island-land map-island-land--mocnhi" />
                         <ui:VisualElement class="map-island-pin">
                             <ui:Label text="🌲" class="map-island-icon" />
                         </ui:VisualElement>
-                        <ui:Label text="Đảo Mộc Nhi" class="map-island-name" />
+                        <ui:Label text="Đảo Phú Quốc" class="map-island-name" />
                         <ui:VisualElement name="LockMocnhi" class="map-island-lock">
                             <ui:Label text="🔒" class="map-island-lock-icon" />
                         </ui:VisualElement>

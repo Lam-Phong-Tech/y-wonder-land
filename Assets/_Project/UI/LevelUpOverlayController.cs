@@ -32,9 +32,9 @@ public class LevelUpOverlayController : MonoBehaviour
         { 15, "🐄 Mua bò sữa" },
         { 20, "🏗️ Build Mode nâng cao" },
         { 30, "🎁 Gift Box" },
-        { 40, "🏝️ Đảo Hải Phú" },
+        { 40, "🏝️ Đảo Nam Du" },
         { 50, "🐑 Vật nuôi đặc biệt" },
-        { 60, "🌲 Đảo Mộc Nhi" },
+        { 60, "🌲 Đảo Phú Quốc" },
     };
 
     private void Awake()

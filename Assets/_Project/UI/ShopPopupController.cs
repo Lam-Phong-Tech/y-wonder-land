@@ -729,11 +729,19 @@ public class ShopPopupController : MonoBehaviour
         if (lblShopName != null) lblShopName.text = item.name;
         if (lblShopDesc != null)
         {
-            // Nếu là CON VẬT -> chèn thêm thông tin nuôi (giá / ô đất / thức ăn).
+            // Con vật -> thông tin nuôi + chu kỳ/sản lượng/EXP; hạt giống -> thông tin trồng.
             var animalDef = YWonderLand.Managers.AnimalManager.LookupDefinition(item.id);
-            lblShopDesc.text = animalDef != null
-                ? item.description + AnimalInfoText(animalDef)
-                : item.description;
+            if (animalDef != null)
+            {
+                lblShopDesc.text = item.description + AnimalInfoText(animalDef);
+            }
+            else
+            {
+                var cropDef = LookupCrop(item.id);
+                lblShopDesc.text = cropDef != null
+                    ? item.description + CropInfoText(cropDef)
+                    : item.description;
+            }
         }
 
         int unitPrice = isSellMode ? item.sellPrice : item.price;
@@ -766,17 +774,88 @@ public class ShopPopupController : MonoBehaviour
         }
     }
 
-    // Thông tin nuôi cơ bản của con vật (chèn vào mô tả): giá / số ô / thức ăn chính-phụ.
+    // Thông tin nuôi của con vật (chèn vào mô tả): giá / số ô / thức ăn + chu kỳ thu, tổng sản lượng, EXP.
+    // Khách chốt 29/07: mỗi loài phải ghi rõ bao nhiêu ngày thu một lần, mỗi lần bao nhiêu,
+    // tổng bao nhiêu ngày / tổng sản lượng và được bao nhiêu điểm EXP.
     private static string AnimalInfoText(YWonderLand.Data.AnimalDefinition d)
     {
         string Food(string name, int amount) =>
             string.IsNullOrEmpty(name) ? "—" : (amount > 0 ? $"{amount}x {name}" : name);
 
-        return $"\n\nThông tin nuôi:"
+        string text = $"\n\nThông tin nuôi:"
              + $"\nGiá mua: {d.buyPrice} Point   |   Cần: {d.penSlots} ô đất"
              + $"\nThức ăn chính: {Food(d.foodMainName, d.foodMainAmount)}"
              + $"\nThức ăn phụ: {Food(d.foodAltName, d.foodAltAmount)}";
+
+        string productName = !string.IsNullOrEmpty(d.productMainName) ? d.productMainName : "sản phẩm";
+
+        text += "\n\nThu hoạch:";
+        if (d.produceCycleTimeSec > 0f && d.produceAmount > 0)
+        {
+            text += $"\nMỗi {YWonderLand.Core.GameTimeConfig.FormatDuration(d.produceCycleTimeSec)}"
+                  + $" thu {d.produceAmount} {productName}";
+        }
+
+        if (d.maxHarvests > 0)
+        {
+            text += $"\nTổng: {d.maxHarvests} lần × {d.produceAmount} = {d.maxHarvests * d.produceAmount} {productName}";
+        }
+        else if (d.produceAmount > 0)
+        {
+            text += "\nThu không giới hạn số lần";
+        }
+
+        if (d.raisingDays > 0f)
+            text += $"\nThời gian nuôi cả vòng đời: {Mathf.RoundToInt(d.raisingDays)} ngày";
+
+        if (!string.IsNullOrEmpty(d.meatItemId) && d.meatAmount > 0)
+            text += $"\nVụ cuối còn thu thêm: {d.meatAmount} (thịt)";
+
+        if (d.expReward > 0)
+            text += $"\nEXP: {d.expReward}";
+
+        return text;
     }
+
+    // Thông tin trồng trọt của HẠT GIỐNG: thời gian lớn, sản lượng mỗi lần, số lần thu, tổng và EXP.
+    private static string CropInfoText(YWonderLand.Data.CropDefinition c)
+    {
+        string text = "\n\nThông tin trồng:";
+        text += $"\nChiếm {c.plotSlots} ô đất   |   Tốn {c.seedItemCost} hạt";
+        text += $"\nLớn sau: {YWonderLand.Core.GameTimeConfig.FormatDuration(c.growthTimeSec)}"
+              + $" → thu {c.harvestYield}";
+
+        int harvests = Mathf.Max(1, c.maxHarvests);
+        if (harvests > 1)
+        {
+            if (c.reHarvestCycleSec > 0f)
+                text += $"\nThu tiếp mỗi {YWonderLand.Core.GameTimeConfig.FormatDuration(c.reHarvestCycleSec)}";
+            text += $"\nTổng: {harvests} lần × {c.harvestYield} = {harvests * c.harvestYield}";
+        }
+        else
+        {
+            text += "\nThu 1 lần rồi hết vụ";
+        }
+
+        if (!string.IsNullOrEmpty(c.finalProductItemId) && c.finalProductAmount > 0)
+            text += $"\nVụ cuối thu thêm: {c.finalProductAmount}";
+
+        if (c.expReward > 0)
+            text += $"\nEXP: {c.expReward} mỗi lần thu";
+
+        return text;
+    }
+
+    /// <summary>Tra CropDefinition theo id hạt giống (nạp CropDatabase từ Resources, cache lại).</summary>
+    private static YWonderLand.Data.CropDefinition LookupCrop(string seedItemId)
+    {
+        if (string.IsNullOrEmpty(seedItemId)) return null;
+        if (cropDatabaseCache == null)
+            cropDatabaseCache = Resources.Load<YWonderLand.Data.CropDatabase>("CropDatabase");
+        return cropDatabaseCache != null ? cropDatabaseCache.GetCropBySeedId(seedItemId) : null;
+    }
+
+    private static YWonderLand.Data.CropDatabase cropDatabaseCache;
 
     private void ShowEmptyDetails()
     {

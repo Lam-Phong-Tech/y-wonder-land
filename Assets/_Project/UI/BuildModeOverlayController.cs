@@ -24,6 +24,9 @@ public class BuildModeOverlayController : MonoBehaviour
     [SerializeField] private bool useTopDownBuildCamera = false;
     [SerializeField] private bool hideGameHudWhileOpen = false;
     [SerializeField] private bool useFrontCellGhostPlacement = true;
+    // Khách chốt 29/07: bấm mục (Ruộng/Đường đá/Chuồng) là nhân vật cuốc/lát/xây LUÔN,
+    // bỏ khâu bấm ✓/✗ trên thẻ. Tắt cờ này để quay lại luồng xác nhận 2 bước.
+    [SerializeField] private bool instantPlaceOnSelect = true;
 
     // State
     private enum BuildState { Hidden, Browsing, Placing }
@@ -69,6 +72,11 @@ public class BuildModeOverlayController : MonoBehaviour
     // Context-selected building
     private GameObject contextSelectedBuilding;
     private bool lastPointerDownWasTouch;
+
+    // Công trình đang được NHẤC để dời chỗ: giữ vật liệu đã tốn để đặt lại không mất,
+    // bỏ dở giữa chừng thì hoàn về túi.
+    private string carriedMaterialId = "";
+    private int carriedCost = 0;
 
     // ── Dữ liệu menu Build (chi phí lấy từ SerializeField bên dưới, không phải số giả) ──
 
@@ -486,6 +494,10 @@ public class BuildModeOverlayController : MonoBehaviour
         // Deactivate ghost and optional legacy camera
         if (GhostPlacementController.Instance != null)
             GhostPlacementController.Instance.Deactivate();
+
+        // Thoát Build Mode khi đang cầm công trình dời dở → hoàn vật liệu, không để mất trắng.
+        RefundCarriedMaterial();
+
         if (useTopDownBuildCamera && BuildCameraController.Instance != null)
             BuildCameraController.Instance.Deactivate();
 
@@ -606,6 +618,9 @@ public class BuildModeOverlayController : MonoBehaviour
             priceRow.Add(priceLabel);
             card.Add(priceRow);
 
+            // B\u1ea5m-l\u00e0-x\u00e2y th\u00ec kh\u00f4ng c\u1ea7n c\u1eb7p n\u00fat \u2713/\u2717 tr\u00ean th\u1ebb n\u1eefa.
+            if (!instantPlaceOnSelect)
+            {
             var actionsRow = new VisualElement();
             actionsRow.AddToClassList("build-card-actions");
 
@@ -629,6 +644,7 @@ public class BuildModeOverlayController : MonoBehaviour
             });
             actionsRow.Add(cancelButton);
             card.Add(actionsRow);
+            }
 
             // Click handler = select item and activate ghost
             card.RegisterCallback<ClickEvent>(evt =>
@@ -690,6 +706,15 @@ public class BuildModeOverlayController : MonoBehaviour
             }
 
             HidePlacementControls();
+
+            // Ch\u1ed1t 29/07: b\u1ea5m m\u1ee5c l\u00e0 X\u00c2Y LU\u00d4N \u2014 kh\u00f4ng b\u1eaft b\u1ea5m \u2713 n\u1eefa.
+            // OnConfirmPlacement t\u1ef1 b\u00e1o khi \u00f4 kh\u00f4ng h\u1ee3p l\u1ec7 / thi\u1ebfu v\u1eadt li\u1ec7u.
+            if (instantPlaceOnSelect)
+            {
+                OnConfirmPlacement();
+                return;
+            }
+
             ShowStatusMessage(
                 ghost.IsPlacementValid
                     ? $"B\u1ea5m d\u1ea5u t\u00edch tr\u00ean th\u1ebb \u0111\u1ec3 x\u00e2y {item.name}."
@@ -768,6 +793,9 @@ public class BuildModeOverlayController : MonoBehaviour
         if (!ghost.ConfirmPlacement())
             return;
 
+        // Đặt xuống thành công → vật liệu đã theo công trình sang ô mới, không còn "đang cầm".
+        ClearCarriedMaterial();
+
         if (useFrontCellGhostPlacement)
         {
             ghost.Deactivate();
@@ -787,6 +815,9 @@ public class BuildModeOverlayController : MonoBehaviour
     {
         if (GhostPlacementController.Instance != null)
             GhostPlacementController.Instance.Deactivate();
+
+        // Bỏ dở lúc đang dời công trình → hoàn vật liệu (công trình cũ đã bị hủy khi nhấc).
+        RefundCarriedMaterial();
 
         state = BuildState.Browsing;
         HidePlacementControls();
@@ -893,6 +924,13 @@ public class BuildModeOverlayController : MonoBehaviour
         bool wasFarmTile = building != null && building.GetComponentInChildren<FarmTile>(true) != null;
         string buildingName = building != null ? building.name : "(null)";
 
+        // Chốt 29/07: chỉ hủy được ô còn TRỐNG — ô đang có cây thì chặn (đồng nhất với nút hủy ngoài game).
+        if (HasCropOnBuilding(building))
+        {
+            ShowStatusMessage("Ô đang có cây — thu hoạch xong mới hủy được!", false);
+            return;
+        }
+
         if (BuildGridManager.Instance != null)
         {
             Vector2Int gridCell = BuildGridManager.Instance.WorldToGrid(building.transform.position);
@@ -924,11 +962,54 @@ public class BuildModeOverlayController : MonoBehaviour
         Debug.Log($"[BuildMode] Deleted building: {buildingName}, refund wood={refundWood}, stone={refundStone}");
     }
 
+    /// <summary>Công trình có ô đất đang trồng cây hay không (đã gieo / đang lớn / chín).</summary>
+    private static bool HasCropOnBuilding(GameObject building)
+    {
+        if (building == null) return false;
+
+        var tiles = building.GetComponentsInChildren<FarmTile>(true);
+        for (int i = 0; i < tiles.Length; i++)
+        {
+            if (tiles[i] == null) continue;
+            var s = tiles[i].currentState;
+            if (s == FarmTile.TileState.Planted || s == FarmTile.TileState.Watered || s == FarmTile.TileState.Ripe)
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>Hoàn vật liệu của công trình đang được NHẤC nếu người chơi bỏ dở (hủy đặt / thoát Build Mode).</summary>
+    private void RefundCarriedMaterial()
+    {
+        if (carriedCost > 0 && !string.IsNullOrEmpty(carriedMaterialId))
+        {
+            var inv = YWonderLand.Managers.InventoryManager.Instance;
+            if (inv != null)
+            {
+                inv.AddItem(carriedMaterialId, carriedCost, "build_refund");
+                Debug.Log($"[BuildMode] Bỏ dở khi dời công trình → hoàn {carriedCost} {carriedMaterialId}");
+            }
+        }
+        ClearCarriedMaterial();
+    }
+
+    private void ClearCarriedMaterial()
+    {
+        carriedMaterialId = "";
+        carriedCost = 0;
+    }
+
     private void PickUpBuilding(GameObject building)
     {
         Vector3 buildingPos = building.transform.position;
         Vector3 buildingScale = building.transform.localScale;
         string buildingName = building.name;
+
+        // Vật liệu đã tốn của công trình này: ClearOccupant bên dưới sẽ XÓA dữ liệu vật liệu của ô,
+        // nên phải giữ lại rồi đóng dấu lại lúc đặt xuống. Không giữ = dời xong hủy sẽ hoàn 0 (mất gỗ).
+        var placedTag = building.GetComponent<YWonderLand.Environment.PlacedBuilding>();
+        carriedMaterialId = placedTag != null ? placedTag.materialId : "";
+        carriedCost = placedTag != null ? placedTag.cost : 0;
 
         float cellSize = BuildGridManager.Instance != null ? BuildGridManager.Instance.CellSize : 1f;
         int sizeX = Mathf.Max(1, Mathf.RoundToInt(buildingScale.x / (cellSize * 0.95f)));
@@ -957,9 +1038,16 @@ public class BuildModeOverlayController : MonoBehaviour
                 if (parts.Length >= 2) itemName = parts[1];
             }
 
-            GhostPlacementController.Instance.Activate(itemName, size, "", 0); // đặt lại công trình đã có → miễn phí (không trừ lại vật liệu)
+            // Đặt lại công trình đã có → KHÔNG trừ lại vật liệu, nhưng vẫn đóng dấu vật liệu cũ lên ô mới
+            // để lần hủy sau hoàn đúng số đã tốn.
+            GhostPlacementController.Instance.ActivateCarried(itemName, size, carriedMaterialId, carriedCost);
             state = BuildState.Placing;
             ShowPlacementControls();
+        }
+        else
+        {
+            // Không dựng được ghost → công trình đã bị hủy, phải hoàn vật liệu kẻo mất trắng.
+            RefundCarriedMaterial();
         }
 
         ShowStatusMessage("\u0110\u00e3 nh\u1ea5c c\u00f4ng tr\u00ecnh \u2014 ch\u1ecdn v\u1ecb tr\u00ed m\u1edbi", true);

@@ -110,15 +110,17 @@ public class MapPopupController : MonoBehaviour
             },
             ["haiphu"] = new MapLocation
             {
-                id = "haiphu", icon = "🏝️", name = "Đảo Hải Phú",
+                // Tên hiển thị khách chốt 29/07: "Đảo Hải Phú" -> "Đảo Nam Du" (giữ nguyên id/sceneName để không vỡ save/scene).
+                id = "haiphu", icon = "🏝️", name = "Đảo Nam Du",
                 description = "Đảo nhiệt đới biển xanh với bãi câu cá đặc biệt, hạt giống và vật nuôi exclusive theo mùa sự kiện.",
-                requiredLevel = 40, requiresVipOrTicket = true, ticketName = "Vé Hải Phú", sceneName = "HaiphuIsland"
+                requiredLevel = 40, requiresVipOrTicket = true, ticketName = "Vé Nam Du", sceneName = "HaiphuIsland"
             },
             ["mocnhi"] = new MapLocation
             {
-                id = "mocnhi", icon = "🌲", name = "Đảo Mộc Nhi",
+                // Tên hiển thị khách chốt 29/07: "Đảo Mộc Nhĩ" -> "Đảo Phú Quốc" (giữ nguyên id/sceneName).
+                id = "mocnhi", icon = "🌲", name = "Đảo Phú Quốc",
                 description = "Rừng huyền bí bao phủ sương mù. Vật phẩm event siêu hiếm, quest đặc biệt, drop tỉ lệ thấp nhưng giá trị cao.",
-                requiredLevel = 60, requiresVipOrTicket = true, ticketName = "Vé Mộc Nhi", sceneName = "MocnhiIsland"
+                requiredLevel = 60, requiresVipOrTicket = true, ticketName = "Vé Phú Quốc", sceneName = "MocnhiIsland"
             },
         };
     }

@@ -53,6 +53,7 @@ public class GhostPlacementController : MonoBehaviour
     private string currentItemName = "";
     private int currentItemPrice = 0;          // = SỐ LƯỢNG vật liệu cần (0 = miễn phí)
     private string currentMaterialId = "";     // id vật liệu (wood_01/stone_01...); "" = miễn phí
+    private bool carriedFreePlacement = false; // công trình NHẤC LÊN đặt lại: giữ vật liệu để hoàn, KHÔNG trừ lại
 
     // Tên hiển thị vật liệu theo id (cho thông báo thiếu vật liệu).
     private static string MatLabel(string id)
@@ -351,6 +352,7 @@ public class GhostPlacementController : MonoBehaviour
         currentItemSize = size;
         currentMaterialId = materialId;
         currentItemPrice = materialAmount;
+        carriedFreePlacement = false; // chọn mục mới từ menu = xây mới → có trừ vật liệu
         rotationAngle = 0;
         isActive = true;
         IsPinned = false;
@@ -374,12 +376,21 @@ public class GhostPlacementController : MonoBehaviour
         Debug.Log($"[GhostPlacement] Activated '{itemName}' size ({size.x},{size.y}) — ghost={(ghostIsPrefab ? "PREFAB mờ" : "Cube")}");
     }
 
+    /// <summary>Đặt lại một công trình ĐÃ XÂY (nhấc lên dời chỗ): giữ nguyên vật liệu đã tốn để
+    /// đóng dấu lên ô mới (hủy sau này hoàn đúng số), nhưng KHÔNG trừ vật liệu lần nữa.</summary>
+    public void ActivateCarried(string itemName, Vector2Int size, string materialId, int materialAmount)
+    {
+        Activate(itemName, size, materialId, materialAmount);
+        carriedFreePlacement = true;
+    }
+
     public void Deactivate()
     {
         isActive = false;
         IsPinned = false;
         currentPlacementValid = false;
         currentCell = null;
+        carriedFreePlacement = false;
 
         if (ghostObject != null) ghostObject.SetActive(false);
     }
@@ -572,7 +583,7 @@ public class GhostPlacementController : MonoBehaviour
         if (!currentPlacementValid || currentCell == null || currentCell.IsOccupied) return false;
 
         // Chi phí VẬT LIỆU: đủ → trừ; thiếu → KHÔNG đặt + báo. (0/"" = miễn phí, vd ô ruộng.)
-        if (currentItemPrice > 0 && !string.IsNullOrEmpty(currentMaterialId))
+        if (!carriedFreePlacement && currentItemPrice > 0 && !string.IsNullOrEmpty(currentMaterialId))
         {
             var inv = YWonderLand.Managers.InventoryManager.Instance;
             int quantityBefore = inv != null ? inv.GetItemQuantity(currentMaterialId) : 0;
@@ -617,6 +628,9 @@ public class GhostPlacementController : MonoBehaviour
         {
             SpawnCubeBuilding(GetEffectiveSize());
         }
+
+        // Công trình "đang cầm" đã đặt xuống xong — cái tiếp theo (nếu giữ ghost để xây tiếp) phải trả vật liệu bình thường.
+        carriedFreePlacement = false;
 
         OnBuildingPlaced?.Invoke(currentItemName, currentItemPrice);
         return true;
