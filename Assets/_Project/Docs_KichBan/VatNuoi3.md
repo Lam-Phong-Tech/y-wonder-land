@@ -202,14 +202,26 @@ chỉ phóng to con số tuyệt đối.
 
 ## Ảnh hưởng tới game (game đang chạy bộ VatNuoi2)
 
-Đọc thẳng từ asset: `milk_01 = 50`, `beef_01 = 325`, `deer_meat_01 = 933` — đúng bộ `VatNuoi2`.
-Muốn theo `VatNuoi3` thì phải sửa:
+### Game KHÔNG code công thức lợi nhuận
 
-1. Giá mua **10 con giống** (`AnimalDefinition.buyPrice`).
+Không có phép tính lợi nhuận / tỷ suất nào trong `Assets/_Project/Scripts` — đã grep
+`profit`, `tỷ suất`, `doanh thu`, không dòng nào. Game chỉ lưu **số thô**: giá mua, giá bán,
+khẩu phần ăn, tỉ lệ bệnh, số mũi vắc-xin. Các cột `AN` / `AO` / `AM` của bảng là **phân tích
+số**, không phải đặc tả tính năng. Nên việc cần làm là **nhập đúng bộ số**, tỷ suất tự đúng theo.
+
+### Số phải sửa nếu áp VatNuoi3
+
+Đọc thẳng từ asset: `milk_01 = 50`, `beef_01 = 325`, `deer_meat_01 = 933` — đúng bộ `VatNuoi2`.
+
+1. Giá mua **10 con giống** (`AnimalDefinition.buyPrice`) — hiện bò 7.800, hươu 10.400, gà 156.
 2. Giá bán **20 sản phẩm** vật nuôi (`ItemDefinition.sellPrice`).
 3. Giá **8 loại cây làm thức ăn** — hiện `sellPrice = 0` trong game, chưa từng có giá.
 4. Khẩu phần **bò sữa 2 → 4 Cỏ Voi**.
-5. Giá **vắc-xin 30 Point/mũi** và **thuốc 70 Point/liều** — hiện chưa có trong `ItemDatabase`.
+
+### Đã khớp sẵn, không phải sửa
+
+`vaccine_01 = 30` và `medicine_01 = 70` trong `ItemDatabase` **đã khớp đúng** công thức
+`=N*30` và `=Q*70` của khách (VatNuoi2 và VatNuoi3 dùng chung hai đơn giá này).
 
 ⚠️ **Câu chưa có lời đáp:** tỷ giá đổi 26 → 150 là đổi cho **toàn bộ game** hay chỉ riêng vật nuôi?
 Nếu chỉ vật nuôi thì cá, đá quý, nông sản, tiền khởi điểm… vẫn ở thang cũ, và mọi so sánh giá
