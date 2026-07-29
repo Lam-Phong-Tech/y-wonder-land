@@ -126,6 +126,7 @@ public class GameHUDController : MonoBehaviour
     private float fishingCancelProgress01;
     private float nextPlayerInfoRefreshTime;
     private const float PlayerInfoRefreshInterval = 0.25f;
+    private int appliedAvatarGender = -1; // -1 = chưa áp lần nào
 
 
 
@@ -667,19 +668,22 @@ public class GameHUDController : MonoBehaviour
         UpdateAvatar();
     }
 
+    /// <summary>
+    /// Đồng bộ avatar theo giới tính hiện tại. Gọi lặp lại được (tự bỏ qua khi không đổi),
+    /// vì giới tính đến MUỘN hơn HUD: luồng online phải chờ bootstrap trả hồ sơ, trong khi
+    /// HUD đã dựng và đọc selectedCharacterIndex lúc nó còn là 0 = nam.
+    /// </summary>
     public void UpdateAvatar()
     {
-        if (playerAvatar != null)
-        {
-            playerAvatar.RemoveFromClassList("avatar-male");
-            playerAvatar.RemoveFromClassList("avatar-female");
-            
-            int gender = GameManager.Instance != null ? GameManager.Instance.selectedCharacterIndex : 0;
-            if (gender == 0)
-                playerAvatar.AddToClassList("avatar-male");
-            else
-                playerAvatar.AddToClassList("avatar-female");
-        }
+        if (playerAvatar == null) return;
+
+        int gender = GameManager.Instance != null ? GameManager.Instance.selectedCharacterIndex : 0;
+        if (gender == appliedAvatarGender) return;
+        appliedAvatarGender = gender;
+
+        playerAvatar.RemoveFromClassList("avatar-male");
+        playerAvatar.RemoveFromClassList("avatar-female");
+        playerAvatar.AddToClassList(gender == 0 ? "avatar-male" : "avatar-female");
     }
 
     /// <summary>
@@ -735,6 +739,11 @@ public class GameHUDController : MonoBehaviour
     {
         if (!force && Time.unscaledTime < nextPlayerInfoRefreshTime) return;
         nextPlayerInfoRefreshTime = Time.unscaledTime + PlayerInfoRefreshInterval;
+
+        // Avatar bám giới tính riêng, KHÔNG đi kèm tên/cấp: SyncPlayerName dừng ngay khi có
+        // tên (thường tức thì từ prefs), còn giới tính mới về sau lượt gọi mạng -> trước đây
+        // avatar kẹt nam dù nhân vật đã spawn đúng nữ.
+        UpdateAvatar();
 
         string resolvedName = ResolveCurrentPlayerName();
         if (string.IsNullOrEmpty(resolvedName)) return;
