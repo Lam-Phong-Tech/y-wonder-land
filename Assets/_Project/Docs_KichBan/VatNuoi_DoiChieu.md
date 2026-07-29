@@ -174,7 +174,27 @@ Không được đổi từ phía game.
 
 ---
 
-## 7. ĐỀ XUẤT — lấy số nào
+## 7. ✅ ĐÃ CHỐT 29/07/2026 — GIỮ NGUYÊN `VatNuoi2` + `SuaLai4`
+
+**Chủ dự án quyết định: dùng số liệu `VatNuoi2` (kèm bản sửa `SuaLai4`), KHÔNG áp `VatNuoi3`.**
+
+Lý do: giá trên **web — nơi người chơi nạp tiền vào game — đã chốt từ trước** và đang chạy thật.
+Khách hỏi lại `VatNuoi3` là do quên rằng số liệu đã thống nhất với web, không phải muốn đổi.
+
+➜ **Không sửa một dòng dữ liệu nào.** Game hiện đã đúng bộ này (xem mục 5).
+➜ Việc duy nhất còn lại: **làm rõ với khách rằng lợi nhuận trong bảng là CẢ VÒNG NUÔI**
+(thu lượt đầu + vụ cuối), **không phải mỗi tháng**.
+
+Chấp nhận sai lệch đã biết: bảng cân bằng dùng tỷ giá 26 trong khi ví dùng 26,5,
+nên giá trong game rẻ hơn ~1,9% so với ý định thiết kế. Nhỏ, không sửa lúc này.
+
+> ⚠️ Nếu sau này khách lại gửi bảng mới với tỷ giá khác — **hỏi lại web trước khi đụng game**.
+> Point là tiền thật quy đổi được với USDT, đổi tỷ giá là quyết định tài chính chứ không
+> phải cân bằng game.
+
+---
+
+## 8. Tham khảo — nếu về sau thật sự phải đổi
 
 ### Quy tắc chốt
 
@@ -207,10 +227,32 @@ Ví dụ: sữa bò `305 × 0,176667 = 53,9` Point · thịt bò `1.975 × 0,176
 
 ---
 
-## 8. Ba câu phải hỏi khách trước khi đụng dữ liệu
+### Nếu mở lại chuyện này, ba câu phải hỏi khách trước
 
 1. **`VatNuoi3` có thay thế `SuaLai4VatNuoi` không?** `SuaLai4` ra **trước** `VatNuoi3`
    nhưng `VatNuoi3` lại không mang bản sửa theo. Cần biết là cố ý hay sót.
-2. **Xác nhận giữ tỷ giá ví 26,5.** Con số 150 trong `VatNuoi3` chỉ là cách ghi khác
+2. **Xác nhận tỷ giá ví.** Con số 150 trong `VatNuoi3` chỉ là cách ghi khác
    của cùng giá trị USDT — đổi tỷ giá ví là quyết định tài chính, không phải cân bằng game.
 3. Giá 8 loại cây trong cột *"Tính theo giá trồng được"* là **giá bán ra** hay **giá mua vào**?
+
+---
+
+## 9. Doanh thu về LÚC NÀO — số để giải thích với khách
+
+Đây là chỗ khách hiểu nhầm thành "lợi nhuận mỗi tháng". Số theo `VatNuoi2`:
+
+| Con | Thu rải trong kỳ (Pro1) | Thu vụ cuối (Pro2) | % doanh thu dồn vào vụ cuối |
+|---|---|---|---|
+| Hươu | 49.470 (2 đợt: tháng 6 và 12) | 37.320 | 43% |
+| Bò sữa | 19.000 (38 đợt) | 16.250 | 46% |
+| Dê con | 1.440 (60 đợt) | 2.360 | 62% |
+| Đà điểu | 12.270 (30 đợt) | 21.000 | 63% |
+| Gà mái | 495 (45 đợt) | 1.550 | 76% |
+| Ngỗng con | 840 (30 đợt) | 3.325 | 80% |
+| Thỏ con | 344 (2 đợt) | 1.445 | 81% |
+| Vịt | 202,5 (45 đợt) | 1.660 | 89% |
+| **Heo con** | 7.042 — **1 đợt duy nhất ở CUỐI kỳ** | 14.600 | **100%** |
+| **Rùa con** | 11.893 — **1 đợt duy nhất ở CUỐI kỳ** | 10.840 | **100%** |
+
+**Heo và Rùa không thu được gì suốt 6 và 10 tháng đầu** — cả hai khoản đều rơi vào ngày cuối.
+Đây là điểm đáng lưu ý nhất khi giải thích với khách.
