@@ -424,13 +424,22 @@
    các con lại -> icon chuồng bị dẹp/méo. */
 /* 3 thẻ = 3 x (114 + 6) = 360, còn dư ~36px so với lòng bảng (416 - 20 padding).
    Chừa dư thật rộng để có lỡ hiện thanh cuộn cũng không xén mất thẻ cuối. */
+/* Viền LUÔN 2px ở mọi trạng thái. `.build-item-selected` tăng viền 1px -> 2px, mà UI Toolkit
+   tính width theo border-box nên viền dày lên sẽ ăn vào lòng thẻ và bóp nội dung. Giữ viền cố
+   định, lúc chọn chỉ ĐỔI MÀU -> bố cục bất động, thẻ cuối hàng không bị xén. */
 .build-popup-panel .build-item-card {
     width: 114px;
     height: 164px;
     margin-right: 6px;
     padding: 8px 6px;
     border-radius: 8px;
+    border-width: 2px;
+    border-color: rgba(255, 255, 255, 0.05);
     justify-content: flex-start;
+}
+
+.build-popup-panel .build-item-selected {
+    border-width: 2px; /* KHÔNG đổi độ dày, chỉ màu viền do rule .build-item-selected lo */
 }
 
 .build-popup-panel .build-item-icon {
@@ -442,7 +451,7 @@
 
 .build-popup-panel .build-item-name {
     font-size: 12px;
-    max-width: 102px; /* = bề ngang thẻ 114 trừ padding 6 mỗi bên */
+    max-width: 98px; /* = 114 trừ padding 6 và VIỀN 2 mỗi bên (số cũ 102 quên trừ viền) */
     white-space: normal;
     min-height: 30px;
     flex-shrink: 0;

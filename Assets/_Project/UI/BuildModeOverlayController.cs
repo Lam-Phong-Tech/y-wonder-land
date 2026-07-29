@@ -336,6 +336,15 @@ public class BuildModeOverlayController : MonoBehaviour
         lblBuildStatus = root.Q<Label>("lblBuildStatus");
         btnExitBuild = root.Q<Button>("BtnExitBuild");
         itemScrollView = root.Q<ScrollView>("ItemScrollView");
+        if (itemScrollView != null)
+        {
+            // KHOÁ CỨNG hai thanh cuộn bằng API thay vì chỉ ẩn bằng USS. Ẩn bằng `display:none`
+            // không ngăn ScrollView TÍNH chỗ cho thanh cuộn: lúc mở lại Build Mode, panel vừa
+            // thoát display:none nên viewport còn 0px, ScrollView tưởng nội dung tràn -> dành chỗ
+            // cho thanh cuộn dọc -> ăn mất bề ngang và xén/bóp méo thẻ cuối hàng ("Chuồng").
+            itemScrollView.verticalScrollerVisibility = ScrollerVisibility.Hidden;
+            itemScrollView.horizontalScrollerVisibility = ScrollerVisibility.Hidden;
+        }
 
         // Placement controls
         placementControls = root.Q<VisualElement>("PlacementControls");
@@ -442,6 +451,9 @@ public class BuildModeOverlayController : MonoBehaviour
         UpdateBalance();
         UpdateCategoryTabs();
         RebuildItemGrid();
+        // Dựng lại lần nữa sau khi panel đã có kích thước thật. Lần dựng ngay trên chạy khi panel
+        // vừa thoát display:none (bề ngang còn 0) nên flexbox tính sai chỗ và bóp méo thẻ cuối.
+        buildRoot?.schedule.Execute(RebuildItemGrid);
         HidePlacementControls();
         HideContextMenu();
         HideInfoTooltip();
