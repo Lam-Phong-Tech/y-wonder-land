@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: spin_ticket_01
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.ItemDefinition
   id: spin_ticket_01
-  itemName: "Vé vòng quay"
-  description: "Hết 3 lượt quay free trong ngày thì mỗi vé = 1 lượt quay thêm."
+  itemName: "V\xE9 v\xF2ng quay"
+  description: "H\u1EBFt 3 l\u01B0\u1EE3t quay free trong ng\xE0y th\xEC m\u1ED7i
+    v\xE9 = 1 l\u01B0\u1EE3t quay th\xEAm."
   iconEmoji: "\U0001F3A1"
   iconSprite: {fileID: 0}
   iconTexture: {fileID: 2800000, guid: 154b2a8ad47540dd93c7a4d0374878f0, type: 3}

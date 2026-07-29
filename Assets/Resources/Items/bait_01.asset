@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.ItemDefinition
   id: bait_01
   itemName: "M\u1ED3i c\xE2u"
-  description: "H\u1EBFt 10 l\u01B0\u1EE3t c\xE2u free trong ng\xE0y th\xEC m\u1ED7i con m\u1ED3i = 1 l\u01B0\u1EE3t c\xE2u th\xEAm."
+  description: "H\u1EBFt 10 l\u01B0\u1EE3t c\xE2u free trong ng\xE0y th\xEC m\u1ED7i
+    con m\u1ED3i = 1 l\u01B0\u1EE3t c\xE2u th\xEAm."
   iconEmoji: "\U0001FAB1"
   iconSprite: {fileID: 0}
   iconTexture: {fileID: 2800000, guid: 9bb77a8f85f12584c95555c19af47fd6, type: 3}
