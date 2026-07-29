@@ -2639,7 +2639,7 @@ namespace YWonderLand.Environment
             pendingEnclosure = null;
             if (PlayerController.Instance != null) PlayerController.Instance.FaceTowards(animal.transform.position);
 
-            EnsureStarterFeed(animal); // demo: cấp ĐÚNG thức ăn của loài (theo tài liệu) để chọn
+            WarnIfNoFeed(animal); // hết thức ăn thì nhắc, không cấp thêm
 
             EnsureInventoryPopupSubscribed();
             if (inventoryPopup != null)
@@ -2717,28 +2717,36 @@ namespace YWonderLand.Environment
                 inv.AddItem(itemId, required);
         }
 
-        // Demo helper: cấp ĐÚNG thức ăn của loài (chính + phụ) để test, thay vì luôn dùng ngô.
-        // Production: người chơi tự trồng/mua thức ăn đúng loại.
-        private void EnsureStarterFeed(FarmAnimal animal)
+        // Hết thức ăn thì NHẮC người chơi trồng/mua, không phát không.
+        // (Bản demo trước tự cấp thức ăn mỗi khi về 0 — cùng lỗi với hạt giống.)
+        private void WarnIfNoFeed(FarmAnimal animal)
         {
             var inv = YWonderLand.Managers.InventoryManager.Instance;
             if (inv == null || animal == null || animal.data == null) return;
-            GiveFoodForDemo(inv, animal.data.foodMainName, Mathf.Max(1, animal.data.foodMainAmount) * 3);
-            // Bỏ qua thức ăn phụ amount 0 (vd 'Cám' — không phải item trong game) → tránh cảnh báo thừa.
-            if (animal.data.foodAltAmount > 0)
-                GiveFoodForDemo(inv, animal.data.foodAltName, animal.data.foodAltAmount * 3);
+
+            string main = animal.data.foodMainName;
+            // Thức ăn phụ ghi amount 0 (vd 'Cám') là không dùng thật -> bỏ qua.
+            string alt = animal.data.foodAltAmount > 0 ? animal.data.foodAltName : null;
+
+            if (HasFood(inv, main) || HasFood(inv, alt)) return;
+
+            string names = string.IsNullOrEmpty(alt) ? main : $"{main} hoặc {alt}";
+            if (string.IsNullOrEmpty(names)) return;
+
+            string who = !string.IsNullOrEmpty(animal.data.animalName) ? animal.data.animalName : "Con vật";
+            ScreenToast.Show($"{who} cần {names} — trồng thêm hoặc mua ở Farm Shop.");
         }
 
-        private void GiveFoodForDemo(YWonderLand.Managers.InventoryManager inv, string foodName, int amount)
+        private bool HasFood(YWonderLand.Managers.InventoryManager inv, string foodName)
         {
+            if (string.IsNullOrEmpty(foodName)) return false;
             string id = ResolveItemIdByName(foodName);
             if (string.IsNullOrEmpty(id))
             {
-                if (!string.IsNullOrEmpty(foodName))
-                    Debug.LogWarning($"[FarmInteraction] Không tìm thấy item khớp tên thức ăn '{foodName}' trong ItemDatabase (kiểm tra lại tên trong AnimalDefinition vs ItemDatabase).");
-                return;
+                Debug.LogWarning($"[FarmInteraction] Không tìm thấy item khớp tên thức ăn '{foodName}' trong ItemDatabase (kiểm tra lại tên trong AnimalDefinition vs ItemDatabase).");
+                return false;
             }
-            if (inv.GetItemQuantity(id) <= 0) inv.AddItem(id, amount);
+            return inv.GetItemQuantity(id) > 0;
         }
 
         // ── Tra cứu tên ↔ id thức ăn qua ItemDatabase ──
@@ -3265,8 +3273,8 @@ namespace YWonderLand.Environment
             // Ghi nhớ ô đất đang chờ gieo, rồi mở Túi đồ ở tab Hạt giống để người chơi CHỌN loại cây.
             pendingPlantTile = tile;
 
-            // Demo helper: nếu chưa có hạt nào thì tặng gói hạt khởi đầu để có cái mà chọn.
-            EnsureStarterSeeds();
+            // Hết hạt thì NHẮC ra shop mua, không tặng thêm.
+            WarnIfNoSeeds();
 
             EnsureInventoryPopupSubscribed();
 
@@ -3283,21 +3291,29 @@ namespace YWonderLand.Environment
             }
         }
 
-        // Đảm bảo túi đồ LUÔN có đủ 3 loại hạt (đã có model 3D) để người chơi chọn trồng.
-        private void EnsureStarterSeeds()
+        // Hết hạt là phải MUA, không phát không.
+        // (Bản demo trước tự cộng 3 hạt cà rốt/cải/bắp mỗi lần về 0 -> hạt vô hạn, hỏng kinh tế
+        //  và còn đẩy delta +3 lên server nên số hạt bên server cũng phồng theo.)
+        private void WarnIfNoSeeds()
         {
             var inv = YWonderLand.Managers.InventoryManager.Instance;
-            if (inv == null) return;
+            if (inv == null || HasAnySeed(inv)) return;
 
-            string[] starterSeeds = { "carrot_seed_01", "cabbage_seed_01", "corn_seed_01" };
-            foreach (var s in starterSeeds)
+            ScreenToast.Show("Hết hạt giống rồi — ra Farm Shop mua thêm để trồng.");
+        }
+
+        private bool HasAnySeed(YWonderLand.Managers.InventoryManager inv)
+        {
+            var db = FoodDb; // dùng chung ItemDatabase
+            if (db == null) return true; // không tra được thì thôi, đừng báo nhầm
+
+            foreach (var slot in inv.GetAllSlots())
             {
-                if (inv.GetItemQuantity(s) <= 0)
-                {
-                    inv.AddItem(s, 3);
-                    Debug.Log($"[FarmInteraction] Bổ sung hạt giống cho demo: {s} +3");
-                }
+                if (slot == null || slot.quantity <= 0) continue;
+                var def = db.GetItem(slot.itemId);
+                if (def != null && def.category == "seeds") return true;
             }
+            return false;
         }
 
         // Mở túi đồ (tab Thú nuôi) để chọn con vật thả vào chuồng đang đứng.

@@ -6,6 +6,33 @@
 
 ---
 
+## [2026-07-29] — Chặn lỗi hạt giống & thức ăn TỰ MỌC LẠI
+
+Khách báo ở tài khoản `green farm rill1`: hạt cải / hạt cà rốt / hạt bắp dùng hết về 0 thì
+**tự quay lại 3**, lặp đi lặp lại.
+
+### Gốc lỗi
+`FarmInteractionController.EnsureStarterSeeds()` — đoạn trợ giúp thời demo. Mỗi lần người chơi
+bấm vào ô đất để gieo, nó rà đúng 3 hạt đó, hạt nào `<= 0` thì `AddItem(s, 3)`. Đây là **hạt
+vô hạn**: trồng hết → bấm ô đất → có lại 3 hạt → trồng tiếp, không bao giờ phải mua.
+Nặng hơn: `AddItem` đẩy delta lên server (`QueueInventoryDelta`) nên số hạt **bên server cũng
+phồng theo**, không chỉ là lỗi hiển thị ở máy người chơi.
+
+`EnsureStarterFeed()` y hệt, cho **thức ăn vật nuôi**: mỗi lần bấm con vật để cho ăn, hết món
+chính/phụ là được cấp bù `amount × 3`. Khách chưa báo nhưng cùng một lỗi.
+
+### Đã sửa
+Bỏ cả hai đoạn phát đồ, thay bằng lời nhắc:
+- Hết hạt (xét **cả nhóm `seeds`**, không riêng 3 loại) → *"Hết hạt giống rồi — ra Farm Shop mua thêm để trồng."*
+- Hết thức ăn → *"{Tên con vật} cần {món chính} hoặc {món phụ} — trồng thêm hoặc mua ở Farm Shop."*
+
+Không sợ kẹt người chơi: tài khoản mới vẫn được 5 hạt cà rốt (server `postgresStore.js`), và
+hết sạch thì vẫn chặt gỗ / đập đá / câu cá bán lấy Point mua hạt.
+
+➜ `Assets/_Project/Scripts/Environment/FarmInteractionController.cs`
+
+---
+
 ## [2026-07-29] — Túi đồ: bỏ nút "Vứt bỏ", nút "Sử dụng" biết giải thích công dụng
 
 Yêu cầu chủ dự án: bỏ hẳn "Vứt bỏ" ở mọi tab; "Sử dụng" mà không có việc gì để làm thì
