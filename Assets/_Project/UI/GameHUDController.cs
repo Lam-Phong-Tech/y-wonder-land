@@ -1118,6 +1118,7 @@ public class GameHUDController : MonoBehaviour
         { "Xem chuồng", "Icon_Eye" },
         { "Thả thú", "Icon_HandRelease" },
         { "Hủy chuồng", "Icon_Cancel" },
+        { "Hủy đường", "Icon_Cancel" },
         { "Múc nước", "Icon_WaterBucket" },
         { "Chặt cây", "Icon_Axe" },
         { "Đào khoáng", "Icon_Pickaxe" },

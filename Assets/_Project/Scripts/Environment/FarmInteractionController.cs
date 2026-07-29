@@ -139,6 +139,7 @@ namespace YWonderLand.Environment
         private bool animalPlacementInFlight;
         private List<BuildSurfaceCell> pendingDemolishEnclosure;
         private FarmTile pendingDemolishTile;
+        private GameObject pendingDemolishPath; // công trình trang trí (vd Đường đá) đang chờ xác nhận hủy
         private float demolishConfirmTimer;
         private const float DemolishConfirmWindow = 1.25f;
         private const string MiningLastDateKey = "YW_MiningLastDate";
@@ -830,6 +831,41 @@ namespace YWonderLand.Environment
             return false;
         }
 
+        // Tra công trình "đường" từ 1 hit: trúng chính công trình HOẶC trúng ô đất bên dưới (đọc occupant).
+        // Đối xứng với ResolveFarmTileFromHit để đường đá cũng bắt được dù prefab không có collider riêng.
+        private GameObject ResolveDemolishablePathFromHit(RaycastHit hit)
+        {
+            if (hit.collider == null) return null;
+
+            var direct = ResolveDemolishablePath(hit.collider.gameObject);
+            if (direct != null) return direct;
+
+            var cell = ResolveBuildSurfaceCellFromHit(hit);
+            if (cell != null && cell.Occupant != null)
+                return ResolveDemolishablePath(cell.Occupant);
+
+            return null;
+        }
+
+        // Fallback dò theo tâm ngắm (sphere-cast) giống ruộng — bắt cả khi ngắm HƠI LỆCH khỏi mặt đường nhỏ.
+        private bool TryResolvePathFromAim(Ray ray, out GameObject path, bool directTap = false)
+        {
+            path = null;
+            int hitCount = Physics.SphereCastNonAlloc(ray, FarmTileAimFallbackRadius, tileAimHitResults, 100f, InteractionLayerMask, QueryTriggerInteraction.Collide);
+            if (hitCount <= 0) return false;
+
+            System.Array.Sort(tileAimHitResults, 0, hitCount, Comparer<RaycastHit>.Create((a, b) => a.distance.CompareTo(b.distance)));
+            for (int i = 0; i < hitCount; i++)
+            {
+                var candidate = ResolveDemolishablePathFromHit(tileAimHitResults[i]);
+                if (candidate == null || !IsPlacedBuildingInRange(candidate, directTap)) continue;
+                path = candidate;
+                return true;
+            }
+
+            return false;
+        }
+
         private void AddTileAction(FarmTile tile, List<InteractionAction> actions)
         {
             if (tile == null || actions == null) return;
@@ -872,6 +908,43 @@ namespace YWonderLand.Environment
 
             var placed = tile.GetComponentInParent<PlacedBuilding>();
             return placed != null ? placed.gameObject : null;
+        }
+
+        // Công trình đặt qua Build Mode nhưng KHÔNG phải ô trồng (FarmTile) và KHÔNG phải hàng rào (chuồng)
+        // — hiện chỉ có "Đường đá". Nhóm này chưa có nút hủy riêng nên gom về đây để cho "Hủy đường".
+        private GameObject ResolveDemolishablePath(GameObject candidate)
+        {
+            if (candidate == null) return null;
+
+            var placed = candidate.GetComponentInParent<PlacedBuilding>();
+            if (placed == null) return null;
+
+            var go = placed.gameObject;
+            if (go.GetComponentInChildren<FarmTile>(true) != null) return null;        // ruộng: đã có "Hủy ô trồng"
+            if (go.GetComponentInChildren<FenceAutoConnect>(true) != null) return null; // chuồng: đã có "Hủy chuồng"
+            return go;
+        }
+
+        private bool IsPlacedBuildingInRange(GameObject building, bool directTap)
+        {
+            if (building == null) return false;
+            float range = directTap
+                ? GetDirectTapRange(tileInteractRange, DefaultTileInteractRange)
+                : GetTileInteractRange();
+            return HorizontalDistanceToClosestColliderPoint(building, building.transform.position) <= range;
+        }
+
+        private void AddPathDemolishAction(GameObject building, List<InteractionAction> actions)
+        {
+            if (building == null || actions == null) return;
+
+            var target = building;
+            actions.Add(new InteractionAction
+            {
+                keyName = "G",
+                actionName = "Hủy đường",
+                onClick = () => { if (IsPlacedBuildingInRange(target, useDirectTapInteraction)) RequestDemolishPathBuilding(target); }
+            });
         }
 
         private bool IsPenSpawnerInRange(AnimalPenSpawner pen)
@@ -1276,6 +1349,7 @@ namespace YWonderLand.Environment
                 {
                     pendingDemolishEnclosure = null;
                     pendingDemolishTile = null;
+                    pendingDemolishPath = null;
                     demolishConfirmTimer = 0f;
                 }
             }
@@ -1367,6 +1441,7 @@ namespace YWonderLand.Environment
             currentPromptFromFootFishing = false;
             pendingDemolishEnclosure = null;
             pendingDemolishTile = null;
+            pendingDemolishPath = null;
             demolishConfirmTimer = 0f;
 
             if (GameHUDController.Instance != null)
@@ -1456,7 +1531,8 @@ namespace YWonderLand.Environment
             GameObject foundObj = null;
 
             if (!TryBuildFrontCellEnclosurePrompt(cell, foundActions, out foundObj) &&
-                !TryBuildFrontCellTilePrompt(cell, foundActions, out foundObj))
+                !TryBuildFrontCellTilePrompt(cell, foundActions, out foundObj) &&
+                !TryBuildFrontCellPathPrompt(cell, foundActions, out foundObj))
             {
                 ClearFrontCellInteractionPrompt();
                 return;
@@ -1519,6 +1595,23 @@ namespace YWonderLand.Environment
 
             foundObj = tile.gameObject;
             AddTileAction(tile, actions);
+            return actions != null && actions.Count > 0;
+        }
+
+        // Ghost đè lên ô chứa ĐƯỜNG ĐÁ (occupant không phải ruộng/chuồng) → hiện nút "Hủy đường".
+        // Nhờ vậy đường đá có UI khi ghost chạm vào, đồng nhất với ruộng/chuồng (không cần click chuột).
+        private bool TryBuildFrontCellPathPrompt(BuildSurfaceCell cell, List<InteractionAction> actions, out GameObject foundObj)
+        {
+            foundObj = null;
+            if (cell == null || cell.Occupant == null)
+                return false;
+
+            GameObject path = ResolveDemolishablePath(cell.Occupant);
+            if (path == null || !IsPlacedBuildingInRange(path, true))
+                return false;
+
+            foundObj = path;
+            AddPathDemolishAction(path, actions);
             return actions != null && actions.Count > 0;
         }
 
@@ -2134,6 +2227,16 @@ namespace YWonderLand.Environment
                     AddTileAction(tile, foundActions);
                     break;
                 }
+                else if (ResolveDemolishablePath(hit.collider.gameObject) is GameObject pathBuilding && pathBuilding != null)
+                {
+                    // Đường đá (hoặc trang trí khác) — ngắm trúng collider của chính công trình.
+                    if (!IsPlacedBuildingInRange(pathBuilding, directTap))
+                        continue;
+
+                    foundObj = pathBuilding;
+                    AddPathDemolishAction(pathBuilding, foundActions);
+                    break;
+                }
                 else if (hit.collider.TryGetComponent<FishingSpot>(out var spot) || (hit.collider.transform.parent != null && hit.collider.transform.parent.TryGetComponent<FishingSpot>(out spot)))
                 {
                     Vector3 fishingHitPoint = hit.point;
@@ -2175,7 +2278,18 @@ namespace YWonderLand.Environment
                         }
                         break;
                     }
-                    if (!penCell.IsFree) continue; // ô bị chiếm bởi công trình khác -> xuyên qua
+                    if (!penCell.IsFree)
+                    {
+                        // Ô bị chiếm bởi đường đá (collider mỏng/không có nên tia trúng ô bên dưới) -> cho "Hủy đường".
+                        var occPath = ResolveDemolishablePath(penCell.Occupant);
+                        if (occPath != null && IsPlacedBuildingInRange(occPath, directTap))
+                        {
+                            foundObj = occPath;
+                            AddPathDemolishAction(occPath, foundActions);
+                            break;
+                        }
+                        continue; // công trình khác -> xuyên qua
+                    }
                     break; // ô đất trống thường (không phải chuồng) -> bỏ
                 }
                 else if (hit.collider.GetComponentInParent<FenceAutoConnect>() != null)
@@ -2195,6 +2309,11 @@ namespace YWonderLand.Environment
             {
                 foundObj = aimTile.gameObject;
                 AddTileAction(aimTile, foundActions);
+            }
+            else if (foundActions.Count == 0 && TryResolvePathFromAim(ray, out var aimPath, directTap))
+            {
+                foundObj = aimPath;
+                AddPathDemolishAction(aimPath, foundActions);
             }
 
             // Update UI if target or state changed
@@ -3269,6 +3388,81 @@ namespace YWonderLand.Environment
 
             ScreenToast.ShowInfo(hadCrop ? "\u0110\u00e3 h\u1ee7y \u00f4 tr\u1ed3ng v\u00e0 c\u00e2y tr\u00ean \u00f4." : "\u0110\u00e3 h\u1ee7y \u00f4 tr\u1ed3ng.");
             Debug.Log($"[FarmInteraction] Huy o trong: {buildingName}, hadCrop={hadCrop}.");
+        }
+
+        // Hủy đường đá (hoặc trang trí khác đặt qua Build Mode): nhấn 2 lần trong DemolishConfirmWindow để xác nhận,
+        // rồi hoàn ĐÚNG vật liệu đã tốn và trả ô về trống — đồng nhất với hủy ruộng/chuồng.
+        private void RequestDemolishPathBuilding(GameObject building)
+        {
+            if (building == null) return;
+
+            if (pendingDemolishPath == building)
+            {
+                pendingDemolishPath = null;
+                pendingDemolishTile = null;
+                pendingDemolishEnclosure = null;
+                demolishConfirmTimer = 0f;
+                DemolishPathBuilding(building);
+                return;
+            }
+
+            pendingDemolishTile = null;
+            pendingDemolishEnclosure = null;
+            pendingDemolishPath = building;
+            demolishConfirmTimer = DemolishConfirmWindow;
+            ScreenToast.Show("Nhấn hủy đường lần nữa để xác nhận.");
+        }
+
+        private void DemolishPathBuilding(GameObject building)
+        {
+            if (building == null) return;
+            if (!IsPlacedBuildingInRange(building, useDirectTapInteraction))
+            {
+                ScreenToast.Show("Đứng gần đường hơn để hủy.");
+                return;
+            }
+
+            string buildingName = building.name;
+
+            pendingDemolishTile = null;
+            pendingDemolishEnclosure = null;
+            pendingDemolishPath = null;
+            demolishConfirmTimer = 0f;
+
+            // Hoàn vật liệu đã tốn — đọc từ ô TRƯỚC khi ClearOccupant xóa dữ liệu vật liệu. Đồng nhất với hủy chuồng.
+            BuildSurfaceCell.SumRefund(building, out int refundWood, out int refundStone);
+            BuildSurfaceCell.ClearOccupant(building);
+            Destroy(building);
+
+            var inv = YWonderLand.Managers.InventoryManager.Instance;
+            if (inv != null)
+            {
+                if (refundWood > 0) inv.AddItem("wood_01", refundWood, "build_refund");
+                if (refundStone > 0) inv.AddItem("stone_01", refundStone, "build_refund");
+            }
+
+            hoverEnclosureSeed = null;
+            hoverEnclosure = null;
+            pendingEnclosure = null;
+            currentHoverObject = null;
+            currentActions.Clear();
+            lastActionSignature = "";
+            currentPromptFromFrontCell = false;
+            currentPromptFromFootWater = false;
+            currentPromptFromFootResource = false;
+            currentPromptFromFootFishing = false;
+            GameHUDController.Instance?.HideInteractionPrompt();
+            if (YWonderLand.UI.ResourceInteractionUIController.Instance != null)
+                YWonderLand.UI.ResourceInteractionUIController.Instance.Hide();
+
+            var persistence = Object.FindFirstObjectByType<BuildPersistence>(FindObjectsInactive.Include);
+            persistence?.SaveBuildings();
+
+            string msg = "Đã hủy đường đá";
+            if (refundStone > 0) msg += $", +{refundStone} Đá";
+            if (refundWood > 0) msg += $", +{refundWood} Gỗ";
+            ScreenToast.ShowInfo(msg);
+            Debug.Log($"[FarmInteraction] Huy duong da: {buildingName}, refund wood={refundWood}, stone={refundStone}.");
         }
 
         private bool IsSameEnclosure(List<BuildSurfaceCell> a, List<BuildSurfaceCell> b)
