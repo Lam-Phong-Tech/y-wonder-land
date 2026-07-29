@@ -54,7 +54,8 @@ create table if not exists player_profiles (
 create table if not exists player_economy (
     player_id text primary key references game_players(id) on delete cascade,
     version integer not null default 1,
-    pos bigint not null default 5000 check (pos >= 0),
+    -- Khách chốt 22/07/2026: tài khoản mới bắt đầu 0 Point. Trước là 5000 (placeholder prototype).
+    pos bigint not null default 0 check (pos >= 0),
     web_point_micros_remainder bigint not null default 0
         check (web_point_micros_remainder >= 0 and web_point_micros_remainder < 1000000),
     updated_at timestamptz not null default now()
