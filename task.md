@@ -48,6 +48,23 @@
 
 ### Thứ tự ưu tiên ngay khi mở session kế tiếp
 
+> ⚠️ **Cập nhật 29/07 — thứ tự bên dưới ĐÃ ĐỔI.** Dòng "Ưu tiên mới nhất của anh: tiếp tục ví Point trước"
+> là của 19/07 và **đã bị supersede**: từ 22/07 tới nay dự án làm gameplay/client, ví Point đứng yên ở trạng
+> thái dormant. Thứ tự hiện hành:
+>
+> 1. `[ ]` **Deploy server câu cá + giá vé/mồi + economy mặc định 0 Point** — code đã push từ 24/07, runbook
+>    `server/RUNBOOK_deploy_fishing.md`. Chủ dự án tự chạy trên VPS; AI không deploy. Gate đạt:
+>    `/player/fishing/catch` không còn `404`, health `200`, account demo câu được cá. **Chưa deploy thì đừng
+>    ship client đăng-nhập.**
+> 2. `[~]` **Build EXE/APK mới rồi nghiệm thu**: punch-list khách T1–T7 (ma trận ở cuối mục 29/07 trong
+>    `CHANGELOG.md`), P0 thả thú `7 → 6`, hotfix hủy cho ăn / cây-thú chết ngay ở `0%`, chặt cây không cộng
+>    gỗ hai lần.
+> 3. `[ ]` Rủi ro dời chuồng: `PUT /player/farm-state` chỉ chép nguyên `build_state_json`; nếu upload
+>    fail/`409` thì server giữ chuồng ở chỗ cũ. Chỉ gia cố (cho `Confirm()` chờ flush) nếu bước 2 tái hiện.
+> 4. `[~]` Ví Point (canary tiền thật, migration số dư cũ, hoa hồng/VIP, source-lot PostgreSQL): giữ nguyên
+>    mọi ràng buộc bên dưới, **chỉ làm khi có phê duyệt riêng**. Các mục 0–7 tiếp theo vẫn còn hiệu lực về
+>    nội dung, chỉ khác về thứ tự ưu tiên.
+>
 > **Cập nhật 20/07 - source-lot PostgreSQL `[~]`:** `server/postgresSmokeTest.js` đã được mở rộng để áp migration `007` trong schema tạm và kiểm race idempotency, conflict, FIFO, `UNATTRIBUTED`, restart persistence và không tự đổi Point authoritative. `node --check` cùng JSON source-ledger pass. Máy local không có Docker/PostgreSQL/WSL distro nên chưa thể chạy `npm.cmd run test:postgres --prefix server`; cần PostgreSQL disposable + DSN riêng, tuyệt đối không dùng DSN production hoặc deploy để thay thế gate này.
 
 > Ưu tiên mới nhất của anh: tiếp tục ví Point trước. Các lỗi gameplay bên dưới vẫn giữ nguyên backlog nhưng tạm đứng sau các cổng ví.
