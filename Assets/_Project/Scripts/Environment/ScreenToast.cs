@@ -111,7 +111,14 @@ namespace YWonderLand.Environment
         {
             if (string.IsNullOrEmpty(_message) || Time.unscaledTime > _hideAt) return;
 
-            const float w = 540f, h = 56f;
+            // Hộp CAO THEO CHỮ: câu công dụng vật phẩm dài 2-3 dòng, hộp cứng 56px sẽ cắt mất chữ.
+            const float maxW = 540f, minH = 56f, padX = 18f, padY = 12f;
+            float w = Mathf.Min(maxW, Screen.width - 40f);
+
+            var style = LabelStyle();
+            var content = new GUIContent(_message);
+            float h = Mathf.Max(minH, style.CalcHeight(content, w - padX * 2f) + padY * 2f);
+
             float x = (Screen.width - w) * 0.5f;
             float y = Screen.height * 0.26f;
 
@@ -120,16 +127,28 @@ namespace YWonderLand.Environment
             GUI.Box(new Rect(x, y, w, h), GUIContent.none);
             GUI.color = prev;
 
-            var style = new GUIStyle(GUI.skin.label)
-            {
-                fontSize = 20,
-                fontStyle = FontStyle.Bold,
-                alignment = TextAnchor.MiddleCenter
-            };
-            style.normal.textColor = Color.white;
-            GUI.Label(new Rect(x, y, w, h), _message, style);
+            GUI.Label(new Rect(x + padX, y + padY, w - padX * 2f, h - padY * 2f), content, style);
 
             DrawFloatingIcon(x + (w * 0.5f), y);
+        }
+
+        private GUIStyle _labelStyle;
+
+        private GUIStyle LabelStyle()
+        {
+            // OnGUI chạy nhiều lần mỗi khung hình -> giữ lại style thay vì tạo mới liên tục.
+            if (_labelStyle == null)
+            {
+                _labelStyle = new GUIStyle(GUI.skin.label)
+                {
+                    fontSize = 20,
+                    fontStyle = FontStyle.Bold,
+                    alignment = TextAnchor.MiddleCenter,
+                    wordWrap = true
+                };
+                _labelStyle.normal.textColor = Color.white;
+            }
+            return _labelStyle;
         }
 
         private void DrawFloatingIcon(float centerX, float toastY)

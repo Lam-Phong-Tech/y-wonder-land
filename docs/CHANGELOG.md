@@ -49,8 +49,16 @@ Khách đổi giá/sản lượng là câu chữ **tự đổi theo**, không c�
 "Bắp ngô", "Cỏ Voi" / "Cỏ voi"), không phải id, viết hoa không nhất quán → phải chuẩn hoá
 (`Trim().ToLowerInvariant()`) trước khi so. Món ghi kèm nhưng số lượng 0 (vd "Cám") bị bỏ qua.
 
+### Toast bị cắt mất chữ (sửa cùng đợt)
+Chủ dự án test thấy toast dài lẹm mất dòng cuối. `ScreenToast.OnGUI` vẽ hộp **cứng 540×56**:
+chữ tự xuống dòng nhưng hộp không cao theo, dòng thứ 3 tràn ra ngoài. Từ trước tới nay toast
+chỉ là câu ngắn ("Chuồng không đủ chỗ") nên chưa lộ; câu công dụng dài 2-3 dòng thì lộ ngay.
+➜ Hộp **cao theo chữ** (`style.CalcHeight`), bề ngang co lại theo màn hẹp (`Screen.width - 40`),
+thêm padding 18×12, `wordWrap` khai báo rõ. Tiện thể giữ lại `GUIStyle` thay vì tạo mới mỗi lần
+`OnGUI` chạy (nhiều lần / khung hình).
+
 **Files:** `Scripts/Data/ItemUsageHint.cs` (mới), `UI/InventoryPopupController.cs`,
-`Scripts/Environment/FarmInteractionController.cs`
+`Scripts/Environment/FarmInteractionController.cs`, `Scripts/Environment/ScreenToast.cs`
 
 **Chưa nghiệm thu runtime** — cần mở túi, bấm "Sử dụng" ở cả 7 tab để đối chiếu câu chữ.
 
