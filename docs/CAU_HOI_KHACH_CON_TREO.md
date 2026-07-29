@@ -46,6 +46,22 @@ từng tầng, ghi nhận theo **upline–downline trực tiếp**, tối đa 6 
 
 ---
 
+## 3b. GIÁ MUA thức ăn chăn nuôi & vật liệu (mới 29/07) — **chờ khách chốt bội số**
+
+Chủ dự án muốn người chơi **mua thẳng thức ăn ở shop** thay vì bắt buộc phải trồng; gỗ/đá cũng nên
+mua được (hết gỗ giữa Build Mode hiện là kẹt cứng).
+
+Bên em đã rà: **cả 8 nông sản ngắn ngày lẫn gỗ/đá/gạch đều `buyPrice = 0`, không shop nào bán.**
+Bảng giá đề xuất đầy đủ + 3 câu hỏi phụ nằm ở **`docs/DEXUAT_GIA_MUA_THUCAN_VATLIEU.md`**.
+
+Chỉ cần khách chốt **một con số**: giá mua = **×2** hay **×3** giá vốn khi tự trồng?
+(Bắt buộc > 1, không thì trồng trọt mất ý nghĩa.) Vị trí bán chủ dự án đã chốt rồi.
+
+⚠️ Kèm 1 phát hiện: **"Cám"** ghi trong thức ăn phụ của Gà/Hươu/Vịt/Đà điểu **không tồn tại** trong
+dữ liệu vật phẩm (số lượng = 0, không có item nào tên Cám) → bỏ hẳn chữ đó, hay tạo item Cám thật?
+
+---
+
 ## 4. ĐIỂM CẦN ĐỂ Ý (không phải câu hỏi, nhưng dễ làm sai)
 
 - **Tỷ giá:** khách dùng nhất quán **1 USDT = 26,5 Point** (100 USDT = 2.650; 10 USDT = 265),
