@@ -3772,9 +3772,17 @@ namespace YWonderLand.Environment
 
         private void OnInventoryItemSelected(string itemId)
         {
+            // MarkHandled() = "bấm nút đã ra việc". Nhánh nào không gọi thì túi đồ tự bắn toast
+            // giải thích công dụng (ItemUsageHint) thay vì im lặng như trước.
+            void MarkHandled()
+            {
+                if (inventoryPopup != null) inventoryPopup.LastItemUseHandled = true;
+            }
+
             // Ưu tiên: đang chờ chọn thức ăn để cho động vật ăn.
             if (pendingFeedAnimal != null)
             {
+                MarkHandled();
                 HandleFeedSelected(itemId);
                 return;
             }
@@ -3782,6 +3790,7 @@ namespace YWonderLand.Environment
             // Ưu tiên: đang chờ thả thú vào VÙNG QUÂY (chuồng từ hàng rào).
             if (pendingEnclosure != null)
             {
+                MarkHandled();
                 _ = HandleEnclosureAnimalSelectedAsync(itemId);
                 return;
             }
@@ -3789,22 +3798,28 @@ namespace YWonderLand.Environment
             // Ưu tiên: đang chờ chọn con vật cho 1 chuồng (kiểu cũ) -> xử lý thả thú.
             if (pendingPen != null)
             {
+                MarkHandled();
                 HandlePenAnimalSelected(itemId);
                 return;
             }
 
             // Bấm "Sử dụng" VÉ trong túi (khi KHÔNG ở chế độ chờ chọn cho ăn/thả/gieo).
-            if (itemId == "mine_ticket_01") { UseMineTicket(); return; }
-            if (itemId == "spin_ticket_01") { UseSpinTicket(); return; }
-            if (itemId == "bait_01")
+            if (itemId == "mine_ticket_01") { MarkHandled(); UseMineTicket(); return; }
+            if (itemId == "spin_ticket_01") { MarkHandled(); UseSpinTicket(); return; }
+
+            // Đang chờ chọn hạt để gieo: nhắc rõ khi người chơi bấm nhầm món không phải hạt,
+            // thay vì bỏ qua lặng lẽ khiến họ tưởng nút hỏng.
+            if (pendingPlantTile != null && !itemId.Contains("seed"))
             {
-                ScreenToast.Show("Mồi câu sẽ TỰ trừ khi câu cá (sau khi hết 10 lượt free trong ngày).");
+                MarkHandled();
+                ScreenToast.Show("Đang chọn hạt để gieo — hãy chọn một HẠT GIỐNG trong tab Hạt giống.");
                 return;
             }
 
-            // Only handle seed selection when we have a pending tile
+            // Ngoài các trường hợp trên: KHÔNG MarkHandled -> túi đồ giải thích công dụng.
             if (pendingPlantTile == null) return;
-            if (!itemId.Contains("seed")) return; // Only accept seed items
+
+            MarkHandled();
 
             if (!TryValidatePlanting(pendingPlantTile, itemId, out string plantingError))
             {

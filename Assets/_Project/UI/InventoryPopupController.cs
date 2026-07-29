@@ -13,6 +13,16 @@ public class InventoryPopupController : MonoBehaviour
     /// Parameter is the item name (e.g. "H\u1ea1t c\u00e0 r\u1ed1t").
     /// </summary>
     public event System.Action<string> OnItemUsed;
+
+    /// <summary>
+    /// Handler nào THỰC SỰ làm gì đó với vật phẩm (gieo hạt, cho ăn, thả thú, dùng vé) phải đặt
+    /// cờ này = true. Hết lượt phát mà cờ vẫn false nghĩa là bấm không ra việc gì -> túi tự bắn
+    /// toast giải thích công dụng thay vì im lặng như trước.
+    /// Đặt ở đây (không phải trong FarmInteractionController) để màn nào không có controller đó
+    /// — ví dụ Thành phố — vẫn có lời giải thích.
+    /// </summary>
+    public bool LastItemUseHandled { get; set; }
+
     [Header("References")]
     [SerializeField] private UIDocument inventoryDocument;
 
@@ -124,7 +134,12 @@ public class InventoryPopupController : MonoBehaviour
         lblDetailQty = root.Q<Label>("LblDetailQty");
         lblDetailDesc = root.Q<Label>("LblDetailDesc");
         btnDetailAction = root.Q<Button>("BtnDetailAction");
+
+        // "Vứt bỏ" ẨN HẲN ở mọi tab (yêu cầu chủ dự án 29/07). Nút này trước giờ chỉ ghi log,
+        // KHÔNG hề xoá đồ -> người chơi bấm tưởng vứt rồi mà đồ vẫn còn. Túi lại tự nới slot khi
+        // đầy nên chẳng bao giờ cần vứt; đồ thừa thì đem BÁN ở shop thu mua.
         btnDetailDiscard = root.Q<Button>("BtnDetailDiscard");
+        if (btnDetailDiscard != null) btnDetailDiscard.style.display = DisplayStyle.None;
 
         // Register callbacks
         RegisterCallbacks();
@@ -177,19 +192,20 @@ public class InventoryPopupController : MonoBehaviour
         // Detail Action clicks
         btnDetailAction?.RegisterCallback<ClickEvent>(evt =>
         {
-            if (selectedItem.HasValue)
-            {
-                Debug.Log($"[Inventory] Executed action '{selectedItem.Value.actionText}' on item: {selectedItem.Value.name} ({selectedItem.Value.id})");
-                OnItemUsed?.Invoke(selectedItem.Value.id); // Send ID instead of name
-            }
-        });
+            if (!selectedItem.HasValue) return;
 
-        btnDetailDiscard?.RegisterCallback<ClickEvent>(evt =>
-        {
-            if (selectedItem.HasValue)
+            string id = selectedItem.Value.id;
+            LastItemUseHandled = false;
+            OnItemUsed?.Invoke(id); // Send ID instead of name
+
+            if (LastItemUseHandled)
             {
-                Debug.Log($"[Inventory] Discarded item: {selectedItem.Value.name}");
+                Debug.Log($"[Inventory] Executed action '{selectedItem.Value.actionText}' on item: {selectedItem.Value.name} ({id})");
+                return;
             }
+
+            // Không có việc thật để làm với món này lúc này -> giải thích công dụng thay vì im lặng.
+            YWonderLand.Environment.ScreenToast.Show(YWonderLand.Data.ItemUsageHint.Build(id), 4f);
         });
     }
 

@@ -6,6 +6,56 @@
 
 ---
 
+## [2026-07-29] — Túi đồ: bỏ nút "Vứt bỏ", nút "Sử dụng" biết giải thích công dụng
+
+Yêu cầu chủ dự án: bỏ hẳn "Vứt bỏ" ở mọi tab; "Sử dụng" mà không có việc gì để làm thì
+hiện toast nói món đó dùng vào việc gì.
+
+### Bỏ "Vứt bỏ" (mọi tab)
+Nút này **chưa bao giờ hoạt động** — handler chỉ `Debug.Log`, không hề gọi `RemoveItem`, nên
+người chơi bấm tưởng vứt rồi mà đồ vẫn còn. Không làm nó chạy thật vì: đây là game kinh tế
+(Mai rùa 11.893 Point, Nhung hươu 12.368) nên lỡ tay là mất trắng; túi lại **tự nới slot** khi
+đầy (`InventoryManager`) nên chẳng bao giờ có nhu cầu vứt; đồ thừa đã có shop thu mua.
+➜ `btnDetailDiscard.style.display = None`, xoá luôn handler chết.
+
+### "Sử dụng" — có việc thì làm việc, không thì giải thích
+Nút này là **cơ chế duy nhất** để gieo hạt / cho thú ăn / thả thú / dùng vé, nên KHÔNG thay
+bằng toast được. Cách làm: `InventoryPopupController.LastItemUseHandled` — handler nào thật sự
+làm việc thì bật cờ; hết lượt phát mà cờ vẫn `false` thì túi bắn toast công dụng.
+Cờ đặt ở phía túi (không phải `FarmInteractionController`) để **màn Thành phố** — nơi không có
+controller đó — vẫn có lời giải thích.
+
+Kèm theo: đang chờ gieo mà bấm nhầm món không phải hạt thì nay **nhắc rõ**, trước đây bỏ qua
+lặng lẽ nên người chơi tưởng nút hỏng.
+
+### `ItemUsageHint` — câu chữ SINH TỪ DỮ LIỆU, không gõ tay
+Mô tả sẵn trong `ItemDefinition` là chữ tả cảnh ("Rìu gỗ đốn củi.", "Buồng chuối chín.") và
+**đã hiện ngay trên nút** trong panel chi tiết → toast lấy lại chuỗi đó thì vô nghĩa. Nên sinh
+câu mới từ dữ liệu, kèm số thật:
+
+| Nhóm | Câu sinh ra | Nguồn |
+|---|---|---|
+| Hạt giống | "trồng ở ruộng, sau 1 ngày thu Cà rốt x1" | `CropDatabase` |
+| Nông sản ngắn ngày | "thức ăn chăn nuôi — cho Heo (2), Bò (4) ăn" | tra ngược `AnimalDefinition` |
+| Cá / sản phẩm / đá quý | "bán ở Siêu thị Cá được 25 Point mỗi cái" | `sellPrice` |
+| Gỗ · Đá · Gạch | "vật liệu xây dựng — mở Chế độ Xây…" | tĩnh theo id |
+| Dụng cụ | "dùng để chặt cây lấy gỗ. Tự động dùng khi bấm nút tương tác" | tĩnh theo id |
+| Con giống | "dựng chuồng (9 ô đất), rồi bấm chuồng để thả vào nuôi. Ăn 2x Khoai lang hoặc 2x Bí ngô" | `AnimalDefinition` |
+| Còn lại | dùng `description` sẵn có (mồi câu, phân bón… vốn đã rõ) | `ItemDefinition` |
+
+Khách đổi giá/sản lượng là câu chữ **tự đổi theo**, không có bảng chữ chết phải bảo trì.
+
+⚠️ Bẫy khi tra ngược thức ăn: `AnimalDefinition.foodMainName` là **chữ hiển thị** ("Bắp Ngô" /
+"Bắp ngô", "Cỏ Voi" / "Cỏ voi"), không phải id, viết hoa không nhất quán → phải chuẩn hoá
+(`Trim().ToLowerInvariant()`) trước khi so. Món ghi kèm nhưng số lượng 0 (vd "Cám") bị bỏ qua.
+
+**Files:** `Scripts/Data/ItemUsageHint.cs` (mới), `UI/InventoryPopupController.cs`,
+`Scripts/Environment/FarmInteractionController.cs`
+
+**Chưa nghiệm thu runtime** — cần mở túi, bấm "Sử dụng" ở cả 7 tab để đối chiếu câu chữ.
+
+---
+
 ## [2026-07-23] — Sửa tutorial chết ở luồng RESUME · thay dữ liệu GIẢ trong UI bằng số thật
 
 ### Tutorial không chạy lại sau khi thoát giữa chừng (tài khoản mới)
