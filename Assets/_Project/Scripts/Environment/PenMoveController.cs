@@ -39,6 +39,21 @@ namespace YWonderLand.Environment
         private static float cellSize = 0.8f;
         private static Vector3 appliedDelta;
 
+        // Chuồng ĐI THEO NGƯỜI CHƠI: giữ nguyên khoảng cách lúc bắt đầu dời, snap theo ô.
+        // Nhờ vậy người chơi đứng ngoài chuồng thì luôn ở ngoài, chuồng không trùm lên nhân vật.
+        private static Transform playerTransform;
+        private static Vector3 playerStartPos;
+
+        // Tắt va chạm khi rê (rào dịch vào người sẽ đẩy/nhấc nhân vật lên nóc) — bật lại khi xong.
+        private static readonly List<Collider> disabledColliders = new List<Collider>();
+
+        // Ghost màu: xanh = đặt được, đỏ = không. Dùng MaterialPropertyBlock nên không tạo material rác.
+        private static readonly List<Renderer> tintedRenderers = new List<Renderer>();
+        private static MaterialPropertyBlock tintBlock;
+        private static int tintState = -1; // -1 = chưa tô, 0 = đỏ, 1 = xanh
+        private static readonly Color ValidColor = new Color(0.35f, 1f, 0.45f);
+        private static readonly Color InvalidColor = new Color(1f, 0.35f, 0.35f);
+
         public static bool IsActive { get; private set; }
 
         /// <summary>Số ô rào đang dời (để hiện thông báo).</summary>
@@ -89,37 +104,109 @@ namespace YWonderLand.Environment
                 }
             }
 
+            // Mốc người chơi để chuồng đi theo đúng khoảng cách ban đầu.
+            playerTransform = global::PlayerController.Instance != null
+                ? global::PlayerController.Instance.transform
+                : null;
+            playerStartPos = playerTransform != null ? playerTransform.position : Vector3.zero;
+
+            CaptureVisuals();
+
             appliedDelta = Vector3.zero;
             IsActive = true;
             return true;
         }
 
-        /// <summary>Rê cả cụm chuồng theo ô trước mặt nhân vật (chỉ đổi vị trí hiển thị).</summary>
-        public static void UpdatePreview(BuildSurfaceCell frontCell)
+        // Gom collider (tắt để không đẩy nhân vật) + renderer (để tô xanh/đỏ) của rào và thú đang dời.
+        private static void CaptureVisuals()
         {
-            if (!IsActive) return;
+            disabledColliders.Clear();
+            tintedRenderers.Clear();
+            tintState = -1;
 
-            Vector3 delta = DeltaFor(frontCell);
-            if ((delta - appliedDelta).sqrMagnitude < 0.0001f) return;
-
-            appliedDelta = delta;
             foreach (var e in entries)
             {
-                if (e.fence != null) e.fence.transform.position = e.fenceStartPos + delta;
-                if (e.animalObject != null) e.animalObject.transform.position = e.animalStartPos + delta;
+                if (e.fence != null)
+                {
+                    foreach (var col in e.fence.GetComponentsInChildren<Collider>(true))
+                        if (col != null && col.enabled) { col.enabled = false; disabledColliders.Add(col); }
+
+                    foreach (var rend in e.fence.GetComponentsInChildren<Renderer>(true))
+                        if (rend != null) tintedRenderers.Add(rend);
+                }
+
+                if (e.animalObject != null)
+                {
+                    foreach (var col in e.animalObject.GetComponentsInChildren<Collider>(true))
+                        if (col != null && col.enabled) { col.enabled = false; disabledColliders.Add(col); }
+                }
             }
         }
 
-        /// <summary>Chỗ mới có đủ ô đất và còn trống cho cả chuồng không.</summary>
-        public static bool CanPlaceAt(BuildSurfaceCell frontCell)
+        // Trả lại va chạm + màu gốc.
+        private static void RestoreVisuals()
         {
-            if (!IsActive || frontCell == null) return false;
+            foreach (var col in disabledColliders)
+                if (col != null) col.enabled = true;
+            disabledColliders.Clear();
 
-            Vector3 delta = DeltaFor(frontCell);
+            if (tintState >= 0)
+            {
+                foreach (var rend in tintedRenderers)
+                    if (rend != null) rend.SetPropertyBlock(null);
+            }
+            tintedRenderers.Clear();
+            tintState = -1;
+        }
+
+        private static void ApplyTint(bool valid)
+        {
+            int wanted = valid ? 1 : 0;
+            if (tintState == wanted) return;
+            tintState = wanted;
+
+            tintBlock ??= new MaterialPropertyBlock();
+            Color color = valid ? ValidColor : InvalidColor;
+
+            foreach (var rend in tintedRenderers)
+            {
+                if (rend == null) continue;
+                rend.GetPropertyBlock(tintBlock);
+                tintBlock.SetColor("_BaseColor", color);
+                tintBlock.SetColor("_Color", color);
+                rend.SetPropertyBlock(tintBlock);
+            }
+        }
+
+        /// <summary>Rê cả cụm chuồng theo bước chân người chơi (snap theo ô) + tô xanh/đỏ báo hợp lệ.
+        /// Gọi mỗi frame khi đang ở chế độ dời.</summary>
+        public static void UpdatePreview()
+        {
+            if (!IsActive) return;
+
+            Vector3 delta = CurrentDelta();
+            if ((delta - appliedDelta).sqrMagnitude > 0.0001f)
+            {
+                appliedDelta = delta;
+                foreach (var e in entries)
+                {
+                    if (e.fence != null) e.fence.transform.position = e.fenceStartPos + delta;
+                    if (e.animalObject != null) e.animalObject.transform.position = e.animalStartPos + delta;
+                }
+            }
+
+            ApplyTint(CanPlace());
+        }
+
+        /// <summary>Chỗ ĐANG XEM TRƯỚC có đủ ô đất trống cho cả chuồng không.</summary>
+        public static bool CanPlace()
+        {
+            if (!IsActive) return false;
+
             foreach (var e in entries)
             {
                 if (e.cell == null) return false;
-                if (!TryGetTargetCell(e.cell, delta, out var target)) return false;
+                if (!TryGetTargetCell(e.cell, appliedDelta, out var target)) return false;
 
                 // Trùng lên chính chuồng đang dời thì được; đè lên vật khác/thú khác thì không.
                 if (capturedCells.Contains(target)) continue;
@@ -128,13 +215,12 @@ namespace YWonderLand.Environment
             return true;
         }
 
-        /// <summary>Chốt vị trí mới: chuyển dữ liệu ô (rào, vật liệu, thú) sang các ô đích.</summary>
-        public static bool Confirm(BuildSurfaceCell frontCell)
+        /// <summary>Chốt ĐÚNG vị trí đang xem trước (không nhận ô ngoài vào, tránh đặt nhầm về chỗ cũ).</summary>
+        public static bool Confirm()
         {
-            if (!IsActive || !CanPlaceAt(frontCell)) return false;
+            if (!IsActive || !CanPlace()) return false;
 
-            Vector3 delta = DeltaFor(frontCell);
-            UpdatePreview(frontCell); // đảm bảo vật thể đã nằm đúng chỗ mới
+            Vector3 delta = appliedDelta;
 
             // Map ô cũ -> ô mới, dùng để cập nhật lại occupiedCells của thú.
             var remap = new Dictionary<BuildSurfaceCell, BuildSurfaceCell>();
@@ -186,6 +272,7 @@ namespace YWonderLand.Environment
                 auto.gameObject.SetActive(true);
             }
 
+            RestoreVisuals();
             Reset();
 
             var persistence = Object.FindFirstObjectByType<BuildPersistence>(FindObjectsInactive.Include);
@@ -203,6 +290,7 @@ namespace YWonderLand.Environment
                 if (e.fence != null) e.fence.transform.position = e.fenceStartPos;
                 if (e.animalObject != null) e.animalObject.transform.position = e.animalStartPos;
             }
+            RestoreVisuals();
             Reset();
         }
 
@@ -212,14 +300,27 @@ namespace YWonderLand.Environment
             capturedCells.Clear();
             grid.Clear();
             anchorCell = null;
+            playerTransform = null;
             appliedDelta = Vector3.zero;
             IsActive = false;
         }
 
-        private static Vector3 DeltaFor(BuildSurfaceCell frontCell)
+        /// <summary>Độ dời hiện tại = quãng người chơi đã đi kể từ lúc bấm "Dời chuồng", làm tròn về ô.
+        /// Cao độ lấy theo ô đích để chuồng nằm đúng mặt đất chỗ mới.</summary>
+        private static Vector3 CurrentDelta()
         {
-            if (frontCell == null || anchorCell == null) return appliedDelta;
-            return frontCell.transform.position - anchorCell.transform.position;
+            if (playerTransform == null || anchorCell == null) return appliedDelta;
+
+            Vector3 walked = playerTransform.position - playerStartPos;
+            Vector3 delta = new Vector3(
+                Mathf.RoundToInt(walked.x / cellSize) * cellSize,
+                0f,
+                Mathf.RoundToInt(walked.z / cellSize) * cellSize);
+
+            if (TryGetTargetCell(anchorCell, delta, out var targetAnchor))
+                delta.y = targetAnchor.transform.position.y - anchorCell.transform.position.y;
+
+            return delta;
         }
 
         private static bool TryGetTargetCell(BuildSurfaceCell source, Vector3 delta, out BuildSurfaceCell target)

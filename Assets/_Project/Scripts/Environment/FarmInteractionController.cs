@@ -1589,23 +1589,21 @@ namespace YWonderLand.Environment
         /// <summary>Gợi ý khi đang DỜI CHUỒNG: rê cụm chuồng theo ô trước mặt, hiện nút Đặt / Hủy dời.</summary>
         private void RefreshPenMovePrompt()
         {
-            var selector = FrontBuildCellSelector.Instance;
-            var cell = selector != null ? selector.CurrentCell : null;
-
-            PenMoveController.UpdatePreview(cell);
-            bool canPlace = PenMoveController.CanPlaceAt(cell);
+            // Chuồng bám theo bước chân người chơi; nút Đặt luôn chốt ĐÚNG vị trí đang xem trước
+            // (không giữ ô cũ trong closure — trước đây HUD không dựng lại nên đặt nhầm về chỗ ban đầu).
+            PenMoveController.UpdatePreview();
+            bool canPlace = PenMoveController.CanPlace();
 
             var actions = new List<InteractionAction>();
             if (canPlace)
             {
-                var target = cell;
                 actions.Add(new InteractionAction
                 {
                     keyName = "Click",
                     actionName = "Đặt chuồng ở đây",
                     onClick = () =>
                     {
-                        if (PenMoveController.Confirm(target)) ScreenToast.ShowInfo("Đã dời chuồng sang chỗ mới.");
+                        if (PenMoveController.Confirm()) ScreenToast.ShowInfo("Đã dời chuồng sang chỗ mới.");
                         else ScreenToast.Show("Chỗ này không đặt được chuồng.");
                         ClearWorldInteractionState();
                     }
@@ -1636,7 +1634,8 @@ namespace YWonderLand.Environment
             string signature = BuildActionSignature(actions);
             bool shouldRefreshPrompt = signature != lastActionSignature || currentActions == null || currentActions.Count == 0;
 
-            currentHoverObject = cell != null ? cell.gameObject : null;
+            var frontCell = FrontBuildCellSelector.Instance != null ? FrontBuildCellSelector.Instance.CurrentCell : null;
+            currentHoverObject = frontCell != null ? frontCell.gameObject : null;
             lastActionSignature = signature;
             currentActions = actions;
             currentPromptFromFrontCell = true;

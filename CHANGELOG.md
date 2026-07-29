@@ -22,8 +22,15 @@ cần mở Unity, build EXE/APK và test theo ma trận ở cuối mục này.
   (bấm ✗, Esc, thoát Build Mode). Ba đường hủy còn lại (hủy chuồng, hủy đường, nút Xóa) đã hoàn đúng từ trước.
 - **T3 — Dời nguyên cụm chuồng.** Thêm `PenMoveController` (`Assets/_Project/Scripts/Environment/`):
   nhấc cả chuồng giữ nguyên hình dạng, thú đi theo, không tốn/không hoàn vật liệu. Bấm "Dời chuồng" →
-  cả cụm rê theo ô trước mặt nhân vật → "Đặt chuồng ở đây" (chỉ hiện khi đủ ô đất trống) hoặc "Hủy dời".
-  Dữ liệu ô chỉ đổi lúc chốt, nên bỏ dở/đổi scene/mở Build Mode giữa chừng đều trả chuồng về chỗ cũ.
+  cả cụm bám theo bước chân người chơi (snap theo ô) → "Đặt chuồng ở đây" (chỉ hiện khi đủ ô đất trống)
+  hoặc "Hủy dời". Dữ liệu ô chỉ đổi lúc chốt, nên bỏ dở/đổi scene/mở Build Mode giữa chừng đều trả
+  chuồng về chỗ cũ.
+  - **Sửa sau phản hồi của chủ dự án (29/07):** (a) bản đầu neo chuồng vào ô TRƯỚC MẶT nên chuồng trùm
+    lên nhân vật, hàng rào còn collider đẩy người chơi lên nóc và "chở" đi theo → nay chuồng giữ nguyên
+    khoảng cách với người chơi lúc bắt đầu dời, và collider rào/thú bị tắt suốt lúc rê. (b) nút "Đặt chuồng"
+    bắt cứng ô đích trong closure, mà HUD chỉ dựng lại khi chữ trên nút đổi, nên đi sang ô khác vẫn đặt
+    về chỗ cũ → `Confirm()` bỏ tham số, luôn chốt đúng vị trí đang xem trước. (c) thêm ghost màu:
+    rào xanh = đặt được, đỏ = không (MaterialPropertyBlock, không tạo material rác, trả màu gốc khi xong).
 - **T4 — Bỏ bước xác nhận ✓/✗.** Cờ mới `instantPlaceOnSelect` (mặc định bật): bấm mục Ruộng/Đường đá/Chuồng
   là nhân vật cuốc/lát/xây luôn; cặp nút ✓/✗ trên thẻ không còn dựng. Tắt cờ để quay lại luồng 2 bước.
 - **T5 — Shop hiện thông tin vật nuôi/cây.** `ShopPopupController` bổ sung vào phần mô tả: chu kỳ thu +
@@ -41,6 +48,9 @@ cần mở Unity, build EXE/APK và test theo ma trận ở cuối mục này.
 - Ô có cây / chuồng có thú: không thấy nút hủy; ô trống thì hủy được bình thường.
 - Xây chuồng → dời chỗ → hủy: gỗ về kho đủ 4/ô. Nhấc rồi bấm ✗ hoặc thoát Build Mode: gỗ cũng về đủ.
 - Dời chuồng có thú: hình dạng giữ nguyên, thú theo cùng, thoát/vào lại vẫn đúng vị trí mới.
+- Dời chuồng: nhân vật KHÔNG bị đẩy/nhấc lên rào, chuồng xanh khi chỗ hợp lệ và đỏ khi không,
+  bấm Đặt thì chuồng nằm đúng chỗ đang xem trước (không nhảy về chỗ cũ); Hủy dời trả về nguyên trạng
+  và rào lấy lại màu + va chạm bình thường.
 - Bấm mục là xây luôn, không còn ✓/✗; thiếu vật liệu vẫn báo và không trừ.
 - Shop: mỗi vật nuôi/hạt giống hiện đủ chu kỳ, tổng sản lượng, EXP.
 - Settings: kéo Zoom 50→200%, kéo Cỡ chữ 50→200%, thoát vào lại vẫn giữ mức đã chọn.
