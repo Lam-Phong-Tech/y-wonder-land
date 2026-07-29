@@ -99,6 +99,47 @@ Hằng số nằm ở ô rời **dưới bảng**, không ô nào trong bảng t
 | `VatNuoi` · `VatNuoi3` | `E16` | 0,006667 → **150** |
 | `VatNuoi` · `VatNuoi3` | `E17` | 26.700 (VND/USDT) |
 
+### 🔑 Cột USDT KHÔNG hề đổi — đây là lối ra
+
+So cột `D` (USDT) giữa `VatNuoi2` và `VatNuoi3`: **giống hệt nhau, cả 10 con.**
+
+| Con | USDT (cả 2 bản) | Con | USDT (cả 2 bản) |
+|---|---|---|---|
+| Bò sữa | 300 | Gà mái | 6 |
+| Rùa con | 90 | Dê con | 50 |
+| Heo con | 100 | Ngỗng con | 10 |
+| Đà điểu | 170 | Thỏ con | 5 |
+| Hươu | 400 | Vịt | 8 |
+
+Nghĩa là **thiết kế giá trị thật chưa từng thay đổi**. Chỉ đổi cách quy ra Point.
+➜ Nguồn sự thật nên là **cột USDT**, còn Point là số **suy ra** tại thời điểm build:
+
+```
+Giá Point = Giá USDT × tỷ giá ví
+```
+
+Làm vậy thì đổi tỷ giá lúc nào cũng được mà **không phải soạn lại bảng**, và
+không bao giờ lặp lại tình trạng 4 file đá nhau như hiện nay.
+
+### ⚠️ Tỷ giá THẬT của hệ thống là 26,5 — không phải 26, càng không phải 150
+
+Ví Point là **tiền thật, quy đổi được với USDT trên web**, không phải tiền chỉ dùng trong game:
+
+| Nguồn | Tỷ giá | Ghi chú |
+|---|---|---|
+| `docs/POINT_WALLET_BUSINESS_RULES.md` | **1 USDT = 26,5 Point** | có version, ghim vào từng source lot |
+| `docs/ADR_POINT_WALLET_AUTHORITY.md` | **26,5 Point/USDT** | dùng cả cho định giá hoa hồng |
+| Mốc VIP | **2.650 Point** | = 100 USDT × 26,5 |
+| Bảng cân bằng game (VatNuoi2/SuaLai4) | 26 | **làm tròn xuống**, lệch ~1,9% |
+| `VatNuoi3` | 150 | mâu thuẫn với ví |
+
+Hệ quả: giá trong game hiện **rẻ hơn ~1,9%** so với ý định thiết kế
+(bò 7.800 Point thay vì 300 × 26,5 = 7.950 Point).
+
+**Đổi tỷ giá sang 150 KHÔNG phải quyết định cân bằng game — đó là quyết định tài chính.**
+Nó định giá lại toàn bộ số dư người dùng đang có, mọi hoa hồng đang treo, và mốc VIP.
+Không được đổi từ phía game.
+
 ---
 
 ## 5. Game hiện đang chạy bộ nào
@@ -133,9 +174,43 @@ Hằng số nằm ở ô rời **dưới bảng**, không ô nào trong bảng t
 
 ---
 
-## 7. Câu phải hỏi khách trước khi đụng dữ liệu
+## 7. ĐỀ XUẤT — lấy số nào
 
-1. **Thang 150 Point/USDT áp cho toàn bộ game hay chỉ bảng vật nuôi?**
-2. **`VatNuoi3` có thay thế `SuaLai4VatNuoi` không?** Nếu có thì lỗi ×2/×8 ở 4 con
-   quay trở lại — cần khách xác nhận là cố ý hay sót.
+### Quy tắc chốt
+
+> **Cột USDT là nguồn sự thật. Point là số suy ra: `Point = USDT × 26,5`.**
+
+Giữ tỷ giá **26,5** theo hệ thống ví đang chạy. Bỏ qua con số 150 trong `VatNuoi3`
+— nó chỉ là cách khách ghi lại **cùng một giá trị** bằng đơn vị khác.
+
+### Lấy gì từ file nào
+
+| Loại dữ liệu | Lấy từ | Lý do |
+|---|---|---|
+| Giá con giống | **cột USDT** (mọi file như nhau) × 26,5 | thiết kế chưa từng đổi |
+| Đơn giá 4 con Hươu·Dê·Ngỗng·Thỏ | **`SuaLai4VatNuoi`** | file duy nhất đã sửa lỗi ×2/×8 |
+| Đơn giá 6 con còn lại | `VatNuoi3` (quy về thang 26,5) | bản mới nhất |
+| Khẩu phần bò sữa **4 Cỏ Voi** | **`VatNuoi3`** | chỉ file này có |
+| Giá 8 cây làm thức ăn | `VatNuoi3` (quy về thang 26,5) | file duy nhất có giá cây |
+| Chu kỳ · số lần thu · bệnh · EXP | `VatNuoi2` = `VatNuoi3` | giống nhau, game đã đúng |
+
+### Cách quy đổi số của `VatNuoi3` về thang ví
+
+```
+Giá thang 26,5 = Giá trong VatNuoi3 × (26,5 ÷ 150) = × 0,176667
+```
+
+Ví dụ: sữa bò `305 × 0,176667 = 53,9` Point · thịt bò `1.975 × 0,176667 = 348,9` Point.
+
+⚠️ Riêng 4 con Hươu·Dê·Ngỗng·Thỏ **phải chia lại số lượng trước**:
+`Đơn giá = Doanh thu Pro1 ÷ (Số lượng Pro1 × Tổng lần thu)`, rồi mới nhân 0,176667.
+
+---
+
+## 8. Ba câu phải hỏi khách trước khi đụng dữ liệu
+
+1. **`VatNuoi3` có thay thế `SuaLai4VatNuoi` không?** `SuaLai4` ra **trước** `VatNuoi3`
+   nhưng `VatNuoi3` lại không mang bản sửa theo. Cần biết là cố ý hay sót.
+2. **Xác nhận giữ tỷ giá ví 26,5.** Con số 150 trong `VatNuoi3` chỉ là cách ghi khác
+   của cùng giá trị USDT — đổi tỷ giá ví là quyết định tài chính, không phải cân bằng game.
 3. Giá 8 loại cây trong cột *"Tính theo giá trồng được"* là **giá bán ra** hay **giá mua vào**?
