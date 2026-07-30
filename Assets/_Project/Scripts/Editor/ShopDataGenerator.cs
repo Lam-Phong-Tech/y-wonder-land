@@ -39,7 +39,12 @@ namespace YWonderLand.EditorTools
 
             // 2) Item Shop — vật tư trồng trọt/chăn nuôi (BuyOnly)
             CreateShop("Shop_ItemShop", "Cửa hàng Vật phẩm", ShopDefinition.AccessMode.BuyOnly,
-                buy: new List<string> { "fertilizer_01", "vaccine_01", "medicine_01", "bait_01", "mine_ticket_01", "spin_ticket_01" });
+                buy: new List<string>
+                {
+                    "fertilizer_01", "vaccine_01", "medicine_01", "bait_01", "mine_ticket_01", "spin_ticket_01",
+                    // Thêm 30/07: vật liệu xây + nước tưới (miễn phí) mua trực tiếp, khỏi phải đi chặt/đào/múc.
+                    "wood_01", "stone_01", "watering_water_01"
+                });
 
             // 3) Fish Shop — mua mồi, thu mua cá (Both)
             CreateShop("Shop_FishShop", "Siêu thị Cá", ShopDefinition.AccessMode.Both,
@@ -54,13 +59,17 @@ namespace YWonderLand.EditorTools
                     "fish_ca_rong_do_01"
                 });
 
-            // 4) Mini Garden — thu mua nông sản + sản phẩm chăn nuôi (SellOnly)
-            CreateShop("Shop_MiniGarden", "Mini Garden — Thu mua Nông sản", ShopDefinition.AccessMode.SellOnly,
+            // 4) Mini Garden — bán nông sản NGẮN NGÀY (thức ăn chăn nuôi) + thu mua sản phẩm (Both)
+            // Đổi 30/07: khách chốt giá mua 8 nông sản ngắn ngày -> mở thêm tab Mua ở đây.
+            // 8 loại này KHÔNG được bán lại (canSell=false trong ItemDatabase) nên bỏ khỏi danh sách sell.
+            CreateShop("Shop_MiniGarden", "Mini Garden — Thu mua Nông sản", ShopDefinition.AccessMode.Both,
+                buy: new List<string>
+                {
+                    "carrot_01", "cabbage_01", "watermelon_01", "corn_01", "pumpkin_01",
+                    "morning_glory_01", "sweet_potato_01", "grass_01"
+                },
                 sell: new List<string>
                 {
-                    // Nông sản NGẮN NGÀY (8)
-                    "carrot_01", "cabbage_01", "watermelon_01", "corn_01", "pumpkin_01",
-                    "morning_glory_01", "sweet_potato_01", "grass_01",
                     // Sản phẩm cây LÂU NĂM (11)
                     "banana_01", "coconut_01", "areca_01", "date_01", "sacha_01",
                     "tea_01", "durian_01", "asparagus_01", "red_ginseng_01", "royal_ginseng_01",

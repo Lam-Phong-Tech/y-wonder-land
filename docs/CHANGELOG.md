@@ -6,6 +6,37 @@
 
 ---
 
+## [2026-07-30] — Thêm giá mua 10 nông sản/vật liệu + nước tưới miễn phí
+
+Khách chốt giá mua: cỏ voi 8, bí ngô 11, bắp ngô 4, bắp cải 4, cà rốt 4, dưa hấu 4,
+rau muống 5, khoai lang 9, đá 2, gỗ 8 Point; nước tưới miễn phí.
+
+Đây là mảnh còn thiếu của bản vá hôm qua ([[2026-07-29] Chặn lỗi hạt giống & thức ăn]
+bên dưới) — toast báo "hết thức ăn/hạt thì mua ở Farm Shop" nhưng trước đó
+KHÔNG shop nào bán các nông sản này (chỉ bán được hạt giống, muốn có thức ăn ngay
+phải tự trồng).
+
+- 8 nông sản ngắn ngày (`carrot_01`...`grass_01`): thêm `buyPrice`, **vẫn giữ
+  `canSell=false`** — mua được nhưng không bán lại, đúng luật "thức ăn chăn nuôi
+  không bán" chốt 22/06.
+- **Mini Garden đổi từ SellOnly sang Both**: mở thêm tab Mua cho 8 món trên. Theo
+  yêu cầu, đã bỏ 8 món này khỏi danh sách BÁN của Mini Garden (trước đó có ghi tên
+  trong whitelist sell nhưng vô hiệu vì `canSell=false` — dọn cho khỏi rối).
+- Item Shop: thêm mua `wood_01` (8), `stone_01` (2), `watering_water_01` (0 — free).
+  Giá bán đá hiện tại 12 trong ItemDatabase KHÔNG tạo lỗ hổng ăn chênh lệch: rà lại
+  toàn bộ 8 shop asset + scene, không có shop nào (kể cả legacy mock) đang cho bán
+  lại đá — `sellPrice` đó là số liệu chưa gắn vào đâu.
+- "Đây khoai lang" trong yêu cầu khách khớp tên `sweet_potato_01` (nông sản "Khoai
+  lang"), không phải hạt giống `sweet_potato_seed_01` ("Dây khoai lang") — áp giá
+  cho đúng vật phẩm nông sản.
+
+➜ `Assets/_Project/Scripts/Editor/ItemDataGenerator.cs`,
+`Assets/_Project/Scripts/Editor/ShopDataGenerator.cs`,
+10 file `Assets/Resources/Items/*.asset`,
+`Assets/_Project/Data/Shops/Shop_ItemShop.asset`, `Shop_MiniGarden.asset`
+
+---
+
 ## [2026-07-29] — Chặn lỗi hạt giống & thức ăn TỰ MỌC LẠI
 
 Khách báo ở tài khoản `green farm rill1`: hạt cải / hạt cà rốt / hạt bắp dùng hết về 0 thì

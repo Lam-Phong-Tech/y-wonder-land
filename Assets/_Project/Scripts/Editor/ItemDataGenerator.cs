@@ -80,14 +80,16 @@ namespace YWonderLand.EditorScripts
 
             // Nông sản (8 loại tương ứng 8 seed)
             // N\u00F4ng s\u1EA3n NG\u1EAEN NG\u00C0Y = TH\u1EE8C \u0102N CH\u0102N NU\u00D4I, KH\u00D4NG b\u00E1n (kh\u00E1ch ch\u1ED1t 22/06): sellPrice 0 + canSell=false.
-            AddItem(db, "carrot_01", "C\u00E0 r\u1ED1t", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83e\udd55", "food", 0, 0, false);
-            AddItem(db, "cabbage_01", "B\u1EAFp c\u1EA3i", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83e\udd6c", "food", 0, 0, false);
-            AddItem(db, "watermelon_01", "D\u01B0a h\u1EA5u", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83c\udf49", "food", 0, 0, false);
-            AddItem(db, "corn_01", "B\u1EAFp ng\u00F4", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83c\udf3d", "food", 0, 0, false);
-            AddItem(db, "pumpkin_01", "B\u00ED ng\u00F4", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83c\udf83", "food", 0, 0, false);
-            AddItem(db, "morning_glory_01", "Rau mu\u1ED1ng", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83c\udf3e", "food", 0, 0, false);
-            AddItem(db, "sweet_potato_01", "Khoai lang", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83c\udf60", "food", 0, 0, false);
-            AddItem(db, "grass_01", "C\u1ECF Voi", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83c\udf3f", "food", 0, 0, false);
+            // Gi\u00E1 mua kh\u00E1ch ch\u1ED1t 30/07: c\u00E0 r\u1ED1t/c\u1EA3i/d\u01B0a h\u1EA5u/b\u1EAFp = 4, rau mu\u1ED1ng = 5,
+            // b\u00ED ng\u00F4 = 11, khoai lang = 9, c\u1ECF voi = 8. V\u1EABn KH\u00D4NG b\u00E1n l\u1EA1i \u0111\u01B0\u1EE3c (canSell=false).
+            AddItem(db, "carrot_01", "C\u00E0 r\u1ED1t", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83e\udd55", "food", 4, 0, false);
+            AddItem(db, "cabbage_01", "B\u1EAFp c\u1EA3i", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83e\udd6c", "food", 4, 0, false);
+            AddItem(db, "watermelon_01", "D\u01B0a h\u1EA5u", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83c\udf49", "food", 4, 0, false);
+            AddItem(db, "corn_01", "B\u1EAFp ng\u00F4", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83c\udf3d", "food", 4, 0, false);
+            AddItem(db, "pumpkin_01", "B\u00ED ng\u00F4", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83c\udf83", "food", 11, 0, false);
+            AddItem(db, "morning_glory_01", "Rau mu\u1ED1ng", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83c\udf3e", "food", 5, 0, false);
+            AddItem(db, "sweet_potato_01", "Khoai lang", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83c\udf60", "food", 9, 0, false);
+            AddItem(db, "grass_01", "C\u1ECF Voi", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83c\udf3f", "food", 8, 0, false);
             
             // Sản phẩm chăn nuôi
             // S\u1EA3n ph\u1EA9m ch\u00EDnh (Pro1) \u2014 gi\u00E1 b\u00E1n theo c\u1ED9t "Gi\u00E1 Product 1" trong VatNuoi.md
@@ -128,8 +130,9 @@ namespace YWonderLand.EditorScripts
             AddItem(db, "passion_fruit_01", "H\u1ED9p m\u1EE9t chanh leo", "H\u1ED9p m\u1EE9t chanh leo (chanh d\u00E2y).", "\uD83C\uDF47", "products", 0, 57, true); // CayTrongLauNam2: ban 57
             
             // Vật liệu
-            AddItem(db, "wood_01", "G\u1ED7", "G\u1ED7 ch\u1EB7t t\u1EEB c\u00E2y.", "\ud83e\udeb5", "materials", 0, 8, true);
-            AddItem(db, "stone_01", "\u0110\u00E1", "\u0110\u00E1 \u0111\u00E0o t\u1EEB m\u1ECF.", "\ud83e\udea8", "materials", 0, 12, true);
+            // Gi\u00E1 mua kh\u00E1ch ch\u1ED1t 30/07: g\u1ED7 8, \u0111\u00E1 2. Sell price gi\u1EEF nguy\u00EAn (ch\u01B0a g\u1EAFn shop n\u00E0o cho b\u00E1n l\u1EA1i).
+            AddItem(db, "wood_01", "G\u1ED7", "G\u1ED7 ch\u1EB7t t\u1EEB c\u00E2y.", "\ud83e\udeb5", "materials", 8, 8, true);
+            AddItem(db, "stone_01", "\u0110\u00E1", "\u0110\u00E1 \u0111\u00E0o t\u1EEB m\u1ECF.", "\ud83e\udea8", "materials", 2, 12, true);
             AddItem(db, "gem_kyanite_01", "Kyanite", "\u0110\u00E1 qu\u00FD Kyanite. B\u00E1n \u0111\u01B0\u1EE3c 2 Point.", "\uD83D\uDC8E", "materials", 0, 2, true);
             AddItem(db, "gem_orange_calcite_01", "Orange Calcite", "\u0110\u00E1 qu\u00FD Orange Calcite. B\u00E1n \u0111\u01B0\u1EE3c 3 Point.", "\uD83D\uDC8E", "materials", 0, 3, true);
             AddItem(db, "gem_green_calcite_01", "Green Calcite", "\u0110\u00E1 qu\u00FD Green Calcite. B\u00E1n \u0111\u01B0\u1EE3c 6 Point.", "\uD83D\uDC8E", "materials", 0, 6, true);
