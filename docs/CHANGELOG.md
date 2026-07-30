@@ -6,6 +6,37 @@
 
 ---
 
+## [2026-07-30] — Nhật ký đầy đủ: tưới, thu hoạch, chữa bệnh, vắc-xin + thư báo cây chết
+
+Mở rộng nhật ký theo yêu cầu khách. `FarmActivityLog` đổi từ "chỉ ghi cho ăn" sang kho
+thao tác chung: `LogEntry{ownerId, kind, detail, unixTime}`, ownerId = animalInstanceId (thú)
+hoặc `FarmTile.HistoryKey` (cây, khoá theo vị trí — cùng cách với khoá lưu trạng thái).
+
+| Ghi cái gì | Ghi vào đâu | Hook |
+|---|---|---|
+| Cho ăn | từng con vật | FarmInteractionController (chỗ cho ăn) |
+| Thu hoạch thú | từng con vật | `FarmAnimal.HarvestProduct` |
+| Chữa bệnh | từng con vật | `FarmAnimal.Heal` |
+| Tiêm vắc-xin | từng con vật | `FarmAnimal.Vaccinate` |
+| Tưới nước | từng cây | `FarmTile.InteractWater` + `WaterAgain` |
+| Thu hoạch cây | từng cây | `FarmTile.InteractHarvest` |
+| Thú chết / **cây chết** | hòm thư | `DieFromHunger` / `DieFromDrought` |
+
+- Dữ liệu nhật ký cũ (chỉ có cho ăn) TỰ CHUYỂN sang định dạng mới lúc nạp, không mất lịch sử.
+- Gieo cây mới trên ô cũ thì XOÁ nhật ký cây cũ, kẻo mở ra thấy lịch sử của cây đã nhổ.
+- Popup "Xem ruộng" nay BẤM VÀO CÂY để xem nhật ký của chính cây đó.
+- Các hàng nhật ký dựng động (thú 4 hàng, cây 2 hàng); popup tự làm mới 4 lần/giây nên chỉ
+  dựng lại hàng khi đổi đối tượng, còn lại chỉ thay chữ — tránh lặp lại lỗi giật vừa sửa.
+- **Gộp thư báo chết**: cùng tên + cùng nguyên nhân trong 10 phút thì dồn 1 thư kèm số lượng.
+  Không gộp thì cả ruộng khát nước chết cùng lúc là hòm thư nhận vài chục thư một lúc.
+
+**CHƯA làm được: lịch sử bón phân.** Game hiện KHÔNG có thao tác bón phân nào để mà ghi —
+`fertilizer_01` chỉ tồn tại như món hàng trong shop, không có code áp dụng lên cây, và đang bị
+`HiddenItems` ẩn khỏi shop/túi. Đã đặt sẵn `FarmActivityLog.KindFertilize` để cắm vào khi nào
+tính năng bón phân được làm.
+
+---
+
 ## [2026-07-30] — Chống giật chữ nổi + popup "Xem ruộng"
 
 Khách gửi ảnh farm chữ đè kín màn hình: *"nhìn như đám rừng không biết đường tưới nước luôn,

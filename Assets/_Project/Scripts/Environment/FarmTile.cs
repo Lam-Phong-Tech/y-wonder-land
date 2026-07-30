@@ -146,6 +146,17 @@ public class FarmTile : MonoBehaviour
     private static string TilePosKey(Vector3 p)
         => $"{Mathf.RoundToInt(p.x * 10f)}_{Mathf.RoundToInt(p.z * 10f)}";
 
+    /// <summary>Khoá ổn định của ô đất (theo vị trí, cùng cách với khoá lưu trạng thái) — dùng làm
+    /// ownerId cho nhật ký tưới/thu hoạch. Ô con của giàn mượn khoá ô CHÍNH để lịch sử gom về một cây.</summary>
+    public string HistoryKey
+    {
+        get
+        {
+            FarmTile owner = masterTile != null ? masterTile : this;
+            return owner != null ? TilePosKey(owner.transform.position) : "";
+        }
+    }
+
     // Thanh nước nổi trên cây — billboard ĐỘC LẬP (KHÔNG parent vào ô đất để né scale lệch của Dirt).
     private Transform waterBarRoot;
     private Transform waterFillPivot;
@@ -430,6 +441,10 @@ public class FarmTile : MonoBehaviour
     {
         if (currentState != TileState.Plowed || masterTile != null) return false;
 
+        // Cây MỚI thì nhật ký tưới/thu của cây CŨ trên ô này phải xoá, không thì người chơi
+        // mở ra thấy lịch sử của cây đã nhổ từ đời nào.
+        FarmActivityLog.ClearHistory(HistoryKey);
+
         plantedSeedId = seedId;
         currentState = TileState.Planted;
         plantedTime = RealNow(); // mốc gieo — đồng hồ CHẾT khi chưa tưới (noWaterDeathSec)
@@ -478,6 +493,7 @@ public class FarmTile : MonoBehaviour
         isGrowing = true;
         lastWaterTime = RealNow(); // đổ đầy thanh máu (wateredLifeSec)
         dryAccumSec = 0f;
+        FarmActivityLog.RecordWater(HistoryKey, "");  // nhật ký tưới (khách chốt 30/07)
         CreateWaterBar();
         UpdateVisuals();
         OnTileWatered?.Invoke(this);
@@ -489,6 +505,7 @@ public class FarmTile : MonoBehaviour
     {
         if (currentState != TileState.Watered || !isGrowing) return false;
         lastWaterTime = RealNow(); // đổ đầy lại thanh máu
+        FarmActivityLog.RecordWater(HistoryKey, "");  // nhật ký tưới (khách chốt 30/07)
         return true;
     }
 
@@ -540,6 +557,14 @@ public class FarmTile : MonoBehaviour
     /// thả ô giàn (cây nhiều ô). KHÔNG trao sản phẩm, KHÔNG tính là thu hoạch (không bắn OnTileHarvested).</summary>
     private void DieFromDrought()
     {
+        // Ghi vào nhật ký -> thành THƯ báo cây chết (khách chốt 30/07). Phải lấy tên TRƯỚC khi
+        // xoá currentCrop bên dưới. Cả ruộng chết cùng lúc thì FarmActivityLog tự gộp thành 1 thư.
+        string cropName = currentCrop != null
+            ? FarmActivityLog.ItemName(currentCrop.harvestItemId, "Cây trồng")
+            : "Cây trồng";
+        FarmActivityLog.RecordDeath(cropName, "héo chết vì thiếu nước");
+        FarmActivityLog.ClearHistory(HistoryKey); // cây đi rồi, dọn nhật ký tưới/thu của nó
+
         currentState = TileState.Soil;
         plantedSeedId = "";
         currentCrop = null;
@@ -599,6 +624,11 @@ public class FarmTile : MonoBehaviour
         LastFinalProductAmount = 0;
 
         harvestsRemaining = Mathf.Max(0, harvestsRemaining - 1);
+
+        // Nhật ký thu hoạch của CHÍNH cây này (khách chốt 30/07) — hiện trong popup "Xem ruộng".
+        // Ghi TRƯỚC khi nhánh vụ-cuối dọn ô, kẻo mất tên nông sản.
+        FarmActivityLog.RecordHarvest(HistoryKey,
+            $"+{amount} {FarmActivityLog.ItemName(harvestedItemId, "nông sản")}");
 
         // CÂY LÂU NĂM còn lần thu → quay lại RA QUẢ tiếp (KHÔNG về đất trống, GIỮ model + lặp chu kỳ).
         if (currentCrop != null && currentCrop.maxHarvests > 1 && harvestsRemaining > 0)

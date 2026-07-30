@@ -378,6 +378,10 @@ namespace YWonderLand.Environment
             if (!IsInfiniteHarvest) harvestsRemaining--;
             LastHarvestWasFinal = !IsInfiniteHarvest && harvestsRemaining <= 0;
 
+            // Nhật ký thu hoạch của CHÍNH con này (khách chốt 30/07) — hiện trong popup con vật.
+            string productName = FarmActivityLog.ItemName(itemId, data.productMainName);
+            FarmActivityLog.RecordHarvest(animalInstanceId, $"+{amount} {productName}".TrimEnd());
+
             UpdateVisuals();
             OnAnimalStateChanged?.Invoke(this);
 
@@ -414,7 +418,7 @@ namespace YWonderLand.Environment
 
             // Làm thịt là KẾT THÚC BÌNH THƯỜNG (không phải chết yểu) nên KHÔNG báo vào hòm thư,
             // chỉ dọn mốc cho ăn của con đã đi.
-            FarmActivityLog.ClearFeedHistory(animalInstanceId);
+            FarmActivityLog.ClearHistory(animalInstanceId);
 
             Destroy(gameObject);
         }
@@ -428,7 +432,7 @@ namespace YWonderLand.Environment
             // Ghi vào nhật ký -> hiện thành THƯ trong hòm thư (khách chốt 30/07). Toast bay mất rồi
             // thì người chơi vẫn tra lại được con nào chết, lúc nào.
             FarmActivityLog.RecordDeath(data != null ? data.animalName : null, "chết đói");
-            FarmActivityLog.ClearFeedHistory(animalInstanceId); // con đi rồi, dọn mốc cho ăn cho nhẹ
+            FarmActivityLog.ClearHistory(animalInstanceId); // con đi rồi, dọn mốc cho ăn cho nhẹ
 
             if (currentPen != null)
             {
@@ -481,6 +485,10 @@ namespace YWonderLand.Environment
             vaccineUntilUnix = RealNow() + VaccineProtectSec;
             isVaccinated = true;
 
+            // Nhật ký tiêm vắc-xin của chính con này (khách chốt 30/07).
+            FarmActivityLog.RecordEvent(animalInstanceId, FarmActivityLog.KindVaccine,
+                $"phòng {YWonderLand.Core.GameTimeConfig.FormatDuration(VaccineProtectSec)}");
+
             UpdateVisuals();
             OnAnimalStateChanged?.Invoke(this);
             FarmStateSync.SaveRuntimeState();
@@ -495,6 +503,10 @@ namespace YWonderLand.Environment
 
             currentState = AnimalState.Healthy;
             sicknessRolled = true; // đã tiêu tiền thuốc cho vòng nuôi này → không gieo bệnh lại (đúng CachTinh)
+
+            // Nhật ký chữa bệnh của chính con này (khách chốt 30/07).
+            FarmActivityLog.RecordEvent(animalInstanceId, FarmActivityLog.KindHeal,
+                $"{MedicineDosesPerCure} liều thuốc");
 
             UpdateVisuals();
             OnAnimalStateChanged?.Invoke(this);

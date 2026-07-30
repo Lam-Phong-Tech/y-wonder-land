@@ -62,13 +62,9 @@
                 </ui:VisualElement>
             </ui:VisualElement>
 
-            <!-- Lịch sử cho ăn (khách chốt 30/07) — chỉ hiện khi đang xem MỘT con cụ thể -->
-            <ui:VisualElement name="FeedLogPanel" class="ap-info">
-                <ui:VisualElement class="ap-row ap-row-last">
-                    <ui:Label text="Lịch sử cho ăn" class="ap-key" />
-                    <ui:Label name="LblFeedLog" text="—" class="ap-val" />
-                </ui:VisualElement>
-            </ui:VisualElement>
+            <!-- Nhật ký (khách chốt 30/07). Các hàng do C# dựng động vì mỗi loại khác nhau:
+                 thú = cho ăn / thu hoạch / chữa bệnh / tiêm vắc-xin; cây = tưới nước / thu hoạch. -->
+            <ui:VisualElement name="FeedLogPanel" class="ap-info" />
 
             <!-- Hành động -->
             <ui:VisualElement class="ap-actions">

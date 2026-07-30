@@ -21,8 +21,9 @@ public class AnimalInteractionPopupController : MonoBehaviour
     private Label lblProducts;
     private Label lblHunger;
     private Label lblHarvest;
-    private VisualElement feedLogPanel;   // khối "Lịch sử cho ăn"
-    private Label lblFeedLog;
+    private VisualElement feedLogPanel;   // khối nhật ký — các hàng dựng động, xem ShowLogPanel
+    private string logPanelSignature;     // chỉ dựng lại hàng khi đổi đối tượng/đổi bộ hàng
+    private readonly List<Label> logValueLabels = new List<Label>();
     private VisualElement enclosurePanel;
     private VisualElement infoPanel;
     private VisualElement actionsPanel;
@@ -42,6 +43,7 @@ public class AnimalInteractionPopupController : MonoBehaviour
     // Chế độ XEM RUỘNG (khách chốt 30/07): dùng CHUNG khung popup này với chuồng thú —
     // cùng là "một cụm ô liền nhau, liệt kê từng thứ bên trong". Khỏi dựng popup mới, khỏi sửa scene.
     private List<FarmTile> currentPlot;
+    private FarmTile selectedPlotTile;   // cây đang chọn trong popup ruộng — để hiện nhật ký của nó
     private readonly List<FarmAnimal> enclosureAnimals = new List<FarmAnimal>();
     private readonly Dictionary<FarmAnimal, VisualElement> animalCards = new Dictionary<FarmAnimal, VisualElement>();
 
@@ -85,12 +87,10 @@ public class AnimalInteractionPopupController : MonoBehaviour
         animalCardScroll = root.Q<ScrollView>("AnimalCardScroll");
 
         feedLogPanel = root.Q<VisualElement>("FeedLogPanel");
-        lblFeedLog = root.Q<Label>("LblFeedLog");
 
         // Cho phép xuống dòng nếu chữ dài, tránh tràn ra ngoài panel.
         if (lblHarvest != null) lblHarvest.style.whiteSpace = WhiteSpace.Normal;
         if (lblStatus != null) lblStatus.style.whiteSpace = WhiteSpace.Normal;
-        if (lblFeedLog != null) lblFeedLog.style.whiteSpace = WhiteSpace.Normal; // nhật ký nhiều dòng
 
         btnClose = root.Q<Button>("BtnClose");
         btnFeed = root.Q<Button>("BtnFeed");
@@ -157,6 +157,8 @@ public class AnimalInteractionPopupController : MonoBehaviour
         currentAnimal = null;
         currentEnclosure = null;
         currentPlot = new List<FarmTile>(tiles);
+        selectedPlotTile = null;
+        logPanelSignature = null; // ép dựng lại hàng nhật ký cho đối tượng mới
 
         container.style.display = DisplayStyle.Flex;
         UIPopupTracker.SetOpen(this, true);
@@ -200,9 +202,16 @@ public class AnimalInteractionPopupController : MonoBehaviour
                 : $"Có <color=#5BD66B>{ripe} chín</color> · <color=#FFD54F>{thirsty} cần tưới</color>";
 
         if (lblEnclosureSummary != null)
-            lblEnclosureSummary.text = $"Ruộng: {total} ô · {planted} cây";
+            lblEnclosureSummary.text = planted == 0
+                ? $"Ruộng: {total} ô"
+                : $"Ruộng: {total} ô · {planted} cây — bấm vào cây để xem nhật ký";
+
+        // Cây đang chọn có thể vừa chết/vừa thu xong -> bỏ chọn cho khỏi hiện nhật ký ma.
+        if (selectedPlotTile == null || selectedPlotTile.GetCurrentCrop() == null)
+            selectedPlotTile = null;
 
         RebuildPlotCards();
+        RefreshCropLog(selectedPlotTile);
     }
 
     // Cần tưới = chưa tưới lần nào, hoặc nước đã tụt thấp (cùng ngưỡng với cảnh báo trên nhãn nổi).
@@ -227,8 +236,16 @@ public class AnimalInteractionPopupController : MonoBehaviour
             if (crop == null) continue; // ô trống thì không cần thẻ
 
             index++;
+            var captured = tile;
             var card = new VisualElement();
+            card.pickingMode = PickingMode.Position;
             card.AddToClassList("ap-animal-card");
+            if (captured == selectedPlotTile) card.AddToClassList("ap-animal-card-selected");
+
+            // Đăng ký CẢ ClickEvent lẫn PointerUp (TrickleDown) — giống thẻ thú, cần cho cảm ứng.
+            card.RegisterCallback<ClickEvent>(evt => { SelectPlotTile(captured); evt.StopPropagation(); });
+            card.RegisterCallback<PointerUpEvent>(evt => { SelectPlotTile(captured); evt.StopPropagation(); },
+                TrickleDown.TrickleDown);
 
             var icon = CreateItemIconElement(crop.harvestItemId, index.ToString());
             icon.AddToClassList("ap-card-icon");
@@ -251,6 +268,12 @@ public class AnimalInteractionPopupController : MonoBehaviour
             empty.AddToClassList("ap-empty");
             animalCardList.Add(empty);
         }
+    }
+
+    private void SelectPlotTile(FarmTile tile)
+    {
+        selectedPlotTile = tile;
+        RefreshPlotUI();
     }
 
     private string CropDisplayName(CropDefinition crop, int index)
@@ -505,36 +528,91 @@ public class AnimalInteractionPopupController : MonoBehaviour
     /// <summary>Chiều cao khung danh sách ở chế độ Xem ruộng (chuồng thú giữ 160px theo USS).</summary>
     private const float PlotScrollHeight = 320f;
 
-    // Lịch sử cho ăn của CHÍNH con đang xem (khách chốt 30/07: nhật ký cho ăn nằm trong popup từng con).
+    // Một hàng nhật ký trong popup: tiêu đề + loại thao tác + chữ hiện khi chưa có mốc nào.
+    private struct LogRow
+    {
+        public string title;
+        public string kind;
+        public string emptyText;
+
+        public LogRow(string title, string kind, string emptyText)
+        {
+            this.title = title; this.kind = kind; this.emptyText = emptyText;
+        }
+    }
+
+    // Nhật ký của CHÍNH con vật đang xem (khách chốt 30/07).
     private void RefreshFeedLog(FarmAnimal animal)
     {
-        if (feedLogPanel == null && lblFeedLog == null) return;
-
         if (animal == null)
         {
             if (feedLogPanel != null) feedLogPanel.style.display = DisplayStyle.None;
             return;
         }
 
-        if (feedLogPanel != null) feedLogPanel.style.display = DisplayStyle.Flex;
-        if (lblFeedLog == null) return;
+        ShowLogPanel(animal.animalInstanceId,
+            new LogRow("Lịch sử cho ăn", FarmActivityLog.KindFeed, "Chưa cho ăn lần nào"),
+            new LogRow("Lịch sử thu hoạch", FarmActivityLog.KindHarvest, "Chưa thu hoạch lần nào"),
+            new LogRow("Lịch sử chữa bệnh", FarmActivityLog.KindHeal, "Chưa phải chữa lần nào"),
+            new LogRow("Lịch sử tiêm vắc-xin", FarmActivityLog.KindVaccine, "Chưa tiêm lần nào"));
+    }
 
-        var history = FarmActivityLog.GetFeedHistory(animal.animalInstanceId, FeedLogLinesShown);
-        if (history.Count == 0)
+    // Nhật ký của CHÍNH cây đang chọn trong popup Xem ruộng.
+    // CHƯA có hàng "Bón phân": game hiện không có thao tác bón phân nào để mà ghi (xem CHANGELOG 30/07).
+    private void RefreshCropLog(FarmTile tile)
+    {
+        if (tile == null || tile.GetCurrentCrop() == null)
         {
-            lblFeedLog.text = "Chưa cho ăn lần nào";
+            if (feedLogPanel != null) feedLogPanel.style.display = DisplayStyle.None;
             return;
         }
 
-        var sb = new System.Text.StringBuilder();
-        for (int i = 0; i < history.Count; i++)
+        ShowLogPanel(tile.HistoryKey,
+            new LogRow("Lịch sử tưới nước", FarmActivityLog.KindWater, "Chưa tưới lần nào"),
+            new LogRow("Lịch sử thu hoạch", FarmActivityLog.KindHarvest, "Chưa thu hoạch lần nào"));
+    }
+
+    /// <summary>
+    /// Dựng khối nhật ký cho một đối tượng. Popup tự làm mới 4 lần/giây nên CHỈ dựng lại hàng khi
+    /// đổi đối tượng hoặc đổi bộ hàng; còn lại chỉ thay chữ, khỏi sinh rác mỗi lần làm mới.
+    /// </summary>
+    private void ShowLogPanel(string ownerId, params LogRow[] rows)
+    {
+        if (feedLogPanel == null || rows == null || rows.Length == 0) return;
+        feedLogPanel.style.display = DisplayStyle.Flex;
+
+        string signature = ownerId + "|" + rows.Length + "|" + rows[0].kind;
+        if (signature != logPanelSignature)
         {
-            if (i > 0) sb.Append('\n');
-            var e = history[i];
-            sb.Append(FarmActivityLog.FormatWhen(e.unixTime));
-            if (!string.IsNullOrEmpty(e.foodText)) sb.Append(" · ").Append(e.foodText);
+            logPanelSignature = signature;
+            feedLogPanel.Clear();
+            logValueLabels.Clear();
+
+            for (int i = 0; i < rows.Length; i++)
+            {
+                var row = new VisualElement();
+                row.AddToClassList("ap-row");
+                if (i == rows.Length - 1) row.AddToClassList("ap-row-last");
+
+                var key = new Label(rows[i].title);
+                key.AddToClassList("ap-key");
+                row.Add(key);
+
+                var val = new Label();
+                val.AddToClassList("ap-val");
+                val.style.whiteSpace = WhiteSpace.Normal; // nhật ký nhiều dòng
+                row.Add(val);
+
+                logValueLabels.Add(val);
+                feedLogPanel.Add(row);
+            }
         }
-        lblFeedLog.text = sb.ToString();
+
+        for (int i = 0; i < rows.Length && i < logValueLabels.Count; i++)
+        {
+            logValueLabels[i].text = FarmActivityLog.FormatHistoryLines(
+                FarmActivityLog.GetHistory(ownerId, rows[i].kind, FeedLogLinesShown), rows[i].emptyText);
+        }
     }
 
     // Đếm ngược vụ thu là số "sống" nên cập nhật định kỳ khi popup đang mở.
@@ -585,6 +663,8 @@ public class AnimalInteractionPopupController : MonoBehaviour
         currentAnimal = null;
         currentEnclosure = null;
         currentPlot = null;
+        selectedPlotTile = null;
+        logPanelSignature = null;
         enclosureAnimals.Clear();
         if (enclosurePanel != null) enclosurePanel.style.display = DisplayStyle.None;
 

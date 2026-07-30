@@ -261,13 +261,17 @@ public class MailboxPopupController : MonoBehaviour
         {
             var d = deaths[i];
             string reason = string.IsNullOrEmpty(d.reason) ? "đã chết" : $"đã {d.reason}";
+            string when = YWonderLand.Environment.FarmActivityLog.FormatWhen(d.unixTime);
+            // Nhiều cái chết cùng loại sát giờ nhau đã được gộp thành 1 mục (xem FarmActivityLog.RecordDeath).
+            string howMany = d.count > 1 ? $" ({d.count} cái)" : "";
+
             var mail = new MailData(
                 d.id,
-                $"{d.animalName} {reason}",
+                $"{d.subjectName} {reason}{howMany}",
                 "Nông trại",
-                YWonderLand.Environment.FarmActivityLog.FormatWhen(d.unixTime),
-                $"{d.animalName} của bạn {reason} lúc {YWonderLand.Environment.FarmActivityLog.FormatWhen(d.unixTime)}.\n\n" +
-                "Nhớ cho thú ăn trước khi thanh đói cạn để khỏi mất thú nhé!",
+                when,
+                $"{d.subjectName} của bạn {reason} lúc {when}{howMany}.\n\n" +
+                "Nhớ cho thú ăn và tưới cây trước khi thanh máu cạn để khỏi mất nhé!",
                 false
             );
             mail.isRead = d.isRead;
