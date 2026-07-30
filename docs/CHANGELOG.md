@@ -25,19 +25,24 @@ thêm vào luôn, giá 1 point. Mỗi lần bón phân tăng trưởng cây 15%.
   được 25 là lỗ hổng mua-rẻ-bán-đắt **in tiền vô hạn** — khách chỉ nói giá mua, không nói giá bán.
 - `fertilizerGrowthPercent` để ở SerializeField (0.15), đổi số khỏi sửa code.
 
-### ⚠️ CẢNH BÁO CÂN BẰNG — CHƯA CÓ GIỚI HẠN SỐ LẦN BÓN
-Khách không nói giới hạn nên code làm đúng lời: bón bao nhiêu lần cũng được.
-`1 / 0.15 = 7` → **7 lần bón (7 Point) là cây chín NGAY, bất kể cây đó 24 giờ hay 90 ngày.**
-Phí bón là số cố định, không theo giá trị/thời gian cây, nên cây càng quý càng lời:
+### ✅ ĐÃ CHỐT LẠI CÙNG NGÀY — trừ THỜI GIAN CỐ ĐỊNH, chỉ cây NGẮN NGÀY
+Bản đầu cộng 15% của TỔNG thời gian mỗi lần → `1/0.15 = 7` lần là cây chín ngay, **bất kể 24 giờ
+hay 90 ngày**. Chanh leo thành bỏ 7 Point ăn 570 Point (gấp 81 lần), xoá sạch 180 ngày chờ của 2 vụ.
+Đã báo, khách chốt: **trừ một lượng thời gian CỐ ĐỊNH, và CHỈ áp lên cây ngắn ngày.**
 
-| Cây | Thời gian | Bón 7 lần tốn | Thu về |
-|---|---|---|---|
-| Cà rốt | 24 giờ | 7 Point | (thức ăn, không bán) |
-| Chanh leo | **90 ngày** | 7 Point | 10 quả × 57 = **570 Point** |
+- `FarmTile.ApplyFertilizer(bonusSeconds, maxGrowthSec)` + `IsFertilizable(maxGrowthSec)` — rút
+  thẳng số giây, không nhân phần trăm. Cửa lọc dùng `currentCrop.growthTimeSec` (số gốc của giống)
+  chứ KHÔNG dùng `GetGrowthTime()`: hàm kia bị tutorial ép về 24s và đổi theo vụ tái sinh của cây
+  lâu năm — dựa vào nó thì trong tutorial cây nào cũng lọt cửa "ngắn ngày".
+- Hai SerializeField: `fertilizerBonusHours = 3.6` (đúng 15% của cây 24 giờ, giữ nguyên ý số khách
+  đưa ban đầu) và `fertilizerMaxCropDays = 1`. Cây ngắn ngày đều đúng 86400s, nhóm kế tiếp 172800s
+  nên ngưỡng 1 ngày tách sạch, không cần thêm trường vào CropDefinition.
+- Mục "Bón phân" trên bảng gợi ý và nút trong túi đều ẩn/từ chối với cây không đủ điều kiện.
 
-→ Chanh leo: bỏ 7 ăn 570 (**gấp 81 lần**), lặp vô hạn, và xoá sạch 180 ngày chờ đợi của 2 vụ.
-Điều này phá đúng cơ chế "quay lại mỗi ngày" mà khách thiết kế. **Đã báo chủ dự án để hỏi khách**
-về giới hạn số lần bón mỗi vụ. Sửa = đổi 1 số ở SerializeField hoặc thêm bộ đếm mỗi ô.
+**Vì sao cách này đóng được lỗ hổng:** 8 cây ngắn ngày đều `canSell=false` (thức ăn chăn nuôi,
+khách chốt 22/06) nên bón nhanh KHÔNG quy ra tiền trực tiếp. Cây bán được tiền (chanh leo, sầu
+riêng, sa chi) nay không bón được. Bón vẫn có thể làm cây ngắn ngày chín ngay (7 lần × 3.6 giờ >
+24 giờ) nhưng chỉ rút ngắn vòng làm THỨC ĂN — vòng tiền thật vẫn kẹt ở chu kỳ vật nuôi.
 
 ---
 

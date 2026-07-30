@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.ItemDefinition
   id: fertilizer_01
   itemName: "Ph\xE2n b\xF3n"
-  description: "M\u1ED7i l\u1EA7n b\xF3n gi\xFAp c\xE2y l\u1EDBn th\xEAm 15%."
+  description: "B\xF3n cho c\xE2y ng\u1EAFn ng\xE0y: m\u1ED7i l\u1EA7n ch\xEDn s\u1EDBm h\u01A1n 3 gi\u1EDD 36 ph\xFAt."
   iconEmoji: "\U0001F9EA"
   iconSprite: {fileID: 0}
   iconTexture: {fileID: 2800000, guid: b6aaaaa85c33fe84f838842035dc5e4c, type: 3}

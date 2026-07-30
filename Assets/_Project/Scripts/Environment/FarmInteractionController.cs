@@ -146,10 +146,17 @@ namespace YWonderLand.Environment
         private const string FertilizerItemId = "fertilizer_01";
 
         [Header("Bón phân (khách chốt 30/07)")]
-        [Tooltip("Mỗi lần bón đẩy tiến độ lớn của cây thêm bao nhiêu. 0.15 = 15% (số khách chốt). " +
-                 "ĐỔI SỐ Ở ĐÂY, không sửa code. Lưu ý: 1/số này = số lần bón để cây chín ngay " +
-                 "(0.15 -> 7 lần). Chưa có giới hạn số lần bón mỗi cây.")]
-        [SerializeField] private float fertilizerGrowthPercent = 0.15f;
+        [Tooltip("Mỗi lần bón rút thẳng bao nhiêu GIỜ thời gian chờ. Cố định, KHÔNG theo phần trăm " +
+                 "— khách chốt vậy để cây dài ngày không bị lợi dụng. Mặc định 3.6 giờ = đúng 15% " +
+                 "của cây ngắn ngày 24 giờ (con số khách đưa ban đầu). ĐỔI SỐ Ở ĐÂY, không sửa code.")]
+        [SerializeField] private float fertilizerBonusHours = 3.6f;
+
+        [Tooltip("CHỈ bón được cây có vòng lớn không quá số ngày này (khách chốt: chỉ cây ngắn ngày). " +
+                 "1 = chỉ 8 cây ngắn ngày (24 giờ); nhóm kế tiếp là 2 ngày nên để 1 là tách sạch.")]
+        [SerializeField] private float fertilizerMaxCropDays = 1f;
+
+        private float FertilizerBonusSec => YWonderLand.Core.GameTimeConfig.Hours(fertilizerBonusHours);
+        private float FertilizerMaxGrowthSec => YWonderLand.Core.GameTimeConfig.Days(fertilizerMaxCropDays);
 
         private const string MiningLastDateKey = "YW_MiningLastDate";
         private const string MiningTurnsLeftKey = "YW_MiningTurnsLeft";
@@ -911,10 +918,10 @@ namespace YWonderLand.Environment
                 }
             });
 
-            // BÓN PHÂN (khách chốt 30/07): chỉ hiện khi cây ĐANG LỚN — chưa tưới thì chưa có tiến độ
-            // để đẩy, mà cây đã chín thì bón vô nghĩa.
+            // BÓN PHÂN (khách chốt 30/07): chỉ hiện với CÂY NGẮN NGÀY đang lớn — chưa tưới thì chưa
+            // có gì để rút, cây đã chín thì bón vô nghĩa, cây dài ngày thì khách không cho bón.
             FarmTile fertilizeTile = tile.masterTile != null ? tile.masterTile : tile;
-            if (fertilizeTile != null && fertilizeTile.currentState == FarmTile.TileState.Watered)
+            if (fertilizeTile != null && fertilizeTile.IsFertilizable(FertilizerMaxGrowthSec))
             {
                 actions.Add(new InteractionAction
                 {
@@ -2698,9 +2705,9 @@ namespace YWonderLand.Environment
                 ScreenToast.Show("Đang chọn phân để bón — hãy chọn PHÂN BÓN trong tab Đồ dùng.");
                 return;
             }
-            if (tile == null || tile.currentState != FarmTile.TileState.Watered)
+            if (tile == null || !tile.IsFertilizable(FertilizerMaxGrowthSec))
             {
-                ScreenToast.Show("Cây này không bón được lúc này (phải là cây đang lớn).");
+                ScreenToast.Show("Chỉ bón được CÂY NGẮN NGÀY đang lớn (đã tưới, chưa chín).");
                 return;
             }
 
@@ -2712,7 +2719,8 @@ namespace YWonderLand.Environment
             }
             if (!inv.RemoveItem(FertilizerItemId, 1)) return;
 
-            if (!tile.ApplyFertilizer(fertilizerGrowthPercent))
+            float bonusSec = FertilizerBonusSec;
+            if (!tile.ApplyFertilizer(bonusSec, FertilizerMaxGrowthSec))
             {
                 inv.AddItem(FertilizerItemId, 1); // bón hụt thì HOÀN phân, không nuốt đồ của người chơi
                 ScreenToast.Show("Bón không được — cây chưa tưới hoặc đã chín.");
@@ -2721,9 +2729,9 @@ namespace YWonderLand.Environment
 
             if (inventoryPopup != null) inventoryPopup.Hide();
 
-            int pct = Mathf.RoundToInt(fertilizerGrowthPercent * 100f);
-            ScreenToast.ShowInfoForItem(FertilizerItemId, $"Đã bón phân: cây lớn thêm {pct}%.", fallbackText: "Phân");
-            FarmActivityLog.RecordEvent(tile.HistoryKey, FarmActivityLog.KindFertilize, $"+{pct}% tăng trưởng");
+            string saved = YWonderLand.Core.GameTimeConfig.FormatDuration(bonusSec);
+            ScreenToast.ShowInfoForItem(FertilizerItemId, $"Đã bón phân: cây chín sớm hơn {saved}.", fallbackText: "Phân");
+            FarmActivityLog.RecordEvent(tile.HistoryKey, FarmActivityLog.KindFertilize, $"sớm hơn {saved}");
         }
 
         // Cho ăn = mở túi (tab Thực phẩm) chọn thức ăn (tạm dùng Bắp ngô) -> animation Feed.

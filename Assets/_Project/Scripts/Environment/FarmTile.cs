@@ -502,27 +502,36 @@ public class FarmTile : MonoBehaviour
 
     /// <summary>Tưới LẠI khi cây đang lớn → ĐỔ ĐẦY thanh máu (wateredLifeSec), lùi mốc chết. Lớn vẫn chạy theo thời gian thật.</summary>
     /// <summary>
-    /// BÓN PHÂN (khách chốt 30/07): đẩy tiến độ lớn thêm `percent` (0.15 = 15%).
-    ///
-    /// Cách làm: DỜI mốc bắt đầu lớn (`growStartTime`) về quá khứ đúng `percent × tổng thời gian lớn`.
-    /// Chọn cách này vì `growStartTime` VỐN ĐÃ được lưu ra đĩa/server và VỐN ĐÃ được dùng để tính bù
-    /// lúc offline (`RestoreSave`) — nên hiệu lực phân bón tự sống sót qua lưu/tải và qua cả lúc
-    /// đóng app, KHÔNG phải thêm trường mới ở 3 chỗ. Cây lâu năm thu xong đặt lại `growStartTime`
-    /// nên phân cũng tự hết hiệu lực theo từng vụ — đúng ý "mỗi vụ bón lại".
-    ///
-    /// Trả false nếu: ô con của giàn, chưa gieo, hoặc CHƯA TƯỚI (chưa bắt đầu lớn thì không có gì để đẩy).
+    /// Cây này có bón phân được không (khách chốt 30/07: CHỈ cây NGẮN NGÀY).
+    /// Điều kiện: là ô chính, đã gieo, ĐANG LỚN (đã tưới), và vòng lớn của giống không quá
+    /// `maxGrowthSec`. Dùng `currentCrop.growthTimeSec` (số gốc của giống) chứ KHÔNG dùng
+    /// GetGrowthTime() — hàm kia bị tutorial ép về 24s và đổi theo vụ tái sinh của cây lâu năm,
+    /// dựa vào nó thì trong tutorial cây nào cũng lọt cửa "ngắn ngày".
     /// </summary>
-    public bool ApplyFertilizer(float percent)
+    public bool IsFertilizable(float maxGrowthSec)
     {
         if (masterTile != null) return false;      // ô con của giàn — bón vào ô CHÍNH
         if (currentCrop == null) return false;
         if (!isGrowing || currentState != TileState.Watered) return false;
-        if (percent <= 0f) return false;
+        return currentCrop.growthTimeSec > 0f && currentCrop.growthTimeSec <= maxGrowthSec;
+    }
 
-        float total = GetGrowthTime();
-        if (total <= 0f) return false;
+    /// <summary>
+    /// BÓN PHÂN (khách chốt 30/07): rút thẳng `bonusSeconds` thời gian chờ — một lượng CỐ ĐỊNH,
+    /// không phải phần trăm. Khách chọn cách này để cây càng dài ngày càng không bị lợi dụng;
+    /// kèm luôn giới hạn chỉ bón được cây ngắn ngày (xem IsFertilizable).
+    ///
+    /// Cách làm: DỜI mốc bắt đầu lớn (`growStartTime`) về quá khứ. Chọn vậy vì `growStartTime`
+    /// VỐN ĐÃ được lưu ra đĩa/server và VỐN ĐÃ dùng để tính bù lúc offline (`RestoreSave`) — nên
+    /// hiệu lực phân tự sống sót qua lưu/tải và qua cả lúc đóng app, KHÔNG phải thêm trường mới
+    /// ở 3 chỗ. Cây lâu năm thu xong đặt lại `growStartTime` nên phân cũng tự hết theo từng vụ.
+    /// </summary>
+    public bool ApplyFertilizer(float bonusSeconds, float maxGrowthSec)
+    {
+        if (bonusSeconds <= 0f) return false;
+        if (!IsFertilizable(maxGrowthSec)) return false;
 
-        growStartTime -= total * percent;
+        growStartTime -= bonusSeconds;
         FarmStateSync.SaveTileState(this);
         return true;
     }
