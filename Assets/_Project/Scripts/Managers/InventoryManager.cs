@@ -127,8 +127,10 @@ namespace YWonderLand.Managers
                 "asparagus_01","red_ginseng_01","royal_ginseng_01" })
                 AddItem(id, productQty);
 
-            // Vật phẩm tiêu hao (phân/vắc-xin/thuốc/mồi) + nước tưới (test, bình thường múc ở ao)
-            foreach (var id in new[] { "fertilizer_01","vaccine_01","medicine_01","bait_01" })
+            // Vật phẩm tiêu hao (vắc-xin/thuốc/mồi) + nước tưới (test, bình thường múc ở ao).
+            // Bỏ "fertilizer_01" 30/07: bón phân dời sang bản sau — phát ra chỉ nằm chết trong kho
+            // và còn đẩy lên server qua QueueInventoryDelta.
+            foreach (var id in new[] { "vaccine_01","medicine_01","bait_01" })
                 AddItem(id, consumableQty);
             AddItem("watering_water_01", waterQty);
 

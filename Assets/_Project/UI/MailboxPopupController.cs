@@ -193,7 +193,9 @@ public class MailboxPopupController : MonoBehaviour
         var compGift = new List<AttachmentItem>
         {
             new AttachmentItem("Cá vàng", "🪙", 500, iconClass: "mail-reward-pos"),
-            new AttachmentItem("Phân bón siêu tốc", "🧪", 3, itemId: "fertilizer_01")
+            // Đổi 30/07: trước đây tặng "Phân bón" — bón phân dời sang bản sau nên không được
+            // để lộ ở đây (hòm thư KHÔNG lọc qua HiddenItems như shop/túi).
+            new AttachmentItem("Thuốc trị", "💊", 3, itemId: "medicine_01")
         };
         var compMail = new MailData(
             "mail_compensation",

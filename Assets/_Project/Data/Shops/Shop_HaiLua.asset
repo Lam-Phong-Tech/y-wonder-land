@@ -15,7 +15,6 @@ MonoBehaviour:
   shopName: "\u0110\u1EA1i l\xFD Hai L\xFAa"
   accessMode: 1
   buyItemIds:
-  - fertilizer_01
   - vaccine_01
   - medicine_01
   sellItemIds: []

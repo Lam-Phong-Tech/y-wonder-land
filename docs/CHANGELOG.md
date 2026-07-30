@@ -6,6 +6,33 @@
 
 ---
 
+## [2026-07-30] — Ẩn hẳn phân bón (dời sang bản sau)
+
+Khách chốt: bón phân để bản sau mới làm (khi có thông số). Ẩn hết dấu vết cho tới lúc đó.
+Nhắc lại: phân bón hiện là món hàng VÔ DỤNG — không có code nào áp nó lên cây, mô tả
+"Giảm 50% thời gian sinh trưởng" là lời hứa suông.
+
+Shop và túi đồ vốn ĐÃ lọc qua `HiddenItems`, nhưng còn 3 chỗ lọt:
+- **Hòm thư** — thư "Đền Bù Sự Cố" mẫu tặng "Phân bón siêu tốc" x3, và hòm thư KHÔNG lọc
+  qua HiddenItems như shop/túi. Đổi thành Thuốc trị.
+- **Loadout test** (`InventoryManager`) phát 300x phân — nằm chết trong kho và còn bị đẩy
+  lên server qua QueueInventoryDelta. Đã bỏ.
+- **Shop asset + generator** (`Shop_ItemShop`, `Shop_HaiLua`) vẫn liệt kê. Đã gỡ khỏi cả
+  2 file .asset lẫn `ShopDataGenerator`, để nếu sau này ai bỏ HiddenItems thì nó cũng
+  không lòi ra. Cùng lúc gỡ khỏi danh sách shop mock của `ShopPopupController`.
+
+`HiddenItems` GIỮ nguyên entry làm lớp chặn cuối. `fertilizer_01.asset` và dòng trong
+`ItemDataGenerator` GIỮ nguyên — người chơi cũ đang có phân trong kho, xoá khỏi ItemDatabase
+là hỏng dữ liệu của họ; ẩn đi thì nó chỉ nằm im.
+
+Đã bỏ `FarmActivityLog.KindFertilize` (không còn ai dùng). Muốn làm lại bản sau: thêm lại
+hằng số + một dòng `LogRow` ở `AnimalInteractionPopupController.RefreshCropLog`.
+
+⚠️ CHƯA đụng `server/shopCatalog.json` (vẫn còn phân bón) — client không chào bán nữa nên
+không lộ, và sửa server thì phải deploy. Dọn cùng lần deploy tới.
+
+---
+
 ## [2026-07-30] — Bỏ hẳn chữ nổi kiểu name-tag, công tắc chuyển vào Cài đặt
 
 Khách chốt: BỎ hẳn kiểu hiện giờ trên đầu cây như bản cũ; cách xem chính thức là BẤM VÀO CÂY

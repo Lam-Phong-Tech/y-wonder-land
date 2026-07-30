@@ -41,7 +41,8 @@ namespace YWonderLand.EditorTools
             CreateShop("Shop_ItemShop", "Cửa hàng Vật phẩm", ShopDefinition.AccessMode.BuyOnly,
                 buy: new List<string>
                 {
-                    "fertilizer_01", "vaccine_01", "medicine_01", "bait_01", "mine_ticket_01", "spin_ticket_01",
+                    // Bỏ "fertilizer_01" 30/07: tính năng bón phân dời sang bản sau (chưa có thông số).
+                    "vaccine_01", "medicine_01", "bait_01", "mine_ticket_01", "spin_ticket_01",
                     // Thêm 30/07: vật liệu xây + nước tưới (miễn phí) mua trực tiếp, khỏi phải đi chặt/đào/múc.
                     "wood_01", "stone_01", "watering_water_01"
                 });
@@ -84,7 +85,8 @@ namespace YWonderLand.EditorTools
 
             // 5) Hai Lúa — phân/vắc-xin/thuốc (BuyOnly)
             CreateShop("Shop_HaiLua", "Đại lý Hai Lúa", ShopDefinition.AccessMode.BuyOnly,
-                buy: new List<string> { "fertilizer_01", "vaccine_01", "medicine_01" });
+                // Bỏ "fertilizer_01" 30/07: bón phân dời sang bản sau.
+                buy: new List<string> { "vaccine_01", "medicine_01" });
 
             // 6) Verdant — bán nông sản + mua tiêu dùng (Both)
             CreateShop("Shop_Verdant", "Siêu thị Verdant", ShopDefinition.AccessMode.Both,

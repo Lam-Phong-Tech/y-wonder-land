@@ -1073,7 +1073,6 @@ public class ShopPopupController : MonoBehaviour
             "corn_seed_01",
             "pumpkin_seed_01",
             "grass_seed_01",
-            "fertilizer_01",
             "vaccine_01",
             "medicine_01",
             "bait_01",
