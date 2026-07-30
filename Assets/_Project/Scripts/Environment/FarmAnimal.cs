@@ -144,6 +144,11 @@ namespace YWonderLand.Environment
         private TextMesh infoTM;
         private MeshFilter infoMF;   // đo bề rộng chữ → co nhãn cho vừa thanh đói, né chữ tràn màn hình
 
+        // Chống giật: nội dung nhãn cập nhật theo NHỊP, không phải mỗi khung hình (xem UpdateInfoLabel).
+        private const float InfoUpdateInterval = 0.25f;
+        private float infoNextUpdate;
+        private string infoLastText;
+
         public event Action<FarmAnimal> OnAnimalStateChanged;
 
         /// <summary>Bắn khi con vật vừa được CHO ĂN (khác OnAnimalStateChanged bắn cho mọi thay đổi). Dùng cho tutorial.</summary>
@@ -658,6 +663,9 @@ namespace YWonderLand.Environment
         {
             if (infoRoot != null) return;
 
+            // Lệch pha để đàn thú không cùng tính lại ở đúng một khung hình rồi dồn cục.
+            infoNextUpdate = Time.unscaledTime + UnityEngine.Random.Range(0f, InfoUpdateInterval);
+
             var go = new GameObject("AnimalInfo");
             infoRoot = go.transform;
             // Làm CON của con vật (giống thanh đói) để con vật bị xoá là nhãn đi theo, không sót rác.
@@ -705,7 +713,17 @@ namespace YWonderLand.Environment
             if (barCamera != null)
                 infoRoot.rotation = Quaternion.LookRotation(barCamera.transform.forward, barCamera.transform.up);
 
-            if (infoTM != null) infoTM.text = GetInfoText();
+            // Giống nhãn cây: dựng lại chuỗi + mesh chữ mỗi khung hình là nguồn gây giật.
+            // Số chỉ đổi theo phút nên 4 lần/giây là đủ. Xoay vẫn giữ mỗi khung hình cho mượt.
+            if (Time.unscaledTime < infoNextUpdate) return;
+            infoNextUpdate = Time.unscaledTime + InfoUpdateInterval;
+
+            string txt = GetInfoText();
+            if (infoTM != null && !string.Equals(txt, infoLastText, StringComparison.Ordinal))
+            {
+                infoLastText = txt;
+                infoTM.text = txt; // chỉ gán khi chữ ĐỔI
+            }
             FitInfoToWidth();
         }
 

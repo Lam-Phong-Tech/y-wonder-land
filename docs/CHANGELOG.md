@@ -6,6 +6,35 @@
 
 ---
 
+## [2026-07-30] — Chống giật chữ nổi + popup "Xem ruộng"
+
+Khách gửi ảnh farm chữ đè kín màn hình: *"nhìn như đám rừng không biết đường tưới nước luôn,
+với lại những con số này nó chạy bị lag game"*. Hai vấn đề, vấn đề thứ hai (GIẬT) là mới.
+
+**Chống giật — gốc: dựng lại chữ mỗi khung hình cho MỖI ô**
+- `FarmTile.UpdateCropInfoLabel` + `LateUpdate` (thanh nước) và `FarmAnimal.UpdateInfoLabel`
+  trước đây mỗi khung hình đều: `GetComponentsInChildren<Renderer>()` (cấp phát mảng mới),
+  dựng chuỗi trạng thái, gán `.text` (dựng lại mesh chữ), đọc `mesh.bounds`. Vài chục ô ×
+  60 khung/giây = ngập rác bộ nhớ -> khựng.
+- Nay cập nhật theo NHỊP 0.25s (số chỉ đổi theo phút nên thừa mượt); chỉ gán `.text` khi chữ
+  THẬT SỰ đổi; cache `Camera.main`. Vị trí/xoay vẫn mỗi khung hình, bỏ thì nhãn giật khi xoay cam.
+- Mỗi ô lệch pha ngẫu nhiên lúc tạo, kẻo cả ruộng cùng tới nhịp một khung hình rồi dồn cục.
+- QUAN TRỌNG: thanh nước KHÔNG dính nút ẩn chữ, nên nếu chỉ sửa phần chữ thì ẩn đi vẫn giật.
+
+**Popup "Xem ruộng" (ý anh Nhiên: làm giống chuồng thú)**
+- Thêm mục `Xem ruộng` (phím Q) vào bảng gợi ý của ô đất — song song với `Xem chuồng` của thú.
+  Click vẫn LÀM VIỆC LUÔN (cuốc/gieo/tưới/thu), không bắt qua popup.
+- `FindPlotTiles` — loang 4 hướng gom mọi ô đất liền nhau, viết theo `FindNearbyPlowedTiles`
+  (giữ chặn lệch lưới + chặn khác tầng/đảo) nhưng lấy CẢ ô đang trồng, không giới hạn số ô.
+- `AnimalInteractionPopupController.ShowPlot(List<FarmTile>)` — DÙNG CHUNG popup của chuồng thú
+  (cùng là "cụm ô liền nhau, liệt kê thứ bên trong"). Khỏi dựng popup mới, KHỎI SỬA SCENE.
+  Chế độ ruộng: ẩn bảng thông tin/nhật ký/hàng nút của thú, nới khung danh sách 160 -> 320px,
+  tiêu đề đổi thành "Ruộng", dòng trạng thái tóm tắt "x chín · y cần tưới".
+- Thẻ mỗi cây: ảnh nông sản + tên + trạng thái (dùng lại `GetStatusText`, gộp xuống dòng thành " · ").
+  Ô con của giàn không tính riêng. CHỈ ĐỌC — chưa có nút tưới/thu trong popup.
+
+---
+
 ## [2026-07-30] — Ẩn thông số trên farm + nhãn con vật + nhật ký cho ăn/chết
 
 Khách phản ánh chữ nổi trên cây ("Lớn 50% · chín ~11 giờ 55 phút") làm mất vẻ đẹp của farm.

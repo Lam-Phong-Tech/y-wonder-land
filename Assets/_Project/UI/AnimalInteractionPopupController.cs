@@ -29,6 +29,7 @@ public class AnimalInteractionPopupController : MonoBehaviour
     private Label lblEnclosureSummary;
     private Button btnAddAnimal;
     private VisualElement animalCardList;
+    private ScrollView animalCardScroll;   // nới cao hơn ở chế độ Xem ruộng (ruộng nhiều cây hơn chuồng)
     private Button btnClose;
     private Button btnFeed;
     private Button btnHarvest;
@@ -38,12 +39,16 @@ public class AnimalInteractionPopupController : MonoBehaviour
 
     private FarmAnimal currentAnimal;
     private List<BuildSurfaceCell> currentEnclosure;
+    // Chế độ XEM RUỘNG (khách chốt 30/07): dùng CHUNG khung popup này với chuồng thú —
+    // cùng là "một cụm ô liền nhau, liệt kê từng thứ bên trong". Khỏi dựng popup mới, khỏi sửa scene.
+    private List<FarmTile> currentPlot;
     private readonly List<FarmAnimal> enclosureAnimals = new List<FarmAnimal>();
     private readonly Dictionary<FarmAnimal, VisualElement> animalCards = new Dictionary<FarmAnimal, VisualElement>();
 
     private float refreshTimer;
 
     private bool IsEnclosureMode => currentEnclosure != null;
+    private bool IsPlotMode => currentPlot != null;
 
     void Awake()
     {
@@ -77,6 +82,7 @@ public class AnimalInteractionPopupController : MonoBehaviour
         lblEnclosureSummary = root.Q<Label>("LblEnclosureSummary");
         btnAddAnimal = root.Q<Button>("BtnAddAnimal");
         animalCardList = root.Q<VisualElement>("AnimalCardList");
+        animalCardScroll = root.Q<ScrollView>("AnimalCardScroll");
 
         feedLogPanel = root.Q<VisualElement>("FeedLogPanel");
         lblFeedLog = root.Q<Label>("LblFeedLog");
@@ -116,6 +122,7 @@ public class AnimalInteractionPopupController : MonoBehaviour
         if (animal == null || container == null) return;
 
         currentEnclosure = null;
+        currentPlot = null;
         if (enclosurePanel != null) enclosurePanel.style.display = DisplayStyle.None;
         ClearAnimalCards();
 
@@ -128,12 +135,138 @@ public class AnimalInteractionPopupController : MonoBehaviour
     {
         if (enclosure == null || container == null) return;
 
+        currentPlot = null;
         currentEnclosure = new List<BuildSurfaceCell>(enclosure);
         container.style.display = DisplayStyle.Flex;
         UIPopupTracker.SetOpen(this, true);
         if (enclosurePanel != null) enclosurePanel.style.display = DisplayStyle.Flex;
 
         RefreshEnclosureUI();
+    }
+
+    /// <summary>
+    /// XEM RUỘNG (khách chốt 30/07): liệt kê mọi cây trong cụm ô đất liền nhau, thay cho việc
+    /// bắt người chơi đọc chữ nổi lởm chởm trên đầu từng cây ("nhìn như đám rừng").
+    /// Chỉ ĐỌC — mọi thao tác cuốc/gieo/tưới/thu vẫn bấm thẳng ngoài ruộng như cũ.
+    /// </summary>
+    public void ShowPlot(List<FarmTile> tiles)
+    {
+        if (tiles == null || container == null) return;
+
+        UnsubscribeCurrentAnimal();
+        currentAnimal = null;
+        currentEnclosure = null;
+        currentPlot = new List<FarmTile>(tiles);
+
+        container.style.display = DisplayStyle.Flex;
+        UIPopupTracker.SetOpen(this, true);
+        if (enclosurePanel != null) enclosurePanel.style.display = DisplayStyle.Flex;
+
+        // Ruộng không có mấy thứ của thú: bảng thông tin, nhật ký cho ăn, nút cho ăn/chữa bệnh, nút thả thú.
+        if (infoPanel != null) infoPanel.style.display = DisplayStyle.None;
+        if (actionsPanel != null) actionsPanel.style.display = DisplayStyle.None;
+        if (feedLogPanel != null) feedLogPanel.style.display = DisplayStyle.None;
+        if (btnAddAnimal != null) btnAddAnimal.style.display = DisplayStyle.None;
+
+        // Khung 160px của chuồng vừa cho vài con; ruộng có thể mấy chục cây nên nới ra.
+        // Chỗ vừa trống do ẩn bảng thông tin + hàng nút bên dưới.
+        if (animalCardScroll != null) animalCardScroll.style.height = PlotScrollHeight;
+
+        RefreshPlotUI();
+    }
+
+    private void RefreshPlotUI()
+    {
+        if (!IsPlotMode) return;
+
+        // Ô bị phá/thu hoạch xong có thể biến mất giữa chừng -> lọc lại mỗi lần vẽ.
+        currentPlot.RemoveAll(t => t == null);
+
+        int total = currentPlot.Count;
+        int planted = 0, ripe = 0, thirsty = 0;
+        foreach (var t in currentPlot)
+        {
+            if (t == null || t.masterTile != null) continue; // ô con của giàn — tính theo ô chính thôi
+            if (t.GetCurrentCrop() == null) continue;
+            planted++;
+            if (t.currentState == FarmTile.TileState.Ripe) ripe++;
+            else if (NeedsWater(t)) thirsty++;
+        }
+
+        if (lblAnimalName != null) lblAnimalName.text = "Ruộng";
+        if (lblStatus != null)
+            lblStatus.text = planted == 0
+                ? "Ruộng trống — chưa gieo hạt nào."
+                : $"Có <color=#5BD66B>{ripe} chín</color> · <color=#FFD54F>{thirsty} cần tưới</color>";
+
+        if (lblEnclosureSummary != null)
+            lblEnclosureSummary.text = $"Ruộng: {total} ô · {planted} cây";
+
+        RebuildPlotCards();
+    }
+
+    // Cần tưới = chưa tưới lần nào, hoặc nước đã tụt thấp (cùng ngưỡng với cảnh báo trên nhãn nổi).
+    private static bool NeedsWater(FarmTile tile)
+    {
+        if (tile == null || tile.GetCurrentCrop() == null) return false;
+        if (tile.currentState == FarmTile.TileState.Planted) return true;
+        return tile.currentState == FarmTile.TileState.Watered && tile.GetWaterFraction() < 0.4f;
+    }
+
+    private void RebuildPlotCards()
+    {
+        if (animalCardList == null) return;
+
+        ClearAnimalCards();
+
+        int index = 0;
+        foreach (var tile in currentPlot)
+        {
+            if (tile == null || tile.masterTile != null) continue; // bỏ ô con của giàn
+            var crop = tile.GetCurrentCrop();
+            if (crop == null) continue; // ô trống thì không cần thẻ
+
+            index++;
+            var card = new VisualElement();
+            card.AddToClassList("ap-animal-card");
+
+            var icon = CreateItemIconElement(crop.harvestItemId, index.ToString());
+            icon.AddToClassList("ap-card-icon");
+            card.Add(icon);
+
+            var name = new Label(CropDisplayName(crop, index));
+            name.AddToClassList("ap-card-name");
+            card.Add(name);
+
+            var meta = new Label(FlattenStatus(tile.GetStatusText()));
+            meta.AddToClassList("ap-card-meta"); // lớp này đã có white-space: normal
+            card.Add(meta);
+
+            animalCardList.Add(card);
+        }
+
+        if (index == 0)
+        {
+            var empty = new Label("Ruộng này chưa gieo hạt nào.");
+            empty.AddToClassList("ap-empty");
+            animalCardList.Add(empty);
+        }
+    }
+
+    private string CropDisplayName(CropDefinition crop, int index)
+    {
+        if (crop == null) return $"Ô {index}";
+        var def = !string.IsNullOrEmpty(crop.harvestItemId) && itemDatabase != null
+            ? itemDatabase.GetItem(crop.harvestItemId) : null;
+        string cropName = def != null && !string.IsNullOrEmpty(def.itemName) ? def.itemName : "Cây";
+        return $"{index}. {cropName}";
+    }
+
+    // GetStatusText xuống dòng cho nhãn nổi 3D; trong thẻ thì gộp lại một dòng cho gọn.
+    private static string FlattenStatus(string status)
+    {
+        if (string.IsNullOrEmpty(status)) return "—";
+        return status.Replace("\n", " · ");
     }
 
     private void SelectAnimal(FarmAnimal animal)
@@ -300,6 +433,12 @@ public class AnimalInteractionPopupController : MonoBehaviour
     private VisualElement CreateAnimalIconElement(FarmAnimal animal)
     {
         string itemId = animal != null && animal.data != null ? animal.data.animalId : "";
+        return CreateItemIconElement(itemId, AnimalIconText(animal));
+    }
+
+    /// <summary>Ảnh vật phẩm theo id; không có ảnh thì trả về chữ thay thế. Dùng chung cho thẻ thú và thẻ cây.</summary>
+    private VisualElement CreateItemIconElement(string itemId, string fallbackText)
+    {
         ItemDefinition def = !string.IsNullOrEmpty(itemId) && itemDatabase != null ? itemDatabase.GetItem(itemId) : null;
 
         if (def != null && (def.iconTexture != null || def.iconSprite != null))
@@ -312,7 +451,7 @@ public class AnimalInteractionPopupController : MonoBehaviour
             return image;
         }
 
-        var fallback = new Label(AnimalIconText(animal));
+        var fallback = new Label(fallbackText);
         fallback.AddToClassList("ap-card-icon-fallback");
         return fallback;
     }
@@ -363,6 +502,9 @@ public class AnimalInteractionPopupController : MonoBehaviour
     /// <summary>Số mốc cho ăn gần nhất hiện trong popup (cũ hơn vẫn nằm trong nhật ký, chỉ không hiện).</summary>
     private const int FeedLogLinesShown = 5;
 
+    /// <summary>Chiều cao khung danh sách ở chế độ Xem ruộng (chuồng thú giữ 160px theo USS).</summary>
+    private const float PlotScrollHeight = 320f;
+
     // Lịch sử cho ăn của CHÍNH con đang xem (khách chốt 30/07: nhật ký cho ăn nằm trong popup từng con).
     private void RefreshFeedLog(FarmAnimal animal)
     {
@@ -404,7 +546,9 @@ public class AnimalInteractionPopupController : MonoBehaviour
         if (refreshTimer < 0.25f) return;
 
         refreshTimer = 0f;
-        if (IsEnclosureMode)
+        if (IsPlotMode)
+            RefreshPlotUI();
+        else if (IsEnclosureMode)
             RefreshEnclosureUI();
         else if (currentAnimal != null)
             RefreshUI(currentAnimal);
@@ -440,8 +584,15 @@ public class AnimalInteractionPopupController : MonoBehaviour
         UnsubscribeCurrentAnimal();
         currentAnimal = null;
         currentEnclosure = null;
+        currentPlot = null;
         enclosureAnimals.Clear();
         if (enclosurePanel != null) enclosurePanel.style.display = DisplayStyle.None;
+
+        // Chế độ Xem ruộng có ẩn bớt mấy khối của thú + nới khung danh sách —
+        // trả lại hết để lần mở sau (chuồng thú) hiện đúng như cũ.
+        if (btnAddAnimal != null) btnAddAnimal.style.display = DisplayStyle.Flex;
+        if (animalCardScroll != null) animalCardScroll.style.height = StyleKeyword.Null;
+
         ClearAnimalCards();
     }
 

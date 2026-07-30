@@ -887,6 +887,21 @@ namespace YWonderLand.Environment
 
             actions.Add(new InteractionAction { keyName = "Click", actionName = actName, onClick = () => PerformTileAction(tile) });
 
+            // Khách chốt 30/07: xem CẢ MẢNH RUỘNG trong một popup (giống "Xem chuồng" của thú),
+            // thay cho việc đọc chữ nổi lởm chởm trên đầu từng cây ("nhìn như đám rừng").
+            // Giữ nguyên Click = làm việc luôn, không bắt mở popup mới thao tác được.
+            FarmTile plotSeed = tile.masterTile != null ? tile.masterTile : tile;
+            actions.Add(new InteractionAction
+            {
+                keyName = "Q",
+                actionName = "Xem ruộng",
+                onClick = () =>
+                {
+                    if (AnimalInteractionPopupController.Instance != null)
+                        AnimalInteractionPopupController.Instance.ShowPlot(FindPlotTiles(plotSeed));
+                }
+            });
+
             FarmTile demolishTile = tile.masterTile != null ? tile.masterTile : tile;
             // Khách chốt 29/07: ô ĐÃ TRỒNG cây thì KHÔNG hiện nút hủy — chỉ hủy được ô còn trống.
             if (CanDemolishFarmTile(demolishTile) && !HasCropOnFarmTile(demolishTile))
@@ -4112,6 +4127,58 @@ namespace YWonderLand.Environment
         }
 
         // Only connected, cardinally adjacent plowed tiles may belong to one multi-slot crop.
+        /// <summary>
+        /// Gom MỌI ô đất liền nhau với ô này thành một "mảnh ruộng" — kể cả ô đang trồng
+        /// (khác FindNearbyPlowedTiles chỉ nhặt ô trống để đặt giàn). Dùng cho "Xem ruộng".
+        /// Cùng thuật toán loang 4 hướng, có chặn lệch lưới và chặn khác tầng/khác đảo.
+        /// </summary>
+        private List<FarmTile> FindPlotTiles(FarmTile seed, int maxTiles = 400)
+        {
+            var result = new List<FarmTile>();
+            if (seed == null) return result;
+
+            FarmTile master = seed.masterTile != null ? seed.masterTile : seed;
+            result.Add(master); // ô đang đứng cũng thuộc ruộng
+
+            Vector2 spacing = GetFarmSlotSpacing(master);
+            Vector3 origin = master.transform.position;
+            var map = new Dictionary<Vector2Int, FarmTile>();
+            foreach (var tile in FindObjectsByType<FarmTile>(FindObjectsSortMode.None))
+            {
+                if (tile == null || tile == master) continue;
+
+                Vector3 position = tile.transform.position;
+                float gridX = (position.x - origin.x) / spacing.x;
+                float gridZ = (position.z - origin.z) / spacing.y;
+                int x = Mathf.RoundToInt(gridX);
+                int z = Mathf.RoundToInt(gridZ);
+                if (Mathf.Abs(gridX - x) > 0.2f || Mathf.Abs(gridZ - z) > 0.2f) continue;
+                if (Mathf.Abs(position.y - origin.y) > Mathf.Max(spacing.x, spacing.y)) continue;
+
+                var key = new Vector2Int(x, z);
+                if (key == Vector2Int.zero || map.ContainsKey(key)) continue;
+                map[key] = tile;
+            }
+
+            var visited = new HashSet<Vector2Int> { Vector2Int.zero };
+            var queue = new Queue<Vector2Int>();
+            queue.Enqueue(Vector2Int.zero);
+            while (queue.Count > 0 && result.Count < maxTiles)
+            {
+                Vector2Int current = queue.Dequeue();
+                foreach (Vector2Int direction in FarmSlotDirections)
+                {
+                    Vector2Int next = current + direction;
+                    if (!visited.Add(next) || !map.TryGetValue(next, out FarmTile tile)) continue;
+                    result.Add(tile);
+                    queue.Enqueue(next);
+                    if (result.Count >= maxTiles) break;
+                }
+            }
+
+            return result;
+        }
+
         private List<FarmTile> FindNearbyPlowedTiles(FarmTile master, int count)
         {
             var result = new List<FarmTile>();
