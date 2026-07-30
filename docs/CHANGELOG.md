@@ -43,16 +43,26 @@ Lớp này vốn đã thao tác trên `BuildSurfaceCell` chứ không dính gì 
   hơn dời xong mất cây.
 - Vào bằng mục "Dời ruộng" (phím M) trên bảng gợi ý, hoặc nút trong popup.
 
-### Dời đường lát đá
-- `PenEnclosure.FindConnected(seed, predicate)` tách ra từ `FindPen` — cùng một phép loang 4 hướng,
-  khác mỗi bộ lọc.
-- `BeginMovePath` nhấc **cả đoạn đường liền nhau**, không phải từng viên: dịch một lối đi dài mà
-  phải gỡ từng viên thì không ai làm nổi. Số ô hiện trong thông báo trước khi đặt → thấy nhiều quá
-  thì bấm Hủy dời. Vật liệu đã tốn được giữ nguyên nên phá sau vẫn hoàn đúng đá.
+### Dời đường lát đá — TỪNG VIÊN
+Bản đầu bé làm nhấc cả đoạn đường liền nhau cho giống chuồng; anh bác ngay: *"dời từng viên thôi,
+cả đoạn thì khó dùng"* — đúng, nhu cầu thật là nắn lại một viên đặt lệch chứ không phải bốc cả lối đi.
+- `BeginMovePath` lấy **đúng bộ ô của công trình đang chỉ** qua `BuildSurfaceCell.FindAllByOccupant`
+  (thêm mới; khác `FindByOccupant` chỉ trả ô đầu). Viên chiếm nhiều ô thì vẫn đi trọn bộ.
+- `PenEnclosure.FindConnected(seed, predicate)` vẫn giữ (tách ra từ `FindPen`) nhưng đường **không**
+  dùng tới. Vật liệu đã tốn giữ nguyên nên phá sau vẫn hoàn đúng đá.
 
-**Files:** `FarmActivityLog.cs`, `PenMoveController.cs`, `PenEnclosure.cs`,
+### Chữ nghĩa phân bón nói theo PHẦN TRĂM
+Anh chốt: mô tả và toast nói *"giảm 15% thời gian"* thay vì *"chín sớm hơn 3 giờ 36 phút"* — dễ hiểu
+hơn với người chơi, và vẫn đúng vì cây ngắn ngày đều 24 giờ nên 3,6 giờ chính xác là 15%.
+- Toast + dòng nhật ký: phần trăm **tính ra từ chính giống cây đang bón** (`bonusSec / growthTimeSec`),
+  không gõ cứng → đổi `fertilizerBonusHours` trong Inspector là câu chữ tự đúng theo.
+- Mô tả tĩnh (`fertilizer_01.asset` + `ItemDataGenerator` + `ItemUsageHint`) ghi thẳng 15%; đổi
+  `fertilizerBonusHours` thì nhớ sửa kèm 3 chỗ này.
+
+**Files:** `FarmActivityLog.cs`, `PenMoveController.cs`, `PenEnclosure.cs`, `BuildSurfaceCell.cs`,
 `FarmInteractionController.cs`, `AnimalInteractionPopupController.cs`,
-`AnimalInteractionPopup.uxml`, `Styles/AnimalInteractionPopup.uss`
+`AnimalInteractionPopup.uxml`, `Styles/AnimalInteractionPopup.uss`,
+`ItemUsageHint.cs`, `ItemDataGenerator.cs`, `Resources/Items/fertilizer_01.asset`
 
 ---
 

@@ -26,8 +26,8 @@ namespace YWonderLand.Environment
 
         /// <summary>
         /// Cụm ô LIỀN NHAU (4-kề) tính từ seed, chỉ nhận những ô thoả <paramref name="include"/>.
-        /// Dùng cho chuồng (ô có rào) và cho đường lát đá (ô có công trình đường) — cùng một phép loang,
-        /// khác mỗi bộ lọc. Null nếu không gom được ô nào.
+        /// Null nếu không gom được ô nào. (Đường lát đá KHÔNG dùng hàm này: anh chốt 30/07 dời
+        /// từng viên chứ không dời cả đoạn — xem FarmInteractionController.BeginMovePath.)
         /// </summary>
         public static List<BuildSurfaceCell> FindConnected(
             BuildSurfaceCell seed, System.Func<BuildSurfaceCell, bool> include, int maxCells = 400)

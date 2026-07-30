@@ -2768,34 +2768,22 @@ namespace YWonderLand.Environment
         }
 
         /// <summary>
-        /// DỜI ĐƯỜNG LÁT ĐÁ: nhấc CẢ ĐOẠN đường liền nhau (giống chuồng), không phải từng viên —
-        /// dịch một lối đi dài mà phải gỡ từng viên thì không ai làm nổi. Số ô hiện trong thông báo
-        /// trước khi đặt, thấy nhiều quá thì bấm Hủy dời.
+        /// DỜI ĐƯỜNG LÁT ĐÁ: nhấc ĐÚNG VIÊN đang chỉ, không nhấc cả đoạn (anh chốt 30/07 —
+        /// bốc cả lối đi lên thì khó dùng, chỉ muốn nắn lại một viên đặt lệch).
+        /// Viên nào chiếm nhiều ô thì đi trọn bộ ô của nó.
         /// </summary>
         public bool BeginMovePath(GameObject pathBuilding)
         {
             if (pathBuilding == null) return false;
 
-            var seed = BuildSurfaceCell.FindByOccupant(pathBuilding);
-            if (seed == null)
+            var cells = BuildSurfaceCell.FindAllByOccupant(pathBuilding);
+            if (cells.Count == 0)
             {
                 ScreenToast.Show("Đường này không dời được (chưa gắn ô nền).");
                 return false;
             }
 
-            var run = PenEnclosure.FindConnected(seed, IsPathCell);
-            if (run == null || run.Count == 0) return false;
-            return StartGroupMove(run, "đường");
-        }
-
-        // Ô đang bị một đoạn đường chiếm: có công trình, mà công trình đó không phải ruộng và không phải rào.
-        private static bool IsPathCell(BuildSurfaceCell cell)
-        {
-            if (cell == null || cell.Occupant == null) return false;
-            var go = cell.Occupant;
-            if (go.GetComponentInChildren<FarmTile>(true) != null) return false;
-            if (go.GetComponentInChildren<FenceAutoConnect>(true) != null) return false;
-            return true;
+            return StartGroupMove(cells, "đường");
         }
 
         private bool StartGroupMove(List<BuildSurfaceCell> cells, string subjectLabel)
@@ -2858,6 +2846,9 @@ namespace YWonderLand.Environment
             if (!inv.RemoveItem(FertilizerItemId, 1)) return;
 
             float bonusSec = FertilizerBonusSec;
+            // Đọc giống TRƯỚC khi bón để tính ra phần trăm; bón xong cây có thể chín và mất crop.
+            var fertilizedCrop = tile.GetCurrentCrop();
+
             if (!tile.ApplyFertilizer(bonusSec, FertilizerMaxGrowthSec))
             {
                 inv.AddItem(FertilizerItemId, 1); // bón hụt thì HOÀN phân, không nuốt đồ của người chơi
@@ -2867,9 +2858,26 @@ namespace YWonderLand.Environment
 
             if (inventoryPopup != null) inventoryPopup.Hide();
 
-            string saved = YWonderLand.Core.GameTimeConfig.FormatDuration(bonusSec);
-            ScreenToast.ShowInfoForItem(FertilizerItemId, $"Đã bón phân: cây chín sớm hơn {saved}.", fallbackText: "Phân");
-            FarmActivityLog.RecordEvent(tile.HistoryKey, FarmActivityLog.KindFertilize, $"sớm hơn {saved}");
+            string saved = FertilizerSavingText(fertilizedCrop, bonusSec);
+            ScreenToast.ShowInfoForItem(FertilizerItemId, $"Đã bón phân: {saved}.", fallbackText: "Phân");
+            FarmActivityLog.RecordEvent(tile.HistoryKey, FarmActivityLog.KindFertilize, saved);
+        }
+
+        /// <summary>
+        /// Chữ báo hiệu quả bón phân. Khách muốn nói theo PHẦN TRĂM ("giảm 15% thời gian") chứ không
+        /// theo số giờ. Phần trăm TÍNH RA từ chính giống cây đang bón chứ không gõ cứng — đổi
+        /// <c>fertilizerBonusHours</c> trong Inspector là câu chữ tự đúng theo, khỏi lệch với số thật.
+        /// </summary>
+        private static string FertilizerSavingText(CropDefinition crop, float bonusSec)
+        {
+            if (crop != null && crop.growthTimeSec > 0f)
+            {
+                int percent = Mathf.RoundToInt(bonusSec / crop.growthTimeSec * 100f);
+                if (percent > 0) return $"giảm {percent}% thời gian chín";
+            }
+
+            // Không tra được giống thì lùi về nói số giờ — vẫn đúng, chỉ kém gọn.
+            return $"chín sớm hơn {YWonderLand.Core.GameTimeConfig.FormatDuration(bonusSec)}";
         }
 
         // Cho ăn = mở túi (tab Thực phẩm) chọn thức ăn (tạm dùng Bắp ngô) -> animation Feed.

@@ -41,7 +41,7 @@ namespace YWonderLand.Data
                 case "animals":   return AnimalHint(def, name);
                 // Phân bón bấm thẳng trong túi thì không biết bón cho cây nào — chỉ đường cho đúng.
                 case "items" when def.id == "fertilizer_01":
-                    return $"{name}: ra ruộng, đứng cạnh CÂY NGẮN NGÀY đang lớn rồi chọn \"Bón phân\" — mỗi lần bón cây chín sớm hơn vài giờ. Cây lâu năm không bón được.";
+                    return $"{name}: ra ruộng, đứng cạnh CÂY NGẮN NGÀY đang lớn rồi chọn \"Bón phân\" — mỗi lần bón giảm 15% thời gian chín. Cây lâu năm không bón được.";
                 default:          return FallbackHint(def, name);
             }
         }

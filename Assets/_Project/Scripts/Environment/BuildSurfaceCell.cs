@@ -98,6 +98,22 @@ namespace YWonderLand.Environment
             return null;
         }
 
+        /// <summary>MỌI ô mà occupant này chiếm (công trình 1 ô trả về đúng 1). Dùng khi dời từng
+        /// công trình lẻ — khác FindByOccupant chỉ trả ô đầu tiên.</summary>
+        public static List<BuildSurfaceCell> FindAllByOccupant(GameObject occupant)
+        {
+            var result = new List<BuildSurfaceCell>();
+            if (occupant == null) return result;
+
+            foreach (var cell in All)
+            {
+                if (cell == null) continue;
+                if (MatchesOccupant(cell.Occupant, occupant)) result.Add(cell);
+            }
+
+            return result;
+        }
+
         public static int ClearOccupant(GameObject occupant, bool clearBuildMaterial = true)
         {
             if (occupant == null) return 0;
