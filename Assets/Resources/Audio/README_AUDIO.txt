@@ -6,7 +6,7 @@ Thả file .wav / .mp3 / .ogg vào đây, ĐẶT ĐÚNG TÊN (không cần đuô
 
   bgm_farm  -> nhạc nền khi ở Nông trại
   bgm_city  -> nhạc nền khi ở Thành phố
-  bgm_mine  -> nhạc nền khi ở Mỏ (nếu mở lại đảo này)
+  bgm_mine  -> nhạc nền khi ở Mỏ đào khoáng (đảo này đang MỞ trong bản demo)
   chop      -> chặt cây / đào đá
   harvest   -> thu hoạch cây trồng
   coin      -> mua / bán ở shop
