@@ -74,6 +74,14 @@
                     </ui:Button>
                 </ui:VisualElement>
 
+                <!-- Bật/tắt CHỮ nổi trên cây & con vật (khách chốt 30/07: mặc định ẩn cho farm đẹp).
+                     Chữ trên nút đổi theo trạng thái: "Hiện" = bấm để hiện, "Ẩn" = bấm để ẩn. -->
+                <ui:VisualElement class="sidebar-btn-shadow">
+                    <ui:Button name="BtnLabels" class="sidebar-btn">
+                        <ui:Label name="BtnLabelsText" text="Hiện" class="sidebar-btn-labels-text" />
+                    </ui:Button>
+                </ui:VisualElement>
+
                 <!-- Shop (Temporary) — ẩn: shop giờ mở qua NPC Mua/Bán -->
                 <ui:VisualElement class="sidebar-btn-shadow" style="display: none;">
                     <ui:Button name="BtnShop" class="sidebar-btn sidebar-btn-shop">

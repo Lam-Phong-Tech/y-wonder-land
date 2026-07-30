@@ -868,7 +868,9 @@ public class FarmTile : MonoBehaviour
 
     private void UpdateCropInfoLabel()
     {
-        bool show = currentCrop != null &&
+        // Khách chốt 30/07: chữ nổi mặc định ẨN cho farm đẹp, bấm nút trên HUD mới hiện.
+        // Thanh nước (CreateWaterBar) KHÔNG dính cờ này — vẫn hiện để liếc phát biết cây khát.
+        bool show = FarmLabelVisibility.Show && currentCrop != null &&
             (currentState == TileState.Watered || currentState == TileState.Ripe || currentState == TileState.Planted);
         if (!show)
         {

@@ -67,6 +67,8 @@ public class GameHUDController : MonoBehaviour
     private Button btnCalendar;
     private Button btnMail;
     private Button btnFriends;
+    private Button btnLabels;        // bật/tắt chữ nổi trên cây & con vật
+    private Label btnLabelsText;     // chữ trên nút, đổi theo trạng thái
     private Button btnShop;
     private Button btnMap;
     private Button btnEvent;
@@ -300,6 +302,9 @@ public class GameHUDController : MonoBehaviour
         btnEvent = root.Q<Button>("BtnEvent");
         btnMail = root.Q<Button>("BtnMail");
         btnFriends = root.Q<Button>("BtnFriends");
+        btnLabels = root.Q<Button>("BtnLabels");
+        btnLabelsText = root.Q<Label>("BtnLabelsText");
+        RefreshLabelsButton(); // dựng đúng chữ/màu theo cờ đã lưu từ lần chơi trước
         btnShop = root.Q<Button>("BtnShop");
         btnMap = root.Q<Button>("BtnMap");
         btnPiggy = root.Q<Button>("BtnPiggy");
@@ -486,6 +491,14 @@ public class GameHUDController : MonoBehaviour
                 friendsPopup.Show();
             else
                 Debug.Log("[GameHUD] Friends clicked (no popup assigned)");
+        });
+
+        // Bật/tắt chữ nổi trên cây & con vật. KHÔNG gọi HideAllPopups — đây chỉ là công tắc
+        // hiển thị, bấm xong người chơi vẫn đang làm dở việc gì đó thì không nên đóng popup của họ.
+        btnLabels?.RegisterCallback<ClickEvent>(evt =>
+        {
+            YWonderLand.Environment.FarmLabelVisibility.Toggle();
+            RefreshLabelsButton();
         });
 
         btnShop?.RegisterCallback<ClickEvent>(evt =>
@@ -710,6 +723,21 @@ public class GameHUDController : MonoBehaviour
             questBubble.style.display = DisplayStyle.Flex;
             if (questText != null) questText.text = text;
         }
+    }
+
+    /// <summary>
+    /// Đồng bộ chữ + màu nút bật/tắt chữ nổi theo cờ hiện tại.
+    /// Chữ trên nút là VIỆC SẼ LÀM khi bấm: đang ẩn -> "Hiện", đang hiện -> "Ẩn".
+    /// </summary>
+    private void RefreshLabelsButton()
+    {
+        bool on = YWonderLand.Environment.FarmLabelVisibility.Show;
+
+        if (btnLabelsText != null) btnLabelsText.text = on ? "Ẩn" : "Hiện";
+        if (btnLabels == null) return;
+
+        if (on) btnLabels.AddToClassList("sidebar-btn-labels-on");
+        else btnLabels.RemoveFromClassList("sidebar-btn-labels-on");
     }
 
     /// <summary>

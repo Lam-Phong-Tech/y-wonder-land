@@ -138,6 +138,12 @@ namespace YWonderLand.Environment
         private const float BAR_W = 0.8f;
         private const float BAR_H = 0.12f;
 
+        // Nhãn chữ NỔI trên đầu (khách chốt 30/07): mấy giờ cho ăn / mấy giờ chết đói / mấy giờ thu trứng-thịt.
+        // Mặc định ẨN — bật bằng nút trên HUD (xem FarmLabelVisibility). Dựng y hệt nhãn cây ở FarmTile.
+        private Transform infoRoot;
+        private TextMesh infoTM;
+        private MeshFilter infoMF;   // đo bề rộng chữ → co nhãn cho vừa thanh đói, né chữ tràn màn hình
+
         public event Action<FarmAnimal> OnAnimalStateChanged;
 
         /// <summary>Bắn khi con vật vừa được CHO ĂN (khác OnAnimalStateChanged bắn cho mọi thay đổi). Dùng cho tutorial.</summary>
@@ -251,6 +257,7 @@ namespace YWonderLand.Environment
         void LateUpdate()
         {
             BillboardStatusBar();
+            UpdateInfoLabel();
         }
 
         // ── Truy vấn cho UI (popup hiện số) ──
@@ -270,6 +277,21 @@ namespace YWonderLand.Environment
         {
             if (data == null) return 0f;
             return hasBeenFed ? data.fedLifeSec : data.noFeedDeathSec;
+        }
+
+        /// <summary>Còn bao nhiêu giây nữa CHẾT ĐÓI nếu không cho ăn. -1 = loài này không chết đói.</summary>
+        public float GetTimeToStarveSec()
+        {
+            float window = CurrentHungerWindow();
+            if (window <= 0f) return -1f;
+            return Mathf.Max(0f, window - (float)(RealNow() - feedRefTime));
+        }
+
+        /// <summary>Còn bao nhiêu giây nữa TỚI CỮ cho ăn kế. 0 = tới cữ/quá cữ rồi. -1 = loài không cần cho ăn định kỳ.</summary>
+        public float GetTimeToNextFeedSec()
+        {
+            if (data == null || data.feedIntervalSec <= 0f) return -1f;
+            return Mathf.Max(0f, data.feedIntervalSec - (float)(RealNow() - feedRefTime));
         }
 
         /// <summary>Đang trong Tutorial? (ép KHÔNG chết đói để người mới khỏi nản — giống cây).</summary>
@@ -298,6 +320,21 @@ namespace YWonderLand.Environment
             if (data == null) return false;
             if (currentState == AnimalState.Sick || currentState == AnimalState.Dead) return false;
             return IsInfiniteHarvest || harvestsRemaining > 0;
+        }
+
+        /// <summary>
+        /// Còn bao nhiêu giây nữa được THỊT. Thịt chỉ ra ở VỤ CUỐI (xem SlaughterForMeat), nên
+        /// = thời gian tới vụ kế + số vụ còn lại phía sau × chu kỳ.
+        /// -1 = loài không ra thịt, hoặc thu vô hạn nên không có vụ cuối.
+        /// </summary>
+        public float GetTimeToMeatSec()
+        {
+            if (data == null || string.IsNullOrEmpty(data.meatItemId) || data.meatAmount <= 0) return -1f;
+            if (IsInfiniteHarvest || harvestsRemaining <= 0) return -1f;
+
+            float next = GetTimeToNextProduceSec();
+            if (next < 0f) return -1f;
+            return next + (harvestsRemaining - 1) * Mathf.Max(0.1f, data.produceCycleTimeSec);
         }
 
         // ── Interactions ──
@@ -370,6 +407,10 @@ namespace YWonderLand.Environment
                 occupiedCells = null;
             }
 
+            // Làm thịt là KẾT THÚC BÌNH THƯỜNG (không phải chết yểu) nên KHÔNG báo vào hòm thư,
+            // chỉ dọn mốc cho ăn của con đã đi.
+            FarmActivityLog.ClearFeedHistory(animalInstanceId);
+
             Destroy(gameObject);
         }
 
@@ -378,6 +419,11 @@ namespace YWonderLand.Environment
         {
             if (data != null)
                 ScreenToast.Show($"{data.animalName} đã chết đói! Nhớ cho ăn đúng giờ.");
+
+            // Ghi vào nhật ký -> hiện thành THƯ trong hòm thư (khách chốt 30/07). Toast bay mất rồi
+            // thì người chơi vẫn tra lại được con nào chết, lúc nào.
+            FarmActivityLog.RecordDeath(data != null ? data.animalName : null, "chết đói");
+            FarmActivityLog.ClearFeedHistory(animalInstanceId); // con đi rồi, dọn mốc cho ăn cho nhẹ
 
             if (currentPen != null)
             {
@@ -497,6 +543,8 @@ namespace YWonderLand.Environment
             {
                 if (r == null) continue;
                 if (barRoot != null && r.transform.IsChildOf(barRoot)) continue;
+                // Bỏ qua cả nhãn chữ — không thì nhãn tự đo chính nó rồi trôi cao dần mỗi lần tính lại.
+                if (infoRoot != null && r.transform.IsChildOf(infoRoot)) continue;
                 maxY = Mathf.Max(maxY, r.bounds.max.y);
                 found = true;
             }
@@ -602,6 +650,130 @@ namespace YWonderLand.Environment
                 productIndicator.transform.localScale = new Vector3(0.22f * p, 0.22f * p, 1f);
             }
         }
+
+        // ── Nhãn chữ nổi trên đầu: cho ăn / chết đói / trứng-thịt (khách chốt 30/07) ──
+        // Mặc định ẨN, bấm nút trên HUD mới hiện — xem FarmLabelVisibility.
+
+        private void CreateInfoLabel()
+        {
+            if (infoRoot != null) return;
+
+            var go = new GameObject("AnimalInfo");
+            infoRoot = go.transform;
+            // Làm CON của con vật (giống thanh đói) để con vật bị xoá là nhãn đi theo, không sót rác.
+            infoRoot.SetParent(transform, false);
+            infoRoot.localPosition = new Vector3(0f, InfoLabelHeight(), 0f);
+
+            infoTM = go.AddComponent<TextMesh>();
+            infoMF = go.GetComponent<MeshFilter>(); // TextMesh tự thêm MeshFilter — dùng đo bề rộng để co nhãn
+            infoTM.text = "";
+            infoTM.characterSize = 0.035f; // NHỎ như nhãn cây; còn co thêm ở FitInfoToWidth
+            infoTM.fontSize = 70;
+            infoTM.anchor = TextAnchor.LowerCenter;
+            infoTM.alignment = TextAlignment.Center;
+            infoTM.color = Color.white;
+            infoTM.richText = true;
+
+            var mr = go.GetComponent<MeshRenderer>();
+            if (mr != null)
+            {
+                mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                mr.receiveShadows = false;
+            }
+        }
+
+        /// <summary>Cao hơn thanh đói một chút để hai thứ không chồng lên nhau.</summary>
+        private float InfoLabelHeight()
+        {
+            float barH = statusBarHeight > 0f ? statusBarHeight : ComputeAutoBarHeight();
+            return barH + 0.3f;
+        }
+
+        private void UpdateInfoLabel()
+        {
+            bool show = FarmLabelVisibility.Show && data != null && currentState != AnimalState.Dead;
+            if (!show)
+            {
+                if (infoRoot != null) infoRoot.gameObject.SetActive(false);
+                return;
+            }
+
+            if (infoRoot == null) CreateInfoLabel();
+            infoRoot.gameObject.SetActive(true);
+
+            if (barCamera == null) barCamera = Camera.main;
+            if (barCamera != null)
+                infoRoot.rotation = Quaternion.LookRotation(barCamera.transform.forward, barCamera.transform.up);
+
+            if (infoTM != null) infoTM.text = GetInfoText();
+            FitInfoToWidth();
+        }
+
+        /// <summary>Co nhãn cho bề rộng không vượt thanh đói — chữ dài tự thu nhỏ (y hệt nhãn cây).</summary>
+        private void FitInfoToWidth()
+        {
+            if (infoRoot == null || infoTM == null) return;
+            if (infoMF == null) infoMF = infoTM.GetComponent<MeshFilter>();
+            var mesh = infoMF != null ? infoMF.sharedMesh : null;
+            if (mesh == null) return;
+
+            float localW = mesh.bounds.size.x;
+            if (localW <= 0.0001f) return; // chưa dựng mesh (chữ rỗng / đầu frame) → giữ nguyên
+            float scale = Mathf.Min(1f, BAR_W / localW); // chỉ THU NHỎ, không phóng to quá thanh đói
+            infoRoot.localScale = new Vector3(scale, scale, scale);
+        }
+
+        /// <summary>Nội dung nhãn: mấy giờ cho ăn · mấy giờ chết đói · mấy giờ thu trứng và thịt.</summary>
+        public string GetInfoText()
+        {
+            if (data == null) return "";
+            if (currentState == AnimalState.Sick)
+                return "<color=#E06666>Đang bệnh — cần Thuốc</color>";
+
+            var sb = new System.Text.StringBuilder();
+
+            // 1) Cữ cho ăn kế tiếp
+            float feed = GetTimeToNextFeedSec();
+            if (feed >= 0f)
+            {
+                sb.Append(feed <= 0.5f
+                    ? "<color=#FFD54F>Cần cho ăn</color>"
+                    : $"Cho ăn sau {FormatSec(feed)}");
+            }
+
+            // 2) Còn bao lâu chết đói nếu bỏ mặc
+            float starve = GetTimeToStarveSec();
+            if (starve >= 0f)
+            {
+                if (sb.Length > 0) sb.Append('\n');
+                sb.Append($"<color=#E06666>Chết đói ~{FormatSec(starve)}</color>");
+            }
+
+            // 3) Trứng/sữa vụ kế
+            float prod = GetTimeToNextProduceSec();
+            if (prod >= 0f)
+            {
+                string pname = !string.IsNullOrEmpty(data.productMainName) ? data.productMainName : "Sản phẩm";
+                if (sb.Length > 0) sb.Append('\n');
+                sb.Append(prod <= 0.5f
+                    ? $"<color=#5BD66B>{pname}: sẵn sàng</color>"
+                    : $"{pname} ~{FormatSec(prod)}");
+            }
+
+            // 4) Thịt (chỉ ra ở vụ cuối)
+            float meat = GetTimeToMeatSec();
+            if (meat >= 0f)
+            {
+                string mname = !string.IsNullOrEmpty(data.productAltName) ? data.productAltName : "Thịt";
+                if (sb.Length > 0) sb.Append('\n');
+                sb.Append($"{mname} ~{FormatSec(meat)}");
+            }
+
+            return sb.ToString();
+        }
+
+        // Dùng CHUNG bộ format với cây trồng: "x ngày x giờ" / "x giờ x phút" / "x phút x giây" / "x giây".
+        private static string FormatSec(float s) => YWonderLand.Core.GameTimeConfig.FormatDuration(s);
 
         // ── Visuals ──
 

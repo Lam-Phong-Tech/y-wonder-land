@@ -107,6 +107,10 @@
 .sidebar-btn-shop-text, .sidebar-btn-map-text { font-size: 14px; -unity-font-style: bold; color: var(--color-text-white); margin-left: 6px; }
 .sidebar-btn-piggy, .sidebar-btn-fishing, .sidebar-btn-build { width: 58px; height: 58px; }
 
+/* Nút bật/tắt chữ nổi trên farm — dùng CHỮ thay icon để tự nói lên nó làm gì. */
+.sidebar-btn-labels-text { font-size: 16px; -unity-font-style: bold; color: var(--color-text-white); }
+.sidebar-btn-labels-on { background-color: rgba(91, 214, 107, 0.55); border-color: #5BD66B; }
+
 .hud-red-dot {
     position: absolute;
     top: -3px;

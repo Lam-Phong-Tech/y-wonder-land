@@ -62,6 +62,14 @@
                 </ui:VisualElement>
             </ui:VisualElement>
 
+            <!-- Lịch sử cho ăn (khách chốt 30/07) — chỉ hiện khi đang xem MỘT con cụ thể -->
+            <ui:VisualElement name="FeedLogPanel" class="ap-info">
+                <ui:VisualElement class="ap-row ap-row-last">
+                    <ui:Label text="Lịch sử cho ăn" class="ap-key" />
+                    <ui:Label name="LblFeedLog" text="—" class="ap-val" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
             <!-- Hành động -->
             <ui:VisualElement class="ap-actions">
                 <ui:Button name="BtnFeed" text="Cho ăn" class="ap-btn ap-btn-primary" />

@@ -21,6 +21,8 @@ public class AnimalInteractionPopupController : MonoBehaviour
     private Label lblProducts;
     private Label lblHunger;
     private Label lblHarvest;
+    private VisualElement feedLogPanel;   // khối "Lịch sử cho ăn"
+    private Label lblFeedLog;
     private VisualElement enclosurePanel;
     private VisualElement infoPanel;
     private VisualElement actionsPanel;
@@ -76,9 +78,13 @@ public class AnimalInteractionPopupController : MonoBehaviour
         btnAddAnimal = root.Q<Button>("BtnAddAnimal");
         animalCardList = root.Q<VisualElement>("AnimalCardList");
 
+        feedLogPanel = root.Q<VisualElement>("FeedLogPanel");
+        lblFeedLog = root.Q<Label>("LblFeedLog");
+
         // Cho phép xuống dòng nếu chữ dài, tránh tràn ra ngoài panel.
         if (lblHarvest != null) lblHarvest.style.whiteSpace = WhiteSpace.Normal;
         if (lblStatus != null) lblStatus.style.whiteSpace = WhiteSpace.Normal;
+        if (lblFeedLog != null) lblFeedLog.style.whiteSpace = WhiteSpace.Normal; // nhật ký nhiều dòng
 
         btnClose = root.Q<Button>("BtnClose");
         btnFeed = root.Q<Button>("BtnFeed");
@@ -354,6 +360,41 @@ public class AnimalInteractionPopupController : MonoBehaviour
         return alt;
     }
 
+    /// <summary>Số mốc cho ăn gần nhất hiện trong popup (cũ hơn vẫn nằm trong nhật ký, chỉ không hiện).</summary>
+    private const int FeedLogLinesShown = 5;
+
+    // Lịch sử cho ăn của CHÍNH con đang xem (khách chốt 30/07: nhật ký cho ăn nằm trong popup từng con).
+    private void RefreshFeedLog(FarmAnimal animal)
+    {
+        if (feedLogPanel == null && lblFeedLog == null) return;
+
+        if (animal == null)
+        {
+            if (feedLogPanel != null) feedLogPanel.style.display = DisplayStyle.None;
+            return;
+        }
+
+        if (feedLogPanel != null) feedLogPanel.style.display = DisplayStyle.Flex;
+        if (lblFeedLog == null) return;
+
+        var history = FarmActivityLog.GetFeedHistory(animal.animalInstanceId, FeedLogLinesShown);
+        if (history.Count == 0)
+        {
+            lblFeedLog.text = "Chưa cho ăn lần nào";
+            return;
+        }
+
+        var sb = new System.Text.StringBuilder();
+        for (int i = 0; i < history.Count; i++)
+        {
+            if (i > 0) sb.Append('\n');
+            var e = history[i];
+            sb.Append(FarmActivityLog.FormatWhen(e.unixTime));
+            if (!string.IsNullOrEmpty(e.foodText)) sb.Append(" · ").Append(e.foodText);
+        }
+        lblFeedLog.text = sb.ToString();
+    }
+
     // Đếm ngược vụ thu là số "sống" nên cập nhật định kỳ khi popup đang mở.
     void Update()
     {
@@ -417,6 +458,7 @@ public class AnimalInteractionPopupController : MonoBehaviour
         if (lblHarvest != null) lblHarvest.text = "—";
         if (infoPanel != null) infoPanel.style.display = DisplayStyle.None;
         if (actionsPanel != null) actionsPanel.style.display = DisplayStyle.None;
+        if (feedLogPanel != null) feedLogPanel.style.display = DisplayStyle.None; // chưa chọn con nào thì không có nhật ký
         if (btnFeed != null) btnFeed.style.display = DisplayStyle.None;
         if (btnHarvest != null) btnHarvest.style.display = DisplayStyle.None;
         if (btnHeal != null) btnHeal.style.display = DisplayStyle.None;
@@ -449,6 +491,7 @@ public class AnimalInteractionPopupController : MonoBehaviour
         if (lblStatus != null) lblStatus.text = "Trạng thái: " + statusStr;
         if (lblHunger != null) lblHunger.text = Mathf.RoundToInt(animal.GetHungerFraction() * 100f) + "%";
         if (lblHarvest != null) lblHarvest.text = HarvestInfoText(animal);
+        RefreshFeedLog(animal);
 
         bool isDead = animal.currentState == FarmAnimal.AnimalState.Dead;
         bool canFeed = (animal.currentState == FarmAnimal.AnimalState.Hungry || animal.currentState == FarmAnimal.AnimalState.Healthy) && !isDead;

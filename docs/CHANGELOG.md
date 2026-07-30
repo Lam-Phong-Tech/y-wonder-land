@@ -6,6 +6,37 @@
 
 ---
 
+## [2026-07-30] — Ẩn thông số trên farm + nhãn con vật + nhật ký cho ăn/chết
+
+Khách phản ánh chữ nổi trên cây ("Lớn 50% · chín ~11 giờ 55 phút") làm mất vẻ đẹp của farm.
+Yêu cầu: ẩn đi, có nút bật lại; khi bật thì hiện cả giờ cho ăn / giờ chết / giờ thu trứng-thịt
+của con vật; kèm nhật ký cho ăn và thông báo con chết.
+
+**Ẩn/hiện chữ nổi**
+- `FarmLabelVisibility.cs` (MỚI): cờ toàn cục, lưu PlayerPrefs `YW_ShowFarmLabels`, mặc định TẮT.
+- `FarmTile.UpdateCropInfoLabel` tôn trọng cờ. Thanh nước KHÔNG dính cờ — vẫn hiện để liếc phát
+  biết cây khát (khách chốt: chỉ ẩn CHỮ, giữ thanh).
+- Nút `BtnLabels` trên sidebar HUD. Dùng CHỮ thay icon ("Hiện" / "Ẩn") nên tự nói lên nó làm gì,
+  khỏi đoán icon; sáng xanh khi đang bật. Bấm KHÔNG đóng popup đang mở.
+
+**Nhãn thông tin con vật (làm mới — trước đây con vật chỉ có thanh đói, không có chữ nào)**
+- `FarmAnimal`: thêm nhãn TextMesh billboard dựng y hệt nhãn cây, nằm ngay trên thanh đói.
+  Nội dung: cữ cho ăn kế · còn bao lâu chết đói · vụ trứng/sữa kế · bao giờ được thịt.
+- Getter mới: `GetTimeToStarveSec()`, `GetTimeToNextFeedSec()`, `GetTimeToMeatSec()`.
+  (Thịt chỉ ra ở VỤ CUỐI nên = thời gian vụ kế + số vụ còn lại × chu kỳ.)
+- Nhãn là CON của con vật -> con bị xoá thì nhãn đi theo, không sót rác trong scene.
+- `ComputeAutoBarHeight` bỏ qua nhãn, không thì nhãn tự đo chính nó rồi trôi cao dần.
+
+**Nhật ký (`FarmActivityLog.cs` — MỚI)**
+- Lưu qua `PlayerScopedPrefs` (theo tài khoản), tự cắt bớt: 10 mốc cho ăn/con, trần 300 tổng, 50 lần chết.
+- Tự nạp lại khi đổi tài khoản (nhớ scope lúc nạp) — không đưa nhầm nhật ký người này cho người kia.
+- Lịch sử CHO ĂN -> popup từng con vật (khối "Lịch sử cho ăn", 5 mốc gần nhất).
+- Con CHẾT -> HÒM THƯ (khách chốt: con chết rồi thì không bấm vào đâu mà xem được nữa).
+  Đọc/xoá thư ghi ngược lại nhật ký nên mở lại không bị hiện như thư mới hay lòi lại thư đã xoá.
+- Làm thịt vụ cuối KHÔNG báo chết (đó là kết thúc bình thường), chỉ dọn mốc cho ăn.
+
+---
+
 ## [2026-07-30] — Dựng khung nhạc nền theo đảo (Nông trại / Thành phố)
 
 Yêu cầu: nhạc nền đổi theo từng đảo (Nông trại khác, Thành phố khác), âm lượng vẫn chỉnh

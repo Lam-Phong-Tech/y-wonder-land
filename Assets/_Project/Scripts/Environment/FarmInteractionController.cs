@@ -2698,6 +2698,8 @@ namespace YWonderLand.Environment
                     if (animal != null)
                     {
                         animal.Feed();
+                        // Ghi nhật ký cho ăn — hiện lại trong popup của chính con này (khách chốt 30/07).
+                        FarmActivityLog.RecordFeed(animal.animalInstanceId, $"{required}x {matchedName}");
                         FarmStateSync.SaveBuildState();
                         ScreenToast.ShowInfo($"Đã cho {(def != null ? def.animalName : "thú")} ăn {required}x {matchedName}.");
                     }

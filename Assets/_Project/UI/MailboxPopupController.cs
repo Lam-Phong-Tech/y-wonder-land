@@ -37,6 +37,10 @@ public class MailboxPopupController : MonoBehaviour
         public bool isRewardClaimed;
         public List<AttachmentItem> attachments;
 
+        /// <summary>Khác rỗng = thư báo CON VẬT CHẾT, sinh từ FarmActivityLog (không phải thư hệ thống).
+        /// Đọc/xoá thư này phải ghi ngược lại nhật ký, kẻo mở lại hòm thư nó hiện lên như mới.</summary>
+        public string deathLogId;
+
         public MailData(string id, string title, string sender, string date, string content, bool hasReward, List<AttachmentItem> attachments = null)
         {
             this.id = id;
@@ -236,10 +240,40 @@ public class MailboxPopupController : MonoBehaviour
         {
             mailboxOverlay.style.display = DisplayStyle.Flex;
         }
-        
+
+        SyncDeathMails();  // nạp thư báo con vật chết trước khi vẽ danh sách
         SelectMail(null); // Clear selected state on open
         RenderMailList();
         UpdateFooterButtons();
+    }
+
+    /// <summary>
+    /// Dựng lại danh sách thư báo CON VẬT CHẾT từ nhật ký nông trại (khách chốt 30/07).
+    /// Con chết thì không bấm vào đâu mà xem được nữa, nên báo về đây. Xếp MỚI NHẤT lên đầu.
+    /// </summary>
+    private void SyncDeathMails()
+    {
+        // Bỏ hết thư chết cũ rồi dựng lại — tránh nhân đôi khi mở hòm thư nhiều lần.
+        mailList.RemoveAll(m => !string.IsNullOrEmpty(m.deathLogId));
+
+        var deaths = YWonderLand.Environment.FarmActivityLog.GetDeaths(); // mới nhất trước
+        for (int i = 0; i < deaths.Count; i++)
+        {
+            var d = deaths[i];
+            string reason = string.IsNullOrEmpty(d.reason) ? "đã chết" : $"đã {d.reason}";
+            var mail = new MailData(
+                d.id,
+                $"{d.animalName} {reason}",
+                "Nông trại",
+                YWonderLand.Environment.FarmActivityLog.FormatWhen(d.unixTime),
+                $"{d.animalName} của bạn {reason} lúc {YWonderLand.Environment.FarmActivityLog.FormatWhen(d.unixTime)}.\n\n" +
+                "Nhớ cho thú ăn trước khi thanh đói cạn để khỏi mất thú nhé!",
+                false
+            );
+            mail.isRead = d.isRead;
+            mail.deathLogId = d.id;
+            mailList.Insert(i, mail); // chèn lên đầu, giữ đúng thứ tự mới -> cũ
+        }
     }
 
     public void Hide()
@@ -374,6 +408,9 @@ public class MailboxPopupController : MonoBehaviour
         if (!mail.isRead)
         {
             mail.isRead = true;
+            // Thư báo chết phải ghi "đã đọc" xuống nhật ký, không thì lần sau mở lại vẫn là thư mới.
+            if (!string.IsNullOrEmpty(mail.deathLogId))
+                YWonderLand.Environment.FarmActivityLog.MarkDeathRead(mail.deathLogId);
             RenderMailList(); // re-render to update the envelope state icon
             UpdateFooterButtons();
         }
@@ -537,6 +574,9 @@ public class MailboxPopupController : MonoBehaviour
         if (selectedMail == null) return;
 
         Debug.Log($"[Mailbox] Đã xóa thư: '{selectedMail.title}'");
+        // Xoá thư báo chết = xoá luôn khỏi nhật ký, không thì mở lại hòm thư nó hiện lại.
+        if (!string.IsNullOrEmpty(selectedMail.deathLogId))
+            YWonderLand.Environment.FarmActivityLog.RemoveDeath(selectedMail.deathLogId);
         mailList.Remove(selectedMail);
         SelectMail(null);
         RenderMailList();
@@ -546,7 +586,14 @@ public class MailboxPopupController : MonoBehaviour
     private void DeleteAllReadMails()
     {
         // Delete mails that are read AND (have no rewards OR rewards are already claimed)
-        int removedCount = mailList.RemoveAll(mail => mail.isRead && (!mail.hasReward || mail.isRewardClaimed));
+        int removedCount = mailList.RemoveAll(mail =>
+        {
+            if (!mail.isRead || (mail.hasReward && !mail.isRewardClaimed)) return false;
+            // Dọn thư báo chết thì xoá luôn khỏi nhật ký cho khớp.
+            if (!string.IsNullOrEmpty(mail.deathLogId))
+                YWonderLand.Environment.FarmActivityLog.RemoveDeath(mail.deathLogId);
+            return true;
+        });
         
         if (removedCount > 0)
         {
