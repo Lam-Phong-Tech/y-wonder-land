@@ -6,6 +6,24 @@
 
 ---
 
+## [2026-07-30] — Bỏ hẳn chữ nổi kiểu name-tag, công tắc chuyển vào Cài đặt
+
+Khách chốt: BỎ hẳn kiểu hiện giờ trên đầu cây như bản cũ; cách xem chính thức là BẤM VÀO CÂY
+(popup Xem ruộng). Thanh nước giữ nguyên. Công tắc bật lại thì cho vào Cài đặt, kèm cảnh báo,
+để ai máy khoẻ tự cân nhắc.
+
+- Gỡ nút `BtnLabels` khỏi sidebar HUD (uxml + controller + uss) — sidebar đỡ chật một nút.
+- Thêm `ToggleCropLabels` vào Cài đặt > ĐỒ HOẠ, ngay dưới Bóng đổ (cùng nhóm hiệu năng),
+  mặc định TẮT, kèm dòng cảnh báo `.settings-hint` (lớp USS mới): rối mắt + máy yếu dễ giật.
+- `FarmLabelVisibility` không đổi logic, chỉ đổi nơi bật — FarmTile/FarmAnimal vẫn đọc cờ
+  mỗi khung hình nên gạt công tắc là thấy ngay, không cần thoát Cài đặt.
+
+**Nhật ký có lưu server không?** CÓ, tự động. Mọi loại mới (tưới/thu hoạch/chữa bệnh/vắc-xin)
+đều nằm chung khoá `YW_FarmActivityLog` đã nối vào farm-state ở commit trước, nên không phải
+nối lại gì. Ước tính ~43KB ở mức cắt hiện tại (400 mốc + 50 lần chết), trần gói là 480KB.
+
+---
+
 ## [2026-07-30] — Nhật ký đầy đủ: tưới, thu hoạch, chữa bệnh, vắc-xin + thư báo cây chết
 
 Mở rộng nhật ký theo yêu cầu khách. `FarmActivityLog` đổi từ "chỉ ghi cho ăn" sang kho

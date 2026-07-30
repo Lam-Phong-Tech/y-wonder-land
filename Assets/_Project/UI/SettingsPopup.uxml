@@ -90,6 +90,15 @@
                             <ui:Label name="LblShadowStatus" text="BẬT" class="settings-toggle-status" />
                         </ui:VisualElement>
 
+                        <!-- Khách chốt 30/07: chữ nổi trên cây/con vật MẶC ĐỊNH TẮT (che kín farm + gây giật).
+                             Ai máy khoẻ thì tự bật ở đây, có cảnh báo kèm. -->
+                        <ui:VisualElement class="settings-toggle-row">
+                            <ui:Label name="LblCropLabels" text="Chữ nổi trên cây/thú" class="settings-toggle-label" />
+                            <ui:Toggle name="ToggleCropLabels" value="false" class="settings-toggle" />
+                            <ui:Label name="LblCropLabelsStatus" text="TẮT" class="settings-toggle-status" />
+                        </ui:VisualElement>
+                        <ui:Label name="LblCropLabelsHint" text="Hiện giờ chín / giờ đói ngay trên đầu. Nông trại đông cây sẽ RỐI MẮT và MÁY YẾU DỄ GIẬT — nên để tắt và bấm vào cây/thú để xem." class="settings-hint" />
+
                         <!-- GENERAL -->
                         <ui:Label name="LblGeneralSection" text="CHUNG" class="settings-section-header" />
 

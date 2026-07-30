@@ -139,7 +139,7 @@ namespace YWonderLand.Environment
         private const float BAR_H = 0.12f;
 
         // Nhãn chữ NỔI trên đầu (khách chốt 30/07): mấy giờ cho ăn / mấy giờ chết đói / mấy giờ thu trứng-thịt.
-        // Mặc định ẨN — bật bằng nút trên HUD (xem FarmLabelVisibility). Dựng y hệt nhãn cây ở FarmTile.
+        // Mặc định ẨN — bật ở Cài đặt > Đồ hoạ (xem FarmLabelVisibility). Dựng y hệt nhãn cây ở FarmTile.
         private Transform infoRoot;
         private TextMesh infoTM;
         private MeshFilter infoMF;   // đo bề rộng chữ → co nhãn cho vừa thanh đói, né chữ tràn màn hình
@@ -669,7 +669,7 @@ namespace YWonderLand.Environment
         }
 
         // ── Nhãn chữ nổi trên đầu: cho ăn / chết đói / trứng-thịt (khách chốt 30/07) ──
-        // Mặc định ẨN, bấm nút trên HUD mới hiện — xem FarmLabelVisibility.
+        // Mặc định ẨN, muốn hiện phải tự bật ở Cài đặt > Đồ hoạ — xem FarmLabelVisibility.
 
         private void CreateInfoLabel()
         {

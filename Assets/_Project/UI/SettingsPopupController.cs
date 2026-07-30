@@ -54,6 +54,8 @@ public class SettingsPopupController : MonoBehaviour
     private Label lblShadowStatus;
     private Toggle toggleShowChat;
     private Label lblShowChatStatus;
+    private Toggle toggleCropLabels;      // chữ nổi trên cây/thú — mặc định TẮT, có cảnh báo giật
+    private Label lblCropLabelsStatus;
 
     // General
     private DropdownField dropdownLanguage;
@@ -109,6 +111,8 @@ public class SettingsPopupController : MonoBehaviour
         lblShadowStatus = root.Q<Label>("LblShadowStatus");
         toggleShowChat = root.Q<Toggle>("ToggleShowChat");
         lblShowChatStatus = root.Q<Label>("LblShowChatStatus");
+        toggleCropLabels = root.Q<Toggle>("ToggleCropLabels");
+        lblCropLabelsStatus = root.Q<Label>("LblCropLabelsStatus");
 
         // General
         dropdownLanguage = root.Q<DropdownField>("DropdownLanguage");
@@ -193,6 +197,8 @@ public class SettingsPopupController : MonoBehaviour
         if (sliderRenderQuality != null) sliderRenderQuality.value = renderQuality * 100f;
         if (toggleShadow != null) toggleShadow.value = shadowEnabled;
         if (toggleShowChat != null) toggleShowChat.value = showChatEnabled;
+        if (toggleCropLabels != null) toggleCropLabels.value = YWonderLand.Environment.FarmLabelVisibility.Show;
+        UpdateCropLabelsStatusLabel();
 
         // ÁP các mức đã lưu vào game luôn — không chỉ dựng lại thanh trượt.
         ApplyRenderQuality(renderQuality);
@@ -287,6 +293,14 @@ public class SettingsPopupController : MonoBehaviour
             UpdateShadowStatusLabel();
             PlayerPrefs.SetInt("YW_Shadow", shadowEnabled ? 1 : 0);
             ApplyShadow(shadowEnabled);
+        });
+
+        // Chữ nổi trên cây/thú. FarmLabelVisibility tự lưu PlayerPrefs; FarmTile/FarmAnimal đọc cờ
+        // mỗi khung hình nên bật/tắt là thấy ngay, không cần báo cho ai.
+        toggleCropLabels?.RegisterValueChangedCallback(evt =>
+        {
+            YWonderLand.Environment.FarmLabelVisibility.Show = evt.newValue;
+            UpdateCropLabelsStatusLabel();
         });
 
         toggleShowChat?.RegisterValueChangedCallback(evt =>
@@ -553,6 +567,23 @@ public class SettingsPopupController : MonoBehaviour
         }
 
         lblShadowStatus.text = shadowEnabled ? onStr : offStr;
+    }
+
+    private void UpdateCropLabelsStatusLabel()
+    {
+        if (lblCropLabelsStatus == null) return;
+
+        var table = LocalizationSettings.StringDatabase.GetTable("GameUI");
+        string onStr = "BẬT";
+        string offStr = "TẮT";
+
+        if (table != null)
+        {
+            onStr = GetLocalizedString(table, "shadow_on", "BẬT");
+            offStr = GetLocalizedString(table, "shadow_off", "TẮT");
+        }
+
+        lblCropLabelsStatus.text = YWonderLand.Environment.FarmLabelVisibility.Show ? onStr : offStr;
     }
 
     private void UpdateChatStatusLabel()

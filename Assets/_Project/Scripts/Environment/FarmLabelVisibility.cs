@@ -3,8 +3,9 @@ using UnityEngine;
 namespace YWonderLand.Environment
 {
     /// <summary>
-    /// Cờ TOÀN CỤC bật/tắt CHỮ nổi trên cây &amp; con vật. Khách chốt 30/07: mặc định ẨN cho farm đẹp,
-    /// bấm nút trên HUD (BtnLabels) mới hiện.
+    /// Cờ TOÀN CỤC bật/tắt CHỮ nổi trên cây &amp; con vật. Khách chốt 30/07: mặc định ẨN — cách xem
+    /// CHÍNH THỨC là bấm vào cây/con vật. Ai máy khoẻ muốn xem ngay trên đầu thì tự bật ở
+    /// Cài đặt &gt; Đồ hoạ &gt; "Chữ nổi trên cây/thú" (có kèm cảnh báo rối mắt + dễ giật).
     ///
     /// CHỈ ẩn CHỮ — thanh nước của cây và thanh đói của con vật VẪN GIỮ, để liếc phát là biết
     /// cây khát hay thú đói mà không phải bật nhãn lên.
