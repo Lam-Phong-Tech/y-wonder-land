@@ -334,7 +334,13 @@ namespace YWonderLand.Backend
                 PlayerScopedPrefs.SetString(PlacedTilesKey, ValidOrDefault(state.placedTilesJson, EmptyPlacedTiles));
                 PlayerScopedPrefs.SetString(FarmTilesKey, ValidOrDefault(state.farmTilesJson, EmptyFarmTiles));
                 PlayerScopedPrefs.SetString(AnimalStateKey, ValidOrDefault(state.animalStateJson, EmptyAnimalState));
+                PlayerScopedPrefs.SetString(FarmActivityLog.PrefKey,
+                    ValidOrDefault(state.activityLogJson, FarmActivityLog.EmptyJson));
                 PlayerScopedPrefs.Save();
+
+                // Vừa đè pref bằng bản của server -> bắt FarmActivityLog nạp lại,
+                // không thì nó vẫn xài nhật ký cũ đang giữ trong RAM.
+                FarmActivityLog.InvalidateCache();
             }
             finally
             {
@@ -361,6 +367,7 @@ namespace YWonderLand.Backend
                 placedTilesJson = PlayerScopedPrefs.GetString(PlacedTilesKey, EmptyPlacedTiles),
                 farmTilesJson = PlayerScopedPrefs.GetString(FarmTilesKey, EmptyFarmTiles),
                 animalStateJson = PlayerScopedPrefs.GetString(AnimalStateKey, EmptyAnimalState),
+                activityLogJson = PlayerScopedPrefs.GetString(FarmActivityLog.PrefKey, FarmActivityLog.EmptyJson),
                 legacyMigration = legacyMigration,
                 clientSavedAt = DateTime.UtcNow.ToString("o")
             };
@@ -634,6 +641,9 @@ namespace YWonderLand.Backend
             });
         }
 
+        // CỐ Ý KHÔNG tính activityLogJson vào đây: điểm này đo "farm có nội dung THẬT hay không"
+        // để quyết định giữ bản nào khi gộp dữ liệu cũ. Nhật ký chỉ là lịch sử — cộng vào thì một
+        // farm trống rỗng nhưng từng cho ăn vài lần sẽ bị chấm là "có nội dung" và đè mất bản thật.
         private static int ContentScore(PlayerBootstrapService.FarmStatePayload payload)
         {
             if (payload == null) return 0;

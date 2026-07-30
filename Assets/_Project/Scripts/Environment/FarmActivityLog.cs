@@ -44,7 +44,13 @@ namespace YWonderLand.Environment
             public List<DeathEntry> deaths = new List<DeathEntry>();
         }
 
-        private const string PrefKey = "YW_FarmActivityLog";
+        /// <summary>Khoá PlayerPrefs. Public để FarmStateSync gói kèm nhật ký lên server cùng farm-state
+        /// (con vật đã lưu server rồi thì lịch sử cho ăn của nó phải đi theo, không thì cài lại game
+        /// con vật còn mà nhật ký trắng — nhìn như lỗi).</summary>
+        public const string PrefKey = "YW_FarmActivityLog";
+
+        /// <summary>Nhật ký rỗng — FarmStateSync dùng làm mặc định khi server chưa có gì.</summary>
+        public const string EmptyJson = "{\"feeds\":[],\"deaths\":[]}";
 
         /// <summary>Số mốc cho ăn giữ lại cho MỖI con (cũ hơn thì bỏ).</summary>
         private const int MaxFeedPerAnimal = 10;

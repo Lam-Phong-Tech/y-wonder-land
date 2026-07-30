@@ -35,6 +35,21 @@ của con vật; kèm nhật ký cho ăn và thông báo con chết.
   Đọc/xoá thư ghi ngược lại nhật ký nên mở lại không bị hiện như thư mới hay lòi lại thư đã xoá.
 - Làm thịt vụ cuối KHÔNG báo chết (đó là kết thúc bình thường), chỉ dọn mốc cho ăn.
 
+**Nhật ký lên server (bổ sung cùng ngày)**
+Ban đầu nhật ký chỉ lưu máy -> cài lại game thì CON VẬT còn (đã sync server) nhưng nhật ký
+của nó trắng trơn, nhìn như lỗi. Đã cho nhật ký đi kèm farm-state:
+- `FarmStatePayload` thêm `activity_log_json`; `FarmStateSync` gói kèm lúc gửi và ghi lại lúc
+  nhận snapshot (kèm `InvalidateCache()` để không xài nhật ký cũ còn trong RAM).
+- KHÔNG đổi server, KHÔNG thêm API, KHÔNG migration: `compareAndSetFarmState` ở CẢ hai kiểu lưu
+  (Postgres `state_json` jsonb và file JSON) đều gộp kiểu `{...current, ...incoming}`, route
+  `PUT /player/farm-state` không lọc trường -> trường mới tự được lưu và trả về nguyên vẹn.
+- KHÔNG thêm lượt gọi mạng: lúc cho ăn đã gọi `SaveBuildState()`, lúc chết đã gọi
+  `SaveRuntimeState()` — nhật ký đi ké chuyến đó.
+- `ContentScore` CỐ Ý bỏ qua nhật ký (đã ghi chú trong code): điểm đó đo "farm có nội dung thật"
+  để chọn bản khi gộp dữ liệu cũ; tính nhật ký vào thì farm trống mà từng cho ăn sẽ bị chấm là
+  có nội dung rồi đè mất bản thật.
+- Dung lượng: mức cắt sẵn (10 mốc/con, trần 300, 50 lần chết) ≈ 30KB, xa trần 480KB của gói.
+
 ---
 
 ## [2026-07-30] — Dựng khung nhạc nền theo đảo (Nông trại / Thành phố)
