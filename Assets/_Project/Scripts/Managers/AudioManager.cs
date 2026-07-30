@@ -8,7 +8,11 @@ namespace YWonderLand.Managers
     /// THIẾU clip thì bỏ qua ÊM (chỉ log 1 lần) — game vẫn chạy bình thường. Tự tạo nếu scene chưa có.
     ///
     /// ► CÁCH CÓ TIẾNG: thả file .wav/.mp3 vào "Assets/Resources/Audio/" đúng tên:
-    ///   "bgm" (nhạc nền) · "chop" (chặt/đào) · "harvest" (thu hoạch) · "coin" (mua/bán).
+    ///   "chop" (chặt/đào) · "harvest" (thu hoạch) · "coin" (mua/bán).
+    ///
+    /// ► NHẠC NỀN THEO ĐẢO: thả "bgm_farm" (Nông trại), "bgm_city" (Thành phố), "bgm_mine" (Mỏ)
+    ///   vào "Assets/Resources/Audio/". IslandTravelManager tự gọi PlayMusicForIsland() mỗi khi
+    ///   đổi đảo — chưa có file thì im lặng, không lỗi. Xem PlayMusicForIsland() bên dưới.
     /// </summary>
     public class AudioManager : MonoBehaviour
     {
@@ -69,14 +73,67 @@ namespace YWonderLand.Managers
             return clip;
         }
 
-        public void PlayMusic(string clipName)
+        public void PlayMusic(string clipName, float fadeSeconds = 0f)
         {
             var clip = Load(clipName);
             if (clip == null || musicSource == null) return;
             if (musicSource.clip == clip && musicSource.isPlaying) return; // đang phát rồi
+
+            _fadeToken++;
+            if (fadeSeconds > 0f && musicSource.isPlaying)
+            {
+                _ = CrossfadeToAsync(clip, fadeSeconds, _fadeToken);
+            }
+            else
+            {
+                musicSource.clip = clip;
+                musicSource.volume = musicVolume;
+                musicSource.Play();
+            }
+        }
+
+        /// <summary>
+        /// Đổi nhạc nền theo đảo hiện tại. Tên clip quy ước "bgm_&lt;islandId&gt;" (vd "bgm_farm", "bgm_city").
+        /// Gọi bởi IslandTravelManager mỗi khi tới đảo mới. Thiếu file clip thì im lặng, không lỗi.
+        /// </summary>
+        public void PlayMusicForIsland(string islandId, float fadeSeconds = 1.2f)
+        {
+            if (string.IsNullOrEmpty(islandId)) return;
+            PlayMusic($"bgm_{islandId}", fadeSeconds);
+        }
+
+        private int _fadeToken;
+
+        // Fade nửa đầu (tắt dần bài cũ) rồi đổi clip, fade nửa sau (lên dần bài mới).
+        // Dùng _fadeToken để huỷ ngang nếu có lệnh đổi nhạc mới đè lên giữa chừng.
+        private async Awaitable CrossfadeToAsync(AudioClip clip, float duration, int token)
+        {
+            float half = duration * 0.5f;
+            float startVol = musicSource.volume;
+
+            float t = 0f;
+            while (t < half)
+            {
+                if (token != _fadeToken) return;
+                t += Time.deltaTime;
+                musicSource.volume = Mathf.Lerp(startVol, 0f, half <= 0f ? 1f : t / half);
+                await Awaitable.NextFrameAsync();
+            }
+            if (token != _fadeToken) return;
+
             musicSource.clip = clip;
-            musicSource.volume = musicVolume;
             musicSource.Play();
+
+            t = 0f;
+            while (t < half)
+            {
+                if (token != _fadeToken) return;
+                t += Time.deltaTime;
+                musicSource.volume = Mathf.Lerp(0f, musicVolume, half <= 0f ? 1f : t / half);
+                await Awaitable.NextFrameAsync();
+            }
+            if (token != _fadeToken) return;
+            musicSource.volume = musicVolume;
         }
 
         public void PlaySFX(string clipName, float volumeScale = 1f)

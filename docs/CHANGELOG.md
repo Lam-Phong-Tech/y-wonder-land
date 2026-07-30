@@ -6,6 +6,23 @@
 
 ---
 
+## [2026-07-30] — Dựng khung nhạc nền theo đảo (Nông trại / Thành phố)
+
+Yêu cầu: nhạc nền đổi theo từng đảo (Nông trại khác, Thành phố khác), âm lượng vẫn chỉnh
+được qua popup Cài đặt như cũ. Đây là DỰNG KHUNG — chưa có file nhạc thật, khách sẽ gửi sau.
+
+- `AudioManager.cs`: thêm `PlayMusicForIsland(islandId)` — quy ước tên clip `bgm_<islandId>`
+  (`bgm_farm`, `bgm_city`, `bgm_mine`), tự tải từ `Resources/Audio/`. Thêm crossfade ~1.2s khi
+  đổi bài (fade cũ ra rồi fade mới vào) cho đỡ giật cụt, huỷ được nếu đổi đảo liên tục.
+- `IslandTravelManager.cs`: gọi `PlayMusicForIsland` ngay lúc khởi động (đảo bắt đầu, không
+  fade) và mỗi lần `TravelToAsync` xong (có fade).
+- `Resources/Audio/README_AUDIO.txt`: cập nhật quy ước tên file + xoá ghi chú cũ sai
+  ("slider Cài đặt còn TODO" — thực ra đã wire xong từ trước, không cần đụng gì thêm).
+- CHƯA cần làm: chỉ cần thả `bgm_farm.mp3`/`bgm_city.mp3` (và `bgm_mine.mp3` nếu cần) vào
+  `Assets/Resources/Audio/` là có tiếng ngay, không phải sửa code.
+
+---
+
 ## [2026-07-30] — Thêm giá mua 10 nông sản/vật liệu + nước tưới miễn phí
 
 Khách chốt giá mua: cỏ voi 8, bí ngô 11, bắp ngô 4, bắp cải 4, cà rốt 4, dưa hấu 4,
