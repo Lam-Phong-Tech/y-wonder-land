@@ -69,7 +69,9 @@ namespace YWonderLand.EditorScripts
             AddItem(db, "passion_fruit_seed_01", "Gi\u1ED1ng chanh leo", "Gi\u1ED1ng c\u00E2y chanh leo (chanh d\u00E2y) l\u00E2u n\u0103m.", "\ud83c\udf47", "seeds", 5300, 3, true); // BA chot 09/07: 200 USDT / cum 20 cay, ti gia 26.500 => 5.300 Point
             
             // Vật phẩm tiêu hao
-            AddItem(db, "fertilizer_01", "Ph\u00E2n b\u00F3n", "Gi\u1EA3m 50% th\u1EDDi gian sinh tr\u01B0\u1EDFng.", "\ud83e\uddea", "items", 50, 25, true);
+            // Kh\u00E1ch ch\u1ED1t 30/07: ph\u00E2n b\u00F3n 1 Point, m\u1ED7i l\u1EA7n b\u00F3n c\u00E2y l\u1EDBn th\u00EAm 15% (xem FarmTile.ApplyFertilizer).
+            // canSell = FALSE c\u00F3 ch\u1EE7 \u00FD: gi\u00E1 mua 1 m\u00E0 cho b\u00E1n l\u1EA1i l\u00E0 l\u1ED7 h\u1ED5ng mua-r\u1EBB-b\u00E1n-\u0111\u1EAFt in ti\u1EC1n v\u00F4 h\u1EA1n.
+            AddItem(db, "fertilizer_01", "Ph\u00E2n b\u00F3n", "M\u1ED7i l\u1EA7n b\u00F3n gi\u00FAp c\u00E2y l\u1EDBn th\u00EAm 15%.", "\ud83e\uddea", "items", 1, 0, false);
             AddItem(db, "vaccine_01", "V\u1EAFc-xin", "Ph\u00F2ng b\u1EC7nh 7 ng\u00E0y.", "\ud83d\udc89", "items", 30, 15, true);   // kh\u00E1ch ch\u1ED1t 22/06: gi\u00E1 mua 30 (theo VatNuoi)
             AddItem(db, "medicine_01", "Thu\u1ED1c tr\u1ECB", "Thu\u1ED1c \u0111i\u1EC1u tr\u1ECB v\u1EADt nu\u00F4i b\u1EC7nh.", "\ud83d\udc8a", "items", 70, 35, true);  // kh\u00E1ch ch\u1ED1t 22/06: gi\u00E1 mua 70 (theo VatNuoi)
             // Gi\u00E1 kh\u00E1ch ch\u1ED1t 24/07: m\u1ED3i c\u00E2u 2 Point/l\u01B0\u1EE3t, v\u00E9 \u0111\u00E0o 2 Point/l\u01B0\u1EE3t. sellPrice < buyPrice

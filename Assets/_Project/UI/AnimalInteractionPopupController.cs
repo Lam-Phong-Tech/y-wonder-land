@@ -558,7 +558,6 @@ public class AnimalInteractionPopupController : MonoBehaviour
     }
 
     // Nhật ký của CHÍNH cây đang chọn trong popup Xem ruộng.
-    // CHƯA có hàng "Bón phân": game hiện không có thao tác bón phân nào để mà ghi (xem CHANGELOG 30/07).
     private void RefreshCropLog(FarmTile tile)
     {
         if (tile == null || tile.GetCurrentCrop() == null)
@@ -569,6 +568,7 @@ public class AnimalInteractionPopupController : MonoBehaviour
 
         ShowLogPanel(tile.HistoryKey,
             new LogRow("Lịch sử tưới nước", FarmActivityLog.KindWater, "Chưa tưới lần nào"),
+            new LogRow("Lịch sử bón phân", FarmActivityLog.KindFertilize, "Chưa bón lần nào"),
             new LogRow("Lịch sử thu hoạch", FarmActivityLog.KindHarvest, "Chưa thu hoạch lần nào"));
     }
 

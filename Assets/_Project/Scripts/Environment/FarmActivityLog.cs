@@ -26,8 +26,7 @@ namespace YWonderLand.Environment
         public const string KindHarvest = "harvest";
         public const string KindHeal = "heal";
         public const string KindVaccine = "vaccine";
-        // KHÔNG có "fertilize": khách chốt 30/07 dời bón phân sang bản sau (chưa có thông số).
-        // Khi làm tính năng đó thì thêm hằng số + một dòng LogRow ở AnimalInteractionPopupController.RefreshCropLog.
+        public const string KindFertilize = "fertilize";
 
         /// <summary>Một mốc thao tác. ownerId = animalInstanceId (thú) hoặc khoá ô đất (cây).</summary>
         [Serializable]

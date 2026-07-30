@@ -501,6 +501,32 @@ public class FarmTile : MonoBehaviour
     }
 
     /// <summary>Tưới LẠI khi cây đang lớn → ĐỔ ĐẦY thanh máu (wateredLifeSec), lùi mốc chết. Lớn vẫn chạy theo thời gian thật.</summary>
+    /// <summary>
+    /// BÓN PHÂN (khách chốt 30/07): đẩy tiến độ lớn thêm `percent` (0.15 = 15%).
+    ///
+    /// Cách làm: DỜI mốc bắt đầu lớn (`growStartTime`) về quá khứ đúng `percent × tổng thời gian lớn`.
+    /// Chọn cách này vì `growStartTime` VỐN ĐÃ được lưu ra đĩa/server và VỐN ĐÃ được dùng để tính bù
+    /// lúc offline (`RestoreSave`) — nên hiệu lực phân bón tự sống sót qua lưu/tải và qua cả lúc
+    /// đóng app, KHÔNG phải thêm trường mới ở 3 chỗ. Cây lâu năm thu xong đặt lại `growStartTime`
+    /// nên phân cũng tự hết hiệu lực theo từng vụ — đúng ý "mỗi vụ bón lại".
+    ///
+    /// Trả false nếu: ô con của giàn, chưa gieo, hoặc CHƯA TƯỚI (chưa bắt đầu lớn thì không có gì để đẩy).
+    /// </summary>
+    public bool ApplyFertilizer(float percent)
+    {
+        if (masterTile != null) return false;      // ô con của giàn — bón vào ô CHÍNH
+        if (currentCrop == null) return false;
+        if (!isGrowing || currentState != TileState.Watered) return false;
+        if (percent <= 0f) return false;
+
+        float total = GetGrowthTime();
+        if (total <= 0f) return false;
+
+        growStartTime -= total * percent;
+        FarmStateSync.SaveTileState(this);
+        return true;
+    }
+
     public bool WaterAgain()
     {
         if (currentState != TileState.Watered || !isGrowing) return false;

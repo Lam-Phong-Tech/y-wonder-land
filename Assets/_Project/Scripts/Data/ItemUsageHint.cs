@@ -39,6 +39,9 @@ namespace YWonderLand.Data
                 case "materials": return MaterialHint(def, name);
                 case "tools":     return ToolHint(def, name);
                 case "animals":   return AnimalHint(def, name);
+                // Phân bón bấm thẳng trong túi thì không biết bón cho cây nào — chỉ đường cho đúng.
+                case "items" when def.id == "fertilizer_01":
+                    return $"{name}: ra ruộng, đứng cạnh cây ĐANG LỚN rồi chọn \"Bón phân\" — mỗi lần bón cây lớn thêm 15%.";
                 default:          return FallbackHint(def, name);
             }
         }

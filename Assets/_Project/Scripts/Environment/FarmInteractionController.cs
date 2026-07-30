@@ -135,6 +135,7 @@ namespace YWonderLand.Environment
         private FarmTile pendingPlantTile; // Tile đang chờ gieo hạt
         private YWonderLand.Environment.AnimalPenSpawner pendingPen; // Chuồng đang chờ chọn con vật từ túi
         private FarmAnimal pendingFeedAnimal; // Con vật đang chờ chọn thức ăn từ túi
+        private FarmTile pendingFertilizeTile; // Cây đang chờ chọn phân bón từ túi
         private List<BuildSurfaceCell> pendingEnclosure; // Vùng quây (rào) đang chờ thả thú
         private bool animalPlacementInFlight;
         private List<BuildSurfaceCell> pendingDemolishEnclosure;
@@ -142,6 +143,14 @@ namespace YWonderLand.Environment
         private GameObject pendingDemolishPath; // công trình trang trí (vd Đường đá) đang chờ xác nhận hủy
         private float demolishConfirmTimer;
         private const float DemolishConfirmWindow = 1.25f;
+        private const string FertilizerItemId = "fertilizer_01";
+
+        [Header("Bón phân (khách chốt 30/07)")]
+        [Tooltip("Mỗi lần bón đẩy tiến độ lớn của cây thêm bao nhiêu. 0.15 = 15% (số khách chốt). " +
+                 "ĐỔI SỐ Ở ĐÂY, không sửa code. Lưu ý: 1/số này = số lần bón để cây chín ngay " +
+                 "(0.15 -> 7 lần). Chưa có giới hạn số lần bón mỗi cây.")]
+        [SerializeField] private float fertilizerGrowthPercent = 0.15f;
+
         private const string MiningLastDateKey = "YW_MiningLastDate";
         private const string MiningTurnsLeftKey = "YW_MiningTurnsLeft";
         private int miningTurnsLeft = -1;
@@ -901,6 +910,19 @@ namespace YWonderLand.Environment
                         AnimalInteractionPopupController.Instance.ShowPlot(FindPlotTiles(plotSeed));
                 }
             });
+
+            // BÓN PHÂN (khách chốt 30/07): chỉ hiện khi cây ĐANG LỚN — chưa tưới thì chưa có tiến độ
+            // để đẩy, mà cây đã chín thì bón vô nghĩa.
+            FarmTile fertilizeTile = tile.masterTile != null ? tile.masterTile : tile;
+            if (fertilizeTile != null && fertilizeTile.currentState == FarmTile.TileState.Watered)
+            {
+                actions.Add(new InteractionAction
+                {
+                    keyName = "B",
+                    actionName = "Bón phân",
+                    onClick = () => BeginFertilize(fertilizeTile)
+                });
+            }
 
             FarmTile demolishTile = tile.masterTile != null ? tile.masterTile : tile;
             // Khách chốt 29/07: ô ĐÃ TRỒNG cây thì KHÔNG hiện nút hủy — chỉ hủy được ô còn trống.
@@ -2644,11 +2666,72 @@ namespace YWonderLand.Environment
         /// <summary>Cổng public cho popup chuồng gọi lại đúng luồng mở túi để thả thêm thú.</summary>
         public void BeginPlaceAnimalInEnclosure(List<BuildSurfaceCell> interior) => OpenEnclosurePicker(interior);
 
+        /// <summary>Bón phân = mở túi (tab Đồ dùng) chọn Phân bón -> đẩy tiến độ lớn của cây.</summary>
+        private void BeginFertilize(FarmTile tile)
+        {
+            if (tile == null) return;
+
+            pendingFertilizeTile = tile;
+            pendingFeedAnimal = null;
+            pendingPen = null;
+            pendingPlantTile = null;
+            pendingEnclosure = null;
+
+            if (PlayerController.Instance != null) PlayerController.Instance.FaceTowards(tile.transform.position);
+
+            var inv = YWonderLand.Managers.InventoryManager.Instance;
+            if (inv != null && inv.GetItemQuantity(FertilizerItemId) <= 0)
+                ScreenToast.Show("Hết phân bón — mua thêm ở Cửa hàng Vật phẩm hoặc Đại lý Hai Lúa.");
+
+            EnsureInventoryPopupSubscribed();
+            if (inventoryPopup != null) inventoryPopup.ShowAtTab("items");
+        }
+
+        // Người chơi chọn Phân bón trong túi khi đang chờ bón -> trừ 1 -> đẩy tiến độ lớn.
+        private void HandleFertilizeSelected(string itemId)
+        {
+            FarmTile tile = pendingFertilizeTile;
+            pendingFertilizeTile = null;
+
+            if (itemId != FertilizerItemId)
+            {
+                ScreenToast.Show("Đang chọn phân để bón — hãy chọn PHÂN BÓN trong tab Đồ dùng.");
+                return;
+            }
+            if (tile == null || tile.currentState != FarmTile.TileState.Watered)
+            {
+                ScreenToast.Show("Cây này không bón được lúc này (phải là cây đang lớn).");
+                return;
+            }
+
+            var inv = YWonderLand.Managers.InventoryManager.Instance;
+            if (inv == null || inv.GetItemQuantity(FertilizerItemId) <= 0)
+            {
+                ScreenToast.Show("Hết phân bón — mua thêm ở Cửa hàng Vật phẩm hoặc Đại lý Hai Lúa.");
+                return;
+            }
+            if (!inv.RemoveItem(FertilizerItemId, 1)) return;
+
+            if (!tile.ApplyFertilizer(fertilizerGrowthPercent))
+            {
+                inv.AddItem(FertilizerItemId, 1); // bón hụt thì HOÀN phân, không nuốt đồ của người chơi
+                ScreenToast.Show("Bón không được — cây chưa tưới hoặc đã chín.");
+                return;
+            }
+
+            if (inventoryPopup != null) inventoryPopup.Hide();
+
+            int pct = Mathf.RoundToInt(fertilizerGrowthPercent * 100f);
+            ScreenToast.ShowInfoForItem(FertilizerItemId, $"Đã bón phân: cây lớn thêm {pct}%.", fallbackText: "Phân");
+            FarmActivityLog.RecordEvent(tile.HistoryKey, FarmActivityLog.KindFertilize, $"+{pct}% tăng trưởng");
+        }
+
         // Cho ăn = mở túi (tab Thực phẩm) chọn thức ăn (tạm dùng Bắp ngô) -> animation Feed.
         private void FeedAnimal(FarmAnimal animal)
         {
             if (animal == null) return;
             pendingFeedAnimal = animal;
+            pendingFertilizeTile = null;
             pendingPen = null;
             pendingPlantTile = null;
             pendingEnclosure = null;
@@ -3817,6 +3900,14 @@ namespace YWonderLand.Environment
             {
                 MarkHandled();
                 HandleFeedSelected(itemId);
+                return;
+            }
+
+            // Ưu tiên: đang chờ chọn phân để bón cho cây.
+            if (pendingFertilizeTile != null)
+            {
+                MarkHandled();
+                HandleFertilizeSelected(itemId);
                 return;
             }
 

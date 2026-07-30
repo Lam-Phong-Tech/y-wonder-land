@@ -23,6 +23,7 @@ MonoBehaviour:
   - morning_glory_01
   - sweet_potato_01
   - grass_01
+  - fertilizer_01
   sellItemIds:
   - banana_01
   - coconut_01

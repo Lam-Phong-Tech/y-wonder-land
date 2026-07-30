@@ -6,6 +6,41 @@
 
 ---
 
+## [2026-07-30] — LÀM THẬT tính năng bón phân (đảo ngược mục ẩn phía dưới)
+
+Khách gửi thông số ngay sau khi bảo ẩn: *"kho bán sản phẩm cho vật nuôi ăn chưa có phân bón,
+thêm vào luôn, giá 1 point. Mỗi lần bón phân tăng trưởng cây 15%."* → mở lại và làm thật.
+
+- `FarmTile.ApplyFertilizer(percent)`: **dời `growStartTime` về quá khứ** đúng `percent × tổng
+  thời gian lớn`. Chọn cách này vì `growStartTime` VỐN ĐÃ được lưu ra đĩa/server và VỐN ĐÃ dùng
+  để tính bù offline (`RestoreSave`) → hiệu lực phân tự sống sót qua lưu/tải/đóng app mà KHÔNG
+  phải thêm trường mới ở 3 chỗ. Cây lâu năm thu xong đặt lại `growStartTime` nên phân tự hết
+  hiệu lực theo từng vụ. Chỉ bón được cây ĐANG LỚN (Watered); chưa tưới thì không có gì để đẩy.
+- Luồng dùng: mục `Bón phân` (phím B) ở bảng gợi ý ô đất → mở túi tab Đồ dùng → chọn Phân bón.
+  Theo đúng mẫu `pendingFeedAnimal`. Bón hụt thì HOÀN lại phân. Ghi vào nhật ký (`KindFertilize`,
+  khôi phục lại) và hiện ở hàng "Lịch sử bón phân" trong popup Xem ruộng.
+- Mở lại khỏi `HiddenItems`, trả về shop Vật phẩm + Hai Lúa, **thêm vào Mini Garden** (đúng cửa
+  hàng khách mô tả). Giá mua 50 → **1**.
+- ⚠️ **BẮT BUỘC phải sửa kèm: `sellPrice 25 → 0`, `canSell → false`.** Giá mua 1 mà vẫn bán lại
+  được 25 là lỗ hổng mua-rẻ-bán-đắt **in tiền vô hạn** — khách chỉ nói giá mua, không nói giá bán.
+- `fertilizerGrowthPercent` để ở SerializeField (0.15), đổi số khỏi sửa code.
+
+### ⚠️ CẢNH BÁO CÂN BẰNG — CHƯA CÓ GIỚI HẠN SỐ LẦN BÓN
+Khách không nói giới hạn nên code làm đúng lời: bón bao nhiêu lần cũng được.
+`1 / 0.15 = 7` → **7 lần bón (7 Point) là cây chín NGAY, bất kể cây đó 24 giờ hay 90 ngày.**
+Phí bón là số cố định, không theo giá trị/thời gian cây, nên cây càng quý càng lời:
+
+| Cây | Thời gian | Bón 7 lần tốn | Thu về |
+|---|---|---|---|
+| Cà rốt | 24 giờ | 7 Point | (thức ăn, không bán) |
+| Chanh leo | **90 ngày** | 7 Point | 10 quả × 57 = **570 Point** |
+
+→ Chanh leo: bỏ 7 ăn 570 (**gấp 81 lần**), lặp vô hạn, và xoá sạch 180 ngày chờ đợi của 2 vụ.
+Điều này phá đúng cơ chế "quay lại mỗi ngày" mà khách thiết kế. **Đã báo chủ dự án để hỏi khách**
+về giới hạn số lần bón mỗi vụ. Sửa = đổi 1 số ở SerializeField hoặc thêm bộ đếm mỗi ô.
+
+---
+
 ## [2026-07-30] — Ẩn hẳn phân bón (dời sang bản sau)
 
 Khách chốt: bón phân để bản sau mới làm (khi có thông số). Ẩn hết dấu vết cho tới lúc đó.

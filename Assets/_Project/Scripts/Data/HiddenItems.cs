@@ -27,8 +27,8 @@ namespace YWonderLand.Data
             "red_ginseng_seed_01",  "red_ginseng_01",   // Hồng sâm
             "royal_ginseng_seed_01","royal_ginseng_01", // Sâm tiến vua
 
-            "fertilizer_01",                            // Phân bón — khách chốt 30/07 dời sang bản sau (chưa có thông số).
-                                                        // Đã gỡ khỏi shop asset + loadout test luôn; giữ ở đây làm lớp chặn cuối.
+            // "fertilizer_01" — MỞ LẠI 30/07 (cùng ngày): khách gửi thông số (1 Point, +15% tăng trưởng
+            // mỗi lần bón) nên tính năng đã làm thật, không cần ẩn nữa. Xem FarmTile.ApplyFertilizer.
         };
 
         /// <summary>True nếu vật phẩm đang bị ẩn tạm (chưa chốt số liệu).</summary>
