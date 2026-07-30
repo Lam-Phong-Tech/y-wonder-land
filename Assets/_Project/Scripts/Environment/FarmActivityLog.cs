@@ -211,6 +211,41 @@ namespace YWonderLand.Environment
             if (d.events.RemoveAll(e => e.ownerId == ownerId) > 0) Save();
         }
 
+        /// <summary>
+        /// Đổi khoá chủ sở hữu hàng loạt — dùng khi DỜI RUỘNG: khoá của ô đất tính theo VỊ TRÍ
+        /// (xem FarmTile.HistoryKey), nên chuyển chỗ mà không đổi khoá là mất sạch lịch sử cây.
+        ///
+        /// Thứ tự hai bước là quan trọng: phải DỌN RÁC ở khoá đích TRƯỚC rồi mới đổi khoá, kẻo xoá
+        /// nhầm chính nhật ký vừa chuyển sang. Rác ở đây là nhật ký của cây đã chết từng đứng chỗ đó —
+        /// ô đích luôn trống mới đặt được nên chắc chắn không phải của cây đang sống.
+        /// </summary>
+        public static void RemapOwners(Dictionary<string, string> oldToNew)
+        {
+            if (oldToNew == null || oldToNew.Count == 0) return;
+            var d = Data;
+
+            // 1) Dọn rác ở khoá ĐÍCH. Khoá vừa-là-đích-vừa-là-nguồn (dời ngang 1 ô) thì GIỮ:
+            //    đó là nhật ký của một cây cũng đang dời, bước 2 sẽ đổi khoá cho nó.
+            d.events.RemoveAll(e => e != null && !string.IsNullOrEmpty(e.ownerId)
+                                    && !oldToNew.ContainsKey(e.ownerId)
+                                    && oldToNew.ContainsValue(e.ownerId));
+
+            // 2) Đổi khoá TẠI CHỖ. Danh sách phẳng nên không có chuyện đè lên nhau,
+            //    và thứ tự thời gian giữ nguyên (GetHistory duyệt ngược từ cuối).
+            int changed = 0;
+            foreach (var e in d.events)
+            {
+                if (e == null || string.IsNullOrEmpty(e.ownerId)) continue;
+                if (!oldToNew.TryGetValue(e.ownerId, out string newId)) continue;
+                if (string.IsNullOrEmpty(newId) || newId == e.ownerId) continue;
+
+                e.ownerId = newId;
+                changed++;
+            }
+
+            if (changed > 0) Save();
+        }
+
         // ── Chết ──
 
         /// <summary>Ghi một cái chết (thú hoặc cây). Sẽ hiện thành THƯ trong hòm thư.

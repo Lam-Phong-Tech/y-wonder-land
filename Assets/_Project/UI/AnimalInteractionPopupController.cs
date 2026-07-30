@@ -36,6 +36,13 @@ public class AnimalInteractionPopupController : MonoBehaviour
     private Button btnHarvest;
     private Button btnHeal;
     private Button btnVaccine;
+    // Việc của CẢ CỤM (dời chuồng / dời ruộng) — dùng chung một nút, đổi chữ theo chế độ.
+    private Button btnMoveGroup;
+    // Việc của CÂY đang chọn ở chế độ Xem ruộng.
+    private VisualElement plotActionsPanel;
+    private Button btnWaterCrop;
+    private Button btnHarvestCrop;
+    private Button btnFertilizeCrop;
     private ItemDatabase itemDatabase;
 
     private FarmAnimal currentAnimal;
@@ -48,6 +55,18 @@ public class AnimalInteractionPopupController : MonoBehaviour
     private readonly Dictionary<FarmAnimal, VisualElement> animalCards = new Dictionary<FarmAnimal, VisualElement>();
 
     private float refreshTimer;
+
+    // Popup tự vẽ lại 4 lần/giây; quét scene tìm controller mỗi lần là đúng cái bẫy giật đã gặp ở
+    // nhãn nổi. Giữ lại một tham chiếu, chỉ quét khi chưa có (hoặc scene cũ đã hủy).
+    private FarmInteractionController cachedFarm;
+    private FarmInteractionController Farm
+    {
+        get
+        {
+            if (cachedFarm == null) cachedFarm = Object.FindFirstObjectByType<FarmInteractionController>();
+            return cachedFarm;
+        }
+    }
 
     private bool IsEnclosureMode => currentEnclosure != null;
     private bool IsPlotMode => currentPlot != null;
@@ -97,6 +116,11 @@ public class AnimalInteractionPopupController : MonoBehaviour
         btnHarvest = root.Q<Button>("BtnHarvest");
         btnHeal = root.Q<Button>("BtnHeal");
         btnVaccine = root.Q<Button>("BtnVaccine");
+        btnMoveGroup = root.Q<Button>("BtnMoveGroup");
+        plotActionsPanel = root.Q<VisualElement>("PlotActionsPanel");
+        btnWaterCrop = root.Q<Button>("BtnWaterCrop");
+        btnHarvestCrop = root.Q<Button>("BtnHarvestCrop");
+        btnFertilizeCrop = root.Q<Button>("BtnFertilizeCrop");
 
         if (btnClose != null) btnClose.clicked += Hide;
         if (btnFeed != null) btnFeed.clicked += OnFeedClicked;
@@ -104,6 +128,10 @@ public class AnimalInteractionPopupController : MonoBehaviour
         if (btnHeal != null) btnHeal.clicked += OnHealClicked;
         if (btnVaccine != null) btnVaccine.clicked += OnVaccineClicked;
         if (btnAddAnimal != null) btnAddAnimal.clicked += OnAddAnimalClicked;
+        if (btnMoveGroup != null) btnMoveGroup.clicked += OnMoveGroupClicked;
+        if (btnWaterCrop != null) btnWaterCrop.clicked += OnWaterCropClicked;
+        if (btnHarvestCrop != null) btnHarvestCrop.clicked += OnHarvestCropClicked;
+        if (btnFertilizeCrop != null) btnFertilizeCrop.clicked += OnFertilizeCropClicked;
 
         Hide();
     }
@@ -124,6 +152,7 @@ public class AnimalInteractionPopupController : MonoBehaviour
         currentEnclosure = null;
         currentPlot = null;
         if (enclosurePanel != null) enclosurePanel.style.display = DisplayStyle.None;
+        if (plotActionsPanel != null) plotActionsPanel.style.display = DisplayStyle.None;
         ClearAnimalCards();
 
         container.style.display = DisplayStyle.Flex;
@@ -140,6 +169,12 @@ public class AnimalInteractionPopupController : MonoBehaviour
         container.style.display = DisplayStyle.Flex;
         UIPopupTracker.SetOpen(this, true);
         if (enclosurePanel != null) enclosurePanel.style.display = DisplayStyle.Flex;
+        if (plotActionsPanel != null) plotActionsPanel.style.display = DisplayStyle.None;
+        if (btnMoveGroup != null)
+        {
+            btnMoveGroup.style.display = DisplayStyle.Flex;
+            btnMoveGroup.text = "Dời chuồng";
+        }
 
         RefreshEnclosureUI();
     }
@@ -147,7 +182,10 @@ public class AnimalInteractionPopupController : MonoBehaviour
     /// <summary>
     /// XEM RUỘNG (khách chốt 30/07): liệt kê mọi cây trong cụm ô đất liền nhau, thay cho việc
     /// bắt người chơi đọc chữ nổi lởm chởm trên đầu từng cây ("nhìn như đám rừng").
-    /// Chỉ ĐỌC — mọi thao tác cuốc/gieo/tưới/thu vẫn bấm thẳng ngoài ruộng như cũ.
+    ///
+    /// Gom luôn việc vào đây giống popup chuồng: chọn cây rồi Tưới / Thu hoạch / Bón phân ngay,
+    /// và "Dời ruộng" cho cả mảnh. Cuốc đất và gieo hạt vẫn bấm ngoài ruộng — chúng cần ngắm
+    /// đúng ô trống, đưa vào danh sách "các cây đang có" thì không có gì để chọn.
     /// </summary>
     public void ShowPlot(List<FarmTile> tiles)
     {
@@ -169,6 +207,14 @@ public class AnimalInteractionPopupController : MonoBehaviour
         if (actionsPanel != null) actionsPanel.style.display = DisplayStyle.None;
         if (feedLogPanel != null) feedLogPanel.style.display = DisplayStyle.None;
         if (btnAddAnimal != null) btnAddAnimal.style.display = DisplayStyle.None;
+
+        // ...bù lại bằng hàng nút của cây + nút dời cả mảnh ruộng.
+        if (plotActionsPanel != null) plotActionsPanel.style.display = DisplayStyle.Flex;
+        if (btnMoveGroup != null)
+        {
+            btnMoveGroup.style.display = DisplayStyle.Flex;
+            btnMoveGroup.text = "Dời ruộng";
+        }
 
         // Khung 160px của chuồng vừa cho vài con; ruộng có thể mấy chục cây nên nới ra.
         // Chỗ vừa trống do ẩn bảng thông tin + hàng nút bên dưới.
@@ -204,7 +250,7 @@ public class AnimalInteractionPopupController : MonoBehaviour
         if (lblEnclosureSummary != null)
             lblEnclosureSummary.text = planted == 0
                 ? $"Ruộng: {total} ô"
-                : $"Ruộng: {total} ô · {planted} cây — bấm vào cây để xem nhật ký";
+                : $"Ruộng: {total} ô · {planted} cây — bấm vào cây để làm việc";
 
         // Cây đang chọn có thể vừa chết/vừa thu xong -> bỏ chọn cho khỏi hiện nhật ký ma.
         if (selectedPlotTile == null || selectedPlotTile.GetCurrentCrop() == null)
@@ -212,6 +258,29 @@ public class AnimalInteractionPopupController : MonoBehaviour
 
         RebuildPlotCards();
         RefreshCropLog(selectedPlotTile);
+        RefreshPlotButtons(selectedPlotTile);
+    }
+
+    /// <summary>
+    /// Bật/tắt hàng nút theo ĐÚNG trạng thái cây đang chọn — chưa chọn cây thì tắt hết, khỏi bấm hụt.
+    /// Điều kiện bón phân hỏi thẳng FarmInteractionController để chỉ có MỘT nơi giữ luật (cây ngắn ngày,
+    /// đã tưới, chưa chín); popup không tự đoán lại.
+    /// </summary>
+    private void RefreshPlotButtons(FarmTile tile)
+    {
+        if (plotActionsPanel == null) return;
+
+        bool hasCrop = tile != null && tile.GetCurrentCrop() != null;
+        bool ripe = hasCrop && tile.currentState == FarmTile.TileState.Ripe;
+        bool waterable = hasCrop && (tile.currentState == FarmTile.TileState.Planted
+                                     || tile.currentState == FarmTile.TileState.Watered);
+
+        var farm = hasCrop ? Farm : null;
+        bool fertilizable = farm != null && farm.CanFertilizeTile(tile);
+
+        if (btnWaterCrop != null) btnWaterCrop.SetEnabled(waterable);
+        if (btnHarvestCrop != null) btnHarvestCrop.SetEnabled(ripe);
+        if (btnFertilizeCrop != null) btnFertilizeCrop.SetEnabled(fertilizable);
     }
 
     // Cần tưới = chưa tưới lần nào, hoặc nước đã tụt thấp (cùng ngưỡng với cảnh báo trên nhãn nổi).
@@ -672,6 +741,8 @@ public class AnimalInteractionPopupController : MonoBehaviour
         // trả lại hết để lần mở sau (chuồng thú) hiện đúng như cũ.
         if (btnAddAnimal != null) btnAddAnimal.style.display = DisplayStyle.Flex;
         if (animalCardScroll != null) animalCardScroll.style.height = StyleKeyword.Null;
+        if (plotActionsPanel != null) plotActionsPanel.style.display = DisplayStyle.None;
+        if (btnMoveGroup != null) btnMoveGroup.style.display = DisplayStyle.None;
 
         ClearAnimalCards();
     }
@@ -760,11 +831,80 @@ public class AnimalInteractionPopupController : MonoBehaviour
         var enclosure = new List<BuildSurfaceCell>(currentEnclosure);
         Hide();
 
-        var fic = Object.FindFirstObjectByType<FarmInteractionController>();
+        var fic = Farm;
         if (fic != null)
             fic.BeginPlaceAnimalInEnclosure(enclosure);
         else
             Debug.LogWarning("[AnimalPopup] Không tìm thấy FarmInteractionController để mở túi thả thú.");
+    }
+
+    // ── Việc của CẢ CỤM: dời chuồng / dời ruộng ─────────────────────────────────────────────
+    // Luôn ĐÓNG popup trước: người chơi phải nhìn thấy cụm đang rê theo bước chân mình mới đặt được.
+
+    private void OnMoveGroupClicked()
+    {
+        var fic = Farm;
+        if (fic == null)
+        {
+            Debug.LogWarning("[AnimalPopup] Không tìm thấy FarmInteractionController để dời.");
+            return;
+        }
+
+        if (IsPlotMode)
+        {
+            FarmTile seed = FirstPlotTile();
+            if (seed == null) return;
+            Hide();
+            fic.BeginMovePlot(seed);
+        }
+        else if (IsEnclosureMode && currentEnclosure != null)
+        {
+            var pen = new List<BuildSurfaceCell>(currentEnclosure);
+            Hide();
+            fic.BeginMovePen(pen);
+        }
+    }
+
+    /// <summary>Một ô bất kỳ của mảnh ruộng — BeginMovePlot tự loang lại ra cả mảnh từ ô này.</summary>
+    private FarmTile FirstPlotTile()
+    {
+        if (currentPlot == null) return null;
+        foreach (var t in currentPlot)
+            if (t != null) return t;
+        return null;
+    }
+
+    // ── Việc của CÂY đang chọn ──────────────────────────────────────────────────────────────
+
+    private void OnWaterCropClicked()
+    {
+        var tile = selectedPlotTile;
+        var fic = Farm;
+        if (tile == null || fic == null) return;
+
+        Hide();                  // tưới có màn múa động tác — che popup thì không thấy gì
+        fic.BeginWaterTile(tile);
+    }
+
+    private void OnHarvestCropClicked()
+    {
+        var tile = selectedPlotTile;
+        var fic = Farm;
+        if (tile == null || fic == null) return;
+
+        // Thu hoạch không có màn múa: GIỮ popup mở để thu liền tay nhiều cây trong cùng mảnh ruộng.
+        fic.BeginHarvestTile(tile);
+        RefreshPlotUI();
+    }
+
+    private void OnFertilizeCropClicked()
+    {
+        var tile = selectedPlotTile;
+        var fic = Farm;
+        if (tile == null || fic == null) return;
+
+        Hide();                  // bón phân mở túi đồ để chọn phân
+        fic.BeginFertilizeTile(tile);
     }
 
     private void OnFeedClicked()

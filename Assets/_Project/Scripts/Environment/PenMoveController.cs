@@ -4,15 +4,19 @@ using UnityEngine;
 namespace YWonderLand.Environment
 {
     /// <summary>
-    /// DỜI NGUYÊN CỤM CHUỒNG (khách chốt 29/07): nhấc cả chuồng — giữ đúng hình dạng và mang theo
-    /// vật nuôi đang ở trong — rồi đặt xuống chỗ mới. KHÔNG tốn/hoàn vật liệu vì chuồng không bị phá.
+    /// DỜI NGUYÊN MỘT CỤM Ô ĐẤT: nhấc cả cụm — giữ đúng hình dạng và mang theo thứ đang đứng trên đó
+    /// — rồi đặt xuống chỗ mới. KHÔNG tốn/hoàn vật liệu vì không có gì bị phá.
+    ///
+    /// Ban đầu chỉ làm cho CHUỒNG (khách chốt 29/07), nay dùng chung cho cả RUỘNG và ĐƯỜNG LÁT ĐÁ
+    /// (khách chốt 30/07) — vì cả ba đều là "một cụm BuildSurfaceCell liền nhau có vật trên đầu".
+    /// Tên lớp giữ nguyên để khỏi lệch với tài liệu cũ; <see cref="SubjectLabel"/> quyết định chữ hiển thị.
     ///
     /// Cách dùng (FarmInteractionController gọi):
-    ///   Begin(pen)                  -> vào chế độ dời, chụp lại hình dạng + thú
-    ///   UpdatePreview(frontCell)    -> mỗi frame: rê cả chuồng theo ô trước mặt nhân vật
-    ///   CanPlaceAt(frontCell)       -> chỗ mới có đủ ô đất trống không
-    ///   Confirm(frontCell)          -> chốt: ghi lại dữ liệu ô + ô của thú
-    ///   Cancel()                    -> trả chuồng về đúng chỗ cũ
+    ///   Begin(cells, label)   -> vào chế độ dời, chụp lại hình dạng + thú + khoá nhật ký của cây
+    ///   UpdatePreview()       -> mỗi frame: rê cả cụm theo bước chân người chơi
+    ///   CanPlace()            -> chỗ mới có đủ ô đất trống không
+    ///   Confirm()             -> chốt: ghi lại dữ liệu ô + ô của thú + đổi khoá nhật ký cây
+    ///   Cancel()              -> trả về đúng chỗ cũ
     ///
     /// Lưu ý: chỉ DI CHUYỂN vật thể lúc xem trước; dữ liệu ô chỉ đổi khi Confirm, nên bỏ dở giữa chừng
     /// (hủy / thoát scene) không làm hỏng trạng thái nông trại.
@@ -29,6 +33,7 @@ namespace YWonderLand.Environment
             public GameObject animalObject;        // ô neo mới giữ thú
             public string animalItemId;
             public Vector3 animalStartPos;
+            public string historyKeyBefore;        // khoá nhật ký của cây trên ô này TRƯỚC khi dời (ruộng)
         }
 
         private static readonly List<Entry> entries = new List<Entry>();
@@ -59,10 +64,19 @@ namespace YWonderLand.Environment
         /// <summary>Số ô rào đang dời (để hiện thông báo).</summary>
         public static int CellCount => entries.Count;
 
-        /// <summary>Vào chế độ dời. Trả false nếu chuồng không hợp lệ.</summary>
-        public static bool Begin(List<BuildSurfaceCell> pen)
+        /// <summary>Chữ gọi thứ đang dời trong gợi ý và thông báo: "chuồng" / "ruộng" / "đường".</summary>
+        public static string SubjectLabel { get; private set; } = DefaultSubject;
+
+        private const string DefaultSubject = "chuồng";
+
+        /// <summary>Vào chế độ dời. Trả false nếu cụm ô không hợp lệ.</summary>
+        public static bool Begin(List<BuildSurfaceCell> pen) => Begin(pen, DefaultSubject);
+
+        /// <summary>Vào chế độ dời với chữ hiển thị riêng ("ruộng", "đường"…).</summary>
+        public static bool Begin(List<BuildSurfaceCell> pen, string subjectLabel)
         {
             Reset();
+            SubjectLabel = string.IsNullOrEmpty(subjectLabel) ? DefaultSubject : subjectLabel;
 
             if (pen == null || pen.Count == 0) return false;
 
@@ -77,7 +91,8 @@ namespace YWonderLand.Environment
                     materialId = cell.BuildMaterialId,
                     cost = cell.BuildCost,
                     animalObject = cell.AnimalObject,
-                    animalItemId = cell.AnimalItemId
+                    animalItemId = cell.AnimalItemId,
+                    historyKeyBefore = HistoryKeyOf(cell.Occupant)
                 };
                 if (entry.fence != null) entry.fenceStartPos = entry.fence.transform.position;
                 if (entry.animalObject != null) entry.animalStartPos = entry.animalObject.transform.position;
@@ -272,12 +287,43 @@ namespace YWonderLand.Environment
                 auto.gameObject.SetActive(true);
             }
 
+            // 5) DỜI RUỘNG: khoá nhật ký của cây tính theo VỊ TRÍ ô, nên đổi chỗ là phải đổi khoá,
+            //    không thì lịch sử tưới/bón/thu của cây thành mồ côi. Lúc này vật thể đã nằm ở chỗ
+            //    mới (xem trước đã dời transform), nên khoá mới đọc thẳng từ FarmTile là đúng.
+            RemapHistoryKeys();
+
             RestoreVisuals();
             Reset();
 
             var persistence = Object.FindFirstObjectByType<BuildPersistence>(FindObjectsInactive.Include);
             persistence?.SaveBuildings();
             return true;
+        }
+
+        /// <summary>Khoá nhật ký của cây đang đứng trên occupant (rỗng nếu không phải ô ruộng).</summary>
+        private static string HistoryKeyOf(GameObject occupant)
+        {
+            if (occupant == null) return "";
+            var tile = occupant.GetComponentInChildren<FarmTile>(true);
+            return tile != null ? tile.HistoryKey : "";
+        }
+
+        private static void RemapHistoryKeys()
+        {
+            Dictionary<string, string> map = null;
+
+            foreach (var e in entries)
+            {
+                if (string.IsNullOrEmpty(e.historyKeyBefore)) continue;
+
+                string after = HistoryKeyOf(e.fence);
+                if (string.IsNullOrEmpty(after) || after == e.historyKeyBefore) continue;
+
+                map ??= new Dictionary<string, string>();
+                map[e.historyKeyBefore] = after; // ô con của giàn mượn khoá ô chính -> trùng cặp, ghi đè vô hại
+            }
+
+            if (map != null) FarmActivityLog.RemapOwners(map);
         }
 
         /// <summary>Bỏ dở: trả chuồng và thú về đúng chỗ cũ, dữ liệu ô không hề đổi.</summary>
@@ -302,6 +348,7 @@ namespace YWonderLand.Environment
             anchorCell = null;
             playerTransform = null;
             appliedDelta = Vector3.zero;
+            SubjectLabel = DefaultSubject;
             IsActive = false;
         }
 

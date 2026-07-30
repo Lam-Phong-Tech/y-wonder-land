@@ -224,7 +224,7 @@ namespace YWonderLand.Environment
         void OnDestroy()
         {
             CancelTimedAction(null);
-            // Đổi scene / thoát khi đang dời chuồng: trả chuồng về chỗ cũ để không lưu nhầm vị trí.
+            // Đổi scene / thoát khi đang dời (chuồng/ruộng/đường): trả về chỗ cũ để không lưu nhầm vị trí.
             if (PenMoveController.IsActive) PenMoveController.Cancel();
             if (Instance == this) Instance = null;
 
@@ -931,6 +931,18 @@ namespace YWonderLand.Environment
                 });
             }
 
+            // DỜI RUỘNG (khách chốt 30/07): làm y như "Dời chuồng" — nhấc cả mảnh ruộng liền nhau,
+            // cây đang trồng đi theo. Chỉ hiện với ruộng dựng bằng Chế độ Xây (có ô nền để đặt lại).
+            if (CanDemolishFarmTile(plotSeed))
+            {
+                actions.Add(new InteractionAction
+                {
+                    keyName = "M",
+                    actionName = "Dời ruộng",
+                    onClick = () => { if (IsTileInRange(plotSeed, useDirectTapInteraction)) BeginMovePlot(plotSeed); }
+                });
+            }
+
             FarmTile demolishTile = tile.masterTile != null ? tile.masterTile : tile;
             // Khách chốt 29/07: ô ĐÃ TRỒNG cây thì KHÔNG hiện nút hủy — chỉ hủy được ô còn trống.
             if (CanDemolishFarmTile(demolishTile) && !HasCropOnFarmTile(demolishTile))
@@ -1020,6 +1032,15 @@ namespace YWonderLand.Environment
             if (building == null || actions == null) return;
 
             var target = building;
+
+            // DỜI ĐƯỜNG (khách chốt 30/07): nhấc cả đoạn đường liền nhau sang chỗ khác, không tốn đá.
+            actions.Add(new InteractionAction
+            {
+                keyName = "M",
+                actionName = "Dời đường",
+                onClick = () => { if (IsPlacedBuildingInRange(target, useDirectTapInteraction)) BeginMovePath(target); }
+            });
+
             actions.Add(new InteractionAction
             {
                 keyName = "G",
@@ -1270,12 +1291,7 @@ namespace YWonderLand.Environment
                 onClick = () =>
                 {
                     if (!IsEnclosureInRange(moveEnclosure, useDirectTapInteraction)) return;
-                    if (PenMoveController.Begin(moveEnclosure))
-                    {
-                        ClearWorldInteractionState();
-                        ScreenToast.ShowInfo($"Đang dời chuồng ({PenMoveController.CellCount} ô) — đi tới chỗ mới rồi bấm Đặt chuồng.");
-                    }
-                    else ScreenToast.Show("Không dời được chuồng này.");
+                    BeginMovePen(moveEnclosure);
                 }
             });
 
@@ -1355,7 +1371,7 @@ namespace YWonderLand.Environment
             if (GameManager.Instance != null && GameManager.Instance.currentState != GameManager.GameState.Gameplay) return;
             if (IsBuildModeOpen())
             {
-                // Mở Build Mode giữa chừng thì bỏ dở việc dời chuồng, trả chuồng về chỗ cũ.
+                // Mở Build Mode giữa chừng thì bỏ dở việc dời, trả cụm về chỗ cũ.
                 if (PenMoveController.IsActive) PenMoveController.Cancel();
                 ClearWorldInteractionState();
                 return;
@@ -1584,7 +1600,7 @@ namespace YWonderLand.Environment
 
         private void RefreshFacingInteractionPrompts()
         {
-            // Đang dời chuồng: chỉ hiện đúng 2 lựa chọn Đặt / Hủy dời, không cho tương tác thứ khác.
+            // Đang dời: chỉ hiện đúng 2 lựa chọn Đặt / Hủy dời, không cho tương tác thứ khác.
             if (PenMoveController.IsActive)
             {
                 RefreshPenMovePrompt();
@@ -1630,13 +1646,14 @@ namespace YWonderLand.Environment
                    currentActions.Count > 0;
         }
 
-        /// <summary>Gợi ý khi đang DỜI CHUỒNG: rê cụm chuồng theo ô trước mặt, hiện nút Đặt / Hủy dời.</summary>
+        /// <summary>Gợi ý khi đang DỜI (chuồng / ruộng / đường): rê cả cụm theo bước chân, hiện nút Đặt / Hủy dời.</summary>
         private void RefreshPenMovePrompt()
         {
-            // Chuồng bám theo bước chân người chơi; nút Đặt luôn chốt ĐÚNG vị trí đang xem trước
+            // Cụm bám theo bước chân người chơi; nút Đặt luôn chốt ĐÚNG vị trí đang xem trước
             // (không giữ ô cũ trong closure — trước đây HUD không dựng lại nên đặt nhầm về chỗ ban đầu).
             PenMoveController.UpdatePreview();
             bool canPlace = PenMoveController.CanPlace();
+            string subject = PenMoveController.SubjectLabel;
 
             var actions = new List<InteractionAction>();
             if (canPlace)
@@ -1644,11 +1661,11 @@ namespace YWonderLand.Environment
                 actions.Add(new InteractionAction
                 {
                     keyName = "Click",
-                    actionName = "Đặt chuồng ở đây",
+                    actionName = $"Đặt {subject} ở đây",
                     onClick = () =>
                     {
-                        if (PenMoveController.Confirm()) ScreenToast.ShowInfo("Đã dời chuồng sang chỗ mới.");
-                        else ScreenToast.Show("Chỗ này không đặt được chuồng.");
+                        if (PenMoveController.Confirm()) ScreenToast.ShowInfo($"Đã dời {subject} sang chỗ mới.");
+                        else ScreenToast.Show($"Chỗ này không đặt được {subject}.");
                         ClearWorldInteractionState();
                     }
                 });
@@ -1659,7 +1676,7 @@ namespace YWonderLand.Environment
                 {
                     keyName = "Click",
                     actionName = "Chưa đặt được — cần đủ ô trống",
-                    onClick = () => ScreenToast.Show("Cần đủ ô đất trống bằng số ô của chuồng.")
+                    onClick = () => ScreenToast.Show($"Cần đủ ô đất trống bằng số ô của {subject}.")
                 });
             }
 
@@ -1670,7 +1687,7 @@ namespace YWonderLand.Environment
                 onClick = () =>
                 {
                     PenMoveController.Cancel();
-                    ScreenToast.Show("Đã hủy dời chuồng — chuồng về chỗ cũ.");
+                    ScreenToast.Show($"Đã hủy dời — {subject} về chỗ cũ.");
                     ClearWorldInteractionState();
                 }
             });
@@ -2672,6 +2689,127 @@ namespace YWonderLand.Environment
 
         /// <summary>Cổng public cho popup chuồng gọi lại đúng luồng mở túi để thả thêm thú.</summary>
         public void BeginPlaceAnimalInEnclosure(List<BuildSurfaceCell> interior) => OpenEnclosurePicker(interior);
+
+        // ── Cổng public cho popup "Xem ruộng" (khách chốt 30/07) ────────────────────────────────
+        // Popup gom việc lại một chỗ giống popup chuồng: bấm cây trong danh sách rồi tưới / thu /
+        // bón / dời ngay tại đó. Mọi nút đều gọi ĐÚNG luồng cũ ngoài ruộng — không có nhánh logic
+        // thứ hai để lệch số liệu hay lách kiểm tra.
+
+        /// <summary>Tưới cây đang chọn trong popup. Popup TỰ ĐÓNG vì tưới có màn múa động tác.</summary>
+        public void BeginWaterTile(FarmTile tile)
+        {
+            if (tile == null) return;
+            if (tile.currentState != FarmTile.TileState.Planted && tile.currentState != FarmTile.TileState.Watered)
+            {
+                ScreenToast.Show("Cây này chưa cần tưới.");
+                return;
+            }
+            if (PlayerController.Instance != null) PlayerController.Instance.FaceTowards(tile.transform.position);
+            HandleWater(tile);
+        }
+
+        /// <summary>Thu hoạch cây đang chọn. KHÔNG có màn múa nên để popup mở, thu liền tay nhiều cây.</summary>
+        public void BeginHarvestTile(FarmTile tile)
+        {
+            if (tile == null) return;
+            if (tile.currentState != FarmTile.TileState.Ripe)
+            {
+                ScreenToast.Show("Cây chưa chín.");
+                return;
+            }
+            if (PlayerController.Instance != null) PlayerController.Instance.FaceTowards(tile.transform.position);
+            HandleHarvest(tile);
+        }
+
+        /// <summary>Bón phân cho cây đang chọn (mở túi ở tab Đồ dùng).</summary>
+        public void BeginFertilizeTile(FarmTile tile) => BeginFertilize(tile);
+
+        /// <summary>Cây này bón phân được không — popup hỏi để bật/tắt nút, khỏi lộ ngưỡng ra ngoài.</summary>
+        public bool CanFertilizeTile(FarmTile tile) => tile != null && tile.IsFertilizable(FertilizerMaxGrowthSec);
+
+        // ── DỜI CỤM: chuồng / ruộng / đường lát đá dùng chung PenMoveController ──────────────────
+
+        /// <summary>Cổng public cho popup chuồng bấm "Dời chuồng".</summary>
+        public bool BeginMovePen(List<BuildSurfaceCell> pen)
+        {
+            if (pen == null || pen.Count == 0) return false;
+            return StartGroupMove(new List<BuildSurfaceCell>(pen), "chuồng");
+        }
+
+        /// <summary>
+        /// DỜI CẢ MẢNH RUỘNG (khách chốt 30/07): nhấc mọi ô đất liền nhau — cây đang trồng đi theo
+        /// vì model cây là con của ô đất — rồi đặt xuống chỗ mới. Không tốn/hoàn vật liệu (ruộng vốn free).
+        /// Chỉ dời được ruộng dựng bằng Chế độ Xây (nằm trên BuildSurfaceCell); ruộng cũ của
+        /// TilePlacementSystem không có ô nền nên từ chối, thà không cho dời còn hơn dời xong mất cây.
+        /// </summary>
+        public bool BeginMovePlot(FarmTile seed)
+        {
+            if (seed == null) return false;
+
+            var tiles = FindPlotTiles(seed.masterTile != null ? seed.masterTile : seed);
+            var cells = new List<BuildSurfaceCell>();
+            var seen = new HashSet<BuildSurfaceCell>();
+
+            foreach (var tile in tiles)
+            {
+                if (tile == null) continue;
+                var building = ResolvePlacedBuildingRoot(tile);
+                var cell = building != null ? BuildSurfaceCell.FindByOccupant(building) : null;
+                if (cell == null)
+                {
+                    ScreenToast.Show("Ruộng này không dời được (ruộng đời cũ, chưa gắn ô nền).");
+                    return false;
+                }
+                if (seen.Add(cell)) cells.Add(cell);
+            }
+
+            if (cells.Count == 0) return false;
+            return StartGroupMove(cells, "ruộng");
+        }
+
+        /// <summary>
+        /// DỜI ĐƯỜNG LÁT ĐÁ: nhấc CẢ ĐOẠN đường liền nhau (giống chuồng), không phải từng viên —
+        /// dịch một lối đi dài mà phải gỡ từng viên thì không ai làm nổi. Số ô hiện trong thông báo
+        /// trước khi đặt, thấy nhiều quá thì bấm Hủy dời.
+        /// </summary>
+        public bool BeginMovePath(GameObject pathBuilding)
+        {
+            if (pathBuilding == null) return false;
+
+            var seed = BuildSurfaceCell.FindByOccupant(pathBuilding);
+            if (seed == null)
+            {
+                ScreenToast.Show("Đường này không dời được (chưa gắn ô nền).");
+                return false;
+            }
+
+            var run = PenEnclosure.FindConnected(seed, IsPathCell);
+            if (run == null || run.Count == 0) return false;
+            return StartGroupMove(run, "đường");
+        }
+
+        // Ô đang bị một đoạn đường chiếm: có công trình, mà công trình đó không phải ruộng và không phải rào.
+        private static bool IsPathCell(BuildSurfaceCell cell)
+        {
+            if (cell == null || cell.Occupant == null) return false;
+            var go = cell.Occupant;
+            if (go.GetComponentInChildren<FarmTile>(true) != null) return false;
+            if (go.GetComponentInChildren<FenceAutoConnect>(true) != null) return false;
+            return true;
+        }
+
+        private bool StartGroupMove(List<BuildSurfaceCell> cells, string subjectLabel)
+        {
+            if (!PenMoveController.Begin(cells, subjectLabel))
+            {
+                ScreenToast.Show($"Không dời được {subjectLabel} này.");
+                return false;
+            }
+
+            ClearWorldInteractionState();
+            ScreenToast.ShowInfo($"Đang dời {subjectLabel} ({PenMoveController.CellCount} ô) — đi tới chỗ mới rồi bấm Đặt.");
+            return true;
+        }
 
         /// <summary>Bón phân = mở túi (tab Đồ dùng) chọn Phân bón -> đẩy tiến độ lớn của cây.</summary>
         private void BeginFertilize(FarmTile tile)

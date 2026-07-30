@@ -6,6 +6,56 @@
 
 ---
 
+## [2026-07-30] — Gom việc vào popup "Xem ruộng" + Dời ruộng + Dời đường lát đá
+
+Anh yêu cầu: *"tích hợp nhiều chức năng vào khi người chơi bấm xem ruộng như cách ta làm xem
+chuồng, thêm nút dời ruộng giống với dời chuồng, tiện thì làm thêm dời đường lát đá."*
+
+### Popup "Xem ruộng" hết chỉ-đọc — làm việc ngay trong popup
+Chia hai tầng cho khỏi lẫn, dùng đúng bố cục của popup chuồng:
+- **Hàng tiêu đề = việc của CẢ CỤM**: nút `BtnMoveGroup` đổi chữ theo chế độ ("Dời chuồng" /
+  "Dời ruộng"). Chuồng có thêm "+ Thả thú" như cũ.
+- **Hàng nút dưới = việc của THỨ ĐANG CHỌN**: `PlotActionsPanel` (Tưới nước / Thu hoạch / Bón phân)
+  cho cây, song song hàng cũ (Cho ăn / Thu hoạch / Chữa bệnh / Vaccine) cho thú.
+- Nút bật/tắt theo trạng thái cây; điều kiện bón hỏi thẳng `FarmInteractionController.CanFertilizeTile`
+  để luật "cây ngắn ngày, đã tưới, chưa chín" chỉ nằm MỘT chỗ, popup không đoán lại.
+- Mọi nút gọi lại ĐÚNG luồng cũ ngoài ruộng (`HandleWater`/`HandleHarvest`/`BeginFertilize`) —
+  không có nhánh logic thứ hai để lệch số liệu hay lách kiểm tra.
+- Tưới và Bón **đóng popup** (một cái có màn múa, một cái mở túi đồ); Thu hoạch **giữ popup mở**
+  để thu liền tay nhiều cây trong cùng mảnh.
+- Cuốc đất / gieo hạt CỐ Ý không đưa vào: danh sách chỉ liệt kê cây đang có, ô trống không có gì để chọn.
+
+### `PenMoveController` dùng chung cho chuồng / ruộng / đường
+Lớp này vốn đã thao tác trên `BuildSurfaceCell` chứ không dính gì tới rào, nên chỉ cần thêm
+`SubjectLabel` là dùng lại được cả ba. **Giữ nguyên tên lớp** để khỏi lệch với tài liệu cũ.
+- `Begin(cells, label)`; mọi câu gợi ý/thông báo ("Đặt … ở đây", "Hủy dời", "Đã dời …") lấy chữ từ label.
+- ⚠️ **Bẫy đã bịt: khoá nhật ký của cây tính theo VỊ TRÍ** (`FarmTile.HistoryKey`). Dời ruộng mà
+  không đổi khoá là lịch sử tưới/bón/thu của mọi cây thành mồ côi. `Confirm()` nay chụp khoá trước,
+  đọc khoá sau rồi gọi `FarmActivityLog.RemapOwners`.
+- `FarmActivityLog.RemapOwners(map)`: dọn rác ở khoá ĐÍCH **trước**, rồi mới đổi khoá tại chỗ —
+  ngược thứ tự là xoá nhầm chính nhật ký vừa chuyển sang (dời ngang 1 ô thì khoá cũ của ô này
+  trùng khoá mới của ô kia).
+
+### Dời ruộng
+- `BeginMovePlot(seed)`: loang ra cả mảnh bằng `FindPlotTiles`, map từng ô sang `BuildSurfaceCell`.
+  Cây đi theo vì model cây là **con của ô đất**. Không tốn/hoàn vật liệu (ruộng vốn free).
+- Ruộng đời cũ (`TilePlacementSystem`) không có ô nền → **từ chối thẳng**, thà không cho dời còn
+  hơn dời xong mất cây.
+- Vào bằng mục "Dời ruộng" (phím M) trên bảng gợi ý, hoặc nút trong popup.
+
+### Dời đường lát đá
+- `PenEnclosure.FindConnected(seed, predicate)` tách ra từ `FindPen` — cùng một phép loang 4 hướng,
+  khác mỗi bộ lọc.
+- `BeginMovePath` nhấc **cả đoạn đường liền nhau**, không phải từng viên: dịch một lối đi dài mà
+  phải gỡ từng viên thì không ai làm nổi. Số ô hiện trong thông báo trước khi đặt → thấy nhiều quá
+  thì bấm Hủy dời. Vật liệu đã tốn được giữ nguyên nên phá sau vẫn hoàn đúng đá.
+
+**Files:** `FarmActivityLog.cs`, `PenMoveController.cs`, `PenEnclosure.cs`,
+`FarmInteractionController.cs`, `AnimalInteractionPopupController.cs`,
+`AnimalInteractionPopup.uxml`, `Styles/AnimalInteractionPopup.uss`
+
+---
+
 ## [2026-07-30] — LÀM THẬT tính năng bón phân (đảo ngược mục ẩn phía dưới)
 
 Khách gửi thông số ngay sau khi bảo ẩn: *"kho bán sản phẩm cho vật nuôi ăn chưa có phân bón,
