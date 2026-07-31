@@ -6,6 +6,35 @@
 
 ---
 
+## [2026-07-31i] — Xong hướng dẫn thì bong bóng ghi "Hiện chưa có nhiệm vụ"
+
+### Anh chốt 31/07
+Đã hoàn thành hướng dẫn tân thủ thì đừng lặp mãi câu "Tìm NPC Tân Thủ để bắt đầu!".
+
+### Hai câu bị kẹt vĩnh viễn
+1. **Người chơi cũ**: `WireHud()` đặt cứng "Tìm NPC Tân Thủ để bắt đầu!", mà `TutorialManager`
+   không chạy với hồ sơ `tutorialCompleted` nên không ai ghi đè → câu đó nằm mãi.
+2. **Người vừa xong**: `CompleteTutorial()` ghi "Hoàn thành Hướng Dẫn Tân Thủ!" rồi cũng để đó luôn.
+
+### Sửa
+- `GameHUDController.ApplyIdleQuestText()` — chọn câu theo hồ sơ: đã xong → `"Hiện chưa có nhiệm vụ"`,
+  chưa xong → nhắc tìm NPC. Tự bỏ qua nếu hướng dẫn đang chạy (lúc đó nó là chủ nhãn, các bước `[x/11]`).
+- `SyncQuestText()` — hồ sơ nạp từ cache ngay ở `Awake` nhưng bản thật về sau lượt gọi mạng, nên
+  chờ `IsLoaded` rồi chỉnh lại, giống cách `SyncPlayerName` chờ tên.
+- `CompleteTutorial()` khoe "Hoàn thành!" 6 giây rồi trả nhãn về trạng thái rảnh.
+
+### Lưu ý cho người sửa sau
+Bong bóng **phải luôn hiện** vì nó là lối vào **duy nhất** của popup Nhiệm vụ. `SetQuest("")` sẽ
+**ẩn** nó đi — đừng bao giờ truyền chuỗi rỗng cho trạng thái "không có nhiệm vụ".
+
+### Files
+- `Assets/_Project/UI/GameHUDController.cs`
+- `Assets/_Project/Scripts/Tutorial/TutorialManager.cs`
+
+`csc exit code: 0`.
+
+---
+
 ## [2026-07-31h] — Chặn thao tác thì phải báo, đừng nuốt cú bấm
 
 ### Nguyên tắc (anh chốt 31/07)

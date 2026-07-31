@@ -666,6 +666,16 @@ public class TutorialManager : MonoBehaviour
 
         CancelInvoke(nameof(HideSubtitle));
         Invoke(nameof(HideSubtitle), 5f);
+
+        // Khoe "Hoàn thành!" một lát rồi trả nhãn về trạng thái rảnh — trước đây câu này nằm
+        // lại trên HUD vĩnh viễn (anh chốt 31/07: xong rồi thì ghi "chưa có nhiệm vụ").
+        StartCoroutine(ShowIdleQuestAfter(6f));
+    }
+
+    private IEnumerator ShowIdleQuestAfter(float seconds)
+    {
+        yield return new WaitForSeconds(seconds);
+        UpdateQuestHUD(GameHUDController.NoQuestText);
     }
 
     // ── Tiện ích điều phối GuideNPC ──

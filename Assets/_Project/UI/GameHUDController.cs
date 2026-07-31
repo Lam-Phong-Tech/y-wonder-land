@@ -208,9 +208,8 @@ public class GameHUDController : MonoBehaviour
         SetPlayerInfo("YWonderPlayer", 1);
         UpdateExpLabel();
         // C\u00e2u ch\u1edd tr\u01b0\u1edbc khi TutorialManager gi\u00e0nh l\u1ea5y nh\u00e3n n\u00e0y (b\u01b0\u1edbc [1/11] tr\u1edf \u0111i).
-        // Ph\u1ea3i m\u00f4 t\u1ea3 \u0111\u00fang vi\u1ec7c ng\u01b0\u1eddi ch\u01a1i c\u1ea7n l\u00e0m: game KH\u00d4NG c\u00f3 m\u1ed1c "t\u00ecm ng\u00f4i nh\u00e0 \u0111\u1ea7u ti\u00ean",
-        // m\u1edf m\u00e0n l\u00e0 \u0111i t\u00ecm NPC T\u00e2n Th\u1ee7.
-        SetQuest("T\u00ecm NPC T\u00e2n Th\u1ee7 \u0111\u1ec3 b\u1eaft \u0111\u1ea7u!");
+        ApplyIdleQuestText();
+        StartCoroutine(SyncQuestText());
         UpdateAvatar();
 
         // Sync player name from GameManager (retry until available)
@@ -727,6 +726,46 @@ public class GameHUDController : MonoBehaviour
     }
 
     // ── Test: Press L = Level Up, E = Event ──
+    // ── NHÃN NHIỆM VỤ LÚC KHÔNG CÓ HƯỚNG DẪN ──
+    // Bong bóng PHẢI luôn hiện vì nó là lối vào duy nhất của popup Nhiệm vụ — nhớ là
+    // SetQuest("") sẽ ẩn nó đi, nên đừng bao giờ truyền chuỗi rỗng ở đây.
+    public const string NoQuestText = "Hiện chưa có nhiệm vụ";
+    private const string FindGuideQuestText = "Tìm NPC Tân Thủ để bắt đầu!";
+
+    /// <summary>
+    /// Chọn câu cho bong bóng nhiệm vụ khi hướng dẫn KHÔNG chạy: người chơi đã học xong thì
+    /// "chưa có nhiệm vụ", người mới thì nhắc đi tìm NPC Tân Thủ.
+    /// Anh chốt 31/07: đừng lặp mãi câu "Tìm NPC Tân Thủ" với người đã xong hướng dẫn.
+    /// </summary>
+    public void ApplyIdleQuestText()
+    {
+        // Hướng dẫn đang chạy thì NÓ là chủ nhãn này (các bước [x/11]) — không giành.
+        if (TutorialManager.Instance != null && TutorialManager.Instance.IsActive()) return;
+
+        var prof = YWonderLand.Backend.PlayerProfileService.Instance;
+        bool done = prof != null && prof.Profile != null && prof.Profile.tutorialCompleted;
+        SetQuest(done ? NoQuestText : FindGuideQuestText);
+    }
+
+    // Hồ sơ nạp từ cache ngay lúc Awake nhưng bản THẬT về sau lượt gọi mạng, nên chờ IsLoaded
+    // rồi chỉnh lại câu — giống cách SyncPlayerName chờ tên.
+    private IEnumerator SyncQuestText()
+    {
+        for (int i = 0; i < 20; i++)
+        {
+            if (TutorialManager.Instance != null && TutorialManager.Instance.IsActive()) yield break;
+
+            var prof = YWonderLand.Backend.PlayerProfileService.Instance;
+            if (prof != null && prof.IsLoaded)
+            {
+                ApplyIdleQuestText();
+                yield break;
+            }
+
+            yield return new WaitForSeconds(0.5f);
+        }
+    }
+
     private IEnumerator SyncPlayerName()
     {
         for (int i = 0; i < 20; i++)
