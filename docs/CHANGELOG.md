@@ -6,6 +6,39 @@
 
 ---
 
+## [2026-07-31h] — Chặn thao tác thì phải báo, đừng nuốt cú bấm
+
+### Nguyên tắc (anh chốt 31/07)
+Ngăn hành động bất thường của người chơi thì **phải có toast**. Chặn mà im lặng thì người chơi
+tưởng game đơ / máy lag rồi bấm loạn — đúng kiểu bực nhất.
+
+### Helper dùng chung
+`FarmInteractionController.NotifyBlocked(message, cooldownSec = 1.5f)` — cooldown theo **từng câu**:
+bấm liên tục cùng một chỗ thì không spam, nhưng đổi sang lỗi khác là báo ngay chứ không bị nuốt.
+
+### Ba chỗ trước đây im lặng
+| Chỗ | Trước | Giờ |
+|---|---|---|
+| Chạm ô đất ngoài tầm với | chỉ `Debug.LogWarning` | "Đứng gần ô đất hơn mới thao tác được." |
+| Bấm nút **Dời ruộng** ngoài tầm | nuốt luôn cú bấm | "Đứng gần mảnh ruộng hơn mới dời được." |
+| Thao tác ruộng trong lúc đang câu cá | chỉ `Debug.LogWarning` | "Đang câu cá — thu cần rồi hãy làm việc khác nhé." |
+
+Nặng nhất là "Dời ruộng": **nút đã hiện ra** rồi bấm không ăn thua gì cả.
+
+### CỐ Ý không thêm toast
+- `BeginTimedAction` chặn vì **đang múa động tác khác** / **player đang bận**: đó là bấm sốt ruột
+  chứ không phải hành động bất thường, mà lúc đó **thanh Hủy đang hiện** ngay trên màn hình rồi.
+  Thêm toast chỉ tổ ồn.
+- Đè chuột đào đá sai đảo (`HandleHold`) đi qua vòng lặp mỗi khung hình — luồng **bấm** đã có toast
+  "Chỉ đào đá được ở Thành phố hoặc Đảo mỏ thôi!", đủ rồi.
+
+### Files
+- `Assets/_Project/Scripts/Environment/FarmInteractionController.cs`
+
+`csc exit code: 0`.
+
+---
+
 ## [2026-07-31g] — Bịt hẳn cheat tua nhanh: thu hẹp về đúng ô của hướng dẫn
 
 ### Vì sao khóa quầy chưa đủ

@@ -583,6 +583,9 @@ namespace YWonderLand.Environment
             }
             if (FishingOverlayController.Instance != null && FishingOverlayController.Instance.IsAutoFishing)
             {
+                // Khác hai nhánh trên: câu cá KHÔNG có thanh Hủy bên ruộng, người chơi chỉ thấy
+                // "bấm mà không ăn thua" nên phải nói rõ.
+                NotifyBlocked("Đang câu cá — thu cần rồi hãy làm việc khác nhé.");
                 Debug.LogWarning($"[FarmInteraction] Timed action '{animName}' blocked: fishing overlay is active.");
                 return false;
             }
@@ -998,7 +1001,16 @@ namespace YWonderLand.Environment
                 {
                     keyName = "M",
                     actionName = "Dời ruộng",
-                    onClick = () => { if (IsTileInRange(plotSeed, useDirectTapInteraction)) BeginMovePlot(plotSeed); }
+                    // Nút đã hiện thì bấm phải có phản hồi — ngoài tầm cũng phải nói, đừng nuốt cú bấm.
+                    onClick = () =>
+                    {
+                        if (!IsTileInRange(plotSeed, useDirectTapInteraction))
+                        {
+                            NotifyBlocked("Đứng gần mảnh ruộng hơn mới dời được.");
+                            return;
+                        }
+                        BeginMovePlot(plotSeed);
+                    }
                 });
             }
 
@@ -1153,6 +1165,24 @@ namespace YWonderLand.Environment
                     return true;
             }
             return false;
+        }
+
+        // ── BÁO KHI CHẶN THAO TÁC (anh chốt 31/07) ──
+        // Chặn mà im lặng thì người chơi tưởng game đơ / máy lag rồi bấm loạn — đúng kiểu bực
+        // nhất. Mọi đường chặn mà người chơi CHẠM TỚI ĐƯỢC đều phải nói ra lý do.
+        // Cooldown theo TỪNG CÂU: bấm liên tục cùng một chỗ thì không spam, nhưng đổi sang lỗi
+        // khác là báo ngay chứ không bị nuốt mất.
+        private float nextBlockToastAt;
+        private string lastBlockToastMessage = "";
+
+        private void NotifyBlocked(string message, float cooldownSec = 1.5f)
+        {
+            if (string.IsNullOrEmpty(message)) return;
+            if (message == lastBlockToastMessage && Time.unscaledTime < nextBlockToastAt) return;
+
+            lastBlockToastMessage = message;
+            nextBlockToastAt = Time.unscaledTime + cooldownSec;
+            ScreenToast.Show(message);
         }
 
         private bool IsTileInRange(FarmTile tile)
@@ -3325,6 +3355,7 @@ namespace YWonderLand.Environment
             if (PlayerController.Instance == null) return; // chống NullReferenceException khi player chưa spawn / đang teleport
             if (!IsTileInRange(tile, useDirectTapInteraction))
             {
+                NotifyBlocked("Đứng gần ô đất hơn mới thao tác được.");
                 Debug.LogWarning($"[FarmInteraction] Tile action blocked by range: tile={(tile != null ? tile.name : "null")}, range={GetTileInteractRange():0.00}");
                 return;
             }
