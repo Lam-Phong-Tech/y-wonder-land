@@ -394,6 +394,7 @@ public class TutorialManager : MonoBehaviour
         // RESUME: node phải có TRƯỚC khi chào, kẻo NPC không biết dẫn đi đâu (xem EnsureTutorialNodesBuilt).
         EnsureTutorialNodesBuilt();
 
+        SubscribeFarmTileEvents();
         SetStep(TutorialStep.FollowToTree);
         UpdateQuestHUD("[1/11] Đi theo NPC Tân Thủ tới chỗ cái cây");
         Debug.Log("[TutorialManager] Onboarding Tutorial (flow mới) bắt đầu.");
@@ -508,16 +509,9 @@ public class TutorialManager : MonoBehaviour
         {
             GhostPlacementController.OnBuildingPlaced -= OnBuildingPlaced;
 
-            // Tìm ô đất MỚI vừa sinh ra để theo dõi cho các bước cuốc/trồng/tưới/thu hoạch.
-            targetFarmTile = FindNewlyBuiltTile();
-            if (targetFarmTile != null)
-            {
-                targetFarmTile.OnTilePlowed += OnTilePlowed;
-                targetFarmTile.OnTilePlanted += OnTilePlanted;
-                targetFarmTile.OnTileWatered += OnTileWatered;
-                targetFarmTile.OnTileHarvested += OnTileHarvested;
-                targetFarmTile.tutorialGrowthTime = 24f; // tutorial tua nhanh 24s (đồng bộ override ở FarmTile.GetGrowthTime)
-            }
+            // Đoán ô đất MỚI vừa sinh ra — chỉ để tua nhanh thời gian lớn và cho con trỏ cũ.
+            // Tiến trình hướng dẫn KHÔNG phụ thuộc vào việc đoán này nữa (xem AdoptFarmTile).
+            AdoptFarmTile(FindNewlyBuiltTile());
 
             SetStep(TutorialStep.PlowTile);
             UpdateQuestHUD("[5/11] Cầm cuốc, nhấp vào ô đất vừa xây để cuốc");
@@ -539,13 +533,25 @@ public class TutorialManager : MonoBehaviour
         var all = FindObjectsByType<FarmTile>(FindObjectsSortMode.None);
         foreach (var t in all)
             if (t != null && !knownTilesBeforeBuild.Contains(t)) return t;
-        // Fallback: nếu không thấy ô mới, lấy ô bất kỳ để không kẹt.
-        return all.Length > 0 ? all[0] : null;
+        // Không nhận ra ô mới thì trả null. TUYỆT ĐỐI không "lấy đại ô bất kỳ": trước đây
+        // nhánh đó nhằm chống kẹt nhưng lại chính là thủ phạm gây kẹt — hướng dẫn bám vào
+        // một ô cũ ở đẩu đâu, người chơi cuốc ô mới thì nó không nghe thấy gì.
+        return null;
+    }
+
+    // Người chơi làm trên ô nào thì hướng dẫn bám theo ô đó.
+    private void AdoptFarmTile(FarmTile tile)
+    {
+        if (tile == null || tile == targetFarmTile) return;
+        targetFarmTile = tile;
+        // Tua nhanh thời gian lớn cho vừa nhịp hướng dẫn (khớp override ở FarmTile.GetGrowthTime).
+        targetFarmTile.tutorialGrowthTime = 24f;
     }
 
     private void OnTilePlowed(FarmTile tile)
     {
         if (currentStep != TutorialStep.PlowTile) return;
+        AdoptFarmTile(tile);
         SetStep(TutorialStep.PlantSeed);
         UpdateQuestHUD("[6/11] Mở túi, chọn hạt rồi nhấp vào ô đất để gieo");
         ShowSubtitleDelayed("Khá đấy! Giờ mở túi chọn hạt giống, rồi gieo xuống ô đất.");
@@ -556,6 +562,7 @@ public class TutorialManager : MonoBehaviour
     private void OnTilePlanted(FarmTile tile)
     {
         if (currentStep != TutorialStep.PlantSeed && currentStep != TutorialStep.BuildFarmPlot) return;
+        AdoptFarmTile(tile);
         SetStep(TutorialStep.WaterTile);
         UpdateQuestHUD("[7/11] Nhấp vào ô đất để tưới nước");
         ShowSubtitleDelayed("Gieo xong rồi. Cây không có nước thì sao lớn? Tưới đi cậu!");
@@ -566,6 +573,7 @@ public class TutorialManager : MonoBehaviour
     private void OnTileWatered(FarmTile tile)
     {
         if (currentStep != TutorialStep.WaterTile) return;
+        AdoptFarmTile(tile);
         SetStep(TutorialStep.WaitHarvest);
 
         harvestCountdown = 5f;
@@ -901,18 +909,31 @@ public class TutorialManager : MonoBehaviour
         HideCountdownTimer();
     }
 
+    // Nghe MỌI ô đất, không bám một ô đoán trước. Các handler đều tự chặn theo currentStep
+    // nên đăng ký sớm cũng vô hại.
+    private void SubscribeFarmTileEvents()
+    {
+        UnsubscribeFarmTileEvents();
+        FarmTile.AnyTilePlowed += OnTilePlowed;
+        FarmTile.AnyTilePlanted += OnTilePlanted;
+        FarmTile.AnyTileWatered += OnTileWatered;
+        FarmTile.AnyTileHarvested += OnTileHarvested;
+    }
+
+    private void UnsubscribeFarmTileEvents()
+    {
+        FarmTile.AnyTilePlowed -= OnTilePlowed;
+        FarmTile.AnyTilePlanted -= OnTilePlanted;
+        FarmTile.AnyTileWatered -= OnTileWatered;
+        FarmTile.AnyTileHarvested -= OnTileHarvested;
+    }
+
     private void UnsubscribeTutorialEvents()
     {
         YWonderLand.Environment.HarvestableResource.OnResourceHarvested -= OnResourceHarvested;
         GhostPlacementController.OnBuildingPlaced -= OnBuildingPlaced;
-        if (targetFarmTile != null)
-        {
-            targetFarmTile.OnTilePlowed -= OnTilePlowed;
-            targetFarmTile.OnTilePlanted -= OnTilePlanted;
-            targetFarmTile.OnTileWatered -= OnTileWatered;
-            targetFarmTile.OnTileHarvested -= OnTileHarvested;
-            targetFarmTile = null;
-        }
+        UnsubscribeFarmTileEvents();
+        targetFarmTile = null;
     }
 
     // ── NPC Exclamation Mark ──

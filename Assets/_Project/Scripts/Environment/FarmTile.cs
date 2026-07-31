@@ -62,6 +62,24 @@ public class FarmTile : MonoBehaviour
     public Action<FarmTile> OnTileWatered;
     public Action<FarmTile> OnTileHarvested;
 
+    // Bản DÙNG CHUNG (mọi ô) — sinh ra cho TutorialManager.
+    // Hướng dẫn cần biết "người chơi vừa cuốc/gieo/tưới/thu MỘT ô nào đó", chứ không phải
+    // trên đúng cái ô mà nó đoán trước. Bám một ô cụ thể là nguồn gốc lỗi kẹt hướng dẫn:
+    // đoán trượt ô là người chơi làm gì cũng vô ích, NPC đứng lặp thoại mãi.
+    public static Action<FarmTile> AnyTilePlowed;
+    public static Action<FarmTile> AnyTilePlanted;
+    public static Action<FarmTile> AnyTileWatered;
+    public static Action<FarmTile> AnyTileHarvested;
+
+    // Sự kiện tĩnh dùng chung: một handler ném lỗi KHÔNG được phép chặn luôn thao tác của
+    // người chơi (bài học từ OnResourceHarvested).
+    private static void RaiseAny(Action<FarmTile> evt, FarmTile tile)
+    {
+        if (evt == null) return;
+        try { evt(tile); }
+        catch (Exception e) { Debug.LogError($"[FarmTile] Handler su kien chung nem loi: {e}"); }
+    }
+
     // MỐC THỜI GIAN bắt đầu lớn (giây, theo đồng hồ TOÀN CỤC RealNow()).
     // % lớn = (giờ hiện tại − mốc này) / thời_gian_lớn → KHÔNG phụ thuộc Update mỗi frame,
     // nên đi thành phố / tắt ô đất cho nhẹ máy thì về farm cây vẫn "lớn bù" đúng thời gian đã trôi.
@@ -434,6 +452,7 @@ public class FarmTile : MonoBehaviour
         currentState = TileState.Plowed;
         UpdateVisuals();
         OnTilePlowed?.Invoke(this);
+        RaiseAny(AnyTilePlowed, this);
         return true;
     }
 
@@ -481,6 +500,7 @@ public class FarmTile : MonoBehaviour
         YWonderLand.Managers.PlayerStats.AddPlanted();
 
         OnTilePlanted?.Invoke(this);
+        RaiseAny(AnyTilePlanted, this);
         return true;
     }
 
@@ -497,6 +517,7 @@ public class FarmTile : MonoBehaviour
         CreateWaterBar();
         UpdateVisuals();
         OnTileWatered?.Invoke(this);
+        RaiseAny(AnyTileWatered, this);
         return true;
     }
 
@@ -677,6 +698,7 @@ public class FarmTile : MonoBehaviour
             CreateWaterBar();
             UpdateVisuals();
             OnTileHarvested?.Invoke(this);
+            RaiseAny(AnyTileHarvested, this);
             return true;
         }
 
@@ -707,6 +729,7 @@ public class FarmTile : MonoBehaviour
 
         UpdateVisuals();
         OnTileHarvested?.Invoke(this);
+        RaiseAny(AnyTileHarvested, this);
         return true;
     }
 

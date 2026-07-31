@@ -6,6 +6,47 @@
 
 ---
 
+## [2026-07-31d] — Hướng dẫn tân thủ kẹt ở bước cuốc đất
+
+### Triệu chứng
+Anh cuốc đất xong, NPC **đứng im lặp thoại** như không biết người chơi đã làm.
+
+### Gốc rễ
+Cả chuỗi ruộng của hướng dẫn (cuốc → gieo → tưới → thu) treo vào **đúng MỘT ô đất** mà
+`TutorialManager` **đoán trước** ngay lúc người chơi đặt ruộng xuống:
+
+```csharp
+targetFarmTile = FindNewlyBuiltTile();
+targetFarmTile.OnTilePlowed += OnTilePlowed;   // chỉ nghe ô này
+```
+
+Đoán trượt là hỏng cả chuỗi. Mà `FindNewlyBuiltTile()` có sẵn một nhánh **bảo đảm** đoán trượt:
+
+```csharp
+// Fallback: nếu không thấy ô mới, lấy ô bất kỳ để không kẹt.
+return all.Length > 0 ? all[0] : null;
+```
+
+Nhánh này viết ra để *chống* kẹt nhưng chính nó *gây* kẹt: nó gán hướng dẫn vào **một ô cũ ở đẩu
+đâu** mà người chơi không có lý do gì đụng tới. Người chơi cuốc ô mới → sự kiện bắn trên ô mới →
+hướng dẫn đang nghe ô khác → không nghe thấy gì → NPC đứng lặp thoại.
+
+Tài khoản đã có sẵn nhiều ruộng (như máy anh, test cả ngày) thì càng dễ dính. Bước hành động
+**không có** cơ chế tự nhảy — anti-kẹt chỉ phủ các bước đi-theo-NPC — nên kẹt là kẹt vĩnh viễn.
+
+### Sửa
+Bỏ hẳn kiểu đoán trước. `FarmTile` có thêm 4 sự kiện **dùng chung cho mọi ô**
+(`AnyTilePlowed/Planted/Watered/Harvested`), hướng dẫn nghe những cái đó rồi **bám theo ô người
+chơi thật sự vừa làm** (`AdoptFarmTile`) — cuốc ô nào thì các bước sau theo ô đó, kể cả ô cũ.
+
+`FindNewlyBuiltTile()` giờ trả `null` khi không nhận ra ô mới thay vì lấy đại; nó chỉ còn dùng để
+tua nhanh thời gian lớn, không còn quyết định tiến trình.
+
+Sự kiện tĩnh bọc `try/catch` — một handler ném lỗi không được phép chặn luôn thao tác của người
+chơi (bài học từ `OnResourceHarvested`).
+
+---
+
 ## [2026-07-31c] — Điểm danh chuyển hẳn lên server + luật mất chuỗi
 
 ### Vì sao phải làm
