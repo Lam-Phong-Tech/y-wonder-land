@@ -101,10 +101,12 @@ public class MailboxPopupController : MonoBehaviour
         itemDatabase = Resources.Load<YWonderLand.Data.ItemDatabase>("ItemDatabase");
         QueryElements();
         RegisterCallbacks();
-        
-        // Load Initial Mock Data
-        InitializeMockData();
-        
+
+        // Hòm thư bắt đầu TRỐNG (anh chốt 31/07). Trước đây nạp sẵn 5 thư mẫu — quà tân thủ, báo
+        // bảo trì, đền bù, đua top, thư hàng xóm — toàn là chữ bịa thời dựng giao diện, khách xem
+        // build là tưởng tính năng thật. Giờ chỉ còn thư THẬT do game sinh ra: báo cây/thú chết
+        // (xem SyncDeathMails). Có thư hệ thống thật thì nối vào cùng chỗ đó.
+
         // Hide popup initially
         Hide();
     }
@@ -154,86 +156,6 @@ public class MailboxPopupController : MonoBehaviour
         // Mail Detail controls
         btnClaimReward?.RegisterCallback<ClickEvent>(evt => ClaimSelectedReward());
         btnDeleteMail?.RegisterCallback<ClickEvent>(evt => DeleteSelectedMail());
-    }
-
-    private void InitializeMockData()
-    {
-        mailList.Clear();
-
-        // 1. Welcome Mail (With reward, unread)
-        var welcomeGift = new List<AttachmentItem>
-        {
-            new AttachmentItem("Cá vàng", "🪙", 1500, iconClass: "mail-reward-pos"),
-            new AttachmentItem("Hạt giống Cà rốt", "🥕", 10, itemId: "carrot_seed_01"),
-            new AttachmentItem("Rùa con", "🐢", 1, itemId: "turtle_01")
-        };
-        mailList.Add(new MailData(
-            "mail_welcome",
-            "Quà Chào Mừng Tân Thủ!",
-            "Hệ Thống",
-            "10:00 02/06",
-            "Chào mừng bạn đến với Y WONDER GREEN FARM! Đây là món quà nhỏ từ Ban Quản Trị để giúp bạn khởi nghiệp nông trại của mình thuận lợi hơn. Hãy chăm sóc cây trồng và kết bạn thật nhiều nhé!",
-            true,
-            welcomeGift
-        ));
-
-        // 2. System Maintenance (No reward, read)
-        var maintenanceMail = new MailData(
-            "mail_maintenance",
-            "Báo Cáo Bảo Trì Định Kỳ",
-            "Kỹ Thuật",
-            "Hôm qua",
-            "Hệ thống đã hoàn tất bảo trì định kỳ lúc 05:00 sáng. Chúng tôi đã nâng cấp server để đảm bảo game chạy mượt mà hơn và sửa một số lỗi hiển thị chữ nút bấm. Cảm ơn bạn đã đồng hành cùng chúng tôi!",
-            false
-        );
-        maintenanceMail.isRead = true; // Mark as read initially
-        mailList.Add(maintenanceMail);
-
-        // 3. Compensation Mail (With reward, read & claimed)
-        var compGift = new List<AttachmentItem>
-        {
-            new AttachmentItem("Cá vàng", "🪙", 500, iconClass: "mail-reward-pos"),
-            // Đổi 30/07: trước đây tặng "Phân bón" — bón phân dời sang bản sau nên không được
-            // để lộ ở đây (hòm thư KHÔNG lọc qua HiddenItems như shop/túi).
-            new AttachmentItem("Thuốc trị", "💊", 3, itemId: "medicine_01")
-        };
-        var compMail = new MailData(
-            "mail_compensation",
-            "Đền Bù Sự Cố Kết Nối",
-            "Ban Quản Trị",
-            "30/05/2026",
-            "Chúng tôi chân thành xin lỗi vì sự cố mất kết nối mạng vào tối ngày 29/05. Gửi kèm theo đây là gói đền bù sự cố. Chúc bạn chơi game vui vẻ!",
-            true,
-            compGift
-        );
-        compMail.isRead = true;
-        compMail.isRewardClaimed = true;
-        mailList.Add(compMail);
-
-        // 4. Weekly Ranking Event (With reward, unread)
-        var rankGift = new List<AttachmentItem>
-        {
-            new AttachmentItem("Kim cương", "💎", 5, iconClass: "mail-reward-diamond")
-        };
-        mailList.Add(new MailData(
-            "mail_weekly_rank",
-            "Sự Kiện Đua Top Tuần",
-            "Sự Kiện",
-            "28/05/2026",
-            "Chúc mừng bạn đã lọt vào Top 100 nông dân chăm chỉ tuần qua! Hãy nhận phần quà đính kèm để tiếp tục nỗ lực trong tuần mới.",
-            true,
-            rankGift
-        ));
-
-        // 5. Letter from Neighbor (No reward, unread)
-        mailList.Add(new MailData(
-            "mail_neighbor",
-            "Lời chào từ người hàng xóm",
-            "Lâm Farming",
-            "25/05/2026",
-            "Chào đằng ấy! Tớ thấy nông trại của đằng ấy rất đẹp. Khi nào rảnh hãy ghé thăm nông trại của tớ chơi nhé! Tớ có trồng rất nhiều dưa hấu chín mọng ngon lắm.",
-            false
-        ));
     }
 
     public void Show()
