@@ -135,7 +135,6 @@ namespace YWonderLand.Environment
         private FarmTile pendingPlantTile; // Tile đang chờ gieo hạt
         private YWonderLand.Environment.AnimalPenSpawner pendingPen; // Chuồng đang chờ chọn con vật từ túi
         private FarmAnimal pendingFeedAnimal; // Con vật đang chờ chọn thức ăn từ túi
-        private FarmTile pendingFertilizeTile; // Cây đang chờ chọn phân bón từ túi
         private List<BuildSurfaceCell> pendingEnclosure; // Vùng quây (rào) đang chờ thả thú
         private bool animalPlacementInFlight;
         private List<BuildSurfaceCell> pendingDemolishEnclosure;
@@ -668,7 +667,12 @@ namespace YWonderLand.Environment
         {
             var target = promptTargetBeforeTimedAction;
             promptTargetBeforeTimedAction = null;
+            RebuildPromptFor(target);
+        }
 
+        /// <summary>Dựng lại bảng nút cho đúng vật thể này theo trạng thái HIỆN TẠI của nó.</summary>
+        private void RebuildPromptFor(GameObject target)
+        {
             if (target == null || !useDirectTapInteraction) return;
             if (PenMoveController.IsActive || UIPopupTracker.AnyOpen) return;
             if (!IsDirectTapTargetStillInRange(target)) return;
@@ -974,7 +978,12 @@ namespace YWonderLand.Environment
                 {
                     keyName = "B",
                     actionName = "Bón phân",
-                    onClick = () => BeginFertilize(fertilizeTile)
+                    // Bón thẳng rồi dựng lại bảng nút: bón xong cây có thể chín, nút "Bón phân"
+                    // phải biến mất chứ không đứng ì đó.
+                    onClick = () =>
+                    {
+                        if (BeginFertilize(fertilizeTile)) RebuildPromptFor(currentHoverObject);
+                    }
                 });
             }
 
@@ -2748,8 +2757,13 @@ namespace YWonderLand.Environment
         // bón / dời ngay tại đó. Mọi nút đều gọi ĐÚNG luồng cũ ngoài ruộng — không có nhánh logic
         // thứ hai để lệch số liệu hay lách kiểm tra.
 
-        /// <summary>Tưới cây đang chọn trong popup. Popup TỰ ĐÓNG vì tưới có màn múa động tác.</summary>
-        public void BeginWaterTile(FarmTile tile)
+        /// <summary>
+        /// Tưới cây đang chọn trong popup. Popup phải đóng vì tưới có màn múa động tác (che thì
+        /// không thấy gì), nhưng <paramref name="onWatered"/> cho phép nó TỰ MỞ LẠI khi múa xong —
+        /// anh chốt 31/07: tưới nhiều cây liên tiếp mà phải đi bấm lại "Xem ruộng" thì mệt.
+        /// Chỉ gọi khi tưới THÀNH CÔNG; bỏ dở giữa chừng thì không mở lại.
+        /// </summary>
+        public void BeginWaterTile(FarmTile tile, System.Action onWatered = null)
         {
             if (tile == null) return;
             if (tile.currentState != FarmTile.TileState.Planted && tile.currentState != FarmTile.TileState.Watered)
@@ -2758,7 +2772,7 @@ namespace YWonderLand.Environment
                 return;
             }
             if (PlayerController.Instance != null) PlayerController.Instance.FaceTowards(tile.transform.position);
-            HandleWater(tile);
+            HandleWater(tile, onWatered);
         }
 
         /// <summary>Thu hoạch cây đang chọn. KHÔNG có màn múa nên để popup mở, thu liền tay nhiều cây.</summary>
@@ -2775,7 +2789,7 @@ namespace YWonderLand.Environment
         }
 
         /// <summary>Bón phân cho cây đang chọn (mở túi ở tab Đồ dùng).</summary>
-        public void BeginFertilizeTile(FarmTile tile) => BeginFertilize(tile);
+        public bool BeginFertilizeTile(FarmTile tile) => BeginFertilize(tile);
 
         /// <summary>Cây này bón phân được không — popup hỏi để bật/tắt nút, khỏi lộ ngưỡng ra ngoài.</summary>
         public bool CanFertilizeTile(FarmTile tile) => tile != null && tile.IsFertilizable(FertilizerMaxGrowthSec);
@@ -2867,61 +2881,43 @@ namespace YWonderLand.Environment
         /// </summary>
         private void ClearPendingItemPickIfBagClosed()
         {
-            if (pendingFertilizeTile == null && pendingFeedAnimal == null && pendingPlantTile == null) return;
+            if (pendingFeedAnimal == null && pendingPlantTile == null) return;
             if (Time.frameCount <= pendingItemPickFrame + 1) return;              // vừa bấm, túi chưa kịp hiện
             if (inventoryPopup != null && inventoryPopup.IsVisible()) return;     // túi còn mở -> vẫn đang chọn
 
-            pendingFertilizeTile = null;
             pendingFeedAnimal = null;
             pendingPlantTile = null;
         }
 
-        /// <summary>Bón phân = mở túi (tab Đồ dùng) chọn Phân bón -> đẩy tiến độ lớn của cây.</summary>
-        private void BeginFertilize(FarmTile tile)
+        /// <summary>
+        /// BÓN PHÂN — bón THẲNG, không mở túi (anh chốt 31/07).
+        ///
+        /// Trước đây bấm "Bón phân" thì mở túi cho người chơi chọn món. Bước đó THỪA vì phân bón chỉ
+        /// có ĐÚNG MỘT loại; đổi lại nó gây hai phiền: popup "Xem ruộng" phải đóng nên không bón liên
+        /// tiếp được, và cờ "đang chờ chọn phân" bị treo khi đóng túi giữa chừng (sinh ra toast phân
+        /// bón lúc đang làm việc khác). Bón thẳng là hết cả hai.
+        ///
+        /// Trả về true nếu bón được — popup dùng để biết có cần vẽ lại không.
+        /// </summary>
+        private bool BeginFertilize(FarmTile tile)
         {
-            if (tile == null) return;
+            if (tile == null) return false;
 
-            pendingFertilizeTile = tile;
-            MarkPendingItemPick();
-            pendingFeedAnimal = null;
-            pendingPen = null;
-            pendingPlantTile = null;
-            pendingEnclosure = null;
-
-            if (PlayerController.Instance != null) PlayerController.Instance.FaceTowards(tile.transform.position);
-
-            var inv = YWonderLand.Managers.InventoryManager.Instance;
-            if (inv != null && inv.GetItemQuantity(FertilizerItemId) <= 0)
-                ScreenToast.Show("Trong túi không còn phân bón — mua thêm ở Cửa hàng Vật phẩm hoặc Đại lý Hai Lúa.");
-
-            EnsureInventoryPopupSubscribed();
-            if (inventoryPopup != null) inventoryPopup.ShowAtTab("items");
-        }
-
-        // Người chơi chọn Phân bón trong túi khi đang chờ bón -> trừ 1 -> đẩy tiến độ lớn.
-        private void HandleFertilizeSelected(string itemId)
-        {
-            FarmTile tile = pendingFertilizeTile;
-            pendingFertilizeTile = null;
-
-            if (itemId != FertilizerItemId)
-            {
-                ScreenToast.Show("Đang chọn phân để bón — hãy chọn PHÂN BÓN trong tab Đồ dùng.");
-                return;
-            }
-            if (tile == null || !tile.IsFertilizable(FertilizerMaxGrowthSec))
+            if (!tile.IsFertilizable(FertilizerMaxGrowthSec))
             {
                 ScreenToast.Show("Chỉ bón được CÂY NGẮN NGÀY đang lớn (đã tưới, chưa chín).");
-                return;
+                return false;
             }
 
             var inv = YWonderLand.Managers.InventoryManager.Instance;
             if (inv == null || inv.GetItemQuantity(FertilizerItemId) <= 0)
             {
-                ScreenToast.Show("Hết phân bón — mua thêm ở Cửa hàng Vật phẩm hoặc Đại lý Hai Lúa.");
-                return;
+                ScreenToast.Show("Trong túi không còn phân bón — mua thêm ở Cửa hàng Vật phẩm hoặc Đại lý Hai Lúa.");
+                return false;
             }
-            if (!inv.RemoveItem(FertilizerItemId, 1)) return;
+
+            if (PlayerController.Instance != null) PlayerController.Instance.FaceTowards(tile.transform.position);
+            if (!inv.RemoveItem(FertilizerItemId, 1)) return false;
 
             float bonusSec = FertilizerBonusSec;
             // Đọc giống TRƯỚC khi bón để tính ra phần trăm; bón xong cây có thể chín và mất crop.
@@ -2931,10 +2927,8 @@ namespace YWonderLand.Environment
             {
                 inv.AddItem(FertilizerItemId, 1); // bón hụt thì HOÀN phân, không nuốt đồ của người chơi
                 ScreenToast.Show("Bón không được — cây chưa tưới hoặc đã chín.");
-                return;
+                return false;
             }
-
-            if (inventoryPopup != null) inventoryPopup.Hide();
 
             string saved = FertilizerSavingText(fertilizedCrop, bonusSec);
 
@@ -2946,6 +2940,7 @@ namespace YWonderLand.Environment
 
             ScreenToast.ShowInfoForItem(FertilizerItemId, $"Đã bón phân: {saved}.{note}", fallbackText: "Phân");
             FarmActivityLog.RecordEvent(tile.HistoryKey, FarmActivityLog.KindFertilize, saved);
+            return true;
         }
 
         /// <summary>
@@ -2971,7 +2966,6 @@ namespace YWonderLand.Environment
             if (animal == null) return;
             pendingFeedAnimal = animal;
             MarkPendingItemPick();
-            pendingFertilizeTile = null;
             pendingPen = null;
             pendingPlantTile = null;
             pendingEnclosure = null;
@@ -4144,13 +4138,8 @@ namespace YWonderLand.Environment
                 return;
             }
 
-            // Ưu tiên: đang chờ chọn phân để bón cho cây.
-            if (pendingFertilizeTile != null)
-            {
-                MarkHandled();
-                HandleFertilizeSelected(itemId);
-                return;
-            }
+            // (Bón phân KHÔNG còn đi qua đây: từ 31/07 bấm "Bón phân" là bón thẳng, không mở túi.
+            //  Bấm Phân bón trong túi giờ rơi xuống ItemUsageHint, chỉ đường ra ruộng — đúng ý.)
 
             // Ưu tiên: đang chờ thả thú vào VÙNG QUÂY (chuồng từ hàng rào).
             if (pendingEnclosure != null)
@@ -4567,7 +4556,7 @@ namespace YWonderLand.Environment
             return spacing;
         }
 
-        private void HandleWater(FarmTile tile)
+        private void HandleWater(FarmTile tile, System.Action onWatered = null)
         {
             // CHẶN SPAM: đang múa động tác (tưới/cuốc...) thì bỏ qua click mới -> không tưới chồng
             // nhiều lần + không tốn nước thừa + không tăng tiến độ ô theo số lần click.
@@ -4602,9 +4591,14 @@ namespace YWonderLand.Environment
                     else if (tile != null && tile.currentState == FarmTile.TileState.Watered) watered = tile.WaterAgain();
 
                     if (watered)
+                    {
                         FarmStateSync.SaveTileState(tile);
+                        onWatered?.Invoke();   // popup "Xem ruộng" tự mở lại để tưới tiếp cây khác
+                    }
                     else
+                    {
                         inv.AddItem("watering_water_01", 1);
+                    }
                 },
                 () => inv.AddItem("watering_water_01", 1),
                 wateringSpeed);

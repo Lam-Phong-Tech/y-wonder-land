@@ -6,6 +6,54 @@
 
 ---
 
+## [2026-07-31b] — Rà soát toàn bộ shop + bón phân bón thẳng
+
+### Rà soát 8 cửa hàng
+Viết script mô phỏng đúng luật `resolveShopOffer` của server rồi đối chiếu **từng món, từng shop**
+giữa asset client / catalog đang chạy / catalog sinh lại. Kết quả:
+
+**12 giao dịch đang bị máy chủ chặn** (đúng lỗi anh gặp) — tất cả do server chưa deploy:
+- `Shop_ItemShop`: Gỗ, Đá, Nước tưới (thêm 30/07)
+- `Shop_MiniGarden`: 8 nông sản ngắn ngày + Phân bón (khách chốt giá 30/07)
+
+**`Shop_Verdant` có tab Bán CHẾT** — cái này deploy không chữa được, là lỗi dữ liệu client.
+Nó khai thu mua 7 nông sản ngắn ngày, nhưng từ 22/06 nhóm này `canSell=false`. Client lọc bỏ món
+không bán được (`ShopPopupController` dòng ~577) nên tab **luôn rỗng** — người chơi không gặp lỗi,
+chỉ thấy trống. Sửa: bỏ `sellItemIds`, đổi `accessMode` **Both → BuyOnly**.
+> ⚠️ Bắt buộc đổi chế độ. `sellItemIds` rỗng + `Both` thì server hiểu là **thu mua mọi thứ bán được**
+> (nhánh `acceptsAllSellable`) — thành cửa mở. Khách chưa quy định Verdant thu mua gì nên để chỉ-bán.
+
+Sau khi sửa: **không còn giao dịch nào client hiện mà server chặn**. Còn đúng 1 cảnh báo cố ý —
+`watering_water_01` giá 0 (nước tưới miễn phí).
+
+### Bón phân: bỏ hẳn bước mở túi đồ
+Anh chốt 31/07. Bước chọn món trong túi là **thừa** — phân bón chỉ có ĐÚNG MỘT loại — mà lại đẻ ra
+hai phiền: popup "Xem ruộng" phải đóng nên không bón liên tiếp được, và cờ `pendingFertilizeTile`
+bị treo khi đóng túi giữa chừng (chính là lỗi #3 hôm nay).
+- `BeginFertilize` giờ bón thẳng và **trả về bool**; xoá hẳn `pendingFertilizeTile` +
+  `HandleFertilizeSelected` + nhánh trong `OnInventoryItemSelected`.
+- Bấm Phân bón trong túi giờ rơi xuống `ItemUsageHint` — chỉ đường ra ruộng, đúng ý.
+- Áp cho **cả** nút trong popup **và** nút ngoài ruộng (phím B). Ngoài ruộng bón xong gọi
+  `RebuildPromptFor` để nút "Bón phân" biến mất khi cây đã chín.
+
+### Tưới xong tự mở lại popup ruộng
+Tưới có màn múa nên vẫn phải đóng popup, nhưng nay nhớ mảnh ruộng + cây đang chọn và **tự mở lại**
+khi múa xong (`BeginWaterTile(tile, onWatered)` → `ShowPlot(tiles, selected)`). Bỏ dở thì không mở lại.
+
+### Hai chỗ nói cho đúng bản chất
+- Câu báo `SHOP_ITEM_NOT_ALLOWED` cũ ("Cửa hàng này không giao dịch vật phẩm đã chọn") **đổ oan cho
+  cửa hàng**. Gặp lỗi này gần như luôn là do danh sách hàng trên máy chủ cũ hơn trong game. Đổi lại
+  cho đúng để khỏi đi tìm nhầm chỗ.
+- Log `FARM_STATE_CONFLICT` giờ in **cả hai số hiệu phiên bản** và nói rõ bản ghi client **bị vứt**.
+  Câu cũ chỉ in phiên bản server nên không lần ra lệch bao nhiêu. Chưa sửa gì ở cơ chế — cần số liệu
+  thật rồi mới quyết, xem `task.md` mục 3.
+
+**Files:** `ShopDataGenerator.cs`, `Shop_Verdant.asset`, `server/shopCatalog.json`,
+`FarmInteractionController.cs`, `AnimalInteractionPopupController.cs`, `ShopPopupController.cs`,
+`FarmStateSync.cs`
+
+---
+
 ## [2026-07-31] — 5 lỗi anh tìm ra khi chơi thử bản mới
 
 ### 1. Bảng nút biến mất sau khi tưới / cuốc

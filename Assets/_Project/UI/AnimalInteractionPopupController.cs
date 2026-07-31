@@ -187,7 +187,11 @@ public class AnimalInteractionPopupController : MonoBehaviour
     /// và "Dời ruộng" cho cả mảnh. Cuốc đất và gieo hạt vẫn bấm ngoài ruộng — chúng cần ngắm
     /// đúng ô trống, đưa vào danh sách "các cây đang có" thì không có gì để chọn.
     /// </summary>
-    public void ShowPlot(List<FarmTile> tiles)
+    public void ShowPlot(List<FarmTile> tiles) => ShowPlot(tiles, null);
+
+    /// <summary>Mở popup ruộng và CHỌN SẴN một cây — dùng khi popup tự mở lại sau khi tưới xong,
+    /// để người chơi quay về đúng chỗ đang làm dở chứ không phải dò lại từ đầu.</summary>
+    public void ShowPlot(List<FarmTile> tiles, FarmTile selected)
     {
         if (tiles == null || container == null) return;
 
@@ -195,7 +199,8 @@ public class AnimalInteractionPopupController : MonoBehaviour
         currentAnimal = null;
         currentEnclosure = null;
         currentPlot = new List<FarmTile>(tiles);
-        selectedPlotTile = null;
+        // Ô có thể vừa bị phá/thu xong trong lúc popup đóng -> chỉ nhận lại nếu còn trong mảnh này.
+        selectedPlotTile = (selected != null && currentPlot.Contains(selected)) ? selected : null;
         logPanelSignature = null; // ép dựng lại hàng nhật ký cho đối tượng mới
 
         container.style.display = DisplayStyle.Flex;
@@ -882,8 +887,12 @@ public class AnimalInteractionPopupController : MonoBehaviour
         var fic = Farm;
         if (tile == null || fic == null) return;
 
-        Hide();                  // tưới có màn múa động tác — che popup thì không thấy gì
-        fic.BeginWaterTile(tile);
+        // Tưới có màn múa động tác nên phải đóng popup (che thì không thấy gì), nhưng nhớ lại mảnh
+        // ruộng + cây đang chọn để TỰ MỞ LẠI khi múa xong — anh chốt 31/07: tưới liên tiếp nhiều cây
+        // mà cứ phải đi bấm lại "Xem ruộng" thì rất mệt. Chép danh sách vì Hide() xoá currentPlot.
+        var plot = new List<FarmTile>(currentPlot);
+        Hide();
+        fic.BeginWaterTile(tile, () => ShowPlot(plot, tile));
     }
 
     private void OnHarvestCropClicked()
@@ -903,8 +912,10 @@ public class AnimalInteractionPopupController : MonoBehaviour
         var fic = Farm;
         if (tile == null || fic == null) return;
 
-        Hide();                  // bón phân mở túi đồ để chọn phân
+        // GIỮ popup mở: từ 31/07 bón phân không mở túi đồ nữa (chỉ có một loại phân, chọn làm gì),
+        // nên bón xong bấm tiếp được ngay — không bị ngắt quãng.
         fic.BeginFertilizeTile(tile);
+        RefreshPlotUI();
     }
 
     private void OnFeedClicked()

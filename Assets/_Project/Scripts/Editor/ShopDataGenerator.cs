@@ -90,13 +90,16 @@ namespace YWonderLand.EditorTools
                 buy: new List<string> { "fertilizer_01", "vaccine_01", "medicine_01" });
 
             // 6) Verdant — bán nông sản + mua tiêu dùng (Both)
-            CreateShop("Shop_Verdant", "Siêu thị Verdant", ShopDefinition.AccessMode.Both,
-                buy: new List<string> { "bread_01", "apple_01" },
-                sell: new List<string>
-                {
-                    "carrot_01", "cabbage_01", "watermelon_01", "corn_01", "pumpkin_01",
-                    "morning_glory_01", "sweet_potato_01"
-                });
+            // Sửa 31/07: tab Bán của Verdant là tab CHẾT. Nó khai thu mua 7 nông sản ngắn ngày, nhưng
+            // từ 22/06 khách chốt nhóm này là thức ăn chăn nuôi KHÔNG bán lại được (canSell=false) —
+            // client lọc bỏ nên tab luôn rỗng, server thì trả 403. Bỏ hẳn tab Bán.
+            //
+            // BẮT BUỘC đổi sang BuyOnly, KHÔNG được để danh sách rỗng mà vẫn Both: server hiểu
+            // "sellItemIds rỗng" là THU MUA MỌI THỨ bán được (xem resolveShopOffer) -> thành cửa mở.
+            //
+            // Khách chưa quy định Verdant thu mua gì, nên tạm chỉ bán Bánh mì + Táo.
+            CreateShop("Shop_Verdant", "Siêu thị Verdant", ShopDefinition.AccessMode.BuyOnly,
+                buy: new List<string> { "bread_01", "apple_01" });
 
             // 7) Thú Y — vắc-xin + thuốc cho vật nuôi (BuyOnly)
             CreateShop("Shop_ThuY", "Phòng khám Thú Y", ShopDefinition.AccessMode.BuyOnly,

@@ -1039,7 +1039,10 @@ public class ShopPopupController : MonoBehaviour
         {
             case "INSUFFICIENT_BALANCE": return "Không đủ Point để mua.";
             case "INSUFFICIENT_ITEM": return "Không đủ vật phẩm để bán.";
-            case "SHOP_ITEM_NOT_ALLOWED": return "Cửa hàng này không giao dịch vật phẩm đã chọn.";
+            // Câu cũ ("Cửa hàng này không giao dịch vật phẩm đã chọn") đổ oan cho cửa hàng: gặp lỗi này
+            // gần như luôn là do DANH SÁCH HÀNG TRÊN MÁY CHỦ cũ hơn trong game, chứ không phải cửa hàng
+            // thật sự cấm bán. Nói đúng bản chất để anh và khách khỏi đi tìm nhầm chỗ.
+            case "SHOP_ITEM_NOT_ALLOWED": return "Máy chủ chưa mở bán vật phẩm này ở cửa hàng — dữ liệu cửa hàng trên máy chủ đang cũ hơn trong game.";
             case "SHOP_NOT_FOUND": return "Cửa hàng chưa được cấu hình trên máy chủ.";
             case "ITEM_NOT_FOUND": return "Vật phẩm chưa có trong dữ liệu máy chủ.";
             case "INVALID_QUANTITY": return "Số lượng giao dịch không hợp lệ.";

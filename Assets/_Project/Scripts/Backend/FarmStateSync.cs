@@ -437,11 +437,21 @@ namespace YWonderLand.Backend
                         && result.data != null
                         && result.data.farm_state != null)
                     {
-                        serverVersion = Mathf.Max(1, result.data.farm_state.version);
+                        // Ghi RÕ hai số hiệu phiên bản: bản ghi của client bị VỨT ĐI ở đây, nên khi
+                        // người chơi kêu "mất mấy thay đổi vừa làm" thì phải có số mà lần. Câu log cũ
+                        // chỉ in phiên bản server nên không lần ra được lệch bao nhiêu, mất cái gì.
+                        int clientExpected = upload.expectedVersion;
+                        int serverActual = Mathf.Max(1, result.data.farm_state.version);
+                        Debug.LogWarning(
+                            $"[FarmStateSync] XUNG DOT phien ban cho '{upload.scopeId}': client gui expected=v{clientExpected}, " +
+                            $"server dang o v{serverActual} — lech {serverActual - clientExpected} ban ghi. " +
+                            $"Ban ghi cua client BI VUT, lay ban server. " +
+                            $"Neu nguoi choi bao mat thay doi nong trai vua lam thi day la cho mat.");
+
+                        serverVersion = serverActual;
                         ApplyServerSnapshot(result.data.farm_state);
                         ClearOutboxIfMatches(upload);
                         LastError = "";
-                        Debug.LogWarning($"[FarmStateSync] Rejected stale snapshot for '{upload.scopeId}' and restored server revision {serverVersion}.");
                         continue;
                     }
 
