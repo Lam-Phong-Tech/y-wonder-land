@@ -31,7 +31,7 @@
 
             <!-- Quest Notification Bubble -->
             <ui:VisualElement name="QuestBubble" class="quest-bubble clickable-hud-element">
-                <ui:Label name="QuestText" text="Khám phá đảo hoang và tìm ngôi nhà đầu tiên!" class="quest-text" />
+                <ui:Label name="QuestText" text="Tìm NPC Tân Thủ để bắt đầu!" class="quest-text" />
                 <ui:VisualElement class="quest-info-icon">
                     <ui:Label text="i" class="quest-info-text" />
                 </ui:VisualElement>

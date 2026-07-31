@@ -207,7 +207,10 @@ public class GameHUDController : MonoBehaviour
         // Set initial values
         SetPlayerInfo("YWonderPlayer", 1);
         UpdateExpLabel();
-        SetQuest("Kh\u00e1m ph\u00e1 \u0111\u1ea3o hoang v\u00e0 t\u00ecm ng\u00f4i nh\u00e0 \u0111\u1ea7u ti\u00ean!");
+        // C\u00e2u ch\u1edd tr\u01b0\u1edbc khi TutorialManager gi\u00e0nh l\u1ea5y nh\u00e3n n\u00e0y (b\u01b0\u1edbc [1/11] tr\u1edf \u0111i).
+        // Ph\u1ea3i m\u00f4 t\u1ea3 \u0111\u00fang vi\u1ec7c ng\u01b0\u1eddi ch\u01a1i c\u1ea7n l\u00e0m: game KH\u00d4NG c\u00f3 m\u1ed1c "t\u00ecm ng\u00f4i nh\u00e0 \u0111\u1ea7u ti\u00ean",
+        // m\u1edf m\u00e0n l\u00e0 \u0111i t\u00ecm NPC T\u00e2n Th\u1ee7.
+        SetQuest("T\u00ecm NPC T\u00e2n Th\u1ee7 \u0111\u1ec3 b\u1eaft \u0111\u1ea7u!");
         UpdateAvatar();
 
         // Sync player name from GameManager (retry until available)
