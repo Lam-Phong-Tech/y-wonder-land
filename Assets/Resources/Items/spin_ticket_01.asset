@@ -10,17 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cac8b9f5919afc44599c356803f7ca4a, type: 3}
-  m_Name: fish_01
+  m_Name: spin_ticket_01
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.ItemDefinition
-  id: fish_01
-  itemName: "C\xE1 ch\xE9p"
-  description: "C\xE1 ch\xE9p t\u01B0\u01A1i s\u1ED1ng."
-  iconEmoji: "\U0001F41F"
+  id: spin_ticket_01
+  itemName: "V\xE9 v\xF2ng quay"
+  description: "H\u1EBFt 3 l\u01B0\u1EE3t quay free trong ng\xE0y th\xEC m\u1ED7i
+    v\xE9 = 1 l\u01B0\u1EE3t quay th\xEAm."
+  iconEmoji: "\U0001F3A1"
   iconSprite: {fileID: 0}
-  iconTexture: {fileID: 2800000, guid: fb06720d1ab5da245a14891f2d105104, type: 3}
-  category: food
-  buyPrice: 0
-  sellPrice: 50
-  canSell: 1
+  iconTexture: {fileID: 2800000, guid: 154b2a8ad47540dd93c7a4d0374878f0, type: 3}
+  category: items
+  buyPrice: 5
+  sellPrice: 0
+  canSell: 0
   isStackable: 1
   maxStack: 999

@@ -62,7 +62,20 @@
     font-size: 15px;
     -unity-font-style: bold;
     color: var(--color-text-white);
+    /* Chữ tóm tắt dài (chế độ Xem ruộng) phải CO LẠI, không được đẩy nút ra khỏi khung. */
+    flex-shrink: 1;
+    white-space: normal;
+    margin-right: 8px;
 }
+
+/* Cụm nút bên phải tiêu đề: "Dời chuồng/Dời ruộng" + "Thả thú" */
+.ap-enclosure-header-btns {
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.ap-btn-gap { margin-right: 8px; }
 
 .ap-btn-small {
     height: 34px;

@@ -45,4 +45,5 @@ Tổng tỉ lệ: 100%.
 - Fish Shop đã whitelist các ID cá mới. Cá thuộc category `food`, nên ở popup shop sẽ thấy trong filter `Tất cả` khi bán.
 - `sellPrice` của từng cá nên bằng đúng giá trị Point trong bảng.
 - Khi câu cá, random trước theo nhóm tỉ lệ, sau đó chọn ngẫu nhiên một loài trong nhóm đã trúng.
-- Nếu cần giữ tương thích dữ liệu cá cũ, không đổi ID `fish_01`/`fish_02`; chỉ thêm item mới.
+- Đã BỎ cá đời cũ `fish_01` (Cá chép) và `fish_02` (Cá hiếm) khỏi game (24/07): xoá asset,
+  gỡ khỏi ItemDatabase + generator. Câu cá và Fish Shop chỉ dùng đúng bộ `fish_ca_*` ở bảng trên.

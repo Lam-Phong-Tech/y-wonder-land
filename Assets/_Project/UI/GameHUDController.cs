@@ -126,6 +126,7 @@ public class GameHUDController : MonoBehaviour
     private float fishingCancelProgress01;
     private float nextPlayerInfoRefreshTime;
     private const float PlayerInfoRefreshInterval = 0.25f;
+    private int appliedAvatarGender = -1; // -1 = chưa áp lần nào
 
 
 
@@ -157,18 +158,58 @@ public class GameHUDController : MonoBehaviour
         // Đảm bảo GameHUD luôn nằm dưới các Popup để popup block được thao tác chuột
         uiDocument.sortingOrder = -10;
 
+        // FIX MOBILE (APK kh\u00f4ng b\u1ea5m \u0111\u01b0\u1ee3c n\u00fat/joystick): tr\u00ean GameObject "GameHUD", th\u1ee9 t\u1ef1
+        // component l\u00e0 GameHUDController \u0110\u1ee8NG TR\u01af\u1edaC UIDocument, n\u00ean OnEnable c\u1ee7a script n\u00e0y
+        // ch\u1ea1y TR\u01af\u1edaC UIDocument.OnEnable. Trong b\u1ea3n build (Android), UIDocument ch\u01b0a k\u1ecbp d\u1ef1ng
+        // c\u00e2y UI -> rootVisualElement = null -> n\u1ebfu n\u1ed1i n\u00fat l\u00fac n\u00e0y th\u00ec QueryElements/
+        // RegisterCallbacks ch\u1ea1y tr\u00ean c\u00e2y r\u1ed7ng, KH\u00d4NG n\u00fat/joystick n\u00e0o \u0111\u01b0\u1ee3c n\u1ed1i (Editor kh\u00f4ng
+        // d\u00ednh v\u00ec panel \u0111\u00e3 d\u1ef1ng s\u1eb5n \u1edf edit-mode). => \u0110\u1ee3i root s\u1eb5n s\u00e0ng r\u1ed3i m\u1edbi n\u1ed1i.
+        if (uiDocument.rootVisualElement == null)
+        {
+            StartCoroutine(WireHudWhenRootReady());
+            return;
+        }
+
+        WireHud();
+    }
+
+    // \u0110\u1ee3i UIDocument d\u1ef1ng xong c\u00e2y UI r\u1ed3i m\u1edbi n\u1ed1i HUD (fix n\u00fat/joystick kh\u00f4ng b\u1ea5m \u0111\u01b0\u1ee3c tr\u00ean APK).
+    private System.Collections.IEnumerator WireHudWhenRootReady()
+    {
+        float timeout = 5f;
+        while (uiDocument != null && uiDocument.rootVisualElement == null && timeout > 0f)
+        {
+            timeout -= Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        if (!isActiveAndEnabled || uiDocument == null || uiDocument.rootVisualElement == null)
+        {
+            Debug.LogError("[GameHUD] rootVisualElement v\u1eabn null sau khi ch\u1edd \u2014 HUD kh\u00f4ng n\u1ed1i \u0111\u01b0\u1ee3c n\u00fat/joystick.");
+            yield break;
+        }
+
+        WireHud();
+    }
+
+    // N\u1ed1i to\u00e0n b\u1ed9 HUD: query element + \u0111\u0103ng k\u00fd callback n\u00fat/joystick + set gi\u00e1 tr\u1ecb ban \u0111\u1ea7u.
+    private void WireHud()
+    {
         var root = uiDocument.rootVisualElement;
         ApplyPlatformLayoutClass(root);
         QueryElements(root);
         SetupGuidanceDots();
         RegisterCallbacks();
+        EnsureMultiTouchUI();
 
 
 
         // Set initial values
         SetPlayerInfo("YWonderPlayer", 1);
         UpdateExpLabel();
-        SetQuest("Kh\u00e1m ph\u00e1 \u0111\u1ea3o hoang v\u00e0 t\u00ecm ng\u00f4i nh\u00e0 \u0111\u1ea7u ti\u00ean!");
+        // C\u00e2u ch\u1edd tr\u01b0\u1edbc khi TutorialManager gi\u00e0nh l\u1ea5y nh\u00e3n n\u00e0y (b\u01b0\u1edbc [1/11] tr\u1edf \u0111i).
+        ApplyIdleQuestText();
+        StartCoroutine(SyncQuestText());
         UpdateAvatar();
 
         // Sync player name from GameManager (retry until available)
@@ -193,6 +234,18 @@ public class GameHUDController : MonoBehaviour
 
         // Nhạc nền (tự tạo AudioManager; thiếu file Resources/Audio/bgm thì im, không lỗi).
         YWonderLand.Managers.AudioManager.Instance?.PlayMusic("bgm");
+    }
+
+    // Mobile đa chạm: mặc định InputSystemUIInputModule là SingleUnifiedPointer -> gộp mọi
+    // ngón thành 1 pointer, nên đang GIỮ joystick mà bấm nút thì nút không ăn. Đặt AllPointersAsIs
+    // để mỗi ngón là 1 pointer riêng (di chuyển + bấm nút cùng lúc). Chuột trên Editor vẫn chạy bình thường.
+    private void EnsureMultiTouchUI()
+    {
+        var es = UnityEngine.EventSystems.EventSystem.current;
+        if (es == null) es = FindFirstObjectByType<UnityEngine.EventSystems.EventSystem>();
+        var module = es != null ? es.GetComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>() : null;
+        if (module != null)
+            module.pointerBehavior = UnityEngine.InputSystem.UI.UIPointerBehavior.AllPointersAsIs;
     }
 
     void OnDisable()
@@ -263,6 +316,14 @@ public class GameHUDController : MonoBehaviour
         btnSettings = root.Q<Button>("BtnSettings");
         btnSprint = root.Q<Button>("BtnSprint");
         interactionContainer = root.Q<VisualElement>("InteractionContainer");
+        if (interactionContainer != null)
+        {
+            // An toàn: khung tương tác phủ full màn nhưng KHÔNG được bắt chuột (chỉ nút con bắt),
+            // và ẩn tới khi có gợi ý. Nếu để Position + hiện thì nó nuốt hover/click của mọi nút HUD
+            // + joystick lúc khởi động (chỉ Sprint lọt vì nằm sau nó trong cây) -> bug "phải bấm 1 nút mới mở khoá".
+            interactionContainer.pickingMode = PickingMode.Ignore;
+            interactionContainer.style.display = DisplayStyle.None;
+        }
         joystickOuter = root.Q<VisualElement>("Joystick");
         joystickKnob = joystickOuter?.Q<VisualElement>(className: "joystick-inner");
         sprintHint = root.Q<VisualElement>("SprintHint");
@@ -609,19 +670,22 @@ public class GameHUDController : MonoBehaviour
         UpdateAvatar();
     }
 
+    /// <summary>
+    /// Đồng bộ avatar theo giới tính hiện tại. Gọi lặp lại được (tự bỏ qua khi không đổi),
+    /// vì giới tính đến MUỘN hơn HUD: luồng online phải chờ bootstrap trả hồ sơ, trong khi
+    /// HUD đã dựng và đọc selectedCharacterIndex lúc nó còn là 0 = nam.
+    /// </summary>
     public void UpdateAvatar()
     {
-        if (playerAvatar != null)
-        {
-            playerAvatar.RemoveFromClassList("avatar-male");
-            playerAvatar.RemoveFromClassList("avatar-female");
-            
-            int gender = GameManager.Instance != null ? GameManager.Instance.selectedCharacterIndex : 0;
-            if (gender == 0)
-                playerAvatar.AddToClassList("avatar-male");
-            else
-                playerAvatar.AddToClassList("avatar-female");
-        }
+        if (playerAvatar == null) return;
+
+        int gender = GameManager.Instance != null ? GameManager.Instance.selectedCharacterIndex : 0;
+        if (gender == appliedAvatarGender) return;
+        appliedAvatarGender = gender;
+
+        playerAvatar.RemoveFromClassList("avatar-male");
+        playerAvatar.RemoveFromClassList("avatar-female");
+        playerAvatar.AddToClassList(gender == 0 ? "avatar-male" : "avatar-female");
     }
 
     /// <summary>
@@ -662,6 +726,46 @@ public class GameHUDController : MonoBehaviour
     }
 
     // ── Test: Press L = Level Up, E = Event ──
+    // ── NHÃN NHIỆM VỤ LÚC KHÔNG CÓ HƯỚNG DẪN ──
+    // Bong bóng PHẢI luôn hiện vì nó là lối vào duy nhất của popup Nhiệm vụ — nhớ là
+    // SetQuest("") sẽ ẩn nó đi, nên đừng bao giờ truyền chuỗi rỗng ở đây.
+    public const string NoQuestText = "Hiện chưa có nhiệm vụ";
+    private const string FindGuideQuestText = "Tìm NPC Tân Thủ để bắt đầu!";
+
+    /// <summary>
+    /// Chọn câu cho bong bóng nhiệm vụ khi hướng dẫn KHÔNG chạy: người chơi đã học xong thì
+    /// "chưa có nhiệm vụ", người mới thì nhắc đi tìm NPC Tân Thủ.
+    /// Anh chốt 31/07: đừng lặp mãi câu "Tìm NPC Tân Thủ" với người đã xong hướng dẫn.
+    /// </summary>
+    public void ApplyIdleQuestText()
+    {
+        // Hướng dẫn đang chạy thì NÓ là chủ nhãn này (các bước [x/11]) — không giành.
+        if (TutorialManager.Instance != null && TutorialManager.Instance.IsActive()) return;
+
+        var prof = YWonderLand.Backend.PlayerProfileService.Instance;
+        bool done = prof != null && prof.Profile != null && prof.Profile.tutorialCompleted;
+        SetQuest(done ? NoQuestText : FindGuideQuestText);
+    }
+
+    // Hồ sơ nạp từ cache ngay lúc Awake nhưng bản THẬT về sau lượt gọi mạng, nên chờ IsLoaded
+    // rồi chỉnh lại câu — giống cách SyncPlayerName chờ tên.
+    private IEnumerator SyncQuestText()
+    {
+        for (int i = 0; i < 20; i++)
+        {
+            if (TutorialManager.Instance != null && TutorialManager.Instance.IsActive()) yield break;
+
+            var prof = YWonderLand.Backend.PlayerProfileService.Instance;
+            if (prof != null && prof.IsLoaded)
+            {
+                ApplyIdleQuestText();
+                yield break;
+            }
+
+            yield return new WaitForSeconds(0.5f);
+        }
+    }
+
     private IEnumerator SyncPlayerName()
     {
         for (int i = 0; i < 20; i++)
@@ -677,6 +781,11 @@ public class GameHUDController : MonoBehaviour
     {
         if (!force && Time.unscaledTime < nextPlayerInfoRefreshTime) return;
         nextPlayerInfoRefreshTime = Time.unscaledTime + PlayerInfoRefreshInterval;
+
+        // Avatar bám giới tính riêng, KHÔNG đi kèm tên/cấp: SyncPlayerName dừng ngay khi có
+        // tên (thường tức thì từ prefs), còn giới tính mới về sau lượt gọi mạng -> trước đây
+        // avatar kẹt nam dù nhân vật đã spawn đúng nữ.
+        UpdateAvatar();
 
         string resolvedName = ResolveCurrentPlayerName();
         if (string.IsNullOrEmpty(resolvedName)) return;
@@ -1058,8 +1167,17 @@ public class GameHUDController : MonoBehaviour
         { "Tiêm vắc-xin", "Icon_Syringe" },
         { "Thông tin", "Icon_Info" },
         { "Xem chuồng", "Icon_Eye" },
+        { "Xem ruộng", "Icon_Eye" },
+        // Chưa có ảnh riêng cho bón phân / dời đồ. Bón phân mượn bát thức ăn (cùng nghĩa "cho ăn"),
+        // dời mượn bàn tay mở (cùng nghĩa "nhấc lên đặt xuống") — vẫn hơn Icon_Hand mặc định vì
+        // Icon_Hand là ảnh dùng khi KHÔNG tra được, nên mọi nút mới đều giống hệt nhau.
+        { "Bón phân", "Icon_FeedBowl" },
+        { "Dời chuồng", "Icon_HandRelease" },
+        { "Dời ruộng", "Icon_HandRelease" },
+        { "Dời đường", "Icon_HandRelease" },
         { "Thả thú", "Icon_HandRelease" },
         { "Hủy chuồng", "Icon_Cancel" },
+        { "Hủy đường", "Icon_Cancel" },
         { "Múc nước", "Icon_WaterBucket" },
         { "Chặt cây", "Icon_Axe" },
         { "Đào khoáng", "Icon_Pickaxe" },

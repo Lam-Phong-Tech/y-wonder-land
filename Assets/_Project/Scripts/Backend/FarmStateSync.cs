@@ -334,7 +334,13 @@ namespace YWonderLand.Backend
                 PlayerScopedPrefs.SetString(PlacedTilesKey, ValidOrDefault(state.placedTilesJson, EmptyPlacedTiles));
                 PlayerScopedPrefs.SetString(FarmTilesKey, ValidOrDefault(state.farmTilesJson, EmptyFarmTiles));
                 PlayerScopedPrefs.SetString(AnimalStateKey, ValidOrDefault(state.animalStateJson, EmptyAnimalState));
+                PlayerScopedPrefs.SetString(FarmActivityLog.PrefKey,
+                    ValidOrDefault(state.activityLogJson, FarmActivityLog.EmptyJson));
                 PlayerScopedPrefs.Save();
+
+                // Vừa đè pref bằng bản của server -> bắt FarmActivityLog nạp lại,
+                // không thì nó vẫn xài nhật ký cũ đang giữ trong RAM.
+                FarmActivityLog.InvalidateCache();
             }
             finally
             {
@@ -361,6 +367,7 @@ namespace YWonderLand.Backend
                 placedTilesJson = PlayerScopedPrefs.GetString(PlacedTilesKey, EmptyPlacedTiles),
                 farmTilesJson = PlayerScopedPrefs.GetString(FarmTilesKey, EmptyFarmTiles),
                 animalStateJson = PlayerScopedPrefs.GetString(AnimalStateKey, EmptyAnimalState),
+                activityLogJson = PlayerScopedPrefs.GetString(FarmActivityLog.PrefKey, FarmActivityLog.EmptyJson),
                 legacyMigration = legacyMigration,
                 clientSavedAt = DateTime.UtcNow.ToString("o")
             };
@@ -410,8 +417,15 @@ namespace YWonderLand.Backend
                     PersistOutbox(upload);
 
                     ApiResult<FarmStateResponse> result = await SendAsync(upload);
+
+                    // GỬI LẠI khi hỏng tạm. Nhớ lại việc lần đầu KHÔNG CÓ HỒI ÂM (status 0), vì đó là
+                    // trường hợp mập mờ: không phân biệt được "server chưa nhận" với "server nhận rồi,
+                    // làm rồi, nhưng câu trả lời rơi trên đường về". Gửi lại ở nhánh sau sẽ đụng 409
+                    // lệch đúng 1 — và đó là 409 LÀNH TÍNH, xem chỗ xử lý 409 bên dưới.
+                    bool resentAfterNoAnswer = false;
                     if (!result.ok && IsTransient(result.status))
                     {
+                        resentAfterNoAnswer = result.status == 0;
                         await Awaitable.NextFrameAsync();
                         result = await SendAsync(upload);
                     }
@@ -430,11 +444,40 @@ namespace YWonderLand.Backend
                         && result.data != null
                         && result.data.farm_state != null)
                     {
-                        serverVersion = Mathf.Max(1, result.data.farm_state.version);
+                        int clientExpected = upload.expectedVersion;
+                        int serverActual = Mathf.Max(1, result.data.farm_state.version);
+                        int gap = serverActual - clientExpected;
+
+                        // PHÂN BIỆT hai loại xung đột — quan trọng, vì hậu quả khác hẳn nhau.
+                        //
+                        // LÀNH TÍNH (gửi lại sau khi mất hồi âm, lệch đúng 1): lần gửi ĐẦU đã tới server
+                        // và đã ghi xong, chỉ có câu trả lời rơi mất. Server đang giữ ĐÚNG dữ liệu của
+                        // client; bản chụp trả về ở đây chính là nó. Không mất gì cả.
+                        // Gốc rễ: PUT /player/farm-state chưa có mã chống trùng như đường mua bán và
+                        // thả thú — đã ghi vào task.md để đợt deploy server sau làm.
+                        //
+                        // ĐÁNG NGỜ (mọi trường hợp còn lại): có đường ghi khác đã đổi dữ liệu mà client
+                        // không hay. Bản chụp của client bị vứt ở đây, thay đổi vừa làm CÓ THỂ mất thật.
+                        if (resentAfterNoAnswer && gap == 1)
+                        {
+                            Debug.Log(
+                                $"[FarmStateSync] Xung dot LANH TINH cho '{upload.scopeId}' (expected=v{clientExpected}, " +
+                                $"server=v{serverActual}): lan gui dau da toi server, chi mat cau tra loi nen client gui lai. " +
+                                $"Server dang giu dung du lieu — KHONG mat gi.");
+                        }
+                        else
+                        {
+                            Debug.LogWarning(
+                                $"[FarmStateSync] XUNG DOT DANG NGO cho '{upload.scopeId}': client gui expected=v{clientExpected}, " +
+                                $"server dang o v{serverActual} — lech {gap} ban ghi, gui lai sau khi mat hoi am = {resentAfterNoAnswer}. " +
+                                $"Ban chup cua client BI VUT, lay ban server. " +
+                                $"Neu nguoi choi bao mat thay doi nong trai vua lam thi day la cho mat.");
+                        }
+
+                        serverVersion = serverActual;
                         ApplyServerSnapshot(result.data.farm_state);
                         ClearOutboxIfMatches(upload);
                         LastError = "";
-                        Debug.LogWarning($"[FarmStateSync] Rejected stale snapshot for '{upload.scopeId}' and restored server revision {serverVersion}.");
                         continue;
                     }
 
@@ -634,6 +677,9 @@ namespace YWonderLand.Backend
             });
         }
 
+        // CỐ Ý KHÔNG tính activityLogJson vào đây: điểm này đo "farm có nội dung THẬT hay không"
+        // để quyết định giữ bản nào khi gộp dữ liệu cũ. Nhật ký chỉ là lịch sử — cộng vào thì một
+        // farm trống rỗng nhưng từng cho ăn vài lần sẽ bị chấm là "có nội dung" và đè mất bản thật.
         private static int ContentScore(PlayerBootstrapService.FarmStatePayload payload)
         {
             if (payload == null) return 0;

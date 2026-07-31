@@ -20,4 +20,8 @@ MonoBehaviour:
   - medicine_01
   - bait_01
   - mine_ticket_01
+  - spin_ticket_01
+  - wood_01
+  - stone_01
+  - watering_water_01
   sellItemIds: []

@@ -102,7 +102,7 @@ namespace YWonderLand.Managers
             {
                 "carrot_01","cabbage_01","watermelon_01","corn_01","pumpkin_01",
                 "morning_glory_01","sweet_potato_01","grass_01",
-                "egg_01","milk_01","pork_01","bread_01","apple_01","fish_01","fish_02"
+                "egg_01","milk_01","pork_01","bread_01","apple_01"
             };
             foreach (var id in foods) AddItem(id, foodQty);
 

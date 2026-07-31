@@ -40,8 +40,8 @@
     },
     "bait_01": {
       "category": "items",
-      "buyPrice": 20,
-      "sellPrice": 10,
+      "buyPrice": 2,
+      "sellPrice": 1,
       "canSell": true
     },
     "banana_01": {
@@ -76,7 +76,7 @@
     },
     "cabbage_01": {
       "category": "food",
-      "buyPrice": 0,
+      "buyPrice": 4,
       "sellPrice": 0,
       "canSell": false
     },
@@ -88,7 +88,7 @@
     },
     "carrot_01": {
       "category": "food",
-      "buyPrice": 0,
+      "buyPrice": 4,
       "sellPrice": 0,
       "canSell": false
     },
@@ -124,7 +124,7 @@
     },
     "corn_01": {
       "category": "food",
-      "buyPrice": 0,
+      "buyPrice": 4,
       "sellPrice": 0,
       "canSell": false
     },
@@ -208,21 +208,9 @@
     },
     "fertilizer_01": {
       "category": "items",
-      "buyPrice": 50,
-      "sellPrice": 25,
-      "canSell": true
-    },
-    "fish_01": {
-      "category": "food",
-      "buyPrice": 0,
-      "sellPrice": 50,
-      "canSell": true
-    },
-    "fish_02": {
-      "category": "food",
-      "buyPrice": 0,
-      "sellPrice": 200,
-      "canSell": true
+      "buyPrice": 1,
+      "sellPrice": 0,
+      "canSell": false
     },
     "fish_ca_com_01": {
       "category": "food",
@@ -394,7 +382,7 @@
     },
     "grass_01": {
       "category": "food",
-      "buyPrice": 0,
+      "buyPrice": 8,
       "sellPrice": 0,
       "canSell": false
     },
@@ -430,13 +418,13 @@
     },
     "mine_ticket_01": {
       "category": "items",
-      "buyPrice": 100,
+      "buyPrice": 2,
       "sellPrice": 0,
       "canSell": false
     },
     "morning_glory_01": {
       "category": "food",
-      "buyPrice": 0,
+      "buyPrice": 5,
       "sellPrice": 0,
       "canSell": false
     },
@@ -508,7 +496,7 @@
     },
     "pumpkin_01": {
       "category": "food",
-      "buyPrice": 0,
+      "buyPrice": 11,
       "sellPrice": 0,
       "canSell": false
     },
@@ -572,15 +560,21 @@
       "sellPrice": 30,
       "canSell": true
     },
+    "spin_ticket_01": {
+      "category": "items",
+      "buyPrice": 5,
+      "sellPrice": 0,
+      "canSell": false
+    },
     "stone_01": {
       "category": "materials",
-      "buyPrice": 0,
+      "buyPrice": 2,
       "sellPrice": 12,
       "canSell": true
     },
     "sweet_potato_01": {
       "category": "food",
-      "buyPrice": 0,
+      "buyPrice": 9,
       "sellPrice": 0,
       "canSell": false
     },
@@ -640,7 +634,7 @@
     },
     "watermelon_01": {
       "category": "food",
-      "buyPrice": 0,
+      "buyPrice": 4,
       "sellPrice": 0,
       "canSell": false
     },
@@ -652,7 +646,7 @@
     },
     "wood_01": {
       "category": "materials",
-      "buyPrice": 0,
+      "buyPrice": 8,
       "sellPrice": 8,
       "canSell": true
     }
@@ -743,14 +737,17 @@
         "vaccine_01",
         "medicine_01",
         "bait_01",
-        "mine_ticket_01"
+        "mine_ticket_01",
+        "spin_ticket_01",
+        "wood_01",
+        "stone_01",
+        "watering_water_01"
       ],
       "sellItemIds": []
     },
     "Shop_MiniGarden": {
-      "accessMode": "sell_only",
-      "buyItemIds": [],
-      "sellItemIds": [
+      "accessMode": "both",
+      "buyItemIds": [
         "carrot_01",
         "cabbage_01",
         "watermelon_01",
@@ -759,6 +756,9 @@
         "morning_glory_01",
         "sweet_potato_01",
         "grass_01",
+        "fertilizer_01"
+      ],
+      "sellItemIds": [
         "banana_01",
         "coconut_01",
         "areca_01",
@@ -801,20 +801,12 @@
       "sellItemIds": []
     },
     "Shop_Verdant": {
-      "accessMode": "both",
+      "accessMode": "buy_only",
       "buyItemIds": [
         "bread_01",
         "apple_01"
       ],
-      "sellItemIds": [
-        "carrot_01",
-        "cabbage_01",
-        "watermelon_01",
-        "corn_01",
-        "pumpkin_01",
-        "morning_glory_01",
-        "sweet_potato_01"
-      ]
+      "sellItemIds": []
     }
   }
 }

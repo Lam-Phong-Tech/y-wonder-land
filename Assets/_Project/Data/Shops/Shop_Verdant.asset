@@ -13,15 +13,8 @@ MonoBehaviour:
   m_Name: Shop_Verdant
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.ShopDefinition
   shopName: "Si\xEAu th\u1ECB Verdant"
-  accessMode: 0
+  accessMode: 1
   buyItemIds:
   - bread_01
   - apple_01
-  sellItemIds:
-  - carrot_01
-  - cabbage_01
-  - watermelon_01
-  - corn_01
-  - pumpkin_01
-  - morning_glory_01
-  - sweet_potato_01
+  sellItemIds: []

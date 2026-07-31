@@ -185,6 +185,7 @@ public class ShopPopupController : MonoBehaviour
         lblShopDesc = root.Q<Label>("LblShopDesc");
         lblOwned = root.Q<Label>("LblOwned");
         txtQty = root.Q<TextField>("TxtQty");
+        UiInputUtil.ConfigureNumeric(txtQty); // ô số lượng: chỉ nhập được chữ số
         lblTotal = root.Q<Label>("LblTotal");
         btnQtyMinus = root.Q<Button>("BtnQtyMinus");
         btnQtyPlus = root.Q<Button>("BtnQtyPlus");
@@ -237,11 +238,38 @@ public class ShopPopupController : MonoBehaviour
 
     // ── Public API ──
 
+    // ── KHÓA QUẦY TRONG LÚC CHƯA XONG HƯỚNG DẪN (anh chốt 31/07) ──
+    // Trong tutorial, FarmTile.GetGrowthTime() ép MỌI loại cây chín trong 24s và cây KHÔNG chết
+    // (FarmTile.IsTutorialActive). Ai cố tình bỏ dở hướng dẫn thì có một nông trại tua nhanh bất tử;
+    // mở được quầy là thành vòng lặp mua hạt -> 24s -> bán -> lãi vô hạn. Chặn ngay cổng vào quầy.
+    //
+    // Chặn ở ĐÂY vì cả 4 lối vào (ShopData / mock / AccessMode / ShopDefinition) đều dồn về hàm này,
+    // nên không sót đường nào — kể cả NPC, vùng chạm nhà, hay phím tắt cũ.
+    private static float lastTutorialLockToastAt = -10f;
+
+    private bool BlockedByTutorial()
+    {
+        var tm = TutorialManager.Instance;
+        if (tm == null || !tm.IsActive()) return false;
+
+        // Vùng chạm nhà bắn OnTriggerEnter mỗi lần đi qua -> chặn spam toast.
+        if (Time.time - lastTutorialLockToastAt >= 2f)
+        {
+            lastTutorialLockToastAt = Time.time;
+            YWonderLand.Environment.ScreenToast.Show("Xong hướng dẫn của NPC Tân Thủ đã rồi mới mua bán được nhé!");
+        }
+
+        Debug.Log("[ShopPopup] Chan mo quay: tutorial chua xong.");
+        return true;
+    }
+
     /// <summary>
     /// Open the shop with specific data. Each NPC shop passes its own ShopData.
     /// </summary>
     public void Show(ShopData data)
     {
+        if (BlockedByTutorial()) return;
+
         if (!gameObject.activeInHierarchy)
         {
             Debug.Log("[ShopPopup] GameObject đang tắt, tiến hành bật lại!");
@@ -728,11 +756,19 @@ public class ShopPopupController : MonoBehaviour
         if (lblShopName != null) lblShopName.text = item.name;
         if (lblShopDesc != null)
         {
-            // Nếu là CON VẬT -> chèn thêm thông tin nuôi (giá / ô đất / thức ăn).
+            // Con vật -> thông tin nuôi + chu kỳ/sản lượng/EXP; hạt giống -> thông tin trồng.
             var animalDef = YWonderLand.Managers.AnimalManager.LookupDefinition(item.id);
-            lblShopDesc.text = animalDef != null
-                ? item.description + AnimalInfoText(animalDef)
-                : item.description;
+            if (animalDef != null)
+            {
+                lblShopDesc.text = item.description + AnimalInfoText(animalDef);
+            }
+            else
+            {
+                var cropDef = LookupCrop(item.id);
+                lblShopDesc.text = cropDef != null
+                    ? item.description + CropInfoText(cropDef)
+                    : item.description;
+            }
         }
 
         int unitPrice = isSellMode ? item.sellPrice : item.price;
@@ -765,17 +801,88 @@ public class ShopPopupController : MonoBehaviour
         }
     }
 
-    // Thông tin nuôi cơ bản của con vật (chèn vào mô tả): giá / số ô / thức ăn chính-phụ.
+    // Thông tin nuôi của con vật (chèn vào mô tả): giá / số ô / thức ăn + chu kỳ thu, tổng sản lượng, EXP.
+    // Khách chốt 29/07: mỗi loài phải ghi rõ bao nhiêu ngày thu một lần, mỗi lần bao nhiêu,
+    // tổng bao nhiêu ngày / tổng sản lượng và được bao nhiêu điểm EXP.
     private static string AnimalInfoText(YWonderLand.Data.AnimalDefinition d)
     {
         string Food(string name, int amount) =>
             string.IsNullOrEmpty(name) ? "—" : (amount > 0 ? $"{amount}x {name}" : name);
 
-        return $"\n\nThông tin nuôi:"
+        string text = $"\n\nThông tin nuôi:"
              + $"\nGiá mua: {d.buyPrice} Point   |   Cần: {d.penSlots} ô đất"
              + $"\nThức ăn chính: {Food(d.foodMainName, d.foodMainAmount)}"
              + $"\nThức ăn phụ: {Food(d.foodAltName, d.foodAltAmount)}";
+
+        string productName = !string.IsNullOrEmpty(d.productMainName) ? d.productMainName : "sản phẩm";
+
+        text += "\n\nThu hoạch:";
+        if (d.produceCycleTimeSec > 0f && d.produceAmount > 0)
+        {
+            text += $"\nMỗi {YWonderLand.Core.GameTimeConfig.FormatDuration(d.produceCycleTimeSec)}"
+                  + $" thu {d.produceAmount} {productName}";
+        }
+
+        if (d.maxHarvests > 0)
+        {
+            text += $"\nTổng: {d.maxHarvests} lần × {d.produceAmount} = {d.maxHarvests * d.produceAmount} {productName}";
+        }
+        else if (d.produceAmount > 0)
+        {
+            text += "\nThu không giới hạn số lần";
+        }
+
+        if (d.raisingDays > 0f)
+            text += $"\nThời gian nuôi cả vòng đời: {Mathf.RoundToInt(d.raisingDays)} ngày";
+
+        if (!string.IsNullOrEmpty(d.meatItemId) && d.meatAmount > 0)
+            text += $"\nVụ cuối còn thu thêm: {d.meatAmount} (thịt)";
+
+        if (d.expReward > 0)
+            text += $"\nEXP: {d.expReward}";
+
+        return text;
     }
+
+    // Thông tin trồng trọt của HẠT GIỐNG: thời gian lớn, sản lượng mỗi lần, số lần thu, tổng và EXP.
+    private static string CropInfoText(YWonderLand.Data.CropDefinition c)
+    {
+        string text = "\n\nThông tin trồng:";
+        text += $"\nChiếm {c.plotSlots} ô đất   |   Tốn {c.seedItemCost} hạt";
+        text += $"\nLớn sau: {YWonderLand.Core.GameTimeConfig.FormatDuration(c.growthTimeSec)}"
+              + $" → thu {c.harvestYield}";
+
+        int harvests = Mathf.Max(1, c.maxHarvests);
+        if (harvests > 1)
+        {
+            if (c.reHarvestCycleSec > 0f)
+                text += $"\nThu tiếp mỗi {YWonderLand.Core.GameTimeConfig.FormatDuration(c.reHarvestCycleSec)}";
+            text += $"\nTổng: {harvests} lần × {c.harvestYield} = {harvests * c.harvestYield}";
+        }
+        else
+        {
+            text += "\nThu 1 lần rồi hết vụ";
+        }
+
+        if (!string.IsNullOrEmpty(c.finalProductItemId) && c.finalProductAmount > 0)
+            text += $"\nVụ cuối thu thêm: {c.finalProductAmount}";
+
+        if (c.expReward > 0)
+            text += $"\nEXP: {c.expReward} mỗi lần thu";
+
+        return text;
+    }
+
+    /// <summary>Tra CropDefinition theo id hạt giống (nạp CropDatabase từ Resources, cache lại).</summary>
+    private static YWonderLand.Data.CropDefinition LookupCrop(string seedItemId)
+    {
+        if (string.IsNullOrEmpty(seedItemId)) return null;
+        if (cropDatabaseCache == null)
+            cropDatabaseCache = Resources.Load<YWonderLand.Data.CropDatabase>("CropDatabase");
+        return cropDatabaseCache != null ? cropDatabaseCache.GetCropBySeedId(seedItemId) : null;
+    }
+
+    private static YWonderLand.Data.CropDatabase cropDatabaseCache;
 
     private void ShowEmptyDetails()
     {
@@ -850,9 +957,10 @@ public class ShopPopupController : MonoBehaviour
     {
         if (!selectedItem.HasValue) return;
 
-        if (int.TryParse(newValue, out int parsed))
+        // Lọc ký tự lạ + ghi lại bản chỉ-chữ-số vào ô (newValue có thể chứa chữ tester gõ).
+        int maxQty = isSellMode ? selectedItem.Value.maxAvailable : 999;
+        if (UiInputUtil.TrySanitizeInt(txtQty, out int parsed))
         {
-            int maxQty = isSellMode ? selectedItem.Value.maxAvailable : 999;
             selectedQty = maxQty <= 0 ? 0 : Mathf.Clamp(parsed, 1, maxQty);
         }
         else
@@ -958,7 +1066,10 @@ public class ShopPopupController : MonoBehaviour
         {
             case "INSUFFICIENT_BALANCE": return "Không đủ Point để mua.";
             case "INSUFFICIENT_ITEM": return "Không đủ vật phẩm để bán.";
-            case "SHOP_ITEM_NOT_ALLOWED": return "Cửa hàng này không giao dịch vật phẩm đã chọn.";
+            // Câu cũ ("Cửa hàng này không giao dịch vật phẩm đã chọn") đổ oan cho cửa hàng: gặp lỗi này
+            // gần như luôn là do DANH SÁCH HÀNG TRÊN MÁY CHỦ cũ hơn trong game, chứ không phải cửa hàng
+            // thật sự cấm bán. Nói đúng bản chất để anh và khách khỏi đi tìm nhầm chỗ.
+            case "SHOP_ITEM_NOT_ALLOWED": return "Máy chủ chưa mở bán vật phẩm này ở cửa hàng — dữ liệu cửa hàng trên máy chủ đang cũ hơn trong game.";
             case "SHOP_NOT_FOUND": return "Cửa hàng chưa được cấu hình trên máy chủ.";
             case "ITEM_NOT_FOUND": return "Vật phẩm chưa có trong dữ liệu máy chủ.";
             case "INVALID_QUANTITY": return "Số lượng giao dịch không hợp lệ.";
@@ -992,7 +1103,6 @@ public class ShopPopupController : MonoBehaviour
             "corn_seed_01",
             "pumpkin_seed_01",
             "grass_seed_01",
-            "fertilizer_01",
             "vaccine_01",
             "medicine_01",
             "bait_01",

@@ -70,6 +70,12 @@ namespace YWonderLand.Backend
             [JsonProperty("animal_state_json")]
             public string animalStateJson;
 
+            /// <summary>Nhật ký nông trại (lịch sử cho ăn + con chết). Đi kèm farm-state vì con vật
+            /// đã lưu server — nhật ký phải theo cùng, không thì cài lại game con còn mà nhật ký mất.
+            /// Server lưu farm-state dạng khối mở nên KHÔNG cần đổi API hay DB.</summary>
+            [JsonProperty("activity_log_json")]
+            public string activityLogJson;
+
             [JsonProperty("legacy_migration")]
             public bool legacyMigration;
 

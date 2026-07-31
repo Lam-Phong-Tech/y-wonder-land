@@ -48,6 +48,35 @@
 
 ### Thứ tự ưu tiên ngay khi mở session kế tiếp
 
+> ⚠️ **Cập nhật 29/07 — thứ tự bên dưới ĐÃ ĐỔI.** Dòng "Ưu tiên mới nhất của anh: tiếp tục ví Point trước"
+> là của 19/07 và **đã bị supersede**: từ 22/07 tới nay dự án làm gameplay/client, ví Point đứng yên ở trạng
+> thái dormant. Thứ tự hiện hành:
+>
+> 1. `[x]` ~~Deploy server câu cá + vé đào + vòng quay~~ — **ĐÃ DEPLOY**, xác minh 29/07 bằng probe read-only
+>    không token: 3 route trả `401` (route có) chứ không phải `404`, health `200` mode `postgres`. Còn treo
+>    nhẹ: chưa có bằng chứng trực tiếp cho `account mới = 0 Point` và `giá bait_01 = 2` trên prod.
+> 2. `[~]` **Build EXE/APK mới rồi nghiệm thu**: punch-list khách T1–T7 (ma trận ở cuối mục 29/07 trong
+>    `CHANGELOG.md`), P0 thả thú `7 → 6`, hotfix hủy cho ăn / cây-thú chết ngay ở `0%`, chặt cây không cộng
+>    gỗ hai lần, và **câu cá/vòng quay/đổi vé đào khi đang đăng nhập** (server đã sẵn sàng, giờ kiểm client).
+> 3. `[ ]` **`PUT /player/farm-state` thiếu mã chống trùng (idempotency) — ĐỢT DEPLOY SERVER SAU.**
+>    Đã bắt được tận tay 31/07 nhờ log mới: client gửi `expected=v182`, server đang ở `v183`, **lệch đúng 1**.
+>    Gốc rễ ở `FarmStateSync.ProcessQueueAsync`: hỏng tạm thì client **gửi lại y hệt**, mà `IsTransient`
+>    tính cả `status == 0` = *không nhận được hồi âm* — không phân biệt được "server chưa nhận" với
+>    "server nhận rồi, ghi rồi, câu trả lời rơi mất". Gửi lại ⇒ `409`.
+>    **Lần này KHÔNG mất dữ liệu** (lần gửi đầu đã ghi thành công, bản 409 trả về chính là dữ liệu đó),
+>    nhưng đây là may chứ không phải thiết kế đúng.
+>    - Đã làm 31/07 (client): log tách **lành tính** (gửi lại sau khi mất hồi âm + lệch 1) khỏi **đáng ngờ**.
+>      Gặp "ĐÁNG NGỜ" trong log = có đường ghi khác đang đổi dữ liệu, phải điều tra ngay.
+>    - **Còn phải làm:** thêm `idempotency_key` cho `PUT /player/farm-state`, đúng khuôn mẫu
+>      `/player/shop/transaction` và `/player/farm/animals/place` đã dùng (`lockIdempotency` +
+>      `findStoredTransaction` trong `postgresStore.js`). Sửa cả `server/index.js` lẫn client, cần deploy.
+>      Runbook mẫu: `server/RUNBOOK_deploy_shopcatalog.md`.
+>    - Rủi ro dời chuồng đi kèm: `PUT /player/farm-state` chỉ chép nguyên `build_state_json`; nếu upload
+>      fail/`409` thì server giữ chuồng ở chỗ cũ. Có idempotency thì hết luôn phần lớn ca này.
+> 4. `[~]` Ví Point (canary tiền thật, migration số dư cũ, hoa hồng/VIP, source-lot PostgreSQL): giữ nguyên
+>    mọi ràng buộc bên dưới, **chỉ làm khi có phê duyệt riêng**. Các mục 0–7 tiếp theo vẫn còn hiệu lực về
+>    nội dung, chỉ khác về thứ tự ưu tiên.
+>
 > **Cập nhật 20/07 - source-lot PostgreSQL `[~]`:** `server/postgresSmokeTest.js` đã được mở rộng để áp migration `007` trong schema tạm và kiểm race idempotency, conflict, FIFO, `UNATTRIBUTED`, restart persistence và không tự đổi Point authoritative. `node --check` cùng JSON source-ledger pass. Máy local không có Docker/PostgreSQL/WSL distro nên chưa thể chạy `npm.cmd run test:postgres --prefix server`; cần PostgreSQL disposable + DSN riêng, tuyệt đối không dùng DSN production hoặc deploy để thay thế gate này.
 
 > Ưu tiên mới nhất của anh: tiếp tục ví Point trước. Các lỗi gameplay bên dưới vẫn giữ nguyên backlog nhưng tạm đứng sau các cổng ví.
@@ -116,7 +145,7 @@
 - `[x]` **Regression local P0 14/07:** `node --check`, Phase 1 JSON smoke, realtime smoke, `test:security`, `test:browser-auth` và `test:web-auth` đều pass. Test bao gồm token cũ bị `401`, socket cũ bị `4008`, logout thu hồi token, farm stale write nhận `409` và không ghi đè. Unity Editor không phát sinh `error CS` mới sau lần compile cuối. PostgreSQL smoke thật sau đó đã pass trong schema tạm trên VPS production.
 - `[x]` **Cổng triển khai backend P0:** đã tạo backup PostgreSQL + env + systemd unit, apply `003_active_player_sessions.sql`, deploy versioned release `21cc20d2a827e5327429cf5f0ecf67a6b67fdf79` và chạy PostgreSQL/public Phase 1 smoke. Session replacement, logout revoke, stale farm `409`, HTTPS/WSS và cleanup account smoke đều pass. Kiểm tra độc lập từ máy Windows xác nhận health PostgreSQL; chỉ `80/443` mở, `3000/5432/8080` vẫn đóng.
 - `[x]` **Cổng nghiệm thu client sau deploy P0:** EXE/APK chứa checkpoint `21cc20d2` đã pass B thay A ngay khi A còn mở, A -> B -> A giữ đúng farm/cây/nước/túi/xây dựng/chuồng/thú, không phục hồi snapshot cũ và retry outbox thành công sau đóng app đột ngột.
-- `[ ]` **Tách cấu hình thời gian Demo/Production:** RC hiện dùng `GameTimeConfig.SecondsPerGameDay = 60f` để khách xem nhanh vòng chơi. Trước bản vận hành phải có cấu hình Production `1 ngày game = 24 giờ thật`, áp đúng `CayTrong2`, `CayTrongLauNam2`, `VatNuoi2`, các cập nhật BA mới hơn và test bằng đồng hồ mô phỏng/server time; không ngồi chờ thực tế hàng tháng.
+- `[x]` **Tách cấu hình thời gian Demo/Production — ĐÃ XONG (kiểm lại 30/07/2026):** `GameTimeConfig.SecondsPerGameDay` nay là `86400f` (1 ngày game = 24 giờ thật), và mọi `.asset` cây/thú đã sinh lại khớp generator — không còn số demo 25s/40s. Mốc thời gian lưu wall-clock nên đóng app vài ngày vẫn chạy bù đúng. Chỉ còn MỘT chỗ tua nhanh: tutorial ép cây chín 24 giây (`FarmTile`, chỉ khi `TutorialManager.IsActive()`). ⚠️ Dòng cũ của mục này từng ghi "RC hiện dùng 60f" — đã sai từ lâu, đừng dựa vào.
 - `[~]` **Chốt số liệu thời gian còn mơ hồ:** cây ngắn ngày mới được BA xác nhận miệng 24 giờ; cây lâu năm có chu kỳ tưới/thu hoạch trong file nhưng phải đối chiếu các cập nhật sau file (đặc biệt chanh dây 5.300 Point/cụm 20 cây và rule gieo/thu cụm) trước khi khóa Production Time.
 
 #### P1 - bắt buộc cho sign-off vận hành ổn định

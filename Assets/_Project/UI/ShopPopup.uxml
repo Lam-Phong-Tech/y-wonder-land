@@ -67,38 +67,49 @@
                         <!-- Empty State -->
                         <ui:Label name="ShopDetailEmpty" text="Chọn vật phẩm để xem chi tiết..." class="shop-detail-empty" />
 
-                        <!-- Detail Content -->
+                        <!-- Detail Content
+                             Phần mô tả dài ngắn tuỳ vật phẩm (thông tin nuôi/thu hoạch có thể rất dài)
+                             -> cho CUỘN, còn số lượng + tổng + nút hành động GHIM đáy để không bao giờ
+                             bị đẩy khuất hay bị bóp bẹp. -->
                         <ui:VisualElement name="ShopDetailContent" class="shop-detail-content">
-                            <ui:VisualElement class="shop-detail-icon-wrap">
-                                <ui:Label name="LblShopIcon" text="❓" class="shop-detail-icon" />
+
+                            <ui:ScrollView name="ShopDetailScroll" class="shop-detail-scroll">
+                                <ui:VisualElement class="shop-detail-scroll-inner">
+                                    <ui:VisualElement class="shop-detail-icon-wrap">
+                                        <ui:Label name="LblShopIcon" text="❓" class="shop-detail-icon" />
+                                    </ui:VisualElement>
+                                    <ui:Label name="LblShopName" text="Tên vật phẩm" class="shop-detail-name" />
+
+                                    <!-- Price row -->
+                                    <ui:VisualElement class="shop-price-row">
+                                        <ui:Label name="LblShopPriceIcon" text="🪙" class="shop-price-icon" />
+                                        <ui:Label name="LblShopPrice" text="100 Point" class="shop-price-text" />
+                                    </ui:VisualElement>
+
+                                    <ui:VisualElement class="shop-detail-divider" />
+                                    <ui:Label name="LblShopDesc" text="Mô tả vật phẩm" class="shop-detail-desc" />
+                                    <ui:Label name="LblOwned" text="Đang có: 0" class="shop-detail-owned-badge" />
+                                </ui:VisualElement>
+                            </ui:ScrollView>
+
+                            <!-- Khối ghim đáy -->
+                            <ui:VisualElement class="shop-detail-actions">
+                                <!-- Quantity selector -->
+                                <ui:VisualElement class="shop-qty-row">
+                                    <ui:Button name="BtnQtyMinus" text="−" class="shop-qty-btn" />
+                                    <ui:TextField name="TxtQty" value="1" class="shop-qty-input" />
+                                    <ui:Button name="BtnQtyPlus" text="+" class="shop-qty-btn" />
+                                </ui:VisualElement>
+
+                                <!-- Total -->
+                                <ui:VisualElement class="shop-total-row">
+                                    <ui:Label text="Tổng:" class="shop-total-label" />
+                                    <ui:Label name="LblTotal" text="100 Point" class="shop-total-value" />
+                                </ui:VisualElement>
+
+                                <!-- Action button -->
+                                <ui:Button name="BtnShopAction" text="MUA" class="shop-btn-action" />
                             </ui:VisualElement>
-                            <ui:Label name="LblShopName" text="Tên vật phẩm" class="shop-detail-name" />
-
-                            <!-- Price row -->
-                            <ui:VisualElement class="shop-price-row">
-                                <ui:Label name="LblShopPriceIcon" text="🪙" class="shop-price-icon" />
-                                <ui:Label name="LblShopPrice" text="100 Point" class="shop-price-text" />
-                            </ui:VisualElement>
-
-                            <ui:VisualElement class="shop-detail-divider" />
-                            <ui:Label name="LblShopDesc" text="Mô tả vật phẩm" class="shop-detail-desc" />
-                            <ui:Label name="LblOwned" text="Đang có: 0" class="shop-detail-owned-badge" />
-
-                            <!-- Quantity selector -->
-                            <ui:VisualElement class="shop-qty-row">
-                                <ui:Button name="BtnQtyMinus" text="−" class="shop-qty-btn" />
-                                <ui:TextField name="TxtQty" value="1" class="shop-qty-input" />
-                                <ui:Button name="BtnQtyPlus" text="+" class="shop-qty-btn" />
-                            </ui:VisualElement>
-
-                            <!-- Total -->
-                            <ui:VisualElement class="shop-total-row">
-                                <ui:Label text="Tổng:" class="shop-total-label" />
-                                <ui:Label name="LblTotal" text="100 Point" class="shop-total-value" />
-                            </ui:VisualElement>
-
-                            <!-- Action button -->
-                            <ui:Button name="BtnShopAction" text="MUA" class="shop-btn-action" />
                         </ui:VisualElement>
                     </ui:VisualElement>
 

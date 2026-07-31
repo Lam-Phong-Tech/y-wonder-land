@@ -57,8 +57,8 @@
 
                         <ui:VisualElement class="settings-slider-row">
                             <ui:Label name="LblCameraZoom" text="Zoom" class="settings-label" />
-                            <ui:Label name="LblCameraZoomValue" text="75%" class="settings-slider-value" />
-                            <ui:Slider name="SliderCameraZoom" low-value="50" high-value="100" value="75" class="settings-slider" />
+                            <ui:Label name="LblCameraZoomValue" text="100%" class="settings-slider-value" />
+                            <ui:Slider name="SliderCameraZoom" low-value="50" high-value="200" value="100" class="settings-slider" />
                         </ui:VisualElement>
 
                     </ui:VisualElement>
@@ -78,11 +78,26 @@
                             <ui:Slider name="SliderRenderQuality" low-value="0" high-value="100" value="100" class="settings-slider" />
                         </ui:VisualElement>
 
+                        <ui:VisualElement class="settings-slider-row">
+                            <ui:Label name="LblUIScale" text="Cỡ chữ &amp; nút" class="settings-label" />
+                            <ui:Label name="LblUIScaleValue" text="100%" class="settings-slider-value" />
+                            <ui:Slider name="SliderUIScale" low-value="50" high-value="200" value="100" class="settings-slider" />
+                        </ui:VisualElement>
+
                         <ui:VisualElement class="settings-toggle-row">
                             <ui:Label name="LblShadow" text="Bóng đổ" class="settings-toggle-label" />
                             <ui:Toggle name="ToggleShadow" value="true" class="settings-toggle" />
                             <ui:Label name="LblShadowStatus" text="BẬT" class="settings-toggle-status" />
                         </ui:VisualElement>
+
+                        <!-- Khách chốt 30/07: chữ nổi trên cây/con vật MẶC ĐỊNH TẮT (che kín farm + gây giật).
+                             Ai máy khoẻ thì tự bật ở đây, có cảnh báo kèm. -->
+                        <ui:VisualElement class="settings-toggle-row">
+                            <ui:Label name="LblCropLabels" text="Chữ nổi trên cây/thú" class="settings-toggle-label" />
+                            <ui:Toggle name="ToggleCropLabels" value="false" class="settings-toggle" />
+                            <ui:Label name="LblCropLabelsStatus" text="TẮT" class="settings-toggle-status" />
+                        </ui:VisualElement>
+                        <ui:Label name="LblCropLabelsHint" text="Hiện giờ chín / giờ đói ngay trên đầu. Nông trại đông cây sẽ RỐI MẮT và MÁY YẾU DỄ GIẬT — nên để tắt và bấm vào cây/thú để xem." class="settings-hint" />
 
                         <!-- GENERAL -->
                         <ui:Label name="LblGeneralSection" text="CHUNG" class="settings-section-header" />

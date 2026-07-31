@@ -21,6 +21,18 @@ namespace YWonderLand.Environment
         public static List<BuildSurfaceCell> FindPen(BuildSurfaceCell seed, int maxCells = 400)
         {
             if (seed == null || !seed.HasFence) return null;
+            return FindConnected(seed, c => c.HasFence, maxCells);
+        }
+
+        /// <summary>
+        /// Cụm ô LIỀN NHAU (4-kề) tính từ seed, chỉ nhận những ô thoả <paramref name="include"/>.
+        /// Null nếu không gom được ô nào. (Đường lát đá KHÔNG dùng hàm này: anh chốt 30/07 dời
+        /// từng viên chứ không dời cả đoạn — xem FarmInteractionController.BeginMovePath.)
+        /// </summary>
+        public static List<BuildSurfaceCell> FindConnected(
+            BuildSurfaceCell seed, System.Func<BuildSurfaceCell, bool> include, int maxCells = 400)
+        {
+            if (seed == null || include == null) return null;
 
             var all = BuildSurfaceCell.All;
             if (all == null || all.Count == 0) return null;
@@ -29,11 +41,11 @@ namespace YWonderLand.Environment
             if (cell < 0.01f) cell = 0.8f;
             Vector3 o = seed.SurfaceCenter; // seed = gốc lưới -> (0,0)
 
-            // Chỉ map các ô CÓ RÀO.
+            // Chỉ map các ô thoả bộ lọc.
             var map = new Dictionary<Vector2Int, BuildSurfaceCell>();
             foreach (var c in all)
             {
-                if (c == null || !c.HasFence) continue;
+                if (c == null || !include(c)) continue;
                 Vector3 p = c.SurfaceCenter;
                 map[new Vector2Int(
                     Mathf.RoundToInt((p.x - o.x) / cell),
@@ -43,14 +55,14 @@ namespace YWonderLand.Environment
             var visited = new HashSet<Vector2Int> { Vector2Int.zero };
             var queue = new Queue<Vector2Int>();
             queue.Enqueue(Vector2Int.zero);
-            var pen = new List<BuildSurfaceCell>();
+            var group = new List<BuildSurfaceCell>();
 
             while (queue.Count > 0)
             {
                 var cur = queue.Dequeue();
                 if (!map.TryGetValue(cur, out var bsc)) continue;
-                pen.Add(bsc);
-                if (pen.Count > maxCells) break;
+                group.Add(bsc);
+                if (group.Count > maxCells) break;
 
                 foreach (var d in Dirs)
                 {
@@ -59,7 +71,7 @@ namespace YWonderLand.Environment
                 }
             }
 
-            return pen.Count > 0 ? pen : null;
+            return group.Count > 0 ? group : null;
         }
 
         /// <summary>Số ô chuồng CHƯA có thú = sức chứa còn lại.</summary>

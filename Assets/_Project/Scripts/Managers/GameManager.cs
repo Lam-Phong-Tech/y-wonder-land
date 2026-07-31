@@ -532,7 +532,9 @@ public class GameManager : MonoBehaviour
             ? profile.name
             : (!string.IsNullOrEmpty(auth?.Username) ? auth.Username : "Player");
 
-        selectedCharacterIndex = string.Equals(profile?.gender, "female", System.StringComparison.OrdinalIgnoreCase) ? 1 : 0;
+        if (profile == null || string.IsNullOrEmpty(profile.gender))
+            Debug.LogWarning("[GameManager] Vào game từ hồ sơ nhưng hồ sơ trống/thiếu giới tính -> tạm dùng nam.");
+        selectedCharacterIndex = GenderToCharacterIndex(profile?.gender);
 
         if (auth != null && profileService != null)
             ApplyDemoAccountOverrides(auth.Username, profileService);
@@ -572,7 +574,24 @@ public class GameManager : MonoBehaviour
         if (!bootstrapLoaded)
             await profile.LoadProfileAsync();
 
-        profile.ApplyCharacterInfo(playerName, selectedCharacterIndex == 0 ? "male" : "female");
+        // CHỈ ghi tên/giới tính khi hồ sơ chưa có nhân vật. Trước đây luôn ghi đè bằng
+        // selectedCharacterIndex local, mà hàm này chạy CẢ trong luồng resume -> một lần đọc
+        // prefs hụt (mặc định 0) là đẩy thẳng "male" lên server, khoá cứng tài khoản nữ thành
+        // nam ở mọi lần đăng nhập sau. Hồ sơ đã có nhân vật thì server mới là nguồn sự thật.
+        if (!profile.HasCharacterCreated)
+        {
+            profile.ApplyCharacterInfo(playerName, selectedCharacterIndex == 0 ? "male" : "female");
+        }
+        else if (profile.Profile != null && !string.IsNullOrEmpty(profile.Profile.gender))
+        {
+            int fromProfile = GenderToCharacterIndex(profile.Profile.gender);
+            if (fromProfile != selectedCharacterIndex)
+                Debug.LogWarning($"[GameManager] Nhân vật đã spawn theo giới tính {(selectedCharacterIndex == 0 ? "nam" : "nữ")} nhưng hồ sơ là {profile.Profile.gender}; đã sửa prefs, vào lại game sẽ đúng.");
+            selectedCharacterIndex = fromProfile;
+            PlayerScopedPrefs.SetInt(K_CharIdx, fromProfile);
+            PlayerScopedPrefs.Save();
+        }
+
         ApplyDemoAccountOverrides(backendUsername, profile);
     }
 
@@ -874,7 +893,7 @@ public class GameManager : MonoBehaviour
 
     private void ResumeGameFromLocalSave(bool bootstrapAlreadyLoaded)
     {
-        selectedCharacterIndex = PlayerScopedPrefs.GetInt(K_CharIdx, 0);
+        selectedCharacterIndex = ResolveCharacterIndex();
         playerName = PlayerScopedPrefs.GetString(K_Name, "Player");
 
         Vector3 pos = new Vector3(
@@ -900,6 +919,44 @@ public class GameManager : MonoBehaviour
 
         SetGameState(GameState.Gameplay);
         Debug.Log($"[GameManager] RESUME: vào thẳng game tại {pos}, char={selectedCharacterIndex}.");
+    }
+
+    /// <summary>
+    /// Giới tính nhân vật khi resume. HỒ SƠ (server/cache) là nguồn sự thật; PlayerPrefs chỉ
+    /// là dự phòng offline.
+    /// Trước đây chỉ đọc `PlayerScopedPrefs.GetInt(K_CharIdx, 0)`: mọi lần đọc HỤT khoá (scope
+    /// đổi từ "name:x" sang "id:N" sau khi bootstrap trả UserId, hoặc khoá legacy đã bị tài
+    /// khoản khác nhận sở hữu) đều trả mặc định 0 = NAM, nên tài khoản nữ thỉnh thoảng vào game
+    /// thành nam.
+    /// </summary>
+    private int ResolveCharacterIndex()
+    {
+        var profileService = PlayerProfileService.Instance;
+        PlayerProfile profile = profileService != null ? profileService.Profile : null;
+
+        if (profile != null && profile.characterCreated && !string.IsNullOrEmpty(profile.gender))
+        {
+            int fromProfile = GenderToCharacterIndex(profile.gender);
+            // Prefs lệch hồ sơ -> ghi đè để lần sau đọc đúng ngay cả khi offline.
+            if (PlayerScopedPrefs.GetInt(K_CharIdx, fromProfile) != fromProfile)
+            {
+                Debug.LogWarning($"[GameManager] PlayerPrefs giới tính lệch hồ sơ ({profile.gender}) -> lấy theo hồ sơ và sửa lại prefs.");
+                PlayerScopedPrefs.SetInt(K_CharIdx, fromProfile);
+                PlayerScopedPrefs.Save();
+            }
+            return fromProfile;
+        }
+
+        if (PlayerScopedPrefs.HasKey(K_CharIdx))
+            return PlayerScopedPrefs.GetInt(K_CharIdx, 0);
+
+        Debug.LogWarning("[GameManager] Không đọc được giới tính từ hồ sơ lẫn prefs -> tạm dùng nam. Nếu nhân vật hiện sai, hồ sơ chưa nạp xong lúc resume.");
+        return 0;
+    }
+
+    private static int GenderToCharacterIndex(string gender)
+    {
+        return string.Equals(gender, "female", System.StringComparison.OrdinalIgnoreCase) ? 1 : 0;
     }
 
     // Spawn nhân vật ở 1 vị trí mặt đất (dùng cho resume) — KHÔNG gắn lên thuyền.

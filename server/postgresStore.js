@@ -1,11 +1,19 @@
 const crypto = require("crypto");
 const { Pool } = require("pg");
 const { prepareAnimalPlacement } = require("./farmAnimalPlacement");
+const { FISHING_FREE_PER_DAY, FISHING_BAIT_ID, rollFish } = require("./fishingTable");
 const {
   normalizePointSourceLot,
   pointSourceLotRequestSignature,
   planPointSourceFifo,
 } = require("./pointSourceLedger");
+const { gameDayKey } = require("./gameDay");
+const {
+  rewardForDay,
+  resolveStreak,
+  isTrackFinished,
+  attendanceView,
+} = require("./attendanceRules");
 
 function nowISO() {
   return new Date().toISOString();
@@ -41,20 +49,14 @@ function makeId(prefix) {
   return `${prefix}_${Date.now()}_${crypto.randomUUID().replace(/-/g, "").slice(0, 12)}`;
 }
 
+// Định nghĩa ngày game đã dọn về gameDay.js để kho JSON dùng chung một mốc.
 function periodKey(date = new Date()) {
-  const timeZone = process.env.GAME_TIMEZONE || "Asia/Ho_Chi_Minh";
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(date);
-  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
-  return `${values.year}-${values.month}-${values.day}`;
+  return gameDayKey(date);
 }
 
 function makeDefaultEconomy() {
-  return { version: 1, pos: 5000, updatedAt: nowISO() };
+  // Tài khoản mới KHÔNG được cấp tiền (khách yêu cầu). Trước đây mặc định 5000 -> đã sửa 0.
+  return { version: 1, pos: 0, updatedAt: nowISO() };
 }
 
 function makeDefaultInventory() {
@@ -354,8 +356,9 @@ class PostgresStore {
     if (player.rowCount === 0) throw new Error(`PLAYER_NOT_FOUND:${playerId}`);
 
     await client.query(
+      // Khách chốt: tài khoản mới bắt đầu với 0 Point (không cấp tiền). Trước là 5000.
       `insert into player_economy (player_id, version, pos)
-       values ($1,1,5000) on conflict (player_id) do nothing`,
+       values ($1,1,0) on conflict (player_id) do nothing`,
       [playerId]
     );
 
@@ -1453,6 +1456,384 @@ class PostgresStore {
         createdAt: nowISO(),
       };
       const response = { ok: true, inventory: inventoryAfter, daily_limits: dailyLimitsAfter, limit, rewards: normalizedRewards, duplicate: false };
+      await this.insertTransaction(client, transaction, response);
+      return { ...response, transaction };
+    });
+  }
+
+  // Câu cá SERVER-AUTHORITATIVE (prod). Server tự bốc cá + tự quản lượt free/mồi; idempotent.
+  async resolveFishingCatch(playerId, options = {}) {
+    const idempotencyKey = String(options.idempotencyKey || "").trim();
+    if (!idempotencyKey) return { ok: false, error: "MISSING_IDEMPOTENCY_KEY" };
+    const currentPeriod = String(options.periodKey || periodKey());
+    // Thưởng NGẪU NHIÊN nên KHÔNG đưa cá vào signature; replay trả nguyên result_json (đã có cá).
+    const requestSignature = JSON.stringify({ op: "fishing", playerId });
+
+    return this.withTransaction(async (client) => {
+      await this.ensurePlayerStateWithClient(client, playerId);
+      await this.lockIdempotency(client, idempotencyKey);
+      const existing = await this.findStoredTransaction(client, idempotencyKey);
+      if (existing) return this.duplicateResult(existing, requestSignature);
+
+      const inventory = await this.getInventoryWithClient(client, playerId, true);
+      const limit = await this.lockDailyLimit(client, playerId, "fishing", currentPeriod, FISHING_FREE_PER_DAY);
+
+      let usedBait = false;
+      if (limit.used < limit.maxCount) {
+        await client.query(
+          `update player_daily_limits set used_count=used_count+1,max_count=$4,updated_at=now()
+           where player_id=$1 and limit_key=$2 and period_key=$3`,
+          [playerId, "fishing", currentPeriod, FISHING_FREE_PER_DAY]
+        );
+      } else {
+        // Hết free -> phải có 1 mồi bait_01.
+        const baitRes = await client.query(
+          "select * from player_inventory where player_id=$1 and item_id=$2 for update",
+          [playerId, FISHING_BAIT_ID]
+        );
+        const baitQty = baitRes.rows[0] ? toInt(baitRes.rows[0].quantity, 0) : 0;
+        if (baitQty < 1) {
+          return {
+            ok: false,
+            error: "NO_FISHING_TURN",
+            inventory,
+            daily_limits: await this.getDailyLimitsWithClient(client, playerId, currentPeriod),
+            limit,
+          };
+        }
+        if (baitQty - 1 <= 0) {
+          await client.query("delete from player_inventory where player_id=$1 and item_id=$2", [playerId, FISHING_BAIT_ID]);
+        } else {
+          await client.query(
+            "update player_inventory set quantity=quantity-1,updated_at=now() where player_id=$1 and item_id=$2",
+            [playerId, FISHING_BAIT_ID]
+          );
+        }
+        usedBait = true;
+      }
+
+      // Server tự bốc cá (client không quyết được).
+      const fish = rollFish();
+      await client.query(
+        `insert into player_inventory (player_id,item_id,quantity,updated_at)
+         values ($1,$2,1,now())
+         on conflict (player_id,item_id) do update
+         set quantity=player_inventory.quantity+1,updated_at=now()`,
+        [playerId, fish.itemId]
+      );
+      await client.query(
+        `update player_inventory_meta
+         set max_slots=greatest(max_slots,(select count(*)::integer from player_inventory where player_id=$1)),
+             updated_at=now()
+         where player_id=$1`,
+        [playerId]
+      );
+
+      const inventoryAfter = await this.getInventoryWithClient(client, playerId);
+      const dailyLimitsAfter = await this.getDailyLimitsWithClient(client, playerId, currentPeriod);
+      const limitAfter = dailyLimitsAfter.limits.fishing || limit;
+      const baitAfterSlot = inventoryAfter.slots.find((s) => s.itemId === FISHING_BAIT_ID);
+      const baitRemaining = baitAfterSlot ? toInt(baitAfterSlot.quantity, 0) : 0;
+
+      const response = {
+        ok: true,
+        fish,
+        inventory: inventoryAfter,
+        daily_limits: dailyLimitsAfter,
+        limit: limitAfter,
+        usedBait,
+        baitRemaining,
+        duplicate: false,
+      };
+      const transaction = {
+        id: makeId("ftx"), playerId, type: "fishing_catch", ref: fish.itemId,
+        idempotencyKey, requestSignature,
+        fish, usedBait, baitRemaining,
+        inventoryAfter: clone(inventoryAfter), dailyLimitsAfter: clone(dailyLimitsAfter),
+        limitAfter: limitAfter ? { ...limitAfter } : null, createdAt: nowISO(),
+      };
+      await this.insertTransaction(client, transaction, response);
+      return { ...response, transaction };
+    });
+  }
+
+  // Đổi 1 Vé đào mỏ (mine_ticket_01) -> +1 lượt đào (tăng max_count daily-limit "mining"). Idempotent.
+  async resolveMineTicketRedeem(playerId, options = {}) {
+    const MINE_TICKET_ID = "mine_ticket_01";
+    const MINING_MAX_PER_DAY = 10;
+
+    const idempotencyKey = String(options.idempotencyKey || "").trim();
+    if (!idempotencyKey) return { ok: false, error: "MISSING_IDEMPOTENCY_KEY" };
+    const currentPeriod = String(options.periodKey || periodKey());
+    const requestSignature = JSON.stringify({ op: "mine_ticket_redeem", playerId });
+
+    return this.withTransaction(async (client) => {
+      await this.ensurePlayerStateWithClient(client, playerId);
+      await this.lockIdempotency(client, idempotencyKey);
+      const existing = await this.findStoredTransaction(client, idempotencyKey);
+      if (existing) return this.duplicateResult(existing, requestSignature);
+
+      const inventory = await this.getInventoryWithClient(client, playerId, true);
+
+      // Cần 1 vé đào mine_ticket_01.
+      const ticketRes = await client.query(
+        "select * from player_inventory where player_id=$1 and item_id=$2 for update",
+        [playerId, MINE_TICKET_ID]
+      );
+      const ticketQty = ticketRes.rows[0] ? toInt(ticketRes.rows[0].quantity, 0) : 0;
+      if (ticketQty < 1) {
+        return {
+          ok: false,
+          error: "NO_MINE_TICKET",
+          inventory,
+          daily_limits: await this.getDailyLimitsWithClient(client, playerId, currentPeriod),
+        };
+      }
+      if (ticketQty - 1 <= 0) {
+        await client.query("delete from player_inventory where player_id=$1 and item_id=$2", [playerId, MINE_TICKET_ID]);
+      } else {
+        await client.query(
+          "update player_inventory set quantity=quantity-1,updated_at=now() where player_id=$1 and item_id=$2",
+          [playerId, MINE_TICKET_ID]
+        );
+      }
+
+      // +1 lượt đào: đảm bảo có row rồi tăng max_count.
+      await this.lockDailyLimit(client, playerId, "mining", currentPeriod, MINING_MAX_PER_DAY);
+      await client.query(
+        `update player_daily_limits set max_count=max_count+1,updated_at=now()
+         where player_id=$1 and limit_key=$2 and period_key=$3`,
+        [playerId, "mining", currentPeriod]
+      );
+
+      const inventoryAfter = await this.getInventoryWithClient(client, playerId);
+      const dailyLimitsAfter = await this.getDailyLimitsWithClient(client, playerId, currentPeriod);
+      const limitAfter = dailyLimitsAfter.limits.mining || null;
+      const miningTurnsRemaining = limitAfter
+        ? Math.max(0, toInt(limitAfter.maxCount, 0) - toInt(limitAfter.used, 0))
+        : 0;
+      const ticketSlotAfter = inventoryAfter.slots.find((s) => s.itemId === MINE_TICKET_ID);
+      const ticketRemaining = ticketSlotAfter ? toInt(ticketSlotAfter.quantity, 0) : 0;
+
+      const response = {
+        ok: true,
+        miningTurnsRemaining,
+        ticketRemaining,
+        inventory: inventoryAfter,
+        daily_limits: dailyLimitsAfter,
+        limit: limitAfter,
+        duplicate: false,
+      };
+      const transaction = {
+        id: makeId("mtx"), playerId, type: "mine_ticket_redeem", ref: MINE_TICKET_ID,
+        idempotencyKey, requestSignature,
+        miningTurnsRemaining, ticketRemaining,
+        inventoryAfter: clone(inventoryAfter), dailyLimitsAfter: clone(dailyLimitsAfter),
+        limitAfter: limitAfter ? { ...limitAfter } : null, createdAt: nowISO(),
+      };
+      await this.insertTransaction(client, transaction, response);
+      return { ...response, transaction };
+    });
+  }
+
+  // 1 lượt quay: 3 free/ngày (daily-limit "spin") rồi trừ 1 spin_ticket_01. Server đếm theo ngày server. Idempotent.
+  async resolveWheelSpin(playerId, options = {}) {
+    const SPIN_TICKET_ID = "spin_ticket_01";
+    const SPIN_FREE_PER_DAY = 3;
+
+    const idempotencyKey = String(options.idempotencyKey || "").trim();
+    if (!idempotencyKey) return { ok: false, error: "MISSING_IDEMPOTENCY_KEY" };
+    const currentPeriod = String(options.periodKey || periodKey());
+    const requestSignature = JSON.stringify({ op: "wheel_spin", playerId });
+
+    return this.withTransaction(async (client) => {
+      await this.ensurePlayerStateWithClient(client, playerId);
+      await this.lockIdempotency(client, idempotencyKey);
+      const existing = await this.findStoredTransaction(client, idempotencyKey);
+      if (existing) return this.duplicateResult(existing, requestSignature);
+
+      const inventory = await this.getInventoryWithClient(client, playerId, true);
+      const limit = await this.lockDailyLimit(client, playerId, "spin", currentPeriod, SPIN_FREE_PER_DAY);
+
+      let usedTicket = false;
+      if (limit.used < limit.maxCount) {
+        await client.query(
+          `update player_daily_limits set used_count=used_count+1,max_count=$4,updated_at=now()
+           where player_id=$1 and limit_key=$2 and period_key=$3`,
+          [playerId, "spin", currentPeriod, SPIN_FREE_PER_DAY]
+        );
+      } else {
+        const ticketRes = await client.query(
+          "select * from player_inventory where player_id=$1 and item_id=$2 for update",
+          [playerId, SPIN_TICKET_ID]
+        );
+        const ticketQty = ticketRes.rows[0] ? toInt(ticketRes.rows[0].quantity, 0) : 0;
+        if (ticketQty < 1) {
+          return {
+            ok: false,
+            error: "NO_SPIN_TURN",
+            inventory,
+            daily_limits: await this.getDailyLimitsWithClient(client, playerId, currentPeriod),
+            limit,
+          };
+        }
+        if (ticketQty - 1 <= 0) {
+          await client.query("delete from player_inventory where player_id=$1 and item_id=$2", [playerId, SPIN_TICKET_ID]);
+        } else {
+          await client.query(
+            "update player_inventory set quantity=quantity-1,updated_at=now() where player_id=$1 and item_id=$2",
+            [playerId, SPIN_TICKET_ID]
+          );
+        }
+        usedTicket = true;
+      }
+
+      const inventoryAfter = await this.getInventoryWithClient(client, playerId);
+      const dailyLimitsAfter = await this.getDailyLimitsWithClient(client, playerId, currentPeriod);
+      const limitAfter = dailyLimitsAfter.limits.spin || limit;
+      const spinsRemaining = limitAfter
+        ? Math.max(0, toInt(limitAfter.maxCount, 0) - toInt(limitAfter.used, 0))
+        : 0;
+      const ticketSlotAfter = inventoryAfter.slots.find((s) => s.itemId === SPIN_TICKET_ID);
+      const ticketRemaining = ticketSlotAfter ? toInt(ticketSlotAfter.quantity, 0) : 0;
+
+      const response = {
+        ok: true,
+        usedTicket,
+        spinsRemaining,
+        ticketRemaining,
+        inventory: inventoryAfter,
+        daily_limits: dailyLimitsAfter,
+        limit: limitAfter,
+        duplicate: false,
+      };
+      const transaction = {
+        id: makeId("stx"), playerId, type: "wheel_spin", ref: usedTicket ? SPIN_TICKET_ID : "free",
+        idempotencyKey, requestSignature,
+        usedTicket, spinsRemaining, ticketRemaining,
+        inventoryAfter: clone(inventoryAfter), dailyLimitsAfter: clone(dailyLimitsAfter),
+        limitAfter: limitAfter ? { ...limitAfter } : null, createdAt: nowISO(),
+      };
+      await this.insertTransaction(client, transaction, response);
+      return { ...response, transaction };
+    });
+  }
+
+  // Dòng điểm danh tạo lười (không nằm trong ensurePlayerState) rồi khoá lại để hai lần bấm
+  // cùng lúc không cùng đọc được một chuỗi.
+  async lockAttendanceWithClient(client, playerId) {
+    await client.query(
+      "insert into player_attendance (player_id) values ($1) on conflict (player_id) do nothing",
+      [playerId]
+    );
+    const result = await client.query(
+      "select * from player_attendance where player_id=$1 for update",
+      [playerId]
+    );
+    const row = result.rows[0] || {};
+    return {
+      claimedDays: toInt(row.claimed_days, 0),
+      maxRewardedDay: toInt(row.max_rewarded_day, 0),
+      lastClaimDate: String(row.last_claim_date || ""),
+    };
+  }
+
+  async getAttendance(playerId, options = {}) {
+    const today = String(options.today || periodKey());
+    return this.withTransaction(async (client) => {
+      await this.ensurePlayerStateWithClient(client, playerId);
+      const record = await this.lockAttendanceWithClient(client, playerId);
+      return { ok: true, attendance: attendanceView(record, today) };
+    });
+  }
+
+  async claimAttendance(playerId, options = {}) {
+    const idempotencyKey = String(options.idempotencyKey || "").trim();
+    if (!idempotencyKey) return { ok: false, error: "MISSING_IDEMPOTENCY_KEY" };
+    const today = String(options.today || periodKey());
+    const requestSignature = JSON.stringify({ op: "attendance_claim", playerId });
+
+    return this.withTransaction(async (client) => {
+      await this.ensurePlayerStateWithClient(client, playerId);
+      await this.lockIdempotency(client, idempotencyKey);
+      const existing = await this.findStoredTransaction(client, idempotencyKey);
+      if (existing) return this.duplicateResult(existing, requestSignature);
+
+      const record = await this.lockAttendanceWithClient(client, playerId);
+      const state = resolveStreak(record.lastClaimDate, record.claimedDays, today);
+
+      if (isTrackFinished(record.maxRewardedDay)) {
+        return { ok: false, error: "ATTENDANCE_COMPLETED", attendance: attendanceView(record, today) };
+      }
+      if (state.claimedToday) {
+        return { ok: false, error: "ALREADY_CLAIMED_TODAY", attendance: attendanceView(record, today) };
+      }
+
+      const day = state.streak;
+      const reward = rewardForDay(day);
+      // Chỉ trả quà cho ngày CHƯA từng trả. Mất chuỗi thì leo lại thật, nhưng đi qua ngày cũ
+      // không được lĩnh lần hai — nếu không, điểm danh cách ngày là in tiền vô hạn.
+      const rewardPaid = day > record.maxRewardedDay && !reward.isNothing;
+
+      if (rewardPaid && reward.point > 0) {
+        await client.query(
+          "update player_economy set pos=pos+$2, updated_at=now() where player_id=$1",
+          [playerId, reward.point]
+        );
+      }
+      if (rewardPaid && reward.itemId && reward.qty > 0) {
+        await client.query(
+          `insert into player_inventory (player_id,item_id,quantity,updated_at)
+           values ($1,$2,$3,now())
+           on conflict (player_id,item_id) do update
+           set quantity=player_inventory.quantity+$3,updated_at=now()`,
+          [playerId, reward.itemId, reward.qty]
+        );
+        await client.query(
+          `update player_inventory_meta
+           set max_slots=greatest(max_slots,(select count(*)::integer from player_inventory where player_id=$1)),
+               updated_at=now()
+           where player_id=$1`,
+          [playerId]
+        );
+      }
+
+      await client.query(
+        `update player_attendance
+         set claimed_days=$2, max_rewarded_day=greatest(max_rewarded_day,$2), last_claim_date=$3, updated_at=now()
+         where player_id=$1`,
+        [playerId, day, today]
+      );
+
+      const attendanceAfter = attendanceView(
+        {
+          claimedDays: day,
+          maxRewardedDay: Math.max(record.maxRewardedDay, day),
+          lastClaimDate: today,
+        },
+        today
+      );
+      const economyAfter = await this.getEconomyWithClient(client, playerId);
+      const inventoryAfter = await this.getInventoryWithClient(client, playerId);
+
+      const response = {
+        ok: true,
+        attendance: attendanceAfter,
+        reward,
+        rewardPaid,
+        streakReset: state.streakReset,
+        economy: economyAfter,
+        inventory: inventoryAfter,
+        duplicate: false,
+      };
+      const transaction = {
+        id: makeId("atx"), playerId, type: "attendance_claim", ref: `day_${day}`,
+        idempotencyKey, requestSignature,
+        reward, rewardPaid, streakReset: state.streakReset,
+        attendanceAfter: clone(attendanceAfter),
+        economyAfter: clone(economyAfter), inventoryAfter: clone(inventoryAfter),
+        createdAt: nowISO(),
+      };
       await this.insertTransaction(client, transaction, response);
       return { ...response, transaction };
     });

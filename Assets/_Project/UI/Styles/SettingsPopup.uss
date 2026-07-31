@@ -110,6 +110,12 @@
 .settings-toggle-label { font-size: 15px; -unity-font-style: bold; color: var(--color-text-white); width: 150px; flex-shrink: 0; }
 .settings-toggle-status { font-size: 14px; -unity-font-style: bold; margin-left: 12px; color: var(--color-bright-grey); }
 
+/* Dòng cảnh báo/giải thích nhỏ dưới một mục cài đặt */
+.settings-hint {
+    font-size: 12px; color: #FFD54F; white-space: normal;
+    margin-top: -4px; margin-bottom: 8px; margin-left: 4px; margin-right: 4px;
+}
+
 /* ── DROPDOWN ── */
 .settings-dropdown-shadow { flex-grow: 1; min-width: 140px; }
 .settings-dropdown {

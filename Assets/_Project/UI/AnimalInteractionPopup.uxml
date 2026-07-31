@@ -21,9 +21,14 @@
 
             <!-- Danh sách thú trong cụm chuồng -->
             <ui:VisualElement name="EnclosurePanel" class="ap-enclosure">
+                <!-- Hàng đầu = việc của CẢ CỤM (dời chuồng / dời ruộng, thả thú).
+                     Việc của TỪNG con / TỪNG cây nằm ở hàng nút dưới cùng. -->
                 <ui:VisualElement class="ap-enclosure-header">
                     <ui:Label name="LblEnclosureSummary" text="Chuồng" class="ap-enclosure-summary" />
-                    <ui:Button name="BtnAddAnimal" text="+ Thả thú" class="ap-btn-small ap-btn-primary" />
+                    <ui:VisualElement class="ap-enclosure-header-btns">
+                        <ui:Button name="BtnMoveGroup" text="Dời chuồng" class="ap-btn-small ap-btn-secondary ap-btn-gap" />
+                        <ui:Button name="BtnAddAnimal" text="+ Thả thú" class="ap-btn-small ap-btn-primary" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:ScrollView name="AnimalCardScroll" class="ap-card-scroll">
                     <ui:VisualElement name="AnimalCardList" class="ap-card-list" />
@@ -62,12 +67,23 @@
                 </ui:VisualElement>
             </ui:VisualElement>
 
-            <!-- Hành động -->
+            <!-- Nhật ký (khách chốt 30/07). Các hàng do C# dựng động vì mỗi loại khác nhau:
+                 thú = cho ăn / thu hoạch / chữa bệnh / tiêm vắc-xin; cây = tưới nước / thu hoạch. -->
+            <ui:VisualElement name="FeedLogPanel" class="ap-info" />
+
+            <!-- Hành động cho CON VẬT đang chọn -->
             <ui:VisualElement class="ap-actions">
                 <ui:Button name="BtnFeed" text="Cho ăn" class="ap-btn ap-btn-primary" />
                 <ui:Button name="BtnHarvest" text="Thu hoạch" class="ap-btn ap-btn-primary" />
                 <ui:Button name="BtnHeal" text="Chữa bệnh" class="ap-btn ap-btn-secondary" />
                 <ui:Button name="BtnVaccine" text="Vaccine" class="ap-btn ap-btn-secondary ap-btn-last" />
+            </ui:VisualElement>
+
+            <!-- Hành động cho CÂY đang chọn ở chế độ Xem ruộng (khách chốt 30/07) -->
+            <ui:VisualElement name="PlotActionsPanel" class="ap-actions">
+                <ui:Button name="BtnWaterCrop" text="Tưới nước" class="ap-btn ap-btn-primary" />
+                <ui:Button name="BtnHarvestCrop" text="Thu hoạch" class="ap-btn ap-btn-primary" />
+                <ui:Button name="BtnFertilizeCrop" text="Bón phân" class="ap-btn ap-btn-secondary ap-btn-last" />
             </ui:VisualElement>
 
         </ui:VisualElement>

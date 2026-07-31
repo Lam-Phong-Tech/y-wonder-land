@@ -6,6 +6,789 @@
 
 ---
 
+## [2026-07-31i] — Xong hướng dẫn thì bong bóng ghi "Hiện chưa có nhiệm vụ"
+
+### Anh chốt 31/07
+Đã hoàn thành hướng dẫn tân thủ thì đừng lặp mãi câu "Tìm NPC Tân Thủ để bắt đầu!".
+
+### Hai câu bị kẹt vĩnh viễn
+1. **Người chơi cũ**: `WireHud()` đặt cứng "Tìm NPC Tân Thủ để bắt đầu!", mà `TutorialManager`
+   không chạy với hồ sơ `tutorialCompleted` nên không ai ghi đè → câu đó nằm mãi.
+2. **Người vừa xong**: `CompleteTutorial()` ghi "Hoàn thành Hướng Dẫn Tân Thủ!" rồi cũng để đó luôn.
+
+### Sửa
+- `GameHUDController.ApplyIdleQuestText()` — chọn câu theo hồ sơ: đã xong → `"Hiện chưa có nhiệm vụ"`,
+  chưa xong → nhắc tìm NPC. Tự bỏ qua nếu hướng dẫn đang chạy (lúc đó nó là chủ nhãn, các bước `[x/11]`).
+- `SyncQuestText()` — hồ sơ nạp từ cache ngay ở `Awake` nhưng bản thật về sau lượt gọi mạng, nên
+  chờ `IsLoaded` rồi chỉnh lại, giống cách `SyncPlayerName` chờ tên.
+- `CompleteTutorial()` khoe "Hoàn thành!" 6 giây rồi trả nhãn về trạng thái rảnh.
+
+### Lưu ý cho người sửa sau
+Bong bóng **phải luôn hiện** vì nó là lối vào **duy nhất** của popup Nhiệm vụ. `SetQuest("")` sẽ
+**ẩn** nó đi — đừng bao giờ truyền chuỗi rỗng cho trạng thái "không có nhiệm vụ".
+
+### Files
+- `Assets/_Project/UI/GameHUDController.cs`
+- `Assets/_Project/Scripts/Tutorial/TutorialManager.cs`
+
+`csc exit code: 0`.
+
+---
+
+## [2026-07-31h] — Chặn thao tác thì phải báo, đừng nuốt cú bấm
+
+### Nguyên tắc (anh chốt 31/07)
+Ngăn hành động bất thường của người chơi thì **phải có toast**. Chặn mà im lặng thì người chơi
+tưởng game đơ / máy lag rồi bấm loạn — đúng kiểu bực nhất.
+
+### Helper dùng chung
+`FarmInteractionController.NotifyBlocked(message, cooldownSec = 1.5f)` — cooldown theo **từng câu**:
+bấm liên tục cùng một chỗ thì không spam, nhưng đổi sang lỗi khác là báo ngay chứ không bị nuốt.
+
+### Ba chỗ trước đây im lặng
+| Chỗ | Trước | Giờ |
+|---|---|---|
+| Chạm ô đất ngoài tầm với | chỉ `Debug.LogWarning` | "Đứng gần ô đất hơn mới thao tác được." |
+| Bấm nút **Dời ruộng** ngoài tầm | nuốt luôn cú bấm | "Đứng gần mảnh ruộng hơn mới dời được." |
+| Thao tác ruộng trong lúc đang câu cá | chỉ `Debug.LogWarning` | "Đang câu cá — thu cần rồi hãy làm việc khác nhé." |
+
+Nặng nhất là "Dời ruộng": **nút đã hiện ra** rồi bấm không ăn thua gì cả.
+
+### CỐ Ý không thêm toast
+- `BeginTimedAction` chặn vì **đang múa động tác khác** / **player đang bận**: đó là bấm sốt ruột
+  chứ không phải hành động bất thường, mà lúc đó **thanh Hủy đang hiện** ngay trên màn hình rồi.
+  Thêm toast chỉ tổ ồn.
+- Đè chuột đào đá sai đảo (`HandleHold`) đi qua vòng lặp mỗi khung hình — luồng **bấm** đã có toast
+  "Chỉ đào đá được ở Thành phố hoặc Đảo mỏ thôi!", đủ rồi.
+
+### Files
+- `Assets/_Project/Scripts/Environment/FarmInteractionController.cs`
+
+`csc exit code: 0`.
+
+---
+
+## [2026-07-31g] — Bịt hẳn cheat tua nhanh: thu hẹp về đúng ô của hướng dẫn
+
+### Vì sao khóa quầy chưa đủ
+Khóa quầy (`[2026-07-31f]`) chỉ **hoãn** vòng lặp: người chơi vẫn ôm hạt sẵn, tua 24s liên tục,
+tích kho rồi **xong hướng dẫn mới bán một thể**. Phải chặn ở gốc: cơ chế tua nhanh.
+
+### Sửa
+`FarmTile.GetGrowthTime()` trước đây chặn **toàn cục**:
+
+```csharp
+if (tm != null && tm.IsActive()) return 24f;   // mọi ô, mọi loại cây
+```
+
+Giờ chỉ tua nhanh **đúng một ô** mà hướng dẫn đang bám:
+
+```csharp
+if (tm != null && tm.IsFastGrowthTile(this)) return tutorialGrowthTime;
+```
+
+- `TutorialManager.IsFastGrowthTile(tile)` = còn hướng dẫn **và** `tile` đúng là `targetFarmTile`.
+- `targetFarmTile` là ô người chơi **thật sự vừa thao tác** (`AdoptFarmTile`, xem `[2026-07-31d]`),
+  nên nhịp hướng dẫn không đổi: cả chuỗi cuốc → gieo → tưới → thu đều trên đúng ô đó.
+- Hằng số gom về `TutorialManager.TutorialFastGrowthSec = 24f` cho hai nơi dùng chung một số.
+- Đổi `FindFirstObjectByType<TutorialManager>()` → `TutorialManager.Instance` (hàm này nằm trong
+  đường tính tăng trưởng, quét scene ở đây là phí).
+
+### Dọn kèm
+Xoá `FarmTile.IsTutorialActive()` — **không có chỗ nào gọi**, nhưng chú thích của nó ("tutorial thì
+KHÔNG cho cây chết") mô tả một luật không hề tồn tại, đọc vào là hiểu sai luật chết cây.
+
+### Còn lại (không sửa, để anh chốt)
+- `FarmAnimal.cs:240` bỏ qua **cú gieo xác suất phát bệnh** khi còn hướng dẫn. Không phải miễn
+  nhiễm vĩnh viễn (`sicknessRolled` vẫn `false` nên gieo lại sau), và mốc phát bệnh cách hàng ngày
+  trong khi hướng dẫn chỉ vài phút → thực tế vô hại.
+- Hướng dẫn đếm ngược **5s** rồi hô "chín rồi!" trong khi ô chín ở **24s** — lệch sẵn từ trước,
+  không thuộc lỗ hổng này.
+
+### Files
+- `Assets/_Project/Scripts/Environment/FarmTile.cs`
+- `Assets/_Project/Scripts/Tutorial/TutorialManager.cs`
+
+`csc exit code: 0`.
+
+---
+
+## [2026-07-31f] — Khóa quầy mua bán khi chưa xong hướng dẫn
+
+### Lý do (anh chốt 31/07)
+Trong lúc chưa hoàn thành hướng dẫn, cơ chế **tua nhanh thời gian vẫn luôn bật**. Người chơi
+cố tình phớt lờ NPC là có nông trại tua nhanh, mở quầy được thì thành vòng lặp kiếm tiền.
+
+### Lỗ hổng thật sự (rộng hơn tưởng)
+`FarmTile.GetGrowthTime()` chặn **ngay dòng đầu**, trước cả khi đọc dữ liệu cây:
+
+```csharp
+TutorialManager tm = FindFirstObjectByType<TutorialManager>();
+if (tm != null && tm.IsActive()) return 24f;   // MỌI loại cây, kể cả cây lâu năm
+```
+
+Tức là ai bỏ dở hướng dẫn thì có một nông trại **tua nhanh**, áp cho mọi loại cây, không giới hạn số ô.
+
+> **Đính chính (31/07):** bản đầu của mục này còn ghi "cây không chết trong tutorial" dựa trên
+> `FarmTile.IsTutorialActive()`. Kiểm lại thì hàm đó **không có chỗ nào gọi** — luật đó không tồn tại.
+> Cây trong hướng dẫn vẫn theo mốc chết bình thường. Đã xoá hàm chết ở mục `[2026-07-31g]`.
+
+### Sửa
+Chặn ở `ShopPopupController.Show(ShopData)` — cả 4 lối vào quầy (ShopData / mock / AccessMode /
+ShopDefinition) đều dồn về hàm này nên không sót đường nào: NPC, vùng chạm nhà, phím tắt cũ.
+
+- Chặn khi `TutorialManager.Instance.IsActive()` — đúng bằng điều kiện đang bật tua nhanh.
+- Người chơi cũ (`tutorialCompleted`) không bị ảnh hưởng: tutorial không chạy → `IsActive()` sai.
+- Toast "Xong hướng dẫn của NPC Tân Thủ đã rồi mới mua bán được nhé!", cooldown 2s vì vùng chạm
+  nhà bắn `OnTriggerEnter` mỗi lần đi qua.
+- Khóa **cả tab Bán**, không chỉ tab Mua — bán mới là chỗ ra tiền.
+
+### CÒN HỞ — cần anh chốt
+Khóa quầy **không đóng hẳn** vòng lặp: người chơi vẫn có thể ôm hạt sẵn, tua 24s liên tục,
+tích kho rồi **xong hướng dẫn mới bán một thể**. Muốn bịt hẳn thì phải thu hẹp cơ chế tua nhanh
+về **đúng ô đất của hướng dẫn** thay vì áp toàn cục.
+
+### Files
+- `Assets/_Project/UI/ShopPopupController.cs`
+
+`csc exit code: 0`.
+
+---
+
+## [2026-07-31e] — Bảng nút ruộng trễ đúng một bước
+
+### Triệu chứng
+Cuốc đất xong nhưng nút vẫn ghi **"Cuốc đất"**. Bấm lại thì nhân vật làm việc **kế tiếp** —
+hiện popup chọn hạt và gieo thật. Tức là chữ trên nút trễ một nhịp so với trạng thái ô.
+
+### Gốc rễ
+`RunTimedAction` dựng lại bảng nút **TRƯỚC** khi chạy `onComplete`:
+
+```csharp
+FinishTimedAction();   // -> RestorePromptAfterTimedAction() -> đọc trạng thái ô
+onComplete?.Invoke();  // <- CHỖ NÀY mới thật sự cuốc/gieo/tưới/thu
+```
+
+Mọi thao tác ruộng đều đổi trạng thái **bên trong** `onComplete` (`HandlePlow` → `InteractPlow`,
+`HandleWater` → `InteractWater`, ...). Nên bảng nút luôn được dựng theo trạng thái **CŨ**:
+ô còn `Soil` → in "Cuốc đất", ngay sau đó `onComplete` mới chuyển sang `Plowed`.
+
+Bấm nút thì `PerformTileAction` đọc trạng thái **hiện tại** (`Plowed`) nên làm đúng việc kế tiếp —
+chữ sai, việc đúng, đúng như anh mô tả.
+
+Lỗi dính **cả bốn bước** ruộng (cuốc/gieo/tưới/thu) và cả các thao tác có màn múa của vật nuôi,
+vì tất cả đi chung `BeginTimedAction`. Ở chế độ chạm-thẳng (mobile) vòng quét theo tầm ngắm không
+chạy nên không có gì sửa lại giúp — bảng sai nằm đó tới khi chạm ô lần nữa.
+
+### Sửa
+- `RunTimedAction`: giữ lại mục tiêu, gọi `FinishTimedAction(restorePrompt: false)`, chạy
+  `onComplete`, **rồi mới** `RebuildPromptFor(promptTarget)`.
+- Nếu `onComplete` mở màn múa mới (chuỗi thao tác) thì bỏ qua việc dựng lại — để màn mới tự lo,
+  không bày nút đè lên thanh Hủy.
+- `FinishTimedAction` nhận cờ `restorePrompt` (mặc định `true`, giữ nguyên hành vi cũ cho các
+  luồng khác); gộp luôn `RestorePromptAfterTimedAction` vào trong.
+
+### Files
+- `Assets/_Project/Scripts/Environment/FarmInteractionController.cs`
+
+`csc exit code: 0`.
+
+---
+
+## [2026-07-31d] — Hướng dẫn tân thủ kẹt ở bước cuốc đất
+
+### Triệu chứng
+Anh cuốc đất xong, NPC **đứng im lặp thoại** như không biết người chơi đã làm.
+
+### Gốc rễ
+Cả chuỗi ruộng của hướng dẫn (cuốc → gieo → tưới → thu) treo vào **đúng MỘT ô đất** mà
+`TutorialManager` **đoán trước** ngay lúc người chơi đặt ruộng xuống:
+
+```csharp
+targetFarmTile = FindNewlyBuiltTile();
+targetFarmTile.OnTilePlowed += OnTilePlowed;   // chỉ nghe ô này
+```
+
+Đoán trượt là hỏng cả chuỗi. Mà `FindNewlyBuiltTile()` có sẵn một nhánh **bảo đảm** đoán trượt:
+
+```csharp
+// Fallback: nếu không thấy ô mới, lấy ô bất kỳ để không kẹt.
+return all.Length > 0 ? all[0] : null;
+```
+
+Nhánh này viết ra để *chống* kẹt nhưng chính nó *gây* kẹt: nó gán hướng dẫn vào **một ô cũ ở đẩu
+đâu** mà người chơi không có lý do gì đụng tới. Người chơi cuốc ô mới → sự kiện bắn trên ô mới →
+hướng dẫn đang nghe ô khác → không nghe thấy gì → NPC đứng lặp thoại.
+
+Tài khoản đã có sẵn nhiều ruộng (như máy anh, test cả ngày) thì càng dễ dính. Bước hành động
+**không có** cơ chế tự nhảy — anti-kẹt chỉ phủ các bước đi-theo-NPC — nên kẹt là kẹt vĩnh viễn.
+
+### Sửa
+Bỏ hẳn kiểu đoán trước. `FarmTile` có thêm 4 sự kiện **dùng chung cho mọi ô**
+(`AnyTilePlowed/Planted/Watered/Harvested`), hướng dẫn nghe những cái đó rồi **bám theo ô người
+chơi thật sự vừa làm** (`AdoptFarmTile`) — cuốc ô nào thì các bước sau theo ô đó, kể cả ô cũ.
+
+`FindNewlyBuiltTile()` giờ trả `null` khi không nhận ra ô mới thay vì lấy đại; nó chỉ còn dùng để
+tua nhanh thời gian lớn, không còn quyết định tiến trình.
+
+Sự kiện tĩnh bọc `try/catch` — một handler ném lỗi không được phép chặn luôn thao tác của người
+chơi (bài học từ `OnResourceHarvested`).
+
+---
+
+## [2026-07-31c] — Điểm danh chuyển hẳn lên server + luật mất chuỗi
+
+### Vì sao phải làm
+Anh hỏi "điểm danh đã đồng bộ và được server quản lý chưa". Rà ra: **chưa, và đây là chỗ thủng thật**.
+
+Toàn bộ sổ điểm danh nằm trong PlayerPrefs của máy (`YW_AttendanceClaimedDays` /
+`YW_AttendanceLastDate`), grep cả `server/` không có một dòng nào về điểm danh. Nhưng **phần thưởng
+thì đi thẳng lên server thật** qua `QueueEconomyDelta` / `QueueInventoryDelta`. Sổ ở máy, tiền ở
+server ⇒ ba lỗ:
+
+1. **Vặn đồng hồ / đổi múi giờ thiết bị** → qua "ngày mới" → ăn trọn 15 ngày trong vài phút.
+2. **Cài lại game** → bộ đếm về 0 → quay vòng 15 ngày lại từ đầu, lặp vô hạn.
+   Mỗi vòng ≈ 52 Point + 12 gỗ (bán 96 Point) + 1 thỏ + nông sản.
+3. **Đổi máy** → người chơi thật mất sạch tiến độ.
+
+Ngày lại lấy `DateTime.Now` — **tờ lịch của điện thoại**, và cắt theo nửa đêm chứ không phải đủ 24
+giờ như cây/thú (`RealNow()`), nên điểm danh 23:59 rồi 00:01 là **hai ngày cách nhau 2 phút**.
+
+### Luật mới (khách chốt 31/07)
+**Nghỉ giữa chừng là mất chuỗi, quay về Ngày 1.**
+
+Chỗ này có một cái bẫy: nếu chỉ đếm một con số thì mất chuỗi = về ngày 1 = **được trả lại quà ngày
+1**, và người chơi chỉ cần điểm danh cách ngày là in tiền mãi mãi — đúng cái lỗ vừa đi bịt. Nên bảng
+giữ **hai** cột:
+
+| Cột | Nghĩa |
+|---|---|
+| `claimed_days` | vị trí hiện tại trong chuỗi |
+| `max_rewarded_day` | ngày cao nhất **đã từng trả thưởng** |
+
+Chuỗi tụt về 1 thật (muốn chạm quà ngày 15 phải leo lại đủ 15 ngày liên tiếp), nhưng đi qua ngày cũ
+**không lĩnh lần hai**. Mốc 15 ngày là quà tân thủ — một lần cho một tài khoản.
+
+> **Anh chốt 31/07: KHÔNG cho vòng lặp nhận tiền** — giữ `max_rewarded_day`.
+> Riêng khách thì chưa được hỏi ý về điểm này; nếu sau này khách đòi cho lĩnh lại thì phải nói rõ
+> hệ quả là vòng lặp kiếm tiền trước khi sửa.
+
+### Sửa gì
+**Server** — sổ + luật + trao thưởng đều về server, client chỉ vẽ lại:
+- `migrations/009_player_attendance.sql`, `schema.sql` — bảng `player_attendance`
+- `attendanceRules.js` (mới) — bảng thưởng 15 ngày + luật chuỗi, **dùng chung** hai kho
+- `gameDay.js` (mới) — một định nghĩa "ngày game" duy nhất
+- `store.js`, `postgresStore.js` — `getAttendance` / `claimAttendance`, có idempotency như vòng quay
+- `index.js` — `GET /player/attendance`, `POST /player/attendance/claim`
+
+**Tiện thể bịt một lỗi lệch giờ:** hai kho đang chấm ngày khác nhau — `store.js` cắt theo **UTC**,
+`postgresStore.js` theo **Asia/Ho_Chi_Minh**. Bản chạy thật là postgres nên người chơi không thấy,
+nhưng chạy kho JSON (máy dev) thì lượt câu cá / vòng quay reset **lệch 7 tiếng** so với production —
+thử ở nhà đúng, lên server sai. Giờ cả hai cùng gọi `gameDay.js`.
+
+**Client:**
+- `AttendanceService.cs` (mới) — gọi 2 endpoint, gửi lại đúng key cũ khi mất mạng
+- `EventPopupController.cs` — online đọc/nhận theo server; offline (demo chưa đăng nhập) giữ đường
+  local **nhưng đã áp cùng luật mất chuỗi**, không còn hai hành vi khác nhau
+
+Nốt đỏ trên HUD gọi hàm tĩnh nên có bản đệm trạng thái server + hãm 30 giây, tránh biến mỗi khung
+hình thành một lượt gọi mạng.
+
+### Đã thử
+- 33 phép thử luật chuỗi trên kho JSON (bơm sẵn "hôm nay" nên không phải chờ qua ngày thật):
+  nghỉ ngày → về 1 · leo lại qua ngày cũ **không** lĩnh lại · vượt mốc cũ thì có quà · hết 15 ngày
+  thì khoá hẳn · gửi trùng key không cộng đôi.
+- Thử thật qua HTTP với server chạy kho JSON: 200 / 400 thiếu key / 409 bấm hai lần trong ngày /
+  401 không token / bản sao không cộng đôi tiền.
+
+> **CHƯA DEPLOY.** Client gọi endpoint chưa có trên prod ⇒ **phải deploy server TRƯỚC khi build APK**,
+> không thì điểm danh ăn 404. Xem `server/RUNBOOK_deploy_attendance.md`.
+
+---
+
+## [2026-07-31b] — Rà soát toàn bộ shop + bón phân bón thẳng
+
+### Rà soát 8 cửa hàng
+Viết script mô phỏng đúng luật `resolveShopOffer` của server rồi đối chiếu **từng món, từng shop**
+giữa asset client / catalog đang chạy / catalog sinh lại. Kết quả:
+
+**12 giao dịch đang bị máy chủ chặn** (đúng lỗi anh gặp) — tất cả do server chưa deploy:
+- `Shop_ItemShop`: Gỗ, Đá, Nước tưới (thêm 30/07)
+- `Shop_MiniGarden`: 8 nông sản ngắn ngày + Phân bón (khách chốt giá 30/07)
+
+**`Shop_Verdant` có tab Bán CHẾT** — cái này deploy không chữa được, là lỗi dữ liệu client.
+Nó khai thu mua 7 nông sản ngắn ngày, nhưng từ 22/06 nhóm này `canSell=false`. Client lọc bỏ món
+không bán được (`ShopPopupController` dòng ~577) nên tab **luôn rỗng** — người chơi không gặp lỗi,
+chỉ thấy trống. Sửa: bỏ `sellItemIds`, đổi `accessMode` **Both → BuyOnly**.
+> ⚠️ Bắt buộc đổi chế độ. `sellItemIds` rỗng + `Both` thì server hiểu là **thu mua mọi thứ bán được**
+> (nhánh `acceptsAllSellable`) — thành cửa mở. Khách chưa quy định Verdant thu mua gì nên để chỉ-bán.
+
+Sau khi sửa: **không còn giao dịch nào client hiện mà server chặn**. Còn đúng 1 cảnh báo cố ý —
+`watering_water_01` giá 0 (nước tưới miễn phí).
+
+### Bón phân: bỏ hẳn bước mở túi đồ
+Anh chốt 31/07. Bước chọn món trong túi là **thừa** — phân bón chỉ có ĐÚNG MỘT loại — mà lại đẻ ra
+hai phiền: popup "Xem ruộng" phải đóng nên không bón liên tiếp được, và cờ `pendingFertilizeTile`
+bị treo khi đóng túi giữa chừng (chính là lỗi #3 hôm nay).
+- `BeginFertilize` giờ bón thẳng và **trả về bool**; xoá hẳn `pendingFertilizeTile` +
+  `HandleFertilizeSelected` + nhánh trong `OnInventoryItemSelected`.
+- Bấm Phân bón trong túi giờ rơi xuống `ItemUsageHint` — chỉ đường ra ruộng, đúng ý.
+- Áp cho **cả** nút trong popup **và** nút ngoài ruộng (phím B). Ngoài ruộng bón xong gọi
+  `RebuildPromptFor` để nút "Bón phân" biến mất khi cây đã chín.
+
+### Tưới xong tự mở lại popup ruộng
+Tưới có màn múa nên vẫn phải đóng popup, nhưng nay nhớ mảnh ruộng + cây đang chọn và **tự mở lại**
+khi múa xong (`BeginWaterTile(tile, onWatered)` → `ShowPlot(tiles, selected)`). Bỏ dở thì không mở lại.
+
+### Hai chỗ nói cho đúng bản chất
+- Câu báo `SHOP_ITEM_NOT_ALLOWED` cũ ("Cửa hàng này không giao dịch vật phẩm đã chọn") **đổ oan cho
+  cửa hàng**. Gặp lỗi này gần như luôn là do danh sách hàng trên máy chủ cũ hơn trong game. Đổi lại
+  cho đúng để khỏi đi tìm nhầm chỗ.
+- Log `FARM_STATE_CONFLICT` giờ in **cả hai số hiệu phiên bản** và nói rõ bản ghi client **bị vứt**.
+  Câu cũ chỉ in phiên bản server nên không lần ra lệch bao nhiêu. Chưa sửa gì ở cơ chế — cần số liệu
+  thật rồi mới quyết, xem `task.md` mục 3.
+
+**Files:** `ShopDataGenerator.cs`, `Shop_Verdant.asset`, `server/shopCatalog.json`,
+`FarmInteractionController.cs`, `AnimalInteractionPopupController.cs`, `ShopPopupController.cs`,
+`FarmStateSync.cs`
+
+---
+
+## [2026-07-31] — 5 lỗi anh tìm ra khi chơi thử bản mới
+
+### 1. Bảng nút biến mất sau khi tưới / cuốc
+**Gốc:** `BeginTimedAction` cố ý xoá `currentActions` + ẩn prompt để nhường chỗ cho thanh Hủy trong
+lúc múa động tác — nhưng `FinishTimedAction` **không ai dựng lại**. Ở chế độ chạm-thẳng (mobile),
+`RefreshFrontCellInteractionPrompt` chỉ dựng theo ô TRƯỚC MẶT, nên ô vừa chạm ở bên hông thì mất hẳn.
+**Sửa:** nhớ mục tiêu vào `promptTargetBeforeTimedAction`, xong việc thì `RestorePromptAfterTimedAction`
+**dựng lại** bảng nút (không cất-rồi-bày, vì trạng thái đã đổi: chưa tưới → đã tưới, chín → vừa thu).
+Bỏ dở giữa chừng thì KHÔNG dựng lại — người chơi chủ động thoát.
+
+### 2. Phân bón niêm yết 1 Point nhưng trừ 50
+**Gốc:** giá mua là **server quyết** (`shopCatalog.js` → `resolveShopOffer` trả `item.buyPrice`).
+`server/shopCatalog.json` đã **lỗi thời cả tháng**, không chỉ mỗi phân bón:
+- `fertilizer_01`: 50/25/bán-được → đúng phải 1/0/không-bán-được
+- 8 nông sản ngắn ngày: `buyPrice: 0` (client là 4–11) và Mini Garden còn là `sell_only`
+  ⇒ **online không mua nổi 8 món này**, dù khách đã chốt giá 30/07
+- thiếu `wood_01` / `stone_01` / `watering_water_01` trong Cửa hàng Vật phẩm
+- còn sót `fish_01` / `fish_02` — cá đời cũ đã bỏ khỏi game, không còn asset, không ai giữ trong túi
+
+**Sửa:** chạy lại `server/scripts/generateShopCatalog.js` (script SẴN CÓ, đọc thẳng asset Unity).
+Đã đối chiếu: `data.json` không có tài khoản nào giữ `fish_01`/`fish_02`, code client cũng không
+nhắc tới, nên bỏ là sạch. Đã dò lỗ hổng mua-rẻ-bán-đắt: **không có** — mọi shop bán hạt/đá đều
+`buy_only`, các shop thu mua đều liệt kê `sellItemIds` rõ ràng nên không nhận hạt/đá.
+> ⚠️ **PHẢI DEPLOY SERVER** thì giá mới có tác dụng. Chưa deploy thì vẫn trừ 50.
+
+### 3. Cuốc ruộng mà báo "hết phân bón"
+**Gốc:** `BeginFertilize` đặt `pendingFertilizeTile` rồi mở túi, nhưng **đóng túi mà không chọn gì
+thì cờ nằm lại mãi**. Lần sau mở túi bấm món bất kỳ, `OnInventoryItemSelected` thấy cờ còn → tưởng
+đang bón phân → bắn toast về phân. Cờ này được xét TRƯỚC cả `pendingPlantTile` nên cướp luôn
+luồng gieo hạt.
+**Sửa:** `ClearPendingItemPickIfBagClosed()` chạy mỗi khung: túi đã đóng thì dọn
+`pendingFertilizeTile` / `pendingFeedAnimal` / `pendingPlantTile`. Có chốt 1 khung hình để không dọn
+nhầm ngay lúc vừa mở túi. **Cố ý không đụng** `pendingPen` / `pendingEnclosure` — hai cái đó do
+luồng thả thú bất đồng bộ (chờ server) giữ.
+
+### 4. Nút "Xem ruộng" hiện bàn tay
+**Gốc:** `InteractionIconByAction` thiếu tên hành động mới → rơi về `Icon_Hand` (ảnh mặc định khi
+không tra được), nên Xem ruộng / Bón phân / Dời ruộng trông giống hệt nhau.
+**Sửa:** Xem ruộng = `Icon_Eye`. Bón phân mượn `Icon_FeedBowl`, ba nút Dời mượn `Icon_HandRelease`
+— **chưa có ảnh riêng** cho hai nhóm này, cần artist vẽ thêm thì mới đúng nghĩa.
+
+### 5. Dùng túi phân cuối cùng thì báo "hết phân bón"
+Bón xong bắn toast thành công, rồi lần bấm sau bắn tiếp "hết phân bón" → tưởng bón hụt.
+**Sửa:** gộp làm một câu — *"Đã bón phân: giảm 15% thời gian chín. Đó là túi phân cuối — mua thêm
+ở Cửa hàng Vật phẩm hoặc Đại lý Hai Lúa."* Câu cảnh báo lúc mở túi cũng đổi thành "Trong túi không
+còn phân bón" cho khỏi mơ hồ.
+
+**Files:** `FarmInteractionController.cs`, `GameHUDController.cs`, `server/shopCatalog.json`
+
+---
+
+## [2026-07-30] — Gom việc vào popup "Xem ruộng" + Dời ruộng + Dời đường lát đá
+
+Anh yêu cầu: *"tích hợp nhiều chức năng vào khi người chơi bấm xem ruộng như cách ta làm xem
+chuồng, thêm nút dời ruộng giống với dời chuồng, tiện thì làm thêm dời đường lát đá."*
+
+### Popup "Xem ruộng" hết chỉ-đọc — làm việc ngay trong popup
+Chia hai tầng cho khỏi lẫn, dùng đúng bố cục của popup chuồng:
+- **Hàng tiêu đề = việc của CẢ CỤM**: nút `BtnMoveGroup` đổi chữ theo chế độ ("Dời chuồng" /
+  "Dời ruộng"). Chuồng có thêm "+ Thả thú" như cũ.
+- **Hàng nút dưới = việc của THỨ ĐANG CHỌN**: `PlotActionsPanel` (Tưới nước / Thu hoạch / Bón phân)
+  cho cây, song song hàng cũ (Cho ăn / Thu hoạch / Chữa bệnh / Vaccine) cho thú.
+- Nút bật/tắt theo trạng thái cây; điều kiện bón hỏi thẳng `FarmInteractionController.CanFertilizeTile`
+  để luật "cây ngắn ngày, đã tưới, chưa chín" chỉ nằm MỘT chỗ, popup không đoán lại.
+- Mọi nút gọi lại ĐÚNG luồng cũ ngoài ruộng (`HandleWater`/`HandleHarvest`/`BeginFertilize`) —
+  không có nhánh logic thứ hai để lệch số liệu hay lách kiểm tra.
+- Tưới và Bón **đóng popup** (một cái có màn múa, một cái mở túi đồ); Thu hoạch **giữ popup mở**
+  để thu liền tay nhiều cây trong cùng mảnh.
+- Cuốc đất / gieo hạt CỐ Ý không đưa vào: danh sách chỉ liệt kê cây đang có, ô trống không có gì để chọn.
+
+### `PenMoveController` dùng chung cho chuồng / ruộng / đường
+Lớp này vốn đã thao tác trên `BuildSurfaceCell` chứ không dính gì tới rào, nên chỉ cần thêm
+`SubjectLabel` là dùng lại được cả ba. **Giữ nguyên tên lớp** để khỏi lệch với tài liệu cũ.
+- `Begin(cells, label)`; mọi câu gợi ý/thông báo ("Đặt … ở đây", "Hủy dời", "Đã dời …") lấy chữ từ label.
+- ⚠️ **Bẫy đã bịt: khoá nhật ký của cây tính theo VỊ TRÍ** (`FarmTile.HistoryKey`). Dời ruộng mà
+  không đổi khoá là lịch sử tưới/bón/thu của mọi cây thành mồ côi. `Confirm()` nay chụp khoá trước,
+  đọc khoá sau rồi gọi `FarmActivityLog.RemapOwners`.
+- `FarmActivityLog.RemapOwners(map)`: dọn rác ở khoá ĐÍCH **trước**, rồi mới đổi khoá tại chỗ —
+  ngược thứ tự là xoá nhầm chính nhật ký vừa chuyển sang (dời ngang 1 ô thì khoá cũ của ô này
+  trùng khoá mới của ô kia).
+
+### Dời ruộng
+- `BeginMovePlot(seed)`: loang ra cả mảnh bằng `FindPlotTiles`, map từng ô sang `BuildSurfaceCell`.
+  Cây đi theo vì model cây là **con của ô đất**. Không tốn/hoàn vật liệu (ruộng vốn free).
+- Ruộng đời cũ (`TilePlacementSystem`) không có ô nền → **từ chối thẳng**, thà không cho dời còn
+  hơn dời xong mất cây.
+- Vào bằng mục "Dời ruộng" (phím M) trên bảng gợi ý, hoặc nút trong popup.
+
+### Dời đường lát đá — TỪNG VIÊN
+Bản đầu bé làm nhấc cả đoạn đường liền nhau cho giống chuồng; anh bác ngay: *"dời từng viên thôi,
+cả đoạn thì khó dùng"* — đúng, nhu cầu thật là nắn lại một viên đặt lệch chứ không phải bốc cả lối đi.
+- `BeginMovePath` lấy **đúng bộ ô của công trình đang chỉ** qua `BuildSurfaceCell.FindAllByOccupant`
+  (thêm mới; khác `FindByOccupant` chỉ trả ô đầu). Viên chiếm nhiều ô thì vẫn đi trọn bộ.
+- `PenEnclosure.FindConnected(seed, predicate)` vẫn giữ (tách ra từ `FindPen`) nhưng đường **không**
+  dùng tới. Vật liệu đã tốn giữ nguyên nên phá sau vẫn hoàn đúng đá.
+
+### Chữ nghĩa phân bón nói theo PHẦN TRĂM
+Anh chốt: mô tả và toast nói *"giảm 15% thời gian"* thay vì *"chín sớm hơn 3 giờ 36 phút"* — dễ hiểu
+hơn với người chơi, và vẫn đúng vì cây ngắn ngày đều 24 giờ nên 3,6 giờ chính xác là 15%.
+- Toast + dòng nhật ký: phần trăm **tính ra từ chính giống cây đang bón** (`bonusSec / growthTimeSec`),
+  không gõ cứng → đổi `fertilizerBonusHours` trong Inspector là câu chữ tự đúng theo.
+- Mô tả tĩnh (`fertilizer_01.asset` + `ItemDataGenerator` + `ItemUsageHint`) ghi thẳng 15%; đổi
+  `fertilizerBonusHours` thì nhớ sửa kèm 3 chỗ này.
+
+**Files:** `FarmActivityLog.cs`, `PenMoveController.cs`, `PenEnclosure.cs`, `BuildSurfaceCell.cs`,
+`FarmInteractionController.cs`, `AnimalInteractionPopupController.cs`,
+`AnimalInteractionPopup.uxml`, `Styles/AnimalInteractionPopup.uss`,
+`ItemUsageHint.cs`, `ItemDataGenerator.cs`, `Resources/Items/fertilizer_01.asset`
+
+---
+
+## [2026-07-30] — LÀM THẬT tính năng bón phân (đảo ngược mục ẩn phía dưới)
+
+Khách gửi thông số ngay sau khi bảo ẩn: *"kho bán sản phẩm cho vật nuôi ăn chưa có phân bón,
+thêm vào luôn, giá 1 point. Mỗi lần bón phân tăng trưởng cây 15%."* → mở lại và làm thật.
+
+- `FarmTile.ApplyFertilizer(percent)`: **dời `growStartTime` về quá khứ** đúng `percent × tổng
+  thời gian lớn`. Chọn cách này vì `growStartTime` VỐN ĐÃ được lưu ra đĩa/server và VỐN ĐÃ dùng
+  để tính bù offline (`RestoreSave`) → hiệu lực phân tự sống sót qua lưu/tải/đóng app mà KHÔNG
+  phải thêm trường mới ở 3 chỗ. Cây lâu năm thu xong đặt lại `growStartTime` nên phân tự hết
+  hiệu lực theo từng vụ. Chỉ bón được cây ĐANG LỚN (Watered); chưa tưới thì không có gì để đẩy.
+- Luồng dùng: mục `Bón phân` (phím B) ở bảng gợi ý ô đất → mở túi tab Đồ dùng → chọn Phân bón.
+  Theo đúng mẫu `pendingFeedAnimal`. Bón hụt thì HOÀN lại phân. Ghi vào nhật ký (`KindFertilize`,
+  khôi phục lại) và hiện ở hàng "Lịch sử bón phân" trong popup Xem ruộng.
+- Mở lại khỏi `HiddenItems`, trả về shop Vật phẩm + Hai Lúa, **thêm vào Mini Garden** (đúng cửa
+  hàng khách mô tả). Giá mua 50 → **1**.
+- ⚠️ **BẮT BUỘC phải sửa kèm: `sellPrice 25 → 0`, `canSell → false`.** Giá mua 1 mà vẫn bán lại
+  được 25 là lỗ hổng mua-rẻ-bán-đắt **in tiền vô hạn** — khách chỉ nói giá mua, không nói giá bán.
+- `fertilizerGrowthPercent` để ở SerializeField (0.15), đổi số khỏi sửa code.
+
+### ✅ ĐÃ CHỐT LẠI CÙNG NGÀY — trừ THỜI GIAN CỐ ĐỊNH, chỉ cây NGẮN NGÀY
+Bản đầu cộng 15% của TỔNG thời gian mỗi lần → `1/0.15 = 7` lần là cây chín ngay, **bất kể 24 giờ
+hay 90 ngày**. Chanh leo thành bỏ 7 Point ăn 570 Point (gấp 81 lần), xoá sạch 180 ngày chờ của 2 vụ.
+Đã báo, khách chốt: **trừ một lượng thời gian CỐ ĐỊNH, và CHỈ áp lên cây ngắn ngày.**
+
+- `FarmTile.ApplyFertilizer(bonusSeconds, maxGrowthSec)` + `IsFertilizable(maxGrowthSec)` — rút
+  thẳng số giây, không nhân phần trăm. Cửa lọc dùng `currentCrop.growthTimeSec` (số gốc của giống)
+  chứ KHÔNG dùng `GetGrowthTime()`: hàm kia bị tutorial ép về 24s và đổi theo vụ tái sinh của cây
+  lâu năm — dựa vào nó thì trong tutorial cây nào cũng lọt cửa "ngắn ngày".
+- Hai SerializeField: `fertilizerBonusHours = 3.6` (đúng 15% của cây 24 giờ, giữ nguyên ý số khách
+  đưa ban đầu) và `fertilizerMaxCropDays = 1`. Cây ngắn ngày đều đúng 86400s, nhóm kế tiếp 172800s
+  nên ngưỡng 1 ngày tách sạch, không cần thêm trường vào CropDefinition.
+- Mục "Bón phân" trên bảng gợi ý và nút trong túi đều ẩn/từ chối với cây không đủ điều kiện.
+
+**Vì sao cách này đóng được lỗ hổng:** 8 cây ngắn ngày đều `canSell=false` (thức ăn chăn nuôi,
+khách chốt 22/06) nên bón nhanh KHÔNG quy ra tiền trực tiếp. Cây bán được tiền (chanh leo, sầu
+riêng, sa chi) nay không bón được. Bón vẫn có thể làm cây ngắn ngày chín ngay (7 lần × 3.6 giờ >
+24 giờ) nhưng chỉ rút ngắn vòng làm THỨC ĂN — vòng tiền thật vẫn kẹt ở chu kỳ vật nuôi.
+
+---
+
+## [2026-07-30] — Ẩn hẳn phân bón (dời sang bản sau)
+
+Khách chốt: bón phân để bản sau mới làm (khi có thông số). Ẩn hết dấu vết cho tới lúc đó.
+Nhắc lại: phân bón hiện là món hàng VÔ DỤNG — không có code nào áp nó lên cây, mô tả
+"Giảm 50% thời gian sinh trưởng" là lời hứa suông.
+
+Shop và túi đồ vốn ĐÃ lọc qua `HiddenItems`, nhưng còn 3 chỗ lọt:
+- **Hòm thư** — thư "Đền Bù Sự Cố" mẫu tặng "Phân bón siêu tốc" x3, và hòm thư KHÔNG lọc
+  qua HiddenItems như shop/túi. Đổi thành Thuốc trị.
+- **Loadout test** (`InventoryManager`) phát 300x phân — nằm chết trong kho và còn bị đẩy
+  lên server qua QueueInventoryDelta. Đã bỏ.
+- **Shop asset + generator** (`Shop_ItemShop`, `Shop_HaiLua`) vẫn liệt kê. Đã gỡ khỏi cả
+  2 file .asset lẫn `ShopDataGenerator`, để nếu sau này ai bỏ HiddenItems thì nó cũng
+  không lòi ra. Cùng lúc gỡ khỏi danh sách shop mock của `ShopPopupController`.
+
+`HiddenItems` GIỮ nguyên entry làm lớp chặn cuối. `fertilizer_01.asset` và dòng trong
+`ItemDataGenerator` GIỮ nguyên — người chơi cũ đang có phân trong kho, xoá khỏi ItemDatabase
+là hỏng dữ liệu của họ; ẩn đi thì nó chỉ nằm im.
+
+Đã bỏ `FarmActivityLog.KindFertilize` (không còn ai dùng). Muốn làm lại bản sau: thêm lại
+hằng số + một dòng `LogRow` ở `AnimalInteractionPopupController.RefreshCropLog`.
+
+⚠️ CHƯA đụng `server/shopCatalog.json` (vẫn còn phân bón) — client không chào bán nữa nên
+không lộ, và sửa server thì phải deploy. Dọn cùng lần deploy tới.
+
+---
+
+## [2026-07-30] — Bỏ hẳn chữ nổi kiểu name-tag, công tắc chuyển vào Cài đặt
+
+Khách chốt: BỎ hẳn kiểu hiện giờ trên đầu cây như bản cũ; cách xem chính thức là BẤM VÀO CÂY
+(popup Xem ruộng). Thanh nước giữ nguyên. Công tắc bật lại thì cho vào Cài đặt, kèm cảnh báo,
+để ai máy khoẻ tự cân nhắc.
+
+- Gỡ nút `BtnLabels` khỏi sidebar HUD (uxml + controller + uss) — sidebar đỡ chật một nút.
+- Thêm `ToggleCropLabels` vào Cài đặt > ĐỒ HOẠ, ngay dưới Bóng đổ (cùng nhóm hiệu năng),
+  mặc định TẮT, kèm dòng cảnh báo `.settings-hint` (lớp USS mới): rối mắt + máy yếu dễ giật.
+- `FarmLabelVisibility` không đổi logic, chỉ đổi nơi bật — FarmTile/FarmAnimal vẫn đọc cờ
+  mỗi khung hình nên gạt công tắc là thấy ngay, không cần thoát Cài đặt.
+
+**Nhật ký có lưu server không?** CÓ, tự động. Mọi loại mới (tưới/thu hoạch/chữa bệnh/vắc-xin)
+đều nằm chung khoá `YW_FarmActivityLog` đã nối vào farm-state ở commit trước, nên không phải
+nối lại gì. Ước tính ~43KB ở mức cắt hiện tại (400 mốc + 50 lần chết), trần gói là 480KB.
+
+---
+
+## [2026-07-30] — Nhật ký đầy đủ: tưới, thu hoạch, chữa bệnh, vắc-xin + thư báo cây chết
+
+Mở rộng nhật ký theo yêu cầu khách. `FarmActivityLog` đổi từ "chỉ ghi cho ăn" sang kho
+thao tác chung: `LogEntry{ownerId, kind, detail, unixTime}`, ownerId = animalInstanceId (thú)
+hoặc `FarmTile.HistoryKey` (cây, khoá theo vị trí — cùng cách với khoá lưu trạng thái).
+
+| Ghi cái gì | Ghi vào đâu | Hook |
+|---|---|---|
+| Cho ăn | từng con vật | FarmInteractionController (chỗ cho ăn) |
+| Thu hoạch thú | từng con vật | `FarmAnimal.HarvestProduct` |
+| Chữa bệnh | từng con vật | `FarmAnimal.Heal` |
+| Tiêm vắc-xin | từng con vật | `FarmAnimal.Vaccinate` |
+| Tưới nước | từng cây | `FarmTile.InteractWater` + `WaterAgain` |
+| Thu hoạch cây | từng cây | `FarmTile.InteractHarvest` |
+| Thú chết / **cây chết** | hòm thư | `DieFromHunger` / `DieFromDrought` |
+
+- Dữ liệu nhật ký cũ (chỉ có cho ăn) TỰ CHUYỂN sang định dạng mới lúc nạp, không mất lịch sử.
+- Gieo cây mới trên ô cũ thì XOÁ nhật ký cây cũ, kẻo mở ra thấy lịch sử của cây đã nhổ.
+- Popup "Xem ruộng" nay BẤM VÀO CÂY để xem nhật ký của chính cây đó.
+- Các hàng nhật ký dựng động (thú 4 hàng, cây 2 hàng); popup tự làm mới 4 lần/giây nên chỉ
+  dựng lại hàng khi đổi đối tượng, còn lại chỉ thay chữ — tránh lặp lại lỗi giật vừa sửa.
+- **Gộp thư báo chết**: cùng tên + cùng nguyên nhân trong 10 phút thì dồn 1 thư kèm số lượng.
+  Không gộp thì cả ruộng khát nước chết cùng lúc là hòm thư nhận vài chục thư một lúc.
+
+**CHƯA làm được: lịch sử bón phân.** Game hiện KHÔNG có thao tác bón phân nào để mà ghi —
+`fertilizer_01` chỉ tồn tại như món hàng trong shop, không có code áp dụng lên cây, và đang bị
+`HiddenItems` ẩn khỏi shop/túi. Đã đặt sẵn `FarmActivityLog.KindFertilize` để cắm vào khi nào
+tính năng bón phân được làm.
+
+---
+
+## [2026-07-30] — Chống giật chữ nổi + popup "Xem ruộng"
+
+Khách gửi ảnh farm chữ đè kín màn hình: *"nhìn như đám rừng không biết đường tưới nước luôn,
+với lại những con số này nó chạy bị lag game"*. Hai vấn đề, vấn đề thứ hai (GIẬT) là mới.
+
+**Chống giật — gốc: dựng lại chữ mỗi khung hình cho MỖI ô**
+- `FarmTile.UpdateCropInfoLabel` + `LateUpdate` (thanh nước) và `FarmAnimal.UpdateInfoLabel`
+  trước đây mỗi khung hình đều: `GetComponentsInChildren<Renderer>()` (cấp phát mảng mới),
+  dựng chuỗi trạng thái, gán `.text` (dựng lại mesh chữ), đọc `mesh.bounds`. Vài chục ô ×
+  60 khung/giây = ngập rác bộ nhớ -> khựng.
+- Nay cập nhật theo NHỊP 0.25s (số chỉ đổi theo phút nên thừa mượt); chỉ gán `.text` khi chữ
+  THẬT SỰ đổi; cache `Camera.main`. Vị trí/xoay vẫn mỗi khung hình, bỏ thì nhãn giật khi xoay cam.
+- Mỗi ô lệch pha ngẫu nhiên lúc tạo, kẻo cả ruộng cùng tới nhịp một khung hình rồi dồn cục.
+- QUAN TRỌNG: thanh nước KHÔNG dính nút ẩn chữ, nên nếu chỉ sửa phần chữ thì ẩn đi vẫn giật.
+
+**Popup "Xem ruộng" (ý anh Nhiên: làm giống chuồng thú)**
+- Thêm mục `Xem ruộng` (phím Q) vào bảng gợi ý của ô đất — song song với `Xem chuồng` của thú.
+  Click vẫn LÀM VIỆC LUÔN (cuốc/gieo/tưới/thu), không bắt qua popup.
+- `FindPlotTiles` — loang 4 hướng gom mọi ô đất liền nhau, viết theo `FindNearbyPlowedTiles`
+  (giữ chặn lệch lưới + chặn khác tầng/đảo) nhưng lấy CẢ ô đang trồng, không giới hạn số ô.
+- `AnimalInteractionPopupController.ShowPlot(List<FarmTile>)` — DÙNG CHUNG popup của chuồng thú
+  (cùng là "cụm ô liền nhau, liệt kê thứ bên trong"). Khỏi dựng popup mới, KHỎI SỬA SCENE.
+  Chế độ ruộng: ẩn bảng thông tin/nhật ký/hàng nút của thú, nới khung danh sách 160 -> 320px,
+  tiêu đề đổi thành "Ruộng", dòng trạng thái tóm tắt "x chín · y cần tưới".
+- Thẻ mỗi cây: ảnh nông sản + tên + trạng thái (dùng lại `GetStatusText`, gộp xuống dòng thành " · ").
+  Ô con của giàn không tính riêng. CHỈ ĐỌC — chưa có nút tưới/thu trong popup.
+
+---
+
+## [2026-07-30] — Ẩn thông số trên farm + nhãn con vật + nhật ký cho ăn/chết
+
+Khách phản ánh chữ nổi trên cây ("Lớn 50% · chín ~11 giờ 55 phút") làm mất vẻ đẹp của farm.
+Yêu cầu: ẩn đi, có nút bật lại; khi bật thì hiện cả giờ cho ăn / giờ chết / giờ thu trứng-thịt
+của con vật; kèm nhật ký cho ăn và thông báo con chết.
+
+**Ẩn/hiện chữ nổi**
+- `FarmLabelVisibility.cs` (MỚI): cờ toàn cục, lưu PlayerPrefs `YW_ShowFarmLabels`, mặc định TẮT.
+- `FarmTile.UpdateCropInfoLabel` tôn trọng cờ. Thanh nước KHÔNG dính cờ — vẫn hiện để liếc phát
+  biết cây khát (khách chốt: chỉ ẩn CHỮ, giữ thanh).
+- Nút `BtnLabels` trên sidebar HUD. Dùng CHỮ thay icon ("Hiện" / "Ẩn") nên tự nói lên nó làm gì,
+  khỏi đoán icon; sáng xanh khi đang bật. Bấm KHÔNG đóng popup đang mở.
+
+**Nhãn thông tin con vật (làm mới — trước đây con vật chỉ có thanh đói, không có chữ nào)**
+- `FarmAnimal`: thêm nhãn TextMesh billboard dựng y hệt nhãn cây, nằm ngay trên thanh đói.
+  Nội dung: cữ cho ăn kế · còn bao lâu chết đói · vụ trứng/sữa kế · bao giờ được thịt.
+- Getter mới: `GetTimeToStarveSec()`, `GetTimeToNextFeedSec()`, `GetTimeToMeatSec()`.
+  (Thịt chỉ ra ở VỤ CUỐI nên = thời gian vụ kế + số vụ còn lại × chu kỳ.)
+- Nhãn là CON của con vật -> con bị xoá thì nhãn đi theo, không sót rác trong scene.
+- `ComputeAutoBarHeight` bỏ qua nhãn, không thì nhãn tự đo chính nó rồi trôi cao dần.
+
+**Nhật ký (`FarmActivityLog.cs` — MỚI)**
+- Lưu qua `PlayerScopedPrefs` (theo tài khoản), tự cắt bớt: 10 mốc cho ăn/con, trần 300 tổng, 50 lần chết.
+- Tự nạp lại khi đổi tài khoản (nhớ scope lúc nạp) — không đưa nhầm nhật ký người này cho người kia.
+- Lịch sử CHO ĂN -> popup từng con vật (khối "Lịch sử cho ăn", 5 mốc gần nhất).
+- Con CHẾT -> HÒM THƯ (khách chốt: con chết rồi thì không bấm vào đâu mà xem được nữa).
+  Đọc/xoá thư ghi ngược lại nhật ký nên mở lại không bị hiện như thư mới hay lòi lại thư đã xoá.
+- Làm thịt vụ cuối KHÔNG báo chết (đó là kết thúc bình thường), chỉ dọn mốc cho ăn.
+
+**Nhật ký lên server (bổ sung cùng ngày)**
+Ban đầu nhật ký chỉ lưu máy -> cài lại game thì CON VẬT còn (đã sync server) nhưng nhật ký
+của nó trắng trơn, nhìn như lỗi. Đã cho nhật ký đi kèm farm-state:
+- `FarmStatePayload` thêm `activity_log_json`; `FarmStateSync` gói kèm lúc gửi và ghi lại lúc
+  nhận snapshot (kèm `InvalidateCache()` để không xài nhật ký cũ còn trong RAM).
+- KHÔNG đổi server, KHÔNG thêm API, KHÔNG migration: `compareAndSetFarmState` ở CẢ hai kiểu lưu
+  (Postgres `state_json` jsonb và file JSON) đều gộp kiểu `{...current, ...incoming}`, route
+  `PUT /player/farm-state` không lọc trường -> trường mới tự được lưu và trả về nguyên vẹn.
+- KHÔNG thêm lượt gọi mạng: lúc cho ăn đã gọi `SaveBuildState()`, lúc chết đã gọi
+  `SaveRuntimeState()` — nhật ký đi ké chuyến đó.
+- `ContentScore` CỐ Ý bỏ qua nhật ký (đã ghi chú trong code): điểm đó đo "farm có nội dung thật"
+  để chọn bản khi gộp dữ liệu cũ; tính nhật ký vào thì farm trống mà từng cho ăn sẽ bị chấm là
+  có nội dung rồi đè mất bản thật.
+- Dung lượng: mức cắt sẵn (10 mốc/con, trần 300, 50 lần chết) ≈ 30KB, xa trần 480KB của gói.
+
+---
+
+## [2026-07-30] — Dựng khung nhạc nền theo đảo (Nông trại / Thành phố)
+
+Yêu cầu: nhạc nền đổi theo từng đảo (Nông trại khác, Thành phố khác), âm lượng vẫn chỉnh
+được qua popup Cài đặt như cũ. Đây là DỰNG KHUNG — chưa có file nhạc thật, khách sẽ gửi sau.
+
+- `AudioManager.cs`: thêm `PlayMusicForIsland(islandId)` — quy ước tên clip `bgm_<islandId>`
+  (`bgm_farm`, `bgm_city`, `bgm_mine`), tự tải từ `Resources/Audio/`. Thêm crossfade ~1.2s khi
+  đổi bài (fade cũ ra rồi fade mới vào) cho đỡ giật cụt, huỷ được nếu đổi đảo liên tục.
+- `IslandTravelManager.cs`: gọi `PlayMusicForIsland` ngay lúc khởi động (đảo bắt đầu, không
+  fade) và mỗi lần `TravelToAsync` xong (có fade).
+- `Resources/Audio/README_AUDIO.txt`: cập nhật quy ước tên file + xoá ghi chú cũ sai
+  ("slider Cài đặt còn TODO" — thực ra đã wire xong từ trước, không cần đụng gì thêm).
+- CHƯA cần làm: chỉ cần thả `bgm_farm.mp3`/`bgm_city.mp3` (và `bgm_mine.mp3` nếu cần) vào
+  `Assets/Resources/Audio/` là có tiếng ngay, không phải sửa code.
+
+---
+
+## [2026-07-30] — Thêm giá mua 10 nông sản/vật liệu + nước tưới miễn phí
+
+Khách chốt giá mua: cỏ voi 8, bí ngô 11, bắp ngô 4, bắp cải 4, cà rốt 4, dưa hấu 4,
+rau muống 5, khoai lang 9, đá 2, gỗ 8 Point; nước tưới miễn phí.
+
+Đây là mảnh còn thiếu của bản vá hôm qua ([[2026-07-29] Chặn lỗi hạt giống & thức ăn]
+bên dưới) — toast báo "hết thức ăn/hạt thì mua ở Farm Shop" nhưng trước đó
+KHÔNG shop nào bán các nông sản này (chỉ bán được hạt giống, muốn có thức ăn ngay
+phải tự trồng).
+
+- 8 nông sản ngắn ngày (`carrot_01`...`grass_01`): thêm `buyPrice`, **vẫn giữ
+  `canSell=false`** — mua được nhưng không bán lại, đúng luật "thức ăn chăn nuôi
+  không bán" chốt 22/06.
+- **Mini Garden đổi từ SellOnly sang Both**: mở thêm tab Mua cho 8 món trên. Theo
+  yêu cầu, đã bỏ 8 món này khỏi danh sách BÁN của Mini Garden (trước đó có ghi tên
+  trong whitelist sell nhưng vô hiệu vì `canSell=false` — dọn cho khỏi rối).
+- Item Shop: thêm mua `wood_01` (8), `stone_01` (2), `watering_water_01` (0 — free).
+  Giá bán đá hiện tại 12 trong ItemDatabase KHÔNG tạo lỗ hổng ăn chênh lệch: rà lại
+  toàn bộ 8 shop asset + scene, không có shop nào (kể cả legacy mock) đang cho bán
+  lại đá — `sellPrice` đó là số liệu chưa gắn vào đâu.
+- "Đây khoai lang" trong yêu cầu khách khớp tên `sweet_potato_01` (nông sản "Khoai
+  lang"), không phải hạt giống `sweet_potato_seed_01` ("Dây khoai lang") — áp giá
+  cho đúng vật phẩm nông sản.
+
+➜ `Assets/_Project/Scripts/Editor/ItemDataGenerator.cs`,
+`Assets/_Project/Scripts/Editor/ShopDataGenerator.cs`,
+10 file `Assets/Resources/Items/*.asset`,
+`Assets/_Project/Data/Shops/Shop_ItemShop.asset`, `Shop_MiniGarden.asset`
+
+---
+
+## [2026-07-29] — Chặn lỗi hạt giống & thức ăn TỰ MỌC LẠI
+
+Khách báo ở tài khoản `green farm rill1`: hạt cải / hạt cà rốt / hạt bắp dùng hết về 0 thì
+**tự quay lại 3**, lặp đi lặp lại.
+
+### Gốc lỗi
+`FarmInteractionController.EnsureStarterSeeds()` — đoạn trợ giúp thời demo. Mỗi lần người chơi
+bấm vào ô đất để gieo, nó rà đúng 3 hạt đó, hạt nào `<= 0` thì `AddItem(s, 3)`. Đây là **hạt
+vô hạn**: trồng hết → bấm ô đất → có lại 3 hạt → trồng tiếp, không bao giờ phải mua.
+Nặng hơn: `AddItem` đẩy delta lên server (`QueueInventoryDelta`) nên số hạt **bên server cũng
+phồng theo**, không chỉ là lỗi hiển thị ở máy người chơi.
+
+`EnsureStarterFeed()` y hệt, cho **thức ăn vật nuôi**: mỗi lần bấm con vật để cho ăn, hết món
+chính/phụ là được cấp bù `amount × 3`. Khách chưa báo nhưng cùng một lỗi.
+
+### Đã sửa
+Bỏ cả hai đoạn phát đồ, thay bằng lời nhắc:
+- Hết hạt (xét **cả nhóm `seeds`**, không riêng 3 loại) → *"Hết hạt giống rồi — ra Farm Shop mua thêm để trồng."*
+- Hết thức ăn → *"{Tên con vật} cần {món chính} hoặc {món phụ} — trồng thêm hoặc mua ở Farm Shop."*
+
+Không sợ kẹt người chơi: tài khoản mới vẫn được 5 hạt cà rốt (server `postgresStore.js`), và
+hết sạch thì vẫn chặt gỗ / đập đá / câu cá bán lấy Point mua hạt.
+
+➜ `Assets/_Project/Scripts/Environment/FarmInteractionController.cs`
+
+---
+
+## [2026-07-29] — Túi đồ: bỏ nút "Vứt bỏ", nút "Sử dụng" biết giải thích công dụng
+
+Yêu cầu chủ dự án: bỏ hẳn "Vứt bỏ" ở mọi tab; "Sử dụng" mà không có việc gì để làm thì
+hiện toast nói món đó dùng vào việc gì.
+
+### Bỏ "Vứt bỏ" (mọi tab)
+Nút này **chưa bao giờ hoạt động** — handler chỉ `Debug.Log`, không hề gọi `RemoveItem`, nên
+người chơi bấm tưởng vứt rồi mà đồ vẫn còn. Không làm nó chạy thật vì: đây là game kinh tế
+(Mai rùa 11.893 Point, Nhung hươu 12.368) nên lỡ tay là mất trắng; túi lại **tự nới slot** khi
+đầy (`InventoryManager`) nên chẳng bao giờ có nhu cầu vứt; đồ thừa đã có shop thu mua.
+➜ `btnDetailDiscard.style.display = None`, xoá luôn handler chết.
+
+### "Sử dụng" — có việc thì làm việc, không thì giải thích
+Nút này là **cơ chế duy nhất** để gieo hạt / cho thú ăn / thả thú / dùng vé, nên KHÔNG thay
+bằng toast được. Cách làm: `InventoryPopupController.LastItemUseHandled` — handler nào thật sự
+làm việc thì bật cờ; hết lượt phát mà cờ vẫn `false` thì túi bắn toast công dụng.
+Cờ đặt ở phía túi (không phải `FarmInteractionController`) để **màn Thành phố** — nơi không có
+controller đó — vẫn có lời giải thích.
+
+Kèm theo: đang chờ gieo mà bấm nhầm món không phải hạt thì nay **nhắc rõ**, trước đây bỏ qua
+lặng lẽ nên người chơi tưởng nút hỏng.
+
+### `ItemUsageHint` — câu chữ SINH TỪ DỮ LIỆU, không gõ tay
+Mô tả sẵn trong `ItemDefinition` là chữ tả cảnh ("Rìu gỗ đốn củi.", "Buồng chuối chín.") và
+**đã hiện ngay trên nút** trong panel chi tiết → toast lấy lại chuỗi đó thì vô nghĩa. Nên sinh
+câu mới từ dữ liệu, kèm số thật:
+
+| Nhóm | Câu sinh ra | Nguồn |
+|---|---|---|
+| Hạt giống | "trồng ở ruộng, sau 1 ngày thu Cà rốt x1" | `CropDatabase` |
+| Nông sản ngắn ngày | "thức ăn chăn nuôi — cho Heo (2), Bò (4) ăn" | tra ngược `AnimalDefinition` |
+| Cá / sản phẩm / đá quý | "bán ở Siêu thị Cá được 25 Point mỗi cái" | `sellPrice` |
+| Gỗ · Đá · Gạch | "vật liệu xây dựng — mở Chế độ Xây…" | tĩnh theo id |
+| Dụng cụ | "dùng để chặt cây lấy gỗ. Tự động dùng khi bấm nút tương tác" | tĩnh theo id |
+| Con giống | "dựng chuồng (9 ô đất), rồi bấm chuồng để thả vào nuôi. Ăn 2x Khoai lang hoặc 2x Bí ngô" | `AnimalDefinition` |
+| Còn lại | dùng `description` sẵn có (mồi câu, phân bón… vốn đã rõ) | `ItemDefinition` |
+
+Khách đổi giá/sản lượng là câu chữ **tự đổi theo**, không có bảng chữ chết phải bảo trì.
+
+⚠️ Bẫy khi tra ngược thức ăn: `AnimalDefinition.foodMainName` là **chữ hiển thị** ("Bắp Ngô" /
+"Bắp ngô", "Cỏ Voi" / "Cỏ voi"), không phải id, viết hoa không nhất quán → phải chuẩn hoá
+(`Trim().ToLowerInvariant()`) trước khi so. Món ghi kèm nhưng số lượng 0 (vd "Cám") bị bỏ qua.
+
+### Toast bị cắt mất chữ (sửa cùng đợt)
+Chủ dự án test thấy toast dài lẹm mất dòng cuối. `ScreenToast.OnGUI` vẽ hộp **cứng 540×56**:
+chữ tự xuống dòng nhưng hộp không cao theo, dòng thứ 3 tràn ra ngoài. Từ trước tới nay toast
+chỉ là câu ngắn ("Chuồng không đủ chỗ") nên chưa lộ; câu công dụng dài 2-3 dòng thì lộ ngay.
+➜ Hộp **cao theo chữ** (`style.CalcHeight`), bề ngang co lại theo màn hẹp (`Screen.width - 40`),
+thêm padding 18×12, `wordWrap` khai báo rõ. Tiện thể giữ lại `GUIStyle` thay vì tạo mới mỗi lần
+`OnGUI` chạy (nhiều lần / khung hình).
+
+**Files:** `Scripts/Data/ItemUsageHint.cs` (mới), `UI/InventoryPopupController.cs`,
+`Scripts/Environment/FarmInteractionController.cs`, `Scripts/Environment/ScreenToast.cs`
+
+**Chưa nghiệm thu runtime** — cần mở túi, bấm "Sử dụng" ở cả 7 tab để đối chiếu câu chữ.
+
+---
+
 ## [2026-07-23] — Sửa tutorial chết ở luồng RESUME · thay dữ liệu GIẢ trong UI bằng số thật
 
 ### Tutorial không chạy lại sau khi thoát giữa chừng (tài khoản mới)

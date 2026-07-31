@@ -139,8 +139,24 @@ namespace YWonderLand.Environment
         private bool animalPlacementInFlight;
         private List<BuildSurfaceCell> pendingDemolishEnclosure;
         private FarmTile pendingDemolishTile;
+        private GameObject pendingDemolishPath; // công trình trang trí (vd Đường đá) đang chờ xác nhận hủy
         private float demolishConfirmTimer;
         private const float DemolishConfirmWindow = 1.25f;
+        private const string FertilizerItemId = "fertilizer_01";
+
+        [Header("Bón phân (khách chốt 30/07)")]
+        [Tooltip("Mỗi lần bón rút thẳng bao nhiêu GIỜ thời gian chờ. Cố định, KHÔNG theo phần trăm " +
+                 "— khách chốt vậy để cây dài ngày không bị lợi dụng. Mặc định 3.6 giờ = đúng 15% " +
+                 "của cây ngắn ngày 24 giờ (con số khách đưa ban đầu). ĐỔI SỐ Ở ĐÂY, không sửa code.")]
+        [SerializeField] private float fertilizerBonusHours = 3.6f;
+
+        [Tooltip("CHỈ bón được cây có vòng lớn không quá số ngày này (khách chốt: chỉ cây ngắn ngày). " +
+                 "1 = chỉ 8 cây ngắn ngày (24 giờ); nhóm kế tiếp là 2 ngày nên để 1 là tách sạch.")]
+        [SerializeField] private float fertilizerMaxCropDays = 1f;
+
+        private float FertilizerBonusSec => YWonderLand.Core.GameTimeConfig.Hours(fertilizerBonusHours);
+        private float FertilizerMaxGrowthSec => YWonderLand.Core.GameTimeConfig.Days(fertilizerMaxCropDays);
+
         private const string MiningLastDateKey = "YW_MiningLastDate";
         private const string MiningTurnsLeftKey = "YW_MiningTurnsLeft";
         private int miningTurnsLeft = -1;
@@ -207,6 +223,8 @@ namespace YWonderLand.Environment
         void OnDestroy()
         {
             CancelTimedAction(null);
+            // Đổi scene / thoát khi đang dời (chuồng/ruộng/đường): trả về chỗ cũ để không lưu nhầm vị trí.
+            if (PenMoveController.IsActive) PenMoveController.Cancel();
             if (Instance == this) Instance = null;
 
             if (AuthService.Instance != null)
@@ -310,7 +328,16 @@ namespace YWonderLand.Environment
                 else if (code == "DAILY_LIMIT_EXCEEDED")
                 {
                     SetServerMiningTurns(0);
-                    ScreenToast.Show("Hết lượt đào hôm nay rồi! Mai quay lại nhé.");
+                    // TỰ dùng Vé đào mỏ (nếu có) để đào tiếp — không cần bấm "Sử dụng", giống vé vòng quay.
+                    if (IsMiningServerAuthoritative() && !_autoRedeemInFlight && HasMineTicket())
+                    {
+                        _autoRedeemInFlight = true;
+                        AutoRedeemMineTicketThenRetry(resource);
+                    }
+                    else
+                    {
+                        ScreenToast.Show("Hết lượt đào hôm nay rồi! Mua Vé đào mỏ để đào thêm nhé.");
+                    }
                 }
                 else if (code == "RESOURCE_TOO_FAR")
                     ScreenToast.Show("Hãy đứng gần tài nguyên hơn để khai thác.");
@@ -318,6 +345,9 @@ namespace YWonderLand.Environment
                     ScreenToast.Show("Mất kết nối máy chủ. Chưa nhận tài nguyên.");
                 return;
             }
+
+            // Đào thành công -> mở lại chốt auto-đổi-vé cho lần hết lượt kế tiếp.
+            _autoRedeemInFlight = false;
 
             bool minedRock = resource != null
                 ? resource.type == HarvestableResource.ResourceType.Rock
@@ -553,6 +583,9 @@ namespace YWonderLand.Environment
             }
             if (FishingOverlayController.Instance != null && FishingOverlayController.Instance.IsAutoFishing)
             {
+                // Khác hai nhánh trên: câu cá KHÔNG có thanh Hủy bên ruộng, người chơi chỉ thấy
+                // "bấm mà không ăn thua" nên phải nói rõ.
+                NotifyBlocked("Đang câu cá — thu cần rồi hãy làm việc khác nhé.");
                 Debug.LogWarning($"[FarmInteraction] Timed action '{animName}' blocked: fishing overlay is active.");
                 return false;
             }
@@ -564,6 +597,10 @@ namespace YWonderLand.Environment
             timedActionActive = true;
             timedActionCancelRefund = onCancelRefund;
             timedActionStartFrame = Time.frameCount;
+
+            // Nhớ mục tiêu để DỰNG LẠI bảng nút sau khi múa xong (anh báo 30/07: tưới/cuốc xong là
+            // bảng nút biến mất, phải chạm lại ô mới hiện). Trong lúc múa vẫn ẩn để nhường thanh Hủy.
+            promptTargetBeforeTimedAction = currentHoverObject;
 
             currentHoverObject = null;
             currentActions.Clear();
@@ -609,11 +646,23 @@ namespace YWonderLand.Environment
 
             if (token != timedActionToken) yield break;
 
-            FinishTimedAction();
+            // THỨ TỰ QUAN TRỌNG (anh báo 31/07: cuốc xong nút vẫn ghi "Cuốc đất", bấm lại thì
+            // nhảy sang gieo hạt). onComplete MỚI là chỗ đổi trạng thái ô đất — dựng bảng nút
+            // trước nó là dựng theo trạng thái CŨ, nên bảng luôn trễ đúng một bước.
+            var promptTarget = promptTargetBeforeTimedAction;
+            FinishTimedAction(restorePrompt: false);
             onComplete?.Invoke();
+
+            // onComplete có thể mở màn múa mới (chuỗi thao tác) — lúc đó để màn mới tự lo bảng nút,
+            // không bày nút đè lên thanh Hủy.
+            if (!timedActionActive) RebuildPromptFor(promptTarget);
         }
 
-        private void FinishTimedAction()
+        /// <param name="restorePrompt">
+        /// Dựng LẠI bảng nút cho đúng thứ vừa thao tác xong. Chỉ đúng khi trạng thái đã đổi xong —
+        /// luồng làm-xong tự dựng SAU onComplete nên truyền false.
+        /// </param>
+        private void FinishTimedAction(bool restorePrompt = true)
         {
             timedActionToken++;
             timedActionRoutine = null;
@@ -621,6 +670,43 @@ namespace YWonderLand.Environment
             timedActionCancelRefund = null;
             GameHUDController.Instance?.HideActionCancelProgress();
             EndTimedActionCursorMode();
+
+            var target = promptTargetBeforeTimedAction;
+            promptTargetBeforeTimedAction = null;
+            if (restorePrompt) RebuildPromptFor(target);
+        }
+
+        /// <summary>Dựng lại bảng nút cho đúng vật thể này theo trạng thái HIỆN TẠI của nó.</summary>
+        private void RebuildPromptFor(GameObject target)
+        {
+            if (target == null || !useDirectTapInteraction) return;
+            if (PenMoveController.IsActive || UIPopupTracker.AnyOpen) return;
+            if (!IsDirectTapTargetStillInRange(target)) return;
+
+            var actions = new List<InteractionAction>();
+
+            var animal = target.GetComponentInParent<FarmAnimal>();
+            if (animal != null)
+            {
+                AddAnimalActions(animal, actions, out _, out _);
+            }
+            else
+            {
+                var tile = target.GetComponentInParent<FarmTile>();
+                if (tile != null) AddTileAction(tile, actions);
+            }
+
+            if (actions.Count == 0) return;
+
+            currentHoverObject = target;
+            currentActions = actions;
+            lastActionSignature = BuildActionSignature(actions);
+            currentPromptFromFrontCell = false;
+            currentPromptFromFootWater = false;
+            currentPromptFromFootResource = false;
+            currentPromptFromFootFishing = false;
+
+            GameHUDController.Instance?.ShowInteractionPrompts(actions);
         }
 
         private void CancelTimedAction(string toast)
@@ -635,6 +721,8 @@ namespace YWonderLand.Environment
             }
 
             timedActionActive = false;
+            // Bỏ dở là người chơi CHỦ ĐỘNG thoát -> không dựng lại bảng nút (khác lúc làm xong).
+            promptTargetBeforeTimedAction = null;
             GameHUDController.Instance?.HideActionCancelProgress();
             EndTimedActionCursorMode();
 
@@ -818,6 +906,41 @@ namespace YWonderLand.Environment
             return false;
         }
 
+        // Tra công trình "đường" từ 1 hit: trúng chính công trình HOẶC trúng ô đất bên dưới (đọc occupant).
+        // Đối xứng với ResolveFarmTileFromHit để đường đá cũng bắt được dù prefab không có collider riêng.
+        private GameObject ResolveDemolishablePathFromHit(RaycastHit hit)
+        {
+            if (hit.collider == null) return null;
+
+            var direct = ResolveDemolishablePath(hit.collider.gameObject);
+            if (direct != null) return direct;
+
+            var cell = ResolveBuildSurfaceCellFromHit(hit);
+            if (cell != null && cell.Occupant != null)
+                return ResolveDemolishablePath(cell.Occupant);
+
+            return null;
+        }
+
+        // Fallback dò theo tâm ngắm (sphere-cast) giống ruộng — bắt cả khi ngắm HƠI LỆCH khỏi mặt đường nhỏ.
+        private bool TryResolvePathFromAim(Ray ray, out GameObject path, bool directTap = false)
+        {
+            path = null;
+            int hitCount = Physics.SphereCastNonAlloc(ray, FarmTileAimFallbackRadius, tileAimHitResults, 100f, InteractionLayerMask, QueryTriggerInteraction.Collide);
+            if (hitCount <= 0) return false;
+
+            System.Array.Sort(tileAimHitResults, 0, hitCount, Comparer<RaycastHit>.Create((a, b) => a.distance.CompareTo(b.distance)));
+            for (int i = 0; i < hitCount; i++)
+            {
+                var candidate = ResolveDemolishablePathFromHit(tileAimHitResults[i]);
+                if (candidate == null || !IsPlacedBuildingInRange(candidate, directTap)) continue;
+                path = candidate;
+                return true;
+            }
+
+            return false;
+        }
+
         private void AddTileAction(FarmTile tile, List<InteractionAction> actions)
         {
             if (tile == null || actions == null) return;
@@ -837,8 +960,63 @@ namespace YWonderLand.Environment
 
             actions.Add(new InteractionAction { keyName = "Click", actionName = actName, onClick = () => PerformTileAction(tile) });
 
+            // Khách chốt 30/07: xem CẢ MẢNH RUỘNG trong một popup (giống "Xem chuồng" của thú),
+            // thay cho việc đọc chữ nổi lởm chởm trên đầu từng cây ("nhìn như đám rừng").
+            // Giữ nguyên Click = làm việc luôn, không bắt mở popup mới thao tác được.
+            FarmTile plotSeed = tile.masterTile != null ? tile.masterTile : tile;
+            actions.Add(new InteractionAction
+            {
+                keyName = "Q",
+                actionName = "Xem ruộng",
+                onClick = () =>
+                {
+                    if (AnimalInteractionPopupController.Instance != null)
+                        AnimalInteractionPopupController.Instance.ShowPlot(FindPlotTiles(plotSeed));
+                }
+            });
+
+            // BÓN PHÂN (khách chốt 30/07): chỉ hiện với CÂY NGẮN NGÀY đang lớn — chưa tưới thì chưa
+            // có gì để rút, cây đã chín thì bón vô nghĩa, cây dài ngày thì khách không cho bón.
+            FarmTile fertilizeTile = tile.masterTile != null ? tile.masterTile : tile;
+            if (fertilizeTile != null && fertilizeTile.IsFertilizable(FertilizerMaxGrowthSec))
+            {
+                actions.Add(new InteractionAction
+                {
+                    keyName = "B",
+                    actionName = "Bón phân",
+                    // Bón thẳng rồi dựng lại bảng nút: bón xong cây có thể chín, nút "Bón phân"
+                    // phải biến mất chứ không đứng ì đó.
+                    onClick = () =>
+                    {
+                        if (BeginFertilize(fertilizeTile)) RebuildPromptFor(currentHoverObject);
+                    }
+                });
+            }
+
+            // DỜI RUỘNG (khách chốt 30/07): làm y như "Dời chuồng" — nhấc cả mảnh ruộng liền nhau,
+            // cây đang trồng đi theo. Chỉ hiện với ruộng dựng bằng Chế độ Xây (có ô nền để đặt lại).
+            if (CanDemolishFarmTile(plotSeed))
+            {
+                actions.Add(new InteractionAction
+                {
+                    keyName = "M",
+                    actionName = "Dời ruộng",
+                    // Nút đã hiện thì bấm phải có phản hồi — ngoài tầm cũng phải nói, đừng nuốt cú bấm.
+                    onClick = () =>
+                    {
+                        if (!IsTileInRange(plotSeed, useDirectTapInteraction))
+                        {
+                            NotifyBlocked("Đứng gần mảnh ruộng hơn mới dời được.");
+                            return;
+                        }
+                        BeginMovePlot(plotSeed);
+                    }
+                });
+            }
+
             FarmTile demolishTile = tile.masterTile != null ? tile.masterTile : tile;
-            if (CanDemolishFarmTile(demolishTile))
+            // Khách chốt 29/07: ô ĐÃ TRỒNG cây thì KHÔNG hiện nút hủy — chỉ hủy được ô còn trống.
+            if (CanDemolishFarmTile(demolishTile) && !HasCropOnFarmTile(demolishTile))
             {
                 actions.Add(new InteractionAction
                 {
@@ -854,12 +1032,92 @@ namespace YWonderLand.Environment
             return ResolvePlacedBuildingRoot(tile) != null;
         }
 
+        /// <summary>Ô đang có cây (đã gieo / đang lớn / chín) — dùng để KHÔNG cho hủy ô trồng.
+        /// Quét mọi FarmTile của cùng công trình để cây nhiều ô (giàn) cũng chặn đúng.</summary>
+        private bool HasCropOnFarmTile(FarmTile tile)
+        {
+            if (tile == null) return false;
+            if (IsCropState(tile.currentState)) return true;
+
+            var building = ResolvePlacedBuildingRoot(tile);
+            if (building == null) return false;
+
+            var tiles = building.GetComponentsInChildren<FarmTile>(true);
+            for (int i = 0; i < tiles.Length; i++)
+                if (tiles[i] != null && IsCropState(tiles[i].currentState)) return true;
+
+            return false;
+        }
+
+        private static bool IsCropState(FarmTile.TileState state)
+        {
+            return state == FarmTile.TileState.Planted ||
+                   state == FarmTile.TileState.Watered ||
+                   state == FarmTile.TileState.Ripe;
+        }
+
+        /// <summary>Chuồng còn vật nuôi hay không. Đọc AnimalObject (tham chiếu thật) thay vì cờ HasAnimal
+        /// để thú đã chết/bị hủy không làm ô "kẹt" không hủy được.</summary>
+        private static bool EnclosureHasAnimal(List<BuildSurfaceCell> pen)
+        {
+            if (pen == null) return false;
+            for (int i = 0; i < pen.Count; i++)
+                if (pen[i] != null && pen[i].AnimalObject != null) return true;
+            return false;
+        }
+
         private GameObject ResolvePlacedBuildingRoot(FarmTile tile)
         {
             if (tile == null) return null;
 
             var placed = tile.GetComponentInParent<PlacedBuilding>();
             return placed != null ? placed.gameObject : null;
+        }
+
+        // Công trình đặt qua Build Mode nhưng KHÔNG phải ô trồng (FarmTile) và KHÔNG phải hàng rào (chuồng)
+        // — hiện chỉ có "Đường đá". Nhóm này chưa có nút hủy riêng nên gom về đây để cho "Hủy đường".
+        private GameObject ResolveDemolishablePath(GameObject candidate)
+        {
+            if (candidate == null) return null;
+
+            var placed = candidate.GetComponentInParent<PlacedBuilding>();
+            if (placed == null) return null;
+
+            var go = placed.gameObject;
+            if (go.GetComponentInChildren<FarmTile>(true) != null) return null;        // ruộng: đã có "Hủy ô trồng"
+            if (go.GetComponentInChildren<FenceAutoConnect>(true) != null) return null; // chuồng: đã có "Hủy chuồng"
+            return go;
+        }
+
+        private bool IsPlacedBuildingInRange(GameObject building, bool directTap)
+        {
+            if (building == null) return false;
+            float range = directTap
+                ? GetDirectTapRange(tileInteractRange, DefaultTileInteractRange)
+                : GetTileInteractRange();
+            return HorizontalDistanceToClosestColliderPoint(building, building.transform.position) <= range;
+        }
+
+        private void AddPathDemolishAction(GameObject building, List<InteractionAction> actions)
+        {
+            if (building == null || actions == null) return;
+
+            var target = building;
+
+            // DỜI ĐƯỜNG (khách chốt 30/07): nhấc cả đoạn đường liền nhau sang chỗ khác, không tốn đá.
+            actions.Add(new InteractionAction
+            {
+                keyName = "M",
+                actionName = "Dời đường",
+                onClick = () => { if (IsPlacedBuildingInRange(target, useDirectTapInteraction)) BeginMovePath(target); }
+            });
+
+            actions.Add(new InteractionAction
+            {
+                keyName = "G",
+                actionName = "Hủy đường",
+                onClick = () => { if (IsPlacedBuildingInRange(target, useDirectTapInteraction)) RequestDemolishPathBuilding(target); }
+            });
         }
 
         private bool IsPenSpawnerInRange(AnimalPenSpawner pen)
@@ -907,6 +1165,24 @@ namespace YWonderLand.Environment
                     return true;
             }
             return false;
+        }
+
+        // ── BÁO KHI CHẶN THAO TÁC (anh chốt 31/07) ──
+        // Chặn mà im lặng thì người chơi tưởng game đơ / máy lag rồi bấm loạn — đúng kiểu bực
+        // nhất. Mọi đường chặn mà người chơi CHẠM TỚI ĐƯỢC đều phải nói ra lý do.
+        // Cooldown theo TỪNG CÂU: bấm liên tục cùng một chỗ thì không spam, nhưng đổi sang lỗi
+        // khác là báo ngay chứ không bị nuốt mất.
+        private float nextBlockToastAt;
+        private string lastBlockToastMessage = "";
+
+        private void NotifyBlocked(string message, float cooldownSec = 1.5f)
+        {
+            if (string.IsNullOrEmpty(message)) return;
+            if (message == lastBlockToastMessage && Time.unscaledTime < nextBlockToastAt) return;
+
+            lastBlockToastMessage = message;
+            nextBlockToastAt = Time.unscaledTime + cooldownSec;
+            ScreenToast.Show(message);
         }
 
         private bool IsTileInRange(FarmTile tile)
@@ -1095,8 +1371,25 @@ namespace YWonderLand.Environment
                 actions.Add(new InteractionAction { keyName = "E", actionName = "Thả thú", onClick = () => { if (IsEnclosureInRange(addEnclosure, useDirectTapInteraction)) OpenEnclosurePicker(addEnclosure); } });
             }
 
-            var demolishEnclosure = new List<BuildSurfaceCell>(enclosure);
-            actions.Add(new InteractionAction { keyName = "G", actionName = "Hủy chuồng", onClick = () => { if (IsEnclosureInRange(demolishEnclosure, useDirectTapInteraction)) RequestDemolishEnclosure(demolishEnclosure); } });
+            // Khách chốt 29/07: cho DỜI nguyên cụm chuồng sang chỗ khác (thú đi theo, không tốn vật liệu).
+            var moveEnclosure = new List<BuildSurfaceCell>(enclosure);
+            actions.Add(new InteractionAction
+            {
+                keyName = "M",
+                actionName = "Dời chuồng",
+                onClick = () =>
+                {
+                    if (!IsEnclosureInRange(moveEnclosure, useDirectTapInteraction)) return;
+                    BeginMovePen(moveEnclosure);
+                }
+            });
+
+            // Khách chốt 29/07: chuồng CÒN THÚ thì KHÔNG hiện nút hủy — chỉ hủy được chuồng trống.
+            if (!EnclosureHasAnimal(enclosure))
+            {
+                var demolishEnclosure = new List<BuildSurfaceCell>(enclosure);
+                actions.Add(new InteractionAction { keyName = "G", actionName = "Hủy chuồng", onClick = () => { if (IsEnclosureInRange(demolishEnclosure, useDirectTapInteraction)) RequestDemolishEnclosure(demolishEnclosure); } });
+            }
         }
 
         private bool TryShowAnimalEnclosurePopup(FarmAnimal animal)
@@ -1165,8 +1458,13 @@ namespace YWonderLand.Environment
         void Update()
         {
             if (GameManager.Instance != null && GameManager.Instance.currentState != GameManager.GameState.Gameplay) return;
+
+            ClearPendingItemPickIfBagClosed();
+
             if (IsBuildModeOpen())
             {
+                // Mở Build Mode giữa chừng thì bỏ dở việc dời, trả cụm về chỗ cũ.
+                if (PenMoveController.IsActive) PenMoveController.Cancel();
                 ClearWorldInteractionState();
                 return;
             }
@@ -1213,6 +1511,14 @@ namespace YWonderLand.Environment
                 }
                 if (!timedActionActive && useDirectTapInteraction)
                     RefreshFacingInteractionPrompts();
+                return;
+            }
+
+            // Đang DỜI CHUỒNG: chỉ dùng 2 nút Đặt/Hủy dời, không cho chạm vật khác trong thế giới
+            // (kẻo prompt bị thay và người chơi kẹt trong chế độ dời).
+            if (PenMoveController.IsActive)
+            {
+                RefreshFacingInteractionPrompts();
                 return;
             }
 
@@ -1264,6 +1570,7 @@ namespace YWonderLand.Environment
                 {
                     pendingDemolishEnclosure = null;
                     pendingDemolishTile = null;
+                    pendingDemolishPath = null;
                     demolishConfirmTimer = 0f;
                 }
             }
@@ -1348,6 +1655,7 @@ namespace YWonderLand.Environment
             }
 
             currentHoverObject = null;
+            promptTargetBeforeTimedAction = null;
             currentActions.Clear();
             currentPromptFromFrontCell = false;
             currentPromptFromFootWater = false;
@@ -1355,6 +1663,7 @@ namespace YWonderLand.Environment
             currentPromptFromFootFishing = false;
             pendingDemolishEnclosure = null;
             pendingDemolishTile = null;
+            pendingDemolishPath = null;
             demolishConfirmTimer = 0f;
 
             if (GameHUDController.Instance != null)
@@ -1384,6 +1693,13 @@ namespace YWonderLand.Environment
 
         private void RefreshFacingInteractionPrompts()
         {
+            // Đang dời: chỉ hiện đúng 2 lựa chọn Đặt / Hủy dời, không cho tương tác thứ khác.
+            if (PenMoveController.IsActive)
+            {
+                RefreshPenMovePrompt();
+                return;
+            }
+
             RefreshFrontCellInteractionPrompt();
             if (currentPromptFromFrontCell)
             {
@@ -1423,6 +1739,68 @@ namespace YWonderLand.Environment
                    currentActions.Count > 0;
         }
 
+        /// <summary>Gợi ý khi đang DỜI (chuồng / ruộng / đường): rê cả cụm theo bước chân, hiện nút Đặt / Hủy dời.</summary>
+        private void RefreshPenMovePrompt()
+        {
+            // Cụm bám theo bước chân người chơi; nút Đặt luôn chốt ĐÚNG vị trí đang xem trước
+            // (không giữ ô cũ trong closure — trước đây HUD không dựng lại nên đặt nhầm về chỗ ban đầu).
+            PenMoveController.UpdatePreview();
+            bool canPlace = PenMoveController.CanPlace();
+            string subject = PenMoveController.SubjectLabel;
+
+            var actions = new List<InteractionAction>();
+            if (canPlace)
+            {
+                actions.Add(new InteractionAction
+                {
+                    keyName = "Click",
+                    actionName = $"Đặt {subject} ở đây",
+                    onClick = () =>
+                    {
+                        if (PenMoveController.Confirm()) ScreenToast.ShowInfo($"Đã dời {subject} sang chỗ mới.");
+                        else ScreenToast.Show($"Chỗ này không đặt được {subject}.");
+                        ClearWorldInteractionState();
+                    }
+                });
+            }
+            else
+            {
+                actions.Add(new InteractionAction
+                {
+                    keyName = "Click",
+                    actionName = "Chưa đặt được — cần đủ ô trống",
+                    onClick = () => ScreenToast.Show($"Cần đủ ô đất trống bằng số ô của {subject}.")
+                });
+            }
+
+            actions.Add(new InteractionAction
+            {
+                keyName = "G",
+                actionName = "Hủy dời",
+                onClick = () =>
+                {
+                    PenMoveController.Cancel();
+                    ScreenToast.Show($"Đã hủy dời — {subject} về chỗ cũ.");
+                    ClearWorldInteractionState();
+                }
+            });
+
+            string signature = BuildActionSignature(actions);
+            bool shouldRefreshPrompt = signature != lastActionSignature || currentActions == null || currentActions.Count == 0;
+
+            var frontCell = FrontBuildCellSelector.Instance != null ? FrontBuildCellSelector.Instance.CurrentCell : null;
+            currentHoverObject = frontCell != null ? frontCell.gameObject : null;
+            lastActionSignature = signature;
+            currentActions = actions;
+            currentPromptFromFrontCell = true;
+            currentPromptFromFootWater = false;
+            currentPromptFromFootResource = false;
+            currentPromptFromFootFishing = false;
+
+            if (shouldRefreshPrompt && GameHUDController.Instance != null)
+                GameHUDController.Instance.ShowInteractionPrompts(actions);
+        }
+
         private void RefreshFrontCellInteractionPrompt()
         {
             if (!useDirectTapInteraction || timedActionActive)
@@ -1444,7 +1822,8 @@ namespace YWonderLand.Environment
             GameObject foundObj = null;
 
             if (!TryBuildFrontCellEnclosurePrompt(cell, foundActions, out foundObj) &&
-                !TryBuildFrontCellTilePrompt(cell, foundActions, out foundObj))
+                !TryBuildFrontCellTilePrompt(cell, foundActions, out foundObj) &&
+                !TryBuildFrontCellPathPrompt(cell, foundActions, out foundObj))
             {
                 ClearFrontCellInteractionPrompt();
                 return;
@@ -1507,6 +1886,23 @@ namespace YWonderLand.Environment
 
             foundObj = tile.gameObject;
             AddTileAction(tile, actions);
+            return actions != null && actions.Count > 0;
+        }
+
+        // Ghost đè lên ô chứa ĐƯỜNG ĐÁ (occupant không phải ruộng/chuồng) → hiện nút "Hủy đường".
+        // Nhờ vậy đường đá có UI khi ghost chạm vào, đồng nhất với ruộng/chuồng (không cần click chuột).
+        private bool TryBuildFrontCellPathPrompt(BuildSurfaceCell cell, List<InteractionAction> actions, out GameObject foundObj)
+        {
+            foundObj = null;
+            if (cell == null || cell.Occupant == null)
+                return false;
+
+            GameObject path = ResolveDemolishablePath(cell.Occupant);
+            if (path == null || !IsPlacedBuildingInRange(path, true))
+                return false;
+
+            foundObj = path;
+            AddPathDemolishAction(path, actions);
             return actions != null && actions.Count > 0;
         }
 
@@ -1945,6 +2341,8 @@ namespace YWonderLand.Environment
         private Collider[] frontCellOverlapResults = new Collider[32];
         private readonly List<Collider> colliderDistanceBuffer = new List<Collider>(16);
         private GameObject currentHoverObject = null;
+        /// <summary>Thứ đang chỉ ngay trước khi vào màn múa động tác — để dựng lại bảng nút khi múa xong.</summary>
+        private GameObject promptTargetBeforeTimedAction;
         private bool currentPromptFromFrontCell;
         private bool currentPromptFromFootWater;
         private bool currentPromptFromFootResource;
@@ -2122,6 +2520,16 @@ namespace YWonderLand.Environment
                     AddTileAction(tile, foundActions);
                     break;
                 }
+                else if (ResolveDemolishablePath(hit.collider.gameObject) is GameObject pathBuilding && pathBuilding != null)
+                {
+                    // Đường đá (hoặc trang trí khác) — ngắm trúng collider của chính công trình.
+                    if (!IsPlacedBuildingInRange(pathBuilding, directTap))
+                        continue;
+
+                    foundObj = pathBuilding;
+                    AddPathDemolishAction(pathBuilding, foundActions);
+                    break;
+                }
                 else if (hit.collider.TryGetComponent<FishingSpot>(out var spot) || (hit.collider.transform.parent != null && hit.collider.transform.parent.TryGetComponent<FishingSpot>(out spot)))
                 {
                     Vector3 fishingHitPoint = hit.point;
@@ -2163,7 +2571,18 @@ namespace YWonderLand.Environment
                         }
                         break;
                     }
-                    if (!penCell.IsFree) continue; // ô bị chiếm bởi công trình khác -> xuyên qua
+                    if (!penCell.IsFree)
+                    {
+                        // Ô bị chiếm bởi đường đá (collider mỏng/không có nên tia trúng ô bên dưới) -> cho "Hủy đường".
+                        var occPath = ResolveDemolishablePath(penCell.Occupant);
+                        if (occPath != null && IsPlacedBuildingInRange(occPath, directTap))
+                        {
+                            foundObj = occPath;
+                            AddPathDemolishAction(occPath, foundActions);
+                            break;
+                        }
+                        continue; // công trình khác -> xuyên qua
+                    }
                     break; // ô đất trống thường (không phải chuồng) -> bỏ
                 }
                 else if (hit.collider.GetComponentInParent<FenceAutoConnect>() != null)
@@ -2183,6 +2602,11 @@ namespace YWonderLand.Environment
             {
                 foundObj = aimTile.gameObject;
                 AddTileAction(aimTile, foundActions);
+            }
+            else if (foundActions.Count == 0 && TryResolvePathFromAim(ray, out var aimPath, directTap))
+            {
+                foundObj = aimPath;
+                AddPathDemolishAction(aimPath, foundActions);
             }
 
             // Update UI if target or state changed
@@ -2361,17 +2785,226 @@ namespace YWonderLand.Environment
         /// <summary>Cổng public cho popup chuồng gọi lại đúng luồng mở túi để thả thêm thú.</summary>
         public void BeginPlaceAnimalInEnclosure(List<BuildSurfaceCell> interior) => OpenEnclosurePicker(interior);
 
+        // ── Cổng public cho popup "Xem ruộng" (khách chốt 30/07) ────────────────────────────────
+        // Popup gom việc lại một chỗ giống popup chuồng: bấm cây trong danh sách rồi tưới / thu /
+        // bón / dời ngay tại đó. Mọi nút đều gọi ĐÚNG luồng cũ ngoài ruộng — không có nhánh logic
+        // thứ hai để lệch số liệu hay lách kiểm tra.
+
+        /// <summary>
+        /// Tưới cây đang chọn trong popup. Popup phải đóng vì tưới có màn múa động tác (che thì
+        /// không thấy gì), nhưng <paramref name="onWatered"/> cho phép nó TỰ MỞ LẠI khi múa xong —
+        /// anh chốt 31/07: tưới nhiều cây liên tiếp mà phải đi bấm lại "Xem ruộng" thì mệt.
+        /// Chỉ gọi khi tưới THÀNH CÔNG; bỏ dở giữa chừng thì không mở lại.
+        /// </summary>
+        public void BeginWaterTile(FarmTile tile, System.Action onWatered = null)
+        {
+            if (tile == null) return;
+            if (tile.currentState != FarmTile.TileState.Planted && tile.currentState != FarmTile.TileState.Watered)
+            {
+                ScreenToast.Show("Cây này chưa cần tưới.");
+                return;
+            }
+            if (PlayerController.Instance != null) PlayerController.Instance.FaceTowards(tile.transform.position);
+            HandleWater(tile, onWatered);
+        }
+
+        /// <summary>Thu hoạch cây đang chọn. KHÔNG có màn múa nên để popup mở, thu liền tay nhiều cây.</summary>
+        public void BeginHarvestTile(FarmTile tile)
+        {
+            if (tile == null) return;
+            if (tile.currentState != FarmTile.TileState.Ripe)
+            {
+                ScreenToast.Show("Cây chưa chín.");
+                return;
+            }
+            if (PlayerController.Instance != null) PlayerController.Instance.FaceTowards(tile.transform.position);
+            HandleHarvest(tile);
+        }
+
+        /// <summary>Bón phân cho cây đang chọn (mở túi ở tab Đồ dùng).</summary>
+        public bool BeginFertilizeTile(FarmTile tile) => BeginFertilize(tile);
+
+        /// <summary>Cây này bón phân được không — popup hỏi để bật/tắt nút, khỏi lộ ngưỡng ra ngoài.</summary>
+        public bool CanFertilizeTile(FarmTile tile) => tile != null && tile.IsFertilizable(FertilizerMaxGrowthSec);
+
+        // ── DỜI CỤM: chuồng / ruộng / đường lát đá dùng chung PenMoveController ──────────────────
+
+        /// <summary>Cổng public cho popup chuồng bấm "Dời chuồng".</summary>
+        public bool BeginMovePen(List<BuildSurfaceCell> pen)
+        {
+            if (pen == null || pen.Count == 0) return false;
+            return StartGroupMove(new List<BuildSurfaceCell>(pen), "chuồng");
+        }
+
+        /// <summary>
+        /// DỜI CẢ MẢNH RUỘNG (khách chốt 30/07): nhấc mọi ô đất liền nhau — cây đang trồng đi theo
+        /// vì model cây là con của ô đất — rồi đặt xuống chỗ mới. Không tốn/hoàn vật liệu (ruộng vốn free).
+        /// Chỉ dời được ruộng dựng bằng Chế độ Xây (nằm trên BuildSurfaceCell); ruộng cũ của
+        /// TilePlacementSystem không có ô nền nên từ chối, thà không cho dời còn hơn dời xong mất cây.
+        /// </summary>
+        public bool BeginMovePlot(FarmTile seed)
+        {
+            if (seed == null) return false;
+
+            var tiles = FindPlotTiles(seed.masterTile != null ? seed.masterTile : seed);
+            var cells = new List<BuildSurfaceCell>();
+            var seen = new HashSet<BuildSurfaceCell>();
+
+            foreach (var tile in tiles)
+            {
+                if (tile == null) continue;
+                var building = ResolvePlacedBuildingRoot(tile);
+                var cell = building != null ? BuildSurfaceCell.FindByOccupant(building) : null;
+                if (cell == null)
+                {
+                    ScreenToast.Show("Ruộng này không dời được (ruộng đời cũ, chưa gắn ô nền).");
+                    return false;
+                }
+                if (seen.Add(cell)) cells.Add(cell);
+            }
+
+            if (cells.Count == 0) return false;
+            return StartGroupMove(cells, "ruộng");
+        }
+
+        /// <summary>
+        /// DỜI ĐƯỜNG LÁT ĐÁ: nhấc ĐÚNG VIÊN đang chỉ, không nhấc cả đoạn (anh chốt 30/07 —
+        /// bốc cả lối đi lên thì khó dùng, chỉ muốn nắn lại một viên đặt lệch).
+        /// Viên nào chiếm nhiều ô thì đi trọn bộ ô của nó.
+        /// </summary>
+        public bool BeginMovePath(GameObject pathBuilding)
+        {
+            if (pathBuilding == null) return false;
+
+            var cells = BuildSurfaceCell.FindAllByOccupant(pathBuilding);
+            if (cells.Count == 0)
+            {
+                ScreenToast.Show("Đường này không dời được (chưa gắn ô nền).");
+                return false;
+            }
+
+            return StartGroupMove(cells, "đường");
+        }
+
+        private bool StartGroupMove(List<BuildSurfaceCell> cells, string subjectLabel)
+        {
+            if (!PenMoveController.Begin(cells, subjectLabel))
+            {
+                ScreenToast.Show($"Không dời được {subjectLabel} này.");
+                return false;
+            }
+
+            ClearWorldInteractionState();
+            ScreenToast.ShowInfo($"Đang dời {subjectLabel} ({PenMoveController.CellCount} ô) — đi tới chỗ mới rồi bấm Đặt.");
+            return true;
+        }
+
+        // Khung hình lúc bật một việc "chờ chọn đồ trong túi" — để đừng dọn nhầm ngay khung vừa mở túi.
+        private int pendingItemPickFrame = -1;
+
+        private void MarkPendingItemPick() => pendingItemPickFrame = Time.frameCount;
+
+        /// <summary>
+        /// Đóng túi mà KHÔNG chọn gì thì bỏ luôn việc đang chờ. Trước đây cờ chờ nằm lại mãi, nên lần
+        /// sau mở túi bấm món bất kỳ vẫn bị hiểu là "đang bón phân" / "đang cho ăn" — anh gặp lúc làm
+        /// việc khác trên ruộng mà game bắn toast về phân bón.
+        ///
+        /// Cố ý KHÔNG đụng pendingPen / pendingEnclosure: hai cái đó do luồng thả thú BẤT ĐỒNG BỘ
+        /// (chờ server) giữ, dọn ngang sẽ làm rơi kết quả trả về.
+        /// </summary>
+        private void ClearPendingItemPickIfBagClosed()
+        {
+            if (pendingFeedAnimal == null && pendingPlantTile == null) return;
+            if (Time.frameCount <= pendingItemPickFrame + 1) return;              // vừa bấm, túi chưa kịp hiện
+            if (inventoryPopup != null && inventoryPopup.IsVisible()) return;     // túi còn mở -> vẫn đang chọn
+
+            pendingFeedAnimal = null;
+            pendingPlantTile = null;
+        }
+
+        /// <summary>
+        /// BÓN PHÂN — bón THẲNG, không mở túi (anh chốt 31/07).
+        ///
+        /// Trước đây bấm "Bón phân" thì mở túi cho người chơi chọn món. Bước đó THỪA vì phân bón chỉ
+        /// có ĐÚNG MỘT loại; đổi lại nó gây hai phiền: popup "Xem ruộng" phải đóng nên không bón liên
+        /// tiếp được, và cờ "đang chờ chọn phân" bị treo khi đóng túi giữa chừng (sinh ra toast phân
+        /// bón lúc đang làm việc khác). Bón thẳng là hết cả hai.
+        ///
+        /// Trả về true nếu bón được — popup dùng để biết có cần vẽ lại không.
+        /// </summary>
+        private bool BeginFertilize(FarmTile tile)
+        {
+            if (tile == null) return false;
+
+            if (!tile.IsFertilizable(FertilizerMaxGrowthSec))
+            {
+                ScreenToast.Show("Chỉ bón được CÂY NGẮN NGÀY đang lớn (đã tưới, chưa chín).");
+                return false;
+            }
+
+            var inv = YWonderLand.Managers.InventoryManager.Instance;
+            if (inv == null || inv.GetItemQuantity(FertilizerItemId) <= 0)
+            {
+                ScreenToast.Show("Trong túi không còn phân bón — mua thêm ở Cửa hàng Vật phẩm hoặc Đại lý Hai Lúa.");
+                return false;
+            }
+
+            if (PlayerController.Instance != null) PlayerController.Instance.FaceTowards(tile.transform.position);
+            if (!inv.RemoveItem(FertilizerItemId, 1)) return false;
+
+            float bonusSec = FertilizerBonusSec;
+            // Đọc giống TRƯỚC khi bón để tính ra phần trăm; bón xong cây có thể chín và mất crop.
+            var fertilizedCrop = tile.GetCurrentCrop();
+
+            if (!tile.ApplyFertilizer(bonusSec, FertilizerMaxGrowthSec))
+            {
+                inv.AddItem(FertilizerItemId, 1); // bón hụt thì HOÀN phân, không nuốt đồ của người chơi
+                ScreenToast.Show("Bón không được — cây chưa tưới hoặc đã chín.");
+                return false;
+            }
+
+            string saved = FertilizerSavingText(fertilizedCrop, bonusSec);
+
+            // Bón đúng túi CUỐI thì gộp luôn lời nhắc vào câu báo thành công. Trước đây bắn 2 toast
+            // liền nhau ("đã bón" rồi "hết phân bón"), anh báo là người chơi tưởng bón hụt.
+            string note = inv.GetItemQuantity(FertilizerItemId) <= 0
+                ? " Đó là túi phân cuối — mua thêm ở Cửa hàng Vật phẩm hoặc Đại lý Hai Lúa."
+                : "";
+
+            ScreenToast.ShowInfoForItem(FertilizerItemId, $"Đã bón phân: {saved}.{note}", fallbackText: "Phân");
+            FarmActivityLog.RecordEvent(tile.HistoryKey, FarmActivityLog.KindFertilize, saved);
+            return true;
+        }
+
+        /// <summary>
+        /// Chữ báo hiệu quả bón phân. Khách muốn nói theo PHẦN TRĂM ("giảm 15% thời gian") chứ không
+        /// theo số giờ. Phần trăm TÍNH RA từ chính giống cây đang bón chứ không gõ cứng — đổi
+        /// <c>fertilizerBonusHours</c> trong Inspector là câu chữ tự đúng theo, khỏi lệch với số thật.
+        /// </summary>
+        private static string FertilizerSavingText(CropDefinition crop, float bonusSec)
+        {
+            if (crop != null && crop.growthTimeSec > 0f)
+            {
+                int percent = Mathf.RoundToInt(bonusSec / crop.growthTimeSec * 100f);
+                if (percent > 0) return $"giảm {percent}% thời gian chín";
+            }
+
+            // Không tra được giống thì lùi về nói số giờ — vẫn đúng, chỉ kém gọn.
+            return $"chín sớm hơn {YWonderLand.Core.GameTimeConfig.FormatDuration(bonusSec)}";
+        }
+
         // Cho ăn = mở túi (tab Thực phẩm) chọn thức ăn (tạm dùng Bắp ngô) -> animation Feed.
         private void FeedAnimal(FarmAnimal animal)
         {
             if (animal == null) return;
             pendingFeedAnimal = animal;
+            MarkPendingItemPick();
             pendingPen = null;
             pendingPlantTile = null;
             pendingEnclosure = null;
             if (PlayerController.Instance != null) PlayerController.Instance.FaceTowards(animal.transform.position);
 
-            EnsureStarterFeed(animal); // demo: cấp ĐÚNG thức ăn của loài (theo tài liệu) để chọn
+            WarnIfNoFeed(animal); // hết thức ăn thì nhắc, không cấp thêm
 
             EnsureInventoryPopupSubscribed();
             if (inventoryPopup != null)
@@ -2430,6 +3063,8 @@ namespace YWonderLand.Environment
                     if (animal != null)
                     {
                         animal.Feed();
+                        // Ghi nhật ký cho ăn — hiện lại trong popup của chính con này (khách chốt 30/07).
+                        FarmActivityLog.RecordFeed(animal.animalInstanceId, $"{required}x {matchedName}");
                         FarmStateSync.SaveBuildState();
                         ScreenToast.ShowInfo($"Đã cho {(def != null ? def.animalName : "thú")} ăn {required}x {matchedName}.");
                     }
@@ -2449,28 +3084,36 @@ namespace YWonderLand.Environment
                 inv.AddItem(itemId, required);
         }
 
-        // Demo helper: cấp ĐÚNG thức ăn của loài (chính + phụ) để test, thay vì luôn dùng ngô.
-        // Production: người chơi tự trồng/mua thức ăn đúng loại.
-        private void EnsureStarterFeed(FarmAnimal animal)
+        // Hết thức ăn thì NHẮC người chơi trồng/mua, không phát không.
+        // (Bản demo trước tự cấp thức ăn mỗi khi về 0 — cùng lỗi với hạt giống.)
+        private void WarnIfNoFeed(FarmAnimal animal)
         {
             var inv = YWonderLand.Managers.InventoryManager.Instance;
             if (inv == null || animal == null || animal.data == null) return;
-            GiveFoodForDemo(inv, animal.data.foodMainName, Mathf.Max(1, animal.data.foodMainAmount) * 3);
-            // Bỏ qua thức ăn phụ amount 0 (vd 'Cám' — không phải item trong game) → tránh cảnh báo thừa.
-            if (animal.data.foodAltAmount > 0)
-                GiveFoodForDemo(inv, animal.data.foodAltName, animal.data.foodAltAmount * 3);
+
+            string main = animal.data.foodMainName;
+            // Thức ăn phụ ghi amount 0 (vd 'Cám') là không dùng thật -> bỏ qua.
+            string alt = animal.data.foodAltAmount > 0 ? animal.data.foodAltName : null;
+
+            if (HasFood(inv, main) || HasFood(inv, alt)) return;
+
+            string names = string.IsNullOrEmpty(alt) ? main : $"{main} hoặc {alt}";
+            if (string.IsNullOrEmpty(names)) return;
+
+            string who = !string.IsNullOrEmpty(animal.data.animalName) ? animal.data.animalName : "Con vật";
+            ScreenToast.Show($"{who} cần {names} — trồng thêm hoặc mua ở Farm Shop.");
         }
 
-        private void GiveFoodForDemo(YWonderLand.Managers.InventoryManager inv, string foodName, int amount)
+        private bool HasFood(YWonderLand.Managers.InventoryManager inv, string foodName)
         {
+            if (string.IsNullOrEmpty(foodName)) return false;
             string id = ResolveItemIdByName(foodName);
             if (string.IsNullOrEmpty(id))
             {
-                if (!string.IsNullOrEmpty(foodName))
-                    Debug.LogWarning($"[FarmInteraction] Không tìm thấy item khớp tên thức ăn '{foodName}' trong ItemDatabase (kiểm tra lại tên trong AnimalDefinition vs ItemDatabase).");
-                return;
+                Debug.LogWarning($"[FarmInteraction] Không tìm thấy item khớp tên thức ăn '{foodName}' trong ItemDatabase (kiểm tra lại tên trong AnimalDefinition vs ItemDatabase).");
+                return false;
             }
-            if (inv.GetItemQuantity(id) <= 0) inv.AddItem(id, amount);
+            return inv.GetItemQuantity(id) > 0;
         }
 
         // ── Tra cứu tên ↔ id thức ăn qua ItemDatabase ──
@@ -2712,6 +3355,7 @@ namespace YWonderLand.Environment
             if (PlayerController.Instance == null) return; // chống NullReferenceException khi player chưa spawn / đang teleport
             if (!IsTileInRange(tile, useDirectTapInteraction))
             {
+                NotifyBlocked("Đứng gần ô đất hơn mới thao tác được.");
                 Debug.LogWarning($"[FarmInteraction] Tile action blocked by range: tile={(tile != null ? tile.name : "null")}, range={GetTileInteractRange():0.00}");
                 return;
             }
@@ -2996,9 +3640,10 @@ namespace YWonderLand.Environment
 
             // Ghi nhớ ô đất đang chờ gieo, rồi mở Túi đồ ở tab Hạt giống để người chơi CHỌN loại cây.
             pendingPlantTile = tile;
+            MarkPendingItemPick();
 
-            // Demo helper: nếu chưa có hạt nào thì tặng gói hạt khởi đầu để có cái mà chọn.
-            EnsureStarterSeeds();
+            // Hết hạt thì NHẮC ra shop mua, không tặng thêm.
+            WarnIfNoSeeds();
 
             EnsureInventoryPopupSubscribed();
 
@@ -3015,21 +3660,29 @@ namespace YWonderLand.Environment
             }
         }
 
-        // Đảm bảo túi đồ LUÔN có đủ 3 loại hạt (đã có model 3D) để người chơi chọn trồng.
-        private void EnsureStarterSeeds()
+        // Hết hạt là phải MUA, không phát không.
+        // (Bản demo trước tự cộng 3 hạt cà rốt/cải/bắp mỗi lần về 0 -> hạt vô hạn, hỏng kinh tế
+        //  và còn đẩy delta +3 lên server nên số hạt bên server cũng phồng theo.)
+        private void WarnIfNoSeeds()
         {
             var inv = YWonderLand.Managers.InventoryManager.Instance;
-            if (inv == null) return;
+            if (inv == null || HasAnySeed(inv)) return;
 
-            string[] starterSeeds = { "carrot_seed_01", "cabbage_seed_01", "corn_seed_01" };
-            foreach (var s in starterSeeds)
+            ScreenToast.Show("Hết hạt giống rồi — ra Farm Shop mua thêm để trồng.");
+        }
+
+        private bool HasAnySeed(YWonderLand.Managers.InventoryManager inv)
+        {
+            var db = FoodDb; // dùng chung ItemDatabase
+            if (db == null) return true; // không tra được thì thôi, đừng báo nhầm
+
+            foreach (var slot in inv.GetAllSlots())
             {
-                if (inv.GetItemQuantity(s) <= 0)
-                {
-                    inv.AddItem(s, 3);
-                    Debug.Log($"[FarmInteraction] Bổ sung hạt giống cho demo: {s} +3");
-                }
+                if (slot == null || slot.quantity <= 0) continue;
+                var def = db.GetItem(slot.itemId);
+                if (def != null && def.category == "seeds") return true;
             }
+            return false;
         }
 
         // Mở túi đồ (tab Thú nuôi) để chọn con vật thả vào chuồng đang đứng.
@@ -3222,6 +3875,14 @@ namespace YWonderLand.Environment
 
             building ??= ResolvePlacedBuildingRoot(tile);
             if (building == null) return;
+
+            // Chốt 29/07: chỉ hủy ô TRỐNG. Chặn ở đây phòng khi lời gọi tới từ đường khác (phím tắt, prompt cũ).
+            if (HasCropOnFarmTile(tile))
+            {
+                ScreenToast.Show("Ô đang có cây — thu hoạch xong mới hủy được.");
+                return;
+            }
+
             string buildingName = building.name;
 
             bool hadCrop = tile.currentState == FarmTile.TileState.Planted ||
@@ -3257,6 +3918,81 @@ namespace YWonderLand.Environment
 
             ScreenToast.ShowInfo(hadCrop ? "\u0110\u00e3 h\u1ee7y \u00f4 tr\u1ed3ng v\u00e0 c\u00e2y tr\u00ean \u00f4." : "\u0110\u00e3 h\u1ee7y \u00f4 tr\u1ed3ng.");
             Debug.Log($"[FarmInteraction] Huy o trong: {buildingName}, hadCrop={hadCrop}.");
+        }
+
+        // Hủy đường đá (hoặc trang trí khác đặt qua Build Mode): nhấn 2 lần trong DemolishConfirmWindow để xác nhận,
+        // rồi hoàn ĐÚNG vật liệu đã tốn và trả ô về trống — đồng nhất với hủy ruộng/chuồng.
+        private void RequestDemolishPathBuilding(GameObject building)
+        {
+            if (building == null) return;
+
+            if (pendingDemolishPath == building)
+            {
+                pendingDemolishPath = null;
+                pendingDemolishTile = null;
+                pendingDemolishEnclosure = null;
+                demolishConfirmTimer = 0f;
+                DemolishPathBuilding(building);
+                return;
+            }
+
+            pendingDemolishTile = null;
+            pendingDemolishEnclosure = null;
+            pendingDemolishPath = building;
+            demolishConfirmTimer = DemolishConfirmWindow;
+            ScreenToast.Show("Nhấn hủy đường lần nữa để xác nhận.");
+        }
+
+        private void DemolishPathBuilding(GameObject building)
+        {
+            if (building == null) return;
+            if (!IsPlacedBuildingInRange(building, useDirectTapInteraction))
+            {
+                ScreenToast.Show("Đứng gần đường hơn để hủy.");
+                return;
+            }
+
+            string buildingName = building.name;
+
+            pendingDemolishTile = null;
+            pendingDemolishEnclosure = null;
+            pendingDemolishPath = null;
+            demolishConfirmTimer = 0f;
+
+            // Hoàn vật liệu đã tốn — đọc từ ô TRƯỚC khi ClearOccupant xóa dữ liệu vật liệu. Đồng nhất với hủy chuồng.
+            BuildSurfaceCell.SumRefund(building, out int refundWood, out int refundStone);
+            BuildSurfaceCell.ClearOccupant(building);
+            Destroy(building);
+
+            var inv = YWonderLand.Managers.InventoryManager.Instance;
+            if (inv != null)
+            {
+                if (refundWood > 0) inv.AddItem("wood_01", refundWood, "build_refund");
+                if (refundStone > 0) inv.AddItem("stone_01", refundStone, "build_refund");
+            }
+
+            hoverEnclosureSeed = null;
+            hoverEnclosure = null;
+            pendingEnclosure = null;
+            currentHoverObject = null;
+            currentActions.Clear();
+            lastActionSignature = "";
+            currentPromptFromFrontCell = false;
+            currentPromptFromFootWater = false;
+            currentPromptFromFootResource = false;
+            currentPromptFromFootFishing = false;
+            GameHUDController.Instance?.HideInteractionPrompt();
+            if (YWonderLand.UI.ResourceInteractionUIController.Instance != null)
+                YWonderLand.UI.ResourceInteractionUIController.Instance.Hide();
+
+            var persistence = Object.FindFirstObjectByType<BuildPersistence>(FindObjectsInactive.Include);
+            persistence?.SaveBuildings();
+
+            string msg = "Đã hủy đường đá";
+            if (refundStone > 0) msg += $", +{refundStone} Đá";
+            if (refundWood > 0) msg += $", +{refundWood} Gỗ";
+            ScreenToast.ShowInfo(msg);
+            Debug.Log($"[FarmInteraction] Huy duong da: {buildingName}, refund wood={refundWood}, stone={refundStone}.");
         }
 
         private bool IsSameEnclosure(List<BuildSurfaceCell> a, List<BuildSurfaceCell> b)
@@ -3299,6 +4035,13 @@ namespace YWonderLand.Environment
             if (pen == null || pen.Count == 0) return;
             pendingDemolishEnclosure = null;
             demolishConfirmTimer = 0f;
+
+            // Chốt 29/07: chuồng còn thú thì không cho hủy (nút đã ẩn; chặn thêm ở đây cho mọi đường gọi).
+            if (EnclosureHasAnimal(pen))
+            {
+                ScreenToast.Show("Chuồng còn vật nuôi — hãy bán hoặc dời thú trước khi hủy.");
+                return;
+            }
 
             var inv = YWonderLand.Managers.InventoryManager.Instance;
             int refundWood = 0;
@@ -3414,16 +4157,28 @@ namespace YWonderLand.Environment
 
         private void OnInventoryItemSelected(string itemId)
         {
+            // MarkHandled() = "bấm nút đã ra việc". Nhánh nào không gọi thì túi đồ tự bắn toast
+            // giải thích công dụng (ItemUsageHint) thay vì im lặng như trước.
+            void MarkHandled()
+            {
+                if (inventoryPopup != null) inventoryPopup.LastItemUseHandled = true;
+            }
+
             // Ưu tiên: đang chờ chọn thức ăn để cho động vật ăn.
             if (pendingFeedAnimal != null)
             {
+                MarkHandled();
                 HandleFeedSelected(itemId);
                 return;
             }
 
+            // (Bón phân KHÔNG còn đi qua đây: từ 31/07 bấm "Bón phân" là bón thẳng, không mở túi.
+            //  Bấm Phân bón trong túi giờ rơi xuống ItemUsageHint, chỉ đường ra ruộng — đúng ý.)
+
             // Ưu tiên: đang chờ thả thú vào VÙNG QUÂY (chuồng từ hàng rào).
             if (pendingEnclosure != null)
             {
+                MarkHandled();
                 _ = HandleEnclosureAnimalSelectedAsync(itemId);
                 return;
             }
@@ -3431,13 +4186,28 @@ namespace YWonderLand.Environment
             // Ưu tiên: đang chờ chọn con vật cho 1 chuồng (kiểu cũ) -> xử lý thả thú.
             if (pendingPen != null)
             {
+                MarkHandled();
                 HandlePenAnimalSelected(itemId);
                 return;
             }
 
-            // Only handle seed selection when we have a pending tile
+            // Bấm "Sử dụng" VÉ trong túi (khi KHÔNG ở chế độ chờ chọn cho ăn/thả/gieo).
+            if (itemId == "mine_ticket_01") { MarkHandled(); UseMineTicket(); return; }
+            if (itemId == "spin_ticket_01") { MarkHandled(); UseSpinTicket(); return; }
+
+            // Đang chờ chọn hạt để gieo: nhắc rõ khi người chơi bấm nhầm món không phải hạt,
+            // thay vì bỏ qua lặng lẽ khiến họ tưởng nút hỏng.
+            if (pendingPlantTile != null && !itemId.Contains("seed"))
+            {
+                MarkHandled();
+                ScreenToast.Show("Đang chọn hạt để gieo — hãy chọn một HẠT GIỐNG trong tab Hạt giống.");
+                return;
+            }
+
+            // Ngoài các trường hợp trên: KHÔNG MarkHandled -> túi đồ giải thích công dụng.
             if (pendingPlantTile == null) return;
-            if (!itemId.Contains("seed")) return; // Only accept seed items
+
+            MarkHandled();
 
             if (!TryValidatePlanting(pendingPlantTile, itemId, out string plantingError))
             {
@@ -3471,6 +4241,122 @@ namespace YWonderLand.Environment
 
             pendingPlantTile = null;
             pendingSeedId = null;
+        }
+
+        /// <summary>
+        /// "Sử dụng" Vé đào mỏ trong túi: trừ 1 vé -> +1 lượt đào (LOCAL).
+        /// LƯU Ý: ở Thành phố/Hầm mỏ khi ONLINE, lượt đào do SERVER quản (giới hạn ngày server-side);
+        /// vé cộng lượt local chỉ có tác dụng ở bản OFFLINE. Muốn vé cộng lượt cả khi online thì phải
+        /// làm 1 endpoint server cấp lượt đào theo vé (chưa làm ở đây).
+        /// </summary>
+        // Online: server nắm daily-limit "mining" (đào realtime kiểm), nên vé phải đổi qua server.
+        private static bool IsMiningServerAuthoritative()
+        {
+            var auth = YWonderLand.Backend.AuthService.Instance;
+            return auth != null && auth.IsSignedIn && !string.IsNullOrWhiteSpace(auth.Token);
+        }
+
+        private void UseMineTicket()
+        {
+            var inv = YWonderLand.Managers.InventoryManager.Instance;
+            if (inv == null || inv.GetItemQuantity("mine_ticket_01") <= 0)
+            {
+                ScreenToast.Show("Bạn không có Vé đào mỏ.");
+                return;
+            }
+
+            // ONLINE: server tự trừ vé + +1 lượt daily-limit "mining"; client KHÔNG tự trừ/cộng.
+            if (IsMiningServerAuthoritative())
+            {
+                RedeemMineTicketServerAsync();
+                return;
+            }
+
+            // OFFLINE (demo): cộng lượt local.
+            EnsureMiningDailyTurns();
+            if (!inv.RemoveItem("mine_ticket_01", 1, "use_mine_ticket")) return;
+
+            miningTurnsLeft = Mathf.Max(0, miningTurnsLeft) + 1;
+            PlayerScopedPrefs.SetInt(MiningTurnsLeftKey, miningTurnsLeft);
+            PlayerScopedPrefs.Save();
+            ScreenToast.Show($"Đã dùng 1 Vé đào mỏ (+1 lượt đào, còn {miningTurnsLeft} lượt).");
+        }
+
+        private async void RedeemMineTicketServerAsync()
+        {
+            var result = await YWonderLand.Backend.MiningService.RedeemTicketAsync();
+            if (result.ok)
+            {
+                SetServerMiningTurns(result.miningTurnsRemaining);
+                ScreenToast.Show($"Đã dùng 1 Vé đào mỏ (+1 lượt, còn {result.miningTurnsRemaining} lượt hôm nay).");
+            }
+            else if (result.errorCode == "NO_MINE_TICKET")
+            {
+                ScreenToast.Show("Bạn không có Vé đào mỏ.");
+            }
+            else
+            {
+                ScreenToast.Show("Mất kết nối, chưa dùng được vé. Thử lại nhé.");
+            }
+        }
+
+        // Chốt tránh auto-đổi vé lặp vô hạn (mỗi lần đào-lại chỉ đổi tối đa 1 vé; reset khi đào thành công).
+        private bool _autoRedeemInFlight = false;
+
+        private static bool HasMineTicket()
+        {
+            var inv = YWonderLand.Managers.InventoryManager.Instance;
+            return inv != null && inv.GetItemQuantity("mine_ticket_01") > 0;
+        }
+
+        // Online hết lượt + còn vé -> tự đổi 1 vé (server) rồi đào lại chính tài nguyên đó. Không cần bấm "Sử dụng".
+        private async void AutoRedeemMineTicketThenRetry(HarvestableResource resource)
+        {
+            var result = await YWonderLand.Backend.MiningService.RedeemTicketAsync();
+            if (!result.ok)
+            {
+                _autoRedeemInFlight = false;
+                ScreenToast.Show(result.errorCode == "NO_MINE_TICKET"
+                    ? "Hết lượt đào hôm nay rồi! Mua Vé đào mỏ để đào thêm nhé."
+                    : "Mất kết nối, chưa dùng được vé. Thử lại nhé.");
+                return;
+            }
+
+            SetServerMiningTurns(result.miningTurnsRemaining);
+            ScreenToast.Show($"Tự dùng 1 Vé đào mỏ (+1 lượt, còn {result.miningTurnsRemaining}). Đào lại...");
+
+            // Đào lại tài nguyên đó bằng lượt vừa cấp. _autoRedeemInFlight giữ true tới khi đào thành công
+            // (reset trong HandleSharedResourceHarvestResult) -> nếu vẫn hết lượt thì KHÔNG đổi vé lần nữa.
+            var realtime = YWonderLand.Realtime.RealtimeClient.Instance;
+            if (resource != null && resource.isHarvestable && realtime != null)
+                realtime.TryRequestResourceHarvest(resource, r => HandleSharedResourceHarvestResult(resource, r));
+            else
+                _autoRedeemInFlight = false;
+        }
+
+        /// <summary>
+        /// "Sử dụng" Vé vòng quay trong túi: mở Vòng quay may mắn. Vé sẽ bị trừ KHI quay quá lượt
+        /// free trong ngày (logic trừ nằm ở EventPopupController.OnSpin), không trừ lúc chỉ mở ra.
+        /// </summary>
+        private void UseSpinTicket()
+        {
+            var inv = YWonderLand.Managers.InventoryManager.Instance;
+            if (inv == null || inv.GetItemQuantity("spin_ticket_01") <= 0)
+            {
+                ScreenToast.Show("Bạn không có Vé vòng quay.");
+                return;
+            }
+
+            // Chỉ lấy bản ĐANG ACTIVE (đã bind UI) để ShowLuckyWheel chạy được; nếu không có thì báo mở qua Sự kiện.
+            var eventPopup = Object.FindFirstObjectByType<EventPopupController>();
+            if (eventPopup == null)
+            {
+                ScreenToast.Show("Chưa mở được Vòng quay. Vào mục Sự kiện để quay nhé.");
+                return;
+            }
+
+            if (inventoryPopup != null) inventoryPopup.Hide();
+            eventPopup.ShowLuckyWheel();
         }
 
         // Múa động tác Planting xong MỚI thật sự gieo hạt xuống ô đất.
@@ -3596,6 +4482,58 @@ namespace YWonderLand.Environment
         }
 
         // Only connected, cardinally adjacent plowed tiles may belong to one multi-slot crop.
+        /// <summary>
+        /// Gom MỌI ô đất liền nhau với ô này thành một "mảnh ruộng" — kể cả ô đang trồng
+        /// (khác FindNearbyPlowedTiles chỉ nhặt ô trống để đặt giàn). Dùng cho "Xem ruộng".
+        /// Cùng thuật toán loang 4 hướng, có chặn lệch lưới và chặn khác tầng/khác đảo.
+        /// </summary>
+        private List<FarmTile> FindPlotTiles(FarmTile seed, int maxTiles = 400)
+        {
+            var result = new List<FarmTile>();
+            if (seed == null) return result;
+
+            FarmTile master = seed.masterTile != null ? seed.masterTile : seed;
+            result.Add(master); // ô đang đứng cũng thuộc ruộng
+
+            Vector2 spacing = GetFarmSlotSpacing(master);
+            Vector3 origin = master.transform.position;
+            var map = new Dictionary<Vector2Int, FarmTile>();
+            foreach (var tile in FindObjectsByType<FarmTile>(FindObjectsSortMode.None))
+            {
+                if (tile == null || tile == master) continue;
+
+                Vector3 position = tile.transform.position;
+                float gridX = (position.x - origin.x) / spacing.x;
+                float gridZ = (position.z - origin.z) / spacing.y;
+                int x = Mathf.RoundToInt(gridX);
+                int z = Mathf.RoundToInt(gridZ);
+                if (Mathf.Abs(gridX - x) > 0.2f || Mathf.Abs(gridZ - z) > 0.2f) continue;
+                if (Mathf.Abs(position.y - origin.y) > Mathf.Max(spacing.x, spacing.y)) continue;
+
+                var key = new Vector2Int(x, z);
+                if (key == Vector2Int.zero || map.ContainsKey(key)) continue;
+                map[key] = tile;
+            }
+
+            var visited = new HashSet<Vector2Int> { Vector2Int.zero };
+            var queue = new Queue<Vector2Int>();
+            queue.Enqueue(Vector2Int.zero);
+            while (queue.Count > 0 && result.Count < maxTiles)
+            {
+                Vector2Int current = queue.Dequeue();
+                foreach (Vector2Int direction in FarmSlotDirections)
+                {
+                    Vector2Int next = current + direction;
+                    if (!visited.Add(next) || !map.TryGetValue(next, out FarmTile tile)) continue;
+                    result.Add(tile);
+                    queue.Enqueue(next);
+                    if (result.Count >= maxTiles) break;
+                }
+            }
+
+            return result;
+        }
+
         private List<FarmTile> FindNearbyPlowedTiles(FarmTile master, int count)
         {
             var result = new List<FarmTile>();
@@ -3652,7 +4590,7 @@ namespace YWonderLand.Environment
             return spacing;
         }
 
-        private void HandleWater(FarmTile tile)
+        private void HandleWater(FarmTile tile, System.Action onWatered = null)
         {
             // CHẶN SPAM: đang múa động tác (tưới/cuốc...) thì bỏ qua click mới -> không tưới chồng
             // nhiều lần + không tốn nước thừa + không tăng tiến độ ô theo số lần click.
@@ -3687,9 +4625,14 @@ namespace YWonderLand.Environment
                     else if (tile != null && tile.currentState == FarmTile.TileState.Watered) watered = tile.WaterAgain();
 
                     if (watered)
+                    {
                         FarmStateSync.SaveTileState(tile);
+                        onWatered?.Invoke();   // popup "Xem ruộng" tự mở lại để tưới tiếp cây khác
+                    }
                     else
+                    {
                         inv.AddItem("watering_water_01", 1);
+                    }
                 },
                 () => inv.AddItem("watering_water_01", 1),
                 wateringSpeed);

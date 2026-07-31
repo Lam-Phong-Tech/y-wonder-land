@@ -116,15 +116,32 @@ public class EventPopupController : MonoBehaviour
         new BundleItem { icon = "👑", name = "Gói VIP 30 ngày", desc = "VIP 30 ngày + 2000 Point", oldPrice = 500000, newPrice = 299000, tag = "-40%", soldOut = true },
     };
 
-    // ── Điểm danh TÂN THỦ 15 ngày (khách chốt 22/06: trao thưởng THẬT, chỉ 1 lần/ngày thật) ──
+    // ── Điểm danh TÂN THỦ 15 ngày ──
+    // Khách chốt 22/06: trao thưởng THẬT, mỗi ngày thật một lần.
+    // Khách chốt 31/07: NGHỈ MỘT NGÀY LÀ MẤT CHUỖI, quay về ngày 1.
+    //
+    // Sổ điểm danh nằm ở SERVER (bảng player_attendance) chứ không còn ở máy: server chấm ngày
+    // theo giờ vận hành nên vặn đồng hồ / đổi múi giờ / cài lại game đều không ăn lại được.
+    // Đường local bên dưới chỉ còn phục vụ bản demo offline chưa đăng nhập.
     private Button btnClaimAttendance;
     private VisualElement attendanceGrid;
     private int claimedDays = 0;
     private bool hasClaimedToday = false;
+    private bool attendanceFinished = false;
+    private bool attendanceBusy = false;
 
     private const int AttendanceTotalDays = 15;
     private const string AttDaysKey = "YW_AttendanceClaimedDays";
     private const string AttDateKey = "YW_AttendanceLastDate";
+    // Ngày cao nhất đã lĩnh quà. Mất chuỗi thì phải leo lại thật, nhưng đi qua ngày cũ không
+    // được lĩnh lần hai — nếu không, điểm danh cách ngày là in tiền.
+    private const string AttMaxRewardedKey = "YW_AttendanceMaxRewardedDay";
+
+    // Trạng thái server gần nhất. HUD chấm nốt đỏ bằng hàm TĨNH nên phải có bản đệm ở đây.
+    private static YWonderLand.Backend.AttendanceService.AttendancePayload serverAttendance;
+    private static bool serverFetchInFlight;
+    private static float serverFetchAtRealtime = -999f;
+    private const float ServerRefetchCooldownSec = 30f;
 
     private struct DayReward
     {
@@ -151,21 +168,61 @@ public class EventPopupController : MonoBehaviour
 
     public static bool IsAttendanceReadyToClaim()
     {
-        int days = PlayerScopedPrefs.GetInt(AttDaysKey, 0);
-        if (days >= AttendanceTotalDays) return false;
+        if (YWonderLand.Backend.AttendanceService.IsOnline())
+        {
+            // Chưa biết trạng thái server thì đi hỏi, và KHÔNG chấm đỏ bừa trong lúc chờ.
+            if (serverAttendance == null)
+            {
+                PrimeServerAttendance();
+                return false;
+            }
+            if (!serverAttendance.canClaim) return false;
+            return !IsAttendanceTutorialLocked(serverAttendance.visibleDays);
+        }
+
+        int days = LocalVisibleDays();
+        if (PlayerScopedPrefs.GetInt(AttMaxRewardedKey, 0) >= AttendanceTotalDays) return false;
         if (IsAttendanceClaimedToday()) return false;
         return !IsAttendanceTutorialLocked(days);
     }
 
     public static bool IsAttendanceLockedByTutorial()
     {
-        int days = PlayerScopedPrefs.GetInt(AttDaysKey, 0);
+        int days = serverAttendance != null ? serverAttendance.visibleDays : LocalVisibleDays();
         return IsAttendanceTutorialLocked(days);
+    }
+
+    // Hỏi server trạng thái điểm danh, có hãm để HUD gọi mỗi khung hình cũng không thành vòi xả.
+    private static async void PrimeServerAttendance()
+    {
+        if (serverFetchInFlight) return;
+        if (Time.realtimeSinceStartup - serverFetchAtRealtime < ServerRefetchCooldownSec) return;
+
+        serverFetchInFlight = true;
+        serverFetchAtRealtime = Time.realtimeSinceStartup;
+        try
+        {
+            var state = await YWonderLand.Backend.AttendanceService.GetStateAsync();
+            if (state != null) serverAttendance = state;
+        }
+        finally { serverFetchInFlight = false; }
     }
 
     private static bool IsAttendanceClaimedToday()
     {
-        return PlayerScopedPrefs.GetString(AttDateKey, "") == System.DateTime.Now.ToString("yyyyMMdd");
+        return PlayerScopedPrefs.GetString(AttDateKey, "") == TodayKey();
+    }
+
+    private static string TodayKey() => System.DateTime.Now.ToString("yyyyMMdd");
+    private static string YesterdayKey() => System.DateTime.Now.AddDays(-1).ToString("yyyyMMdd");
+
+    // Chuỗi local sau khi áp luật mất chuỗi: bỏ một ngày là lưới sáng lại từ đầu.
+    private static int LocalVisibleDays()
+    {
+        string last = PlayerScopedPrefs.GetString(AttDateKey, "");
+        if (string.IsNullOrEmpty(last)) return 0;
+        if (last != TodayKey() && last != YesterdayKey()) return 0;
+        return PlayerScopedPrefs.GetInt(AttDaysKey, 0);
     }
 
     private static bool IsAttendanceTutorialLocked(int currentClaimedDays)
@@ -211,6 +268,16 @@ public class EventPopupController : MonoBehaviour
     private const string SpinDateKey = "YW_WheelSpinDate";
     private const string SpinCountKey = "YW_WheelSpinCount";
     private int spinsUsedToday = 0;
+
+    // Vé vòng quay: hết 3 lượt free/ngày thì mỗi vé = 1 lượt quay thêm (giống mồi câu ở câu cá).
+    private const string SpinTicketItemId = "spin_ticket_01";
+    private const string OutOfSpinsMessage = "Hết lượt quay free hôm nay. Mua Vé vòng quay ở shop để quay tiếp nhé!";
+
+    private static int SpinTicketCount()
+    {
+        var inv = YWonderLand.Managers.InventoryManager.Instance;
+        return inv != null ? inv.GetItemQuantity(SpinTicketItemId) : 0;
+    }
 
     // ── Lifecycle ──
 
@@ -313,6 +380,10 @@ public class EventPopupController : MonoBehaviour
         UpdateAttendanceGridUI();
         overlay.style.display = DisplayStyle.Flex;
         Debug.Log("[Event] Opened Event Hub popup on tab " + tabIndex);
+
+        // Online: lấy sổ điểm danh theo server (không tin bộ đếm ở máy).
+        if (YWonderLand.Backend.AttendanceService.IsOnline())
+            SyncAttendanceFromServerAsync();
     }
 
     public void ShowLuckyWheel()
@@ -325,6 +396,18 @@ public class EventPopupController : MonoBehaviour
 
         wheelOverlay.style.display = DisplayStyle.Flex;
         Debug.Log("[Event] Opened NPC Lucky Wheel popup");
+
+        // Online: lấy lượt free CÒN LẠI theo server để hiển thị đúng (không tin đếm local).
+        if (IsSpinServerAuthoritative())
+            SyncSpinsFromServerAsync();
+    }
+
+    private async void SyncSpinsFromServerAsync()
+    {
+        int remaining = await YWonderLand.Backend.WheelService.GetFreeSpinsRemainingAsync(MaxSpinsPerDay);
+        if (remaining < 0) return; // không lấy được -> giữ hiển thị hiện tại
+        spinsUsedToday = Mathf.Clamp(MaxSpinsPerDay - remaining, 0, MaxSpinsPerDay);
+        RefreshWheel();
     }
 
     public void Hide()
@@ -517,11 +600,31 @@ public class EventPopupController : MonoBehaviour
 
     // ── Attendance Grid ──
 
-    // Đọc tiến độ điểm danh + xem hôm nay đã điểm danh chưa (theo NGÀY THẬT).
+    // Đọc tiến độ điểm danh. ONLINE: lấy theo server (server đã tính sẵn luật mất chuỗi).
+    // OFFLINE: đọc local, tự áp luật mất chuỗi cho khớp.
     private void LoadAttendance()
     {
-        claimedDays = PlayerScopedPrefs.GetInt(AttDaysKey, 0);
+        if (serverAttendance != null && YWonderLand.Backend.AttendanceService.IsOnline())
+        {
+            claimedDays = serverAttendance.visibleDays;
+            hasClaimedToday = serverAttendance.claimedToday;
+            attendanceFinished = serverAttendance.finished;
+            return;
+        }
+
+        claimedDays = LocalVisibleDays();
         hasClaimedToday = IsAttendanceClaimedToday();
+        attendanceFinished = PlayerScopedPrefs.GetInt(AttMaxRewardedKey, 0) >= AttendanceTotalDays;
+    }
+
+    // Mở popup thì hỏi lại server ngay (bỏ qua hãm), vì đây là lúc người chơi thật sự nhìn lưới.
+    private async void SyncAttendanceFromServerAsync()
+    {
+        serverFetchAtRealtime = Time.realtimeSinceStartup;
+        var state = await YWonderLand.Backend.AttendanceService.GetStateAsync();
+        if (state == null) return; // không lấy được -> giữ nguyên những gì đang hiện
+        serverAttendance = state;
+        UpdateAttendanceGridUI();
     }
 
     private void UpdateAttendanceGridUI()
@@ -569,7 +672,12 @@ public class EventPopupController : MonoBehaviour
 
         if (btnClaimAttendance != null)
         {
-            if (claimedDays >= AttendanceTotalDays)
+            if (attendanceBusy)
+            {
+                btnClaimAttendance.text = "Đang nhận…";
+                btnClaimAttendance.SetEnabled(false);
+            }
+            else if (attendanceFinished)
             {
                 btnClaimAttendance.text = "Đã hoàn thành!";
                 btnClaimAttendance.SetEnabled(false);
@@ -629,8 +737,10 @@ public class EventPopupController : MonoBehaviour
 
     private void ClaimDailyReward()
     {
+        if (attendanceBusy) return;
+
         LoadAttendance();
-        if (hasClaimedToday || claimedDays >= AttendanceTotalDays) return;
+        if (hasClaimedToday || attendanceFinished) return;
         if (IsAttendanceTutorialLocked(claimedDays))
         {
             YWonderLand.Environment.ScreenToast.ShowInfo("Làm xong hướng dẫn NPC tân thủ trước khi nhận điểm danh ngày đầu.");
@@ -638,11 +748,46 @@ public class EventPopupController : MonoBehaviour
             return;
         }
 
-        claimedDays++;
-        var r = GetDayReward(claimedDays);
+        if (YWonderLand.Backend.AttendanceService.IsOnline()) ClaimFromServerAsync();
+        else ClaimLocal();
+    }
 
-        // Trao thưởng THẬT.
-        if (!r.isNothing && r.qty > 0)
+    // ONLINE: server chấm ngày, giữ chuỗi và tự trao thưởng. Client chỉ báo lại kết quả.
+    private async void ClaimFromServerAsync()
+    {
+        attendanceBusy = true;
+        UpdateAttendanceGridUI();
+
+        var result = await YWonderLand.Backend.AttendanceService.ClaimAsync();
+
+        attendanceBusy = false;
+        if (result.attendance != null) serverAttendance = result.attendance;
+
+        if (!result.ok)
+        {
+            YWonderLand.Environment.ScreenToast.ShowInfo(AttendanceErrorText(result.errorCode));
+            UpdateAttendanceGridUI();
+            return;
+        }
+
+        AnnounceClaim(result.attendance.claimedDays, result.reward, result.rewardPaid, result.streakReset);
+        UpdateAttendanceGridUI();
+    }
+
+    // OFFLINE (bản demo chưa đăng nhập): giữ nguyên luật của server, chỉ đổi chỗ lưu.
+    private void ClaimLocal()
+    {
+        string last = PlayerScopedPrefs.GetString(AttDateKey, "");
+        int stored = PlayerScopedPrefs.GetInt(AttDaysKey, 0);
+        int maxRewarded = PlayerScopedPrefs.GetInt(AttMaxRewardedKey, 0);
+
+        bool streakReset = !string.IsNullOrEmpty(last) && last != YesterdayKey() && stored > 0;
+        int day = (!string.IsNullOrEmpty(last) && last == YesterdayKey()) ? stored + 1 : 1;
+
+        var r = GetDayReward(day);
+        bool rewardPaid = day > maxRewarded && !r.isNothing && r.qty > 0;
+
+        if (rewardPaid)
         {
             if (r.isPoint)
                 YWonderLand.Managers.EconomyManager.Instance?.AddPOS(r.qty);
@@ -650,20 +795,68 @@ public class EventPopupController : MonoBehaviour
                 YWonderLand.Managers.InventoryManager.Instance?.AddItem(r.itemId, r.qty);
         }
 
-        PlayerScopedPrefs.SetInt(AttDaysKey, claimedDays);
-        PlayerScopedPrefs.SetString(AttDateKey, System.DateTime.Now.ToString("yyyyMMdd"));
+        PlayerScopedPrefs.SetInt(AttDaysKey, day);
+        PlayerScopedPrefs.SetInt(AttMaxRewardedKey, Mathf.Max(maxRewarded, day));
+        PlayerScopedPrefs.SetString(AttDateKey, TodayKey());
         PlayerScopedPrefs.Save();
-        hasClaimedToday = true;
 
-        string msg = r.isNothing
-            ? $"📅 Đã điểm danh Ngày {claimedDays}!"
-            : $"📅 Ngày {claimedDays}: nhận {r.name} {(r.isPoint ? "+" : "x")}{r.qty}!";
-        if (!r.isNothing && !r.isPoint && !string.IsNullOrEmpty(r.itemId) && r.qty > 0)
-            YWonderLand.Environment.ScreenToast.ShowItemReward(r.itemId, r.qty, $"Ngày {claimedDays}");
-        else
-            YWonderLand.Environment.ScreenToast.ShowInfo(msg);
-
+        AnnounceClaim(day, ToRewardPayload(day, r), rewardPaid, streakReset);
         UpdateAttendanceGridUI();
+    }
+
+    private static YWonderLand.Backend.AttendanceService.RewardPayload ToRewardPayload(int day, DayReward r)
+    {
+        return new YWonderLand.Backend.AttendanceService.RewardPayload
+        {
+            day = day,
+            point = r.isPoint ? r.qty : 0,
+            itemId = r.isPoint ? "" : (r.itemId ?? ""),
+            qty = r.isPoint ? 0 : r.qty,
+            isNothing = r.isNothing || r.qty <= 0,
+        };
+    }
+
+    // Một lần bấm = MỘT toast. Mất chuỗi và được quà không bao giờ xảy ra cùng lúc: mất chuỗi
+    // nghĩa là đã từng điểm danh, mà đã từng điểm danh thì quà ngày 1 đã trả rồi.
+    private void AnnounceClaim(int day, YWonderLand.Backend.AttendanceService.RewardPayload reward,
+                               bool rewardPaid, bool streakReset)
+    {
+        if (streakReset)
+        {
+            YWonderLand.Environment.ScreenToast.ShowInfo(
+                $"📅 Bỏ lỡ một ngày nên chuỗi quay về Ngày {day}. Quà những ngày này đã nhận trước đó — điểm danh tiếp để mở quà mới.");
+            return;
+        }
+
+        bool hasReward = reward != null && !reward.isNothing;
+
+        if (rewardPaid && hasReward)
+        {
+            if (reward.point > 0)
+                YWonderLand.Environment.ScreenToast.ShowInfo($"📅 Ngày {day}: nhận Point +{reward.point}!");
+            else
+                YWonderLand.Environment.ScreenToast.ShowItemReward(reward.itemId, reward.qty, $"Ngày {day}");
+            return;
+        }
+
+        if (hasReward)
+        {
+            YWonderLand.Environment.ScreenToast.ShowInfo(
+                $"📅 Đã điểm danh Ngày {day}. Quà ngày này đã nhận ở chuỗi trước, đi tiếp để mở quà mới.");
+            return;
+        }
+
+        YWonderLand.Environment.ScreenToast.ShowInfo($"📅 Đã điểm danh Ngày {day}!");
+    }
+
+    private static string AttendanceErrorText(string errorCode)
+    {
+        switch (errorCode)
+        {
+            case "ALREADY_CLAIMED_TODAY": return "Hôm nay điểm danh rồi, mai quay lại nhé!";
+            case "ATTENDANCE_COMPLETED": return "Đã nhận đủ 15 ngày điểm danh tân thủ rồi!";
+            default: return "Mất kết nối, chưa điểm danh được. Thử lại nhé.";
+        }
     }
 
     // ── Vòng quay may mắn ──
@@ -879,26 +1072,107 @@ public class EventPopupController : MonoBehaviour
 
     private void RefreshWheel()
     {
-        LoadSpins();
-        int left = Mathf.Max(0, MaxSpinsPerDay - spinsUsedToday);
-        if (lblSpinsLeft != null) lblSpinsLeft.text = $"Lượt còn: {left}/{MaxSpinsPerDay}";
+        // ONLINE: giữ spinsUsedToday đã đồng bộ từ server (SyncSpinsFromServerAsync / OnSpinServerAsync).
+        // OFFLINE: đọc đếm local. (Nếu online mà gọi LoadSpins sẽ đè lại số local -> hiển thị sai.)
+        if (!IsSpinServerAuthoritative())
+            LoadSpins();
+        int free = Mathf.Max(0, MaxSpinsPerDay - spinsUsedToday);
+        int tickets = SpinTicketCount();
+        if (lblSpinsLeft != null)
+        {
+            lblSpinsLeft.text = free > 0
+                ? $"Lượt còn: {free}/{MaxSpinsPerDay}"
+                : (tickets > 0 ? $"Hết free — vé vòng quay: {tickets}" : "Hết lượt quay hôm nay");
+        }
         if (btnSpin != null)
         {
-            btnSpin.SetEnabled(left > 0);
+            // Còn lượt free HOẶC còn vé thì quay được.
+            btnSpin.SetEnabled(free > 0 || tickets > 0);
             btnSpin.text = string.Empty;
         }
+    }
+
+    // Online: server đếm lượt/vé (theo NGÀY SERVER, bền qua đăng nhập lại — hết lỗi reset-mỗi-login).
+    private static bool IsSpinServerAuthoritative()
+    {
+        var auth = YWonderLand.Backend.AuthService.Instance;
+        return auth != null && auth.IsSignedIn && !string.IsNullOrWhiteSpace(auth.Token);
     }
 
     private void OnSpin()
     {
         if (isSpinning) return;
-        LoadSpins();
-        if (spinsUsedToday >= MaxSpinsPerDay) return;
 
-        // Chọn quà theo TRỌNG SỐ.
+        // ONLINE: để server quyết free/vé (chống reset-mỗi-login + trừ vé thật). Client chỉ bốc quà.
+        if (IsSpinServerAuthoritative())
+        {
+            OnSpinServerAsync();
+            return;
+        }
+
+        // OFFLINE (demo): đếm lượt local.
+        LoadSpins();
+        bool useFreeSpin = spinsUsedToday < MaxSpinsPerDay;
+        if (!useFreeSpin && SpinTicketCount() <= 0)
+        {
+            YWonderLand.Environment.ScreenToast.Show(OutOfSpinsMessage);
+            return;
+        }
+        if (useFreeSpin)
+        {
+            spinsUsedToday++;
+            PlayerScopedPrefs.SetInt(SpinCountKey, spinsUsedToday);
+            PlayerScopedPrefs.Save();
+        }
+        else
+        {
+            var inv = YWonderLand.Managers.InventoryManager.Instance;
+            if (inv == null || !inv.RemoveItem(SpinTicketItemId, 1, "wheel_spin_ticket"))
+            {
+                YWonderLand.Environment.ScreenToast.Show(OutOfSpinsMessage);
+                return;
+            }
+            int leftTickets = inv.GetItemQuantity(SpinTicketItemId);
+            YWonderLand.Environment.ScreenToast.ShowInfoForItem(
+                SpinTicketItemId, $"Dùng 1 vé vòng quay để quay tiếp (còn {leftTickets} vé).");
+        }
+
+        StartSpinVisual();
+    }
+
+    private async void OnSpinServerAsync()
+    {
+        isSpinning = true;
+        if (btnSpin != null) btnSpin.SetEnabled(false);
+
+        var result = await YWonderLand.Backend.WheelService.SpinAsync();
+        if (!result.ok)
+        {
+            isSpinning = false;
+            // NO_SPIN_TURN = hết cả free lẫn vé -> phản ánh lên hiển thị (free = 0).
+            if (result.errorCode == "NO_SPIN_TURN")
+                spinsUsedToday = MaxSpinsPerDay;
+            YWonderLand.Environment.ScreenToast.Show(
+                result.errorCode == "NO_SPIN_TURN" ? OutOfSpinsMessage : "Mất kết nối, chưa quay được. Thử lại nhé.");
+            RefreshWheel();
+            return;
+        }
+
+        // Đồng bộ lượt free hiển thị theo server.
+        spinsUsedToday = Mathf.Clamp(MaxSpinsPerDay - result.spinsRemaining, 0, MaxSpinsPerDay);
+        if (result.usedTicket)
+            YWonderLand.Environment.ScreenToast.ShowInfoForItem(
+                SpinTicketItemId, $"Dùng 1 vé vòng quay để quay tiếp (còn {result.ticketRemaining} vé).");
+
+        StartSpinVisual();
+    }
+
+    // Bốc quà theo trọng số + quay + trao thưởng. Gọi SAU khi đã chốt được 1 lượt (free/vé).
+    private void StartSpinVisual()
+    {
         int total = 0;
         foreach (var p in wheelPrizes) total += p.weight;
-        if (total <= 0) return;
+        if (total <= 0) { isSpinning = false; return; }
         int roll = UnityEngine.Random.Range(0, total);
         int acc = 0, idx = wheelPrizes.Count - 1;
         for (int i = 0; i < wheelPrizes.Count; i++)
@@ -907,11 +1181,6 @@ public class EventPopupController : MonoBehaviour
             if (roll < acc) { idx = i; break; }
         }
         WheelPrize won = wheelPrizes[idx];
-
-        // Trừ lượt (lưu ngay).
-        spinsUsedToday++;
-        PlayerScopedPrefs.SetInt(SpinCountKey, spinsUsedToday);
-        PlayerScopedPrefs.Save();
 
         isSpinning = true;
         if (btnSpin != null) { btnSpin.SetEnabled(false); btnSpin.text = string.Empty; }

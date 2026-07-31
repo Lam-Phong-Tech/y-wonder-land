@@ -13,9 +13,8 @@ MonoBehaviour:
   m_Name: Shop_MiniGarden
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.ShopDefinition
   shopName: "Mini Garden \u2014 Thu mua N\xF4ng s\u1EA3n"
-  accessMode: 2
-  buyItemIds: []
-  sellItemIds:
+  accessMode: 0
+  buyItemIds:
   - carrot_01
   - cabbage_01
   - watermelon_01
@@ -24,6 +23,8 @@ MonoBehaviour:
   - morning_glory_01
   - sweet_potato_01
   - grass_01
+  - fertilizer_01
+  sellItemIds:
   - banana_01
   - coconut_01
   - areca_01

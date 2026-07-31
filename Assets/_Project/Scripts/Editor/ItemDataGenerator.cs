@@ -69,22 +69,30 @@ namespace YWonderLand.EditorScripts
             AddItem(db, "passion_fruit_seed_01", "Gi\u1ED1ng chanh leo", "Gi\u1ED1ng c\u00E2y chanh leo (chanh d\u00E2y) l\u00E2u n\u0103m.", "\ud83c\udf47", "seeds", 5300, 3, true); // BA chot 09/07: 200 USDT / cum 20 cay, ti gia 26.500 => 5.300 Point
             
             // Vật phẩm tiêu hao
-            AddItem(db, "fertilizer_01", "Ph\u00E2n b\u00F3n", "Gi\u1EA3m 50% th\u1EDDi gian sinh tr\u01B0\u1EDFng.", "\ud83e\uddea", "items", 50, 25, true);
+            // Kh\u00E1ch ch\u1ED1t 30/07: ph\u00E2n b\u00F3n 1 Point; m\u1ED7i l\u1EA7n b\u00F3n r\u00FAt C\u1ED0 \u0110\u1ECANH 3.6 gi\u1EDD ch\u1EDD v\u00E0 CH\u1EC8 \u00E1p d\u1EE5ng
+            // cho c\u00E2y ng\u1EAFn ng\u00E0y (xem FarmTile.ApplyFertilizer + IsFertilizable).
+            // canSell = FALSE c\u00F3 ch\u1EE7 \u00FD: gi\u00E1 mua 1 m\u00E0 cho b\u00E1n l\u1EA1i l\u00E0 l\u1ED7 h\u1ED5ng mua-r\u1EBB-b\u00E1n-\u0111\u1EAFt in ti\u1EC1n v\u00F4 h\u1EA1n.
+            AddItem(db, "fertilizer_01", "Ph\u00E2n b\u00F3n", "B\u00F3n cho c\u00E2y ng\u1EAFn ng\u00E0y: m\u1ED7i l\u1EA7n gi\u1EA3m 15% th\u1EDDi gian ch\u00EDn.", "\ud83e\uddea", "items", 1, 0, false);
             AddItem(db, "vaccine_01", "V\u1EAFc-xin", "Ph\u00F2ng b\u1EC7nh 7 ng\u00E0y.", "\ud83d\udc89", "items", 30, 15, true);   // kh\u00E1ch ch\u1ED1t 22/06: gi\u00E1 mua 30 (theo VatNuoi)
             AddItem(db, "medicine_01", "Thu\u1ED1c tr\u1ECB", "Thu\u1ED1c \u0111i\u1EC1u tr\u1ECB v\u1EADt nu\u00F4i b\u1EC7nh.", "\ud83d\udc8a", "items", 70, 35, true);  // kh\u00E1ch ch\u1ED1t 22/06: gi\u00E1 mua 70 (theo VatNuoi)
-            AddItem(db, "bait_01", "M\u1ED3i c\u00E2u", "T\u0103ng 20% c\u00E1 hi\u1EBFm.", "\ud83e\udeb1", "items", 20, 10, true);
-            AddItem(db, "mine_ticket_01", "V\u00E9 \u0111\u00E0o m\u1ECF", "Th\u00EAm 5 l\u01B0\u1EE3t \u0111\u00E0o qu\u1EB7ng.", "\ud83c\udfab", "items", 100, 0, false);
+            // Gi\u00E1 kh\u00E1ch ch\u1ED1t 24/07: m\u1ED3i c\u00E2u 2 Point/l\u01B0\u1EE3t, v\u00E9 \u0111\u00E0o 2 Point/l\u01B0\u1EE3t. sellPrice < buyPrice
+            // \u0111\u1EC3 KH\u00D4NG th\u00E0nh l\u1ED7 h\u1ED5ng mua-r\u1EBB-b\u00E1n-\u0111\u1EAFt (m\u1ED3i c\u0169 buy 20/sell 10, gi\u1EDD buy 2 m\u00E0 sell 10 l\u00E0 in ti\u1EC1n).
+            AddItem(db, "bait_01", "M\u1ED3i c\u00E2u", "H\u1EBFt 10 l\u01B0\u1EE3t c\u00E2u free trong ng\u00E0y th\u00EC m\u1ED7i con m\u1ED3i = 1 l\u01B0\u1EE3t c\u00E2u th\u00EAm.", "\ud83e\udeb1", "items", 2, 1, true);
+            AddItem(db, "mine_ticket_01", "V\u00E9 \u0111\u00E0o m\u1ECF", "H\u1EBFt l\u01B0\u1EE3t \u0111\u00E0o free trong ng\u00E0y th\u00EC m\u1ED7i v\u00E9 = 1 l\u01B0\u1EE3t \u0111\u00E0o th\u00EAm.", "\ud83c\udfab", "items", 2, 0, false);
+            AddItem(db, "spin_ticket_01", "V\u00E9 v\u00F2ng quay", "H\u1EBFt 3 l\u01B0\u1EE3t quay free trong ng\u00E0y th\u00EC m\u1ED7i v\u00E9 = 1 l\u01B0\u1EE3t quay th\u00EAm.", "\ud83c\uDFA1", "items", 5, 0, false);
 
             // Nông sản (8 loại tương ứng 8 seed)
             // N\u00F4ng s\u1EA3n NG\u1EAEN NG\u00C0Y = TH\u1EE8C \u0102N CH\u0102N NU\u00D4I, KH\u00D4NG b\u00E1n (kh\u00E1ch ch\u1ED1t 22/06): sellPrice 0 + canSell=false.
-            AddItem(db, "carrot_01", "C\u00E0 r\u1ED1t", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83e\udd55", "food", 0, 0, false);
-            AddItem(db, "cabbage_01", "B\u1EAFp c\u1EA3i", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83e\udd6c", "food", 0, 0, false);
-            AddItem(db, "watermelon_01", "D\u01B0a h\u1EA5u", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83c\udf49", "food", 0, 0, false);
-            AddItem(db, "corn_01", "B\u1EAFp ng\u00F4", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83c\udf3d", "food", 0, 0, false);
-            AddItem(db, "pumpkin_01", "B\u00ED ng\u00F4", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83c\udf83", "food", 0, 0, false);
-            AddItem(db, "morning_glory_01", "Rau mu\u1ED1ng", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83c\udf3e", "food", 0, 0, false);
-            AddItem(db, "sweet_potato_01", "Khoai lang", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83c\udf60", "food", 0, 0, false);
-            AddItem(db, "grass_01", "C\u1ECF Voi", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83c\udf3f", "food", 0, 0, false);
+            // Gi\u00E1 mua kh\u00E1ch ch\u1ED1t 30/07: c\u00E0 r\u1ED1t/c\u1EA3i/d\u01B0a h\u1EA5u/b\u1EAFp = 4, rau mu\u1ED1ng = 5,
+            // b\u00ED ng\u00F4 = 11, khoai lang = 9, c\u1ECF voi = 8. V\u1EABn KH\u00D4NG b\u00E1n l\u1EA1i \u0111\u01B0\u1EE3c (canSell=false).
+            AddItem(db, "carrot_01", "C\u00E0 r\u1ED1t", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83e\udd55", "food", 4, 0, false);
+            AddItem(db, "cabbage_01", "B\u1EAFp c\u1EA3i", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83e\udd6c", "food", 4, 0, false);
+            AddItem(db, "watermelon_01", "D\u01B0a h\u1EA5u", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83c\udf49", "food", 4, 0, false);
+            AddItem(db, "corn_01", "B\u1EAFp ng\u00F4", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83c\udf3d", "food", 4, 0, false);
+            AddItem(db, "pumpkin_01", "B\u00ED ng\u00F4", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83c\udf83", "food", 11, 0, false);
+            AddItem(db, "morning_glory_01", "Rau mu\u1ED1ng", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83c\udf3e", "food", 5, 0, false);
+            AddItem(db, "sweet_potato_01", "Khoai lang", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83c\udf60", "food", 9, 0, false);
+            AddItem(db, "grass_01", "C\u1ECF Voi", "Th\u1EE9c \u0103n ch\u0103n nu\u00F4i (kh\u00F4ng b\u00E1n).", "\ud83c\udf3f", "food", 8, 0, false);
             
             // Sản phẩm chăn nuôi
             // S\u1EA3n ph\u1EA9m ch\u00EDnh (Pro1) \u2014 gi\u00E1 b\u00E1n theo c\u1ED9t "Gi\u00E1 Product 1" trong VatNuoi.md
@@ -125,8 +133,9 @@ namespace YWonderLand.EditorScripts
             AddItem(db, "passion_fruit_01", "H\u1ED9p m\u1EE9t chanh leo", "H\u1ED9p m\u1EE9t chanh leo (chanh d\u00E2y).", "\uD83C\uDF47", "products", 0, 57, true); // CayTrongLauNam2: ban 57
             
             // Vật liệu
-            AddItem(db, "wood_01", "G\u1ED7", "G\u1ED7 ch\u1EB7t t\u1EEB c\u00E2y.", "\ud83e\udeb5", "materials", 0, 8, true);
-            AddItem(db, "stone_01", "\u0110\u00E1", "\u0110\u00E1 \u0111\u00E0o t\u1EEB m\u1ECF.", "\ud83e\udea8", "materials", 0, 12, true);
+            // Gi\u00E1 mua kh\u00E1ch ch\u1ED1t 30/07: g\u1ED7 8, \u0111\u00E1 2. Sell price gi\u1EEF nguy\u00EAn (ch\u01B0a g\u1EAFn shop n\u00E0o cho b\u00E1n l\u1EA1i).
+            AddItem(db, "wood_01", "G\u1ED7", "G\u1ED7 ch\u1EB7t t\u1EEB c\u00E2y.", "\ud83e\udeb5", "materials", 8, 8, true);
+            AddItem(db, "stone_01", "\u0110\u00E1", "\u0110\u00E1 \u0111\u00E0o t\u1EEB m\u1ECF.", "\ud83e\udea8", "materials", 2, 12, true);
             AddItem(db, "gem_kyanite_01", "Kyanite", "\u0110\u00E1 qu\u00FD Kyanite. B\u00E1n \u0111\u01B0\u1EE3c 2 Point.", "\uD83D\uDC8E", "materials", 0, 2, true);
             AddItem(db, "gem_orange_calcite_01", "Orange Calcite", "\u0110\u00E1 qu\u00FD Orange Calcite. B\u00E1n \u0111\u01B0\u1EE3c 3 Point.", "\uD83D\uDC8E", "materials", 0, 3, true);
             AddItem(db, "gem_green_calcite_01", "Green Calcite", "\u0110\u00E1 qu\u00FD Green Calcite. B\u00E1n \u0111\u01B0\u1EE3c 6 Point.", "\uD83D\uDC8E", "materials", 0, 6, true);
@@ -161,9 +170,8 @@ namespace YWonderLand.EditorScripts
             AddItem(db, "goose_01", "Ngỗng", "Ngỗng cho trứng to.", "🦢", "animals", 260, 0, false);
             AddItem(db, "turtle_01", "Rùa", "Rùa cho mai quý.", "🐢", "animals", 2340, 0, false);
 
-            // Câu cá
-            AddItem(db, "fish_01", "Cá chép", "Cá chép tươi sống.", "🐟", "food", 0, 50, true);
-            AddItem(db, "fish_02", "Cá hiếm", "Loài cá quý hiếm.", "🐡", "food", 0, 200, true);
+            // Câu cá — chỉ giữ bộ cá theo tài liệu CacLoaiCa.md (fish_ca_*).
+            // fish_01 "Cá chép" / fish_02 "Cá hiếm" là cá đời cũ, đã bỏ khỏi game.
             AddItem(db, "fish_ca_com_01", "C\u00e1 c\u01a1m", "C\u00e1 c\u01a1m t\u01b0\u01a1i. B\u00e1n \u0111\u01b0\u1ee3c 2 Point.", "\ud83d\udc1f", "food", 0, 2, true);
             AddItem(db, "fish_ca_nuc_01", "C\u00e1 n\u1ee5c", "C\u00e1 n\u1ee5c t\u01b0\u01a1i. B\u00e1n \u0111\u01b0\u1ee3c 2 Point.", "\ud83d\udc1f", "food", 0, 2, true);
             AddItem(db, "fish_ca_hong_01", "C\u00e1 h\u1ed3ng", "C\u00e1 h\u1ed3ng t\u01b0\u01a1i. B\u00e1n \u0111\u01b0\u1ee3c 2 Point.", "\ud83d\udc1f", "food", 0, 2, true);
@@ -280,8 +288,6 @@ namespace YWonderLand.EditorScripts
 
                 ["apple_01"] = "Assets/Sprites/icon/SanPham/DoAn/Tao.png",
                 ["bread_01"] = "Assets/Sprites/icon/SanPham/DoAn/BanhMi.png",
-                ["fish_01"] = "Assets/Sprites/icon/SanPham/DoAn/CaChep.png",
-                ["fish_02"] = "Assets/Sprites/icon/SanPham/DoAn/CaHiem.png",
                 ["fish_ca_com_01"] = "Assets/Sprites/icon/CacLoaiCa/CaCom.png",
                 ["fish_ca_nuc_01"] = "Assets/Sprites/icon/CacLoaiCa/CaNuc.png",
                 ["fish_ca_hong_01"] = "Assets/Sprites/icon/CacLoaiCa/CaHong.png",
@@ -324,6 +330,7 @@ namespace YWonderLand.EditorScripts
                 ["bait_01"] = "Assets/Sprites/icon/SanPham/VatPham/worm.png",
                 ["gift_box_01"] = "Assets/Sprites/icon/SanPham/VatPham/giftbox.png",
                 ["mine_ticket_01"] = "Assets/Sprites/icon/SanPham/VatPham/tickets.png",
+                ["spin_ticket_01"] = "Assets/Sprites/icon/SanPham/VatPham/tickets_wheel.png",
 
                 ["wood_01"] = "Assets/Sprites/icon/BoSungIcon/Go.png",
                 ["stone_01"] = "Assets/Sprites/icon/BoSungIcon/Da.png",

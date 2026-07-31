@@ -138,6 +138,7 @@ public class PiggyBankPopupController : MonoBehaviour
         depositForm = root.Q<VisualElement>("DepositForm");
         lblFormPkg = root.Q<Label>("LblFormPkg");
         txtAmount = root.Q<TextField>("TxtAmount");
+        UiInputUtil.ConfigureNumeric(txtAmount); // ô số Point gửi: chỉ nhập được chữ số
         lblPreviewPrincipal = root.Q<Label>("LblPreviewPrincipal");
         lblPreviewInterest = root.Q<Label>("LblPreviewInterest");
         lblPreviewTotal = root.Q<Label>("LblPreviewTotal");
@@ -308,7 +309,8 @@ public class PiggyBankPopupController : MonoBehaviour
     private float ParseAmount()
     {
         if (txtAmount == null) return 0;
-        if (float.TryParse(txtAmount.value, out float result))
+        // Lọc ký tự lạ + ghi lại bản chỉ-chữ-số vào ô. Point là số nguyên nên không nhận thập phân.
+        if (UiInputUtil.TrySanitizeInt(txtAmount, out int result))
             return Mathf.Max(0, result);
         return 0;
     }

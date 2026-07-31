@@ -133,7 +133,21 @@
     border-radius: var(--radius-panel); border-width: 0;
     margin: 24px 24px 24px 0; padding: 20px;
     align-items: center; justify-content: flex-start; flex-shrink: 0;
+    overflow: hidden; /* chốt chặn: nội dung dài không bao giờ tràn ra ngoài khung */
 }
+
+/* Vùng CUỘN (icon → mô tả → đang có). flex-basis 0 để nó nhận đúng phần cao còn thừa
+   sau khi khối ghim đáy lấy phần của mình, thay vì đòi theo chiều cao nội dung. */
+.shop-detail-scroll {
+    flex-grow: 1; flex-shrink: 1; flex-basis: 0;
+    width: 100%; min-height: 60px;
+}
+.shop-detail-scroll .unity-scroll-view__content-container { width: 100%; }
+.shop-detail-scroll .unity-scroller--horizontal { display: none; }
+.shop-detail-scroll-inner { width: 100%; align-items: center; }
+
+/* Khối GHIM ĐÁY (số lượng + tổng + nút) — cấm co, luôn thấy được. */
+.shop-detail-actions { width: 100%; align-items: center; flex-shrink: 0; margin-top: 12px; }
 
 .shop-detail-empty {
     font-size: 14px; color: var(--color-bright-grey); -unity-font-style: italic;
@@ -142,35 +156,39 @@
 
 .shop-detail-content { width: 100%; height: 100%; align-items: center; }
 
+/* flex-shrink: 0 trên MỌI hàng cao cố định — mặc định Yoga cho co về 0, đó là lý do
+   ảnh chụp thấy "Đang có"/số lượng bẹp dí sau nút MUA. */
 .shop-detail-icon-wrap {
     width: 80px; height: 80px; border-radius: 16px;
     background-color: var(--color-mystic-black); align-items: center; justify-content: center;
-    margin-bottom: 12px;
+    margin-bottom: 12px; flex-shrink: 0;
 }
 .shop-detail-icon { font-size: 40px; -unity-text-align: middle-center; }
 .shop-detail-icon-image { width: 72px; height: 72px; }
-.shop-detail-name { font-size: 18px; -unity-font-style: bold; color: var(--color-text-white); margin-bottom: 8px; -unity-text-align: middle-center; white-space: normal; }
+.shop-detail-name { font-size: 18px; -unity-font-style: bold; color: var(--color-text-white); margin-bottom: 8px; -unity-text-align: middle-center; white-space: normal; flex-shrink: 0; }
 
 /* === PRICE ROW === */
-.shop-price-row { flex-direction: row; align-items: center; justify-content: center; margin-bottom: 12px; }
+.shop-price-row { flex-direction: row; align-items: center; justify-content: center; margin-bottom: 12px; flex-shrink: 0; }
 .shop-price-icon { font-size: 16px; margin-right: 6px; -unity-text-align: middle-center; }
 .shop-price-text { font-size: 16px; -unity-font-style: bold; color: var(--color-accent-yellow); -unity-text-align: middle-center; }
 
-.shop-detail-divider { height: 1px; background-color: rgba(255, 255, 255, 0.05); width: 100%; margin-bottom: 12px; }
+.shop-detail-divider { height: 1px; background-color: rgba(255, 255, 255, 0.05); width: 100%; margin-bottom: 12px; flex-shrink: 0; }
 
+/* Mô tả nằm trong vùng cuộn -> KHÔNG flex-grow nữa (trước đây grow:1 tranh chỗ với các
+   hàng dưới, đẩy chúng co về 0 rồi đè lên nhau khi mô tả dài). */
 .shop-detail-desc {
     font-size: 13px; color: var(--color-bright-grey); margin-bottom: 12px;
-    white-space: normal; -unity-text-align: upper-center; flex-grow: 1; width: 100%;
+    white-space: normal; -unity-text-align: upper-center; flex-grow: 0; flex-shrink: 0; width: 100%;
 }
 
 .shop-detail-owned-badge {
     background-color: var(--color-mystic-black); border-radius: 12px; padding: 6px 16px;
     color: var(--color-text-white); font-size: 13px; -unity-font-style: bold; -unity-text-align: middle-center;
-    margin-bottom: 16px;
+    margin-bottom: 16px; flex-shrink: 0;
 }
 
 /* === QUANTITY SELECTOR === */
-.shop-qty-row { flex-direction: row; align-items: center; justify-content: center; margin-bottom: 16px; }
+.shop-qty-row { flex-direction: row; align-items: center; justify-content: center; margin-bottom: 16px; flex-shrink: 0; }
 .shop-qty-btn {
     width: 36px; height: 36px; border-radius: 18px; border-width: 0;
     background-color: rgba(255, 255, 255, 0.1);
@@ -192,7 +210,7 @@
 .shop-total-row {
     flex-direction: row; align-items: center; justify-content: center;
     margin-bottom: 16px; padding: 8px 16px;
-    background-color: var(--color-mystic-black); border-radius: 12px; width: 100%;
+    background-color: var(--color-mystic-black); border-radius: 12px; width: 100%; flex-shrink: 0;
 }
 .shop-total-label { font-size: 14px; -unity-font-style: bold; color: var(--color-bright-grey); margin-right: 8px; }
 .shop-total-value { font-size: 16px; -unity-font-style: bold; color: var(--color-accent-yellow); }
@@ -202,7 +220,7 @@
     width: 100%; padding: 12px 24px; border-radius: var(--radius-button); border-width: 0;
     background-color: var(--color-accent-yellow); color: var(--color-mystic-black);
     font-size: 16px; -unity-font-style: bold; -unity-text-align: middle-center; letter-spacing: 1px;
-    margin-top: auto; transition-property: scale, background-color; transition-duration: 0.1s;
+    flex-shrink: 0; transition-property: scale, background-color; transition-duration: 0.1s;
 }
 .shop-btn-action:hover { background-color: #FFF890; }
 .shop-btn-action:active { scale: 0.97; background-color: #D0C350; }
@@ -339,6 +357,9 @@
     margin: 14px 14px 14px 0;
     padding: 14px;
 }
+
+.shop-mobile .shop-detail-scroll { min-height: 50px; }
+.shop-mobile .shop-detail-actions { margin-top: 8px; }
 
 .shop-mobile .shop-detail-icon-wrap {
     width: 80px; height: 80px;

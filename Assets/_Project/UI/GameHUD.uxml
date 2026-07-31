@@ -31,7 +31,7 @@
 
             <!-- Quest Notification Bubble -->
             <ui:VisualElement name="QuestBubble" class="quest-bubble clickable-hud-element">
-                <ui:Label name="QuestText" text="Khám phá đảo hoang và tìm ngôi nhà đầu tiên!" class="quest-text" />
+                <ui:Label name="QuestText" text="Tìm NPC Tân Thủ để bắt đầu!" class="quest-text" />
                 <ui:VisualElement class="quest-info-icon">
                     <ui:Label text="i" class="quest-info-text" />
                 </ui:VisualElement>
@@ -196,8 +196,10 @@
             <ui:VisualElement class="crosshair-dot" picking-mode="Ignore" />
         </ui:VisualElement>
 
-        <!-- Nút gợi ý tương tác nổi: BẤM/TAP được (mỗi nhát = 1 lần chặt/cuốc...). Co theo nội dung để chỉ chặn đúng vùng nút. -->
-        <ui:VisualElement name="InteractionContainer" class="interaction-container" />
+        <!-- Nút gợi ý tương tác nổi: BẤM/TAP được (mỗi nhát = 1 lần chặt/cuốc...). Co theo nội dung để chỉ chặn đúng vùng nút.
+             picking-mode="Ignore": KHUNG phủ full màn KHÔNG được bắt chuột (chỉ mấy nút tròn con bên trong mới bắt).
+             Nếu để mặc định (Position) thì lúc khởi động khung này nuốt hover/click của mọi nút HUD + joystick. -->
+        <ui:VisualElement name="InteractionContainer" class="interaction-container" picking-mode="Ignore" />
 
         <!-- ============================== -->
         <!-- SPRINT BUTTON — Middle Left    -->

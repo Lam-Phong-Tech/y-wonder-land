@@ -39,7 +39,12 @@ namespace YWonderLand.EditorTools
 
             // 2) Item Shop — vật tư trồng trọt/chăn nuôi (BuyOnly)
             CreateShop("Shop_ItemShop", "Cửa hàng Vật phẩm", ShopDefinition.AccessMode.BuyOnly,
-                buy: new List<string> { "fertilizer_01", "vaccine_01", "medicine_01", "bait_01", "mine_ticket_01" });
+                buy: new List<string>
+                {
+                    "fertilizer_01", "vaccine_01", "medicine_01", "bait_01", "mine_ticket_01", "spin_ticket_01",
+                    // Thêm 30/07: vật liệu xây + nước tưới (miễn phí) mua trực tiếp, khỏi phải đi chặt/đào/múc.
+                    "wood_01", "stone_01", "watering_water_01"
+                });
 
             // 3) Fish Shop — mua mồi, thu mua cá (Both)
             CreateShop("Shop_FishShop", "Siêu thị Cá", ShopDefinition.AccessMode.Both,
@@ -54,13 +59,20 @@ namespace YWonderLand.EditorTools
                     "fish_ca_rong_do_01"
                 });
 
-            // 4) Mini Garden — thu mua nông sản + sản phẩm chăn nuôi (SellOnly)
-            CreateShop("Shop_MiniGarden", "Mini Garden — Thu mua Nông sản", ShopDefinition.AccessMode.SellOnly,
-                sell: new List<string>
+            // 4) Mini Garden — bán nông sản NGẮN NGÀY (thức ăn chăn nuôi) + thu mua sản phẩm (Both)
+            // Đổi 30/07: khách chốt giá mua 8 nông sản ngắn ngày -> mở thêm tab Mua ở đây.
+            // 8 loại này KHÔNG được bán lại (canSell=false trong ItemDatabase) nên bỏ khỏi danh sách sell.
+            CreateShop("Shop_MiniGarden", "Mini Garden — Thu mua Nông sản", ShopDefinition.AccessMode.Both,
+                buy: new List<string>
                 {
-                    // Nông sản NGẮN NGÀY (8)
                     "carrot_01", "cabbage_01", "watermelon_01", "corn_01", "pumpkin_01",
                     "morning_glory_01", "sweet_potato_01", "grass_01",
+                    // Thêm 30/07: khách nhắc đúng cửa hàng này ("kho bán sản phẩm cho vật nuôi ăn")
+                    // là chỗ họ đi tìm phân bón. Vẫn giữ ở Vật phẩm + Hai Lúa cho tiện.
+                    "fertilizer_01"
+                },
+                sell: new List<string>
+                {
                     // Sản phẩm cây LÂU NĂM (11)
                     "banana_01", "coconut_01", "areca_01", "date_01", "sacha_01",
                     "tea_01", "durian_01", "asparagus_01", "red_ginseng_01", "royal_ginseng_01",
@@ -78,13 +90,16 @@ namespace YWonderLand.EditorTools
                 buy: new List<string> { "fertilizer_01", "vaccine_01", "medicine_01" });
 
             // 6) Verdant — bán nông sản + mua tiêu dùng (Both)
-            CreateShop("Shop_Verdant", "Siêu thị Verdant", ShopDefinition.AccessMode.Both,
-                buy: new List<string> { "bread_01", "apple_01" },
-                sell: new List<string>
-                {
-                    "carrot_01", "cabbage_01", "watermelon_01", "corn_01", "pumpkin_01",
-                    "morning_glory_01", "sweet_potato_01"
-                });
+            // Sửa 31/07: tab Bán của Verdant là tab CHẾT. Nó khai thu mua 7 nông sản ngắn ngày, nhưng
+            // từ 22/06 khách chốt nhóm này là thức ăn chăn nuôi KHÔNG bán lại được (canSell=false) —
+            // client lọc bỏ nên tab luôn rỗng, server thì trả 403. Bỏ hẳn tab Bán.
+            //
+            // BẮT BUỘC đổi sang BuyOnly, KHÔNG được để danh sách rỗng mà vẫn Both: server hiểu
+            // "sellItemIds rỗng" là THU MUA MỌI THỨ bán được (xem resolveShopOffer) -> thành cửa mở.
+            //
+            // Khách chưa quy định Verdant thu mua gì, nên tạm chỉ bán Bánh mì + Táo.
+            CreateShop("Shop_Verdant", "Siêu thị Verdant", ShopDefinition.AccessMode.BuyOnly,
+                buy: new List<string> { "bread_01", "apple_01" });
 
             // 7) Thú Y — vắc-xin + thuốc cho vật nuôi (BuyOnly)
             CreateShop("Shop_ThuY", "Phòng khám Thú Y", ShopDefinition.AccessMode.BuyOnly,

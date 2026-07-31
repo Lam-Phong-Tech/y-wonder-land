@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using YWonderLand.Managers;
 
 /// <summary>
 /// IslandTravelManager: Trung tâm điều phối di chuyển giữa các đảo (map).
@@ -66,6 +67,12 @@ public class IslandTravelManager : MonoBehaviour
         }
         Instance = this;
         CurrentIslandId = startingIslandId;
+    }
+
+    private void Start()
+    {
+        // Đảo khởi đầu (thường là Nông trại) đã tải sẵn trong Scene nền -> phát nhạc ngay, không fade.
+        AudioManager.Instance.PlayMusicForIsland(CurrentIslandId, fadeSeconds: 0f);
     }
 
     /// <summary>Gọi từ UI (Bản đồ). Fire-and-forget — không cần await.</summary>
@@ -166,6 +173,7 @@ public class IslandTravelManager : MonoBehaviour
             await Awaitable.NextFrameAsync();
 
             CurrentIslandId = target.id;
+            AudioManager.Instance.PlayMusicForIsland(target.id);
             Debug.Log($"[IslandTravel] Đã tới đảo: {target.displayName} ({target.id})");
         }
         catch (System.Exception e)

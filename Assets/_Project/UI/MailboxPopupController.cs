@@ -37,6 +37,10 @@ public class MailboxPopupController : MonoBehaviour
         public bool isRewardClaimed;
         public List<AttachmentItem> attachments;
 
+        /// <summary>Khác rỗng = thư báo CON VẬT CHẾT, sinh từ FarmActivityLog (không phải thư hệ thống).
+        /// Đọc/xoá thư này phải ghi ngược lại nhật ký, kẻo mở lại hòm thư nó hiện lên như mới.</summary>
+        public string deathLogId;
+
         public MailData(string id, string title, string sender, string date, string content, bool hasReward, List<AttachmentItem> attachments = null)
         {
             this.id = id;
@@ -97,10 +101,12 @@ public class MailboxPopupController : MonoBehaviour
         itemDatabase = Resources.Load<YWonderLand.Data.ItemDatabase>("ItemDatabase");
         QueryElements();
         RegisterCallbacks();
-        
-        // Load Initial Mock Data
-        InitializeMockData();
-        
+
+        // Hòm thư bắt đầu TRỐNG (anh chốt 31/07). Trước đây nạp sẵn 5 thư mẫu — quà tân thủ, báo
+        // bảo trì, đền bù, đua top, thư hàng xóm — toàn là chữ bịa thời dựng giao diện, khách xem
+        // build là tưởng tính năng thật. Giờ chỉ còn thư THẬT do game sinh ra: báo cây/thú chết
+        // (xem SyncDeathMails). Có thư hệ thống thật thì nối vào cùng chỗ đó.
+
         // Hide popup initially
         Hide();
     }
@@ -152,94 +158,50 @@ public class MailboxPopupController : MonoBehaviour
         btnDeleteMail?.RegisterCallback<ClickEvent>(evt => DeleteSelectedMail());
     }
 
-    private void InitializeMockData()
-    {
-        mailList.Clear();
-
-        // 1. Welcome Mail (With reward, unread)
-        var welcomeGift = new List<AttachmentItem>
-        {
-            new AttachmentItem("Cá vàng", "🪙", 1500, iconClass: "mail-reward-pos"),
-            new AttachmentItem("Hạt giống Cà rốt", "🥕", 10, itemId: "carrot_seed_01"),
-            new AttachmentItem("Rùa con", "🐢", 1, itemId: "turtle_01")
-        };
-        mailList.Add(new MailData(
-            "mail_welcome",
-            "Quà Chào Mừng Tân Thủ!",
-            "Hệ Thống",
-            "10:00 02/06",
-            "Chào mừng bạn đến với Y WONDER GREEN FARM! Đây là món quà nhỏ từ Ban Quản Trị để giúp bạn khởi nghiệp nông trại của mình thuận lợi hơn. Hãy chăm sóc cây trồng và kết bạn thật nhiều nhé!",
-            true,
-            welcomeGift
-        ));
-
-        // 2. System Maintenance (No reward, read)
-        var maintenanceMail = new MailData(
-            "mail_maintenance",
-            "Báo Cáo Bảo Trì Định Kỳ",
-            "Kỹ Thuật",
-            "Hôm qua",
-            "Hệ thống đã hoàn tất bảo trì định kỳ lúc 05:00 sáng. Chúng tôi đã nâng cấp server để đảm bảo game chạy mượt mà hơn và sửa một số lỗi hiển thị chữ nút bấm. Cảm ơn bạn đã đồng hành cùng chúng tôi!",
-            false
-        );
-        maintenanceMail.isRead = true; // Mark as read initially
-        mailList.Add(maintenanceMail);
-
-        // 3. Compensation Mail (With reward, read & claimed)
-        var compGift = new List<AttachmentItem>
-        {
-            new AttachmentItem("Cá vàng", "🪙", 500, iconClass: "mail-reward-pos"),
-            new AttachmentItem("Phân bón siêu tốc", "🧪", 3, itemId: "fertilizer_01")
-        };
-        var compMail = new MailData(
-            "mail_compensation",
-            "Đền Bù Sự Cố Kết Nối",
-            "Ban Quản Trị",
-            "30/05/2026",
-            "Chúng tôi chân thành xin lỗi vì sự cố mất kết nối mạng vào tối ngày 29/05. Gửi kèm theo đây là gói đền bù sự cố. Chúc bạn chơi game vui vẻ!",
-            true,
-            compGift
-        );
-        compMail.isRead = true;
-        compMail.isRewardClaimed = true;
-        mailList.Add(compMail);
-
-        // 4. Weekly Ranking Event (With reward, unread)
-        var rankGift = new List<AttachmentItem>
-        {
-            new AttachmentItem("Kim cương", "💎", 5, iconClass: "mail-reward-diamond")
-        };
-        mailList.Add(new MailData(
-            "mail_weekly_rank",
-            "Sự Kiện Đua Top Tuần",
-            "Sự Kiện",
-            "28/05/2026",
-            "Chúc mừng bạn đã lọt vào Top 100 nông dân chăm chỉ tuần qua! Hãy nhận phần quà đính kèm để tiếp tục nỗ lực trong tuần mới.",
-            true,
-            rankGift
-        ));
-
-        // 5. Letter from Neighbor (No reward, unread)
-        mailList.Add(new MailData(
-            "mail_neighbor",
-            "Lời chào từ người hàng xóm",
-            "Lâm Farming",
-            "25/05/2026",
-            "Chào đằng ấy! Tớ thấy nông trại của đằng ấy rất đẹp. Khi nào rảnh hãy ghé thăm nông trại của tớ chơi nhé! Tớ có trồng rất nhiều dưa hấu chín mọng ngon lắm.",
-            false
-        ));
-    }
-
     public void Show()
     {
         if (mailboxOverlay != null)
         {
             mailboxOverlay.style.display = DisplayStyle.Flex;
         }
-        
+
+        SyncDeathMails();  // nạp thư báo con vật chết trước khi vẽ danh sách
         SelectMail(null); // Clear selected state on open
         RenderMailList();
         UpdateFooterButtons();
+    }
+
+    /// <summary>
+    /// Dựng lại danh sách thư báo CON VẬT CHẾT từ nhật ký nông trại (khách chốt 30/07).
+    /// Con chết thì không bấm vào đâu mà xem được nữa, nên báo về đây. Xếp MỚI NHẤT lên đầu.
+    /// </summary>
+    private void SyncDeathMails()
+    {
+        // Bỏ hết thư chết cũ rồi dựng lại — tránh nhân đôi khi mở hòm thư nhiều lần.
+        mailList.RemoveAll(m => !string.IsNullOrEmpty(m.deathLogId));
+
+        var deaths = YWonderLand.Environment.FarmActivityLog.GetDeaths(); // mới nhất trước
+        for (int i = 0; i < deaths.Count; i++)
+        {
+            var d = deaths[i];
+            string reason = string.IsNullOrEmpty(d.reason) ? "đã chết" : $"đã {d.reason}";
+            string when = YWonderLand.Environment.FarmActivityLog.FormatWhen(d.unixTime);
+            // Nhiều cái chết cùng loại sát giờ nhau đã được gộp thành 1 mục (xem FarmActivityLog.RecordDeath).
+            string howMany = d.count > 1 ? $" ({d.count} cái)" : "";
+
+            var mail = new MailData(
+                d.id,
+                $"{d.subjectName} {reason}{howMany}",
+                "Nông trại",
+                when,
+                $"{d.subjectName} của bạn {reason} lúc {when}{howMany}.\n\n" +
+                "Nhớ cho thú ăn và tưới cây trước khi thanh máu cạn để khỏi mất nhé!",
+                false
+            );
+            mail.isRead = d.isRead;
+            mail.deathLogId = d.id;
+            mailList.Insert(i, mail); // chèn lên đầu, giữ đúng thứ tự mới -> cũ
+        }
     }
 
     public void Hide()
@@ -374,6 +336,9 @@ public class MailboxPopupController : MonoBehaviour
         if (!mail.isRead)
         {
             mail.isRead = true;
+            // Thư báo chết phải ghi "đã đọc" xuống nhật ký, không thì lần sau mở lại vẫn là thư mới.
+            if (!string.IsNullOrEmpty(mail.deathLogId))
+                YWonderLand.Environment.FarmActivityLog.MarkDeathRead(mail.deathLogId);
             RenderMailList(); // re-render to update the envelope state icon
             UpdateFooterButtons();
         }
@@ -537,6 +502,9 @@ public class MailboxPopupController : MonoBehaviour
         if (selectedMail == null) return;
 
         Debug.Log($"[Mailbox] Đã xóa thư: '{selectedMail.title}'");
+        // Xoá thư báo chết = xoá luôn khỏi nhật ký, không thì mở lại hòm thư nó hiện lại.
+        if (!string.IsNullOrEmpty(selectedMail.deathLogId))
+            YWonderLand.Environment.FarmActivityLog.RemoveDeath(selectedMail.deathLogId);
         mailList.Remove(selectedMail);
         SelectMail(null);
         RenderMailList();
@@ -546,7 +514,14 @@ public class MailboxPopupController : MonoBehaviour
     private void DeleteAllReadMails()
     {
         // Delete mails that are read AND (have no rewards OR rewards are already claimed)
-        int removedCount = mailList.RemoveAll(mail => mail.isRead && (!mail.hasReward || mail.isRewardClaimed));
+        int removedCount = mailList.RemoveAll(mail =>
+        {
+            if (!mail.isRead || (mail.hasReward && !mail.isRewardClaimed)) return false;
+            // Dọn thư báo chết thì xoá luôn khỏi nhật ký cho khớp.
+            if (!string.IsNullOrEmpty(mail.deathLogId))
+                YWonderLand.Environment.FarmActivityLog.RemoveDeath(mail.deathLogId);
+            return true;
+        });
         
         if (removedCount > 0)
         {

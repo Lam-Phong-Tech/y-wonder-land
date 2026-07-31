@@ -4,11 +4,19 @@
 const fs = require("fs");
 const path = require("path");
 const { prepareAnimalPlacement } = require("./farmAnimalPlacement");
+const { FISHING_FREE_PER_DAY, FISHING_BAIT_ID, rollFish } = require("./fishingTable");
 const {
   normalizePointSourceLot,
   pointSourceLotRequestSignature,
   planPointSourceFifo,
 } = require("./pointSourceLedger");
+const { gameDayKey } = require("./gameDay");
+const {
+  rewardForDay,
+  resolveStreak,
+  isTrackFinished,
+  attendanceView,
+} = require("./attendanceRules");
 
 const STORE_MODE = (process.env.STORE_MODE || "json").toLowerCase();
 const DB_PATH = process.env.YW_DATA_PATH || path.join(__dirname, "data.json");
@@ -17,8 +25,11 @@ function nowISO() {
   return new Date().toISOString();
 }
 
+// Ngày game dùng CHUNG với kho Postgres (giờ Asia/Ho_Chi_Minh). Trước đây hàm này cắt theo
+// UTC nên kho JSON reset lượt lệch 7 tiếng so với bản chạy thật — thử ở máy dev thì đúng,
+// lên server lại sai. Xem gameDay.js.
 function todayKey(date = new Date()) {
-  return date.toISOString().slice(0, 10);
+  return gameDayKey(date);
 }
 
 function emptyDb() {
@@ -35,6 +46,7 @@ function emptyDb() {
     inventories: {},
     farmStates: {},
     dailyLimits: {},
+    attendance: {},
     transactions: [],
     sessions: [],
     browserAuthRequests: {},
@@ -49,7 +61,8 @@ function normalizeEconomy(value) {
   const economy = normalizeObject(value);
   return {
     version: toInt(economy.version, 1),
-    pos: toNumber(economy.pos, 5000),
+    // Khách chốt: KHÔNG cấp tiền cho người chơi (chỉ kiếm trong game hoặc nạp) -> mặc định 0.
+    pos: toNumber(economy.pos, 0),
     updatedAt: economy.updatedAt || nowISO(),
   };
 }
@@ -83,6 +96,7 @@ function normalizeDb(db) {
     inventories: normalizeObject(source.inventories),
     farmStates: normalizeObject(source.farmStates),
     dailyLimits: normalizeObject(source.dailyLimits),
+    attendance: normalizeObject(source.attendance),
     transactions: Array.isArray(source.transactions)
       ? source.transactions.map(normalizeTransaction)
       : [],
@@ -119,9 +133,10 @@ function findTransactionByIdempotency(db, idempotencyKey) {
 }
 
 function makeDefaultEconomy() {
+  // Tài khoản mới KHÔNG được cấp tiền (khách yêu cầu). Trước đây mặc định 5000 -> đã sửa 0.
   return {
     version: 1,
-    pos: 5000,
+    pos: 0,
     updatedAt: nowISO(),
   };
 }
@@ -160,6 +175,16 @@ function makeDefaultDailyLimits() {
     updatedAt: nowISO(),
   };
 }
+
+function makeDefaultAttendance() {
+  return {
+    claimedDays: 0,
+    maxRewardedDay: 0,
+    lastClaimDate: "",
+    updatedAt: nowISO(),
+  };
+}
+
 
 function pointSourceLotFromStored(value) {
   const source = normalizeObject(value);
@@ -213,6 +238,7 @@ class JsonStore {
     if (!db.inventories[playerId]) db.inventories[playerId] = makeDefaultInventory();
     if (!db.farmStates[playerId]) db.farmStates[playerId] = makeDefaultFarmState();
     if (!db.dailyLimits[playerId]) db.dailyLimits[playerId] = makeDefaultDailyLimits();
+    if (!db.attendance[playerId]) db.attendance[playerId] = makeDefaultAttendance();
     this.ensureDefaultDailyLimit(db.dailyLimits[playerId], "fishing", 10);
     this.ensureDefaultDailyLimit(db.dailyLimits[playerId], "mining", 10);
   }
@@ -1121,6 +1147,351 @@ class JsonStore {
     };
   }
 
+  // Câu cá SERVER-AUTHORITATIVE: server tự bốc cá + tự quản lượt free/mồi. Client KHÔNG
+  // gửi phần thưởng. 10 lượt free/ngày; hết free thì ăn 1 bait_01. Idempotent theo key.
+  resolveFishingCatch(playerId, options = {}) {
+    const db = this.readAll();
+    this.ensurePlayerStateInDb(db, playerId);
+
+    const idempotencyKey = String(options.idempotencyKey || "").trim();
+    if (!idempotencyKey) return { ok: false, error: "MISSING_IDEMPOTENCY_KEY" };
+
+    const existing = findTransactionByIdempotency(db, idempotencyKey);
+    if (existing) {
+      return {
+        ok: true,
+        fish: existing.fish || null,
+        inventory: existing.inventoryAfter || db.inventories[playerId],
+        daily_limits: existing.dailyLimitsAfter || db.dailyLimits[playerId],
+        limit: existing.limitAfter || null,
+        usedBait: !!existing.usedBait,
+        baitRemaining: toInt(existing.baitRemaining, 0),
+        duplicate: true,
+      };
+    }
+
+    const inventory = db.inventories[playerId];
+    const dailyLimits = db.dailyLimits[playerId];
+    const periodKey = String(options.periodKey || todayKey());
+    const limit = this.ensureDefaultDailyLimit(dailyLimits, "fishing", FISHING_FREE_PER_DAY, periodKey);
+
+    // Ưu tiên lượt free; hết free thì phải có mồi.
+    let usedBait = false;
+    if (limit.used < limit.maxCount) {
+      limit.used += 1;
+      limit.remaining = Math.max(0, limit.maxCount - limit.used);
+      limit.updatedAt = nowISO();
+      dailyLimits.updatedAt = nowISO();
+    } else {
+      const baitSlot = findSlot(inventory, FISHING_BAIT_ID);
+      if (!baitSlot || baitSlot.quantity < 1) {
+        return { ok: false, error: "NO_FISHING_TURN", inventory, daily_limits: dailyLimits, limit };
+      }
+      baitSlot.quantity -= 1;
+      usedBait = true;
+    }
+
+    // Server tự bốc cá (không tin client).
+    const fish = rollFish();
+
+    let slot = findSlot(inventory, fish.itemId);
+    if (!slot) {
+      if (inventory.slots.length >= inventory.maxSlots) inventory.maxSlots += 1;
+      slot = { itemId: fish.itemId, quantity: 0 };
+      inventory.slots.push(slot);
+    }
+    slot.quantity += 1;
+    inventory.slots = inventory.slots.filter((entry) => entry.quantity > 0);
+    inventory.updatedAt = nowISO();
+
+    const baitSlotAfter = findSlot(inventory, FISHING_BAIT_ID);
+    const baitRemaining = baitSlotAfter ? baitSlotAfter.quantity : 0;
+
+    const transaction = {
+      id: generateId("ftx"),
+      playerId,
+      type: "fishing_catch",
+      ref: fish.itemId,
+      idempotencyKey,
+      fish,
+      usedBait,
+      baitRemaining,
+      inventoryAfter: JSON.parse(JSON.stringify(inventory)),
+      dailyLimitsAfter: JSON.parse(JSON.stringify(dailyLimits)),
+      limitAfter: { ...limit },
+      createdAt: nowISO(),
+    };
+    db.transactions.push(transaction);
+    this.writeAll(db);
+
+    return {
+      ok: true,
+      fish,
+      inventory,
+      daily_limits: dailyLimits,
+      limit,
+      usedBait,
+      baitRemaining,
+      duplicate: false,
+    };
+  }
+
+  // Đổi 1 Vé đào mỏ (mine_ticket_01) -> +1 lượt đào trong ngày (tăng maxCount daily-limit "mining").
+  // Server-authoritative để khớp với đào realtime (server mới là bên chặn daily-limit). Idempotent theo key.
+  resolveMineTicketRedeem(playerId, options = {}) {
+    const MINE_TICKET_ID = "mine_ticket_01";
+    const MINING_MAX_PER_DAY = 10;
+
+    const db = this.readAll();
+    this.ensurePlayerStateInDb(db, playerId);
+
+    const idempotencyKey = String(options.idempotencyKey || "").trim();
+    if (!idempotencyKey) return { ok: false, error: "MISSING_IDEMPOTENCY_KEY" };
+
+    const existing = findTransactionByIdempotency(db, idempotencyKey);
+    if (existing) {
+      return {
+        ok: true,
+        miningTurnsRemaining: toInt(existing.miningTurnsRemaining, 0),
+        ticketRemaining: toInt(existing.ticketRemaining, 0),
+        inventory: existing.inventoryAfter || db.inventories[playerId],
+        daily_limits: existing.dailyLimitsAfter || db.dailyLimits[playerId],
+        limit: existing.limitAfter || null,
+        duplicate: true,
+      };
+    }
+
+    const inventory = db.inventories[playerId];
+    const dailyLimits = db.dailyLimits[playerId];
+    const periodKey = String(options.periodKey || todayKey());
+
+    const ticketSlot = findSlot(inventory, MINE_TICKET_ID);
+    if (!ticketSlot || ticketSlot.quantity < 1) {
+      return { ok: false, error: "NO_MINE_TICKET", inventory, daily_limits: dailyLimits };
+    }
+    ticketSlot.quantity -= 1;
+    inventory.slots = inventory.slots.filter((entry) => entry.quantity > 0);
+    inventory.updatedAt = nowISO();
+
+    const limit = this.ensureDefaultDailyLimit(dailyLimits, "mining", MINING_MAX_PER_DAY, periodKey);
+    limit.maxCount += 1;
+    limit.remaining = Math.max(0, limit.maxCount - limit.used);
+    limit.updatedAt = nowISO();
+    dailyLimits.updatedAt = nowISO();
+
+    const ticketAfter = findSlot(inventory, MINE_TICKET_ID);
+    const ticketRemaining = ticketAfter ? ticketAfter.quantity : 0;
+
+    const transaction = {
+      id: generateId("mtx"),
+      playerId,
+      type: "mine_ticket_redeem",
+      ref: MINE_TICKET_ID,
+      idempotencyKey,
+      miningTurnsRemaining: limit.remaining,
+      ticketRemaining,
+      inventoryAfter: JSON.parse(JSON.stringify(inventory)),
+      dailyLimitsAfter: JSON.parse(JSON.stringify(dailyLimits)),
+      limitAfter: { ...limit },
+      createdAt: nowISO(),
+    };
+    db.transactions.push(transaction);
+    this.writeAll(db);
+
+    return {
+      ok: true,
+      miningTurnsRemaining: limit.remaining,
+      ticketRemaining,
+      inventory,
+      daily_limits: dailyLimits,
+      limit,
+      duplicate: false,
+    };
+  }
+
+  // 1 lượt quay Vòng quay may mắn: ưu tiên 3 lượt free/ngày (daily-limit "spin"), hết free thì trừ 1
+  // spin_ticket_01. Server đếm theo NGÀY SERVER (bền qua login, không lệch scope client). Idempotent.
+  // Server KHÔNG bốc quà (client tự bốc + áp), chỉ nắm lượt/vé.
+  resolveWheelSpin(playerId, options = {}) {
+    const SPIN_TICKET_ID = "spin_ticket_01";
+    const SPIN_FREE_PER_DAY = 3;
+
+    const db = this.readAll();
+    this.ensurePlayerStateInDb(db, playerId);
+
+    const idempotencyKey = String(options.idempotencyKey || "").trim();
+    if (!idempotencyKey) return { ok: false, error: "MISSING_IDEMPOTENCY_KEY" };
+
+    const existing = findTransactionByIdempotency(db, idempotencyKey);
+    if (existing) {
+      return {
+        ok: true,
+        usedTicket: !!existing.usedTicket,
+        spinsRemaining: toInt(existing.spinsRemaining, 0),
+        ticketRemaining: toInt(existing.ticketRemaining, 0),
+        inventory: existing.inventoryAfter || db.inventories[playerId],
+        daily_limits: existing.dailyLimitsAfter || db.dailyLimits[playerId],
+        limit: existing.limitAfter || null,
+        duplicate: true,
+      };
+    }
+
+    const inventory = db.inventories[playerId];
+    const dailyLimits = db.dailyLimits[playerId];
+    const periodKey = String(options.periodKey || todayKey());
+    const limit = this.ensureDefaultDailyLimit(dailyLimits, "spin", SPIN_FREE_PER_DAY, periodKey);
+
+    let usedTicket = false;
+    if (limit.used < limit.maxCount) {
+      limit.used += 1;
+      limit.remaining = Math.max(0, limit.maxCount - limit.used);
+      limit.updatedAt = nowISO();
+      dailyLimits.updatedAt = nowISO();
+    } else {
+      const ticketSlot = findSlot(inventory, SPIN_TICKET_ID);
+      if (!ticketSlot || ticketSlot.quantity < 1) {
+        return { ok: false, error: "NO_SPIN_TURN", inventory, daily_limits: dailyLimits, limit };
+      }
+      ticketSlot.quantity -= 1;
+      inventory.slots = inventory.slots.filter((entry) => entry.quantity > 0);
+      inventory.updatedAt = nowISO();
+      usedTicket = true;
+    }
+
+    const spinsRemaining = Math.max(0, limit.maxCount - limit.used);
+    const ticketAfter = findSlot(inventory, SPIN_TICKET_ID);
+    const ticketRemaining = ticketAfter ? ticketAfter.quantity : 0;
+
+    const transaction = {
+      id: generateId("stx"),
+      playerId,
+      type: "wheel_spin",
+      ref: usedTicket ? SPIN_TICKET_ID : "free",
+      idempotencyKey,
+      usedTicket,
+      spinsRemaining,
+      ticketRemaining,
+      inventoryAfter: JSON.parse(JSON.stringify(inventory)),
+      dailyLimitsAfter: JSON.parse(JSON.stringify(dailyLimits)),
+      limitAfter: { ...limit },
+      createdAt: nowISO(),
+    };
+    db.transactions.push(transaction);
+    this.writeAll(db);
+
+    return {
+      ok: true,
+      usedTicket,
+      spinsRemaining,
+      ticketRemaining,
+      inventory,
+      daily_limits: dailyLimits,
+      limit,
+      duplicate: false,
+    };
+  }
+
+  getAttendance(playerId, options = {}) {
+    const db = this.readAll();
+    this.ensurePlayerStateInDb(db, playerId);
+    this.writeAll(db);
+    const today = String(options.today || todayKey());
+    return { ok: true, attendance: attendanceView(db.attendance[playerId], today) };
+  }
+
+  claimAttendance(playerId, options = {}) {
+    const db = this.readAll();
+    this.ensurePlayerStateInDb(db, playerId);
+
+    const idempotencyKey = String(options.idempotencyKey || "").trim();
+    if (!idempotencyKey) return { ok: false, error: "MISSING_IDEMPOTENCY_KEY" };
+
+    const existing = findTransactionByIdempotency(db, idempotencyKey);
+    if (existing) {
+      return {
+        ok: true,
+        attendance: existing.attendanceAfter || attendanceView(db.attendance[playerId], todayKey()),
+        reward: existing.reward || null,
+        rewardPaid: !!existing.rewardPaid,
+        streakReset: !!existing.streakReset,
+        economy: existing.economyAfter || db.economies[playerId],
+        inventory: existing.inventoryAfter || db.inventories[playerId],
+        duplicate: true,
+      };
+    }
+
+    const today = String(options.today || todayKey());
+    const record = db.attendance[playerId];
+    const state = resolveStreak(record.lastClaimDate, record.claimedDays, today);
+
+    if (isTrackFinished(record.maxRewardedDay)) {
+      return { ok: false, error: "ATTENDANCE_COMPLETED", attendance: attendanceView(record, today) };
+    }
+    if (state.claimedToday) {
+      return { ok: false, error: "ALREADY_CLAIMED_TODAY", attendance: attendanceView(record, today) };
+    }
+
+    const day = state.streak;
+    const reward = rewardForDay(day);
+    // Quà chỉ trả cho ngày CHƯA từng trả. Mất chuỗi thì phải leo lại thật, nhưng leo qua
+    // những ngày cũ không được lĩnh lần hai (nếu không thì điểm danh cách ngày = in tiền).
+    const rewardPaid = day > toInt(record.maxRewardedDay, 0) && !reward.isNothing;
+
+    const economy = db.economies[playerId];
+    const inventory = db.inventories[playerId];
+
+    if (rewardPaid) {
+      if (reward.point > 0) {
+        economy.pos = toNumber(economy.pos, 0) + reward.point;
+        economy.updatedAt = nowISO();
+      }
+      if (reward.itemId && reward.qty > 0) {
+        let slot = findSlot(inventory, reward.itemId);
+        if (!slot) {
+          if (inventory.slots.length >= inventory.maxSlots) inventory.maxSlots += 1;
+          slot = { itemId: reward.itemId, quantity: 0 };
+          inventory.slots.push(slot);
+        }
+        slot.quantity += reward.qty;
+        inventory.updatedAt = nowISO();
+      }
+    }
+
+    record.claimedDays = day;
+    record.maxRewardedDay = Math.max(toInt(record.maxRewardedDay, 0), day);
+    record.lastClaimDate = today;
+    record.updatedAt = nowISO();
+
+    const attendanceAfter = attendanceView(record, today);
+    const transaction = {
+      id: generateId("atx"),
+      playerId,
+      type: "attendance_claim",
+      ref: `day_${day}`,
+      idempotencyKey,
+      reward,
+      rewardPaid,
+      streakReset: state.streakReset,
+      attendanceAfter,
+      economyAfter: JSON.parse(JSON.stringify(economy)),
+      inventoryAfter: JSON.parse(JSON.stringify(inventory)),
+      createdAt: nowISO(),
+    };
+    db.transactions.push(transaction);
+    this.writeAll(db);
+
+    return {
+      ok: true,
+      attendance: attendanceAfter,
+      reward,
+      rewardPaid,
+      streakReset: state.streakReset,
+      economy,
+      inventory,
+      duplicate: false,
+    };
+  }
+
   getFarmState(playerId) {
     const db = this.readAll();
     this.ensurePlayerStateInDb(db, playerId);
@@ -1368,6 +1739,7 @@ class JsonStore {
     delete db.inventories[playerId];
     delete db.farmStates[playerId];
     delete db.dailyLimits[playerId];
+    delete db.attendance[playerId];
     delete db.playerSessions[playerId];
     delete db.players[playerId];
     for (const [webUserId, mappedPlayerId] of Object.entries(db.playersByWebUserId)) {
@@ -1431,6 +1803,11 @@ module.exports = {
   adjustInventoryItem: activeStore.adjustInventoryItem.bind(activeStore),
   transactShop: activeStore.transactShop.bind(activeStore),
   applyResourceHarvest: activeStore.applyResourceHarvest.bind(activeStore),
+  resolveFishingCatch: activeStore.resolveFishingCatch.bind(activeStore),
+  resolveMineTicketRedeem: activeStore.resolveMineTicketRedeem.bind(activeStore),
+  resolveWheelSpin: activeStore.resolveWheelSpin.bind(activeStore),
+  getAttendance: activeStore.getAttendance.bind(activeStore),
+  claimAttendance: activeStore.claimAttendance.bind(activeStore),
   getFarmState: activeStore.getFarmState.bind(activeStore),
   setFarmState: activeStore.setFarmState.bind(activeStore),
   compareAndSetFarmState: activeStore.compareAndSetFarmState.bind(activeStore),

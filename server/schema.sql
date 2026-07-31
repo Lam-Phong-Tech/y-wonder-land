@@ -54,7 +54,8 @@ create table if not exists player_profiles (
 create table if not exists player_economy (
     player_id text primary key references game_players(id) on delete cascade,
     version integer not null default 1,
-    pos bigint not null default 5000 check (pos >= 0),
+    -- Khách chốt 22/07/2026: tài khoản mới bắt đầu 0 Point. Trước là 5000 (placeholder prototype).
+    pos bigint not null default 0 check (pos >= 0),
     web_point_micros_remainder bigint not null default 0
         check (web_point_micros_remainder >= 0 and web_point_micros_remainder < 1000000),
     updated_at timestamptz not null default now()
@@ -102,6 +103,16 @@ create table if not exists player_daily_limits (
     version integer not null default 1,
     updated_at timestamptz not null default now(),
     primary key (player_id, limit_key, period_key)
+);
+
+-- Điểm danh 15 ngày tân thủ. claimed_days = vị trí trong chuỗi, max_rewarded_day = ngày cao
+-- nhất đã trả thưởng (chặn việc mất chuỗi rồi lĩnh lại quà cũ). Xem migration 009.
+create table if not exists player_attendance (
+    player_id text primary key references game_players(id) on delete cascade,
+    claimed_days integer not null default 0 check (claimed_days >= 0),
+    max_rewarded_day integer not null default 0 check (max_rewarded_day >= 0),
+    last_claim_date text not null default '',
+    updated_at timestamptz not null default now()
 );
 
 create table if not exists game_transactions (
