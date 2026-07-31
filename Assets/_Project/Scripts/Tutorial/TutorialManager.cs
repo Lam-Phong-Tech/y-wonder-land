@@ -545,7 +545,23 @@ public class TutorialManager : MonoBehaviour
         if (tile == null || tile == targetFarmTile) return;
         targetFarmTile = tile;
         // Tua nhanh thời gian lớn cho vừa nhịp hướng dẫn (khớp override ở FarmTile.GetGrowthTime).
-        targetFarmTile.tutorialGrowthTime = 24f;
+        targetFarmTile.tutorialGrowthTime = TutorialFastGrowthSec;
+    }
+
+    /// <summary>Thời gian lớn ép cho ĐÚNG ô đất của hướng dẫn (giây).</summary>
+    public const float TutorialFastGrowthSec = 24f;
+
+    /// <summary>
+    /// Ô này có được tua nhanh không? CHỈ đúng ô hướng dẫn đang bám, và chỉ khi hướng dẫn còn chạy.
+    ///
+    /// Trước đây FarmTile.GetGrowthTime() chặn TOÀN CỤC ("còn tutorial thì mọi cây chín trong 24s"),
+    /// nên ai cố tình bỏ dở hướng dẫn là có nông trại tua nhanh không giới hạn số ô, áp cho cả
+    /// sầu riêng/chanh leo (28-90 ngày thật). Thu hẹp về một ô để hết đường cheat mà nhịp hướng dẫn
+    /// vẫn y như cũ — người chơi chỉ thao tác trên đúng ô đó trong suốt chuỗi cuốc/gieo/tưới/thu.
+    /// </summary>
+    public bool IsFastGrowthTile(FarmTile tile)
+    {
+        return tile != null && IsActive() && ReferenceEquals(tile, targetFarmTile);
     }
 
     private void OnTilePlowed(FarmTile tile)

@@ -6,6 +6,51 @@
 
 ---
 
+## [2026-07-31g] — Bịt hẳn cheat tua nhanh: thu hẹp về đúng ô của hướng dẫn
+
+### Vì sao khóa quầy chưa đủ
+Khóa quầy (`[2026-07-31f]`) chỉ **hoãn** vòng lặp: người chơi vẫn ôm hạt sẵn, tua 24s liên tục,
+tích kho rồi **xong hướng dẫn mới bán một thể**. Phải chặn ở gốc: cơ chế tua nhanh.
+
+### Sửa
+`FarmTile.GetGrowthTime()` trước đây chặn **toàn cục**:
+
+```csharp
+if (tm != null && tm.IsActive()) return 24f;   // mọi ô, mọi loại cây
+```
+
+Giờ chỉ tua nhanh **đúng một ô** mà hướng dẫn đang bám:
+
+```csharp
+if (tm != null && tm.IsFastGrowthTile(this)) return tutorialGrowthTime;
+```
+
+- `TutorialManager.IsFastGrowthTile(tile)` = còn hướng dẫn **và** `tile` đúng là `targetFarmTile`.
+- `targetFarmTile` là ô người chơi **thật sự vừa thao tác** (`AdoptFarmTile`, xem `[2026-07-31d]`),
+  nên nhịp hướng dẫn không đổi: cả chuỗi cuốc → gieo → tưới → thu đều trên đúng ô đó.
+- Hằng số gom về `TutorialManager.TutorialFastGrowthSec = 24f` cho hai nơi dùng chung một số.
+- Đổi `FindFirstObjectByType<TutorialManager>()` → `TutorialManager.Instance` (hàm này nằm trong
+  đường tính tăng trưởng, quét scene ở đây là phí).
+
+### Dọn kèm
+Xoá `FarmTile.IsTutorialActive()` — **không có chỗ nào gọi**, nhưng chú thích của nó ("tutorial thì
+KHÔNG cho cây chết") mô tả một luật không hề tồn tại, đọc vào là hiểu sai luật chết cây.
+
+### Còn lại (không sửa, để anh chốt)
+- `FarmAnimal.cs:240` bỏ qua **cú gieo xác suất phát bệnh** khi còn hướng dẫn. Không phải miễn
+  nhiễm vĩnh viễn (`sicknessRolled` vẫn `false` nên gieo lại sau), và mốc phát bệnh cách hàng ngày
+  trong khi hướng dẫn chỉ vài phút → thực tế vô hại.
+- Hướng dẫn đếm ngược **5s** rồi hô "chín rồi!" trong khi ô chín ở **24s** — lệch sẵn từ trước,
+  không thuộc lỗ hổng này.
+
+### Files
+- `Assets/_Project/Scripts/Environment/FarmTile.cs`
+- `Assets/_Project/Scripts/Tutorial/TutorialManager.cs`
+
+`csc exit code: 0`.
+
+---
+
 ## [2026-07-31f] — Khóa quầy mua bán khi chưa xong hướng dẫn
 
 ### Lý do (anh chốt 31/07)
@@ -20,8 +65,11 @@ TutorialManager tm = FindFirstObjectByType<TutorialManager>();
 if (tm != null && tm.IsActive()) return 24f;   // MỌI loại cây, kể cả cây lâu năm
 ```
 
-Cộng thêm `FarmTile.IsTutorialActive()` khiến cây **không chết** trong tutorial. Tức là ai bỏ dở
-hướng dẫn thì có một nông trại **tua nhanh + bất tử**, áp cho mọi loại cây, không giới hạn số ô.
+Tức là ai bỏ dở hướng dẫn thì có một nông trại **tua nhanh**, áp cho mọi loại cây, không giới hạn số ô.
+
+> **Đính chính (31/07):** bản đầu của mục này còn ghi "cây không chết trong tutorial" dựa trên
+> `FarmTile.IsTutorialActive()`. Kiểm lại thì hàm đó **không có chỗ nào gọi** — luật đó không tồn tại.
+> Cây trong hướng dẫn vẫn theo mốc chết bình thường. Đã xoá hàm chết ở mục `[2026-07-31g]`.
 
 ### Sửa
 Chặn ở `ShopPopupController.Show(ShopData)` — cả 4 lối vào quầy (ShopData / mock / AccessMode /

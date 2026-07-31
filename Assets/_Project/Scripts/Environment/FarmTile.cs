@@ -641,12 +641,10 @@ public class FarmTile : MonoBehaviour
         ScreenToast.Show("Cây đã héo chết vì thiếu nước! Nhớ tưới đúng giờ nhé.");
     }
 
-    /// <summary>Có đang trong Tutorial không (tutorial ép lớn nhanh → KHÔNG cho cây chết, người mới khỏi nản).</summary>
-    private bool IsTutorialActive()
-    {
-        TutorialManager tm = FindFirstObjectByType<TutorialManager>();
-        return tm != null && tm.IsActive();
-    }
+    // Đã bỏ IsTutorialActive(): hàm này KHÔNG có chỗ nào gọi, nhưng chú thích của nó ("tutorial thì
+    // KHÔNG cho cây chết") lại mô tả một luật không hề tồn tại — đọc vào là hiểu sai luật chết cây.
+    // Cây trong hướng dẫn vẫn theo mốc chết bình thường (8h -> 20h), chỉ là hướng dẫn chỉ kéo dài
+    // vài phút nên không bao giờ chạm tới mốc đó.
 
     public bool InteractHarvest(out string harvestedItemId, out int amount)
     {
@@ -811,9 +809,13 @@ public class FarmTile : MonoBehaviour
 
     private float GetGrowthTime()
     {
-        // Ép TUA NHANH nếu đang trong Tutorial (khách chốt 24s). Ngoài tutorial dùng growthTimeSec thật (24h cây ngắn ngày).
-        TutorialManager tm = FindFirstObjectByType<TutorialManager>();
-        if (tm != null && tm.IsActive()) return 24f; // Tutorial = 24s (tua nhanh, bỏ qua growthTimeSec thật)
+        // Ép TUA NHANH cho ĐÚNG Ô ĐẤT của hướng dẫn (anh chốt 31/07). Ngoài ra dùng growthTimeSec thật.
+        //
+        // TRƯỚC ĐÂY chặn TOÀN CỤC: "còn tutorial thì mọi cây chín trong 24s", không nhìn ô nào cây gì.
+        // Ai cố tình bỏ dở hướng dẫn là có nông trại tua nhanh KHÔNG GIỚI HẠN SỐ Ô, áp cho cả sầu riêng
+        // (28 ngày thật, 16.800 Point) lẫn chanh leo (90 ngày) — tích kho rồi xong hướng dẫn bán một thể.
+        TutorialManager tm = TutorialManager.Instance;
+        if (tm != null && tm.IsFastGrowthTile(this)) return tutorialGrowthTime;
 
         if (currentCrop != null)
         {
