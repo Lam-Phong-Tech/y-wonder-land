@@ -6,6 +6,46 @@
 
 ---
 
+## [2026-07-31e] — Bảng nút ruộng trễ đúng một bước
+
+### Triệu chứng
+Cuốc đất xong nhưng nút vẫn ghi **"Cuốc đất"**. Bấm lại thì nhân vật làm việc **kế tiếp** —
+hiện popup chọn hạt và gieo thật. Tức là chữ trên nút trễ một nhịp so với trạng thái ô.
+
+### Gốc rễ
+`RunTimedAction` dựng lại bảng nút **TRƯỚC** khi chạy `onComplete`:
+
+```csharp
+FinishTimedAction();   // -> RestorePromptAfterTimedAction() -> đọc trạng thái ô
+onComplete?.Invoke();  // <- CHỖ NÀY mới thật sự cuốc/gieo/tưới/thu
+```
+
+Mọi thao tác ruộng đều đổi trạng thái **bên trong** `onComplete` (`HandlePlow` → `InteractPlow`,
+`HandleWater` → `InteractWater`, ...). Nên bảng nút luôn được dựng theo trạng thái **CŨ**:
+ô còn `Soil` → in "Cuốc đất", ngay sau đó `onComplete` mới chuyển sang `Plowed`.
+
+Bấm nút thì `PerformTileAction` đọc trạng thái **hiện tại** (`Plowed`) nên làm đúng việc kế tiếp —
+chữ sai, việc đúng, đúng như anh mô tả.
+
+Lỗi dính **cả bốn bước** ruộng (cuốc/gieo/tưới/thu) và cả các thao tác có màn múa của vật nuôi,
+vì tất cả đi chung `BeginTimedAction`. Ở chế độ chạm-thẳng (mobile) vòng quét theo tầm ngắm không
+chạy nên không có gì sửa lại giúp — bảng sai nằm đó tới khi chạm ô lần nữa.
+
+### Sửa
+- `RunTimedAction`: giữ lại mục tiêu, gọi `FinishTimedAction(restorePrompt: false)`, chạy
+  `onComplete`, **rồi mới** `RebuildPromptFor(promptTarget)`.
+- Nếu `onComplete` mở màn múa mới (chuỗi thao tác) thì bỏ qua việc dựng lại — để màn mới tự lo,
+  không bày nút đè lên thanh Hủy.
+- `FinishTimedAction` nhận cờ `restorePrompt` (mặc định `true`, giữ nguyên hành vi cũ cho các
+  luồng khác); gộp luôn `RestorePromptAfterTimedAction` vào trong.
+
+### Files
+- `Assets/_Project/Scripts/Environment/FarmInteractionController.cs`
+
+`csc exit code: 0`.
+
+---
+
 ## [2026-07-31d] — Hướng dẫn tân thủ kẹt ở bước cuốc đất
 
 ### Triệu chứng

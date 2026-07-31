@@ -643,11 +643,23 @@ namespace YWonderLand.Environment
 
             if (token != timedActionToken) yield break;
 
-            FinishTimedAction();
+            // THỨ TỰ QUAN TRỌNG (anh báo 31/07: cuốc xong nút vẫn ghi "Cuốc đất", bấm lại thì
+            // nhảy sang gieo hạt). onComplete MỚI là chỗ đổi trạng thái ô đất — dựng bảng nút
+            // trước nó là dựng theo trạng thái CŨ, nên bảng luôn trễ đúng một bước.
+            var promptTarget = promptTargetBeforeTimedAction;
+            FinishTimedAction(restorePrompt: false);
             onComplete?.Invoke();
+
+            // onComplete có thể mở màn múa mới (chuỗi thao tác) — lúc đó để màn mới tự lo bảng nút,
+            // không bày nút đè lên thanh Hủy.
+            if (!timedActionActive) RebuildPromptFor(promptTarget);
         }
 
-        private void FinishTimedAction()
+        /// <param name="restorePrompt">
+        /// Dựng LẠI bảng nút cho đúng thứ vừa thao tác xong. Chỉ đúng khi trạng thái đã đổi xong —
+        /// luồng làm-xong tự dựng SAU onComplete nên truyền false.
+        /// </param>
+        private void FinishTimedAction(bool restorePrompt = true)
         {
             timedActionToken++;
             timedActionRoutine = null;
@@ -655,19 +667,10 @@ namespace YWonderLand.Environment
             timedActionCancelRefund = null;
             GameHUDController.Instance?.HideActionCancelProgress();
             EndTimedActionCursorMode();
-            RestorePromptAfterTimedAction();
-        }
 
-        /// <summary>
-        /// Dựng LẠI bảng nút cho đúng thứ vừa thao tác xong. Cố ý dựng lại chứ không cất đi rồi bày ra:
-        /// trạng thái đã đổi (chưa tưới -> đã tưới, chín -> vừa thu) nên bảng cũ sẽ sai.
-        /// Gọi sau khi múa xong/hủy; ngoài tầm với thì thôi, để luồng thường tự lo.
-        /// </summary>
-        private void RestorePromptAfterTimedAction()
-        {
             var target = promptTargetBeforeTimedAction;
             promptTargetBeforeTimedAction = null;
-            RebuildPromptFor(target);
+            if (restorePrompt) RebuildPromptFor(target);
         }
 
         /// <summary>Dựng lại bảng nút cho đúng vật thể này theo trạng thái HIỆN TẠI của nó.</summary>
