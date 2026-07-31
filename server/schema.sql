@@ -105,6 +105,16 @@ create table if not exists player_daily_limits (
     primary key (player_id, limit_key, period_key)
 );
 
+-- Điểm danh 15 ngày tân thủ. claimed_days = vị trí trong chuỗi, max_rewarded_day = ngày cao
+-- nhất đã trả thưởng (chặn việc mất chuỗi rồi lĩnh lại quà cũ). Xem migration 009.
+create table if not exists player_attendance (
+    player_id text primary key references game_players(id) on delete cascade,
+    claimed_days integer not null default 0 check (claimed_days >= 0),
+    max_rewarded_day integer not null default 0 check (max_rewarded_day >= 0),
+    last_claim_date text not null default '',
+    updated_at timestamptz not null default now()
+);
+
 create table if not exists game_transactions (
     id text primary key,
     player_id text not null references game_players(id) on delete cascade,

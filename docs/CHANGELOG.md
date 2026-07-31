@@ -6,6 +6,75 @@
 
 ---
 
+## [2026-07-31c] — Điểm danh chuyển hẳn lên server + luật mất chuỗi
+
+### Vì sao phải làm
+Anh hỏi "điểm danh đã đồng bộ và được server quản lý chưa". Rà ra: **chưa, và đây là chỗ thủng thật**.
+
+Toàn bộ sổ điểm danh nằm trong PlayerPrefs của máy (`YW_AttendanceClaimedDays` /
+`YW_AttendanceLastDate`), grep cả `server/` không có một dòng nào về điểm danh. Nhưng **phần thưởng
+thì đi thẳng lên server thật** qua `QueueEconomyDelta` / `QueueInventoryDelta`. Sổ ở máy, tiền ở
+server ⇒ ba lỗ:
+
+1. **Vặn đồng hồ / đổi múi giờ thiết bị** → qua "ngày mới" → ăn trọn 15 ngày trong vài phút.
+2. **Cài lại game** → bộ đếm về 0 → quay vòng 15 ngày lại từ đầu, lặp vô hạn.
+   Mỗi vòng ≈ 52 Point + 12 gỗ (bán 96 Point) + 1 thỏ + nông sản.
+3. **Đổi máy** → người chơi thật mất sạch tiến độ.
+
+Ngày lại lấy `DateTime.Now` — **tờ lịch của điện thoại**, và cắt theo nửa đêm chứ không phải đủ 24
+giờ như cây/thú (`RealNow()`), nên điểm danh 23:59 rồi 00:01 là **hai ngày cách nhau 2 phút**.
+
+### Luật mới (khách chốt 31/07)
+**Nghỉ giữa chừng là mất chuỗi, quay về Ngày 1.**
+
+Chỗ này có một cái bẫy: nếu chỉ đếm một con số thì mất chuỗi = về ngày 1 = **được trả lại quà ngày
+1**, và người chơi chỉ cần điểm danh cách ngày là in tiền mãi mãi — đúng cái lỗ vừa đi bịt. Nên bảng
+giữ **hai** cột:
+
+| Cột | Nghĩa |
+|---|---|
+| `claimed_days` | vị trí hiện tại trong chuỗi |
+| `max_rewarded_day` | ngày cao nhất **đã từng trả thưởng** |
+
+Chuỗi tụt về 1 thật (muốn chạm quà ngày 15 phải leo lại đủ 15 ngày liên tiếp), nhưng đi qua ngày cũ
+**không lĩnh lần hai**. Mốc 15 ngày là quà tân thủ — một lần cho một tài khoản.
+
+> ⚠️ Đây là suy luận của bé, khách chưa nói. Nếu khách muốn mất chuỗi thì được lĩnh lại từ đầu
+> thì bỏ `max_rewarded_day` đi — nhưng lúc đó phải chấp nhận vòng lặp kiếm tiền.
+
+### Sửa gì
+**Server** — sổ + luật + trao thưởng đều về server, client chỉ vẽ lại:
+- `migrations/009_player_attendance.sql`, `schema.sql` — bảng `player_attendance`
+- `attendanceRules.js` (mới) — bảng thưởng 15 ngày + luật chuỗi, **dùng chung** hai kho
+- `gameDay.js` (mới) — một định nghĩa "ngày game" duy nhất
+- `store.js`, `postgresStore.js` — `getAttendance` / `claimAttendance`, có idempotency như vòng quay
+- `index.js` — `GET /player/attendance`, `POST /player/attendance/claim`
+
+**Tiện thể bịt một lỗi lệch giờ:** hai kho đang chấm ngày khác nhau — `store.js` cắt theo **UTC**,
+`postgresStore.js` theo **Asia/Ho_Chi_Minh**. Bản chạy thật là postgres nên người chơi không thấy,
+nhưng chạy kho JSON (máy dev) thì lượt câu cá / vòng quay reset **lệch 7 tiếng** so với production —
+thử ở nhà đúng, lên server sai. Giờ cả hai cùng gọi `gameDay.js`.
+
+**Client:**
+- `AttendanceService.cs` (mới) — gọi 2 endpoint, gửi lại đúng key cũ khi mất mạng
+- `EventPopupController.cs` — online đọc/nhận theo server; offline (demo chưa đăng nhập) giữ đường
+  local **nhưng đã áp cùng luật mất chuỗi**, không còn hai hành vi khác nhau
+
+Nốt đỏ trên HUD gọi hàm tĩnh nên có bản đệm trạng thái server + hãm 30 giây, tránh biến mỗi khung
+hình thành một lượt gọi mạng.
+
+### Đã thử
+- 33 phép thử luật chuỗi trên kho JSON (bơm sẵn "hôm nay" nên không phải chờ qua ngày thật):
+  nghỉ ngày → về 1 · leo lại qua ngày cũ **không** lĩnh lại · vượt mốc cũ thì có quà · hết 15 ngày
+  thì khoá hẳn · gửi trùng key không cộng đôi.
+- Thử thật qua HTTP với server chạy kho JSON: 200 / 400 thiếu key / 409 bấm hai lần trong ngày /
+  401 không token / bản sao không cộng đôi tiền.
+
+> **CHƯA DEPLOY.** Client gọi endpoint chưa có trên prod ⇒ **phải deploy server TRƯỚC khi build APK**,
+> không thì điểm danh ăn 404. Xem `server/RUNBOOK_deploy_attendance.md`.
+
+---
+
 ## [2026-07-31b] — Rà soát toàn bộ shop + bón phân bón thẳng
 
 ### Rà soát 8 cửa hàng

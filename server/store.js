@@ -10,6 +10,13 @@ const {
   pointSourceLotRequestSignature,
   planPointSourceFifo,
 } = require("./pointSourceLedger");
+const { gameDayKey } = require("./gameDay");
+const {
+  rewardForDay,
+  resolveStreak,
+  isTrackFinished,
+  attendanceView,
+} = require("./attendanceRules");
 
 const STORE_MODE = (process.env.STORE_MODE || "json").toLowerCase();
 const DB_PATH = process.env.YW_DATA_PATH || path.join(__dirname, "data.json");
@@ -18,8 +25,11 @@ function nowISO() {
   return new Date().toISOString();
 }
 
+// Ngày game dùng CHUNG với kho Postgres (giờ Asia/Ho_Chi_Minh). Trước đây hàm này cắt theo
+// UTC nên kho JSON reset lượt lệch 7 tiếng so với bản chạy thật — thử ở máy dev thì đúng,
+// lên server lại sai. Xem gameDay.js.
 function todayKey(date = new Date()) {
-  return date.toISOString().slice(0, 10);
+  return gameDayKey(date);
 }
 
 function emptyDb() {
@@ -36,6 +46,7 @@ function emptyDb() {
     inventories: {},
     farmStates: {},
     dailyLimits: {},
+    attendance: {},
     transactions: [],
     sessions: [],
     browserAuthRequests: {},
@@ -85,6 +96,7 @@ function normalizeDb(db) {
     inventories: normalizeObject(source.inventories),
     farmStates: normalizeObject(source.farmStates),
     dailyLimits: normalizeObject(source.dailyLimits),
+    attendance: normalizeObject(source.attendance),
     transactions: Array.isArray(source.transactions)
       ? source.transactions.map(normalizeTransaction)
       : [],
@@ -164,6 +176,16 @@ function makeDefaultDailyLimits() {
   };
 }
 
+function makeDefaultAttendance() {
+  return {
+    claimedDays: 0,
+    maxRewardedDay: 0,
+    lastClaimDate: "",
+    updatedAt: nowISO(),
+  };
+}
+
+
 function pointSourceLotFromStored(value) {
   const source = normalizeObject(value);
   const lot = normalizePointSourceLot(source);
@@ -216,6 +238,7 @@ class JsonStore {
     if (!db.inventories[playerId]) db.inventories[playerId] = makeDefaultInventory();
     if (!db.farmStates[playerId]) db.farmStates[playerId] = makeDefaultFarmState();
     if (!db.dailyLimits[playerId]) db.dailyLimits[playerId] = makeDefaultDailyLimits();
+    if (!db.attendance[playerId]) db.attendance[playerId] = makeDefaultAttendance();
     this.ensureDefaultDailyLimit(db.dailyLimits[playerId], "fishing", 10);
     this.ensureDefaultDailyLimit(db.dailyLimits[playerId], "mining", 10);
   }
@@ -1368,6 +1391,107 @@ class JsonStore {
     };
   }
 
+  getAttendance(playerId, options = {}) {
+    const db = this.readAll();
+    this.ensurePlayerStateInDb(db, playerId);
+    this.writeAll(db);
+    const today = String(options.today || todayKey());
+    return { ok: true, attendance: attendanceView(db.attendance[playerId], today) };
+  }
+
+  claimAttendance(playerId, options = {}) {
+    const db = this.readAll();
+    this.ensurePlayerStateInDb(db, playerId);
+
+    const idempotencyKey = String(options.idempotencyKey || "").trim();
+    if (!idempotencyKey) return { ok: false, error: "MISSING_IDEMPOTENCY_KEY" };
+
+    const existing = findTransactionByIdempotency(db, idempotencyKey);
+    if (existing) {
+      return {
+        ok: true,
+        attendance: existing.attendanceAfter || attendanceView(db.attendance[playerId], todayKey()),
+        reward: existing.reward || null,
+        rewardPaid: !!existing.rewardPaid,
+        streakReset: !!existing.streakReset,
+        economy: existing.economyAfter || db.economies[playerId],
+        inventory: existing.inventoryAfter || db.inventories[playerId],
+        duplicate: true,
+      };
+    }
+
+    const today = String(options.today || todayKey());
+    const record = db.attendance[playerId];
+    const state = resolveStreak(record.lastClaimDate, record.claimedDays, today);
+
+    if (isTrackFinished(record.maxRewardedDay)) {
+      return { ok: false, error: "ATTENDANCE_COMPLETED", attendance: attendanceView(record, today) };
+    }
+    if (state.claimedToday) {
+      return { ok: false, error: "ALREADY_CLAIMED_TODAY", attendance: attendanceView(record, today) };
+    }
+
+    const day = state.streak;
+    const reward = rewardForDay(day);
+    // Quà chỉ trả cho ngày CHƯA từng trả. Mất chuỗi thì phải leo lại thật, nhưng leo qua
+    // những ngày cũ không được lĩnh lần hai (nếu không thì điểm danh cách ngày = in tiền).
+    const rewardPaid = day > toInt(record.maxRewardedDay, 0) && !reward.isNothing;
+
+    const economy = db.economies[playerId];
+    const inventory = db.inventories[playerId];
+
+    if (rewardPaid) {
+      if (reward.point > 0) {
+        economy.pos = toNumber(economy.pos, 0) + reward.point;
+        economy.updatedAt = nowISO();
+      }
+      if (reward.itemId && reward.qty > 0) {
+        let slot = findSlot(inventory, reward.itemId);
+        if (!slot) {
+          if (inventory.slots.length >= inventory.maxSlots) inventory.maxSlots += 1;
+          slot = { itemId: reward.itemId, quantity: 0 };
+          inventory.slots.push(slot);
+        }
+        slot.quantity += reward.qty;
+        inventory.updatedAt = nowISO();
+      }
+    }
+
+    record.claimedDays = day;
+    record.maxRewardedDay = Math.max(toInt(record.maxRewardedDay, 0), day);
+    record.lastClaimDate = today;
+    record.updatedAt = nowISO();
+
+    const attendanceAfter = attendanceView(record, today);
+    const transaction = {
+      id: generateId("atx"),
+      playerId,
+      type: "attendance_claim",
+      ref: `day_${day}`,
+      idempotencyKey,
+      reward,
+      rewardPaid,
+      streakReset: state.streakReset,
+      attendanceAfter,
+      economyAfter: JSON.parse(JSON.stringify(economy)),
+      inventoryAfter: JSON.parse(JSON.stringify(inventory)),
+      createdAt: nowISO(),
+    };
+    db.transactions.push(transaction);
+    this.writeAll(db);
+
+    return {
+      ok: true,
+      attendance: attendanceAfter,
+      reward,
+      rewardPaid,
+      streakReset: state.streakReset,
+      economy,
+      inventory,
+      duplicate: false,
+    };
+  }
+
   getFarmState(playerId) {
     const db = this.readAll();
     this.ensurePlayerStateInDb(db, playerId);
@@ -1615,6 +1739,7 @@ class JsonStore {
     delete db.inventories[playerId];
     delete db.farmStates[playerId];
     delete db.dailyLimits[playerId];
+    delete db.attendance[playerId];
     delete db.playerSessions[playerId];
     delete db.players[playerId];
     for (const [webUserId, mappedPlayerId] of Object.entries(db.playersByWebUserId)) {
@@ -1681,6 +1806,8 @@ module.exports = {
   resolveFishingCatch: activeStore.resolveFishingCatch.bind(activeStore),
   resolveMineTicketRedeem: activeStore.resolveMineTicketRedeem.bind(activeStore),
   resolveWheelSpin: activeStore.resolveWheelSpin.bind(activeStore),
+  getAttendance: activeStore.getAttendance.bind(activeStore),
+  claimAttendance: activeStore.claimAttendance.bind(activeStore),
   getFarmState: activeStore.getFarmState.bind(activeStore),
   setFarmState: activeStore.setFarmState.bind(activeStore),
   compareAndSetFarmState: activeStore.compareAndSetFarmState.bind(activeStore),

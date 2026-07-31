@@ -745,6 +745,30 @@ api.post("/player/wheel/spin", auth, asyncRoute(async (req, res) => {
   res.json(result);
 }));
 
+// Điểm danh SERVER-AUTHORITATIVE: server chấm ngày (giờ vận hành), giữ chuỗi, tự trao thưởng.
+// Trước đây sổ nằm trong PlayerPrefs của máy nên vặn đồng hồ / cài lại game là ăn lại từ đầu.
+api.get("/player/attendance", auth, asyncRoute(async (req, res) => {
+  res.json(await store.getAttendance(req.userId));
+}));
+
+api.post("/player/attendance/claim", auth, asyncRoute(async (req, res) => {
+  const body = req.body || {};
+  const idempotencyKey = String(body.idempotency_key || body.idempotencyKey || "").trim();
+  if (!idempotencyKey) return res.status(400).json({ error: "MISSING_IDEMPOTENCY_KEY" });
+
+  const result = await store.claimAttendance(req.userId, { idempotencyKey });
+
+  if (!result.ok) {
+    // Bấm hai lần trong ngày / đã xong 15 ngày là chuyện thường, không phải lỗi hệ thống.
+    const conflict = result.error === "ALREADY_CLAIMED_TODAY" || result.error === "ATTENDANCE_COMPLETED";
+    return res.status(conflict ? 409 : 400).json({
+      error: result.error,
+      attendance: result.attendance,
+    });
+  }
+  res.json(result);
+}));
+
 api.post("/player/farm/animals/place", auth, asyncRoute(async (req, res) => {
   const body = req.body || {};
   const itemId = String(body.item_id || body.itemId || "").trim();
