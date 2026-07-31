@@ -417,8 +417,15 @@ namespace YWonderLand.Backend
                     PersistOutbox(upload);
 
                     ApiResult<FarmStateResponse> result = await SendAsync(upload);
+
+                    // GỬI LẠI khi hỏng tạm. Nhớ lại việc lần đầu KHÔNG CÓ HỒI ÂM (status 0), vì đó là
+                    // trường hợp mập mờ: không phân biệt được "server chưa nhận" với "server nhận rồi,
+                    // làm rồi, nhưng câu trả lời rơi trên đường về". Gửi lại ở nhánh sau sẽ đụng 409
+                    // lệch đúng 1 — và đó là 409 LÀNH TÍNH, xem chỗ xử lý 409 bên dưới.
+                    bool resentAfterNoAnswer = false;
                     if (!result.ok && IsTransient(result.status))
                     {
+                        resentAfterNoAnswer = result.status == 0;
                         await Awaitable.NextFrameAsync();
                         result = await SendAsync(upload);
                     }
@@ -437,16 +444,35 @@ namespace YWonderLand.Backend
                         && result.data != null
                         && result.data.farm_state != null)
                     {
-                        // Ghi RÕ hai số hiệu phiên bản: bản ghi của client bị VỨT ĐI ở đây, nên khi
-                        // người chơi kêu "mất mấy thay đổi vừa làm" thì phải có số mà lần. Câu log cũ
-                        // chỉ in phiên bản server nên không lần ra được lệch bao nhiêu, mất cái gì.
                         int clientExpected = upload.expectedVersion;
                         int serverActual = Mathf.Max(1, result.data.farm_state.version);
-                        Debug.LogWarning(
-                            $"[FarmStateSync] XUNG DOT phien ban cho '{upload.scopeId}': client gui expected=v{clientExpected}, " +
-                            $"server dang o v{serverActual} — lech {serverActual - clientExpected} ban ghi. " +
-                            $"Ban ghi cua client BI VUT, lay ban server. " +
-                            $"Neu nguoi choi bao mat thay doi nong trai vua lam thi day la cho mat.");
+                        int gap = serverActual - clientExpected;
+
+                        // PHÂN BIỆT hai loại xung đột — quan trọng, vì hậu quả khác hẳn nhau.
+                        //
+                        // LÀNH TÍNH (gửi lại sau khi mất hồi âm, lệch đúng 1): lần gửi ĐẦU đã tới server
+                        // và đã ghi xong, chỉ có câu trả lời rơi mất. Server đang giữ ĐÚNG dữ liệu của
+                        // client; bản chụp trả về ở đây chính là nó. Không mất gì cả.
+                        // Gốc rễ: PUT /player/farm-state chưa có mã chống trùng như đường mua bán và
+                        // thả thú — đã ghi vào task.md để đợt deploy server sau làm.
+                        //
+                        // ĐÁNG NGỜ (mọi trường hợp còn lại): có đường ghi khác đã đổi dữ liệu mà client
+                        // không hay. Bản chụp của client bị vứt ở đây, thay đổi vừa làm CÓ THỂ mất thật.
+                        if (resentAfterNoAnswer && gap == 1)
+                        {
+                            Debug.Log(
+                                $"[FarmStateSync] Xung dot LANH TINH cho '{upload.scopeId}' (expected=v{clientExpected}, " +
+                                $"server=v{serverActual}): lan gui dau da toi server, chi mat cau tra loi nen client gui lai. " +
+                                $"Server dang giu dung du lieu — KHONG mat gi.");
+                        }
+                        else
+                        {
+                            Debug.LogWarning(
+                                $"[FarmStateSync] XUNG DOT DANG NGO cho '{upload.scopeId}': client gui expected=v{clientExpected}, " +
+                                $"server dang o v{serverActual} — lech {gap} ban ghi, gui lai sau khi mat hoi am = {resentAfterNoAnswer}. " +
+                                $"Ban chup cua client BI VUT, lay ban server. " +
+                                $"Neu nguoi choi bao mat thay doi nong trai vua lam thi day la cho mat.");
+                        }
 
                         serverVersion = serverActual;
                         ApplyServerSnapshot(result.data.farm_state);

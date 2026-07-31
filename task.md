@@ -58,8 +58,21 @@
 > 2. `[~]` **Build EXE/APK mới rồi nghiệm thu**: punch-list khách T1–T7 (ma trận ở cuối mục 29/07 trong
 >    `CHANGELOG.md`), P0 thả thú `7 → 6`, hotfix hủy cho ăn / cây-thú chết ngay ở `0%`, chặt cây không cộng
 >    gỗ hai lần, và **câu cá/vòng quay/đổi vé đào khi đang đăng nhập** (server đã sẵn sàng, giờ kiểm client).
-> 3. `[ ]` Rủi ro dời chuồng: `PUT /player/farm-state` chỉ chép nguyên `build_state_json`; nếu upload
->    fail/`409` thì server giữ chuồng ở chỗ cũ. Chỉ gia cố (cho `Confirm()` chờ flush) nếu bước 2 tái hiện.
+> 3. `[ ]` **`PUT /player/farm-state` thiếu mã chống trùng (idempotency) — ĐỢT DEPLOY SERVER SAU.**
+>    Đã bắt được tận tay 31/07 nhờ log mới: client gửi `expected=v182`, server đang ở `v183`, **lệch đúng 1**.
+>    Gốc rễ ở `FarmStateSync.ProcessQueueAsync`: hỏng tạm thì client **gửi lại y hệt**, mà `IsTransient`
+>    tính cả `status == 0` = *không nhận được hồi âm* — không phân biệt được "server chưa nhận" với
+>    "server nhận rồi, ghi rồi, câu trả lời rơi mất". Gửi lại ⇒ `409`.
+>    **Lần này KHÔNG mất dữ liệu** (lần gửi đầu đã ghi thành công, bản 409 trả về chính là dữ liệu đó),
+>    nhưng đây là may chứ không phải thiết kế đúng.
+>    - Đã làm 31/07 (client): log tách **lành tính** (gửi lại sau khi mất hồi âm + lệch 1) khỏi **đáng ngờ**.
+>      Gặp "ĐÁNG NGỜ" trong log = có đường ghi khác đang đổi dữ liệu, phải điều tra ngay.
+>    - **Còn phải làm:** thêm `idempotency_key` cho `PUT /player/farm-state`, đúng khuôn mẫu
+>      `/player/shop/transaction` và `/player/farm/animals/place` đã dùng (`lockIdempotency` +
+>      `findStoredTransaction` trong `postgresStore.js`). Sửa cả `server/index.js` lẫn client, cần deploy.
+>      Runbook mẫu: `server/RUNBOOK_deploy_shopcatalog.md`.
+>    - Rủi ro dời chuồng đi kèm: `PUT /player/farm-state` chỉ chép nguyên `build_state_json`; nếu upload
+>      fail/`409` thì server giữ chuồng ở chỗ cũ. Có idempotency thì hết luôn phần lớn ca này.
 > 4. `[~]` Ví Point (canary tiền thật, migration số dư cũ, hoa hồng/VIP, source-lot PostgreSQL): giữ nguyên
 >    mọi ràng buộc bên dưới, **chỉ làm khi có phê duyệt riêng**. Các mục 0–7 tiếp theo vẫn còn hiệu lực về
 >    nội dung, chỉ khác về thứ tự ưu tiên.
