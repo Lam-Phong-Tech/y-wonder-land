@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -106,8 +106,10 @@ public class QuestPopupController : MonoBehaviour
         QueryElements();
         RegisterCallbacks();
 
-        // Load Mock Data
-        InitializeMockData();
+        // Danh sách nhiệm vụ bắt đầu TRỐNG (anh chốt 31/07). Trước đây nạp sẵn 5 nhiệm vụ bịa thời
+        // dựng giao diện — "Tìm Ngôi Nhà Đầu Tiên", "Gieo Hạt Giống Cà Rốt" (còn hiện SẴN 10/10 chờ
+        // nhận thưởng), chăm sóc thú, kết bạn... Khách mở ra là tưởng hệ nhiệm vụ đã chạy thật.
+        // Hệ nhiệm vụ thật chưa làm; khi làm thì nạp vào questList rồi gọi RenderQuestList().
 
         // Hide initially
         Hide();
@@ -156,77 +158,6 @@ public class QuestPopupController : MonoBehaviour
         btnClaimReward?.RegisterCallback<ClickEvent>(evt => ClaimSelectedQuestReward());
     }
 
-    private void InitializeMockData()
-    {
-        questList.Clear();
-
-        // 1. Village Discovery (In Progress)
-        var welcomeReward = new List<RewardItem>
-        {
-            new RewardItem("Cá vàng", "🪙", 500),
-            new RewardItem("Kinh nghiệm", "★", 100)
-        };
-        questList.Add(new QuestData(
-            "quest_discovery",
-            "Tìm Ngôi Nhà Đầu Tiên",
-            "Trưởng Làng",
-            "Khám phá các ngóc ngách của đảo hoang và tìm kiếm ngôi nhà cổ kính đầu tiên để mở khóa các tính năng chế tạo công cụ.",
-            0,
-            1,
-            welcomeReward
-        ));
-
-        // 2. Carrot Planting (Completed, Ready to Claim)
-        var carrotReward = new List<RewardItem>
-        {
-            new RewardItem("Cá vàng", "🪙", 300),
-            new RewardItem("Hộp gỗ", "📦", 1)
-        };
-        questList.Add(new QuestData(
-            "quest_carrot",
-            "Gieo Hạt Giống Cà Rốt",
-            "Lâm Nông Dân",
-            "Lâm đang rất cần cà rốt để nấu món súp cho lễ hội. Hãy mua hạt giống tại cửa hàng, gieo 10 hạt giống cà rốt lên các ô đất trống trong vườn.",
-            10,
-            10,
-            carrotReward
-        ));
-
-        // 3. Pet Care (In Progress)
-        var petReward = new List<RewardItem>
-        {
-            new RewardItem("Cá vàng", "🪙", 200),
-            new RewardItem("Quả táo", "🍎", 2)
-        };
-        questList.Add(new QuestData(
-            "quest_pet",
-            "Chăm sóc Rùa con",
-            "Vy Vy",
-            "Hãy cho Rùa con ăn đầy đủ các bữa để tăng điểm thân mật. Rùa con khi vui vẻ sẽ giúp bạn tìm kiếm các vật phẩm ẩn dưới lòng đất.",
-            1,
-            3,
-            petReward
-        ));
-
-        // 4. Connect with Neighbors (Claimed)
-        var connectReward = new List<RewardItem>
-        {
-            new RewardItem("Cá vàng", "🪙", 100),
-            new RewardItem("Kim cương", "💎", 1)
-        };
-        var finishedQuest = new QuestData(
-            "quest_neighbors",
-            "Giao lưu kết bạn",
-            "Hệ Thống",
-            "Mở danh sách Bạn bè và gửi lời mời kết bạn với ít nhất một người chơi khác trên bản đồ để bắt đầu hoạt động giao thương nông sản.",
-            1,
-            1,
-            connectReward
-        );
-        finishedQuest.isRewardClaimed = true;
-        questList.Add(finishedQuest);
-    }
-
     public void Show()
     {
         if (questOverlay != null)
@@ -250,6 +181,20 @@ public class QuestPopupController : MonoBehaviour
     {
         if (questListScroll == null) return;
         questListScroll.Clear();
+
+        // Chưa có nhiệm vụ nào thì phải NÓI RA. Bỏ mock đi mà không có dòng này thì popup mở ra
+        // trống trơn, trông như hỏng. (Hòm thư vốn đã có sẵn dòng tương tự.)
+        if (questList.Count == 0)
+        {
+            Label emptyText = new Label("Chưa có nhiệm vụ nào!");
+            emptyText.style.color = new Color(0.54f, 0.49f, 0.43f);
+            emptyText.style.fontSize = 14;
+            emptyText.style.unityFontStyleAndWeight = FontStyle.Bold;
+            emptyText.style.marginTop = 20;
+            emptyText.style.alignSelf = Align.Center;
+            questListScroll.Add(emptyText);
+            return;
+        }
 
         foreach (var quest in questList)
         {
@@ -295,7 +240,7 @@ public class QuestPopupController : MonoBehaviour
             Label title = new Label(quest.title);
             title.AddToClassList("quest-card-title");
             
-            Label progress = new Label($"Tiến trình: {quest.currentProgress}/{quest.targetProgress}");
+            Label progress = new Label($"Tiáº¿n trÃ¬nh: {quest.currentProgress}/{quest.targetProgress}");
             progress.AddToClassList("quest-card-progress-brief");
 
             info.Add(title);
@@ -306,15 +251,15 @@ public class QuestPopupController : MonoBehaviour
             VisualElement badge = new VisualElement();
             badge.AddToClassList("quest-card-status-badge");
             
-            string statusTxt = "Đang làm";
+            string statusTxt = "Äang lÃ m";
             if (quest.isRewardClaimed)
             {
-                statusTxt = "Đã nhận";
+                statusTxt = "ÄÃ£ nháº­n";
                 badge.AddToClassList("claimed");
             }
             else if (quest.isCompleted)
             {
-                statusTxt = "Nhận quà";
+                statusTxt = "Nháº­n quÃ ";
                 badge.AddToClassList("ready");
             }
             
@@ -346,7 +291,7 @@ public class QuestPopupController : MonoBehaviour
         detailContentState.style.display = DisplayStyle.Flex;
 
         detailTitle.text = quest.title;
-        detailGiver.text = $"Người giao: {quest.giver}";
+        detailGiver.text = $"NgÆ°á»i giao: {quest.giver}";
         detailDescription.text = quest.description;
 
         // Progress bar calculation
@@ -385,17 +330,17 @@ public class QuestPopupController : MonoBehaviour
         {
             if (quest.isRewardClaimed)
             {
-                btnClaimReward.text = "Đã hoàn thành";
+                btnClaimReward.text = "ÄÃ£ hoÃ n thÃ nh";
                 btnClaimReward.SetEnabled(false);
             }
             else if (quest.isCompleted)
             {
-                btnClaimReward.text = "Nhận thưởng";
+                btnClaimReward.text = "Nháº­n thÆ°á»Ÿng";
                 btnClaimReward.SetEnabled(true);
             }
             else
             {
-                btnClaimReward.text = "Đang thực hiện...";
+                btnClaimReward.text = "Äang thá»±c hiá»‡n...";
                 btnClaimReward.SetEnabled(false);
             }
         }
@@ -414,7 +359,7 @@ public class QuestPopupController : MonoBehaviour
         }
         if (summary.Length > 2) summary = summary.Substring(0, summary.Length - 2);
 
-        Debug.Log($"[Quest] Nhận phần thưởng nhiệm vụ '{selectedQuest.title}' thành công: {summary}");
+        Debug.Log($"[Quest] Nháº­n pháº§n thÆ°á»Ÿng nhiá»‡m vá»¥ '{selectedQuest.title}' thÃ nh cÃ´ng: {summary}");
 
         SelectQuest(selectedQuest);
     }
