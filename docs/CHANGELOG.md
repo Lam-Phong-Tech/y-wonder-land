@@ -39,8 +39,9 @@ giữ **hai** cột:
 Chuỗi tụt về 1 thật (muốn chạm quà ngày 15 phải leo lại đủ 15 ngày liên tiếp), nhưng đi qua ngày cũ
 **không lĩnh lần hai**. Mốc 15 ngày là quà tân thủ — một lần cho một tài khoản.
 
-> ⚠️ Đây là suy luận của bé, khách chưa nói. Nếu khách muốn mất chuỗi thì được lĩnh lại từ đầu
-> thì bỏ `max_rewarded_day` đi — nhưng lúc đó phải chấp nhận vòng lặp kiếm tiền.
+> **Anh chốt 31/07: KHÔNG cho vòng lặp nhận tiền** — giữ `max_rewarded_day`.
+> Riêng khách thì chưa được hỏi ý về điểm này; nếu sau này khách đòi cho lĩnh lại thì phải nói rõ
+> hệ quả là vòng lặp kiếm tiền trước khi sửa.
 
 ### Sửa gì
 **Server** — sổ + luật + trao thưởng đều về server, client chỉ vẽ lại:
