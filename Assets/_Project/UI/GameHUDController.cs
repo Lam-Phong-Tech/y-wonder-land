@@ -1125,6 +1125,14 @@ public class GameHUDController : MonoBehaviour
         { "Tiêm vắc-xin", "Icon_Syringe" },
         { "Thông tin", "Icon_Info" },
         { "Xem chuồng", "Icon_Eye" },
+        { "Xem ruộng", "Icon_Eye" },
+        // Chưa có ảnh riêng cho bón phân / dời đồ. Bón phân mượn bát thức ăn (cùng nghĩa "cho ăn"),
+        // dời mượn bàn tay mở (cùng nghĩa "nhấc lên đặt xuống") — vẫn hơn Icon_Hand mặc định vì
+        // Icon_Hand là ảnh dùng khi KHÔNG tra được, nên mọi nút mới đều giống hệt nhau.
+        { "Bón phân", "Icon_FeedBowl" },
+        { "Dời chuồng", "Icon_HandRelease" },
+        { "Dời ruộng", "Icon_HandRelease" },
+        { "Dời đường", "Icon_HandRelease" },
         { "Thả thú", "Icon_HandRelease" },
         { "Hủy chuồng", "Icon_Cancel" },
         { "Hủy đường", "Icon_Cancel" },

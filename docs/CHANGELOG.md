@@ -6,6 +6,57 @@
 
 ---
 
+## [2026-07-31] — 5 lỗi anh tìm ra khi chơi thử bản mới
+
+### 1. Bảng nút biến mất sau khi tưới / cuốc
+**Gốc:** `BeginTimedAction` cố ý xoá `currentActions` + ẩn prompt để nhường chỗ cho thanh Hủy trong
+lúc múa động tác — nhưng `FinishTimedAction` **không ai dựng lại**. Ở chế độ chạm-thẳng (mobile),
+`RefreshFrontCellInteractionPrompt` chỉ dựng theo ô TRƯỚC MẶT, nên ô vừa chạm ở bên hông thì mất hẳn.
+**Sửa:** nhớ mục tiêu vào `promptTargetBeforeTimedAction`, xong việc thì `RestorePromptAfterTimedAction`
+**dựng lại** bảng nút (không cất-rồi-bày, vì trạng thái đã đổi: chưa tưới → đã tưới, chín → vừa thu).
+Bỏ dở giữa chừng thì KHÔNG dựng lại — người chơi chủ động thoát.
+
+### 2. Phân bón niêm yết 1 Point nhưng trừ 50
+**Gốc:** giá mua là **server quyết** (`shopCatalog.js` → `resolveShopOffer` trả `item.buyPrice`).
+`server/shopCatalog.json` đã **lỗi thời cả tháng**, không chỉ mỗi phân bón:
+- `fertilizer_01`: 50/25/bán-được → đúng phải 1/0/không-bán-được
+- 8 nông sản ngắn ngày: `buyPrice: 0` (client là 4–11) và Mini Garden còn là `sell_only`
+  ⇒ **online không mua nổi 8 món này**, dù khách đã chốt giá 30/07
+- thiếu `wood_01` / `stone_01` / `watering_water_01` trong Cửa hàng Vật phẩm
+- còn sót `fish_01` / `fish_02` — cá đời cũ đã bỏ khỏi game, không còn asset, không ai giữ trong túi
+
+**Sửa:** chạy lại `server/scripts/generateShopCatalog.js` (script SẴN CÓ, đọc thẳng asset Unity).
+Đã đối chiếu: `data.json` không có tài khoản nào giữ `fish_01`/`fish_02`, code client cũng không
+nhắc tới, nên bỏ là sạch. Đã dò lỗ hổng mua-rẻ-bán-đắt: **không có** — mọi shop bán hạt/đá đều
+`buy_only`, các shop thu mua đều liệt kê `sellItemIds` rõ ràng nên không nhận hạt/đá.
+> ⚠️ **PHẢI DEPLOY SERVER** thì giá mới có tác dụng. Chưa deploy thì vẫn trừ 50.
+
+### 3. Cuốc ruộng mà báo "hết phân bón"
+**Gốc:** `BeginFertilize` đặt `pendingFertilizeTile` rồi mở túi, nhưng **đóng túi mà không chọn gì
+thì cờ nằm lại mãi**. Lần sau mở túi bấm món bất kỳ, `OnInventoryItemSelected` thấy cờ còn → tưởng
+đang bón phân → bắn toast về phân. Cờ này được xét TRƯỚC cả `pendingPlantTile` nên cướp luôn
+luồng gieo hạt.
+**Sửa:** `ClearPendingItemPickIfBagClosed()` chạy mỗi khung: túi đã đóng thì dọn
+`pendingFertilizeTile` / `pendingFeedAnimal` / `pendingPlantTile`. Có chốt 1 khung hình để không dọn
+nhầm ngay lúc vừa mở túi. **Cố ý không đụng** `pendingPen` / `pendingEnclosure` — hai cái đó do
+luồng thả thú bất đồng bộ (chờ server) giữ.
+
+### 4. Nút "Xem ruộng" hiện bàn tay
+**Gốc:** `InteractionIconByAction` thiếu tên hành động mới → rơi về `Icon_Hand` (ảnh mặc định khi
+không tra được), nên Xem ruộng / Bón phân / Dời ruộng trông giống hệt nhau.
+**Sửa:** Xem ruộng = `Icon_Eye`. Bón phân mượn `Icon_FeedBowl`, ba nút Dời mượn `Icon_HandRelease`
+— **chưa có ảnh riêng** cho hai nhóm này, cần artist vẽ thêm thì mới đúng nghĩa.
+
+### 5. Dùng túi phân cuối cùng thì báo "hết phân bón"
+Bón xong bắn toast thành công, rồi lần bấm sau bắn tiếp "hết phân bón" → tưởng bón hụt.
+**Sửa:** gộp làm một câu — *"Đã bón phân: giảm 15% thời gian chín. Đó là túi phân cuối — mua thêm
+ở Cửa hàng Vật phẩm hoặc Đại lý Hai Lúa."* Câu cảnh báo lúc mở túi cũng đổi thành "Trong túi không
+còn phân bón" cho khỏi mơ hồ.
+
+**Files:** `FarmInteractionController.cs`, `GameHUDController.cs`, `server/shopCatalog.json`
+
+---
+
 ## [2026-07-30] — Gom việc vào popup "Xem ruộng" + Dời ruộng + Dời đường lát đá
 
 Anh yêu cầu: *"tích hợp nhiều chức năng vào khi người chơi bấm xem ruộng như cách ta làm xem

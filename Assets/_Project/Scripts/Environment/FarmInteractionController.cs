@@ -596,6 +596,10 @@ namespace YWonderLand.Environment
             timedActionCancelRefund = onCancelRefund;
             timedActionStartFrame = Time.frameCount;
 
+            // Nhớ mục tiêu để DỰNG LẠI bảng nút sau khi múa xong (anh báo 30/07: tưới/cuốc xong là
+            // bảng nút biến mất, phải chạm lại ô mới hiện). Trong lúc múa vẫn ẩn để nhường thanh Hủy.
+            promptTargetBeforeTimedAction = currentHoverObject;
+
             currentHoverObject = null;
             currentActions.Clear();
             currentPromptFromFrontCell = false;
@@ -652,6 +656,47 @@ namespace YWonderLand.Environment
             timedActionCancelRefund = null;
             GameHUDController.Instance?.HideActionCancelProgress();
             EndTimedActionCursorMode();
+            RestorePromptAfterTimedAction();
+        }
+
+        /// <summary>
+        /// Dựng LẠI bảng nút cho đúng thứ vừa thao tác xong. Cố ý dựng lại chứ không cất đi rồi bày ra:
+        /// trạng thái đã đổi (chưa tưới -> đã tưới, chín -> vừa thu) nên bảng cũ sẽ sai.
+        /// Gọi sau khi múa xong/hủy; ngoài tầm với thì thôi, để luồng thường tự lo.
+        /// </summary>
+        private void RestorePromptAfterTimedAction()
+        {
+            var target = promptTargetBeforeTimedAction;
+            promptTargetBeforeTimedAction = null;
+
+            if (target == null || !useDirectTapInteraction) return;
+            if (PenMoveController.IsActive || UIPopupTracker.AnyOpen) return;
+            if (!IsDirectTapTargetStillInRange(target)) return;
+
+            var actions = new List<InteractionAction>();
+
+            var animal = target.GetComponentInParent<FarmAnimal>();
+            if (animal != null)
+            {
+                AddAnimalActions(animal, actions, out _, out _);
+            }
+            else
+            {
+                var tile = target.GetComponentInParent<FarmTile>();
+                if (tile != null) AddTileAction(tile, actions);
+            }
+
+            if (actions.Count == 0) return;
+
+            currentHoverObject = target;
+            currentActions = actions;
+            lastActionSignature = BuildActionSignature(actions);
+            currentPromptFromFrontCell = false;
+            currentPromptFromFootWater = false;
+            currentPromptFromFootResource = false;
+            currentPromptFromFootFishing = false;
+
+            GameHUDController.Instance?.ShowInteractionPrompts(actions);
         }
 
         private void CancelTimedAction(string toast)
@@ -666,6 +711,8 @@ namespace YWonderLand.Environment
             }
 
             timedActionActive = false;
+            // Bỏ dở là người chơi CHỦ ĐỘNG thoát -> không dựng lại bảng nút (khác lúc làm xong).
+            promptTargetBeforeTimedAction = null;
             GameHUDController.Instance?.HideActionCancelProgress();
             EndTimedActionCursorMode();
 
@@ -1369,6 +1416,9 @@ namespace YWonderLand.Environment
         void Update()
         {
             if (GameManager.Instance != null && GameManager.Instance.currentState != GameManager.GameState.Gameplay) return;
+
+            ClearPendingItemPickIfBagClosed();
+
             if (IsBuildModeOpen())
             {
                 // Mở Build Mode giữa chừng thì bỏ dở việc dời, trả cụm về chỗ cũ.
@@ -1563,6 +1613,7 @@ namespace YWonderLand.Environment
             }
 
             currentHoverObject = null;
+            promptTargetBeforeTimedAction = null;
             currentActions.Clear();
             currentPromptFromFrontCell = false;
             currentPromptFromFootWater = false;
@@ -2248,6 +2299,8 @@ namespace YWonderLand.Environment
         private Collider[] frontCellOverlapResults = new Collider[32];
         private readonly List<Collider> colliderDistanceBuffer = new List<Collider>(16);
         private GameObject currentHoverObject = null;
+        /// <summary>Thứ đang chỉ ngay trước khi vào màn múa động tác — để dựng lại bảng nút khi múa xong.</summary>
+        private GameObject promptTargetBeforeTimedAction;
         private bool currentPromptFromFrontCell;
         private bool currentPromptFromFootWater;
         private bool currentPromptFromFootResource;
@@ -2799,12 +2852,37 @@ namespace YWonderLand.Environment
             return true;
         }
 
+        // Khung hình lúc bật một việc "chờ chọn đồ trong túi" — để đừng dọn nhầm ngay khung vừa mở túi.
+        private int pendingItemPickFrame = -1;
+
+        private void MarkPendingItemPick() => pendingItemPickFrame = Time.frameCount;
+
+        /// <summary>
+        /// Đóng túi mà KHÔNG chọn gì thì bỏ luôn việc đang chờ. Trước đây cờ chờ nằm lại mãi, nên lần
+        /// sau mở túi bấm món bất kỳ vẫn bị hiểu là "đang bón phân" / "đang cho ăn" — anh gặp lúc làm
+        /// việc khác trên ruộng mà game bắn toast về phân bón.
+        ///
+        /// Cố ý KHÔNG đụng pendingPen / pendingEnclosure: hai cái đó do luồng thả thú BẤT ĐỒNG BỘ
+        /// (chờ server) giữ, dọn ngang sẽ làm rơi kết quả trả về.
+        /// </summary>
+        private void ClearPendingItemPickIfBagClosed()
+        {
+            if (pendingFertilizeTile == null && pendingFeedAnimal == null && pendingPlantTile == null) return;
+            if (Time.frameCount <= pendingItemPickFrame + 1) return;              // vừa bấm, túi chưa kịp hiện
+            if (inventoryPopup != null && inventoryPopup.IsVisible()) return;     // túi còn mở -> vẫn đang chọn
+
+            pendingFertilizeTile = null;
+            pendingFeedAnimal = null;
+            pendingPlantTile = null;
+        }
+
         /// <summary>Bón phân = mở túi (tab Đồ dùng) chọn Phân bón -> đẩy tiến độ lớn của cây.</summary>
         private void BeginFertilize(FarmTile tile)
         {
             if (tile == null) return;
 
             pendingFertilizeTile = tile;
+            MarkPendingItemPick();
             pendingFeedAnimal = null;
             pendingPen = null;
             pendingPlantTile = null;
@@ -2814,7 +2892,7 @@ namespace YWonderLand.Environment
 
             var inv = YWonderLand.Managers.InventoryManager.Instance;
             if (inv != null && inv.GetItemQuantity(FertilizerItemId) <= 0)
-                ScreenToast.Show("Hết phân bón — mua thêm ở Cửa hàng Vật phẩm hoặc Đại lý Hai Lúa.");
+                ScreenToast.Show("Trong túi không còn phân bón — mua thêm ở Cửa hàng Vật phẩm hoặc Đại lý Hai Lúa.");
 
             EnsureInventoryPopupSubscribed();
             if (inventoryPopup != null) inventoryPopup.ShowAtTab("items");
@@ -2859,7 +2937,14 @@ namespace YWonderLand.Environment
             if (inventoryPopup != null) inventoryPopup.Hide();
 
             string saved = FertilizerSavingText(fertilizedCrop, bonusSec);
-            ScreenToast.ShowInfoForItem(FertilizerItemId, $"Đã bón phân: {saved}.", fallbackText: "Phân");
+
+            // Bón đúng túi CUỐI thì gộp luôn lời nhắc vào câu báo thành công. Trước đây bắn 2 toast
+            // liền nhau ("đã bón" rồi "hết phân bón"), anh báo là người chơi tưởng bón hụt.
+            string note = inv.GetItemQuantity(FertilizerItemId) <= 0
+                ? " Đó là túi phân cuối — mua thêm ở Cửa hàng Vật phẩm hoặc Đại lý Hai Lúa."
+                : "";
+
+            ScreenToast.ShowInfoForItem(FertilizerItemId, $"Đã bón phân: {saved}.{note}", fallbackText: "Phân");
             FarmActivityLog.RecordEvent(tile.HistoryKey, FarmActivityLog.KindFertilize, saved);
         }
 
@@ -2885,6 +2970,7 @@ namespace YWonderLand.Environment
         {
             if (animal == null) return;
             pendingFeedAnimal = animal;
+            MarkPendingItemPick();
             pendingFertilizeTile = null;
             pendingPen = null;
             pendingPlantTile = null;
@@ -3526,6 +3612,7 @@ namespace YWonderLand.Environment
 
             // Ghi nhớ ô đất đang chờ gieo, rồi mở Túi đồ ở tab Hạt giống để người chơi CHỌN loại cây.
             pendingPlantTile = tile;
+            MarkPendingItemPick();
 
             // Hết hạt thì NHẮC ra shop mua, không tặng thêm.
             WarnIfNoSeeds();
