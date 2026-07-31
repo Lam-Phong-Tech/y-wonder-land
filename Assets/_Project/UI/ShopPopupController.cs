@@ -238,11 +238,38 @@ public class ShopPopupController : MonoBehaviour
 
     // ── Public API ──
 
+    // ── KHÓA QUẦY TRONG LÚC CHƯA XONG HƯỚNG DẪN (anh chốt 31/07) ──
+    // Trong tutorial, FarmTile.GetGrowthTime() ép MỌI loại cây chín trong 24s và cây KHÔNG chết
+    // (FarmTile.IsTutorialActive). Ai cố tình bỏ dở hướng dẫn thì có một nông trại tua nhanh bất tử;
+    // mở được quầy là thành vòng lặp mua hạt -> 24s -> bán -> lãi vô hạn. Chặn ngay cổng vào quầy.
+    //
+    // Chặn ở ĐÂY vì cả 4 lối vào (ShopData / mock / AccessMode / ShopDefinition) đều dồn về hàm này,
+    // nên không sót đường nào — kể cả NPC, vùng chạm nhà, hay phím tắt cũ.
+    private static float lastTutorialLockToastAt = -10f;
+
+    private bool BlockedByTutorial()
+    {
+        var tm = TutorialManager.Instance;
+        if (tm == null || !tm.IsActive()) return false;
+
+        // Vùng chạm nhà bắn OnTriggerEnter mỗi lần đi qua -> chặn spam toast.
+        if (Time.time - lastTutorialLockToastAt >= 2f)
+        {
+            lastTutorialLockToastAt = Time.time;
+            YWonderLand.Environment.ScreenToast.Show("Xong hướng dẫn của NPC Tân Thủ đã rồi mới mua bán được nhé!");
+        }
+
+        Debug.Log("[ShopPopup] Chan mo quay: tutorial chua xong.");
+        return true;
+    }
+
     /// <summary>
     /// Open the shop with specific data. Each NPC shop passes its own ShopData.
     /// </summary>
     public void Show(ShopData data)
     {
+        if (BlockedByTutorial()) return;
+
         if (!gameObject.activeInHierarchy)
         {
             Debug.Log("[ShopPopup] GameObject đang tắt, tiến hành bật lại!");

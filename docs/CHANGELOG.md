@@ -6,6 +6,45 @@
 
 ---
 
+## [2026-07-31f] — Khóa quầy mua bán khi chưa xong hướng dẫn
+
+### Lý do (anh chốt 31/07)
+Trong lúc chưa hoàn thành hướng dẫn, cơ chế **tua nhanh thời gian vẫn luôn bật**. Người chơi
+cố tình phớt lờ NPC là có nông trại tua nhanh, mở quầy được thì thành vòng lặp kiếm tiền.
+
+### Lỗ hổng thật sự (rộng hơn tưởng)
+`FarmTile.GetGrowthTime()` chặn **ngay dòng đầu**, trước cả khi đọc dữ liệu cây:
+
+```csharp
+TutorialManager tm = FindFirstObjectByType<TutorialManager>();
+if (tm != null && tm.IsActive()) return 24f;   // MỌI loại cây, kể cả cây lâu năm
+```
+
+Cộng thêm `FarmTile.IsTutorialActive()` khiến cây **không chết** trong tutorial. Tức là ai bỏ dở
+hướng dẫn thì có một nông trại **tua nhanh + bất tử**, áp cho mọi loại cây, không giới hạn số ô.
+
+### Sửa
+Chặn ở `ShopPopupController.Show(ShopData)` — cả 4 lối vào quầy (ShopData / mock / AccessMode /
+ShopDefinition) đều dồn về hàm này nên không sót đường nào: NPC, vùng chạm nhà, phím tắt cũ.
+
+- Chặn khi `TutorialManager.Instance.IsActive()` — đúng bằng điều kiện đang bật tua nhanh.
+- Người chơi cũ (`tutorialCompleted`) không bị ảnh hưởng: tutorial không chạy → `IsActive()` sai.
+- Toast "Xong hướng dẫn của NPC Tân Thủ đã rồi mới mua bán được nhé!", cooldown 2s vì vùng chạm
+  nhà bắn `OnTriggerEnter` mỗi lần đi qua.
+- Khóa **cả tab Bán**, không chỉ tab Mua — bán mới là chỗ ra tiền.
+
+### CÒN HỞ — cần anh chốt
+Khóa quầy **không đóng hẳn** vòng lặp: người chơi vẫn có thể ôm hạt sẵn, tua 24s liên tục,
+tích kho rồi **xong hướng dẫn mới bán một thể**. Muốn bịt hẳn thì phải thu hẹp cơ chế tua nhanh
+về **đúng ô đất của hướng dẫn** thay vì áp toàn cục.
+
+### Files
+- `Assets/_Project/UI/ShopPopupController.cs`
+
+`csc exit code: 0`.
+
+---
+
 ## [2026-07-31e] — Bảng nút ruộng trễ đúng một bước
 
 ### Triệu chứng
