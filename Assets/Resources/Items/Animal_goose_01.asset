@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Animal_goose_01
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.AnimalDefinition
   animalId: goose_01
-  animalName: "Ng\u1ED7ng con V2"
+  animalName: "Ng\u1ED7ng con"
   buyPrice: 260
   penSlots: 1
   foodMainName: "B\u1EAFp C\u1EA3i"
