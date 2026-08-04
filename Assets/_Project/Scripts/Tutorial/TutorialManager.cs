@@ -89,7 +89,7 @@ public class TutorialManager : MonoBehaviour
     private bool authEventsSubscribed;
     private bool nodesBuilt;
 
-    private float harvestCountdown = 5f;
+    private float harvestCountdown = TutorialFastGrowthSec;
     private Coroutine countdownCoroutine;
 
     // Timeout hint system
@@ -592,7 +592,9 @@ public class TutorialManager : MonoBehaviour
         AdoptFarmTile(tile);
         SetStep(TutorialStep.WaitHarvest);
 
-        harvestCountdown = 5f;
+        // Khớp ĐÚNG thời gian ô đất chín (TutorialFastGrowthSec). Đếm ngược và ô đất cùng
+        // bấm giờ từ khoảnh khắc TƯỚI, nên hai đồng hồ chạy song song, không lệch pha.
+        harvestCountdown = TutorialFastGrowthSec;
         if (countdownCoroutine != null) StopCoroutine(countdownCoroutine);
         countdownCoroutine = StartCoroutine(HarvestCountdownSequence());
 
@@ -603,9 +605,16 @@ public class TutorialManager : MonoBehaviour
         ShowCountdownTimer();
     }
 
+    private bool IsTargetTileRipe()
+    {
+        return targetFarmTile != null && targetFarmTile.currentState == FarmTile.TileState.Ripe;
+    }
+
     private IEnumerator HarvestCountdownSequence()
     {
-        while (harvestCountdown > 0f)
+        // Dừng khi HẾT GIỜ *hoặc* ô đã chín thật — cái nào tới trước. Đếm ngược chỉ để người
+        // chơi thấy còn bao lâu; mốc "chín" thật do trạng thái ô quyết định.
+        while (harvestCountdown > 0f && !IsTargetTileRipe())
         {
             UpdateQuestHUD($"[8/11] Chờ cây chín (còn {Mathf.CeilToInt(harvestCountdown)}s)");
             if (countdownNumber != null)
@@ -617,6 +626,17 @@ public class TutorialManager : MonoBehaviour
             }
             yield return new WaitForSeconds(1f);
             harvestCountdown -= 1f;
+        }
+
+        // Đếm hết mà ô chưa kịp chín (lệch làm tròn giữa giờ game và giờ tường): chờ nốt tới lúc
+        // chín THẬT rồi mới hô, để bấm là thu được ngay. Chốt 10s phòng ô mục tiêu null (adopt
+        // hụt) — không để tutorial kẹt vĩnh viễn.
+        float safety = 0f;
+        while (targetFarmTile != null && !IsTargetTileRipe() && safety < 10f)
+        {
+            if (countdownNumber != null) countdownNumber.text = "0";
+            yield return new WaitForSeconds(0.25f);
+            safety += 0.25f;
         }
 
         HideCountdownTimer();
