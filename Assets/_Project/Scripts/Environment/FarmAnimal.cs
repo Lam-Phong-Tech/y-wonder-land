@@ -40,6 +40,9 @@ namespace YWonderLand.Environment
         public float produceTimer = 0f;
         public int harvestsRemaining;
         public bool hasProductReady = false;
+        // CỘNG DỒN (khách chốt 04/08): số vòng đã ra sản phẩm mà người chơi CHƯA thu. Thu là gom hết.
+        // hasProductReady giữ lại cho tương thích save cũ = (pendingProduct > 0).
+        public int pendingProduct = 0;
         public bool isVaccinated = false;
         public bool LastHarvestWasFinal { get; private set; }
 
@@ -183,6 +186,7 @@ namespace YWonderLand.Environment
             feedTimer = 0f;
             produceTimer = 0f;
             hasProductReady = false;
+            pendingProduct = 0;
             isVaccinated = false;
 
             feedRefTime = RealNow();
@@ -246,15 +250,29 @@ namespace YWonderLand.Environment
             }
 
             // ── RA SẢN PHẨM theo mốc thời gian (độc lập với đói; chỉ dừng khi Bệnh/Chết) ──
-            if (CanProduce() && !hasProductReady)
+            // CỘNG DỒN (khách chốt 04/08): mỗi vòng hoàn tất +1 sản phẩm, KHÔNG dừng ở 1. Đồng hồ
+            // chạy độc lập, thu hoạch không reset. Chết/Bệnh thì Update thoát sớm nên tự ngừng dồn,
+            // vòng đang dở lúc chết bị mất (chưa đủ 1 chu kỳ = chưa +1).
+            if (CanProduce())
             {
-                double produceElapsed = now - produceRefTime;
-                produceTimer = (float)produceElapsed;
-                if (produceElapsed >= Mathf.Max(0.1f, data.produceCycleTimeSec))
+                float cycle = Mathf.Max(0.1f, data.produceCycleTimeSec);
+                produceTimer = (float)(now - produceRefTime);
+                int completed = Mathf.FloorToInt((float)((now - produceRefTime) / cycle));
+                if (completed > 0)
                 {
-                    hasProductReady = true;
-                    UpdateVisuals();
-                    OnAnimalStateChanged?.Invoke(this);
+                    // Loài thu hữu hạn: không dồn quá số lần thu còn lại của cả đời.
+                    int producible = IsInfiniteHarvest ? completed : Mathf.Min(completed, harvestsRemaining);
+                    if (producible > 0)
+                    {
+                        pendingProduct += producible;
+                        hasProductReady = true;
+                        if (!IsInfiniteHarvest) harvestsRemaining -= producible;
+                        produceRefTime += producible * cycle; // giữ phần dư tiến tới vòng kế
+                        UpdateVisuals();
+                        OnAnimalStateChanged?.Invoke(this);
+                    }
+                    // producible == 0 = đã sản xuất hết số lần thu (dồn vào pending, chờ người chơi thu
+                    // mẻ cuối mới làm thịt). CanProduce() sẽ false từ đây, đồng hồ dừng.
                 }
             }
         }
@@ -313,12 +331,15 @@ namespace YWonderLand.Environment
         /// <summary>Còn bao nhiêu giây tới vụ sản phẩm kế. 0 = đã chín; -1 = hết vụ / không sản xuất.</summary>
         public float GetTimeToNextProduceSec()
         {
-            if (!CanProduce()) return -1f;
-            if (hasProductReady) return 0f;
+            if (!CanProduce()) return pendingProduct > 0 ? 0f : -1f; // hết vụ nhưng còn hàng chờ thu
             float cycle = Mathf.Max(0.1f, data.produceCycleTimeSec);
-            double elapsed = RealNow() - produceRefTime;
-            return Mathf.Max(0f, cycle - (float)elapsed);
+            // Đếm liên tục tới vòng KẾ (dù đang có hàng dồn) — phần dư sau các vòng đã tính.
+            double into = (RealNow() - produceRefTime) % cycle;
+            return Mathf.Max(0f, cycle - (float)into);
         }
+
+        /// <summary>Số sản phẩm đã cộng dồn đang chờ thu (mỗi cái = produceAmount).</summary>
+        public int PendingProduct => pendingProduct;
 
         private bool CanProduce()
         {
@@ -367,15 +388,17 @@ namespace YWonderLand.Environment
             amount = 0;
             LastHarvestWasFinal = false;
 
-            if (!hasProductReady || currentState == AnimalState.Dead) return false;
+            if (pendingProduct <= 0 || currentState == AnimalState.Dead) return false;
 
+            // Gom HẾT các vòng đã cộng dồn trong một lần thu (khách chốt 04/08: thu 1 lần hết).
             itemId = data.produceItemId;
-            amount = data.produceAmount;
+            amount = data.produceAmount * pendingProduct;
 
+            pendingProduct = 0;
             hasProductReady = false;
-            produceRefTime = RealNow(); // bắt đầu chu kỳ kế từ bây giờ
-            produceTimer = 0f;
-            if (!IsInfiniteHarvest) harvestsRemaining--;
+            // KHÔNG reset produceRefTime nữa: đồng hồ sản xuất chạy độc lập trong Update (đã trừ dần
+            // theo số vòng đã ra). Reset ở đây sẽ vứt mất phần dư đang tiến tới vòng kế.
+            // harvestsRemaining ĐÃ trừ lúc SẢN XUẤT (không trừ lại ở thu hoạch).
             LastHarvestWasFinal = !IsInfiniteHarvest && harvestsRemaining <= 0;
 
             // Nhật ký thu hoạch của CHÍNH con này (khách chốt 30/07) — hiện trong popup con vật.
@@ -914,6 +937,7 @@ namespace YWonderLand.Environment
             produceTimer = pTimer;
             harvestsRemaining = harvests;
             hasProductReady = ready;
+            pendingProduct = ready ? 1 : 0; // save cũ chỉ có cờ bool → coi như 1 sản phẩm chờ
             isVaccinated = vacc;
             hasBeenFed = true; // con vật load lại → coi như đã cho ăn (dùng fedLifeSec)
             // Save kiểu CŨ chỉ có cờ bool: cờ bật → cấp lại 1 kỳ bảo vệ; đếm ủ bệnh lại từ bây giờ
@@ -948,13 +972,15 @@ namespace YWonderLand.Environment
         /// <summary>Khôi phục trạng thái thú từ save (persistence): set thẳng mốc Unix → Update tự đói-bù/chết-bù
         /// theo thời gian thực đã trôi (gọi SAU Initialize, đè lại mốc no/sản phẩm).</summary>
         public void RestoreAnimalState(double feedRefUnix, double produceRefUnix, bool fed, int harvests, bool product, bool vacc,
-            double vaccineUntil = 0.0, double sickRef = 0.0, int stateInt = -1, bool rolled = false)
+            double vaccineUntil = 0.0, double sickRef = 0.0, int stateInt = -1, bool rolled = false, int pending = -1)
         {
             feedRefTime = feedRefUnix;
             produceRefTime = produceRefUnix;
             hasBeenFed = fed;
             harvestsRemaining = harvests;
-            hasProductReady = product;
+            // pending < 0 = save CŨ chưa có trường này → suy từ cờ bool (product ? 1 : 0).
+            pendingProduct = pending >= 0 ? pending : (product ? 1 : 0);
+            hasProductReady = pendingProduct > 0;
             isVaccinated = vacc;
             // Save CŨ chưa có 2 mốc này → mốc vòng nuôi tính từ bây giờ để không giết oan thú đang nuôi.
             vaccineUntilUnix = vaccineUntil;

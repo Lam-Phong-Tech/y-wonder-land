@@ -6,6 +6,27 @@
 
 ---
 
+## [2026-08-04c] — Cộng dồn sản phẩm vật nuôi qua nhiều vòng (khách chốt 04/08) — PHA 1
+
+### Yêu cầu
+Trước đây thú ra 1 sản phẩm rồi ĐỒNG HỒ ĐỨNG (chưa thu thì vòng sau không chạy). Khách muốn:
+mỗi vòng hoàn tất +1 sản phẩm, dồn không giới hạn, thu là gom hết một lần; số lượng/thời gian
+mỗi vòng giữ nguyên. Thú chết/bệnh thì ngừng dồn; vòng đang dở lúc chết bị mất.
+
+### Sửa
+- `FarmAnimal.cs`: thêm `pendingProduct` (số vòng đã dồn chưa thu). Update tính số vòng đã trôi,
+  cộng vào pending, đồng hồ chạy độc lập (thu KHÔNG reset nữa, giữ phần dư tiến tới vòng kế).
+  Loài thu hữu hạn: không dồn quá số lần thu còn lại; `harvestsRemaining` trừ lúc SẢN XUẤT, làm
+  thịt vòng cuối vẫn CHỜ người chơi thu mẻ cuối. `HarvestProduct` gom hết pending trong 1 lần thu.
+- `BuildPersistence.cs`: lưu/nạp `pendingProduct` (mặc định -1 cho save cũ → suy từ cờ bool, không
+  mất sản phẩm của người chơi cũ).
+- `AnimalInteractionPopupController.cs`: hiện số đã dồn ("Có N sản phẩm!", "Sẵn sàng (N)").
+
+### Còn lại (pha sau)
+Pha 2: thú/cây chết để XÁC (giữ sản phẩm, chờ cứu). Pha 3: công cụ cứu 60% giá mua + cờ hỗ trợ 40%.
+
+---
+
 ## [2026-08-04b] — Bỏ hậu tố "V2" ở tên vật nuôi (khách yêu cầu)
 
 ### Khách chốt 04/08

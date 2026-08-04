@@ -154,6 +154,7 @@ namespace YWonderLand.Environment
                     hasBeenFed = fa.HasBeenFed,
                     harvestsRemaining = fa.harvestsRemaining,
                     hasProductReady = fa.hasProductReady,
+                    pendingProduct = fa.pendingProduct,
                     isVaccinated = fa.isVaccinated,
                     vaccineUntilUnix = fa.VaccineUntilUnix,
                     sickRefUnix = fa.SickRefUnix,
@@ -272,7 +273,7 @@ namespace YWonderLand.Environment
                 spawned.occupiedCells = new List<BuildSurfaceCell>(cells);
                 spawned.RestoreAnimalState(a.feedRefUnix, a.produceRefUnix, a.hasBeenFed,
                     a.harvestsRemaining, a.hasProductReady, a.isVaccinated,
-                    a.vaccineUntilUnix, a.sickRefUnix, a.state, a.sicknessRolled);
+                    a.vaccineUntilUnix, a.sickRefUnix, a.state, a.sicknessRolled, a.pendingProduct);
             }
             return true;
         }
@@ -322,6 +323,9 @@ namespace YWonderLand.Environment
             public bool hasBeenFed;
             public int harvestsRemaining;
             public bool hasProductReady;
+            // -1 = save CŨ chưa có trường này → RestoreAnimalState suy từ hasProductReady (giữ nguyên
+            // "1 sản phẩm chờ" cho người chơi cũ). Save MỚI ghi số vòng đã cộng dồn thật (>=0).
+            public int pendingProduct = -1;
             public bool isVaccinated;
             public double vaccineUntilUnix; // mốc hết hạn vắc-xin
             public double sickRefUnix;      // mốc bắt đầu vòng nuôi (gốc tính thời điểm phát bệnh)

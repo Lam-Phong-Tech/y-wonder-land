@@ -712,9 +712,10 @@ public class AnimalInteractionPopupController : MonoBehaviour
         if (animal == null || animal.data == null) return "—";
 
         float t = animal.GetTimeToNextProduceSec();
+        int pending = animal.PendingProduct;
         string when;
-        if (t < 0f) when = "Hết vụ";
-        else if (t <= 0.5f) when = "<color=#5BD66B>Sẵn sàng</color>";
+        if (pending > 0) when = $"<color=#5BD66B>Sẵn sàng ({pending})</color>"; // đã cộng dồn, chờ thu
+        else if (t < 0f) when = "Hết vụ";
         else when = "Vụ tới " + FormatDuration(t);
 
         string count = animal.IsInfiniteHarvest
@@ -793,7 +794,13 @@ public class AnimalInteractionPopupController : MonoBehaviour
             case FarmAnimal.AnimalState.Dead: statusStr = "<color=#000000>Đã chết</color>"; break;
         }
         if (animal.hasProductReady)
-            statusStr += " - <color=#00AA00>Có sản phẩm!</color>";
+        {
+            // CỘNG DỒN (khách chốt 04/08): hiện số vòng đã dồn để người chơi biết thu được bao nhiêu.
+            int n = animal.PendingProduct;
+            statusStr += n > 1
+                ? $" - <color=#00AA00>Có {n} sản phẩm!</color>"
+                : " - <color=#00AA00>Có sản phẩm!</color>";
+        }
 
         if (lblStatus != null) lblStatus.text = "Trạng thái: " + statusStr;
         if (lblHunger != null) lblHunger.text = Mathf.RoundToInt(animal.GetHungerFraction() * 100f) + "%";
