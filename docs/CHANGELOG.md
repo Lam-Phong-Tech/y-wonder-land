@@ -6,6 +6,23 @@
 
 ---
 
+## [2026-08-04b] — Bỏ hậu tố "V2" ở tên vật nuôi (khách yêu cầu)
+
+### Khách chốt 04/08
+Tên vật nuôi bỏ chữ "V2": hiển thị ở thẻ chuồng, tiêu đề popup, toast đều dùng chung
+trường `animalName`, sửa 1 chỗ/con là khớp hết.
+
+### Files
+- `Assets/Resources/Items/Animal_chicken_01.asset` — "Gà mái V2" → "Gà mái"
+- `Assets/Resources/Items/Animal_goose_01.asset` — "Ngỗng con V2" → "Ngỗng con"
+- `Assets/Resources/Items/Animal_ostrich_01.asset` — "Đà điểu V2" → "Đà điểu"
+- `Assets/Resources/Items/Animal_goat_01.asset` — "Dê con V2" → "Dê con"
+- `Assets/Resources/Items/Animal_rabbit_01.asset` — "Thỏ con V2" → "Thỏ con"
+
+Chỉ sửa nội dung chuỗi, giữ nguyên escape unicode — không đụng code, không cần compile.
+
+---
+
 ## [2026-08-04a] — Khớp đếm ngược thu hoạch với thời gian cây chín thật (hướng dẫn)
 
 ### Lỗi

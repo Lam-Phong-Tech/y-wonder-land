@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Animal_rabbit_01
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.AnimalDefinition
   animalId: rabbit_01
-  animalName: "Th\u1ECF con V2"
+  animalName: "Th\u1ECF con"
   buyPrice: 130
   penSlots: 1
   foodMainName: "C\xE0 r\u1ED1t"

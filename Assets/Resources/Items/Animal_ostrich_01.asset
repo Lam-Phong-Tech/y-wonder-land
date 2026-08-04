@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Animal_ostrich_01
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.AnimalDefinition
   animalId: ostrich_01
-  animalName: "\u0110\xE0 \u0111i\u1EC3u V2"
+  animalName: "\u0110\xE0 \u0111i\u1EC3u"
   buyPrice: 4420
   penSlots: 1
   foodMainName: "D\u01B0a H\u1EA5u"

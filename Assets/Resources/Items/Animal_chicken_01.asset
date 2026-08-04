@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Animal_chicken_01
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.AnimalDefinition
   animalId: chicken_01
-  animalName: "G\xE0 m\xE1i V2"
+  animalName: "G\xE0 m\xE1i"
   buyPrice: 156
   penSlots: 1
   foodMainName: "B\u1EAFp Ng\xF4"
