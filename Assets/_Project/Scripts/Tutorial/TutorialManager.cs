@@ -548,8 +548,9 @@ public class TutorialManager : MonoBehaviour
         targetFarmTile.tutorialGrowthTime = TutorialFastGrowthSec;
     }
 
-    /// <summary>Thời gian lớn ép cho ĐÚNG ô đất của hướng dẫn (giây).</summary>
-    public const float TutorialFastGrowthSec = 24f;
+    /// <summary>Thời gian lớn ép cho ĐÚNG ô đất của hướng dẫn (giây). Đây là NGUỒN DUY NHẤT:
+    /// cả ô đất (AdoptFarmTile) lẫn đếm ngược thu hoạch đều lấy từ đây, đổi 1 chỗ là khớp cả hai.</summary>
+    public const float TutorialFastGrowthSec = 8f;
 
     /// <summary>
     /// Ô này có được tua nhanh không? CHỈ đúng ô hướng dẫn đang bám, và chỉ khi hướng dẫn còn chạy.

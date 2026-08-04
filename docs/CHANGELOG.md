@@ -23,9 +23,9 @@ phải chờ thêm ~19 giây trong bối rối.
   (giờ tường) khiến NPC hô sớm một nhịp, người chơi bấm hụt.
 - Chốt an toàn 10s phòng ô mục tiêu null (adopt hụt) — không để tutorial kẹt vĩnh viễn.
 
-### Lưu ý
-Nếu muốn hướng dẫn nhanh hơn: hạ `TutorialFastGrowthSec` là cả ô đất lẫn đếm ngược tự khớp
-theo (một nguồn sự thật duy nhất).
+### Anh chốt 04/08
+Hạ `TutorialFastGrowthSec` 24s → **8s** cho tân thủ khỏi ngồi chờ lâu. Cả ô đất lẫn đếm ngược
+tự khớp theo (một nguồn sự thật duy nhất).
 
 ---
 
