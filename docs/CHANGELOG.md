@@ -6,6 +6,29 @@
 
 ---
 
+## [2026-08-04a] — Khớp đếm ngược thu hoạch với thời gian cây chín thật (hướng dẫn)
+
+### Lỗi
+Bước chờ thu hoạch trong hướng dẫn đếm ngược **5 giây** rồi NPC hô "Chín rồi kìa! Mau nhấp
+vào thu hoạch." — nhưng ô đất của hướng dẫn chỉ chín ở **24 giây** (`TutorialFastGrowthSec`).
+Người chơi bấm thu hoạch theo lời NPC nhưng `HandleHarvest` trả `false` vì ô chưa `Ripe`,
+phải chờ thêm ~19 giây trong bối rối.
+
+### Sửa
+`TutorialManager.cs`:
+- Đếm ngược khởi từ `TutorialFastGrowthSec` (24s) thay vì hằng số 5 rời rạc. Đếm ngược và ô
+  đất **cùng bấm giờ từ khoảnh khắc TƯỚI**, nên hai đồng hồ chạy song song.
+- Điều kiện hô "chín" giờ chốt theo **trạng thái thật của ô** (`currentState == Ripe`), không
+  thuần theo giờ — tránh lệch nhịp làm tròn giữa `WaitForSeconds` (giờ game) và `growStartTime`
+  (giờ tường) khiến NPC hô sớm một nhịp, người chơi bấm hụt.
+- Chốt an toàn 10s phòng ô mục tiêu null (adopt hụt) — không để tutorial kẹt vĩnh viễn.
+
+### Anh chốt 04/08
+Hạ `TutorialFastGrowthSec` 24s → **8s** cho tân thủ khỏi ngồi chờ lâu. Cả ô đất lẫn đếm ngược
+tự khớp theo (một nguồn sự thật duy nhất).
+
+---
+
 ## [2026-07-31i] — Xong hướng dẫn thì bong bóng ghi "Hiện chưa có nhiệm vụ"
 
 ### Anh chốt 31/07
