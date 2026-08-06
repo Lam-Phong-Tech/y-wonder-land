@@ -6,6 +6,24 @@
 
 ---
 
+## [2026-08-04f] — Công cụ cứu: lớp logic + cấu hình (khách chốt 04/08) — PHA 3 (1/2)
+
+### Logic + config (chưa có UI — wire nút ở commit sau)
+- `RescueConfig.cs` (mới): chi phí cứu = 60% giá mua (`CompanySupport40On` bật) hoặc 100% (admin
+  tạm đóng hỗ trợ → tắt cờ). Cờ CLIENT (anh chốt, wire server sau). `RescueCost(buyPrice)`.
+- `FarmAnimal`: `IsDead`, `RescueCost()` (theo `data.buyPrice`), `Rescue()` (về vạch xuất phát:
+  khoẻ + reset số lần thu, GIỮ pendingProduct cho thu), `DiscardCorpse()` (dọn xác, giải phóng ô,
+  mất sản phẩm — khách duyệt nút dọn).
+- `FarmTile`: `IsCropDead`, `RescueCost()` (tra giá hạt qua ItemDatabase), `ReviveCrop()` (về vạch
+  xuất phát: Planted, cần tưới lại, dựng model tươi), `DiscardCrop()` (ô về đất trống).
+- Caller (popup) tự trừ Point bằng `EconomyManager.SpendPOS` TRƯỚC khi gọi Rescue/Revive.
+
+### Còn lại — PHA 3 (2/2)
+Wire nút "Cứu (X Point)" + "Dọn" vào popup con vật & popup Xem ruộng; ẩn/chặn Cho ăn/Thu/Tưới khi
+đã chết kèm toast. Xong cái này là trọn bộ, mới gộp main.
+
+---
+
 ## [2026-08-04e] — Cây chết để lại HÉO tại ô (đảo luật cũ) — PHA 2 (phần cây trồng)
 
 ### Đảo luật (khách chốt 04/08)

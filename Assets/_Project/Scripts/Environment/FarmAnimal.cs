@@ -429,6 +429,48 @@ namespace YWonderLand.Environment
             return true;
         }
 
+        // ── CÔNG CỤ CỨU (khách chốt 04/08) ──
+
+        public bool IsDead => currentState == AnimalState.Dead;
+
+        /// <summary>Số Point phải trả để cứu con này (60% giá mua, hoặc 100% nếu admin tạm đóng hỗ trợ).</summary>
+        public int RescueCost() => data != null ? RescueConfig.RescueCost(data.buyPrice) : 0;
+
+        /// <summary>Cứu sống xác: VỀ VẠCH XUẤT PHÁT (như mới thả) nhưng GIỮ sản phẩm đã cộng dồn cho thu.
+        /// Caller tự trừ Point TRƯỚC khi gọi (xem popup con vật).</summary>
+        public void Rescue()
+        {
+            if (currentState != AnimalState.Dead) return;
+
+            currentState = AnimalState.Healthy;
+            harvestsRemaining = data != null ? data.maxHarvests : harvestsRemaining; // reset số lần thu
+            feedRefTime = RealNow();
+            produceRefTime = RealNow();
+            hasBeenFed = false;
+            vaccineUntilUnix = 0.0;
+            sickRefUnix = RealNow();
+            sicknessRolled = false;
+            // pendingProduct GIỮ NGUYÊN — sản phẩm đã dồn vẫn cho người chơi thu (khách chốt).
+
+            UpdateVisuals();                    // trả model về tư thế đứng (nhánh non-dead)
+            OnAnimalStateChanged?.Invoke(this);
+            FarmStateSync.SaveRuntimeState();
+        }
+
+        /// <summary>Dọn xác: giải phóng ô chuồng, MẤT sản phẩm đang giữ, xoá con vật (khách duyệt nút này).</summary>
+        public void DiscardCorpse()
+        {
+            FarmActivityLog.ClearHistory(animalInstanceId);
+            if (currentPen != null) { currentPen.RemoveAnimal(this); currentPen = null; }
+            if (occupiedCells != null)
+            {
+                foreach (var c in occupiedCells) if (c != null) c.ClearAnimal();
+                occupiedCells = null;
+            }
+            FarmStateSync.SaveRuntimeState();
+            Destroy(gameObject);
+        }
+
         /// <summary>Vụ cuối: cộng thịt vào túi, giải phóng ô chuồng, xoá con vật.</summary>
         private void SlaughterForMeat()
         {

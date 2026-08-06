@@ -652,6 +652,66 @@ public class FarmTile : MonoBehaviour
             if (r != null && r.material != null) r.material.color = WitheredColor;
     }
 
+    // ── CÔNG CỤ CỨU (khách chốt 04/08) ──
+
+    public bool IsCropDead => cropDead;
+
+    /// <summary>Số Point phải trả để cứu cây héo này (60% giá mua hạt, hoặc 100% nếu admin tạm đóng hỗ trợ).</summary>
+    public int RescueCost()
+    {
+        if (!cropDead) return 0;
+        var db = Resources.Load<ItemDatabase>("ItemDatabase");
+        var def = db != null ? db.GetItem(plantedSeedId) : null;
+        return RescueConfig.RescueCost(def != null ? def.buyPrice : 0);
+    }
+
+    /// <summary>Cứu cây héo: VỀ VẠCH XUẤT PHÁT (như vừa gieo, cần tưới lại), dựng lại model tươi.
+    /// Caller tự trừ Point TRƯỚC khi gọi (xem popup Xem ruộng).</summary>
+    public void ReviveCrop()
+    {
+        if (!cropDead) return;
+
+        cropDead = false;
+        currentState = TileState.Planted;
+        isGrowing = false;
+        isReGrowing = false;
+        growStartTime = 0.0;
+        plantedTime = RealNow();  // đếm lại cửa sổ chết-khát từ đầu → phải tưới
+        lastWaterTime = 0.0;
+        dryAccumSec = 0f;
+        harvestsRemaining = currentCrop != null ? Mathf.Max(1, currentCrop.maxHarvests) : 1;
+
+        // Dựng lại model TƯƠI (bỏ nhuộm nâu).
+        if (cropModelInstance != null) { Destroy(cropModelInstance); cropModelInstance = null; }
+        if (ShouldUseCustomCropModel()) SpawnCropModel();
+        else if (createPrimitiveFallbackVisuals) { DestroySeedAndGrowingVisuals(); CreateCropVisuals(); }
+
+        UpdateVisuals();
+        FarmStateSync.SaveTileState(this);
+    }
+
+    /// <summary>Dọn cây héo: ô về đất trống, thả ô giàn, mất giống (khách duyệt nút này).</summary>
+    public void DiscardCrop()
+    {
+        cropDead = false;
+        currentState = TileState.Soil;
+        plantedSeedId = "";
+        currentCrop = null;
+        cropColor = Color.green;
+        growStartTime = 0.0;
+        plantedTime = 0.0;
+        isGrowing = false;
+        isReGrowing = false;
+        harvestsRemaining = 1;
+        dryAccumSec = 0f;
+        FreeSlaves();
+        FarmActivityLog.ClearHistory(HistoryKey);
+        if (cropModelInstance != null) { Destroy(cropModelInstance); cropModelInstance = null; }
+        if (cropInfoRoot != null) { Destroy(cropInfoRoot.gameObject); cropInfoRoot = null; cropInfoTM = null; cropInfoMF = null; }
+        UpdateVisuals();
+        FarmStateSync.SaveTileState(this);
+    }
+
     // Đã bỏ IsTutorialActive(): hàm này KHÔNG có chỗ nào gọi, nhưng chú thích của nó ("tutorial thì
     // KHÔNG cho cây chết") lại mô tả một luật không hề tồn tại — đọc vào là hiểu sai luật chết cây.
     // Cây trong hướng dẫn vẫn theo mốc chết bình thường (8h -> 20h), chỉ là hướng dẫn chỉ kéo dài
