@@ -6,6 +6,24 @@
 
 ---
 
+## [2026-08-04g] — Công cụ cứu: nút UI trong 2 popup — PHA 3 (2/2) — TRỌN BỘ
+
+### Wire UI (`AnimalInteractionPopupController.cs`)
+- Popup con vật: thú CHẾT → hiện **"Cứu (X Point)"** + **"Dọn xác"**, ẩn Cho ăn/Thu/Chữa/Vắc-xin.
+  Cứu: `CanAffordPOS` → `SpendPOS("rescue_animal")` → `Rescue()`, không đủ tiền thì toast. Dọn xác:
+  `ConfirmDialog` (Danger) cảnh báo mất sản phẩm rồi `DiscardCorpse()`.
+- Popup Xem ruộng: cây HÉO → **"Cứu (X Point)"** + **"Dọn"**, ẩn Tưới/Thu/Bón. Cứu:
+  `SpendPOS("rescue_crop")` → `ReviveCrop()`. Dọn: ConfirmDialog → `DiscardCrop()`. Cây héo không
+  còn bị đếm vào "cần tưới".
+- 2 nút mỗi popup tạo TRONG CODE (copy class USS của nút mẫu, thêm cùng hàng) — khỏi sửa UXML.
+- Nút cứu tự mờ khi không đủ Point.
+
+### TRỌN BỘ tính năng (khách chốt 04/08)
+Cộng dồn sản phẩm (Pha 1) + thú/cây chết để xác (Pha 2) + công cụ cứu 60% giá mua với cờ hỗ trợ
+40% + nút dọn xác (Pha 3) — ĐÃ XONG. Giờ mới đủ để gộp main (xác không còn kẹt ô).
+
+---
+
 ## [2026-08-04f] — Công cụ cứu: lớp logic + cấu hình (khách chốt 04/08) — PHA 3 (1/2)
 
 ### Logic + config (chưa có UI — wire nút ở commit sau)
