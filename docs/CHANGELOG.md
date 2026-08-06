@@ -6,6 +6,28 @@
 
 ---
 
+## [2026-08-06a] — Sửa hiển thị XÁC chết sau khi test APK (cứu/dọn)
+
+### Vì sao (anh test 06/08 phát hiện)
+- Chuồng toàn thú chết báo "0 thú · còn 0 ô", KHÔNG tới được nút Cứu/Dọn.
+- Thỏ chết nghiêng 82° + lún 0.12 → chui gần hết xuống đất, chỉ chồi một mẩu.
+- Cây héo cứu được nhưng nhìn không thấy héo (màu không đổi).
+
+### Cách làm
+- `AnimalInteractionPopupController.RefreshEnclosureAnimals`: GIỮ cả xác (Dead) trong danh sách
+  chuồng — xác vẫn chiếm ô + cần chọn để bấm Cứu/Dọn. Thẻ hiện "Đã chết — bấm để Cứu".
+  Cứu/Dọn vẫn theo TỪNG con (`currentAnimal`), không phải cả đàn.
+- `FarmAnimal`: đổi `DeadTilt`/`DeadSink` từ const thành SerializeField `deadTiltDegrees`/`deadSink`
+  (mặc định 80° / lún 0), chỉnh được cho từng model trong Inspector.
+- `FarmTile.ApplyWitheredLook`: set cả `_BaseColor` (URP/Lit) lẫn `_Color` để cây héo nâu rõ.
+
+### Files
+- Assets/_Project/UI/AnimalInteractionPopupController.cs
+- Assets/_Project/Scripts/Environment/FarmAnimal.cs
+- Assets/_Project/Scripts/Environment/FarmTile.cs
+
+---
+
 ## [2026-08-04h] — Hệ số tăng tốc test cho vật nuôi (KHÔNG đụng số khách)
 
 ### Vì sao

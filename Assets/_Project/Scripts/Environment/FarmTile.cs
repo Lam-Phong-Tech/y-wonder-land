@@ -655,7 +655,14 @@ public class FarmTile : MonoBehaviour
     {
         if (cropModelInstance == null) return;
         foreach (var r in cropModelInstance.GetComponentsInChildren<Renderer>())
-            if (r != null && r.material != null) r.material.color = WitheredColor;
+        {
+            if (r == null || r.material == null) continue;
+            var m = r.material;
+            // URP/Lit dùng _BaseColor (không phải _Color); chỉ set .color đôi khi không ăn -> set cả hai.
+            if (m.HasProperty("_BaseColor")) m.SetColor("_BaseColor", WitheredColor);
+            if (m.HasProperty("_Color")) m.SetColor("_Color", WitheredColor);
+            m.color = WitheredColor;
+        }
     }
 
     // ── CÔNG CỤ CỨU (khách chốt 04/08) ──

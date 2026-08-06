@@ -147,8 +147,13 @@ namespace YWonderLand.Environment
         private readonly System.Collections.Generic.List<Transform> modelRoots = new System.Collections.Generic.List<Transform>();
         private readonly System.Collections.Generic.List<Quaternion> modelRootRot0 = new System.Collections.Generic.List<Quaternion>();
         private readonly System.Collections.Generic.List<Vector3> modelRootPos0 = new System.Collections.Generic.List<Vector3>();
-        private static readonly Quaternion DeadTilt = Quaternion.Euler(0f, 0f, 82f);
-        private const float DeadSink = 0.12f;
+        // Tư thế XÁC khi chết — CHỈNH ĐƯỢC cho từng model (model nhỏ như thỏ hay chui xuống đất).
+        // Trước là const 82°/lún 0.12 → thỏ nằm gần hết dưới đất. Mặc định mới: nghiêng 80°, KHÔNG lún.
+        [Header("Tư thế XÁC khi chết (chỉnh cho khớp từng model)")]
+        [Tooltip("Độ nghiêng model khi thành xác (độ, quanh trục Z). ~80 = nằm nghiêng. Xác chui đất thì GIẢM.")]
+        [SerializeField] private float deadTiltDegrees = 80f;
+        [Tooltip("HẠ (dương) / NÂNG (âm) xác so với mặt đất (m). Xác chui đất thì để 0 hoặc số ÂM để nâng lên.")]
+        [SerializeField] private float deadSink = 0f;
 
         // Thanh HP nổi
         private Transform barRoot;           // billboard quay về camera
@@ -242,7 +247,7 @@ namespace YWonderLand.Environment
             // ── CHẾT ĐÓI khi thanh máu cạn (khách chốt thanh-máu). 'Bệnh' nay là hệ RIÊNG, KHÔNG set từ đói. ──
             if (window > 0f && (now - feedRefTime) >= window)
             {
-                DieFromHunger(); // khách chốt: chết là BIẾN MẤT + trả ô chuồng, không để xác
+                DieFromHunger(); // ĐẢO LUẬT 04/08: chết để XÁC trong chuồng (giữ ô + sản phẩm), chờ CỨU
                 return;
             }
 
@@ -912,14 +917,15 @@ namespace YWonderLand.Environment
             // Nghiêng model thành XÁC khi chết (universal: primitive + model thật). Chừa thanh máu/nhãn
             // (dựng SAU snapshot nên không nằm trong modelRoots). Cứu sống → trả lại tư thế gốc.
             bool dead = currentState == AnimalState.Dead;
+            Quaternion deadTilt = Quaternion.Euler(0f, 0f, deadTiltDegrees);
             for (int i = 0; i < modelRoots.Count; i++)
             {
                 var t = modelRoots[i];
                 if (t == null) continue;
                 if (dead)
                 {
-                    t.localRotation = DeadTilt * modelRootRot0[i];
-                    t.localPosition = modelRootPos0[i] + Vector3.down * DeadSink;
+                    t.localRotation = deadTilt * modelRootRot0[i];
+                    t.localPosition = modelRootPos0[i] + Vector3.down * deadSink;
                 }
                 else
                 {

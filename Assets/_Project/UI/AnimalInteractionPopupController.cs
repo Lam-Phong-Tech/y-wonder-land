@@ -537,7 +537,9 @@ public class AnimalInteractionPopupController : MonoBehaviour
         var animals = PenEnclosure.FindAnimals(currentEnclosure);
         foreach (var animal in animals)
         {
-            if (animal != null && animal.currentState != FarmAnimal.AnimalState.Dead)
+            // GIỮ CẢ XÁC (khách chốt 04/08): xác vẫn chiếm ô + cần vào danh sách để bấm CỨU/DỌN.
+            // Trước đây lọc bỏ Dead -> xác chết thì chuồng báo "0 thú", không tới được nút Cứu.
+            if (animal != null)
                 enclosureAnimals.Add(animal);
         }
     }
@@ -648,6 +650,7 @@ public class AnimalInteractionPopupController : MonoBehaviour
     private static string CardStatusText(FarmAnimal animal)
     {
         if (animal == null) return "";
+        if (animal.currentState == FarmAnimal.AnimalState.Dead) return "Đã chết — bấm để Cứu";
         if (animal.currentState == FarmAnimal.AnimalState.Sick) return "Đang bệnh";
         if (animal.currentState == FarmAnimal.AnimalState.Hungry) return "Đang đói";
         if (animal.hasProductReady) return "Có sản phẩm";
