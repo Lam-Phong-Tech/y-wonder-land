@@ -118,6 +118,16 @@ namespace YWonderLand.Environment
         // Đã cho ăn lần nào chưa: false → dùng noFeedDeathSec (vd 24h); true → fedLifeSec (vd 48h). Khách chốt thanh-máu.
         private bool hasBeenFed = false;
 
+        // ── TĂNG TỐC TEST (KHÔNG phải cân bằng game) ──
+        // Nhân vào mọi mốc thời gian sản phẩm/cho ăn/chết đói để test nhanh. MẶC ĐỊNH 1 = số thật
+        // của khách (VatNuoi2) giữ NGUYÊN. Anh chỉnh ở AnimalPrefabLibrary (Inspector) khi cần test;
+        // >1 = chậm hơn, <1 = nhanh hơn. PHẢI để 1 khi build production.
+        public static float DebugTimeScale = 1f;
+        private float ProduceCycleSec => data != null ? data.produceCycleTimeSec * DebugTimeScale : 0f;
+        private float FeedIntervalSecScaled => data != null ? data.feedIntervalSec * DebugTimeScale : 0f;
+        private float FedLifeSecScaled => data != null ? data.fedLifeSec * DebugTimeScale : 0f;
+        private float NoFeedDeathSecScaled => data != null ? data.noFeedDeathSec * DebugTimeScale : 0f;
+
         [Header("Thanh HP (no/đói) nổi trên đầu")]
         [Tooltip("Chiều cao thanh HP so với gốc con vật (m). 0 = tự đo theo model.")]
         public float statusBarHeight = 0f;
@@ -268,7 +278,7 @@ namespace YWonderLand.Environment
             // vòng đang dở lúc chết bị mất (chưa đủ 1 chu kỳ = chưa +1).
             if (CanProduce())
             {
-                float cycle = Mathf.Max(0.1f, data.produceCycleTimeSec);
+                float cycle = Mathf.Max(0.1f, ProduceCycleSec);
                 produceTimer = (float)(now - produceRefTime);
                 int completed = Mathf.FloorToInt((float)((now - produceRefTime) / cycle));
                 if (completed > 0)
@@ -312,7 +322,7 @@ namespace YWonderLand.Environment
         private float CurrentHungerWindow()
         {
             if (data == null) return 0f;
-            return hasBeenFed ? data.fedLifeSec : data.noFeedDeathSec;
+            return hasBeenFed ? FedLifeSecScaled : NoFeedDeathSecScaled;
         }
 
         /// <summary>Còn bao nhiêu giây nữa CHẾT ĐÓI nếu không cho ăn. -1 = loài này không chết đói.</summary>
@@ -326,8 +336,8 @@ namespace YWonderLand.Environment
         /// <summary>Còn bao nhiêu giây nữa TỚI CỮ cho ăn kế. 0 = tới cữ/quá cữ rồi. -1 = loài không cần cho ăn định kỳ.</summary>
         public float GetTimeToNextFeedSec()
         {
-            if (data == null || data.feedIntervalSec <= 0f) return -1f;
-            return Mathf.Max(0f, data.feedIntervalSec - (float)(RealNow() - feedRefTime));
+            if (data == null || FeedIntervalSecScaled <= 0f) return -1f;
+            return Mathf.Max(0f, FeedIntervalSecScaled - (float)(RealNow() - feedRefTime));
         }
 
         /// <summary>Đang trong Tutorial? (ép KHÔNG chết đói để người mới khỏi nản — giống cây).</summary>
@@ -345,7 +355,7 @@ namespace YWonderLand.Environment
         public float GetTimeToNextProduceSec()
         {
             if (!CanProduce()) return pendingProduct > 0 ? 0f : -1f; // hết vụ nhưng còn hàng chờ thu
-            float cycle = Mathf.Max(0.1f, data.produceCycleTimeSec);
+            float cycle = Mathf.Max(0.1f, ProduceCycleSec);
             // Đếm liên tục tới vòng KẾ (dù đang có hàng dồn) — phần dư sau các vòng đã tính.
             double into = (RealNow() - produceRefTime) % cycle;
             return Mathf.Max(0f, cycle - (float)into);
@@ -373,7 +383,7 @@ namespace YWonderLand.Environment
 
             float next = GetTimeToNextProduceSec();
             if (next < 0f) return -1f;
-            return next + (harvestsRemaining - 1) * Mathf.Max(0.1f, data.produceCycleTimeSec);
+            return next + (harvestsRemaining - 1) * Mathf.Max(0.1f, ProduceCycleSec);
         }
 
         // ── Interactions ──

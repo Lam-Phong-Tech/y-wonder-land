@@ -25,10 +25,22 @@ namespace YWonderLand.Environment
         [Tooltip("Map itemId -> prefab con vật.")]
         public List<Entry> animals = new List<Entry>();
 
+        [Header("⚠️ TĂNG TỐC TEST (KHÔNG phải cân bằng game)")]
+        [Tooltip("Nhân vào MỌI mốc thời gian sản phẩm/cho ăn/chết đói của vật nuôi để test nhanh.\n" +
+                 "1 = số thật của khách (VatNuoi2) GIỮ NGUYÊN. <1 = nhanh hơn (vd 0.001).\n" +
+                 "PHẢI để 1 khi build production!")]
+        [Min(0.0001f)]
+        public float testTimeScale = 1f;
+
         void Awake()
         {
             if (Instance == null) Instance = this;
             else { Destroy(gameObject); return; }
+
+            FarmAnimal.DebugTimeScale = testTimeScale;
+            if (!Mathf.Approximately(testTimeScale, 1f))
+                Debug.LogWarning($"[AnimalPrefabLibrary] ⚠️ TĂNG TỐC TEST đang BẬT: testTimeScale={testTimeScale}. " +
+                                 "Thời gian vật nuôi KHÔNG phải số thật — nhớ để 1 khi build production!");
         }
 
         private Entry Find(string itemId)

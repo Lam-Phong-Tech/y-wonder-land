@@ -6,6 +6,23 @@
 
 ---
 
+## [2026-08-04h] — Hệ số tăng tốc test cho vật nuôi (KHÔNG đụng số khách)
+
+### Vì sao
+Số VatNuoi2 là giây thực rất lớn (gà: sản phẩm 48h, chết đói 24h) → test luồng chết/cứu/cộng dồn
+mất mấy ngày. Anh cần giảm tạm để test.
+
+### Cách làm — KHÔNG sửa đè số khách đã khoá
+- `FarmAnimal.DebugTimeScale` (static, mặc định 1): nhân vào produceCycleTimeSec / feedIntervalSec /
+  fedLifeSec / noFeedDeathSec qua 4 helper. 1 = số thật giữ nguyên; <1 = nhanh hơn.
+- `AnimalPrefabLibrary`: thêm `testTimeScale` (Inspector, mặc định 1) set vào static ở Awake, kèm
+  cảnh báo log khi ≠ 1. Anh chỉnh thẳng trong Inspector, KHÔNG chạm file .asset của khách.
+- ⚠️ PHẢI để 1 khi build production (có log cảnh báo nếu quên).
+
+Chỉ áp cho VẬT NUÔI (anh yêu cầu). Cây trồng chưa scale — thêm sau nếu cần test cây héo nhanh.
+
+---
+
 ## [2026-08-04g] — Công cụ cứu: nút UI trong 2 popup — PHA 3 (2/2) — TRỌN BỘ
 
 ### Wire UI (`AnimalInteractionPopupController.cs`)
