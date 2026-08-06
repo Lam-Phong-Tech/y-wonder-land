@@ -195,6 +195,12 @@ public class FarmTile : MonoBehaviour
     // Dùng CỜ thay vì thêm giá trị enum để khỏi đụng hàng loạt switch trên TileState.
     public bool cropDead = false;
     private static readonly Color WitheredColor = new Color(0.34f, 0.26f, 0.15f, 1f); // nâu héo
+
+    // ── TĂNG TỐC TEST (KHÔNG phải cân bằng game) ── set từ AnimalPrefabLibrary cùng núm với vật nuôi.
+    // Nhân vào cửa sổ chết-khát + thời gian chín để test cây héo/cứu nhanh. 1 = số thật giữ nguyên.
+    public static float DebugTimeScale = 1f;
+    private float NoWaterDeathSecScaled => currentCrop != null ? currentCrop.noWaterDeathSec * DebugTimeScale : 0f;
+    private float WateredLifeSecScaled => currentCrop != null ? currentCrop.wateredLifeSec * DebugTimeScale : 0f;
     private Vector3 cropModelBaseScale = Vector3.one;
     // Scale THẾ GIỚI của ô đất (Dirt = 0.15,1,0.15) — bù lại để cây không bị bóp dẹp khi làm con của ô.
     private Vector3 cropParentLossy = Vector3.one;
@@ -587,13 +593,13 @@ public class FarmTile : MonoBehaviour
         if (currentCrop == null) return 1f;
         if (currentState == TileState.Planted)
         {
-            float win = currentCrop.noWaterDeathSec;
+            float win = NoWaterDeathSecScaled;
             if (win <= 0f) return 1f;
             return Mathf.Clamp01(1f - (float)((RealNow() - plantedTime) / win));
         }
         if (currentState == TileState.Watered)
         {
-            float win = currentCrop.wateredLifeSec;
+            float win = WateredLifeSecScaled;
             if (win <= 0f) return 1f;
             return Mathf.Clamp01(1f - (float)((RealNow() - lastWaterTime) / win));
         }
@@ -606,13 +612,13 @@ public class FarmTile : MonoBehaviour
         if (currentCrop == null) return float.MaxValue;
         if (currentState == TileState.Planted)
         {
-            if (currentCrop.noWaterDeathSec <= 0f) return float.MaxValue;
-            return Mathf.Max(0f, currentCrop.noWaterDeathSec - (float)(RealNow() - plantedTime));
+            if (NoWaterDeathSecScaled <= 0f) return float.MaxValue;
+            return Mathf.Max(0f, NoWaterDeathSecScaled - (float)(RealNow() - plantedTime));
         }
         if (currentState == TileState.Watered)
         {
-            if (currentCrop.wateredLifeSec <= 0f) return float.MaxValue;
-            return Mathf.Max(0f, currentCrop.wateredLifeSec - (float)(RealNow() - lastWaterTime));
+            if (WateredLifeSecScaled <= 0f) return float.MaxValue;
+            return Mathf.Max(0f, WateredLifeSecScaled - (float)(RealNow() - lastWaterTime));
         }
         return float.MaxValue;
     }
@@ -891,8 +897,9 @@ public class FarmTile : MonoBehaviour
         if (currentCrop != null)
         {
             // Cây lâu năm đang RA QUẢ LẠI → dùng chu kỳ tái sinh thay vì thời gian lớn ban đầu.
-            if (isReGrowing && currentCrop.reHarvestCycleSec > 0f) return currentCrop.reHarvestCycleSec;
-            return currentCrop.growthTimeSec;
+            // Nhân DebugTimeScale để test nhanh (1 = số thật). Tutorial ở nhánh trên KHÔNG scale.
+            if (isReGrowing && currentCrop.reHarvestCycleSec > 0f) return currentCrop.reHarvestCycleSec * DebugTimeScale;
+            return currentCrop.growthTimeSec * DebugTimeScale;
         }
         return tutorialGrowthTime;
     }
@@ -1477,7 +1484,7 @@ public class FarmTile : MonoBehaviour
         // CHƯA tưới (Planted): chết nếu offline vượt noWaterDeathSec.
         if (currentState == TileState.Planted)
         {
-            if (currentCrop.noWaterDeathSec > 0f && now >= plantedTime + currentCrop.noWaterDeathSec)
+            if (NoWaterDeathSecScaled > 0f && now >= plantedTime + NoWaterDeathSecScaled)
             { DieFromDrought(); return; }
             UpdateVisuals();
             return;
@@ -1495,8 +1502,8 @@ public class FarmTile : MonoBehaviour
         // ĐÃ tưới, đang lớn (Watered): so MỐC chín vs MỐC chết để biết offline đã chín hay đã chết.
         isGrowing = true;
         double ripeAt = growStartTime + GetGrowthTime();
-        double deathAt = (currentCrop.wateredLifeSec > 0f)
-                         ? lastWaterTime + currentCrop.wateredLifeSec
+        double deathAt = (WateredLifeSecScaled > 0f)
+                         ? lastWaterTime + WateredLifeSecScaled
                          : double.PositiveInfinity;
 
         if (deathAt < ripeAt && now >= deathAt) { DieFromDrought(); return; }   // hết nước trước khi chín → đã chết

@@ -19,7 +19,10 @@ mất mấy ngày. Anh cần giảm tạm để test.
   cảnh báo log khi ≠ 1. Anh chỉnh thẳng trong Inspector, KHÔNG chạm file .asset của khách.
 - ⚠️ PHẢI để 1 khi build production (có log cảnh báo nếu quên).
 
-Chỉ áp cho VẬT NUÔI (anh yêu cầu). Cây trồng chưa scale — thêm sau nếu cần test cây héo nhanh.
+Cập nhật 04/08: đã thêm cả CÂY TRỒNG — cùng núm `testTimeScale`. `FarmTile.DebugTimeScale` nhân
+vào cửa sổ chết-khát (noWaterDeathSec/wateredLifeSec) + thời gian chín (growthTimeSec/reHarvest),
+áp cho cả runtime lẫn chết-bù offline. Tutorial fast-growth KHÔNG bị scale. Bón-phân threshold
+(IsFertilizable) dùng số THẬT, không scale.
 
 ---
 
