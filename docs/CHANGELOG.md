@@ -6,6 +6,148 @@
 
 ---
 
+## [2026-08-06a] — Sửa hiển thị XÁC chết sau khi test APK (cứu/dọn)
+
+### Vì sao (anh test 06/08 phát hiện)
+- Chuồng toàn thú chết báo "0 thú · còn 0 ô", KHÔNG tới được nút Cứu/Dọn.
+- Thỏ chết nghiêng 82° + lún 0.12 → chui gần hết xuống đất, chỉ chồi một mẩu.
+- Cây héo cứu được nhưng nhìn không thấy héo (màu không đổi).
+
+### Cách làm
+- `AnimalInteractionPopupController.RefreshEnclosureAnimals`: GIỮ cả xác (Dead) trong danh sách
+  chuồng — xác vẫn chiếm ô + cần chọn để bấm Cứu/Dọn. Thẻ hiện "Đã chết — bấm để Cứu".
+  Cứu/Dọn vẫn theo TỪNG con (`currentAnimal`), không phải cả đàn.
+- `FarmAnimal`: đổi `DeadTilt`/`DeadSink` từ const thành SerializeField `deadTiltDegrees`/`deadSink`
+  (mặc định 80° / lún 0), chỉnh được cho từng model trong Inspector.
+- `FarmTile.ApplyWitheredLook`: set cả `_BaseColor` (URP/Lit) lẫn `_Color` để cây héo nâu rõ.
+
+### Files
+- Assets/_Project/UI/AnimalInteractionPopupController.cs
+- Assets/_Project/Scripts/Environment/FarmAnimal.cs
+- Assets/_Project/Scripts/Environment/FarmTile.cs
+
+---
+
+## [2026-08-04h] — Hệ số tăng tốc test cho vật nuôi (KHÔNG đụng số khách)
+
+### Vì sao
+Số VatNuoi2 là giây thực rất lớn (gà: sản phẩm 48h, chết đói 24h) → test luồng chết/cứu/cộng dồn
+mất mấy ngày. Anh cần giảm tạm để test.
+
+### Cách làm — KHÔNG sửa đè số khách đã khoá
+- `FarmAnimal.DebugTimeScale` (static, mặc định 1): nhân vào produceCycleTimeSec / feedIntervalSec /
+  fedLifeSec / noFeedDeathSec qua 4 helper. 1 = số thật giữ nguyên; <1 = nhanh hơn.
+- `AnimalPrefabLibrary`: thêm `testTimeScale` (Inspector, mặc định 1) set vào static ở Awake, kèm
+  cảnh báo log khi ≠ 1. Anh chỉnh thẳng trong Inspector, KHÔNG chạm file .asset của khách.
+- ⚠️ PHẢI để 1 khi build production (có log cảnh báo nếu quên).
+
+Cập nhật 04/08: đã thêm cả CÂY TRỒNG — cùng núm `testTimeScale`. `FarmTile.DebugTimeScale` nhân
+vào cửa sổ chết-khát (noWaterDeathSec/wateredLifeSec) + thời gian chín (growthTimeSec/reHarvest),
+áp cho cả runtime lẫn chết-bù offline. Tutorial fast-growth KHÔNG bị scale. Bón-phân threshold
+(IsFertilizable) dùng số THẬT, không scale.
+
+---
+
+## [2026-08-04g] — Công cụ cứu: nút UI trong 2 popup — PHA 3 (2/2) — TRỌN BỘ
+
+### Wire UI (`AnimalInteractionPopupController.cs`)
+- Popup con vật: thú CHẾT → hiện **"Cứu (X Point)"** + **"Dọn xác"**, ẩn Cho ăn/Thu/Chữa/Vắc-xin.
+  Cứu: `CanAffordPOS` → `SpendPOS("rescue_animal")` → `Rescue()`, không đủ tiền thì toast. Dọn xác:
+  `ConfirmDialog` (Danger) cảnh báo mất sản phẩm rồi `DiscardCorpse()`.
+- Popup Xem ruộng: cây HÉO → **"Cứu (X Point)"** + **"Dọn"**, ẩn Tưới/Thu/Bón. Cứu:
+  `SpendPOS("rescue_crop")` → `ReviveCrop()`. Dọn: ConfirmDialog → `DiscardCrop()`. Cây héo không
+  còn bị đếm vào "cần tưới".
+- 2 nút mỗi popup tạo TRONG CODE (copy class USS của nút mẫu, thêm cùng hàng) — khỏi sửa UXML.
+- Nút cứu tự mờ khi không đủ Point.
+
+### TRỌN BỘ tính năng (khách chốt 04/08)
+Cộng dồn sản phẩm (Pha 1) + thú/cây chết để xác (Pha 2) + công cụ cứu 60% giá mua với cờ hỗ trợ
+40% + nút dọn xác (Pha 3) — ĐÃ XONG. Giờ mới đủ để gộp main (xác không còn kẹt ô).
+
+---
+
+## [2026-08-04f] — Công cụ cứu: lớp logic + cấu hình (khách chốt 04/08) — PHA 3 (1/2)
+
+### Logic + config (chưa có UI — wire nút ở commit sau)
+- `RescueConfig.cs` (mới): chi phí cứu = 60% giá mua (`CompanySupport40On` bật) hoặc 100% (admin
+  tạm đóng hỗ trợ → tắt cờ). Cờ CLIENT (anh chốt, wire server sau). `RescueCost(buyPrice)`.
+- `FarmAnimal`: `IsDead`, `RescueCost()` (theo `data.buyPrice`), `Rescue()` (về vạch xuất phát:
+  khoẻ + reset số lần thu, GIỮ pendingProduct cho thu), `DiscardCorpse()` (dọn xác, giải phóng ô,
+  mất sản phẩm — khách duyệt nút dọn).
+- `FarmTile`: `IsCropDead`, `RescueCost()` (tra giá hạt qua ItemDatabase), `ReviveCrop()` (về vạch
+  xuất phát: Planted, cần tưới lại, dựng model tươi), `DiscardCrop()` (ô về đất trống).
+- Caller (popup) tự trừ Point bằng `EconomyManager.SpendPOS` TRƯỚC khi gọi Rescue/Revive.
+
+### Còn lại — PHA 3 (2/2)
+Wire nút "Cứu (X Point)" + "Dọn" vào popup con vật & popup Xem ruộng; ẩn/chặn Cho ăn/Thu/Tưới khi
+đã chết kèm toast. Xong cái này là trọn bộ, mới gộp main.
+
+---
+
+## [2026-08-04e] — Cây chết để lại HÉO tại ô (đảo luật cũ) — PHA 2 (phần cây trồng)
+
+### Đảo luật (khách chốt 04/08)
+Trước đây `DieFromDrought` = ô về đất trống + mất giống. Giờ NGƯỢC: cây héo chết để lại tại ô,
+giữ giống + giữ ô giàn, chờ người chơi cứu (60% giá mua hạt).
+
+### Sửa (`FarmTile.cs`)
+- Cờ `cropDead` (không thêm giá trị enum để khỏi đụng loạt switch trên TileState).
+- `DieFromDrought`: bỏ reset về Soil + FreeSlaves + xoá model. Chỉ set `cropDead`, dừng lớn, bỏ
+  thanh nước, nhuộm nâu héo (`ApplyWitheredLook`), ghi thư báo, lưu ngay.
+- `Update`: `cropDead` thì đứng yên — không chết lại, không lớn.
+- `InteractWater`: chặn tưới cây héo (phải CỨU mới sống). `WaterAgain` tự chặn vì hết `isGrowing`.
+- Lưu/nạp `cropDead` trong `CropSave`; `RestoreSave` giữ nguyên xác héo, bỏ qua đánh giá offline.
+- `ResetForPlayerState`: reset cờ khi đổi người chơi.
+
+### ⚠️ Chưa xong — PHẢI đi kèm Pha 3
+Cây héo giữ ô mà chưa cứu được → ô kẹt. Nhãn nổi "ĐÃ CHẾT" cho cây chưa làm (dựa nhuộm nâu là
+tín hiệu chính). Còn: công cụ cứu 60% giá mua cho cả thú lẫn cây.
+
+---
+
+## [2026-08-04d] — Thú chết để lại XÁC (đảo luật cũ) — PHA 2 (phần vật nuôi)
+
+### Đảo luật (khách chốt 04/08)
+Trước đây `DieFromHunger` ghi "chết = biến mất + trả ô, không để xác". Giờ NGƯỢC: thú chết đói
+để lại XÁC trong chuồng, GIỮ sản phẩm đã cộng dồn, CHIẾM ô tới khi người chơi cứu.
+
+### Sửa (`FarmAnimal.cs`)
+- `DieFromHunger`: bỏ Destroy + RemoveAnimal + ClearAnimal ô. Chỉ set Dead, giữ ô/sản phẩm, ghi
+  thư báo chết, lưu ngay (reload vẫn thấy xác).
+- Nghiêng model thành xác UNIVERSAL (primitive + model thật): chụp "gốc model" lúc Initialize
+  (trước khi dựng thanh máu/nhãn), khi chết nghiêng 82° + lún nhẹ; chừa thanh máu/nhãn ra. Tư thế
+  gốc cache lại để cứu sống trả về nguyên (Pha 3). Số nghiêng/lún ở `DeadTilt`/`DeadSink`.
+- Nhãn "ĐÃ CHẾT" (đỏ) LUÔN hiện trên xác kể cả khi tắt nhãn thường; đặt world-space cho thẳng đứng.
+  Dùng chữ thay 💀 vì TextMesh font mặc định không render emoji (muốn icon xương cần sprite).
+- `RestoreAnimalState`: khôi phục trạng thái Dead qua reload (trước chỉ khôi phục Sick).
+
+### ⚠️ Chưa xong — PHẢI đi kèm Pha 3 mới ship
+Hiện xác CHIẾM ô mà CHƯA có công cụ cứu → ô bị kẹt. Đừng gộp main tới khi Pha 3 (cứu) xong.
+Còn: cây chết để lại (FarmTile) + công cụ cứu 60% giá mua.
+
+---
+
+## [2026-08-04c] — Cộng dồn sản phẩm vật nuôi qua nhiều vòng (khách chốt 04/08) — PHA 1
+
+### Yêu cầu
+Trước đây thú ra 1 sản phẩm rồi ĐỒNG HỒ ĐỨNG (chưa thu thì vòng sau không chạy). Khách muốn:
+mỗi vòng hoàn tất +1 sản phẩm, dồn không giới hạn, thu là gom hết một lần; số lượng/thời gian
+mỗi vòng giữ nguyên. Thú chết/bệnh thì ngừng dồn; vòng đang dở lúc chết bị mất.
+
+### Sửa
+- `FarmAnimal.cs`: thêm `pendingProduct` (số vòng đã dồn chưa thu). Update tính số vòng đã trôi,
+  cộng vào pending, đồng hồ chạy độc lập (thu KHÔNG reset nữa, giữ phần dư tiến tới vòng kế).
+  Loài thu hữu hạn: không dồn quá số lần thu còn lại; `harvestsRemaining` trừ lúc SẢN XUẤT, làm
+  thịt vòng cuối vẫn CHỜ người chơi thu mẻ cuối. `HarvestProduct` gom hết pending trong 1 lần thu.
+- `BuildPersistence.cs`: lưu/nạp `pendingProduct` (mặc định -1 cho save cũ → suy từ cờ bool, không
+  mất sản phẩm của người chơi cũ).
+- `AnimalInteractionPopupController.cs`: hiện số đã dồn ("Có N sản phẩm!", "Sẵn sàng (N)").
+
+### Còn lại (pha sau)
+Pha 2: thú/cây chết để XÁC (giữ sản phẩm, chờ cứu). Pha 3: công cụ cứu 60% giá mua + cờ hỗ trợ 40%.
+
+---
+
 ## [2026-08-04b] — Bỏ hậu tố "V2" ở tên vật nuôi (khách yêu cầu)
 
 ### Khách chốt 04/08

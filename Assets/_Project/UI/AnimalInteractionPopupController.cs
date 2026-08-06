@@ -36,6 +36,8 @@ public class AnimalInteractionPopupController : MonoBehaviour
     private Button btnHarvest;
     private Button btnHeal;
     private Button btnVaccine;
+    private Button btnRescue;   // CỨU xác (tạo trong code, khách chốt 04/08)
+    private Button btnDiscard;  // DỌN xác
     // Việc của CẢ CỤM (dời chuồng / dời ruộng) — dùng chung một nút, đổi chữ theo chế độ.
     private Button btnMoveGroup;
     // Việc của CÂY đang chọn ở chế độ Xem ruộng.
@@ -43,6 +45,8 @@ public class AnimalInteractionPopupController : MonoBehaviour
     private Button btnWaterCrop;
     private Button btnHarvestCrop;
     private Button btnFertilizeCrop;
+    private Button btnRescueCrop;   // CỨU cây héo (tạo trong code, khách chốt 04/08)
+    private Button btnDiscardCrop;  // DỌN cây héo
     private ItemDatabase itemDatabase;
 
     private FarmAnimal currentAnimal;
@@ -133,7 +137,34 @@ public class AnimalInteractionPopupController : MonoBehaviour
         if (btnHarvestCrop != null) btnHarvestCrop.clicked += OnHarvestCropClicked;
         if (btnFertilizeCrop != null) btnFertilizeCrop.clicked += OnFertilizeCropClicked;
 
+        // CÔNG CỤ CỨU (khách chốt 04/08): tạo 2 nút trong code, cùng hàng với các nút thú, khỏi sửa UXML.
+        if (btnFeed != null && btnFeed.parent != null)
+        {
+            btnRescue = CloneActionButton(btnFeed, "BtnRescueAnimal", "Cứu");
+            btnDiscard = CloneActionButton(btnFeed, "BtnDiscardAnimal", "Dọn xác");
+            if (btnRescue != null) btnRescue.clicked += OnRescueAnimalClicked;
+            if (btnDiscard != null) btnDiscard.clicked += OnDiscardAnimalClicked;
+        }
+        if (btnWaterCrop != null && btnWaterCrop.parent != null)
+        {
+            btnRescueCrop = CloneActionButton(btnWaterCrop, "BtnRescueCrop", "Cứu");
+            btnDiscardCrop = CloneActionButton(btnWaterCrop, "BtnDiscardCrop", "Dọn");
+            if (btnRescueCrop != null) btnRescueCrop.clicked += OnRescueCropClicked;
+            if (btnDiscardCrop != null) btnDiscardCrop.clicked += OnDiscardCropClicked;
+        }
+
         Hide();
+    }
+
+    /// <summary>Tạo một nút cùng style (copy class USS) với nút mẫu, thêm vào cùng hàng. Mặc định ẩn.</summary>
+    private Button CloneActionButton(Button template, string name, string text)
+    {
+        if (template == null || template.parent == null) return null;
+        var b = new Button { name = name, text = text };
+        foreach (var cls in template.GetClasses()) b.AddToClassList(cls);
+        template.parent.Add(b);
+        b.style.display = DisplayStyle.None;
+        return b;
     }
 
     // An toàn: nếu popup bị tắt/destroy khi đang mở (vd đổi đảo) mà chưa kịp gọi Hide(),
@@ -276,6 +307,27 @@ public class AnimalInteractionPopupController : MonoBehaviour
         if (plotActionsPanel == null) return;
 
         bool hasCrop = tile != null && tile.GetCurrentCrop() != null;
+        bool dead = hasCrop && tile.IsCropDead;
+
+        // CÂY HÉO: chỉ cho CỨU / DỌN. Ẩn Tưới/Thu/Bón (khách chốt 04/08).
+        DisplayIf(btnWaterCrop, !dead);
+        DisplayIf(btnHarvestCrop, !dead);
+        DisplayIf(btnFertilizeCrop, !dead);
+        DisplayIf(btnRescueCrop, dead);
+        DisplayIf(btnDiscardCrop, dead);
+
+        if (dead)
+        {
+            if (btnRescueCrop != null)
+            {
+                int cost = tile.RescueCost();
+                btnRescueCrop.text = $"Cứu ({cost} Point)";
+                var eco = EconomyManager.Instance;
+                btnRescueCrop.SetEnabled(eco != null && eco.CanAffordPOS(cost));
+            }
+            return;
+        }
+
         bool ripe = hasCrop && tile.currentState == FarmTile.TileState.Ripe;
         bool waterable = hasCrop && (tile.currentState == FarmTile.TileState.Planted
                                      || tile.currentState == FarmTile.TileState.Watered);
@@ -288,10 +340,43 @@ public class AnimalInteractionPopupController : MonoBehaviour
         if (btnFertilizeCrop != null) btnFertilizeCrop.SetEnabled(fertilizable);
     }
 
+    private void OnRescueCropClicked()
+    {
+        var tile = selectedPlotTile;
+        if (tile == null || !tile.IsCropDead) return;
+
+        int cost = tile.RescueCost();
+        var eco = EconomyManager.Instance;
+        if (eco == null) return;
+        if (!eco.CanAffordPOS(cost)) { ScreenToast.Show($"Không đủ Point để cứu (cần {cost})."); return; }
+        if (!eco.SpendPOS(cost, "rescue_crop")) return;
+
+        tile.ReviveCrop();
+        ScreenToast.Show($"Đã cứu cây! (-{cost} Point) — nhớ tưới lại nhé.");
+        RefreshPlotButtons(tile);
+    }
+
+    private void OnDiscardCropClicked()
+    {
+        var tile = selectedPlotTile;
+        if (tile == null || !tile.IsCropDead) return;
+
+        var dialog = FindFirstObjectByType<ConfirmDialogController>();
+        if (dialog == null) { tile.DiscardCrop(); selectedPlotTile = null; RefreshPlotButtons(null); return; }
+        dialog.Show(
+            "DỌN CÂY HÉO",
+            "Dọn cây héo sẽ trả ô về đất trống và MẤT giống. Chắc chưa?",
+            "Dọn",
+            "Hủy",
+            () => { tile.DiscardCrop(); selectedPlotTile = null; RefreshPlotButtons(null); },
+            ConfirmDialogType.Danger);
+    }
+
     // Cần tưới = chưa tưới lần nào, hoặc nước đã tụt thấp (cùng ngưỡng với cảnh báo trên nhãn nổi).
     private static bool NeedsWater(FarmTile tile)
     {
         if (tile == null || tile.GetCurrentCrop() == null) return false;
+        if (tile.IsCropDead) return false; // cây héo tính riêng, không phải "cần tưới"
         if (tile.currentState == FarmTile.TileState.Planted) return true;
         return tile.currentState == FarmTile.TileState.Watered && tile.GetWaterFraction() < 0.4f;
     }
@@ -452,7 +537,9 @@ public class AnimalInteractionPopupController : MonoBehaviour
         var animals = PenEnclosure.FindAnimals(currentEnclosure);
         foreach (var animal in animals)
         {
-            if (animal != null && animal.currentState != FarmAnimal.AnimalState.Dead)
+            // GIỮ CẢ XÁC (khách chốt 04/08): xác vẫn chiếm ô + cần vào danh sách để bấm CỨU/DỌN.
+            // Trước đây lọc bỏ Dead -> xác chết thì chuồng báo "0 thú", không tới được nút Cứu.
+            if (animal != null)
                 enclosureAnimals.Add(animal);
         }
     }
@@ -563,6 +650,7 @@ public class AnimalInteractionPopupController : MonoBehaviour
     private static string CardStatusText(FarmAnimal animal)
     {
         if (animal == null) return "";
+        if (animal.currentState == FarmAnimal.AnimalState.Dead) return "Đã chết — bấm để Cứu";
         if (animal.currentState == FarmAnimal.AnimalState.Sick) return "Đang bệnh";
         if (animal.currentState == FarmAnimal.AnimalState.Hungry) return "Đang đói";
         if (animal.hasProductReady) return "Có sản phẩm";
@@ -712,9 +800,10 @@ public class AnimalInteractionPopupController : MonoBehaviour
         if (animal == null || animal.data == null) return "—";
 
         float t = animal.GetTimeToNextProduceSec();
+        int pending = animal.PendingProduct;
         string when;
-        if (t < 0f) when = "Hết vụ";
-        else if (t <= 0.5f) when = "<color=#5BD66B>Sẵn sàng</color>";
+        if (pending > 0) when = $"<color=#5BD66B>Sẵn sàng ({pending})</color>"; // đã cộng dồn, chờ thu
+        else if (t < 0f) when = "Hết vụ";
         else when = "Vụ tới " + FormatDuration(t);
 
         string count = animal.IsInfiniteHarvest
@@ -770,6 +859,8 @@ public class AnimalInteractionPopupController : MonoBehaviour
         if (btnHarvest != null) btnHarvest.style.display = DisplayStyle.None;
         if (btnHeal != null) btnHeal.style.display = DisplayStyle.None;
         if (btnVaccine != null) btnVaccine.style.display = DisplayStyle.None;
+        if (btnRescue != null) btnRescue.style.display = DisplayStyle.None;
+        if (btnDiscard != null) btnDiscard.style.display = DisplayStyle.None;
     }
 
     private void RefreshUI(FarmAnimal animal)
@@ -793,7 +884,13 @@ public class AnimalInteractionPopupController : MonoBehaviour
             case FarmAnimal.AnimalState.Dead: statusStr = "<color=#000000>Đã chết</color>"; break;
         }
         if (animal.hasProductReady)
-            statusStr += " - <color=#00AA00>Có sản phẩm!</color>";
+        {
+            // CỘNG DỒN (khách chốt 04/08): hiện số vòng đã dồn để người chơi biết thu được bao nhiêu.
+            int n = animal.PendingProduct;
+            statusStr += n > 1
+                ? $" - <color=#00AA00>Có {n} sản phẩm!</color>"
+                : " - <color=#00AA00>Có sản phẩm!</color>";
+        }
 
         if (lblStatus != null) lblStatus.text = "Trạng thái: " + statusStr;
         if (lblHunger != null) lblHunger.text = Mathf.RoundToInt(animal.GetHungerFraction() * 100f) + "%";
@@ -803,30 +900,74 @@ public class AnimalInteractionPopupController : MonoBehaviour
         bool isDead = animal.currentState == FarmAnimal.AnimalState.Dead;
         bool canFeed = (animal.currentState == FarmAnimal.AnimalState.Hungry || animal.currentState == FarmAnimal.AnimalState.Healthy) && !isDead;
 
-        if (btnFeed != null)
+        // CHẾT: chỉ cho CỨU / DỌN XÁC. Ẩn hết Cho ăn/Thu/Chữa/Vắc-xin (khách chốt 04/08).
+        DisplayIf(btnFeed, !isDead);
+        DisplayIf(btnHarvest, !isDead);
+        DisplayIf(btnHeal, !isDead);
+        DisplayIf(btnVaccine, !isDead);
+        DisplayIf(btnRescue, isDead);
+        DisplayIf(btnDiscard, isDead);
+
+        if (isDead)
         {
-            btnFeed.style.display = DisplayStyle.Flex;
-            btnFeed.SetEnabled(canFeed);
+            if (btnRescue != null)
+            {
+                int cost = animal.RescueCost();
+                btnRescue.text = $"Cứu ({cost} Point)";
+                var eco = EconomyManager.Instance;
+                btnRescue.SetEnabled(eco != null && eco.CanAffordPOS(cost));
+            }
+            return;
         }
-        if (btnHarvest != null)
-        {
-            btnHarvest.style.display = DisplayStyle.Flex;
-            btnHarvest.SetEnabled(animal.hasProductReady && !isDead);
-        }
+
+        if (btnFeed != null) btnFeed.SetEnabled(canFeed);
+        if (btnHarvest != null) btnHarvest.SetEnabled(animal.hasProductReady);
         // CHỮA BỆNH: chỉ bật khi con vật ĐANG BỆNH (tốn 1 Thuốc).
-        if (btnHeal != null)
-        {
-            btnHeal.style.display = DisplayStyle.Flex;
-            btnHeal.SetEnabled(!isDead && animal.currentState == FarmAnimal.AnimalState.Sick);
-        }
+        if (btnHeal != null) btnHeal.SetEnabled(animal.currentState == FarmAnimal.AnimalState.Sick);
         // TIÊM VẮC-XIN: phòng bệnh — bật khi KHÔNG bệnh và vắc-xin cũ đã hết hạn (tốn 1 Vắc-xin).
         if (btnVaccine != null)
+            btnVaccine.SetEnabled(animal.currentState != FarmAnimal.AnimalState.Sick && !animal.IsVaccineActive);
+    }
+
+    private static void DisplayIf(VisualElement el, bool show)
+    {
+        if (el != null) el.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
+    }
+
+    private void OnRescueAnimalClicked()
+    {
+        var animal = currentAnimal;
+        if (animal == null || !animal.IsDead) return;
+
+        int cost = animal.RescueCost();
+        var eco = EconomyManager.Instance;
+        if (eco == null) return;
+        if (!eco.CanAffordPOS(cost))
         {
-            btnVaccine.style.display = DisplayStyle.Flex;
-            btnVaccine.SetEnabled(!isDead
-                && animal.currentState != FarmAnimal.AnimalState.Sick
-                && !animal.IsVaccineActive);
+            ScreenToast.Show($"Không đủ Point để cứu (cần {cost}).");
+            return;
         }
+        if (!eco.SpendPOS(cost, "rescue_animal")) return;
+
+        animal.Rescue();
+        ScreenToast.Show($"Đã cứu {(animal.data != null ? animal.data.animalName : "vật nuôi")}! (-{cost} Point)");
+        RefreshUI(animal);
+    }
+
+    private void OnDiscardAnimalClicked()
+    {
+        var animal = currentAnimal;
+        if (animal == null || !animal.IsDead) return;
+
+        var dialog = FindFirstObjectByType<ConfirmDialogController>();
+        if (dialog == null) { animal.DiscardCorpse(); Hide(); return; } // không có dialog thì dọn luôn
+        dialog.Show(
+            "DỌN XÁC",
+            "Dọn xác sẽ giải phóng ô chuồng nhưng MẤT toàn bộ sản phẩm đang giữ. Chắc chưa?",
+            "Dọn",
+            "Hủy",
+            () => { animal.DiscardCorpse(); Hide(); },
+            ConfirmDialogType.Danger);
     }
 
     private void OnAddAnimalClicked()
