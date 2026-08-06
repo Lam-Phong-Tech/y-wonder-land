@@ -190,6 +190,11 @@ public class FarmTile : MonoBehaviour
 
     // Model 3D thật của cây (khi useCustomCropModels = true)
     private GameObject cropModelInstance;
+
+    // CÂY CHẾT (khách chốt 04/08): héo chết KHÔNG về đất trống nữa mà để lại tại ô, chờ cứu.
+    // Dùng CỜ thay vì thêm giá trị enum để khỏi đụng hàng loạt switch trên TileState.
+    public bool cropDead = false;
+    private static readonly Color WitheredColor = new Color(0.34f, 0.26f, 0.15f, 1f); // nâu héo
     private Vector3 cropModelBaseScale = Vector3.one;
     // Scale THẾ GIỚI của ô đất (Dirt = 0.15,1,0.15) — bù lại để cây không bị bóp dẹp khi làm con của ô.
     private Vector3 cropParentLossy = Vector3.one;
@@ -221,6 +226,8 @@ public class FarmTile : MonoBehaviour
     {
         // CHẾT vì THIẾU NƯỚC (khách chốt): thanh nước = THANH MÁU. Áp cho CẢ lúc chưa tưới (Planted, đồng hồ 8h)
         // lẫn đang lớn (Watered, đồng hồ 20h từ lần tưới). Cạn về 0 = chết, kể cả trong Tutorial.
+        if (cropDead) return; // đã héo chết: đứng yên chờ cứu, không chết lại, không lớn
+
         if (currentCrop != null
             && (currentState == TileState.Planted || currentState == TileState.Watered)
             && GetWaterFraction() <= 0f)
@@ -506,6 +513,7 @@ public class FarmTile : MonoBehaviour
 
     public bool InteractWater()
     {
+        if (cropDead) return false; // cây héo: phải CỨU (60% giá) chứ tưới không sống lại
         if (currentState != TileState.Planted || masterTile != null) return false;
 
         currentState = TileState.Watered;
@@ -609,36 +617,39 @@ public class FarmTile : MonoBehaviour
         return float.MaxValue;
     }
 
-    /// <summary>Cây CHẾT vì thiếu nước (thanh máu cạn): ô về Đất trống, MẤT giống, dọn model/thanh nước/nhãn,
-    /// thả ô giàn (cây nhiều ô). KHÔNG trao sản phẩm, KHÔNG tính là thu hoạch (không bắn OnTileHarvested).</summary>
+    /// <summary>Cây HÉO CHẾT vì thiếu nước. ĐẢO LUẬT (khách chốt 04/08): KHÔNG về đất trống, KHÔNG mất
+    /// giống — để lại cây héo tại ô (giữ giống, giữ ô giàn), chờ người chơi CỨU (60% giá mua hạt).
+    /// Trước đây "chết = về đất trống + mất giống"; nay đảo theo yêu cầu mới.</summary>
     private void DieFromDrought()
     {
-        // Ghi vào nhật ký -> thành THƯ báo cây chết (khách chốt 30/07). Phải lấy tên TRƯỚC khi
-        // xoá currentCrop bên dưới. Cả ruộng chết cùng lúc thì FarmActivityLog tự gộp thành 1 thư.
+        if (cropDead) return; // đã héo rồi thì thôi
+
+        // Ghi vào nhật ký -> thành THƯ báo cây chết (khách chốt 30/07). Cả ruộng chết cùng lúc thì
+        // FarmActivityLog tự gộp thành 1 thư. GIỮ lịch sử lại trên cây héo (cứu sống mới reset).
         string cropName = currentCrop != null
             ? FarmActivityLog.ItemName(currentCrop.harvestItemId, "Cây trồng")
             : "Cây trồng";
         FarmActivityLog.RecordDeath(cropName, "héo chết vì thiếu nước");
-        FarmActivityLog.ClearHistory(HistoryKey); // cây đi rồi, dọn nhật ký tưới/thu của nó
 
-        currentState = TileState.Soil;
-        plantedSeedId = "";
-        currentCrop = null;
-        cropColor = Color.green;
-        growStartTime = 0.0;
-        plantedTime = 0.0;
+        // Giữ currentCrop/plantedSeedId/growStartTime để công cụ cứu biết giống gì, tính giá 60%.
+        cropDead = true;
         isGrowing = false;
         isReGrowing = false;
-        harvestsRemaining = 1;
         dryAccumSec = 0f;
-        FreeSlaves(); // cây nhiều ô chết → thả các ô slave cho trồng lại
-        DestroyWaterBar();
-        if (cropInfoRoot != null) { Destroy(cropInfoRoot.gameObject); cropInfoRoot = null; cropInfoTM = null; cropInfoMF = null; }
-        if (cropModelInstance != null) { Destroy(cropModelInstance); cropModelInstance = null; }
+        DestroyWaterBar();        // héo thì khỏi thanh nước
+        ApplyWitheredLook();      // nhuộm nâu héo
         UpdateVisuals();
         FarmStateSync.SaveTileState(this);
 
-        ScreenToast.Show("Cây đã héo chết vì thiếu nước! Nhớ tưới đúng giờ nhé.");
+        ScreenToast.Show("Cây đã héo chết! Cứu nó để trồng tiếp nhé.");
+    }
+
+    /// <summary>Nhuộm nâu model cây thành "héo chết". Cứu sống sẽ dựng lại model tươi nên khỏi cache màu gốc.</summary>
+    private void ApplyWitheredLook()
+    {
+        if (cropModelInstance == null) return;
+        foreach (var r in cropModelInstance.GetComponentsInChildren<Renderer>())
+            if (r != null && r.material != null) r.material.color = WitheredColor;
     }
 
     // Đã bỏ IsTutorialActive(): hàm này KHÔNG có chỗ nào gọi, nhưng chú thích của nó ("tutorial thì
@@ -1299,6 +1310,7 @@ public class FarmTile : MonoBehaviour
         public double growStartUnix;
         public int harvestsRemaining;
         public bool isReGrowing;
+        public bool cropDead; // cây đã héo chết, để lại chờ cứu (khách chốt 04/08)
         public List<string> slaveTileKeys;
     }
 
@@ -1316,6 +1328,7 @@ public class FarmTile : MonoBehaviour
             growStartUnix = growStartTime,
             harvestsRemaining = harvestsRemaining,
             isReGrowing = isReGrowing,
+            cropDead = cropDead,
             slaveTileKeys = ExportSlaveTileKeys(),
         };
     }
@@ -1326,6 +1339,7 @@ public class FarmTile : MonoBehaviour
         FreeSlaves();
         masterTile = null;
         currentState = TileState.Soil;
+        cropDead = false;
         plantedSeedId = "";
         currentCrop = null;
         cropColor = Color.green;
@@ -1387,6 +1401,16 @@ public class FarmTile : MonoBehaviour
 
         if (ShouldUseCustomCropModel()) SpawnCropModel();
         else if (createPrimitiveFallbackVisuals) { DestroySeedAndGrowingVisuals(); CreateCropVisuals(); }
+
+        // Cây HÉO CHẾT lúc lưu: giữ nguyên xác héo, KHÔNG đánh giá chết/lớn offline, chờ cứu.
+        if (s.cropDead)
+        {
+            cropDead = true;
+            isGrowing = false;
+            ApplyWitheredLook();
+            UpdateVisuals();
+            return;
+        }
 
         double now = RealNow();
 

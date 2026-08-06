@@ -6,6 +6,27 @@
 
 ---
 
+## [2026-08-04e] — Cây chết để lại HÉO tại ô (đảo luật cũ) — PHA 2 (phần cây trồng)
+
+### Đảo luật (khách chốt 04/08)
+Trước đây `DieFromDrought` = ô về đất trống + mất giống. Giờ NGƯỢC: cây héo chết để lại tại ô,
+giữ giống + giữ ô giàn, chờ người chơi cứu (60% giá mua hạt).
+
+### Sửa (`FarmTile.cs`)
+- Cờ `cropDead` (không thêm giá trị enum để khỏi đụng loạt switch trên TileState).
+- `DieFromDrought`: bỏ reset về Soil + FreeSlaves + xoá model. Chỉ set `cropDead`, dừng lớn, bỏ
+  thanh nước, nhuộm nâu héo (`ApplyWitheredLook`), ghi thư báo, lưu ngay.
+- `Update`: `cropDead` thì đứng yên — không chết lại, không lớn.
+- `InteractWater`: chặn tưới cây héo (phải CỨU mới sống). `WaterAgain` tự chặn vì hết `isGrowing`.
+- Lưu/nạp `cropDead` trong `CropSave`; `RestoreSave` giữ nguyên xác héo, bỏ qua đánh giá offline.
+- `ResetForPlayerState`: reset cờ khi đổi người chơi.
+
+### ⚠️ Chưa xong — PHẢI đi kèm Pha 3
+Cây héo giữ ô mà chưa cứu được → ô kẹt. Nhãn nổi "ĐÃ CHẾT" cho cây chưa làm (dựa nhuộm nâu là
+tín hiệu chính). Còn: công cụ cứu 60% giá mua cho cả thú lẫn cây.
+
+---
+
 ## [2026-08-04d] — Thú chết để lại XÁC (đảo luật cũ) — PHA 2 (phần vật nuôi)
 
 ### Đảo luật (khách chốt 04/08)
