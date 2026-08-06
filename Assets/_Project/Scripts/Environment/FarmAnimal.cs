@@ -131,6 +131,15 @@ namespace YWonderLand.Environment
         private GameObject visualObject;     // chỉ tạo cho fallback primitive
         private bool ownsPrimitiveBody = false;
 
+        // XÁC CHẾT (khách chốt 04/08): nghiêng model thành xác khi chết. Chụp "gốc model" (các con
+        // trực tiếp TRƯỚC khi dựng thanh máu/nhãn) để chỉ nghiêng thân, chừa thanh máu + nhãn ra.
+        // Universal: primitive lẫn model thật. Cứu sống thì trả lại tư thế gốc.
+        private readonly System.Collections.Generic.List<Transform> modelRoots = new System.Collections.Generic.List<Transform>();
+        private readonly System.Collections.Generic.List<Quaternion> modelRootRot0 = new System.Collections.Generic.List<Quaternion>();
+        private readonly System.Collections.Generic.List<Vector3> modelRootPos0 = new System.Collections.Generic.List<Vector3>();
+        private static readonly Quaternion DeadTilt = Quaternion.Euler(0f, 0f, 82f);
+        private const float DeadSink = 0.12f;
+
         // Thanh HP nổi
         private Transform barRoot;           // billboard quay về camera
         private Transform hungerFillPivot;   // pivot trái để fill mọc từ trái
@@ -146,6 +155,9 @@ namespace YWonderLand.Environment
         private Transform infoRoot;
         private TextMesh infoTM;
         private MeshFilter infoMF;   // đo bề rộng chữ → co nhãn cho vừa thanh đói, né chữ tràn màn hình
+
+        // Nhãn xác: chữ đỏ thay cho 💀 (TextMesh font mặc định không render emoji). Muốn icon xương thật cần sprite.
+        private const string DeadLabelText = "<color=#FF4040><b>ĐÃ CHẾT</b></color>";
 
         // Chống giật: nội dung nhãn cập nhật theo NHỊP, không phải mỗi khung hình (xem UpdateInfoLabel).
         private const float InfoUpdateInterval = 0.25f;
@@ -199,6 +211,7 @@ namespace YWonderLand.Environment
             ownsPrimitiveBody = createPrimitiveBody;
             if (createPrimitiveBody) CreatePrimitiveBody();
             EnsureCollider();
+            SnapshotModelRoots(); // chụp thân TRƯỚC khi dựng thanh máu/nhãn (để nghiêng xác không kéo theo UI)
             CreateStatusBar();
             UpdateVisuals();
         }
@@ -446,35 +459,23 @@ namespace YWonderLand.Environment
             Destroy(gameObject);
         }
 
-        /// <summary>Chết ĐÓI (khách chốt): báo toast, TRẢ ô chuồng về trống, rồi XOÁ con vật — KHÔNG để lại xác.</summary>
+        /// <summary>Chết ĐÓI. ĐẢO LUẬT (khách chốt 04/08): KHÔNG xoá, KHÔNG trả ô — để lại XÁC trong
+        /// chuồng, GIỮ sản phẩm đã cộng dồn, chiếm ô tới khi người chơi CỨU (công cụ cứu 60% giá mua).
+        /// Trước đây "chết = biến mất + trả ô"; nay đảo theo yêu cầu mới.</summary>
         private void DieFromHunger()
         {
             if (data != null)
-                ScreenToast.Show($"{data.animalName} đã chết đói! Nhớ cho ăn đúng giờ.");
+                ScreenToast.Show($"{data.animalName} đã chết đói! Cứu nó để nuôi tiếp nhé.");
 
-            // Ghi vào nhật ký -> hiện thành THƯ trong hòm thư (khách chốt 30/07). Toast bay mất rồi
-            // thì người chơi vẫn tra lại được con nào chết, lúc nào.
+            // Ghi vào nhật ký -> hiện thành THƯ trong hòm thư (khách chốt 30/07). GIỮ lịch sử lại
+            // trên xác (không ClearHistory) — cứu sống thì reset sau ở công cụ cứu.
             FarmActivityLog.RecordDeath(data != null ? data.animalName : null, "chết đói");
-            FarmActivityLog.ClearHistory(animalInstanceId); // con đi rồi, dọn mốc cho ăn cho nhẹ
 
-            if (currentPen != null)
-            {
-                currentPen.RemoveAnimal(this);
-                currentPen = null;
-            }
-
-            // Trả ô chuồng về trống (rào vẫn còn) để thả con mới — không để xác kẹt ô.
-            if (occupiedCells != null)
-            {
-                foreach (var c in occupiedCells)
-                    if (c != null) c.ClearAnimal();
-                occupiedCells = null;
-            }
-
+            // KHÔNG RemoveAnimal khỏi chuồng, KHÔNG ClearAnimal ô, KHÔNG Destroy: xác nằm lại giữ ô.
             currentState = AnimalState.Dead;
-            OnAnimalStateChanged?.Invoke(this); // báo popup/listener cập nhật trước khi xoá
-            FarmStateSync.SaveRuntimeState();
-            Destroy(gameObject);
+            UpdateVisuals();                    // nghiêng model thành xác
+            OnAnimalStateChanged?.Invoke(this); // popup/listener cập nhật "Đã chết"
+            FarmStateSync.SaveRuntimeState();   // lưu ngay: reload vẫn thấy xác + sản phẩm
         }
 
         public bool Pet()
@@ -734,7 +735,9 @@ namespace YWonderLand.Environment
 
         private void UpdateInfoLabel()
         {
-            bool show = FarmLabelVisibility.Show && data != null && currentState != AnimalState.Dead;
+            // Nhãn "ĐÃ CHẾT" LUÔN hiện trên xác (kể cả khi tắt nhãn thường) để nhìn phát biết cần cứu.
+            bool dead = currentState == AnimalState.Dead;
+            bool show = dead || (FarmLabelVisibility.Show && data != null);
             if (!show)
             {
                 if (infoRoot != null) infoRoot.gameObject.SetActive(false);
@@ -747,6 +750,22 @@ namespace YWonderLand.Environment
             if (barCamera == null) barCamera = Camera.main;
             if (barCamera != null)
                 infoRoot.rotation = Quaternion.LookRotation(barCamera.transform.forward, barCamera.transform.up);
+
+            if (dead)
+            {
+                // Model đã nghiêng thành xác → đặt nhãn theo WORLD-space cho thẳng đứng trên đầu, khỏi bị kéo lệch.
+                infoRoot.position = transform.position + Vector3.up * InfoLabelHeight();
+                infoRoot.localScale = Vector3.one;
+                if (infoTM != null && !string.Equals(infoLastText, DeadLabelText, StringComparison.Ordinal))
+                {
+                    infoLastText = DeadLabelText;
+                    infoTM.text = DeadLabelText;
+                }
+                return;
+            }
+
+            // Còn sống: trả nhãn về vị trí local chuẩn (phòng lượt trước là xác đã đặt world-space).
+            infoRoot.localPosition = new Vector3(0f, InfoLabelHeight(), 0f);
 
             // Giống nhãn cây: dựng lại chuỗi + mesh chữ mỗi khung hình là nguồn gây giật.
             // Số chỉ đổi theo phút nên 4 lần/giây là đủ. Xoay vẫn giữ mỗi khung hình cho mượt.
@@ -838,19 +857,35 @@ namespace YWonderLand.Environment
             if (productIndicator != null)
                 productIndicator.SetActive(hasProductReady && currentState != AnimalState.Dead);
 
-            // Fallback primitive: nằm nghiêng khi chết
-            if (ownsPrimitiveBody && visualObject != null)
+            // Nghiêng model thành XÁC khi chết (universal: primitive + model thật). Chừa thanh máu/nhãn
+            // (dựng SAU snapshot nên không nằm trong modelRoots). Cứu sống → trả lại tư thế gốc.
+            bool dead = currentState == AnimalState.Dead;
+            for (int i = 0; i < modelRoots.Count; i++)
             {
-                if (currentState == AnimalState.Dead)
+                var t = modelRoots[i];
+                if (t == null) continue;
+                if (dead)
                 {
-                    visualObject.transform.localRotation = Quaternion.Euler(0, 0, 90f);
-                    visualObject.transform.localPosition = new Vector3(0.5f, -0.4f, 0);
+                    t.localRotation = DeadTilt * modelRootRot0[i];
+                    t.localPosition = modelRootPos0[i] + Vector3.down * DeadSink;
                 }
                 else
                 {
-                    visualObject.transform.localRotation = Quaternion.identity;
-                    visualObject.transform.localPosition = Vector3.zero;
+                    t.localRotation = modelRootRot0[i];
+                    t.localPosition = modelRootPos0[i];
                 }
+            }
+        }
+
+        /// <summary>Chụp các gốc model (con trực tiếp) + tư thế gốc, để nghiêng thành xác rồi trả lại khi cứu.</summary>
+        private void SnapshotModelRoots()
+        {
+            modelRoots.Clear(); modelRootRot0.Clear(); modelRootPos0.Clear();
+            foreach (Transform child in transform)
+            {
+                modelRoots.Add(child);
+                modelRootRot0.Add(child.localRotation);
+                modelRootPos0.Add(child.localPosition);
             }
         }
 
@@ -990,6 +1025,7 @@ namespace YWonderLand.Environment
             {
                 var saved = (AnimalState)stateInt;
                 if (saved == AnimalState.Sick) currentState = AnimalState.Sick; // giữ nguyên đang bệnh qua các phiên
+                else if (saved == AnimalState.Dead) currentState = AnimalState.Dead; // XÁC giữ qua các phiên (chờ cứu)
             }
             feedTimer = (float)(RealNow() - feedRefTime);
             produceTimer = (float)(RealNow() - produceRefTime);

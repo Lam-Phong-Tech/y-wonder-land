@@ -6,6 +6,28 @@
 
 ---
 
+## [2026-08-04d] — Thú chết để lại XÁC (đảo luật cũ) — PHA 2 (phần vật nuôi)
+
+### Đảo luật (khách chốt 04/08)
+Trước đây `DieFromHunger` ghi "chết = biến mất + trả ô, không để xác". Giờ NGƯỢC: thú chết đói
+để lại XÁC trong chuồng, GIỮ sản phẩm đã cộng dồn, CHIẾM ô tới khi người chơi cứu.
+
+### Sửa (`FarmAnimal.cs`)
+- `DieFromHunger`: bỏ Destroy + RemoveAnimal + ClearAnimal ô. Chỉ set Dead, giữ ô/sản phẩm, ghi
+  thư báo chết, lưu ngay (reload vẫn thấy xác).
+- Nghiêng model thành xác UNIVERSAL (primitive + model thật): chụp "gốc model" lúc Initialize
+  (trước khi dựng thanh máu/nhãn), khi chết nghiêng 82° + lún nhẹ; chừa thanh máu/nhãn ra. Tư thế
+  gốc cache lại để cứu sống trả về nguyên (Pha 3). Số nghiêng/lún ở `DeadTilt`/`DeadSink`.
+- Nhãn "ĐÃ CHẾT" (đỏ) LUÔN hiện trên xác kể cả khi tắt nhãn thường; đặt world-space cho thẳng đứng.
+  Dùng chữ thay 💀 vì TextMesh font mặc định không render emoji (muốn icon xương cần sprite).
+- `RestoreAnimalState`: khôi phục trạng thái Dead qua reload (trước chỉ khôi phục Sick).
+
+### ⚠️ Chưa xong — PHẢI đi kèm Pha 3 mới ship
+Hiện xác CHIẾM ô mà CHƯA có công cụ cứu → ô bị kẹt. Đừng gộp main tới khi Pha 3 (cứu) xong.
+Còn: cây chết để lại (FarmTile) + công cụ cứu 60% giá mua.
+
+---
+
 ## [2026-08-04c] — Cộng dồn sản phẩm vật nuôi qua nhiều vòng (khách chốt 04/08) — PHA 1
 
 ### Yêu cầu
