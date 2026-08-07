@@ -17,6 +17,9 @@
 # Recordings
 /[Rr]ecordings/
 
+# Unity crash-recovery scenes (ban sao luu tu dong, khong phai scene dung that)
+/Assets/_Recovery/
+
 # Asset meta data should only be ignored when the corresponding asset is also ignored
 !/[Aa]ssets/**/*.meta
 
