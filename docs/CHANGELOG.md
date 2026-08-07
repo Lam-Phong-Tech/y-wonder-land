@@ -6,6 +6,24 @@
 
 ---
 
+## [2026-08-07a] — Bỏ hậu tố "V2/V3" ở tên vật nuôi + sửa chữ "thu 11" bí ngô
+
+### Vì sao (khách báo 07/08 kèm ảnh)
+- Con **Vịt** vẫn hiển thị "Vịt V3" trong chuồng — sót từ đợt bỏ "V2" (find-replace trước chỉ tìm "V2" nên bỏ qua "V3").
+- Shop hạt giống bí ngô ghi "→ thu 11" ngay trên "Thu 1 lần" → khách đọc thành "thu 11 lần". Thực ra 11 là SỐ SẢN PHẨM mỗi vụ (đúng bảng CayTrong2.md), thu 1 lần. Lỗi chỉ ở CHỮ, không phải tính toán, không phải server.
+
+### Đã sửa (toàn bộ ở CLIENT)
+- `Animal_duck_01.asset`: `animalName` "Vịt V3" → "Vịt" (thẻ chuồng đọc thẳng field này).
+- `ItemDataGenerator.cs` (tool editor): dọn sạch hậu tố ở 6 con (Gà mái/Đà điểu/Dê con/Thỏ con/Ngỗng con/Vịt) + comment — chạy lại tool cũng không tái sinh "V2/V3". (5 con V2 đã sạch ở asset từ đợt e5073915; đây chỉ đồng bộ tool.)
+- `ShopPopupController.cs` `CropInfoText`: đổi "→ thu {yield}" thành "Mỗi vụ thu: {yield} sản phẩm" + "Số lần thu: N lần"/"1 lần rồi hết vụ" cho rõ nghĩa (áp cho MỌI cây).
+- `EventPopupController.cs`: bỏ "V2" ở 5 món event không phải vật nuôi (Hộp Sa Chi/Sầu Riêng/Búp Măng Tây/Hộp Hồng Sâm/Gói Mùa Hè "Hạt giống").
+
+### Không đụng
+- `Docs_KichBan/*.md` giữ nguyên "V2/V3" — đó là bảng số liệu gốc của khách, không hiện trong game.
+- Không xóa/tạo mới asset con vật nào (chỉ đổi tên).
+
+---
+
 ## [2026-08-06a] — Sửa hiển thị XÁC chết sau khi test APK (cứu/dọn)
 
 ### Vì sao (anh test 06/08 phát hiện)
