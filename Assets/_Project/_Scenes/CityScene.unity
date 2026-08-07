@@ -2879,8 +2879,14 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 9164476545203416380, guid: 93ebe91eead762d47894d764142c2600, type: 3}
+      propertyPath: fishingInteractRange
+      value: 1.5
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 4668956307432685771, guid: 93ebe91eead762d47894d764142c2600, type: 3}
+    - {fileID: 8728708281651729932, guid: 93ebe91eead762d47894d764142c2600, type: 3}
+    - {fileID: 9164476545203416380, guid: 93ebe91eead762d47894d764142c2600, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
