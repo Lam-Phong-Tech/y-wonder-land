@@ -89,10 +89,10 @@ public class EventPopupController : MonoBehaviour
 
     private List<ExchangeItem> exchangeItems = new List<ExchangeItem>
     {
-        new ExchangeItem { icon = "🌟", name = "Hộp Sa Chi V2", costText = "🐟 x3 Cá event", costType = "fish", costAmount = 3 },
-        new ExchangeItem { icon = "🍈", name = "Hộp Sầu Riêng V2", costText = "🐟 x5 Cá event", costType = "fish", costAmount = 5 },
-        new ExchangeItem { icon = "🌿", name = "Búp Măng Tây V2", costText = "💎 x2 Quặng hiếm", costType = "ore", costAmount = 2 },
-        new ExchangeItem { icon = "🧧", name = "Hộp Hồng Sâm V2", costText = "💎 x4 Quặng hiếm", costType = "ore", costAmount = 4 },
+        new ExchangeItem { icon = "🌟", name = "Hộp Sa Chi", costText = "🐟 x3 Cá event", costType = "fish", costAmount = 3 },
+        new ExchangeItem { icon = "🍈", name = "Hộp Sầu Riêng", costText = "🐟 x5 Cá event", costType = "fish", costAmount = 5 },
+        new ExchangeItem { icon = "🌿", name = "Búp Măng Tây", costText = "💎 x2 Quặng hiếm", costType = "ore", costAmount = 2 },
+        new ExchangeItem { icon = "🧧", name = "Hộp Hồng Sâm", costText = "💎 x4 Quặng hiếm", costType = "ore", costAmount = 4 },
         new ExchangeItem { icon = "🐾", name = "Pet Mèo Vàng", costText = "🎫 x1 Vé sự kiện", costType = "ticket", costAmount = 1 },
         new ExchangeItem { icon = "👒", name = "Nón Mùa Hè", costText = "🐟 x2 + 💎 x1", costType = "fish", costAmount = 2 },
     };
@@ -112,7 +112,7 @@ public class EventPopupController : MonoBehaviour
     private List<BundleItem> bundleItems = new List<BundleItem>
     {
         new BundleItem { icon = "💎", name = "Gói Khởi Đầu", desc = "500 Point + 3 Vé sự kiện", oldPrice = 100000, newPrice = 49000, tag = "-50%", soldOut = false },
-        new BundleItem { icon = "🎁", name = "Gói Mùa Hè", desc = "1000 Point + 1 Pet + 5 Hạt giống V2", oldPrice = 200000, newPrice = 99000, tag = "HOT", soldOut = false },
+        new BundleItem { icon = "🎁", name = "Gói Mùa Hè", desc = "1000 Point + 1 Pet + 5 Hạt giống", oldPrice = 200000, newPrice = 99000, tag = "HOT", soldOut = false },
         new BundleItem { icon = "👑", name = "Gói VIP 30 ngày", desc = "VIP 30 ngày + 2000 Point", oldPrice = 500000, newPrice = 299000, tag = "-40%", soldOut = true },
     };
 

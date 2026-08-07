@@ -371,15 +371,15 @@ namespace YWonderLand.EditorScripts
 
             // Thông tin chăn nuôi (giá/ô/thức ăn/sản phẩm) — nguồn: bảng VatNuoi khách gửi.
             // Chỉ set trường hiển thị + tên/giá; GIỮ nguyên field gameplay (cycle, produceItemId) nếu asset đã có.
-            SetHusbandry("chicken_01", "Gà mái V2", 156, 1, "Bắp Ngô", 2, "Cám", 0, "Trứng gà", 1, "Thịt gà", 5);
+            SetHusbandry("chicken_01", "Gà mái", 156, 1, "Bắp Ngô", 2, "Cám", 0, "Trứng gà", 1, "Thịt gà", 5);
             SetHusbandry("cow_01", "Bò sữa", 7800, 9, "Cỏ Voi", 2, "Khoai Lang", 4, "Sữa bò", 10, "Thịt bò", 50);
             SetHusbandry("pig_01", "Heo con", 2600, 9, "Khoai lang", 2, "Bí ngô", 2, "Da heo", 1, "Thịt heo", 50);
-            SetHusbandry("ostrich_01", "Đà điểu V2", 4420, 1, "Dưa Hấu", 4, "Cám", 0, "Trứng đà điểu", 1, "Thịt đà điểu", 20);
+            SetHusbandry("ostrich_01", "Đà điểu", 4420, 1, "Dưa Hấu", 4, "Cám", 0, "Trứng đà điểu", 1, "Thịt đà điểu", 20);
             SetHusbandry("deer_01", "Hươu", 10400, 9, "Bắp Ngô", 5, "Cám", 0, "Nhung hươu", 2, "Thịt hươu", 40);
-            SetHusbandry("goat_01", "Dê con V2", 1300, 9, "Bí ngô", 2, "Cỏ voi", 2, "Sữa dê", 2, "Thịt dê", 20);
-            SetHusbandry("rabbit_01", "Thỏ con V2", 130, 1, "Cà rốt", 1, "Bắp ngô", 1, "Lông thỏ", 8, "Thịt thỏ", 5);
-            SetHusbandry("goose_01", "Ngỗng con V2", 260, 1, "Bắp Cải", 2, "Bắp Ngô", 3, "Trứng ngỗng", 2, "Thịt ngỗng", 5);
-            SetHusbandry("duck_01", "Vịt V3", 208, 1, "Bắp Ngô", 1, "Cám", 0, "Trứng vịt", 1, "Thịt vịt", 5);
+            SetHusbandry("goat_01", "Dê con", 1300, 9, "Bí ngô", 2, "Cỏ voi", 2, "Sữa dê", 2, "Thịt dê", 20);
+            SetHusbandry("rabbit_01", "Thỏ con", 130, 1, "Cà rốt", 1, "Bắp ngô", 1, "Lông thỏ", 8, "Thịt thỏ", 5);
+            SetHusbandry("goose_01", "Ngỗng con", 260, 1, "Bắp Cải", 2, "Bắp Ngô", 3, "Trứng ngỗng", 2, "Thịt ngỗng", 5);
+            SetHusbandry("duck_01", "Vịt", 208, 1, "Bắp Ngô", 1, "Cám", 0, "Trứng vịt", 1, "Thịt vịt", 5);
             SetHusbandry("turtle_01", "Rùa con", 2340, 1, "Rau Muống", 7, "Dưa hấu", 12, "Mai rùa", 1, "Thịt rùa", 10);
 
             // Logic gameplay theo VatNuoi: produceId, SL sản phẩm/vụ (Pro1), TỔNG SỐ LẦN THU, thịt vụ cuối (Pro2), SL thịt.
@@ -400,15 +400,15 @@ namespace YWonderLand.EditorScripts
             // ── BỆNH / VẮC-XIN: số lấy NGUYÊN từ VatNuoi2 (Thời điểm phát bệnh · Tỉ lệ phát bệnh ·
             // SL vắc-xin · SL thuốc) + cột "Số ngày nuôi". KHÔNG tự bịa. ──
             //                    id            ngàyNuôi  hệSốMốcBệnh  tỉLệBệnh  sốMũiVắcXin  sốLiềuThuốc
-            SetAnimalDisease("chicken_01",  90f,  0.15f, 0.6f, 3,  3);  // Gà mái V2
+            SetAnimalDisease("chicken_01",  90f,  0.15f, 0.6f, 3,  3);  // Gà mái
             SetAnimalDisease("cow_01",     270f,  0.30f, 0.4f, 4, 10);  // Bò sữa
             SetAnimalDisease("pig_01",     180f,  0.50f, 0.3f, 4,  9);  // Heo con
-            SetAnimalDisease("ostrich_01", 180f,  0.30f, 0.4f, 4, 10);  // Đà điểu V2
+            SetAnimalDisease("ostrich_01", 180f,  0.30f, 0.4f, 4, 10);  // Đà điểu
             SetAnimalDisease("deer_01",    360f,  0.15f, 0.6f, 4,  9);  // Hươu
-            SetAnimalDisease("goat_01",    180f,  0.30f, 0.3f, 4, 10);  // Dê con V2
-            SetAnimalDisease("rabbit_01",   80f,  0.40f, 0.5f, 2,  2);  // Thỏ con V2
-            SetAnimalDisease("goose_01",    90f,  0.15f, 0.4f, 4,  2);  // Ngỗng con V2
-            SetAnimalDisease("duck_01",     45f,  0.15f, 0.6f, 2,  2);  // Vịt V3
+            SetAnimalDisease("goat_01",    180f,  0.30f, 0.3f, 4, 10);  // Dê con
+            SetAnimalDisease("rabbit_01",   80f,  0.40f, 0.5f, 2,  2);  // Thỏ con
+            SetAnimalDisease("goose_01",    90f,  0.15f, 0.4f, 4,  2);  // Ngỗng con
+            SetAnimalDisease("duck_01",     45f,  0.15f, 0.6f, 2,  2);  // Vịt
             SetAnimalDisease("turtle_01",  300f,  0.50f, 0.6f, 4, 10);  // Rùa con
 
             AssetDatabase.SaveAssets();

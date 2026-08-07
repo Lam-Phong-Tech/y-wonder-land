@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Animal_duck_01
   m_EditorClassIdentifier: Assembly-CSharp::YWonderLand.Data.AnimalDefinition
   animalId: duck_01
-  animalName: "V\u1ECBt V3"
+  animalName: "V\u1ECBt"
   buyPrice: 208
   penSlots: 1
   foodMainName: "B\u1EAFp Ng\xF4"

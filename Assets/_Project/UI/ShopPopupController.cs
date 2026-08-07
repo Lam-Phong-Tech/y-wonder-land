@@ -849,19 +849,21 @@ public class ShopPopupController : MonoBehaviour
     {
         string text = "\n\nThông tin trồng:";
         text += $"\nChiếm {c.plotSlots} ô đất   |   Tốn {c.seedItemCost} hạt";
-        text += $"\nLớn sau: {YWonderLand.Core.GameTimeConfig.FormatDuration(c.growthTimeSec)}"
-              + $" → thu {c.harvestYield}";
+        text += $"\nLớn sau: {YWonderLand.Core.GameTimeConfig.FormatDuration(c.growthTimeSec)}";
+        // 11 là SỐ SẢN PHẨM mỗi vụ (harvestYield), KHÔNG phải số lần thu. Khách 07/08 đọc "→ thu 11"
+        // thành "thu 11 lần" vì nó nằm ngay trên dòng "Thu 1 lần" -> ghi rõ "sản phẩm/vụ" cho hết nhầm.
+        text += $"\nMỗi vụ thu: {c.harvestYield} sản phẩm";
 
         int harvests = Mathf.Max(1, c.maxHarvests);
         if (harvests > 1)
         {
             if (c.reHarvestCycleSec > 0f)
                 text += $"\nThu tiếp mỗi {YWonderLand.Core.GameTimeConfig.FormatDuration(c.reHarvestCycleSec)}";
-            text += $"\nTổng: {harvests} lần × {c.harvestYield} = {harvests * c.harvestYield}";
+            text += $"\nSố lần thu: {harvests} lần (tổng {harvests * c.harvestYield} sản phẩm)";
         }
         else
         {
-            text += "\nThu 1 lần rồi hết vụ";
+            text += "\nSố lần thu: 1 lần rồi hết vụ";
         }
 
         if (!string.IsNullOrEmpty(c.finalProductItemId) && c.finalProductAmount > 0)
