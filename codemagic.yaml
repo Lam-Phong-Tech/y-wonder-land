@@ -188,8 +188,14 @@ workflows:
           perl -0pi -e 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' "$PROJECT_FILE"
 
           keychain initialize
+          # --certificate-key la bat buoc: Apple da co san certificate distribution
+          # tu cac app khac, fetch-signing-files se tai ve phan cong khai cua no
+          # nhung khoa rieng chi nam tren may tao ra no => keychain add-certificates
+          # bao "Unable to save Signing Certificate without certificate private key".
+          # Dua khoa rieng vao thi CLI se tao certificate moi gan voi chinh khoa do.
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --type IOS_APP_STORE \
+            --certificate-key=@env:CERTIFICATE_PRIVATE_KEY \
             --create
           keychain add-certificates
 
