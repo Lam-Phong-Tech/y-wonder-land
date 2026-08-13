@@ -167,6 +167,29 @@ workflows:
           /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$UNITY_IOS_DIR/Info.plist"
           /usr/libexec/PlistBuddy -c "Print :ITSAppUsesNonExemptEncryption" "$UNITY_IOS_DIR/Info.plist"
 
+      - name: Verify app icon 1024x1024
+        script: |
+          # App Store Connect tu choi upload voi loi 91111 neu thieu icon
+          # ios-marketing 1024x1024, hoac neu icon co kenh alpha.
+          # Unity export lai se ghi de ca thu muc AppIcon.appiconset nen buoc
+          # nay canh bao som thay vi de fail o khau publish sau 40 phut build.
+          ICON="$UNITY_IOS_DIR/Unity-iPhone/Images.xcassets/AppIcon.appiconset/Icon-Marketing-1024.png"
+          if [ ! -f "$ICON" ]; then
+            echo "Thieu $ICON"
+            echo "Unity export lai da xoa icon. Dat icon that trong Unity Player"
+            echo "Settings > iOS > Icon, hoac chep lai file 1024x1024 vao appiconset."
+            exit 1
+          fi
+          sips -g pixelWidth -g pixelHeight -g hasAlpha "$ICON"
+          if sips -g hasAlpha "$ICON" | grep -q "hasAlpha: yes"; then
+            echo "Icon 1024 con kenh alpha - App Store se tu choi (loi 91111)."
+            exit 1
+          fi
+          grep -q "ios-marketing" "$UNITY_IOS_DIR/Unity-iPhone/Images.xcassets/AppIcon.appiconset/Contents.json" || {
+            echo "Contents.json thieu muc ios-marketing."
+            exit 1
+          }
+
       - name: Verify IL2CPP linker flags
         script: |
           PROJECT_FILE="$UNITY_IOS_DIR/$XCODE_PROJECT/project.pbxproj"
