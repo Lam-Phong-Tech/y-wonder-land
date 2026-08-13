@@ -175,12 +175,37 @@ workflows:
 
       - name: Set up iOS code signing
         script: |
+          set -e
+          PROJECT_FILE="$UNITY_IOS_DIR/$XCODE_PROJECT/project.pbxproj"
+
+          # Unity xuat project voi PROVISIONING_PROFILE_SPECIFIER tro vao bien
+          # $(PROVISIONING_PROFILE_SPECIFIER_APP) - bien nay khong duoc dinh nghia
+          # o dau ca nen luon rong, che mat gia tri ma use-profiles ghi vao.
+          # CODE_SIGN_IDENTITY cung dang la chung chi phat trien. Don sach truoc.
+          perl -0pi -e 's/PROVISIONING_PROFILE_SPECIFIER = "\$\(PROVISIONING_PROFILE_SPECIFIER_APP\)";/PROVISIONING_PROFILE_SPECIFIER = "";/g' "$PROJECT_FILE"
+          perl -0pi -e 's/PROVISIONING_PROFILE = "\$\(PROVISIONING_PROFILE_APP\)";/PROVISIONING_PROFILE = "";/g' "$PROJECT_FILE"
+          perl -0pi -e 's/CODE_SIGN_IDENTITY = "iPhone Developer";/CODE_SIGN_IDENTITY = "Apple Distribution";/g' "$PROJECT_FILE"
+          perl -0pi -e 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' "$PROJECT_FILE"
+
           keychain initialize
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --type IOS_APP_STORE \
             --create
           keychain add-certificates
-          xcode-project use-profiles
+
+          echo "--- Provisioning profile da tai ve ---"
+          ls -la "$HOME/Library/MobileDevice/Provisioning Profiles/" || echo "(thu muc trong)"
+
+          xcode-project use-profiles \
+            --project "$UNITY_IOS_DIR/$XCODE_PROJECT" \
+            --archive-method app-store \
+            --code-signing-setup-verbose-logging
+
+          echo "--- Build settings cua target Unity-iPhone sau khi ap profile ---"
+          xcodebuild -project "$UNITY_IOS_DIR/$XCODE_PROJECT" \
+            -target Unity-iPhone \
+            -showBuildSettings 2>/dev/null \
+            | grep -E "PROVISIONING_PROFILE|CODE_SIGN_IDENTITY|CODE_SIGN_STYLE|DEVELOPMENT_TEAM|PRODUCT_BUNDLE_IDENTIFIER" || true
 
       - name: Diagnose GameAssembly build
         script: |
