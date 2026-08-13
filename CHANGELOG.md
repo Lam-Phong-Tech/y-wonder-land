@@ -1,4 +1,25 @@
-# CHANGELOG
+# CHANGELOG — BẢN LƯU TRỮ (dừng ở 29/07/2026)
+
+> ## ⚠️ Đây KHÔNG phải nhật ký hiện hành
+>
+> **Nguồn sự thật là [`docs/CHANGELOG.md`](docs/CHANGELOG.md).** File đó ghi đầy đủ dự án từ ngày
+> khởi tạo `27/05/2026` cho tới nay, và là nơi **duy nhất** được ghi tiếp.
+>
+> File này dừng ở `29/07/2026`, nội dung trùng lặp một phần với `docs/CHANGELOG.md`. Giữ lại vì các
+> mục cũ có chi tiết chẩn đoán còn dùng được và đã bị tài liệu khác trích dẫn — **đừng ghi thêm vào đây**.
+>
+> | Cần gì | Xem ở đâu |
+> |---|---|
+> | Đã làm những gì, mới nhất | `docs/CHANGELOG.md` |
+> | Đang làm gì tiếp | `task.md`, mục đầu file |
+> | Trạng thái hiện tại + danh sách file | `docs/CONTEXT_RECOVERY.md` |
+> | Quy tắc làm việc + module đã QC | `RULES.md` |
+> | Tổng quan dự án cho người mới | `README.md` |
+>
+> ⚠️ `Assets/_Project/Docs_KichBan/LoTrinh_Demo_Thu2.md` đã **lỗi thời hoàn toàn** (lộ trình demo
+> tháng 6, xong từ lâu) — đừng dùng để định hướng.
+
+---
 
 ## [Unreleased] - 2026-07-29 (Punch-list khách 29/07: T1–T7)
 
