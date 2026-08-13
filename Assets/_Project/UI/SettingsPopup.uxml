@@ -91,13 +91,15 @@
                         </ui:VisualElement>
 
                         <!-- Khách chốt 30/07: chữ nổi trên cây/con vật MẶC ĐỊNH TẮT (che kín farm + gây giật).
-                             Ai máy khoẻ thì tự bật ở đây, có cảnh báo kèm. -->
-                        <ui:VisualElement class="settings-toggle-row">
+                             ẨN HẲN công tắc 13/08 theo yêu cầu của anh — chỉ giữ lại để test nội bộ.
+                             Muốn bật lại: bỏ display:none ở 2 dòng dưới VÀ đổi ForceHidden=false
+                             trong FarmLabelVisibility.cs (bỏ một chỗ thôi là không ăn thua). -->
+                        <ui:VisualElement class="settings-toggle-row" style="display: none;">
                             <ui:Label name="LblCropLabels" text="Chữ nổi trên cây/thú" class="settings-toggle-label" />
                             <ui:Toggle name="ToggleCropLabels" value="false" class="settings-toggle" />
                             <ui:Label name="LblCropLabelsStatus" text="TẮT" class="settings-toggle-status" />
                         </ui:VisualElement>
-                        <ui:Label name="LblCropLabelsHint" text="Hiện giờ chín / giờ đói ngay trên đầu. Nông trại đông cây sẽ RỐI MẮT và MÁY YẾU DỄ GIẬT — nên để tắt và bấm vào cây/thú để xem." class="settings-hint" />
+                        <ui:Label name="LblCropLabelsHint" text="Hiện giờ chín / giờ đói ngay trên đầu. Nông trại đông cây sẽ RỐI MẮT và MÁY YẾU DỄ GIẬT — nên để tắt và bấm vào cây/thú để xem." class="settings-hint" style="display: none;" />
 
                         <!-- GENERAL -->
                         <ui:Label name="LblGeneralSection" text="CHUNG" class="settings-section-header" />
