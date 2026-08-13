@@ -11,14 +11,14 @@ workflows:
       unity: 6000.3.15f1
       ios_signing:
         distribution_type: app_store
-        bundle_identifier: com.ywonder.greenfarm
+        bundle_identifier: net.ywonder.greenfarm
       groups:
         - unity_credentials
       vars:
         UNITY_IOS_DIR: ios
         XCODE_PROJECT: Unity-iPhone.xcodeproj
         XCODE_SCHEME: Unity-iPhone
-        BUNDLE_ID: com.ywonder.greenfarm
+        BUNDLE_ID: net.ywonder.greenfarm
         APP_VERSION: 0.1.1
         BUILD_NUMBER: 4
 
@@ -107,7 +107,7 @@ workflows:
     environment:
       ios_signing:
         distribution_type: app_store
-        bundle_identifier: com.ywonder.greenfarm
+        bundle_identifier: net.ywonder.greenfarm
       groups:
         - appstore_credentials
       vars:
@@ -139,8 +139,17 @@ workflows:
       - name: Force iOS bundle identifier
         script: |
           PROJECT_FILE="$UNITY_IOS_DIR/$XCODE_PROJECT/project.pbxproj"
-          perl -0pi -e 's/com\.Unity-Technologies\.com\.unity\.template\.urp-blank/com.ywonder.greenfarm/g' "$PROJECT_FILE"
+          perl -0pi -e 's/com\.Unity-Technologies\.com\.unity\.template\.urp-blank/net.ywonder.greenfarm/g' "$PROJECT_FILE"
+          perl -0pi -e 's/com\.ywonder\.greenfarm/net.ywonder.greenfarm/g' "$PROJECT_FILE"
           grep -n "PRODUCT_BUNDLE_IDENTIFIER" "$PROJECT_FILE"
+          if grep -q "com\.ywonder\.greenfarm" "$PROJECT_FILE"; then
+            echo "Bundle id cu com.ywonder.greenfarm van con trong project.pbxproj."
+            exit 1
+          fi
+          if ! grep -q "net\.ywonder\.greenfarm" "$PROJECT_FILE"; then
+            echo "Khong tim thay net.ywonder.greenfarm trong project.pbxproj."
+            exit 1
+          fi
 
       - name: Force iOS version, build number, and export compliance
         script: |
