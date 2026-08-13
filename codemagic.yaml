@@ -105,15 +105,17 @@ workflows:
     instance_type: mac_mini_m2
 
     environment:
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: net.ywonder.greenfarm
+      # Khong dung khoi `ios_signing` vi no lay profile tu muc "Code signing
+      # identities" da upload san. O day ky tu dong: buoc "Set up iOS code
+      # signing" goi app-store-connect fetch-signing-files --create de tu tao
+      # certificate + provisioning profile qua App Store Connect API key.
       groups:
         - appstore_credentials
       vars:
         UNITY_IOS_DIR: ios
         XCODE_PROJECT: Unity-iPhone.xcodeproj
         XCODE_SCHEME: Unity-iPhone
+        BUNDLE_ID: net.ywonder.greenfarm
         APP_VERSION: 0.1.1
         BUILD_NUMBER: 5
 
@@ -173,6 +175,11 @@ workflows:
 
       - name: Set up iOS code signing
         script: |
+          keychain initialize
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
+          keychain add-certificates
           xcode-project use-profiles
 
       - name: Diagnose GameAssembly build
