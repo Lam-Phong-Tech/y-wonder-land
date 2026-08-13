@@ -14,14 +14,13 @@ workflows:
         bundle_identifier: com.ywonder.greenfarm
       groups:
         - unity_credentials
-        - appstore_credentials
       vars:
         UNITY_IOS_DIR: ios
         XCODE_PROJECT: Unity-iPhone.xcodeproj
         XCODE_SCHEME: Unity-iPhone
         BUNDLE_ID: com.ywonder.greenfarm
         APP_VERSION: 0.1.1
-        BUILD_NUMBER: 5
+        BUILD_NUMBER: 4
 
     scripts:
       - name: Fetch Git LFS assets
@@ -99,10 +98,6 @@ workflows:
         - name: Deactivate Unity license
           script: |
             $UNITY_HOME/Contents/MacOS/Unity -batchmode -quit -logFile - -returnlicense -username ${UNITY_EMAIL} -password ${UNITY_PASSWORD}
-      app_store_connect:
-        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
-        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
-        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
 
   ios-testflight-from-exported-xcode:
     name: iOS TestFlight (exported Xcode project, no Unity)
@@ -120,7 +115,7 @@ workflows:
         XCODE_PROJECT: Unity-iPhone.xcodeproj
         XCODE_SCHEME: Unity-iPhone
         APP_VERSION: 0.1.1
-        BUILD_NUMBER: 4
+        BUILD_NUMBER: 5
 
     scripts:
       - name: Fetch Git LFS assets
