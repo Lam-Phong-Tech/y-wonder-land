@@ -188,14 +188,46 @@ workflows:
           perl -0pi -e 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' "$PROJECT_FILE"
 
           keychain initialize
+
           # --certificate-key la bat buoc: Apple da co san certificate distribution
           # tu cac app khac, fetch-signing-files se tai ve phan cong khai cua no
           # nhung khoa rieng chi nam tren may tao ra no => keychain add-certificates
           # bao "Unable to save Signing Certificate without certificate private key".
-          # Dua khoa rieng vao thi CLI se tao certificate moi gan voi chinh khoa do.
+          # Dua khoa rieng vao thi CLI tao certificate moi gan voi chinh khoa do.
+          #
+          # Bien CERTIFICATE_PRIVATE_KEY hay bi hong xuong dong khi dan qua clipboard
+          # Windows (LF -> CRLF, hoac mat sach newline). Doan duoi chap nhan ca PEM
+          # lan base64, don CR, va dung lai PEM neu newline bi mat.
+          KEY_FILE=/tmp/cert_key.pem
+          printf '%s' "$CERTIFICATE_PRIVATE_KEY" | tr -d '\r' > /tmp/raw_key
+
+          if head -c 5 /tmp/raw_key | grep -q -- "-----"; then
+            echo "CERTIFICATE_PRIVATE_KEY dang o dang PEM"
+            cp /tmp/raw_key "$KEY_FILE"
+          else
+            echo "CERTIFICATE_PRIVATE_KEY dang o dang base64, dang giai ma"
+            base64 --decode < /tmp/raw_key > "$KEY_FILE"
+          fi
+          rm -f /tmp/raw_key
+
+          [ -n "$(tail -c1 "$KEY_FILE")" ] && echo >> "$KEY_FILE"
+
+          if [ "$(wc -l < "$KEY_FILE")" -lt 5 ]; then
+            echo "Khoa bi mat xuong dong, dang dung lai PEM"
+            BODY=$(sed -e 's/-----[A-Z ]*-----//g' "$KEY_FILE" | tr -d ' \n\t')
+            {
+              echo "-----BEGIN RSA PRIVATE KEY-----"
+              echo "$BODY" | fold -w 64
+              echo "-----END RSA PRIVATE KEY-----"
+            } > "$KEY_FILE"
+          fi
+
+          echo "Khoa rieng: $(wc -l < "$KEY_FILE") dong, dong dau: $(head -1 "$KEY_FILE")"
+          openssl rsa -in "$KEY_FILE" -noout -check
+
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --type IOS_APP_STORE \
-            --certificate-key=@env:CERTIFICATE_PRIVATE_KEY \
+            --certificate-key=@file:$KEY_FILE \
             --create
           keychain add-certificates
 
