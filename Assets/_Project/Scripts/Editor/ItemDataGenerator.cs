@@ -390,12 +390,12 @@ namespace YWonderLand.EditorScripts
             SetAnimalGameplay("cow_01", "milk_01", 10, 38, 10000, "beef_01", 50, Days(7f), Days(1f), Days(1f), Days(2f));
             SetAnimalGameplay("pig_01", "pigskin_01", 1, 1, 8000, "pork_01", 50, Days(180f), Days(1f), Days(1f), Days(2f));
             SetAnimalGameplay("ostrich_01", "ostrich_egg_01", 1, 30, 5000, "ostrich_meat_01", 20, Days(6f), Days(1f), Days(1f), Days(2f)); // gia cầm: trứng theo chu kỳ, thịt ở vụ cuối
-            SetAnimalGameplay("deer_01", "deer_velvet_01", 2, 2, 15000, "deer_meat_01", 40, Days(180f), Days(1f), Days(1f), Days(2f));
+            SetAnimalGameplay("deer_01", "deer_velvet_01", 2, 2, 15000, "deer_meat_01", 40, Days(180f), Days(1f), Days(2f), Days(4f)); // khách chốt 13/08: hươu chưa ăn 48h chết / cho ăn 96h
             SetAnimalGameplay("goat_01", "goat_milk_01", 2, 60, 8000, "goat_meat_01", 20, Days(3f), Days(1f), Days(1f), Days(2f));
             SetAnimalGameplay("rabbit_01", "rabbit_fur_01", 8, 2, 1500, "rabbit_meat_01", 5, Days(40f), Days(1f), Days(1f), Days(2f));
             SetAnimalGameplay("goose_01", "goose_egg_01", 2, 30, 4500, "goose_meat_01", 5, Days(3f), Days(1f), Days(1f), Days(2f)); // gia cầm: trứng theo chu kỳ, thịt ở vụ cuối
-            SetAnimalGameplay("duck_01", "duck_egg_01", 1, 45, 1000, "duck_meat_01", 5, Days(1f), Days(0.5f), Days(1f), Days(2f)); // gia cầm: trứng theo chu kỳ, thịt ở vụ cuối (đói từ 12h = thanh 50%)
-            SetAnimalGameplay("turtle_01", "turtle_shell_01", 1, 1, 20000, "turtle_meat_01", 10, Days(300f), Days(7f), Days(5f), Days(10f)); // rùa: chưa ăn 5 ngày chết / cho ăn 10 ngày
+            SetAnimalGameplay("duck_01", "duck_egg_01", 1, 45, 1000, "duck_meat_01", 5, Days(1f), Days(0.5f), Days(0.5f), Days(1f)); // khách chốt 13/08: vịt chưa ăn 12h chết / cho ăn 24h
+            SetAnimalGameplay("turtle_01", "turtle_shell_01", 1, 1, 20000, "turtle_meat_01", 10, Days(300f), Days(7f), Days(4f), Days(8f)); // khách chốt 13/08: rùa chưa ăn 4 ngày chết / cho ăn 8 ngày (trước là 5/10)
 
             // ── BỆNH / VẮC-XIN: số lấy NGUYÊN từ VatNuoi2 (Thời điểm phát bệnh · Tỉ lệ phát bệnh ·
             // SL vắc-xin · SL thuốc) + cột "Số ngày nuôi". KHÔNG tự bịa. ──
@@ -454,8 +454,10 @@ namespace YWonderLand.EditorScripts
             a.meatAmount = meatAmt;
             a.produceCycleTimeSec = cycle;
             a.feedIntervalSec = feed;
-            a.noFeedDeathSec = noFeedDeath; // chưa cho ăn sống bao lâu (24h / rùa 5 ngày)
-            a.fedLifeSec = fedLife;         // cho ăn 1 lần sống bao lâu (48h / rùa 10 ngày)
+            // Mốc chết 2 tầng (khách chốt lại 13/08): mặc định 24h chưa ăn / 48h đã ăn;
+            // RIÊNG vịt 12h/24h, hươu 48h/96h, rùa 4 ngày/8 ngày.
+            a.noFeedDeathSec = noFeedDeath; // chưa cho ăn lần nào thì sống bao lâu
+            a.fedLifeSec = fedLife;         // cho ăn 1 lần thì sống thêm bao lâu
             a.canGetSick = true;
             EditorUtility.SetDirty(a);
         }

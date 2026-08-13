@@ -6,6 +6,165 @@
 
 ---
 
+## [2026-08-13b] — Cho ăn xong mất bảng nút chuồng + ẩn công tắc "Chữ nổi trên cây/thú"
+
+### 1. Cho ăn xong là bảng nút của CHUỒNG biến mất (anh báo 13/08)
+
+Đường đi tái hiện: xây chuồng → thả vịt → **chạm vào chuồng** → Cho ăn → xong thì bảng nút tương
+tác không hiện lại nữa, phải chạy ra chỗ khác rồi quay lại mới thấy.
+
+Gốc lỗi tìm ra bằng log tạm gắn vào 4 cửa thoát sớm của `RebuildPromptFor` (đọc code suông đoán
+trượt 2 lần). Log thật lúc tái hiện:
+
+```
+[PromptRestore] foot-probe XOÁ bảng nút của 'Cube.2099' (ô trước mặt = Cube.2158)
+[PromptRestore] 'Feed' bắt đầu — nhớ mục tiêu: KHÔNG CÓ (null), nguồn=chạm thẳng
+[PromptRestore] BỎ: target=null directTap=True
+```
+
+Bảng nút chuồng **đã mất TRƯỚC KHI** bấm Cho ăn, chứ không phải mất lúc múa xong:
+
+1. Cho ăn **không** có nút trên bảng nút thế giới — `AddEnclosureActions` chỉ có Xem chuồng / Thả thú
+   / Dời chuồng / Hủy chuồng. Muốn cho ăn **bắt buộc** phải mở popup chuồng.
+2. Trong lúc popup che, người chơi xê dịch chút xíu → ô trước mặt đổi sang ô khác không có gì →
+   `ClearFrontCellInteractionPrompt` xoá `currentHoverObject` về null.
+3. `BeginTimedAction` nhớ mục tiêu bằng **đúng** `currentHoverObject` → nhớ được `null`.
+4. Múa xong `RebuildPromptFor(null, …)` thoát ngay ở cửa đầu tiên → không còn gì để dựng lại. Chỉ
+   hồi khi ô trước mặt đổi lần nữa → phải chạy đi chỗ khác rồi quay lại.
+
+**Sửa (`FarmInteractionController`):**
+
+- Thêm `promptRestoreHint`: luồng nào mở màn múa **từ popup** thì tự khai báo mình đang thao tác lên
+  cái gì. `FeedAnimal` khai báo con thú. `BeginTimedAction` lấy `currentHoverObject`, rỗng thì lấy
+  hint. Dùng một lần rồi tự xoá để không dính sang màn múa sau.
+- Dùng tới hint = bảng nút cũ đã mất → dựng lại kiểu "chạm thẳng" (dính trong tầm với), đúng như
+  vừa chạm vào chuồng.
+- `ShouldFrontCellOverrideStickyTilePrompt`: **thú/chuồng không bị giành quyền** (chỉ ruộng mới bị,
+  vì ô ruộng rộng 1m — xem `[2026-08-13a]`). Thiếu chốt này thì bảng nút vừa dựng lại bị foot-probe
+  xoá ngay khung hình sau.
+- `RebuildPromptFor` thêm nhánh **chuồng** và xếp ưu tiên **thú → chuồng → ruộng** đúng như lúc chạm
+  lần đầu trong `HandleHover`. Trước đây chỉ nhận `FarmAnimal`/`FarmTile`, nên chạm thẳng vào **hàng
+  rào** (mục tiêu là ô nền `BuildSurfaceCell`) là dựng ra rỗng. Đây là lỗ hổng thứ hai, độc lập với
+  chuỗi trên — bịt luôn.
+- Thú **đang trong chuồng** thì dựng lại ra bảng nút **của chuồng**, không phải của riêng con thú
+  (trước đây lệch nhau nên sau mỗi lần cho ăn bảng nút tự đổi mặt).
+
+### 2. Ẩn công tắc "Chữ nổi trên cây/thú" (anh chốt 13/08)
+
+Chữ nổi vốn đã mặc định TẮT từ 30/07, chỉ còn công tắc trong Cài đặt > Đồ hoạ để ai muốn thì bật.
+Nay ẩn hẳn công tắc đó.
+
+Ẩn ở **hai chỗ**, cố ý:
+
+- `SettingsPopup.uxml`: hàng công tắc + dòng gợi ý để `display: none` (giữ nguyên element để code
+  `root.Q<Toggle>` không đổi).
+- `FarmLabelVisibility.ForceHidden = true`: khoá cứng `Show` về `false`. **Bắt buộc phải có** — ẩn
+  mỗi công tắc thì máy nào lỡ bật trước đó sẽ kẹt chữ nổi vĩnh viễn, vì `PlayerPrefs` còn nguyên mà
+  không còn chỗ để tắt.
+
+Muốn mở lại cho người chơi thì phải sửa **cả hai** chỗ. Nhãn **"ĐÃ CHẾT"** trên xác thú không bị ảnh
+hưởng (nhánh riêng, luôn hiện để biết đường mà cứu), thanh nước/thanh đói cũng giữ nguyên.
+
+### Files
+
+- `Assets/_Project/Scripts/Environment/FarmInteractionController.cs`
+- `Assets/_Project/Scripts/Environment/FarmLabelVisibility.cs`
+- `Assets/_Project/UI/SettingsPopup.uxml`
+
+### Nghiệm thu
+
+| Việc | Mong đợi |
+|---|---|
+| Xây chuồng → thả thú → **chạm chuồng** → Cho ăn | Xong là bảng nút chuồng hiện lại NGAY tại chỗ |
+| Chạm **con thú trong chuồng** → Cho ăn | Bảng nút dựng lại là của **chuồng**, giống hệt lúc mới chạm |
+| Chạm ô ruộng → cuốc/tưới | Vẫn đúng như `[2026-08-13a]`, không hồi quy |
+| Mở Cài đặt > Đồ hoạ | Không còn dòng "Chữ nổi trên cây/thú" |
+| Vào nông trại | Không còn chữ nổi trên cây/thú, kể cả máy trước đó đã bật |
+| Để thú chết | Nhãn "ĐÃ CHẾT" trên xác VẪN hiện |
+
+### Còn treo
+
+Các luồng khác cũng mở màn múa **từ popup** (`BeginWaterTile` gọi từ popup "Xem ruộng", chữa bệnh,
+vắc-xin) về lý thuyết dính đúng cái bẫy này. Chưa ai báo lỗi nên **chưa đụng**; nếu gặp thì cách chữa
+y hệt — gán `promptRestoreHint` trước khi gọi `BeginTimedAction`.
+
+---
+
+## [2026-08-13a] — Ruộng hết "dính" cả vạt sau khi cuốc/gieo/tưới + mốc chết vịt/hươu/rùa theo bảng khách
+
+### Vì sao (khách gửi 2 ảnh 13/08)
+
+1. *"Khi anh cuốc đất, gieo hạt và tưới nước xong thì khu vực xung quanh cách tầm 6 ô đất bị dính
+   liên kết với ô đất vừa cuốc, anh di chuyển rất xa mới làm ô khác được."*
+2. Bảng thời gian chết của Vịt / Hươu / Rùa trong game không khớp bảng khách đã gửi trước đó.
+
+### 1. Gốc lỗi "dính cả vạt ruộng" — bảng nút bị đóng dấu nhầm là "chạm thẳng"
+
+Bảng nút có HAI nguồn: **foot-probe** (ô ngay trước mặt, tự đổi theo bước chân) và **chạm thẳng**
+(bấm vào vật thể — CỐ Ý dính tới khi đi xa `directTapMaxRange` = **3.5m**, để cây/đá/NPC không bị
+tuột mất khi đi vòng quanh).
+
+Chuỗi gây lỗi:
+
+- `BeginTimedAction` cất `promptTargetBeforeTimedAction` rồi **xoá sạch** mọi cờ nguồn gốc.
+- Làm xong, `RebuildPromptFor` dựng lại bảng nút nhưng **gán cứng** `currentPromptFromFrontCell = false`
+  → bảng nút của ô vừa làm bị đóng dấu thành "chạm thẳng" dù người chơi chưa hề chạm.
+- `HasDirectTapPrompt()` thành `true` → `RefreshFrontCellInteractionPrompt` **return sớm**, foot-probe
+  chết hẳn.
+- Ô ruộng rộng đúng **1m** (`BuildGridManager.cellSize = 1`), mà bán kính dính là 3.5m → kẹt nguyên
+  vạt bán kính 3–4 ô (đường kính ~7 ô). Khớp đúng "tầm 6 ô" khách mô tả. Chỉ nhả khi đi ra xa 3.5m.
+
+Đây là hệ quả phụ của bản vá 31/07 "bảng nút ruộng hết trễ một bước" (`f8f94306`) — lúc đó thêm
+`RebuildPromptFor` sau `onComplete` mà chưa giữ nguồn gốc bảng nút.
+
+**Sửa (`FarmInteractionController.cs`):**
+
+- Thêm `promptFromFrontCellBeforeTimedAction`: nhớ bảng nút đến từ đâu, xuyên qua màn múa động tác.
+- `RebuildPromptFor(target, fromFrontCell)` nhận thêm tham số nguồn gốc thay vì gán cứng `false`.
+  Bảng nút gốc foot-probe dựng lại vẫn là foot-probe → bước sang ô kế bên là đổi nút ngay.
+- Thêm `ShouldFrontCellOverrideStickyTilePrompt()`: **chỉ với RUỘNG**, nếu ô trước mặt là ô KHÁC ô
+  đang dính thì trả quyền cho foot-probe. Cây/đá/NPC/thú **giữ nguyên** nết dính 3.5m như cũ.
+- Vẫn giữ nguyên bản vá 31/07 (dựng bảng nút SAU `onComplete`), không làm trễ lại một bước.
+
+### 2. Mốc chết 2 tầng — 3 loài lệch bảng khách
+
+Khách chốt: **Vịt 12h → 24h**, **Hươu 48h → 96h**, **Rùa 4 ngày → 8 ngày**; mọi loài còn lại giữ
+**24h → 48h** (đang đúng sẵn). Tầng 1 = chưa cho ăn lần nào (`noFeedDeathSec`), tầng 2 = đã cho ăn
+(`fedLifeSec`).
+
+| Loài | Trước | Sau |
+|---|---|---|
+| Vịt | 24h / 48h | **12h / 24h** |
+| Hươu | 24h / 48h | **48h / 96h** |
+| Rùa | 5 ngày / 10 ngày | **4 ngày / 8 ngày** |
+
+Sửa ở CẢ HAI nơi để chạy lại tool không làm số quay về cũ:
+`ItemDataGenerator.SetAnimalGameplay` (3 dòng) và 3 file `.asset`
+(`Animal_duck_01`, `Animal_deer_01`, `Animal_turtle_01`).
+
+Thanh no/đói tự khớp theo — `GetHungerFraction` tính thẳng từ cửa sổ sống hiện tại, không dùng
+`feedIntervalSec`. Giữ nguyên `feedIntervalSec` (chỉ là dòng chữ "tới cữ cho ăn kế"), giữ nguyên chu
+kỳ sản phẩm, giá, hệ bệnh.
+
+⚠️ Ghi chú: mốc rùa `5/10` từng được xác nhận 30/07; lần này khách đổi xuống `4/8` — số mới đè số cũ.
+
+### Files
+
+- Assets/_Project/Scripts/Environment/FarmInteractionController.cs
+- Assets/_Project/Scripts/Editor/ItemDataGenerator.cs
+- Assets/Resources/Items/Animal_duck_01.asset, Animal_deer_01.asset, Animal_turtle_01.asset
+
+### Nghiệm thu (chưa chạy — cần build)
+
+- Cuốc/gieo/tưới xong một ô → **bước sang ô kế bên**, bảng nút phải đổi sang ô mới ngay, không phải
+  đi xa. Làm liên tiếp 5–6 ô sát nhau không bị kẹt.
+- Chạm thẳng vào cây/đá rồi đi vòng quanh trong 3.5m → bảng nút vẫn dính như cũ (không được hồi quy).
+- Chuồng/hàng rào/đường đá: bảng nút không đổi hành vi.
+- Thả vịt không cho ăn → chết sau 12h; cho ăn → thêm 24h. Hươu 48/96h. Rùa 4/8 ngày.
+  (Bật `AnimalPrefabLibrary.testTimeScale` < 1 để test nhanh, **nhớ trả về 1 trước khi build**.)
+
+---
+
 ## [2026-08-07a] — Bỏ hậu tố "V2/V3" ở tên vật nuôi + sửa chữ "thu 11" bí ngô
 
 ### Vì sao (khách báo 07/08 kèm ảnh)

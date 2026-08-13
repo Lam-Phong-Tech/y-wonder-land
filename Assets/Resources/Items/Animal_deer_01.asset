@@ -32,8 +32,8 @@ MonoBehaviour:
   meatItemId: deer_meat_01
   meatAmount: 40
   feedIntervalSec: 86400
-  noFeedDeathSec: 86400
-  fedLifeSec: 172800
+  noFeedDeathSec: 172800
+  fedLifeSec: 345600
   canGetSick: 1
   raisingDays: 360
   sicknessOnsetRatio: 0.15
