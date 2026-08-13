@@ -601,6 +601,10 @@ namespace YWonderLand.Environment
             // Nhớ mục tiêu để DỰNG LẠI bảng nút sau khi múa xong (anh báo 30/07: tưới/cuốc xong là
             // bảng nút biến mất, phải chạm lại ô mới hiện). Trong lúc múa vẫn ẩn để nhường thanh Hủy.
             promptTargetBeforeTimedAction = currentHoverObject;
+            // Nhớ luôn NGUỒN GỐC bảng nút. Trước đây dựng lại là gán cứng "chạm thẳng" nên bảng nút
+            // dính vào ô vừa làm trong bán kính 3.5m (~7 ô) — khách báo 13/08 "cuốc/gieo/tưới xong
+            // là cả vạt ruộng quanh đó dính theo, đi rất xa mới làm ô khác được".
+            promptFromFrontCellBeforeTimedAction = currentPromptFromFrontCell;
 
             currentHoverObject = null;
             currentActions.Clear();
@@ -650,12 +654,13 @@ namespace YWonderLand.Environment
             // nhảy sang gieo hạt). onComplete MỚI là chỗ đổi trạng thái ô đất — dựng bảng nút
             // trước nó là dựng theo trạng thái CŨ, nên bảng luôn trễ đúng một bước.
             var promptTarget = promptTargetBeforeTimedAction;
+            bool promptWasFromFrontCell = promptFromFrontCellBeforeTimedAction;
             FinishTimedAction(restorePrompt: false);
             onComplete?.Invoke();
 
             // onComplete có thể mở màn múa mới (chuỗi thao tác) — lúc đó để màn mới tự lo bảng nút,
             // không bày nút đè lên thanh Hủy.
-            if (!timedActionActive) RebuildPromptFor(promptTarget);
+            if (!timedActionActive) RebuildPromptFor(promptTarget, promptWasFromFrontCell);
         }
 
         /// <param name="restorePrompt">
@@ -672,12 +677,20 @@ namespace YWonderLand.Environment
             EndTimedActionCursorMode();
 
             var target = promptTargetBeforeTimedAction;
+            bool wasFromFrontCell = promptFromFrontCellBeforeTimedAction;
             promptTargetBeforeTimedAction = null;
-            if (restorePrompt) RebuildPromptFor(target);
+            promptFromFrontCellBeforeTimedAction = false;
+            if (restorePrompt) RebuildPromptFor(target, wasFromFrontCell);
         }
 
         /// <summary>Dựng lại bảng nút cho đúng vật thể này theo trạng thái HIỆN TẠI của nó.</summary>
-        private void RebuildPromptFor(GameObject target)
+        /// <param name="fromFrontCell">
+        /// Bảng nút này ĐẾN TỪ ĐÂU. Phải giữ đúng nguồn gốc, đừng mặc định false:
+        /// false = kiểu "chạm thẳng", bảng nút DÍNH vào vật thể tới khi đi xa 3.5m (HasDirectTapPrompt
+        /// chặn cả foot-probe). Với ruộng thì 3.5m ≈ 7 ô nên cuốc/tưới xong là kẹt cả vạt ruộng,
+        /// đi rất xa mới làm được ô khác (khách báo 13/08).
+        /// </param>
+        private void RebuildPromptFor(GameObject target, bool fromFrontCell)
         {
             if (target == null || !useDirectTapInteraction) return;
             if (PenMoveController.IsActive || UIPopupTracker.AnyOpen) return;
@@ -701,7 +714,7 @@ namespace YWonderLand.Environment
             currentHoverObject = target;
             currentActions = actions;
             lastActionSignature = BuildActionSignature(actions);
-            currentPromptFromFrontCell = false;
+            currentPromptFromFrontCell = fromFrontCell;
             currentPromptFromFootWater = false;
             currentPromptFromFootResource = false;
             currentPromptFromFootFishing = false;
@@ -723,6 +736,7 @@ namespace YWonderLand.Environment
             timedActionActive = false;
             // Bỏ dở là người chơi CHỦ ĐỘNG thoát -> không dựng lại bảng nút (khác lúc làm xong).
             promptTargetBeforeTimedAction = null;
+            promptFromFrontCellBeforeTimedAction = false;
             GameHUDController.Instance?.HideActionCancelProgress();
             EndTimedActionCursorMode();
 
@@ -988,7 +1002,7 @@ namespace YWonderLand.Environment
                     // phải biến mất chứ không đứng ì đó.
                     onClick = () =>
                     {
-                        if (BeginFertilize(fertilizeTile)) RebuildPromptFor(currentHoverObject);
+                        if (BeginFertilize(fertilizeTile)) RebuildPromptFor(currentHoverObject, currentPromptFromFrontCell);
                     }
                 });
             }
@@ -1807,7 +1821,7 @@ namespace YWonderLand.Environment
                 return;
 
             // A direct-tapped tree/rock/NPC prompt should stay until it leaves range.
-            if (HasDirectTapPrompt())
+            if (HasDirectTapPrompt() && !ShouldFrontCellOverrideStickyTilePrompt())
                 return;
 
             var selector = FrontBuildCellSelector.Instance;
@@ -1855,6 +1869,28 @@ namespace YWonderLand.Environment
 
             if (shouldRefreshPrompt && GameHUDController.Instance != null)
                 GameHUDController.Instance.ShowInteractionPrompts(foundActions);
+        }
+
+        /// <summary>
+        /// Bảng nút "chạm thẳng" CỐ Ý dính vào mục tiêu tới khi người chơi đi xa `directTapMaxRange`
+        /// (3.5m) — hợp lý với cây/đá/NPC/thú vì chúng đứng thưa. Nhưng ô ruộng chỉ rộng 1m nên 3.5m
+        /// là dính nguyên vạt ~7 ô: đứng trước ô khác vẫn hiện nút của ô cũ, phải đi thật xa mới thao
+        /// tác được ô kế bên (khách báo 13/08). CHỈ với ruộng: ô trước mặt là ô KHÁC thì trả quyền
+        /// cho foot-probe. Cây/đá/NPC/thú giữ nguyên nết dính cũ.
+        /// </summary>
+        private bool ShouldFrontCellOverrideStickyTilePrompt()
+        {
+            if (currentHoverObject == null) return false;
+
+            var stickyTile = currentHoverObject.GetComponentInParent<FarmTile>();
+            if (stickyTile == null) return false;
+
+            var selector = FrontBuildCellSelector.Instance;
+            var cell = selector != null ? selector.CurrentCell : null;
+            if (cell == null) return false;
+
+            var frontTile = ResolveFarmTileFromCell(cell);
+            return frontTile != null && frontTile != stickyTile;
         }
 
         private bool TryBuildFrontCellEnclosurePrompt(BuildSurfaceCell cell, List<InteractionAction> actions, out GameObject foundObj)
@@ -2343,6 +2379,8 @@ namespace YWonderLand.Environment
         private GameObject currentHoverObject = null;
         /// <summary>Thứ đang chỉ ngay trước khi vào màn múa động tác — để dựng lại bảng nút khi múa xong.</summary>
         private GameObject promptTargetBeforeTimedAction;
+        /// <summary>Bảng nút lúc đó đến từ foot-probe (ô trước mặt) hay từ cú chạm thẳng — dựng lại phải giữ đúng nguồn.</summary>
+        private bool promptFromFrontCellBeforeTimedAction;
         private bool currentPromptFromFrontCell;
         private bool currentPromptFromFootWater;
         private bool currentPromptFromFootResource;

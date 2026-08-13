@@ -32,8 +32,8 @@ MonoBehaviour:
   meatItemId: turtle_meat_01
   meatAmount: 10
   feedIntervalSec: 604800
-  noFeedDeathSec: 432000
-  fedLifeSec: 864000
+  noFeedDeathSec: 345600
+  fedLifeSec: 691200
   canGetSick: 1
   raisingDays: 300
   sicknessOnsetRatio: 0.5

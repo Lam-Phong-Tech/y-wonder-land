@@ -6,6 +6,81 @@
 
 ---
 
+## [2026-08-13a] — Ruộng hết "dính" cả vạt sau khi cuốc/gieo/tưới + mốc chết vịt/hươu/rùa theo bảng khách
+
+### Vì sao (khách gửi 2 ảnh 13/08)
+
+1. *"Khi anh cuốc đất, gieo hạt và tưới nước xong thì khu vực xung quanh cách tầm 6 ô đất bị dính
+   liên kết với ô đất vừa cuốc, anh di chuyển rất xa mới làm ô khác được."*
+2. Bảng thời gian chết của Vịt / Hươu / Rùa trong game không khớp bảng khách đã gửi trước đó.
+
+### 1. Gốc lỗi "dính cả vạt ruộng" — bảng nút bị đóng dấu nhầm là "chạm thẳng"
+
+Bảng nút có HAI nguồn: **foot-probe** (ô ngay trước mặt, tự đổi theo bước chân) và **chạm thẳng**
+(bấm vào vật thể — CỐ Ý dính tới khi đi xa `directTapMaxRange` = **3.5m**, để cây/đá/NPC không bị
+tuột mất khi đi vòng quanh).
+
+Chuỗi gây lỗi:
+
+- `BeginTimedAction` cất `promptTargetBeforeTimedAction` rồi **xoá sạch** mọi cờ nguồn gốc.
+- Làm xong, `RebuildPromptFor` dựng lại bảng nút nhưng **gán cứng** `currentPromptFromFrontCell = false`
+  → bảng nút của ô vừa làm bị đóng dấu thành "chạm thẳng" dù người chơi chưa hề chạm.
+- `HasDirectTapPrompt()` thành `true` → `RefreshFrontCellInteractionPrompt` **return sớm**, foot-probe
+  chết hẳn.
+- Ô ruộng rộng đúng **1m** (`BuildGridManager.cellSize = 1`), mà bán kính dính là 3.5m → kẹt nguyên
+  vạt bán kính 3–4 ô (đường kính ~7 ô). Khớp đúng "tầm 6 ô" khách mô tả. Chỉ nhả khi đi ra xa 3.5m.
+
+Đây là hệ quả phụ của bản vá 31/07 "bảng nút ruộng hết trễ một bước" (`f8f94306`) — lúc đó thêm
+`RebuildPromptFor` sau `onComplete` mà chưa giữ nguồn gốc bảng nút.
+
+**Sửa (`FarmInteractionController.cs`):**
+
+- Thêm `promptFromFrontCellBeforeTimedAction`: nhớ bảng nút đến từ đâu, xuyên qua màn múa động tác.
+- `RebuildPromptFor(target, fromFrontCell)` nhận thêm tham số nguồn gốc thay vì gán cứng `false`.
+  Bảng nút gốc foot-probe dựng lại vẫn là foot-probe → bước sang ô kế bên là đổi nút ngay.
+- Thêm `ShouldFrontCellOverrideStickyTilePrompt()`: **chỉ với RUỘNG**, nếu ô trước mặt là ô KHÁC ô
+  đang dính thì trả quyền cho foot-probe. Cây/đá/NPC/thú **giữ nguyên** nết dính 3.5m như cũ.
+- Vẫn giữ nguyên bản vá 31/07 (dựng bảng nút SAU `onComplete`), không làm trễ lại một bước.
+
+### 2. Mốc chết 2 tầng — 3 loài lệch bảng khách
+
+Khách chốt: **Vịt 12h → 24h**, **Hươu 48h → 96h**, **Rùa 4 ngày → 8 ngày**; mọi loài còn lại giữ
+**24h → 48h** (đang đúng sẵn). Tầng 1 = chưa cho ăn lần nào (`noFeedDeathSec`), tầng 2 = đã cho ăn
+(`fedLifeSec`).
+
+| Loài | Trước | Sau |
+|---|---|---|
+| Vịt | 24h / 48h | **12h / 24h** |
+| Hươu | 24h / 48h | **48h / 96h** |
+| Rùa | 5 ngày / 10 ngày | **4 ngày / 8 ngày** |
+
+Sửa ở CẢ HAI nơi để chạy lại tool không làm số quay về cũ:
+`ItemDataGenerator.SetAnimalGameplay` (3 dòng) và 3 file `.asset`
+(`Animal_duck_01`, `Animal_deer_01`, `Animal_turtle_01`).
+
+Thanh no/đói tự khớp theo — `GetHungerFraction` tính thẳng từ cửa sổ sống hiện tại, không dùng
+`feedIntervalSec`. Giữ nguyên `feedIntervalSec` (chỉ là dòng chữ "tới cữ cho ăn kế"), giữ nguyên chu
+kỳ sản phẩm, giá, hệ bệnh.
+
+⚠️ Ghi chú: mốc rùa `5/10` từng được xác nhận 30/07; lần này khách đổi xuống `4/8` — số mới đè số cũ.
+
+### Files
+
+- Assets/_Project/Scripts/Environment/FarmInteractionController.cs
+- Assets/_Project/Scripts/Editor/ItemDataGenerator.cs
+- Assets/Resources/Items/Animal_duck_01.asset, Animal_deer_01.asset, Animal_turtle_01.asset
+
+### Nghiệm thu (chưa chạy — cần build)
+
+- Cuốc/gieo/tưới xong một ô → **bước sang ô kế bên**, bảng nút phải đổi sang ô mới ngay, không phải
+  đi xa. Làm liên tiếp 5–6 ô sát nhau không bị kẹt.
+- Chạm thẳng vào cây/đá rồi đi vòng quanh trong 3.5m → bảng nút vẫn dính như cũ (không được hồi quy).
+- Chuồng/hàng rào/đường đá: bảng nút không đổi hành vi.
+- Thả vịt không cho ăn → chết sau 12h; cho ăn → thêm 24h. Hươu 48/96h. Rùa 4/8 ngày.
+  (Bật `AnimalPrefabLibrary.testTimeScale` < 1 để test nhanh, **nhớ trả về 1 trước khi build**.)
+
+---
+
 ## [2026-08-07a] — Bỏ hậu tố "V2/V3" ở tên vật nuôi + sửa chữ "thu 11" bí ngô
 
 ### Vì sao (khách báo 07/08 kèm ảnh)
