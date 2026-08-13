@@ -600,11 +600,18 @@ namespace YWonderLand.Environment
 
             // Nhớ mục tiêu để DỰNG LẠI bảng nút sau khi múa xong (anh báo 30/07: tưới/cuốc xong là
             // bảng nút biến mất, phải chạm lại ô mới hiện). Trong lúc múa vẫn ẩn để nhường thanh Hủy.
-            promptTargetBeforeTimedAction = currentHoverObject;
+            // Màn múa mở TỪ POPUP (Cho ăn trong popup chuồng) thì `currentHoverObject` thường đã null:
+            // popup che mất thế giới, foot-probe kịp xoá bảng nút vì ô trước mặt không có gì. Lúc đó
+            // dùng mục tiêu do chính luồng đó khai báo, không thì dựng lại bằng null = mất bảng nút,
+            // phải chạy đi chỗ khác rồi quay lại (anh báo 13/08).
+            promptTargetBeforeTimedAction = currentHoverObject != null ? currentHoverObject : promptRestoreHint;
             // Nhớ luôn NGUỒN GỐC bảng nút. Trước đây dựng lại là gán cứng "chạm thẳng" nên bảng nút
             // dính vào ô vừa làm trong bán kính 3.5m (~7 ô) — khách báo 13/08 "cuốc/gieo/tưới xong
             // là cả vạt ruộng quanh đó dính theo, đi rất xa mới làm ô khác được".
-            promptFromFrontCellBeforeTimedAction = currentPromptFromFrontCell;
+            // Dùng tới hint tức là bảng nút cũ đã mất -> dựng lại kiểu "chạm thẳng" (dính trong tầm với),
+            // đúng như vừa chạm vào chuồng.
+            promptFromFrontCellBeforeTimedAction = currentHoverObject != null && currentPromptFromFrontCell;
+            promptRestoreHint = null; // dùng một lần rồi thôi, đừng để dính sang màn múa sau
 
             currentHoverObject = null;
             currentActions.Clear();
@@ -698,15 +705,35 @@ namespace YWonderLand.Environment
 
             var actions = new List<InteractionAction>();
 
+            // Dựng lại phải RA ĐÚNG bảng nút mà một cú chạm mới sẽ cho (xem HandleHover) — thứ tự
+            // ưu tiên y hệt: thú -> chuồng -> ruộng.
             var animal = target.GetComponentInParent<FarmAnimal>();
             if (animal != null)
             {
-                AddAnimalActions(animal, actions, out _, out _);
+                // Thú ĐANG TRONG CHUỒNG thì bảng nút là của CHUỒNG, không phải của riêng con.
+                if (TryGetAnimalEnclosure(animal, out var animalEnclosure) && IsEnclosureInRange(animalEnclosure, true))
+                    AddEnclosureActions(animalEnclosure, actions);
+                else
+                    AddAnimalActions(animal, actions, out _, out _);
             }
             else
             {
-                var tile = target.GetComponentInParent<FarmTile>();
-                if (tile != null) AddTileAction(tile, actions);
+                // Chạm thẳng vào HÀNG RÀO: mục tiêu là ô nền của chuồng, trên đó KHÔNG có FarmAnimal
+                // lẫn FarmTile. Thiếu nhánh này thì cho ăn xong actions rỗng -> thoát sớm -> bảng nút
+                // của chuồng mất hẳn, phải chạy ra xa rồi quay lại mới hiện (khách báo 13/08).
+                var penCell = target.GetComponentInParent<BuildSurfaceCell>();
+                if (penCell != null && penCell.HasFence)
+                {
+                    var pen = PenEnclosure.FindPen(penCell);
+                    if (pen != null && IsEnclosureInRange(pen, true))
+                        AddEnclosureActions(pen, actions);
+                }
+
+                if (actions.Count == 0)
+                {
+                    var tile = target.GetComponentInParent<FarmTile>();
+                    if (tile != null) AddTileAction(tile, actions);
+                }
             }
 
             if (actions.Count == 0) return;
@@ -1882,6 +1909,10 @@ namespace YWonderLand.Environment
         {
             if (currentHoverObject == null) return false;
 
+            // Thú/chuồng KHÔNG bị giành quyền — chúng đứng thưa nên dính là đúng, mà giành mất thì
+            // cho ăn xong là bảng nút chuồng bay ngay (anh báo 13/08).
+            if (currentHoverObject.GetComponentInParent<FarmAnimal>() != null) return false;
+
             var stickyTile = currentHoverObject.GetComponentInParent<FarmTile>();
             if (stickyTile == null) return false;
 
@@ -2381,6 +2412,14 @@ namespace YWonderLand.Environment
         private GameObject promptTargetBeforeTimedAction;
         /// <summary>Bảng nút lúc đó đến từ foot-probe (ô trước mặt) hay từ cú chạm thẳng — dựng lại phải giữ đúng nguồn.</summary>
         private bool promptFromFrontCellBeforeTimedAction;
+
+        /// <summary>
+        /// Mục tiêu dự phòng để dựng lại bảng nút, cho các luồng mở màn múa TỪ POPUP thay vì từ bảng
+        /// nút ngoài thế giới. Lúc popup đang che, foot-probe hay xoá mất `currentHoverObject`, nên
+        /// luồng nào tự biết mình đang thao tác lên cái gì thì khai báo ở đây trước khi gọi
+        /// <see cref="BeginTimedAction"/>. Dùng xong tự xoá.
+        /// </summary>
+        private GameObject promptRestoreHint;
         private bool currentPromptFromFrontCell;
         private bool currentPromptFromFootWater;
         private bool currentPromptFromFootResource;
@@ -3036,6 +3075,9 @@ namespace YWonderLand.Environment
         {
             if (animal == null) return;
             pendingFeedAnimal = animal;
+            // Cho ăn luôn đi qua popup + túi đồ, nên tới lúc múa xong thì bảng nút thế giới đã mất.
+            // Khai báo trước để còn dựng lại bảng nút của chuồng/con thú này.
+            promptRestoreHint = animal.gameObject;
             MarkPendingItemPick();
             pendingPen = null;
             pendingPlantTile = null;

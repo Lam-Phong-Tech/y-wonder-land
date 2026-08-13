@@ -6,6 +6,90 @@
 
 ---
 
+## [2026-08-13b] — Cho ăn xong mất bảng nút chuồng + ẩn công tắc "Chữ nổi trên cây/thú"
+
+### 1. Cho ăn xong là bảng nút của CHUỒNG biến mất (anh báo 13/08)
+
+Đường đi tái hiện: xây chuồng → thả vịt → **chạm vào chuồng** → Cho ăn → xong thì bảng nút tương
+tác không hiện lại nữa, phải chạy ra chỗ khác rồi quay lại mới thấy.
+
+Gốc lỗi tìm ra bằng log tạm gắn vào 4 cửa thoát sớm của `RebuildPromptFor` (đọc code suông đoán
+trượt 2 lần). Log thật lúc tái hiện:
+
+```
+[PromptRestore] foot-probe XOÁ bảng nút của 'Cube.2099' (ô trước mặt = Cube.2158)
+[PromptRestore] 'Feed' bắt đầu — nhớ mục tiêu: KHÔNG CÓ (null), nguồn=chạm thẳng
+[PromptRestore] BỎ: target=null directTap=True
+```
+
+Bảng nút chuồng **đã mất TRƯỚC KHI** bấm Cho ăn, chứ không phải mất lúc múa xong:
+
+1. Cho ăn **không** có nút trên bảng nút thế giới — `AddEnclosureActions` chỉ có Xem chuồng / Thả thú
+   / Dời chuồng / Hủy chuồng. Muốn cho ăn **bắt buộc** phải mở popup chuồng.
+2. Trong lúc popup che, người chơi xê dịch chút xíu → ô trước mặt đổi sang ô khác không có gì →
+   `ClearFrontCellInteractionPrompt` xoá `currentHoverObject` về null.
+3. `BeginTimedAction` nhớ mục tiêu bằng **đúng** `currentHoverObject` → nhớ được `null`.
+4. Múa xong `RebuildPromptFor(null, …)` thoát ngay ở cửa đầu tiên → không còn gì để dựng lại. Chỉ
+   hồi khi ô trước mặt đổi lần nữa → phải chạy đi chỗ khác rồi quay lại.
+
+**Sửa (`FarmInteractionController`):**
+
+- Thêm `promptRestoreHint`: luồng nào mở màn múa **từ popup** thì tự khai báo mình đang thao tác lên
+  cái gì. `FeedAnimal` khai báo con thú. `BeginTimedAction` lấy `currentHoverObject`, rỗng thì lấy
+  hint. Dùng một lần rồi tự xoá để không dính sang màn múa sau.
+- Dùng tới hint = bảng nút cũ đã mất → dựng lại kiểu "chạm thẳng" (dính trong tầm với), đúng như
+  vừa chạm vào chuồng.
+- `ShouldFrontCellOverrideStickyTilePrompt`: **thú/chuồng không bị giành quyền** (chỉ ruộng mới bị,
+  vì ô ruộng rộng 1m — xem `[2026-08-13a]`). Thiếu chốt này thì bảng nút vừa dựng lại bị foot-probe
+  xoá ngay khung hình sau.
+- `RebuildPromptFor` thêm nhánh **chuồng** và xếp ưu tiên **thú → chuồng → ruộng** đúng như lúc chạm
+  lần đầu trong `HandleHover`. Trước đây chỉ nhận `FarmAnimal`/`FarmTile`, nên chạm thẳng vào **hàng
+  rào** (mục tiêu là ô nền `BuildSurfaceCell`) là dựng ra rỗng. Đây là lỗ hổng thứ hai, độc lập với
+  chuỗi trên — bịt luôn.
+- Thú **đang trong chuồng** thì dựng lại ra bảng nút **của chuồng**, không phải của riêng con thú
+  (trước đây lệch nhau nên sau mỗi lần cho ăn bảng nút tự đổi mặt).
+
+### 2. Ẩn công tắc "Chữ nổi trên cây/thú" (anh chốt 13/08)
+
+Chữ nổi vốn đã mặc định TẮT từ 30/07, chỉ còn công tắc trong Cài đặt > Đồ hoạ để ai muốn thì bật.
+Nay ẩn hẳn công tắc đó.
+
+Ẩn ở **hai chỗ**, cố ý:
+
+- `SettingsPopup.uxml`: hàng công tắc + dòng gợi ý để `display: none` (giữ nguyên element để code
+  `root.Q<Toggle>` không đổi).
+- `FarmLabelVisibility.ForceHidden = true`: khoá cứng `Show` về `false`. **Bắt buộc phải có** — ẩn
+  mỗi công tắc thì máy nào lỡ bật trước đó sẽ kẹt chữ nổi vĩnh viễn, vì `PlayerPrefs` còn nguyên mà
+  không còn chỗ để tắt.
+
+Muốn mở lại cho người chơi thì phải sửa **cả hai** chỗ. Nhãn **"ĐÃ CHẾT"** trên xác thú không bị ảnh
+hưởng (nhánh riêng, luôn hiện để biết đường mà cứu), thanh nước/thanh đói cũng giữ nguyên.
+
+### Files
+
+- `Assets/_Project/Scripts/Environment/FarmInteractionController.cs`
+- `Assets/_Project/Scripts/Environment/FarmLabelVisibility.cs`
+- `Assets/_Project/UI/SettingsPopup.uxml`
+
+### Nghiệm thu
+
+| Việc | Mong đợi |
+|---|---|
+| Xây chuồng → thả thú → **chạm chuồng** → Cho ăn | Xong là bảng nút chuồng hiện lại NGAY tại chỗ |
+| Chạm **con thú trong chuồng** → Cho ăn | Bảng nút dựng lại là của **chuồng**, giống hệt lúc mới chạm |
+| Chạm ô ruộng → cuốc/tưới | Vẫn đúng như `[2026-08-13a]`, không hồi quy |
+| Mở Cài đặt > Đồ hoạ | Không còn dòng "Chữ nổi trên cây/thú" |
+| Vào nông trại | Không còn chữ nổi trên cây/thú, kể cả máy trước đó đã bật |
+| Để thú chết | Nhãn "ĐÃ CHẾT" trên xác VẪN hiện |
+
+### Còn treo
+
+Các luồng khác cũng mở màn múa **từ popup** (`BeginWaterTile` gọi từ popup "Xem ruộng", chữa bệnh,
+vắc-xin) về lý thuyết dính đúng cái bẫy này. Chưa ai báo lỗi nên **chưa đụng**; nếu gặp thì cách chữa
+y hệt — gán `promptRestoreHint` trước khi gọi `BeginTimedAction`.
+
+---
+
 ## [2026-08-13a] — Ruộng hết "dính" cả vạt sau khi cuốc/gieo/tưới + mốc chết vịt/hươu/rùa theo bảng khách
 
 ### Vì sao (khách gửi 2 ảnh 13/08)
