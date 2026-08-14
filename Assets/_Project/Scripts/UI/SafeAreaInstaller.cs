@@ -39,6 +39,16 @@ public static class SafeAreaInstaller
                 safe = doc.gameObject.AddComponent<UISafeArea>();
             // Bật cả cho component CŨ (gắn tay) để Device Simulator luôn áp safe area.
             safe.ApplyInEditor = true;
+
+            // RIÊNG GameHUD: phần tử gốc .hud-root là absolute neo đủ 4 cạnh, mà con của nó
+            // (.hud-top-left, .hud-bottom-left) cũng absolute nên KHÔNG ăn theo padding —
+            // cụm nút trái bị Dynamic Island che trên iPhone 14 trở lên (khách báo 14/08).
+            // Với riêng nó thì đặt thẳng offset thay vì padding.
+            //
+            // Nhận diện qua tên VisualTreeAsset chứ không qua class của rootVisualElement:
+            // popup thường tắt sẵn trong scene nên cây UI chưa dựng lúc installer chạy.
+            safe.OffsetAbsoluteRoot = doc.visualTreeAsset != null
+                                      && doc.visualTreeAsset.name == "GameHUD";
         }
     }
 }

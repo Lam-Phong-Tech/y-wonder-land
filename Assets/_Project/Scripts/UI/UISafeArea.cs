@@ -15,6 +15,20 @@ public class UISafeArea : MonoBehaviour
     [SerializeField, Min(0f)] private float minimumMobileInset = 18f;
     [SerializeField] private bool previewMinimumInsetInEditor = false;
 
+    [Tooltip("Chỉ bật cho UIDocument mà phần tử gốc UXML neo ĐỦ 4 cạnh (top/left/right/bottom), " +
+             "ví dụ .hud-root. Khi bật, safe inset được đặt thẳng vào left/top/right/bottom của " +
+             "phần tử đó thay vì đệm padding — vì phần tử absolute bỏ qua padding của cha, khiến " +
+             "cụm nút trái bị Dynamic Island che trên iPhone 14 trở lên. TUYỆT ĐỐI không bật cho " +
+             "popup căn giữa (.chat-root dùng left: 50%) hay overlay không neo cạnh nào.")]
+    [SerializeField] private bool offsetAbsoluteRoot = false;
+
+    /// <summary>Cho installer bật riêng cho HUD (xem tooltip của <c>offsetAbsoluteRoot</c>).</summary>
+    public bool OffsetAbsoluteRoot
+    {
+        get => offsetAbsoluteRoot;
+        set { offsetAbsoluteRoot = value; lastSafe = new Rect(-1f, -1f, -1f, -1f); } // ép tính lại
+    }
+
     private UIDocument doc;
     private Rect lastSafe = new Rect(-1f, -1f, -1f, -1f);
     private Vector2 lastScreen = Vector2.zero;
@@ -93,8 +107,17 @@ public class UISafeArea : MonoBehaviour
     /// bằng đúng safe inset — cả cây con dịch theo, không cần sửa từng vị trí trong USS.
     /// </summary>
     /// <returns>true nếu đã xử lý bằng offset (khi đó KHÔNG đặt padding nữa).</returns>
-    private static bool TryApplyToAbsoluteRootChild(VisualElement root, float left, float top, float right, float bottom)
+    private bool TryApplyToAbsoluteRootChild(VisualElement root, float left, float top, float right, float bottom)
     {
+        // CHỈ làm khi được bật rõ ràng. Đè left/top/right/bottom lên một phần tử absolute
+        // KHÔNG neo đủ 4 cạnh sẽ phá bố cục của nó. Trong dự án này có thật:
+        //   .chat-root       { position: absolute; bottom: 16px; left: 50%; }  ← căn giữa
+        //   .build-overlay / .charselect-screen / .fish-root                   ← không neo gì
+        //   .levelup-overlay / .login-screen / .reward-overlay / .splash-screen ← chỉ top+left
+        // Đè lên mấy cái đó thì khung chat văng sang trái, overlay nhảy lung tung.
+        // Chỉ .hud-root mới neo đủ top/left/right/bottom = 0 nên an toàn.
+        if (!offsetAbsoluteRoot) return false;
+
         if (root.childCount == 0) return false;
 
         VisualElement content = root[0];
