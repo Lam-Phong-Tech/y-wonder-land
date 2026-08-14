@@ -1,6 +1,50 @@
 # Danh sách công việc dự án (Task Backlog & Progress)
 
-## Ưu tiên hiện tại 19/07/2026: kiểm thử source-lot PostgreSQL cô lập và hoàn thiện contract hoa hồng/VIP
+> 📌 **Đọc mục 13/08/2026 ngay dưới đây trước.** Mọi khối bên dưới nó đều là lịch sử — giữ lại vì
+> nội dung vẫn đúng, nhưng **thứ tự ưu tiên trong đó đã lỗi thời**.
+>
+> Nguồn sự thật về những gì đã làm: `docs/CHANGELOG.md` (bản đầy đủ, mới nhất) và `git log`.
+> `CHANGELOG.md` ở gốc repo chỉ là bản lưu trữ tới 29/07. `Assets/_Project/Docs_KichBan/LoTrinh_Demo_Thu2.md`
+> đã lỗi thời hoàn toàn (lộ trình demo tháng 6, xong từ lâu).
+
+---
+
+## Ưu tiên hiện tại 13/08/2026: dọn nốt việc bàn giao + 2 việc server còn treo
+
+> Tháng 8 dự án chạy **gameplay/client theo yêu cầu khách**, ví Point đứng yên ở trạng thái dormant.
+> Toàn bộ đã gộp `main`. Bản export iOS nằm trong repo ở `/ios`, commit kèm mỗi lần build.
+
+### Đã xong trong tháng 8 (đã nghiệm thu runtime, đã lên `main`)
+
+- `[x]` **Cộng dồn sản phẩm vật nuôi** qua nhiều vòng — PHA 1 (khách chốt 04/08).
+- `[x]` **Đảo luật chết**: thú để lại XÁC, cây để lại HÉO, giữ nguyên ô — PHA 2.
+- `[x]` **Công cụ cứu** 60% giá mua + nút Cứu/Dọn trong 2 popup — PHA 3.
+- `[x]` **README bàn giao song ngữ Anh-Việt** ở gốc repo (khảo sát từ code thật).
+- `[x]` **Đợt khách báo 13/08** (4 việc): ruộng hết "dính" cả vạt sau khi cuốc/gieo/tưới; mốc chết
+  vịt `12h/24h`, hươu `48h/96h`, rùa `4 ngày/8 ngày`; cho ăn xong không mất bảng nút chuồng; ẩn công
+  tắc "Chữ nổi trên cây/thú". Chi tiết ở `docs/CHANGELOG.md` mục `[2026-08-13a]` và `[2026-08-13b]`.
+- `[x]` **Bộ icon app iOS** đầy đủ 19 tấm, có `Icon-Store-1024.png` (1024×1024, không alpha).
+
+### Thứ tự ưu tiên ngay khi mở session kế tiếp
+
+1. `[ ]` **Nút admin "tạm đóng hỗ trợ 40%"** — hiện mới có cờ phía client
+   `RescueConfig.CompanySupport40On` (`Assets/_Project/Scripts/Environment/RescueConfig.cs:16`),
+   chưa có UI lẫn endpoint. VPS `42.96.18.14` đã sống lại (health `200`, `storage.mode = postgres`,
+   xác minh 13/08) nên hết bị chặn hạ tầng.
+2. `[ ]` **`PUT /player/farm-state` thiếu `idempotency_key`** — xem mục 3 trong khối 29/07 bên dưới,
+   nội dung vẫn nguyên giá trị. Sửa cả `server/index.js` lẫn client `FarmStateSync`, cần deploy.
+3. `[ ]` **Tinh chỉnh runtime còn lại:** `deadTiltDegrees` / `deadSink` cho đà điểu và dê (thỏ đã ổn)
+   — việc trong Editor.
+4. `[~]` **Ví Point** — giữ nguyên mọi ràng buộc ở các khối bên dưới, **chỉ làm khi có phê duyệt riêng**.
+
+### Cờ phải kiểm trước mỗi lần build
+
+- `AnimalPrefabLibrary.testTimeScale` = `1` (khác 1 là thú/cây chết sai giờ; Console in cảnh báo vàng).
+- `BackendConfig.useOfflineFallback` = `0`.
+
+---
+
+## Ưu tiên hiện tại 19/07/2026 (LỊCH SỬ — đã bị mục 13/08 supersede): kiểm thử source-lot PostgreSQL cô lập và hoàn thiện contract hoa hồng/VIP
 
 > Phase 1 online cơ bản đã đạt. Point web/game là cùng một ví; rate hiện tại `26,5 Point/USDT`, `1,59 Point/YWH`. Hoa hồng tiêu dùng theo nguồn: nguồn USDT trả USDT, nguồn gameplay trả Point; giữ số lẻ/FIFO/rate version/transfer source và reversal. Khách chốt 6 cấp `8% + 5 x 1%`; VIP cộng dồn từ `2.650 Point` nguồn USDT. Bản trả lời mới nhất sửa ngược bản trước: Point nguồn USDT chuyển tới vẫn tính VIP khi tiêu; refund trừ tiến độ và thu hồi VIP nếu rơi dưới ngưỡng. Share của A vẫn phát sinh khi A hoặc B chưa VIP nhưng bị khóa; chỉ mở sử dụng/rút khi cả A và B đều VIP, đồng thời mở toàn bộ lịch sử tương ứng. Candidate source-lot local đã pass, source/rate lineage hiện đủ cho phân loại VIP nhưng chưa nối runtime/deploy. Nền authority v3 production vẫn dormant; debit tắt, chưa link/migrate, chưa tiền thật.
 >
@@ -50,7 +94,11 @@
 
 > ⚠️ **Cập nhật 29/07 — thứ tự bên dưới ĐÃ ĐỔI.** Dòng "Ưu tiên mới nhất của anh: tiếp tục ví Point trước"
 > là của 19/07 và **đã bị supersede**: từ 22/07 tới nay dự án làm gameplay/client, ví Point đứng yên ở trạng
-> thái dormant. Thứ tự hiện hành:
+> thái dormant.
+>
+> ⚠️ **Cập nhật 13/08 — khối này cũng đã bị supersede** bởi mục "Ưu tiên hiện tại 13/08/2026" ở đầu file.
+> Mục 1 và 2 dưới đây **đã xong** (server đã deploy, đã build và nghiệm thu nhiều đợt). Chỉ còn **mục 3
+> (`idempotency_key`)** là vẫn đúng nguyên văn — giữ lại vì phần chẩn đoán còn giá trị. Thứ tự 29/07:
 >
 > 1. `[x]` ~~Deploy server câu cá + vé đào + vòng quay~~ — **ĐÃ DEPLOY**, xác minh 29/07 bằng probe read-only
 >    không token: 3 route trả `401` (route có) chứ không phải `404`, health `200` mode `postgres`. Còn treo

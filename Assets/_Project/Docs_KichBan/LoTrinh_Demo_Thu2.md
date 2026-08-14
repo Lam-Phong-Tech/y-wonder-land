@@ -1,5 +1,15 @@
 # 🎯 LỘ TRÌNH DEMO — Build APK Thứ 2
 
+> # 🛑 TÀI LIỆU LỖI THỜI — ĐỪNG DÙNG ĐỂ ĐỊNH HƯỚNG
+>
+> Đây là lộ trình chạy nước rút cho bản demo APK **tháng 6/2026**, đã hoàn thành xong từ lâu.
+> Mọi thứ ghi "chưa làm" / "Phase 2" trong file này **phần lớn đã làm xong** trong tháng 7-8.
+>
+> Muốn biết dự án đang ở đâu, đọc theo thứ tự: `RULES.md` → `docs/CONTEXT_RECOVERY.md` →
+> `task.md` (mục đầu file) → `docs/CHANGELOG.md`. Giữ file này làm tư liệu lịch sử.
+>
+> — Đánh dấu ngày 13/08/2026
+
 > Mục tiêu DUY NHẤT: **APK chơi được VÒNG LẶP NÔNG TRẠI cốt lõi — OFFLINE, 1 đảo, model nào thiếu thì dùng khối tạm.**
 > Sếp cần THẤY game chạy, KHÔNG phải sản phẩm hoàn chỉnh. Mọi thứ ngoài vòng lặp cốt lõi → Phase 2.
 
