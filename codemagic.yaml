@@ -11,14 +11,14 @@ workflows:
       unity: 6000.3.15f1
       ios_signing:
         distribution_type: app_store
-        bundle_identifier: com.ywonder.greenfarm
+        bundle_identifier: net.ywonder.greenfarm
       groups:
         - unity_credentials
       vars:
         UNITY_IOS_DIR: ios
         XCODE_PROJECT: Unity-iPhone.xcodeproj
         XCODE_SCHEME: Unity-iPhone
-        BUNDLE_ID: com.ywonder.greenfarm
+        BUNDLE_ID: net.ywonder.greenfarm
         APP_VERSION: 0.1.1
         BUILD_NUMBER: 4
 
@@ -105,17 +105,22 @@ workflows:
     instance_type: mac_mini_m2
 
     environment:
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.ywonder.greenfarm
+      # Khong dung khoi `ios_signing` vi no lay profile tu muc "Code signing
+      # identities" da upload san. O day ky tu dong: buoc "Set up iOS code
+      # signing" goi app-store-connect fetch-signing-files --create de tu tao
+      # certificate + provisioning profile qua App Store Connect API key.
       groups:
         - appstore_credentials
       vars:
         UNITY_IOS_DIR: ios
         XCODE_PROJECT: Unity-iPhone.xcodeproj
         XCODE_SCHEME: Unity-iPhone
+        BUNDLE_ID: net.ywonder.greenfarm
         APP_VERSION: 0.1.1
-        BUILD_NUMBER: 4
+        # PHAI tang moi lan upload len TestFlight. Apple tu choi voi
+        # ENTITY_ERROR.ATTRIBUTE.INVALID.DUPLICATE neu so nay <= so da upload.
+        # Da dung: 5. Lan sau nho tang tiep thanh 7.
+        BUILD_NUMBER: 6
 
     scripts:
       - name: Fetch Git LFS assets
@@ -139,8 +144,17 @@ workflows:
       - name: Force iOS bundle identifier
         script: |
           PROJECT_FILE="$UNITY_IOS_DIR/$XCODE_PROJECT/project.pbxproj"
-          perl -0pi -e 's/com\.Unity-Technologies\.com\.unity\.template\.urp-blank/com.ywonder.greenfarm/g' "$PROJECT_FILE"
+          perl -0pi -e 's/com\.Unity-Technologies\.com\.unity\.template\.urp-blank/net.ywonder.greenfarm/g' "$PROJECT_FILE"
+          perl -0pi -e 's/com\.ywonder\.greenfarm/net.ywonder.greenfarm/g' "$PROJECT_FILE"
           grep -n "PRODUCT_BUNDLE_IDENTIFIER" "$PROJECT_FILE"
+          if grep -q "com\.ywonder\.greenfarm" "$PROJECT_FILE"; then
+            echo "Bundle id cu com.ywonder.greenfarm van con trong project.pbxproj."
+            exit 1
+          fi
+          if ! grep -q "net\.ywonder\.greenfarm" "$PROJECT_FILE"; then
+            echo "Khong tim thay net.ywonder.greenfarm trong project.pbxproj."
+            exit 1
+          fi
 
       - name: Force iOS version, build number, and export compliance
         script: |
@@ -156,6 +170,34 @@ workflows:
           /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$UNITY_IOS_DIR/Info.plist"
           /usr/libexec/PlistBuddy -c "Print :ITSAppUsesNonExemptEncryption" "$UNITY_IOS_DIR/Info.plist"
 
+      - name: Verify app icon 1024x1024
+        script: |
+          # App Store Connect tu choi upload voi loi 91111 neu thieu icon
+          # ios-marketing 1024x1024, hoac neu icon co kenh alpha.
+          #
+          # DOC TEN FILE TU Contents.json, khong hard-code: Unity dat ten icon
+          # khac nhau moi lan export (13/08 sang la Icon-Marketing-1024.png,
+          # trua la Icon-Store-1024.png). Hard-code ten la build gay ngay lan
+          # export sau du icon van co day du.
+          ICON_DIR="$UNITY_IOS_DIR/Unity-iPhone/Images.xcassets/AppIcon.appiconset"
+          ICON_NAME=$(python3 -c "import json,sys; d=json.load(open(sys.argv[1])); print(next((i.get('filename','') for i in d['images'] if i.get('idiom')=='ios-marketing'), ''))" "$ICON_DIR/Contents.json")
+          if [ -z "$ICON_NAME" ]; then
+            echo "Contents.json thieu muc ios-marketing 1024x1024."
+            echo "Dat icon trong Unity Player Settings > iOS > Icon roi export lai ios/."
+            exit 1
+          fi
+          ICON="$ICON_DIR/$ICON_NAME"
+          if [ ! -f "$ICON" ]; then
+            echo "Contents.json khai bao '$ICON_NAME' nhung file do khong ton tai."
+            exit 1
+          fi
+          echo "Icon marketing dang dung: $ICON_NAME"
+          sips -g pixelWidth -g pixelHeight -g hasAlpha "$ICON"
+          if sips -g hasAlpha "$ICON" | grep -q "hasAlpha: yes"; then
+            echo "Icon 1024 con kenh alpha - App Store se tu choi (loi 91111)."
+            exit 1
+          fi
+
       - name: Verify IL2CPP linker flags
         script: |
           PROJECT_FILE="$UNITY_IOS_DIR/$XCODE_PROJECT/project.pbxproj"
@@ -164,7 +206,75 @@ workflows:
 
       - name: Set up iOS code signing
         script: |
-          xcode-project use-profiles
+          set -e
+          PROJECT_FILE="$UNITY_IOS_DIR/$XCODE_PROJECT/project.pbxproj"
+
+          # Unity xuat project voi PROVISIONING_PROFILE_SPECIFIER tro vao bien
+          # $(PROVISIONING_PROFILE_SPECIFIER_APP) - bien nay khong duoc dinh nghia
+          # o dau ca nen luon rong, che mat gia tri ma use-profiles ghi vao.
+          # CODE_SIGN_IDENTITY cung dang la chung chi phat trien. Don sach truoc.
+          perl -0pi -e 's/PROVISIONING_PROFILE_SPECIFIER = "\$\(PROVISIONING_PROFILE_SPECIFIER_APP\)";/PROVISIONING_PROFILE_SPECIFIER = "";/g' "$PROJECT_FILE"
+          perl -0pi -e 's/PROVISIONING_PROFILE = "\$\(PROVISIONING_PROFILE_APP\)";/PROVISIONING_PROFILE = "";/g' "$PROJECT_FILE"
+          perl -0pi -e 's/CODE_SIGN_IDENTITY = "iPhone Developer";/CODE_SIGN_IDENTITY = "Apple Distribution";/g' "$PROJECT_FILE"
+          perl -0pi -e 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' "$PROJECT_FILE"
+
+          keychain initialize
+
+          # --certificate-key la bat buoc: Apple da co san certificate distribution
+          # tu cac app khac, fetch-signing-files se tai ve phan cong khai cua no
+          # nhung khoa rieng chi nam tren may tao ra no => keychain add-certificates
+          # bao "Unable to save Signing Certificate without certificate private key".
+          # Dua khoa rieng vao thi CLI tao certificate moi gan voi chinh khoa do.
+          #
+          # Bien CERTIFICATE_PRIVATE_KEY hay bi hong xuong dong khi dan qua clipboard
+          # Windows (LF -> CRLF, hoac mat sach newline). Doan duoi chap nhan ca PEM
+          # lan base64, don CR, va dung lai PEM neu newline bi mat.
+          KEY_FILE=/tmp/cert_key.pem
+          printf '%s' "$CERTIFICATE_PRIVATE_KEY" | tr -d '\r' > /tmp/raw_key
+
+          if head -c 5 /tmp/raw_key | grep -q -- "-----"; then
+            echo "CERTIFICATE_PRIVATE_KEY dang o dang PEM"
+            cp /tmp/raw_key "$KEY_FILE"
+          else
+            echo "CERTIFICATE_PRIVATE_KEY dang o dang base64, dang giai ma"
+            base64 --decode < /tmp/raw_key > "$KEY_FILE"
+          fi
+          rm -f /tmp/raw_key
+
+          [ -n "$(tail -c1 "$KEY_FILE")" ] && echo >> "$KEY_FILE"
+
+          if [ "$(wc -l < "$KEY_FILE")" -lt 5 ]; then
+            echo "Khoa bi mat xuong dong, dang dung lai PEM"
+            BODY=$(sed -e 's/-----[A-Z ]*-----//g' "$KEY_FILE" | tr -d ' \n\t')
+            {
+              echo "-----BEGIN RSA PRIVATE KEY-----"
+              echo "$BODY" | fold -w 64
+              echo "-----END RSA PRIVATE KEY-----"
+            } > "$KEY_FILE"
+          fi
+
+          echo "Khoa rieng: $(wc -l < "$KEY_FILE") dong, dong dau: $(head -1 "$KEY_FILE")"
+          openssl rsa -in "$KEY_FILE" -noout -check
+
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --certificate-key=@file:$KEY_FILE \
+            --create
+          keychain add-certificates
+
+          echo "--- Provisioning profile da tai ve ---"
+          ls -la "$HOME/Library/MobileDevice/Provisioning Profiles/" || echo "(thu muc trong)"
+
+          xcode-project use-profiles \
+            --project "$UNITY_IOS_DIR/$XCODE_PROJECT" \
+            --archive-method app-store \
+            --code-signing-setup-verbose-logging
+
+          echo "--- Build settings cua target Unity-iPhone sau khi ap profile ---"
+          xcodebuild -project "$UNITY_IOS_DIR/$XCODE_PROJECT" \
+            -target Unity-iPhone \
+            -showBuildSettings 2>/dev/null \
+            | grep -E "PROVISIONING_PROFILE|CODE_SIGN_IDENTITY|CODE_SIGN_STYLE|DEVELOPMENT_TEAM|PRODUCT_BUNDLE_IDENTIFIER" || true
 
       - name: Diagnose GameAssembly build
         script: |
@@ -235,3 +345,235 @@ workflows:
         api_key: $APP_STORE_CONNECT_PRIVATE_KEY
         key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
         issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+
+  # Workflow nay KHONG upload len Apple. No tao IPA ad hoc chi cai duoc
+  # tren nhung iPhone da dang ky UDID trong Apple Developer > Devices.
+  # Dung khi TestFlight khong cai duoc, hoac khi can vong lap thu nghiem
+  # nhanh (khong phai cho Apple xu ly, khong phai bump BUILD_NUMBER).
+  ios-adhoc-direct-install:
+    name: iOS Ad Hoc (cai truc tiep vao may, khong qua TestFlight)
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+
+    environment:
+      # Khong dung khoi `ios_signing` vi no lay profile tu muc "Code signing
+      # identities" da upload san. O day ky tu dong: buoc "Set up iOS code
+      # signing" goi app-store-connect fetch-signing-files --create de tu tao
+      # certificate + provisioning profile qua App Store Connect API key.
+      groups:
+        - appstore_credentials
+      vars:
+        UNITY_IOS_DIR: ios
+        XCODE_PROJECT: Unity-iPhone.xcodeproj
+        XCODE_SCHEME: Unity-iPhone
+        BUNDLE_ID: net.ywonder.greenfarm
+        APP_VERSION: 0.1.1
+        # PHAI tang moi lan upload len TestFlight. Apple tu choi voi
+        # ENTITY_ERROR.ATTRIBUTE.INVALID.DUPLICATE neu so nay <= so da upload.
+        # Da dung: 5. Lan sau nho tang tiep thanh 7.
+        BUILD_NUMBER: 6
+
+    scripts:
+      - name: Fetch Git LFS assets
+        script: |
+          git lfs pull
+
+      - name: Verify exported Unity Xcode project
+        script: |
+          if [ ! -d "$UNITY_IOS_DIR/$XCODE_PROJECT" ]; then
+            echo "Missing exported Unity Xcode project: $UNITY_IOS_DIR/$XCODE_PROJECT"
+            echo "This workflow intentionally does not run Unity."
+            echo "Export iOS from Unity locally, then commit/push the generated ios/ folder, or use the unity-ios-release workflow."
+            exit 1
+          fi
+
+      - name: Prepare iOS executable scripts
+        script: |
+          chmod +x "$UNITY_IOS_DIR/process_symbols.sh" "$UNITY_IOS_DIR/usymtool" "$UNITY_IOS_DIR/usymtoolarm64"
+          ls -lh "$UNITY_IOS_DIR/process_symbols.sh" "$UNITY_IOS_DIR/usymtool" "$UNITY_IOS_DIR/usymtoolarm64"
+
+      - name: Force iOS bundle identifier
+        script: |
+          PROJECT_FILE="$UNITY_IOS_DIR/$XCODE_PROJECT/project.pbxproj"
+          perl -0pi -e 's/com\.Unity-Technologies\.com\.unity\.template\.urp-blank/net.ywonder.greenfarm/g' "$PROJECT_FILE"
+          perl -0pi -e 's/com\.ywonder\.greenfarm/net.ywonder.greenfarm/g' "$PROJECT_FILE"
+          grep -n "PRODUCT_BUNDLE_IDENTIFIER" "$PROJECT_FILE"
+          if grep -q "com\.ywonder\.greenfarm" "$PROJECT_FILE"; then
+            echo "Bundle id cu com.ywonder.greenfarm van con trong project.pbxproj."
+            exit 1
+          fi
+          if ! grep -q "net\.ywonder\.greenfarm" "$PROJECT_FILE"; then
+            echo "Khong tim thay net.ywonder.greenfarm trong project.pbxproj."
+            exit 1
+          fi
+
+      - name: Force iOS version, build number, and export compliance
+        script: |
+          PROJECT_FILE="$UNITY_IOS_DIR/$XCODE_PROJECT/project.pbxproj"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $APP_VERSION" "$UNITY_IOS_DIR/Info.plist"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" "$UNITY_IOS_DIR/Info.plist"
+          /usr/libexec/PlistBuddy -c "Delete :ITSAppUsesNonExemptEncryption" "$UNITY_IOS_DIR/Info.plist" || true
+          /usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" "$UNITY_IOS_DIR/Info.plist"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $APP_VERSION" "$UNITY_IOS_DIR/UnityFramework/Info.plist" || true
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" "$UNITY_IOS_DIR/UnityFramework/Info.plist" || true
+          perl -0pi -e "s/CURRENT_PROJECT_VERSION = [^;]+;/CURRENT_PROJECT_VERSION = ${BUILD_NUMBER};/g" "$PROJECT_FILE"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$UNITY_IOS_DIR/Info.plist"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$UNITY_IOS_DIR/Info.plist"
+          /usr/libexec/PlistBuddy -c "Print :ITSAppUsesNonExemptEncryption" "$UNITY_IOS_DIR/Info.plist"
+
+      - name: Verify app icon 1024x1024
+        script: |
+          # App Store Connect tu choi upload voi loi 91111 neu thieu icon
+          # ios-marketing 1024x1024, hoac neu icon co kenh alpha.
+          #
+          # DOC TEN FILE TU Contents.json, khong hard-code: Unity dat ten icon
+          # khac nhau moi lan export (13/08 sang la Icon-Marketing-1024.png,
+          # trua la Icon-Store-1024.png). Hard-code ten la build gay ngay lan
+          # export sau du icon van co day du.
+          ICON_DIR="$UNITY_IOS_DIR/Unity-iPhone/Images.xcassets/AppIcon.appiconset"
+          ICON_NAME=$(python3 -c "import json,sys; d=json.load(open(sys.argv[1])); print(next((i.get('filename','') for i in d['images'] if i.get('idiom')=='ios-marketing'), ''))" "$ICON_DIR/Contents.json")
+          if [ -z "$ICON_NAME" ]; then
+            echo "Contents.json thieu muc ios-marketing 1024x1024."
+            echo "Dat icon trong Unity Player Settings > iOS > Icon roi export lai ios/."
+            exit 1
+          fi
+          ICON="$ICON_DIR/$ICON_NAME"
+          if [ ! -f "$ICON" ]; then
+            echo "Contents.json khai bao '$ICON_NAME' nhung file do khong ton tai."
+            exit 1
+          fi
+          echo "Icon marketing dang dung: $ICON_NAME"
+          sips -g pixelWidth -g pixelHeight -g hasAlpha "$ICON"
+          if sips -g hasAlpha "$ICON" | grep -q "hasAlpha: yes"; then
+            echo "Icon 1024 con kenh alpha - App Store se tu choi (loi 91111)."
+            exit 1
+          fi
+
+      - name: Verify IL2CPP linker flags
+        script: |
+          PROJECT_FILE="$UNITY_IOS_DIR/$XCODE_PROJECT/project.pbxproj"
+          grep -n '\$CONFIGURATION_BUILD_DIR/il2cpp\.a' "$PROJECT_FILE"
+          grep -n "libGameAssembly.a" "$PROJECT_FILE"
+
+      - name: Set up iOS code signing
+        script: |
+          set -e
+          PROJECT_FILE="$UNITY_IOS_DIR/$XCODE_PROJECT/project.pbxproj"
+
+          # Unity xuat project voi PROVISIONING_PROFILE_SPECIFIER tro vao bien
+          # $(PROVISIONING_PROFILE_SPECIFIER_APP) - bien nay khong duoc dinh nghia
+          # o dau ca nen luon rong, che mat gia tri ma use-profiles ghi vao.
+          # CODE_SIGN_IDENTITY cung dang la chung chi phat trien. Don sach truoc.
+          perl -0pi -e 's/PROVISIONING_PROFILE_SPECIFIER = "\$\(PROVISIONING_PROFILE_SPECIFIER_APP\)";/PROVISIONING_PROFILE_SPECIFIER = "";/g' "$PROJECT_FILE"
+          perl -0pi -e 's/PROVISIONING_PROFILE = "\$\(PROVISIONING_PROFILE_APP\)";/PROVISIONING_PROFILE = "";/g' "$PROJECT_FILE"
+          perl -0pi -e 's/CODE_SIGN_IDENTITY = "iPhone Developer";/CODE_SIGN_IDENTITY = "Apple Distribution";/g' "$PROJECT_FILE"
+          perl -0pi -e 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' "$PROJECT_FILE"
+
+          keychain initialize
+
+          # --certificate-key la bat buoc: Apple da co san certificate distribution
+          # tu cac app khac, fetch-signing-files se tai ve phan cong khai cua no
+          # nhung khoa rieng chi nam tren may tao ra no => keychain add-certificates
+          # bao "Unable to save Signing Certificate without certificate private key".
+          # Dua khoa rieng vao thi CLI tao certificate moi gan voi chinh khoa do.
+          #
+          # Bien CERTIFICATE_PRIVATE_KEY hay bi hong xuong dong khi dan qua clipboard
+          # Windows (LF -> CRLF, hoac mat sach newline). Doan duoi chap nhan ca PEM
+          # lan base64, don CR, va dung lai PEM neu newline bi mat.
+          KEY_FILE=/tmp/cert_key.pem
+          printf '%s' "$CERTIFICATE_PRIVATE_KEY" | tr -d '\r' > /tmp/raw_key
+
+          if head -c 5 /tmp/raw_key | grep -q -- "-----"; then
+            echo "CERTIFICATE_PRIVATE_KEY dang o dang PEM"
+            cp /tmp/raw_key "$KEY_FILE"
+          else
+            echo "CERTIFICATE_PRIVATE_KEY dang o dang base64, dang giai ma"
+            base64 --decode < /tmp/raw_key > "$KEY_FILE"
+          fi
+          rm -f /tmp/raw_key
+
+          [ -n "$(tail -c1 "$KEY_FILE")" ] && echo >> "$KEY_FILE"
+
+          if [ "$(wc -l < "$KEY_FILE")" -lt 5 ]; then
+            echo "Khoa bi mat xuong dong, dang dung lai PEM"
+            BODY=$(sed -e 's/-----[A-Z ]*-----//g' "$KEY_FILE" | tr -d ' \n\t')
+            {
+              echo "-----BEGIN RSA PRIVATE KEY-----"
+              echo "$BODY" | fold -w 64
+              echo "-----END RSA PRIVATE KEY-----"
+            } > "$KEY_FILE"
+          fi
+
+          echo "Khoa rieng: $(wc -l < "$KEY_FILE") dong, dong dau: $(head -1 "$KEY_FILE")"
+          openssl rsa -in "$KEY_FILE" -noout -check
+
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_ADHOC \
+            --certificate-key=@file:$KEY_FILE \
+            --create
+          keychain add-certificates
+
+          echo "--- Provisioning profile da tai ve ---"
+          ls -la "$HOME/Library/MobileDevice/Provisioning Profiles/" || echo "(thu muc trong)"
+
+          xcode-project use-profiles \
+            --project "$UNITY_IOS_DIR/$XCODE_PROJECT" \
+            --archive-method ad-hoc \
+            --code-signing-setup-verbose-logging
+
+          echo "--- Build settings cua target Unity-iPhone sau khi ap profile ---"
+          xcodebuild -project "$UNITY_IOS_DIR/$XCODE_PROJECT" \
+            -target Unity-iPhone \
+            -showBuildSettings 2>/dev/null \
+            | grep -E "PROVISIONING_PROFILE|CODE_SIGN_IDENTITY|CODE_SIGN_STYLE|DEVELOPMENT_TEAM|PRODUCT_BUNDLE_IDENTIFIER" || true
+
+      - name: Diagnose GameAssembly build
+        script: |
+          set -o pipefail
+          PROJECT_PATH="$UNITY_IOS_DIR/$XCODE_PROJECT"
+          mkdir -p build/diagnostics
+          echo "Inspecting GameAssembly build settings"
+          xcodebuild \
+            -project "$PROJECT_PATH" \
+            -target GameAssembly \
+            -configuration Release \
+            -sdk iphoneos \
+            -showBuildSettings \
+            | grep -E "TARGET_NAME|PRODUCT_NAME|CONFIGURATION_BUILD_DIR|TARGET_BUILD_DIR|ARCHS|SDKROOT|ONLY_ACTIVE_ARCH|SYMROOT|OBJROOT" \
+            || true
+          echo "Building GameAssembly target before IPA archive"
+          xcodebuild \
+            -project "$PROJECT_PATH" \
+            -target GameAssembly \
+            -configuration Release \
+            -sdk iphoneos \
+            build \
+            | tee build/diagnostics/gameassembly-xcodebuild.log
+          echo "Searching for generated IL2CPP static libraries"
+          find "$HOME/Library/Developer/Xcode/DerivedData" "$PWD/$UNITY_IOS_DIR" \
+            \( -name "libGameAssembly.a" -o -name "il2cpp.a" \) \
+            -print \
+            -exec ls -lh {} \; \
+            | tee build/diagnostics/gameassembly-artifacts.log
+          if ! find "$HOME/Library/Developer/Xcode/DerivedData" "$PWD/$UNITY_IOS_DIR" -name "libGameAssembly.a" -print -quit | grep -q .; then
+            echo "libGameAssembly.a was not generated before Build IPA"
+            exit 1
+          fi
+          if ! find "$HOME/Library/Developer/Xcode/DerivedData" "$PWD/$UNITY_IOS_DIR" -name "il2cpp.a" -print -quit | grep -q .; then
+            echo "il2cpp.a was not generated before Build IPA"
+            exit 1
+          fi
+
+      - name: Build IPA
+        script: |
+          xcode-project build-ipa \
+            --project "$UNITY_IOS_DIR/$XCODE_PROJECT" \
+            --scheme "$XCODE_SCHEME"
+
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - build/diagnostics/*.log
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Logs/**/*.xcactivitylog
+
