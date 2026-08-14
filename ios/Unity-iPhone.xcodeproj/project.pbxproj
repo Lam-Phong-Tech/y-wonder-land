@@ -2216,7 +2216,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "mkdir -p \"$CONFIGURATION_TEMP_DIR/artifacts/arm64/buildstate/\"\nmkdir -p \"$PROJECT_DIR/Il2CppTempDirArtifacts/$CONFIGURATION\"\nln -sF  \"$CONFIGURATION_TEMP_DIR/artifacts\" \"$PROJECT_DIR/Il2CppTempDirArtifacts/$CONFIGURATION/artifacts\"\nif [ \"$CONFIGURATION\" = \"Debug\" ];\nthen\n    IL2CPP_CONFIG=\"Debug\"\nelse\n    IL2CPP_CONFIG=\"Release\"\nfi\n\nHOST_ARCH=$(uname -m)\nif [ \"$HOST_ARCH\" = \"arm64\" ];\nthen\n    HOST_ARCH_BEE=\"arm64\"\nelse\n    HOST_ARCH_BEE=\"x64\"\nfi\n\nif [ \"$ARCHS\" = \"arm64\" ];\nthen\n    LIB_ARCH=\"arm64\"\nelif [ \"$ARCHS\" = \"x86_64\" ];\nthen\n   LIB_ARCH=\"x64\"\nelse\n   LIB_ARCH=\"$HOST_ARCH_BEE\"\nfi\n\necho \"Lib arch: $LIB_ARCH\"\necho \"Host arch: $HOST_ARCH\"\necho \"Bee arch: $HOST_ARCH_BEE\"\n\nIL2CPP_DIR=\"$PROJECT_DIR/Il2CppOutputProject/IL2CPP/build/deploy_$HOST_ARCH\"\nIL2CPP=\"$IL2CPP_DIR/il2cpp\"\nchmod +x \"$IL2CPP\"\nchmod +x \"$IL2CPP-compile\"\nchmod +x \"$IL2CPP_DIR/bee_backend/mac-$HOST_ARCH_BEE/bee_backend\"\n\nARGS=(\n    --compile-cpp\n    --platform=iOS\n    --baselib-directory=\"Libraries\"\n    --incremental-g-c-time-slice=3\n    --dotnetprofile=unityaot-macos\n    --usymtool-path=\"D:/Du_lieu_Unity/6000.3.15f1/Editor/Data/Tools\\usymtool.exe\"\n    --profiler-report\n    --print-command-line\n    --static-lib-il2-cpp\n    --emit-source-mapping\n    --generatedcppdir=\"Il2CppOutputProject/Source/il2cppOutput\"\n    --custom-il2-cpp-root=\"Il2CppOutputProject/IL2CPP\"\n    --architecture=\"$LIB_ARCH\"\n    --outputpath=\"$CONFIGURATION_BUILD_DIR/libGameAssembly.a\"\n    --cachedirectory=\"Il2CppTempDirArtifacts/$CONFIGURATION/artifacts/$LIB_ARCH\"\n    --configuration=\"$IL2CPP_CONFIG\"\n    )\n\n# Enable this flag to search for toolchain and SDK automatically.\n# If multiple versions of Xcode are present on the system, this may result in an arbitrary selection, potentially causing a mismatch between the Xcode toolchain used for building Il2Cpp and the one used for building the app. This discrepancy could lead to compatibility issues and unexpected behavior.\nSELECT_TOOLCHAIN_SDK_AUTOMATICALLY=\"false\"\nif [ \"$SELECT_TOOLCHAIN_SDK_AUTOMATICALLY\" = \"false\" ]; then\n    UNITY_TOOLCHAIN_DIR=\"\"\n    if [ -n \"$TOOLCHAIN_DIR\" ] && [ -d \"$TOOLCHAIN_DIR\" ] && [ -f \"$TOOLCHAIN_DIR/usr/bin/clang++\" ]; then\n        UNITY_TOOLCHAIN_DIR=\"$TOOLCHAIN_DIR\"\n    fi\n    if [ -z \"$UNITY_TOOLCHAIN_DIR\" ] && [ -n \"$DT_TOOLCHAIN_DIR\" ] && [ -f \"$DT_TOOLCHAIN_DIR/usr/bin/clang++\" ]; then\n        UNITY_TOOLCHAIN_DIR=\"$DT_TOOLCHAIN_DIR\"\n    fi\n    if [ -z \"$UNITY_TOOLCHAIN_DIR\" ]; then\n        echo \"Toolchain not found in environment variable. Enable SELECT_TOOLCHAIN_SDK_AUTOMATICALLY for automatic detection.\"\n        exit 1\n    fi\n\n    if [ -n \"$SDKROOT\" ] && [ -d \"$SDKROOT\" ]; then\n        ARGS+=(\n            --tool-chain-path=\"$UNITY_TOOLCHAIN_DIR\"\n            --sysroot-path=\"$SDKROOT\"\n        )\n    else\n        echo \"error: Toolchain and/or SDK was not found. To enable automatic toolchain/SDK discovery, override SELECT_TOOLCHAIN_SDK_AUTOMATICALLY flag.\"\n        exit 1\n    fi\nelse\n    echo \"warning: The toolchain and SDK will be selected automatically. If multiple versions of Xcode are present on the system, this may result in an arbitrary selection, potentially causing a mismatch between the Xcode toolchain used for building Il2Cpp and the one used for building the app. This discrepancy could lead to compatibility issues and unexpected behavior.\"\nfi\n\n\"$IL2CPP\" \"${ARGS[@]}\"\nrm -rf \"$PROJECT_DIR/Il2CppTempDirArtifacts/$CONFIGURATION\"\n";
+			shellScript = "mkdir -p \"$CONFIGURATION_TEMP_DIR/artifacts/arm64/buildstate/\"\nmkdir -p \"$PROJECT_DIR/Il2CppTempDirArtifacts/$CONFIGURATION\"\nln -sF  \"$CONFIGURATION_TEMP_DIR/artifacts\" \"$PROJECT_DIR/Il2CppTempDirArtifacts/$CONFIGURATION/artifacts\"\nif [ \"$CONFIGURATION\" = \"Debug\" ];\nthen\n    IL2CPP_CONFIG=\"Debug\"\nelse\n    IL2CPP_CONFIG=\"Release\"\nfi\n\nHOST_ARCH=$(uname -m)\nif [ \"$HOST_ARCH\" = \"arm64\" ];\nthen\n    HOST_ARCH_BEE=\"arm64\"\nelse\n    HOST_ARCH_BEE=\"x64\"\nfi\n\nif [ \"$ARCHS\" = \"arm64\" ];\nthen\n    LIB_ARCH=\"arm64\"\nelif [ \"$ARCHS\" = \"x86_64\" ];\nthen\n   LIB_ARCH=\"x64\"\nelse\n   LIB_ARCH=\"$HOST_ARCH_BEE\"\nfi\n\necho \"Lib arch: $LIB_ARCH\"\necho \"Host arch: $HOST_ARCH\"\necho \"Bee arch: $HOST_ARCH_BEE\"\n\nIL2CPP_DIR=\"$PROJECT_DIR/Il2CppOutputProject/IL2CPP/build/deploy_$HOST_ARCH\"\nIL2CPP=\"$IL2CPP_DIR/il2cpp\"\nchmod +x \"$IL2CPP\"\nchmod +x \"$IL2CPP-compile\"\nchmod +x \"$IL2CPP_DIR/bee_backend/mac-$HOST_ARCH_BEE/bee_backend\"\n\nARGS=(\n    --compile-cpp\n    --platform=iOS\n    --baselib-directory=\"Libraries\"\n    --incremental-g-c-time-slice=3\n    --dotnetprofile=unityaot-macos\n    --usymtool-path=\"C:/Program Files/Unity/Hub/Editor/6000.3.15f1/Editor/Data/Tools\\usymtool.exe\"\n    --profiler-report\n    --print-command-line\n    --static-lib-il2-cpp\n    --emit-source-mapping\n    --generatedcppdir=\"Il2CppOutputProject/Source/il2cppOutput\"\n    --custom-il2-cpp-root=\"Il2CppOutputProject/IL2CPP\"\n    --architecture=\"$LIB_ARCH\"\n    --outputpath=\"$CONFIGURATION_BUILD_DIR/libGameAssembly.a\"\n    --cachedirectory=\"Il2CppTempDirArtifacts/$CONFIGURATION/artifacts/$LIB_ARCH\"\n    --configuration=\"$IL2CPP_CONFIG\"\n    )\n\n# Enable this flag to search for toolchain and SDK automatically.\n# If multiple versions of Xcode are present on the system, this may result in an arbitrary selection, potentially causing a mismatch between the Xcode toolchain used for building Il2Cpp and the one used for building the app. This discrepancy could lead to compatibility issues and unexpected behavior.\nSELECT_TOOLCHAIN_SDK_AUTOMATICALLY=\"false\"\nif [ \"$SELECT_TOOLCHAIN_SDK_AUTOMATICALLY\" = \"false\" ]; then\n    UNITY_TOOLCHAIN_DIR=\"\"\n    if [ -n \"$TOOLCHAIN_DIR\" ] && [ -d \"$TOOLCHAIN_DIR\" ] && [ -f \"$TOOLCHAIN_DIR/usr/bin/clang++\" ]; then\n        UNITY_TOOLCHAIN_DIR=\"$TOOLCHAIN_DIR\"\n    fi\n    if [ -z \"$UNITY_TOOLCHAIN_DIR\" ] && [ -n \"$DT_TOOLCHAIN_DIR\" ] && [ -f \"$DT_TOOLCHAIN_DIR/usr/bin/clang++\" ]; then\n        UNITY_TOOLCHAIN_DIR=\"$DT_TOOLCHAIN_DIR\"\n    fi\n    if [ -z \"$UNITY_TOOLCHAIN_DIR\" ]; then\n        echo \"Toolchain not found in environment variable. Enable SELECT_TOOLCHAIN_SDK_AUTOMATICALLY for automatic detection.\"\n        exit 1\n    fi\n\n    if [ -n \"$SDKROOT\" ] && [ -d \"$SDKROOT\" ]; then\n        ARGS+=(\n            --tool-chain-path=\"$UNITY_TOOLCHAIN_DIR\"\n            --sysroot-path=\"$SDKROOT\"\n        )\n    else\n        echo \"error: Toolchain and/or SDK was not found. To enable automatic toolchain/SDK discovery, override SELECT_TOOLCHAIN_SDK_AUTOMATICALLY flag.\"\n        exit 1\n    fi\nelse\n    echo \"warning: The toolchain and SDK will be selected automatically. If multiple versions of Xcode are present on the system, this may result in an arbitrary selection, potentially causing a mismatch between the Xcode toolchain used for building Il2Cpp and the one used for building the app. This discrepancy could lead to compatibility issues and unexpected behavior.\"\nfi\n\n\"$IL2CPP\" \"${ARGS[@]}\"\nrm -rf \"$PROJECT_DIR/Il2CppTempDirArtifacts/$CONFIGURATION\"\n";
 		};
 		D4BF5B853AEA9FBFC39E33E9 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2371,15 +2371,16 @@
 					"$(inherited)",
 					"$(OTHER_CFLAGS)",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.ywonder.greenfarm;
+				PRODUCT_BUNDLE_IDENTIFIER = net.ywonder.greenfarm;
 				PRODUCT_NAME = "$(PRODUCT_NAME_APP)";
 				PROVISIONING_PROFILE = "$(PROVISIONING_PROFILE_APP)";
 				PROVISIONING_PROFILE_APP = "";
 				PROVISIONING_PROFILE_SPECIFIER = "$(PROVISIONING_PROFILE_SPECIFIER_APP)";
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = iphoneos;
+				SYNCHRONOUS_SYMBOL_PROCESSING = TRUE;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				UNITY_CLOUD_PROJECT_ID = "086a727c-ff38-4790-9f6d-724ffd13b4ed";
+				UNITY_CLOUD_PROJECT_ID = "";
 				UNITY_RUNTIME_VERSION = 6000.3.15f1;
 				UNITY_SCRIPTING_BACKEND = il2cpp;
 				USYM_UPLOAD_AUTH_TOKEN = "";
@@ -2413,15 +2414,16 @@
 					"$(inherited)",
 					"$(OTHER_CFLAGS)",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.ywonder.greenfarm;
+				PRODUCT_BUNDLE_IDENTIFIER = net.ywonder.greenfarm;
 				PRODUCT_NAME = "$(PRODUCT_NAME_APP)";
 				PROVISIONING_PROFILE = "$(PROVISIONING_PROFILE_APP)";
 				PROVISIONING_PROFILE_APP = "";
 				PROVISIONING_PROFILE_SPECIFIER = "$(PROVISIONING_PROFILE_SPECIFIER_APP)";
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = iphoneos;
+				SYNCHRONOUS_SYMBOL_PROCESSING = TRUE;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				UNITY_CLOUD_PROJECT_ID = "086a727c-ff38-4790-9f6d-724ffd13b4ed";
+				UNITY_CLOUD_PROJECT_ID = "";
 				UNITY_RUNTIME_VERSION = 6000.3.15f1;
 				UNITY_SCRIPTING_BACKEND = il2cpp;
 				USYM_UPLOAD_AUTH_TOKEN = "";
@@ -2463,9 +2465,10 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = iphoneos;
+				SYNCHRONOUS_SYMBOL_PROCESSING = TRUE;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/$(PRODUCT_NAME_APP).app/$(PRODUCT_NAME_APP)";
-				UNITY_CLOUD_PROJECT_ID = "086a727c-ff38-4790-9f6d-724ffd13b4ed";
+				UNITY_CLOUD_PROJECT_ID = "";
 				UNITY_RUNTIME_VERSION = 6000.3.15f1;
 				UNITY_SCRIPTING_BACKEND = il2cpp;
 				USYM_UPLOAD_AUTH_TOKEN = "";
@@ -2516,9 +2519,10 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = iphoneos;
+				SYNCHRONOUS_SYMBOL_PROCESSING = TRUE;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/$(PRODUCT_NAME_APP).app/$(PRODUCT_NAME_APP)";
-				UNITY_CLOUD_PROJECT_ID = "086a727c-ff38-4790-9f6d-724ffd13b4ed";
+				UNITY_CLOUD_PROJECT_ID = "";
 				UNITY_RUNTIME_VERSION = 6000.3.15f1;
 				UNITY_SCRIPTING_BACKEND = il2cpp;
 				USYM_UPLOAD_AUTH_TOKEN = "";
@@ -2565,7 +2569,8 @@
 				PRODUCT_NAME_APP = YWONDERGREENFARM;
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = iphoneos;
-				UNITY_CLOUD_PROJECT_ID = "086a727c-ff38-4790-9f6d-724ffd13b4ed";
+				SYNCHRONOUS_SYMBOL_PROCESSING = TRUE;
+				UNITY_CLOUD_PROJECT_ID = "";
 				USYM_UPLOAD_AUTH_TOKEN = "";
 				USYM_UPLOAD_URL_SOURCE = "https://perf-events.cloud.unity3d.com/url";
 			};
@@ -2597,15 +2602,16 @@
 					"$(inherited)",
 					"$(OTHER_CFLAGS)",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.ywonder.greenfarm;
+				PRODUCT_BUNDLE_IDENTIFIER = net.ywonder.greenfarm;
 				PRODUCT_NAME = "$(PRODUCT_NAME_APP)";
 				PROVISIONING_PROFILE = "$(PROVISIONING_PROFILE_APP)";
 				PROVISIONING_PROFILE_APP = "";
 				PROVISIONING_PROFILE_SPECIFIER = "$(PROVISIONING_PROFILE_SPECIFIER_APP)";
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = iphoneos;
+				SYNCHRONOUS_SYMBOL_PROCESSING = TRUE;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				UNITY_CLOUD_PROJECT_ID = "086a727c-ff38-4790-9f6d-724ffd13b4ed";
+				UNITY_CLOUD_PROJECT_ID = "";
 				UNITY_RUNTIME_VERSION = 6000.3.15f1;
 				UNITY_SCRIPTING_BACKEND = il2cpp;
 				USYM_UPLOAD_AUTH_TOKEN = "";
@@ -2647,9 +2653,10 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = iphoneos;
+				SYNCHRONOUS_SYMBOL_PROCESSING = TRUE;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/$(PRODUCT_NAME_APP).app/$(PRODUCT_NAME_APP)";
-				UNITY_CLOUD_PROJECT_ID = "086a727c-ff38-4790-9f6d-724ffd13b4ed";
+				UNITY_CLOUD_PROJECT_ID = "";
 				UNITY_RUNTIME_VERSION = 6000.3.15f1;
 				UNITY_SCRIPTING_BACKEND = il2cpp;
 				USYM_UPLOAD_AUTH_TOKEN = "";
@@ -2697,7 +2704,8 @@
 				PRODUCT_NAME_APP = YWONDERGREENFARM;
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = iphoneos;
-				UNITY_CLOUD_PROJECT_ID = "086a727c-ff38-4790-9f6d-724ffd13b4ed";
+				SYNCHRONOUS_SYMBOL_PROCESSING = TRUE;
+				UNITY_CLOUD_PROJECT_ID = "";
 				USYM_UPLOAD_AUTH_TOKEN = "";
 				USYM_UPLOAD_URL_SOURCE = "https://perf-events.cloud.unity3d.com/url";
 			};
@@ -2729,15 +2737,16 @@
 					"$(inherited)",
 					"$(OTHER_CFLAGS)",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.ywonder.greenfarm;
+				PRODUCT_BUNDLE_IDENTIFIER = net.ywonder.greenfarm;
 				PRODUCT_NAME = "$(PRODUCT_NAME_APP)";
 				PROVISIONING_PROFILE = "$(PROVISIONING_PROFILE_APP)";
 				PROVISIONING_PROFILE_APP = "";
 				PROVISIONING_PROFILE_SPECIFIER = "$(PROVISIONING_PROFILE_SPECIFIER_APP)";
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = iphoneos;
+				SYNCHRONOUS_SYMBOL_PROCESSING = TRUE;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				UNITY_CLOUD_PROJECT_ID = "086a727c-ff38-4790-9f6d-724ffd13b4ed";
+				UNITY_CLOUD_PROJECT_ID = "";
 				UNITY_RUNTIME_VERSION = 6000.3.15f1;
 				UNITY_SCRIPTING_BACKEND = il2cpp;
 				USYM_UPLOAD_AUTH_TOKEN = "";
@@ -2779,9 +2788,10 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = iphoneos;
+				SYNCHRONOUS_SYMBOL_PROCESSING = TRUE;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/$(PRODUCT_NAME_APP).app/$(PRODUCT_NAME_APP)";
-				UNITY_CLOUD_PROJECT_ID = "086a727c-ff38-4790-9f6d-724ffd13b4ed";
+				UNITY_CLOUD_PROJECT_ID = "";
 				UNITY_RUNTIME_VERSION = 6000.3.15f1;
 				UNITY_SCRIPTING_BACKEND = il2cpp;
 				USYM_UPLOAD_AUTH_TOKEN = "";
@@ -3001,8 +3011,9 @@
 				SKIP_INSTALL = YES;
 				STRIP_STYLE = "non-global";
 				SUPPORTED_PLATFORMS = iphoneos;
+				SYNCHRONOUS_SYMBOL_PROCESSING = TRUE;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				UNITY_CLOUD_PROJECT_ID = "086a727c-ff38-4790-9f6d-724ffd13b4ed";
+				UNITY_CLOUD_PROJECT_ID = "";
 				UNITY_RUNTIME_VERSION = 6000.3.15f1;
 				UNITY_SCRIPTING_BACKEND = il2cpp;
 				USYM_UPLOAD_AUTH_TOKEN = "";
@@ -3078,8 +3089,9 @@
 				SKIP_INSTALL = YES;
 				STRIP_STYLE = "non-global";
 				SUPPORTED_PLATFORMS = iphoneos;
+				SYNCHRONOUS_SYMBOL_PROCESSING = TRUE;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				UNITY_CLOUD_PROJECT_ID = "086a727c-ff38-4790-9f6d-724ffd13b4ed";
+				UNITY_CLOUD_PROJECT_ID = "";
 				UNITY_RUNTIME_VERSION = 6000.3.15f1;
 				UNITY_SCRIPTING_BACKEND = il2cpp;
 				USYM_UPLOAD_AUTH_TOKEN = "";
@@ -3155,8 +3167,9 @@
 				SKIP_INSTALL = YES;
 				STRIP_STYLE = "non-global";
 				SUPPORTED_PLATFORMS = iphoneos;
+				SYNCHRONOUS_SYMBOL_PROCESSING = TRUE;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				UNITY_CLOUD_PROJECT_ID = "086a727c-ff38-4790-9f6d-724ffd13b4ed";
+				UNITY_CLOUD_PROJECT_ID = "";
 				UNITY_RUNTIME_VERSION = 6000.3.15f1;
 				UNITY_SCRIPTING_BACKEND = il2cpp;
 				USYM_UPLOAD_AUTH_TOKEN = "";
@@ -3234,8 +3247,9 @@
 				SKIP_INSTALL = YES;
 				STRIP_STYLE = "non-global";
 				SUPPORTED_PLATFORMS = iphoneos;
+				SYNCHRONOUS_SYMBOL_PROCESSING = TRUE;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				UNITY_CLOUD_PROJECT_ID = "086a727c-ff38-4790-9f6d-724ffd13b4ed";
+				UNITY_CLOUD_PROJECT_ID = "";
 				UNITY_RUNTIME_VERSION = 6000.3.15f1;
 				UNITY_SCRIPTING_BACKEND = il2cpp;
 				USYM_UPLOAD_AUTH_TOKEN = "";
@@ -3283,7 +3297,8 @@
 				PRODUCT_NAME_APP = YWONDERGREENFARM;
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = iphoneos;
-				UNITY_CLOUD_PROJECT_ID = "086a727c-ff38-4790-9f6d-724ffd13b4ed";
+				SYNCHRONOUS_SYMBOL_PROCESSING = TRUE;
+				UNITY_CLOUD_PROJECT_ID = "";
 				USYM_UPLOAD_AUTH_TOKEN = "";
 				USYM_UPLOAD_URL_SOURCE = "https://perf-events.cloud.unity3d.com/url";
 			};
@@ -3327,7 +3342,8 @@
 				PRODUCT_NAME_APP = YWONDERGREENFARM;
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = iphoneos;
-				UNITY_CLOUD_PROJECT_ID = "086a727c-ff38-4790-9f6d-724ffd13b4ed";
+				SYNCHRONOUS_SYMBOL_PROCESSING = TRUE;
+				UNITY_CLOUD_PROJECT_ID = "";
 				USYM_UPLOAD_AUTH_TOKEN = "";
 				USYM_UPLOAD_URL_SOURCE = "https://perf-events.cloud.unity3d.com/url";
 			};
