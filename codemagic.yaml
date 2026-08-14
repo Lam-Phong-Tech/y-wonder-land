@@ -117,7 +117,10 @@ workflows:
         XCODE_SCHEME: Unity-iPhone
         BUNDLE_ID: net.ywonder.greenfarm
         APP_VERSION: 0.1.1
-        BUILD_NUMBER: 5
+        # PHAI tang moi lan upload len TestFlight. Apple tu choi voi
+        # ENTITY_ERROR.ATTRIBUTE.INVALID.DUPLICATE neu so nay <= so da upload.
+        # Da dung: 5. Lan sau nho tang tiep thanh 7.
+        BUILD_NUMBER: 6
 
     scripts:
       - name: Fetch Git LFS assets
