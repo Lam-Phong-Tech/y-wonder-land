@@ -47894,6 +47894,7 @@ struct UISafeArea_t286D95242C1D3B2DB5A30E6DB94FCC2E933BDD1B  : public MonoBehavi
 	bool ___applyInEditor;
 	float ___minimumMobileInset;
 	bool ___previewMinimumInsetInEditor;
+	bool ___offsetAbsoluteRoot;
 	UIDocument_t4186BEBCC01278F63B895274AA08AD9ADFBF4C77* ___doc;
 	Rect_tA04E0F8A1830E767F40FB27ECD8D309303571F0D ___lastSafe;
 	Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7 ___lastScreen;

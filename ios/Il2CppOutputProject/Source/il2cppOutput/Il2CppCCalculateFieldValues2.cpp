@@ -21721,6 +21721,7 @@ struct UISafeArea_t286D95242C1D3B2DB5A30E6DB94FCC2E933BDD1B  : public MonoBehavi
 	bool ___applyInEditor;
 	float ___minimumMobileInset;
 	bool ___previewMinimumInsetInEditor;
+	bool ___offsetAbsoluteRoot;
 	UIDocument_t4186BEBCC01278F63B895274AA08AD9ADFBF4C77* ___doc;
 	Rect_tA04E0F8A1830E767F40FB27ECD8D309303571F0D ___lastSafe;
 	Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7 ___lastScreen;
@@ -27698,9 +27699,9 @@ IL2CPP_EXTERN_C const int32_t g_FieldOffsetTable7363[5] =
 IL2CPP_EXTERN_C const int32_t g_FieldOffsetTable7364[8] = 
 {
 	static_cast<int32_t>(offsetof(LoadingScreenController_tD6101D83AC967C546B25FB9A742B8AB655C4EFCC_StaticFields, ___U3CInstanceU3Ek__BackingField)),static_cast<int32_t>(offsetof(LoadingScreenController_tD6101D83AC967C546B25FB9A742B8AB655C4EFCC, ___loadingScreenAsset)),static_cast<int32_t>(offsetof(LoadingScreenController_tD6101D83AC967C546B25FB9A742B8AB655C4EFCC, ___uiDocument)),static_cast<int32_t>(offsetof(LoadingScreenController_tD6101D83AC967C546B25FB9A742B8AB655C4EFCC, ___rootContainer)),static_cast<int32_t>(offsetof(LoadingScreenController_tD6101D83AC967C546B25FB9A742B8AB655C4EFCC, ___progressBarFill)),static_cast<int32_t>(offsetof(LoadingScreenController_tD6101D83AC967C546B25FB9A742B8AB655C4EFCC, ___loadingText)),static_cast<int32_t>(offsetof(LoadingScreenController_tD6101D83AC967C546B25FB9A742B8AB655C4EFCC, ___loadingLogo)),static_cast<int32_t>(offsetof(LoadingScreenController_tD6101D83AC967C546B25FB9A742B8AB655C4EFCC, ___isVisible)),};
-IL2CPP_EXTERN_C const int32_t g_FieldOffsetTable7366[6] = 
+IL2CPP_EXTERN_C const int32_t g_FieldOffsetTable7366[7] = 
 {
-	static_cast<int32_t>(offsetof(UISafeArea_t286D95242C1D3B2DB5A30E6DB94FCC2E933BDD1B, ___applyInEditor)),static_cast<int32_t>(offsetof(UISafeArea_t286D95242C1D3B2DB5A30E6DB94FCC2E933BDD1B, ___minimumMobileInset)),static_cast<int32_t>(offsetof(UISafeArea_t286D95242C1D3B2DB5A30E6DB94FCC2E933BDD1B, ___previewMinimumInsetInEditor)),static_cast<int32_t>(offsetof(UISafeArea_t286D95242C1D3B2DB5A30E6DB94FCC2E933BDD1B, ___doc)),static_cast<int32_t>(offsetof(UISafeArea_t286D95242C1D3B2DB5A30E6DB94FCC2E933BDD1B, ___lastSafe)),static_cast<int32_t>(offsetof(UISafeArea_t286D95242C1D3B2DB5A30E6DB94FCC2E933BDD1B, ___lastScreen)),};
+	static_cast<int32_t>(offsetof(UISafeArea_t286D95242C1D3B2DB5A30E6DB94FCC2E933BDD1B, ___applyInEditor)),static_cast<int32_t>(offsetof(UISafeArea_t286D95242C1D3B2DB5A30E6DB94FCC2E933BDD1B, ___minimumMobileInset)),static_cast<int32_t>(offsetof(UISafeArea_t286D95242C1D3B2DB5A30E6DB94FCC2E933BDD1B, ___previewMinimumInsetInEditor)),static_cast<int32_t>(offsetof(UISafeArea_t286D95242C1D3B2DB5A30E6DB94FCC2E933BDD1B, ___offsetAbsoluteRoot)),static_cast<int32_t>(offsetof(UISafeArea_t286D95242C1D3B2DB5A30E6DB94FCC2E933BDD1B, ___doc)),static_cast<int32_t>(offsetof(UISafeArea_t286D95242C1D3B2DB5A30E6DB94FCC2E933BDD1B, ___lastSafe)),static_cast<int32_t>(offsetof(UISafeArea_t286D95242C1D3B2DB5A30E6DB94FCC2E933BDD1B, ___lastScreen)),};
 IL2CPP_EXTERN_C const int32_t g_FieldOffsetTable7367[3] = 
 {
 	static_cast<int32_t>(offsetof(LogRow_tBF47C8922D39BB4A3E81553B88587CA378E59087, ___title)) + static_cast<int32_t>(sizeof(RuntimeObject)),static_cast<int32_t>(offsetof(LogRow_tBF47C8922D39BB4A3E81553B88587CA378E59087, ___kind)) + static_cast<int32_t>(sizeof(RuntimeObject)),static_cast<int32_t>(offsetof(LogRow_tBF47C8922D39BB4A3E81553B88587CA378E59087, ___emptyText)) + static_cast<int32_t>(sizeof(RuntimeObject)),};

@@ -7157,7 +7157,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Array_Clear_m50BAA3751899858B097D3FF2ED3
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 54763
+// Method Definition Index: 54765
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass34_0__ctor_m5D5E13CFFC1D84038AB53469991A5DC4BFB68C6F (U3CU3Ec__DisplayClass34_0_t2F4BE426C1DDA73F02B38D4A593737322251532A* __this, const RuntimeMethod* method) 
 {
 	{
@@ -7165,7 +7165,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass34_0__ctor_m5D5E13C
 		return;
 	}
 }
-// Method Definition Index: 54764
+// Method Definition Index: 54766
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool U3CU3Ec__DisplayClass34_0_U3CSendMessageFromInputU3Eb__0_mFCCA6328F6CFA64C8BE2BDEFBD002DFF6C087D0F (U3CU3Ec__DisplayClass34_0_t2F4BE426C1DDA73F02B38D4A593737322251532A* __this, float ___0_t, const RuntimeMethod* method) 
 {
 	{
@@ -7183,7 +7183,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool U3CU3Ec__DisplayClass34_0_U3CSendMessage
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 54765
+// Method Definition Index: 54767
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CHandleAIResponseCheckU3Ed__41__ctor_mCAC86297696BD5E3931002538FFEF356116197FC (U3CHandleAIResponseCheckU3Ed__41_t48602BD315AB8D2A81D1BB7F1C802C1418DCA590* __this, int32_t ___0_U3CU3E1__state, const RuntimeMethod* method) 
 {
 	{
@@ -7193,14 +7193,14 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CHandleAIResponseCheckU3Ed__41__ctor_m
 		return;
 	}
 }
-// Method Definition Index: 54766
+// Method Definition Index: 54768
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CHandleAIResponseCheckU3Ed__41_System_IDisposable_Dispose_m8CCE4589E7C2F7645F2C82AC9968CB758EE984CA (U3CHandleAIResponseCheckU3Ed__41_t48602BD315AB8D2A81D1BB7F1C802C1418DCA590* __this, const RuntimeMethod* method) 
 {
 	{
 		return;
 	}
 }
-// Method Definition Index: 54767
+// Method Definition Index: 54769
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool U3CHandleAIResponseCheckU3Ed__41_MoveNext_m7473DA7848F015B2FE3903D2D35D0B53A2FA3AE4 (U3CHandleAIResponseCheckU3Ed__41_t48602BD315AB8D2A81D1BB7F1C802C1418DCA590* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -7543,7 +7543,7 @@ IL_01cc:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 54768
+// Method Definition Index: 54770
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* U3CHandleAIResponseCheckU3Ed__41_System_Collections_Generic_IEnumeratorU3CSystem_ObjectU3E_get_Current_m96BAAD02219CA142EF1AD20F8DC76EA7A9293798 (U3CHandleAIResponseCheckU3Ed__41_t48602BD315AB8D2A81D1BB7F1C802C1418DCA590* __this, const RuntimeMethod* method) 
 {
 	{
@@ -7551,7 +7551,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* U3CHandleAIResponseCheckU3Ed__
 		return L_0;
 	}
 }
-// Method Definition Index: 54769
+// Method Definition Index: 54771
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CHandleAIResponseCheckU3Ed__41_System_Collections_IEnumerator_Reset_m9463AE51111B4CF9A1D285D2F7760FE26B52AE98 (U3CHandleAIResponseCheckU3Ed__41_t48602BD315AB8D2A81D1BB7F1C802C1418DCA590* __this, const RuntimeMethod* method) 
 {
 	{
@@ -7560,7 +7560,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CHandleAIResponseCheckU3Ed__41_System_
 		IL2CPP_RAISE_MANAGED_EXCEPTION(L_0, ((RuntimeMethod*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&U3CHandleAIResponseCheckU3Ed__41_System_Collections_IEnumerator_Reset_m9463AE51111B4CF9A1D285D2F7760FE26B52AE98_RuntimeMethod_var)));
 	}
 }
-// Method Definition Index: 54770
+// Method Definition Index: 54772
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* U3CHandleAIResponseCheckU3Ed__41_System_Collections_IEnumerator_get_Current_m858E3AF322764F70D386B9E2BB4B56C5D65F92F7 (U3CHandleAIResponseCheckU3Ed__41_t48602BD315AB8D2A81D1BB7F1C802C1418DCA590* __this, const RuntimeMethod* method) 
 {
 	{
@@ -7576,7 +7576,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* U3CHandleAIResponseCheckU3Ed__
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 54771
+// Method Definition Index: 54773
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ConfirmDialogController_Awake_m01312E5790A42A22A7EA1E5ECD2A09097114B3E5 (ConfirmDialogController_t8A28C66AF0E7259F728145889F60603C03DCE3B8* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -7629,7 +7629,7 @@ IL_0027:
 		return;
 	}
 }
-// Method Definition Index: 54772
+// Method Definition Index: 54774
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ConfirmDialogController_OnEnable_m10E4C2B6A7EF39651DA22BB050B1C25567D32CDB (ConfirmDialogController_t8A28C66AF0E7259F728145889F60603C03DCE3B8* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -7732,7 +7732,7 @@ IL_000f:
 		return;
 	}
 }
-// Method Definition Index: 54773
+// Method Definition Index: 54775
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ConfirmDialogController_OnDisable_mFD89A40697D9D1F31BD24429D1681221FDF45D19 (ConfirmDialogController_t8A28C66AF0E7259F728145889F60603C03DCE3B8* __this, const RuntimeMethod* method) 
 {
 	{
@@ -7742,7 +7742,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ConfirmDialogController_OnDisable_mFD89A
 		return;
 	}
 }
-// Method Definition Index: 54774
+// Method Definition Index: 54776
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ConfirmDialogController_RegisterCallbacks_m8D2BC337C5AC3F8A060EB0DCE1F843B689D6114D (ConfirmDialogController_t8A28C66AF0E7259F728145889F60603C03DCE3B8* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -7832,7 +7832,7 @@ IL_0080:
 		return;
 	}
 }
-// Method Definition Index: 54775
+// Method Definition Index: 54777
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ConfirmDialogController_UnregisterCallbacks_m0E9B8D8A59C6C0F81CC717C3739F5C58767DB566 (ConfirmDialogController_t8A28C66AF0E7259F728145889F60603C03DCE3B8* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -7922,7 +7922,7 @@ IL_0080:
 		return;
 	}
 }
-// Method Definition Index: 54776
+// Method Definition Index: 54778
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ConfirmDialogController_Show_m0ACD65AABA1EE7155B31E20077057B0B893138BF (ConfirmDialogController_t8A28C66AF0E7259F728145889F60603C03DCE3B8* __this, String_t* ___0_title, String_t* ___1_message, String_t* ___2_confirmText, String_t* ___3_cancelText, Action_tD00B0A84D7945E50C2DFFC28EFEE6ED44ED2AD07* ___4_onConfirm, int32_t ___5_dialogType, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8113,7 +8113,7 @@ IL_00f2:
 		return;
 	}
 }
-// Method Definition Index: 54777
+// Method Definition Index: 54779
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ConfirmDialogController_Hide_mF53CE7E8E0CEB23997F0F6A0D6263BA1AEFF991E (ConfirmDialogController_t8A28C66AF0E7259F728145889F60603C03DCE3B8* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8173,7 +8173,7 @@ IL_003d:
 		return;
 	}
 }
-// Method Definition Index: 54778
+// Method Definition Index: 54780
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ConfirmDialogController_BringDialogToFront_m35104A671BCA616E24780F950C55755C8DDE6596 (ConfirmDialogController_t8A28C66AF0E7259F728145889F60603C03DCE3B8* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8261,7 +8261,7 @@ IL_005b:
 		return;
 	}
 }
-// Method Definition Index: 54779
+// Method Definition Index: 54781
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ConfirmDialogController_ApplyDialogType_mFA7AE29A25689604A57A8D2BDCCFB2192334657D (ConfirmDialogController_t8A28C66AF0E7259F728145889F60603C03DCE3B8* __this, int32_t ___0_dialogType, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8541,7 +8541,7 @@ IL_01c8:
 		return;
 	}
 }
-// Method Definition Index: 54780
+// Method Definition Index: 54782
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ConfirmDialogController_OnConfirmClicked_mC8EB97A4DC934CB685D92BFCD82341BBD46221FD (ConfirmDialogController_t8A28C66AF0E7259F728145889F60603C03DCE3B8* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	Action_tD00B0A84D7945E50C2DFFC28EFEE6ED44ED2AD07* G_B2_0 = NULL;
@@ -8576,7 +8576,7 @@ IL_0017:
 		return;
 	}
 }
-// Method Definition Index: 54781
+// Method Definition Index: 54783
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ConfirmDialogController_OnCancelClicked_m2A08FCD387EA5D5C1301B2FB8987BD608390D7B3 (ConfirmDialogController_t8A28C66AF0E7259F728145889F60603C03DCE3B8* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -8590,7 +8590,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ConfirmDialogController_OnCancelClicked_
 		return;
 	}
 }
-// Method Definition Index: 54782
+// Method Definition Index: 54784
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ConfirmDialogController_OnOverlayClicked_mE630B0D78653AF6B3F26FC91782EED7E0347617F (ConfirmDialogController_t8A28C66AF0E7259F728145889F60603C03DCE3B8* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -8616,7 +8616,7 @@ IL_0014:
 		return;
 	}
 }
-// Method Definition Index: 54783
+// Method Definition Index: 54785
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ConfirmDialogController__ctor_m9A0783F60CEA21F0307AAABA0001B14DB2309E2E (ConfirmDialogController_t8A28C66AF0E7259F728145889F60603C03DCE3B8* __this, const RuntimeMethod* method) 
 {
 	{
@@ -8642,7 +8642,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ConfirmDialogController__ctor_m9A0783F60
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 54784
+// Method Definition Index: 54786
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR DayReward_t3432703194CABB9272AEEAE9391771E61F8C535C EventPopupController_GetDayReward_m0B7215D15B7D1AFD22AB676BA1790B9EF4230A71 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, int32_t ___0_day, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8862,7 +8862,7 @@ IL_01f3:
 		return L_9;
 	}
 }
-// Method Definition Index: 54785
+// Method Definition Index: 54787
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool EventPopupController_IsAttendanceReadyToClaim_mF48097FAB50AC72AE70E41B3FCD9AE52A0312314 (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8974,7 +8974,7 @@ IL_0056:
 		return (bool)((((int32_t)L_11) == ((int32_t)0))? 1 : 0);
 	}
 }
-// Method Definition Index: 54786
+// Method Definition Index: 54788
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool EventPopupController_IsAttendanceLockedByTutorial_mCD49765183C54E2FC17B8995E6B193A514C9FC14 (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -9019,7 +9019,7 @@ IL_0018:
 		return L_4;
 	}
 }
-// Method Definition Index: 54787
+// Method Definition Index: 54789
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_PrimeServerAttendance_mCA3F5EEB8CFB3C19E333FBCED8FF43EF5824704D (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -9050,7 +9050,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_PrimeServerAttendan
 		return;
 	}
 }
-// Method Definition Index: 54788
+// Method Definition Index: 54790
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool EventPopupController_IsAttendanceClaimedToday_m3AC38C60F52890E2223894D98E522A51A38B8C0C (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -9073,7 +9073,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool EventPopupController_IsAttendanceClaimed
 		return L_2;
 	}
 }
-// Method Definition Index: 54789
+// Method Definition Index: 54791
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* EventPopupController_TodayKey_mAA946CE26F9BEF0BB95414D716FEC71B2871F572 (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -9096,7 +9096,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* EventPopupController_TodayKey_mAA94
 		return L_1;
 	}
 }
-// Method Definition Index: 54790
+// Method Definition Index: 54792
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* EventPopupController_YesterdayKey_m39D113BFA526DB8FC7F6926F50F9A19FBFD183B7 (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -9122,7 +9122,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* EventPopupController_YesterdayKey_m
 		return L_2;
 	}
 }
-// Method Definition Index: 54791
+// Method Definition Index: 54793
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t EventPopupController_LocalVisibleDays_m00CD04A9FABF480FDE4D59458BB5B55DFFE5F3A5 (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -9193,7 +9193,7 @@ IL_0036:
 		return L_9;
 	}
 }
-// Method Definition Index: 54792
+// Method Definition Index: 54794
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool EventPopupController_IsAttendanceTutorialLocked_m4991F8B3C8DE606E3025DD99A0E100787ACBC7A3 (int32_t ___0_currentClaimedDays, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -9222,7 +9222,7 @@ IL_000d:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 54793
+// Method Definition Index: 54795
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool EventPopupController_IsTutorialCompleteForAttendance_mD669180004951753E6E9DC4221E1E356440A816A (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -9303,7 +9303,7 @@ IL_0040:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 54794
+// Method Definition Index: 54796
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t EventPopupController_SpinTicketCount_mE5774A7D43AAFB07760F5ACA3399CFA3EE89D5C2 (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -9342,7 +9342,7 @@ IL_0011:
 		return L_4;
 	}
 }
-// Method Definition Index: 54795
+// Method Definition Index: 54797
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_Awake_mB95A9BAD7CA09A9BD9CEA610416C2198B6CFF380 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -9384,7 +9384,7 @@ IL_001a:
 		return;
 	}
 }
-// Method Definition Index: 54796
+// Method Definition Index: 54798
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_OnEnable_mCFE3631AD60E340FF9AC8768DC61D8BAD0C7F57A (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, const RuntimeMethod* method) 
 {
 	VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* V_0 = NULL;
@@ -9408,7 +9408,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_OnEnable_mCFE3631AD
 		return;
 	}
 }
-// Method Definition Index: 54797
+// Method Definition Index: 54799
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_OnDestroy_m9D2F236F8860E1C6AD6554EC3002CBBD16902C37 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -9441,7 +9441,7 @@ IL_0019:
 		return;
 	}
 }
-// Method Definition Index: 54798
+// Method Definition Index: 54800
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_QueryElements_m44C9FD21F1914A47B2E8E16A418089FF473B33A5 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* ___0_root, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -9620,7 +9620,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_QueryElements_m44C9
 		return;
 	}
 }
-// Method Definition Index: 54799
+// Method Definition Index: 54801
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_RegisterCallbacks_mA7B5B672E8EA98977BA0A5ECA30EA829E4C3B951 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -9880,7 +9880,7 @@ IL_00fb:
 		return;
 	}
 }
-// Method Definition Index: 54800
+// Method Definition Index: 54802
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_Show_m724F42FFFC3AB6EE2E2CADBCD595CED34933A765 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, const RuntimeMethod* method) 
 {
 	{
@@ -9890,7 +9890,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_Show_m724F42FFFC3AB
 		return;
 	}
 }
-// Method Definition Index: 54801
+// Method Definition Index: 54803
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_ShowTab_m4B918A210926E5EC6367794FAE58375C76934AD0 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, int32_t ___0_tabIndex, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -9965,7 +9965,7 @@ IL_0067:
 		return;
 	}
 }
-// Method Definition Index: 54802
+// Method Definition Index: 54804
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_ShowLuckyWheel_m633A76F1AF213FC8FB98A40B9A3AA0D7EE13E800 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -10031,7 +10031,7 @@ IL_0048:
 		return;
 	}
 }
-// Method Definition Index: 54803
+// Method Definition Index: 54805
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_SyncSpinsFromServerAsync_mF46B2C7A014D03F052559A57A3933E85542D09AD (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -10064,7 +10064,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_SyncSpinsFromServer
 		return;
 	}
 }
-// Method Definition Index: 54804
+// Method Definition Index: 54806
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_Hide_mB20FBA6F83869841E44C16DFC1C84C8FA1B8F7D9 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -10105,7 +10105,7 @@ IL_0028:
 		return;
 	}
 }
-// Method Definition Index: 54805
+// Method Definition Index: 54807
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool EventPopupController_IsVisible_m4E377BA3E4016C2C849BBF2078DB0FAE030922B6 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -10144,7 +10144,7 @@ IL_0024:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 54806
+// Method Definition Index: 54808
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_HideLuckyWheel_mABA5863D8A964B1EB11E1BBF574FC3056C2F53A4 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -10185,7 +10185,7 @@ IL_0028:
 		return;
 	}
 }
-// Method Definition Index: 54807
+// Method Definition Index: 54809
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_SwitchTab_m1C3B787F78DF4B63D0EAA95451602CF403E3BE32 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, int32_t ___0_tabIndex, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -10512,7 +10512,7 @@ IL_0101:
 		return;
 	}
 }
-// Method Definition Index: 54808
+// Method Definition Index: 54810
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_PopulateExchangeGrid_m4BE9133BB63E3DDE773C5447099F028A6C1C8673 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -10800,7 +10800,7 @@ IL_0154:
 		return;
 	}
 }
-// Method Definition Index: 54809
+// Method Definition Index: 54811
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool EventPopupController_CanAfford_m94A21CD137CACA1EFC0D29858417A772A90A9EDA (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, ExchangeItem_t9194F3F78E0EB6EA9D05C13CA0539699DFB463C8 ___0_item, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -10880,7 +10880,7 @@ IL_0066:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 54810
+// Method Definition Index: 54812
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_OnExchange_mBCE17B8B8E2FE1E11D1EC22889987F33384340E7 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, ExchangeItem_t9194F3F78E0EB6EA9D05C13CA0539699DFB463C8 ___0_item, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -10998,7 +10998,7 @@ IL_006d:
 		return;
 	}
 }
-// Method Definition Index: 54811
+// Method Definition Index: 54813
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_PopulateBundleGrid_m8F2CD18C2B46940FA5518B06C91942A6976D7B81 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -11362,7 +11362,7 @@ IL_0223:
 		return;
 	}
 }
-// Method Definition Index: 54812
+// Method Definition Index: 54814
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_LoadAttendance_mD5228CEE30A845C08DF75512BF8DFAD6CCF984C6 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -11429,7 +11429,7 @@ IL_003f:
 		return;
 	}
 }
-// Method Definition Index: 54813
+// Method Definition Index: 54815
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_SyncAttendanceFromServerAsync_m673878B39A3226CB66F977F552F2702F5343F8AE (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -11462,7 +11462,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_SyncAttendanceFromS
 		return;
 	}
 }
-// Method Definition Index: 54814
+// Method Definition Index: 54816
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_UpdateAttendanceGridUI_m7A173A5ED1060199DC516DAC1C0509B2AE34CA36 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -11914,7 +11914,7 @@ IL_0281:
 		return;
 	}
 }
-// Method Definition Index: 54815
+// Method Definition Index: 54817
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* EventPopupController_CreateAttendanceRewardIcon_m53AD01629CD7AACE500DD629976C6E23D5405842 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, DayReward_t3432703194CABB9272AEEAE9391771E61F8C535C ___0_reward, bool ___1_special, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -12165,7 +12165,7 @@ IL_0104:
 		return L_49;
 	}
 }
-// Method Definition Index: 54816
+// Method Definition Index: 54818
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_ClaimDailyReward_m59B976BABF4D66C6474BEC568F7476731C93BC78 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -12258,7 +12258,7 @@ IL_0051:
 		return;
 	}
 }
-// Method Definition Index: 54817
+// Method Definition Index: 54819
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_ClaimFromServerAsync_m975C9F97CD5AAC8F6F0745A31E60F88ABC9D70F1 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -12291,7 +12291,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_ClaimFromServerAsyn
 		return;
 	}
 }
-// Method Definition Index: 54818
+// Method Definition Index: 54820
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_ClaimLocal_m7B7AAD5242EC173356371F9ED78D57082A106938 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -12554,7 +12554,7 @@ IL_00e6:
 		return;
 	}
 }
-// Method Definition Index: 54819
+// Method Definition Index: 54821
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RewardPayload_t74D3FF6F436809FCAEDE32733CA2C16880A171C6* EventPopupController_ToRewardPayload_mAD5AC7F1773535795D1E7D3D59D607C5C41F342F (int32_t ___0_day, DayReward_t3432703194CABB9272AEEAE9391771E61F8C535C ___1_r, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -12755,7 +12755,7 @@ IL_0076:
 		return G_B13_2;
 	}
 }
-// Method Definition Index: 54820
+// Method Definition Index: 54822
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_AnnounceClaim_m37F72C0C99707968265069371F893A18BAB01FFD (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, int32_t ___0_day, RewardPayload_t74D3FF6F436809FCAEDE32733CA2C16880A171C6* ___1_reward, bool ___2_rewardPaid, bool ___3_streakReset, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -12904,7 +12904,7 @@ IL_00a9:
 		return;
 	}
 }
-// Method Definition Index: 54821
+// Method Definition Index: 54823
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* EventPopupController_AttendanceErrorText_mDB5DFCBE58A599EE5A0994E279937D81EC794420 (String_t* ___0_errorCode, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -12957,7 +12957,7 @@ IL_0028:
 		return _stringLiteralB0E9E090DABDE7F6711D5D9D5AB3EB56C89A5D89;
 	}
 }
-// Method Definition Index: 54822
+// Method Definition Index: 54824
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_BuildWheelSegmented_m82616DAEF5EAFA3EA18324F330DE080988D208C0 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -13057,7 +13057,7 @@ IL_0062:
 		return;
 	}
 }
-// Method Definition Index: 54823
+// Method Definition Index: 54825
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_LockWheelCircleLayout_m93DDD8878B641415358406F10A352A1304EDD849 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -13143,7 +13143,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_LockWheelCircleLayo
 		return;
 	}
 }
-// Method Definition Index: 54824
+// Method Definition Index: 54826
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_ApplyWheelSliceBackground_mE0FA099B22AFAE1CC3DC6498D1C178C6D9D2D8BB (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, int32_t ___0_segmentCount, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -13194,7 +13194,7 @@ IL_0019:
 		return;
 	}
 }
-// Method Definition Index: 54825
+// Method Definition Index: 54827
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Texture2D_tE6505BC111DD8A424A9DBE8E05D7D09E11FFFCF4* EventPopupController_CreateWheelSliceTexture_mF782B830E2DA82DFFB2E576D926F2E54750E7D6B (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, int32_t ___0_segmentCount, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -13419,7 +13419,7 @@ IL_012a:
 		return L_54;
 	}
 }
-// Method Definition Index: 54826
+// Method Definition Index: 54828
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* EventPopupController_CreateWheelPrizeSlot_mDABE3F050FB2804B598014EB63318600E1C988EE (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, WheelPrize_t92FC80230EBC5213FD492F7FB30A2952DD305A73 ___0_prize, int32_t ___1_index, float ___2_segmentDegrees, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -13544,7 +13544,7 @@ IL_00b0:
 		return L_34;
 	}
 }
-// Method Definition Index: 54827
+// Method Definition Index: 54829
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* EventPopupController_CreateWheelPrizeWheelIcon_m9FCF8B815CB75ED04CEDE46BF49094F20D4ACBFA (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, WheelPrize_t92FC80230EBC5213FD492F7FB30A2952DD305A73 ___0_prize, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -13739,7 +13739,7 @@ IL_00c1:
 		return L_41;
 	}
 }
-// Method Definition Index: 54828
+// Method Definition Index: 54830
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_BuildWheel_m00DC8F01E5C30FD5F3E278D0E3BC6320D42F7D3B (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -13870,7 +13870,7 @@ IL_00cc:
 		return;
 	}
 }
-// Method Definition Index: 54829
+// Method Definition Index: 54831
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* EventPopupController_CreateWheelPrizeIcon_m3EAD2DFF35F92467574A8B9D5C618A8F04362FB4 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, WheelPrize_t92FC80230EBC5213FD492F7FB30A2952DD305A73 ___0_prize, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -14065,7 +14065,7 @@ IL_00c1:
 		return L_41;
 	}
 }
-// Method Definition Index: 54830
+// Method Definition Index: 54832
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_LoadSpins_m3455068B7643877D4611267812578B7CF2921F42 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -14122,7 +14122,7 @@ IL_0048:
 		return;
 	}
 }
-// Method Definition Index: 54831
+// Method Definition Index: 54833
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_RefreshWheel_mCFD0CE50C4784EB1020CD9C7F950D14D11E821D5 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -14289,7 +14289,7 @@ IL_009a:
 		return;
 	}
 }
-// Method Definition Index: 54832
+// Method Definition Index: 54834
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool EventPopupController_IsSpinServerAuthoritative_mE1B5041140D68E3D9A452BB624021F38AA72665E (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -14339,7 +14339,7 @@ IL_0026:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 54833
+// Method Definition Index: 54835
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_OnSpin_m79E43D56BA38E2A0D3DDDA6D607CFEF0B6570340 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -14500,7 +14500,7 @@ IL_00c8:
 		return;
 	}
 }
-// Method Definition Index: 54834
+// Method Definition Index: 54836
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_OnSpinServerAsync_m87F8EDFD949DC3B48FFEF259CC818D245AAEDDA9 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -14533,7 +14533,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_OnSpinServerAsync_m
 		return;
 	}
 }
-// Method Definition Index: 54835
+// Method Definition Index: 54837
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_StartSpinVisual_m0551FDFE964BB26DA25A17610E2D53408FBAE3E2 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -14864,7 +14864,7 @@ IL_01b9:
 		return;
 	}
 }
-// Method Definition Index: 54836
+// Method Definition Index: 54838
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_RevealWheelResult_mA7CFFF9C714E3AC7DF883410FD56CC7A41FE0594 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, WheelPrize_t92FC80230EBC5213FD492F7FB30A2952DD305A73 ___0_won, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -15041,7 +15041,7 @@ IL_00d8:
 		return;
 	}
 }
-// Method Definition Index: 54837
+// Method Definition Index: 54839
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_SetWheelHubIcon_m6F89A91730C8C607DF61647E79A72C9C3234D718 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, Nullable_1_t75A59C0866599020F8259D2587BB42746D7E7A73 ___0_prize, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -15107,7 +15107,7 @@ IL_0009:
 		return;
 	}
 }
-// Method Definition Index: 54838
+// Method Definition Index: 54840
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_UpdateMaterials_mB73FCE56955409442230E150796614C261D6438C (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -15184,7 +15184,7 @@ IL_0078:
 		return;
 	}
 }
-// Method Definition Index: 54839
+// Method Definition Index: 54841
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController__ctor_m32817EC3E3DB4BB7F524F8B3D55998095D83F745 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -15634,7 +15634,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController__ctor_m32817EC3E3DB
 		return;
 	}
 }
-// Method Definition Index: 54840
+// Method Definition Index: 54842
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController__cctor_m786EB46F8AB9A93A15331481C6F9B8D51C56AD36 (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -15740,7 +15740,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController__cctor_m786EB46F8AB
 		return;
 	}
 }
-// Method Definition Index: 54841
+// Method Definition Index: 54843
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_U3CRegisterCallbacksU3Eb__78_0_m39BA5AF542D638639FF278BCC6EC313ED932F209 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -15749,7 +15749,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_U3CRegisterCallback
 		return;
 	}
 }
-// Method Definition Index: 54842
+// Method Definition Index: 54844
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_U3CRegisterCallbacksU3Eb__78_1_mA71FEDA2C719E66B32E6AB473F2D158EE70E5E45 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -15775,7 +15775,7 @@ IL_0014:
 		return;
 	}
 }
-// Method Definition Index: 54843
+// Method Definition Index: 54845
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_U3CRegisterCallbacksU3Eb__78_2_m1302DF79D1FEF3EFF5FCDE2B6739B1BFCCF5D3A1 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -15784,7 +15784,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_U3CRegisterCallback
 		return;
 	}
 }
-// Method Definition Index: 54844
+// Method Definition Index: 54846
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_U3CRegisterCallbacksU3Eb__78_3_mBD3CD0C8D63A8EFC1E177CE063B687A58BB8FC95 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -15793,7 +15793,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_U3CRegisterCallback
 		return;
 	}
 }
-// Method Definition Index: 54845
+// Method Definition Index: 54847
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_U3CRegisterCallbacksU3Eb__78_4_m0F76010C89B1BF03828ED67F215AFC1488050528 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -15802,7 +15802,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_U3CRegisterCallback
 		return;
 	}
 }
-// Method Definition Index: 54846
+// Method Definition Index: 54848
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_U3CRegisterCallbacksU3Eb__78_5_m2618A2886BE13214F159F3DEEC444082B4F5AE43 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -15811,7 +15811,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_U3CRegisterCallback
 		return;
 	}
 }
-// Method Definition Index: 54847
+// Method Definition Index: 54849
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_U3CRegisterCallbacksU3Eb__78_6_mDED0362553F768AC4DF7988D7AA87330161ADC54 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -15820,7 +15820,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_U3CRegisterCallback
 		return;
 	}
 }
-// Method Definition Index: 54848
+// Method Definition Index: 54850
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_U3CRegisterCallbacksU3Eb__78_7_mDB1946A57EA4B46C0C87A854D6E5325416AA96CF (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -15846,7 +15846,7 @@ IL_0014:
 		return;
 	}
 }
-// Method Definition Index: 54849
+// Method Definition Index: 54851
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EventPopupController_U3CRegisterCallbacksU3Eb__78_8_m18BB938C3A21D7DF4CC0F763DA4A6D35102A5879 (EventPopupController_tDF8B2477C28B6E53374A3F52F8208D1B570ABEE0* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -16207,7 +16207,7 @@ IL2CPP_EXTERN_C void WheelPrize_t92FC80230EBC5213FD492F7FB30A2952DD305A73_marsha
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 54850
+// Method Definition Index: 54852
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass114_0__ctor_mC8C4772F61460B89000D7AD5DD5D7CD455D02C7B (U3CU3Ec__DisplayClass114_0_t17912BDD3FD4CBAE438D10A4178CFC9F835B6665* __this, const RuntimeMethod* method) 
 {
 	{
@@ -16215,7 +16215,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass114_0__ctor_mC8C477
 		return;
 	}
 }
-// Method Definition Index: 54851
+// Method Definition Index: 54853
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass114_0_U3CStartSpinVisualU3Eb__0_m3A431F206987FD345AFEFE05C83B93890E90F998 (U3CU3Ec__DisplayClass114_0_t17912BDD3FD4CBAE438D10A4178CFC9F835B6665* __this, const RuntimeMethod* method) 
 {
 	{
@@ -16235,7 +16235,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass114_0_U3CStartSpinV
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 54852
+// Method Definition Index: 54854
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass87_0__ctor_m03495B68B7BA7727B58823B2A4CBC83449F134B3 (U3CU3Ec__DisplayClass87_0_t5C994764AE7F04918D356539E75C575C7EF73183* __this, const RuntimeMethod* method) 
 {
 	{
@@ -16243,7 +16243,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass87_0__ctor_m03495B6
 		return;
 	}
 }
-// Method Definition Index: 54853
+// Method Definition Index: 54855
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass87_0_U3CPopulateExchangeGridU3Eb__0_mBA1857027C1E04C96799E59B250542F5C025514E (U3CU3Ec__DisplayClass87_0_t5C994764AE7F04918D356539E75C575C7EF73183* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -16264,7 +16264,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass87_0_U3CPopulateExc
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 54854
+// Method Definition Index: 54856
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass90_0__ctor_m3BFB572C56545AB5CBC2C531CF401782C43B836E (U3CU3Ec__DisplayClass90_0_t4BA4F57B69868E2AAB7D4F7D9531156B096E392B* __this, const RuntimeMethod* method) 
 {
 	{
@@ -16272,7 +16272,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass90_0__ctor_m3BFB572
 		return;
 	}
 }
-// Method Definition Index: 54855
+// Method Definition Index: 54857
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass90_0_U3CPopulateBundleGridU3Eb__0_m45C1D1FA1FFB09C6695E5C9995232B43DC27BCD0 (U3CU3Ec__DisplayClass90_0_t4BA4F57B69868E2AAB7D4F7D9531156B096E392B* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -16306,7 +16306,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass90_0_U3CPopulateBun
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 54856
+// Method Definition Index: 54858
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CClaimFromServerAsyncU3Ed__96_MoveNext_m054455D10ADE088F44F9806A06EB03708D8408AA (U3CClaimFromServerAsyncU3Ed__96_t53D19C88C78D34B9A45BC2884D5386BF20DF89E7* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -16505,7 +16505,7 @@ IL2CPP_EXTERN_C  void U3CClaimFromServerAsyncU3Ed__96_MoveNext_m054455D10ADE088F
 	_thisAdjusted = reinterpret_cast<U3CClaimFromServerAsyncU3Ed__96_t53D19C88C78D34B9A45BC2884D5386BF20DF89E7*>(__this + _offset);
 	U3CClaimFromServerAsyncU3Ed__96_MoveNext_m054455D10ADE088F44F9806A06EB03708D8408AA(_thisAdjusted, method);
 }
-// Method Definition Index: 54857
+// Method Definition Index: 54859
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CClaimFromServerAsyncU3Ed__96_SetStateMachine_mE9F3251B1E20C84F6D30B741952F5B7849540BC3 (U3CClaimFromServerAsyncU3Ed__96_t53D19C88C78D34B9A45BC2884D5386BF20DF89E7* __this, RuntimeObject* ___0_stateMachine, const RuntimeMethod* method) 
 {
 	{
@@ -16530,7 +16530,7 @@ IL2CPP_EXTERN_C  void U3CClaimFromServerAsyncU3Ed__96_SetStateMachine_mE9F3251B1
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 54858
+// Method Definition Index: 54860
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3COnSpinServerAsyncU3Ed__113_MoveNext_mE55965C280D551004A06A9BFD48E9DBF3DC47729 (U3COnSpinServerAsyncU3Ed__113_tA566CC62055A61E5B89CC96B74909934AEFF6B11* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -16783,7 +16783,7 @@ IL2CPP_EXTERN_C  void U3COnSpinServerAsyncU3Ed__113_MoveNext_mE55965C280D551004A
 	_thisAdjusted = reinterpret_cast<U3COnSpinServerAsyncU3Ed__113_tA566CC62055A61E5B89CC96B74909934AEFF6B11*>(__this + _offset);
 	U3COnSpinServerAsyncU3Ed__113_MoveNext_mE55965C280D551004A06A9BFD48E9DBF3DC47729(_thisAdjusted, method);
 }
-// Method Definition Index: 54859
+// Method Definition Index: 54861
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3COnSpinServerAsyncU3Ed__113_SetStateMachine_mDB0598C96B32DB9B49C7CED279F84D4A168545B8 (U3COnSpinServerAsyncU3Ed__113_tA566CC62055A61E5B89CC96B74909934AEFF6B11* __this, RuntimeObject* ___0_stateMachine, const RuntimeMethod* method) 
 {
 	{
@@ -16808,7 +16808,7 @@ IL2CPP_EXTERN_C  void U3COnSpinServerAsyncU3Ed__113_SetStateMachine_mDB0598C96B3
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 54860
+// Method Definition Index: 54862
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CPrimeServerAttendanceU3Ed__58_MoveNext_mF7CACCC8E2B2A7CBF16442A9C1B3DB2137D85C60 (U3CPrimeServerAttendanceU3Ed__58_t17127BC9152D6172AD4CE57FAB45E3CE30EB2B19* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -17036,7 +17036,7 @@ IL2CPP_EXTERN_C  void U3CPrimeServerAttendanceU3Ed__58_MoveNext_mF7CACCC8E2B2A7C
 	_thisAdjusted = reinterpret_cast<U3CPrimeServerAttendanceU3Ed__58_t17127BC9152D6172AD4CE57FAB45E3CE30EB2B19*>(__this + _offset);
 	U3CPrimeServerAttendanceU3Ed__58_MoveNext_mF7CACCC8E2B2A7CBF16442A9C1B3DB2137D85C60(_thisAdjusted, method);
 }
-// Method Definition Index: 54861
+// Method Definition Index: 54863
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CPrimeServerAttendanceU3Ed__58_SetStateMachine_m7AAA85F4365AEE95D67166536B403FC361E1530C (U3CPrimeServerAttendanceU3Ed__58_t17127BC9152D6172AD4CE57FAB45E3CE30EB2B19* __this, RuntimeObject* ___0_stateMachine, const RuntimeMethod* method) 
 {
 	{
@@ -17061,7 +17061,7 @@ IL2CPP_EXTERN_C  void U3CPrimeServerAttendanceU3Ed__58_SetStateMachine_m7AAA85F4
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 54862
+// Method Definition Index: 54864
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CSyncAttendanceFromServerAsyncU3Ed__92_MoveNext_m30240BD3E78522CB385E2DE2514BCA41A2932864 (U3CSyncAttendanceFromServerAsyncU3Ed__92_t7D104DE002775BB2ABF01674E4BE7BA55B753AD3* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -17212,7 +17212,7 @@ IL2CPP_EXTERN_C  void U3CSyncAttendanceFromServerAsyncU3Ed__92_MoveNext_m30240BD
 	_thisAdjusted = reinterpret_cast<U3CSyncAttendanceFromServerAsyncU3Ed__92_t7D104DE002775BB2ABF01674E4BE7BA55B753AD3*>(__this + _offset);
 	U3CSyncAttendanceFromServerAsyncU3Ed__92_MoveNext_m30240BD3E78522CB385E2DE2514BCA41A2932864(_thisAdjusted, method);
 }
-// Method Definition Index: 54863
+// Method Definition Index: 54865
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CSyncAttendanceFromServerAsyncU3Ed__92_SetStateMachine_mC1AB246CC223A12C752920830C00835933998301 (U3CSyncAttendanceFromServerAsyncU3Ed__92_t7D104DE002775BB2ABF01674E4BE7BA55B753AD3* __this, RuntimeObject* ___0_stateMachine, const RuntimeMethod* method) 
 {
 	{
@@ -17237,7 +17237,7 @@ IL2CPP_EXTERN_C  void U3CSyncAttendanceFromServerAsyncU3Ed__92_SetStateMachine_m
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 54864
+// Method Definition Index: 54866
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CSyncSpinsFromServerAsyncU3Ed__82_MoveNext_mDC691973434D8C4F5BE79AE5245EA0CC6770F3CF (U3CSyncSpinsFromServerAsyncU3Ed__82_tB2C9C3FA3EFB16068B7AFF3A2E6062D72627FA2A* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -17384,7 +17384,7 @@ IL2CPP_EXTERN_C  void U3CSyncSpinsFromServerAsyncU3Ed__82_MoveNext_mDC691973434D
 	_thisAdjusted = reinterpret_cast<U3CSyncSpinsFromServerAsyncU3Ed__82_tB2C9C3FA3EFB16068B7AFF3A2E6062D72627FA2A*>(__this + _offset);
 	U3CSyncSpinsFromServerAsyncU3Ed__82_MoveNext_mDC691973434D8C4F5BE79AE5245EA0CC6770F3CF(_thisAdjusted, method);
 }
-// Method Definition Index: 54865
+// Method Definition Index: 54867
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CSyncSpinsFromServerAsyncU3Ed__82_SetStateMachine_mC4E34DAFFB6DDAF4CAA9C77F6DFA1355C877357D (U3CSyncSpinsFromServerAsyncU3Ed__82_tB2C9C3FA3EFB16068B7AFF3A2E6062D72627FA2A* __this, RuntimeObject* ___0_stateMachine, const RuntimeMethod* method) 
 {
 	{
@@ -17409,7 +17409,7 @@ IL2CPP_EXTERN_C  void U3CSyncSpinsFromServerAsyncU3Ed__82_SetStateMachine_mC4E34
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 54866
+// Method Definition Index: 54868
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* FishingOverlayController_get_Instance_m257D8CD0CB0564E83A5DC41B4FCCA6D5649545E8 (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -17424,7 +17424,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR FishingOverlayController_t9518180503FD2C490F0
 		return L_0;
 	}
 }
-// Method Definition Index: 54867
+// Method Definition Index: 54869
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FishingOverlayController_set_Instance_m2DF81F43DAC518C9185E547AF25E45DEE720BBC5 (FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* ___0_value, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -17441,7 +17441,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FishingOverlayController_set_Instance_m2
 		return;
 	}
 }
-// Method Definition Index: 54868
+// Method Definition Index: 54870
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FishingOverlayController_get_IsAutoFishing_m3C1C7166BE49CCA329D78DCA494B2699DD939177 (FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* __this, const RuntimeMethod* method) 
 {
 	{
@@ -17450,7 +17450,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FishingOverlayController_get_IsAutoFishi
 		return (bool)((((int32_t)L_0) == ((int32_t)2))? 1 : 0);
 	}
 }
-// Method Definition Index: 54869
+// Method Definition Index: 54871
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FishingOverlayController_Awake_m2A6092B22EB91AF47F79D4DB3CB53CEE9858A3D6 (FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -17551,7 +17551,7 @@ IL_007a:
 		return;
 	}
 }
-// Method Definition Index: 54870
+// Method Definition Index: 54872
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FishingOverlayController_OnDestroy_mDC4EFC01E158BBC9B043B8A3A3637B3FBBF2EDA9 (FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -17590,7 +17590,7 @@ IL_0023:
 		return;
 	}
 }
-// Method Definition Index: 54871
+// Method Definition Index: 54873
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FishingOverlayController_HandleIdentityChanged_m9D36A9484C3E1AD1EA1E3CA7DCEDB9C08DA54208 (FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* __this, String_t* ___0_previousScopeId, String_t* ___1_nextScopeId, const RuntimeMethod* method) 
 {
 	{
@@ -17602,7 +17602,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FishingOverlayController_HandleIdentityC
 		return;
 	}
 }
-// Method Definition Index: 54872
+// Method Definition Index: 54874
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FishingOverlayController_LoadDailyTurns_m7818FD6C6A740AC9772E94EA77949DCE89C1F6B5 (FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -17665,7 +17665,7 @@ IL_0057:
 		return;
 	}
 }
-// Method Definition Index: 54873
+// Method Definition Index: 54875
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FishingOverlayController_OnEnable_m44193FD4EF24AECBA53F008589290AFA72C8B2C1 (FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -17817,7 +17817,7 @@ IL_00fd:
 		return;
 	}
 }
-// Method Definition Index: 54874
+// Method Definition Index: 54876
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FishingOverlayController_OnDisable_m52E6D9A08253047144B8A93DD9554BC196DD8445 (FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -17915,7 +17915,7 @@ IL_0053:
 		return;
 	}
 }
-// Method Definition Index: 54875
+// Method Definition Index: 54877
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FishingOverlayController_OnExitClicked_m9F6B8616309B07A7E672A807A4258C324EDA8196 (FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -17924,7 +17924,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FishingOverlayController_OnExitClicked_m
 		return;
 	}
 }
-// Method Definition Index: 54876
+// Method Definition Index: 54878
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FishingOverlayController_OnActionClicked_m48A2BDD01974132ED4D91ED87D14FF052FE4BBE2 (FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -17949,7 +17949,7 @@ IL_0010:
 		return;
 	}
 }
-// Method Definition Index: 54877
+// Method Definition Index: 54879
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FishingOverlayController_Update_mF2E2050E772E53C892B83F3BD10070118D765180 (FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -18267,7 +18267,7 @@ IL_01c0:
 		return;
 	}
 }
-// Method Definition Index: 54878
+// Method Definition Index: 54880
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FishingOverlayController_Show_m93087FCC50F07339025D476BBF2AEAD13F7A6974 (FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* __this, const RuntimeMethod* method) 
 {
 	{
@@ -18279,7 +18279,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FishingOverlayController_Show_m93087FCC5
 		return;
 	}
 }
-// Method Definition Index: 54879
+// Method Definition Index: 54881
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FishingOverlayController_BaitCount_m989AEB9D69ED58308A39587C7354982844DF134F (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -18318,7 +18318,7 @@ IL_0011:
 		return L_4;
 	}
 }
-// Method Definition Index: 54880
+// Method Definition Index: 54882
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FishingOverlayController_CanStartFishing_m1326EC5827F4F4C78061BDB8FA8F8A5394FC37EA (FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* __this, bool ___0_showToast, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -18399,7 +18399,7 @@ IL_0038:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 54881
+// Method Definition Index: 54883
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FishingOverlayController_TryConsumeFishingTurn_m22C8995AE6AFF4FB1EE1DC3626F1FD720802CDD6 (FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* __this, bool ___0_showToast, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -18513,7 +18513,7 @@ IL_0093:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 54882
+// Method Definition Index: 54884
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FishingOverlayController_BeginAutoFishing_m24A5907B4B251B8E823C25ED0CE94FBDDC43B6E9 (FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* __this, float ___0_durationSec, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -18676,7 +18676,7 @@ IL_00a4:
 		return (bool)1;
 	}
 }
-// Method Definition Index: 54883
+// Method Definition Index: 54885
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FishingOverlayController_CancelFishingFromHUD_m09BC71D70AE656AF0FA8B94CA9179C9BA77D2A42 (FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -18787,7 +18787,7 @@ IL_0060:
 		return;
 	}
 }
-// Method Definition Index: 54884
+// Method Definition Index: 54886
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FishingOverlayController_BeginFishingCursorMode_mBE8AEAD914FAE7D10EBEEBD9DFBC412D71DBAC21 (FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -18830,7 +18830,7 @@ IL_0025:
 		return;
 	}
 }
-// Method Definition Index: 54885
+// Method Definition Index: 54887
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FishingOverlayController_EndFishingCursorMode_m3A20D82826CE2D4C29D6C4A32E6F11B6B2FA29F6 (FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -18885,7 +18885,7 @@ IL_0034:
 		return;
 	}
 }
-// Method Definition Index: 54886
+// Method Definition Index: 54888
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FishingOverlayController_Hide_mDFBA5EAAC0E7FBFBB3B2F096C9669901A00B3838 (FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -19028,7 +19028,7 @@ IL_0088:
 		return;
 	}
 }
-// Method Definition Index: 54887
+// Method Definition Index: 54889
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FishingOverlayController_StartCast_m4FB9DCD9225CDD4365D7E199A3DDC2B622AA307C (FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* __this, bool ___0_playAnim, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -19161,7 +19161,7 @@ IL_00a9:
 		return;
 	}
 }
-// Method Definition Index: 54888
+// Method Definition Index: 54890
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FishingOverlayController_AttemptPull_mDC630D4E1A9AA0663DB1CFFF74AE4796EF4C4876 (FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -19237,7 +19237,7 @@ IL_0040:
 		return;
 	}
 }
-// Method Definition Index: 54889
+// Method Definition Index: 54891
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FishingOverlayController_EnsureFishRewardTiers_m1D32E62351907A07A23619BE6D40DACA57DE7501 (FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -19388,7 +19388,7 @@ IL_0022:
 		return;
 	}
 }
-// Method Definition Index: 54890
+// Method Definition Index: 54892
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR FishItem_t06C77F23DB13753E4675364E8E31643FB3F49DF7 FishingOverlayController_PickCaughtFish_m2E841BBE5560D04C43C43DE040A32812AE918D06 (FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -19502,7 +19502,7 @@ IL_0051:
 		return L_23;
 	}
 }
-// Method Definition Index: 54891
+// Method Definition Index: 54893
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR FishRewardTier_t170B8E1E84EEAEFF8C227CA580043E5093756067* FishingOverlayController_PickFishTier_m66AB7047F85A4587120D8CE1780B31CE35DB0CEB (FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -19797,7 +19797,7 @@ IL_0132:
 		return L_44;
 	}
 }
-// Method Definition Index: 54892
+// Method Definition Index: 54894
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* FishingOverlayController_PickFishItemId_m8CB76F3A2826B77964C8AA8B099560ED7F570B41 (FishRewardTier_t170B8E1E84EEAEFF8C227CA580043E5093756067* ___0_tier, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -19948,7 +19948,7 @@ IL_005d:
 		return _stringLiteral7B9DCA929E69AF341F780D8410ABC7B460694335;
 	}
 }
-// Method Definition Index: 54893
+// Method Definition Index: 54895
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FishingOverlayController_IsServerAuthoritative_m5503CFEC241A5041BA999475CC15281E5FF99FCF (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -19998,7 +19998,7 @@ IL_0026:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 54894
+// Method Definition Index: 54896
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FishingOverlayController_HandleCatch_m1BA13ADEA2F7A537310673E568FFD95B16B31455 (FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -20123,7 +20123,7 @@ IL_0052:
 		return;
 	}
 }
-// Method Definition Index: 54895
+// Method Definition Index: 54897
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FishingOverlayController_HandleCatchServerAsync_m1F7CDCFF7CB880D13092A476575756E53290D684 (FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -20156,7 +20156,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FishingOverlayController_HandleCatchServ
 		return;
 	}
 }
-// Method Definition Index: 54896
+// Method Definition Index: 54898
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* FishingOverlayController_ResolveFishName_mE8FC40DF7F485C4C25945CC7903E9CF305A3E991 (FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* __this, String_t* ___0_itemId, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -20232,7 +20232,7 @@ IL_0036:
 		return L_12;
 	}
 }
-// Method Definition Index: 54897
+// Method Definition Index: 54899
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FishingOverlayController_FinishCatchCommon_m62E53ED9B611006344E820F9E68964AADF2FBA92 (FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -20298,7 +20298,7 @@ IL_0027:
 		return;
 	}
 }
-// Method Definition Index: 54898
+// Method Definition Index: 54900
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FishingOverlayController_HandleMiss_mE6D14993BA5081F815EFD662933787E8D05C6821 (FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* __this, String_t* ___0_reason, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -20371,7 +20371,7 @@ IL_0041:
 		return;
 	}
 }
-// Method Definition Index: 54899
+// Method Definition Index: 54901
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FishingOverlayController_UpdateUI_mAE64811DA3456284EEAFBE710E3422445F498362 (FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -20677,7 +20677,7 @@ IL_016b:
 		return;
 	}
 }
-// Method Definition Index: 54900
+// Method Definition Index: 54902
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FishingOverlayController__ctor_m4085C1E5264BF451628868DA79A395A0FACCE9B5 (FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -20777,7 +20777,7 @@ IL2CPP_EXTERN_C void FishItem_t06C77F23DB13753E4675364E8E31643FB3F49DF7_marshal_
 	il2cpp_codegen_marshal_free_bstring(marshaled.___rarity);
 	marshaled.___rarity = NULL;
 }
-// Method Definition Index: 54901
+// Method Definition Index: 54903
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FishItem__ctor_mAA9B993C7EEC49590C0254E69C002C91F5577AC9 (FishItem_t06C77F23DB13753E4675364E8E31643FB3F49DF7* __this, String_t* ___0_itemId, String_t* ___1_name, String_t* ___2_rarity, const RuntimeMethod* method) 
 {
 	{
@@ -20812,7 +20812,7 @@ IL2CPP_EXTERN_C  void FishItem__ctor_mAA9B993C7EEC49590C0254E69C002C91F5577AC9_A
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 54902
+// Method Definition Index: 54904
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FishRewardTier__ctor_mA103EB35DEEACD868F67F553C80067CD77067054 (FishRewardTier_t170B8E1E84EEAEFF8C227CA580043E5093756067* __this, const RuntimeMethod* method) 
 {
 	{
@@ -20822,7 +20822,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FishRewardTier__ctor_mA103EB35DEEACD868F
 		return;
 	}
 }
-// Method Definition Index: 54903
+// Method Definition Index: 54905
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FishRewardTier__ctor_m72A421B298E8CE00F06DCFD195EB32CC6F872526 (FishRewardTier_t170B8E1E84EEAEFF8C227CA580043E5093756067* __this, int32_t ___0_pointValue, float ___1_chancePercent, StringU5BU5D_t7674CD946EC0CE7B3AE0BE70E6EE85F2ECD9F248* ___2_itemIds, const RuntimeMethod* method) 
 {
 	{
@@ -20842,7 +20842,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FishRewardTier__ctor_m72A421B298E8CE00F0
 		return;
 	}
 }
-// Method Definition Index: 54904
+// Method Definition Index: 54906
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FishRewardTier_HasValidItems_m6E7F99FED17781854B3B782B4EBCF503AB8E3291 (FishRewardTier_t170B8E1E84EEAEFF8C227CA580043E5093756067* __this, const RuntimeMethod* method) 
 {
 	int32_t V_0 = 0;
@@ -20927,7 +20927,7 @@ IL_002c:
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 54905
+// Method Definition Index: 54907
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CHandleCatchServerAsyncU3Ed__62_MoveNext_m0749B87529B0BD239A2BED02E636C44EB5B90DAB (U3CHandleCatchServerAsyncU3Ed__62_t08FDA64E58644AAE3F503752CF710E17F1A074D3* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -21235,7 +21235,7 @@ IL2CPP_EXTERN_C  void U3CHandleCatchServerAsyncU3Ed__62_MoveNext_m0749B87529B0BD
 	_thisAdjusted = reinterpret_cast<U3CHandleCatchServerAsyncU3Ed__62_t08FDA64E58644AAE3F503752CF710E17F1A074D3*>(__this + _offset);
 	U3CHandleCatchServerAsyncU3Ed__62_MoveNext_m0749B87529B0BD239A2BED02E636C44EB5B90DAB(_thisAdjusted, method);
 }
-// Method Definition Index: 54906
+// Method Definition Index: 54908
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CHandleCatchServerAsyncU3Ed__62_SetStateMachine_m38EC4432CC0C644AB1FC115D972E68F8CF6416DC (U3CHandleCatchServerAsyncU3Ed__62_t08FDA64E58644AAE3F503752CF710E17F1A074D3* __this, RuntimeObject* ___0_stateMachine, const RuntimeMethod* method) 
 {
 	{
@@ -21260,7 +21260,7 @@ IL2CPP_EXTERN_C  void U3CHandleCatchServerAsyncU3Ed__62_SetStateMachine_m38EC443
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 54907
+// Method Definition Index: 54909
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ForgotPasswordPopupController_OnEnable_m19E8C6AD8DF9DC768FBDA1B73F49A4FC5A89C461 (ForgotPasswordPopupController_t4943C53230D805C3CCBFB961BB52B296854EE2F5* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -21316,7 +21316,7 @@ IL_0025:
 		return;
 	}
 }
-// Method Definition Index: 54908
+// Method Definition Index: 54910
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ForgotPasswordPopupController_OnDisable_m134920AE489481C497F0EDECD26175D62CDDEC2E (ForgotPasswordPopupController_t4943C53230D805C3CCBFB961BB52B296854EE2F5* __this, const RuntimeMethod* method) 
 {
 	{
@@ -21326,7 +21326,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ForgotPasswordPopupController_OnDisable_
 		return;
 	}
 }
-// Method Definition Index: 54909
+// Method Definition Index: 54911
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ForgotPasswordPopupController_QueryElements_m66F3CB8287737CE081353A50870AB08697CE5AA7 (ForgotPasswordPopupController_t4943C53230D805C3CCBFB961BB52B296854EE2F5* __this, VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* ___0_root, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -21387,7 +21387,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ForgotPasswordPopupController_QueryEleme
 		return;
 	}
 }
-// Method Definition Index: 54910
+// Method Definition Index: 54912
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ForgotPasswordPopupController_RegisterCallbacks_m25157A8CF6283856CAF4FB6BEF23C04228258C20 (ForgotPasswordPopupController_t4943C53230D805C3CCBFB961BB52B296854EE2F5* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -21545,7 +21545,7 @@ IL_00a5:
 		return;
 	}
 }
-// Method Definition Index: 54911
+// Method Definition Index: 54913
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ForgotPasswordPopupController_UnregisterCallbacks_mCE966E1748E32AB5608A17373BE02357947C0A2C (ForgotPasswordPopupController_t4943C53230D805C3CCBFB961BB52B296854EE2F5* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -21637,7 +21637,7 @@ IL_0047:
 		return;
 	}
 }
-// Method Definition Index: 54912
+// Method Definition Index: 54914
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ForgotPasswordPopupController_SetupPlaceholder_mEA4F4F8DDF5C485BB5CE31429E758016429E0264 (ForgotPasswordPopupController_t4943C53230D805C3CCBFB961BB52B296854EE2F5* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -21672,7 +21672,7 @@ IL_001d:
 		return;
 	}
 }
-// Method Definition Index: 54913
+// Method Definition Index: 54915
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ForgotPasswordPopupController_Show_m8B072E28AFE58C92B8F77157961CD207CAC14D05 (ForgotPasswordPopupController_t4943C53230D805C3CCBFB961BB52B296854EE2F5* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -21734,7 +21734,7 @@ IL_0021:
 		return;
 	}
 }
-// Method Definition Index: 54914
+// Method Definition Index: 54916
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ForgotPasswordPopupController_Hide_mBECB38001D0D588A4261A430A8B6290C705926E2 (ForgotPasswordPopupController_t4943C53230D805C3CCBFB961BB52B296854EE2F5* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -21777,7 +21777,7 @@ IL_0009:
 		return;
 	}
 }
-// Method Definition Index: 54915
+// Method Definition Index: 54917
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ForgotPasswordPopupController_OnCloseClicked_m656689AF99CDC318378F78552AB3F395DB4193E8 (ForgotPasswordPopupController_t4943C53230D805C3CCBFB961BB52B296854EE2F5* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -21791,7 +21791,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ForgotPasswordPopupController_OnCloseCli
 		return;
 	}
 }
-// Method Definition Index: 54916
+// Method Definition Index: 54918
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ForgotPasswordPopupController_OnOverlayClicked_m3C57D7ED8C89C43A80861B6428A80A6092C58E9C (ForgotPasswordPopupController_t4943C53230D805C3CCBFB961BB52B296854EE2F5* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -21817,7 +21817,7 @@ IL_0014:
 		return;
 	}
 }
-// Method Definition Index: 54917
+// Method Definition Index: 54919
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ForgotPasswordPopupController_OnEmailChanged_m05A59DE724FAE728404438C64E93CC20867BB16B (ForgotPasswordPopupController_t4943C53230D805C3CCBFB961BB52B296854EE2F5* __this, ChangeEvent_1_tC8920B8153267870361787158B3897821AA4522F* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -21868,7 +21868,7 @@ IL_001c:
 		return;
 	}
 }
-// Method Definition Index: 54918
+// Method Definition Index: 54920
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ForgotPasswordPopupController_OnSubmitClicked_mD94A177C49021C1A01F5C795C97E885B411118B9 (ForgotPasswordPopupController_t4943C53230D805C3CCBFB961BB52B296854EE2F5* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -21967,7 +21967,7 @@ IL_0038:
 		return;
 	}
 }
-// Method Definition Index: 54919
+// Method Definition Index: 54921
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool ForgotPasswordPopupController_ValidateEmail_mA4AD46EB513A5E2B6574C69F817C712916B1809D (ForgotPasswordPopupController_t4943C53230D805C3CCBFB961BB52B296854EE2F5* __this, String_t* ___0_email, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22004,7 +22004,7 @@ IL_000a:
 		return L_3;
 	}
 }
-// Method Definition Index: 54920
+// Method Definition Index: 54922
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ForgotPasswordPopupController_ShowStatus_m2EF364DD6395129A194E543CCCFC17AC9A410049 (ForgotPasswordPopupController_t4943C53230D805C3CCBFB961BB52B296854EE2F5* __this, String_t* ___0_message, bool ___1_isSuccess, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22087,7 +22087,7 @@ IL_004a:
 		return;
 	}
 }
-// Method Definition Index: 54921
+// Method Definition Index: 54923
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ForgotPasswordPopupController_ClearStatus_mE568CD4DC43A09D48B84CE59CD0C610A4B99038E (ForgotPasswordPopupController_t4943C53230D805C3CCBFB961BB52B296854EE2F5* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22140,7 +22140,7 @@ IL_0009:
 		return;
 	}
 }
-// Method Definition Index: 54922
+// Method Definition Index: 54924
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ForgotPasswordPopupController__ctor_m76E1C35F11F88336054BAEF97969A21C9E81FE8D (ForgotPasswordPopupController_t4943C53230D805C3CCBFB961BB52B296854EE2F5* __this, const RuntimeMethod* method) 
 {
 	{
@@ -22148,7 +22148,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ForgotPasswordPopupController__ctor_m76E
 		return;
 	}
 }
-// Method Definition Index: 54923
+// Method Definition Index: 54925
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ForgotPasswordPopupController_U3CRegisterCallbacksU3Eb__13_0_m8A9C521C3E58973E8BD575BE411DE05B4BD42EFE (ForgotPasswordPopupController_t4943C53230D805C3CCBFB961BB52B296854EE2F5* __this, FocusInEvent_tC1179D309FE58E4766E94687240513A96F08AFBE* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22165,7 +22165,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ForgotPasswordPopupController_U3CRegiste
 		return;
 	}
 }
-// Method Definition Index: 54924
+// Method Definition Index: 54926
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ForgotPasswordPopupController_U3CRegisterCallbacksU3Eb__13_1_m3BCF77D5852A0ACB117E94F0B231AC450C782E45 (ForgotPasswordPopupController_t4943C53230D805C3CCBFB961BB52B296854EE2F5* __this, FocusOutEvent_t5CC3AC57C2BEFAD0E0A7E73FE6314F0F63DFFD2C* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22190,7 +22190,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ForgotPasswordPopupController_U3CRegiste
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 54925
+// Method Definition Index: 54927
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_Awake_mA6F74B4E909DF442D42E29DD56348F0126A51FAA (FriendsPopupController_tA5C0450743C1431DB60078135A804691A20DD3FE* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22246,7 +22246,7 @@ IL_0038:
 		return;
 	}
 }
-// Method Definition Index: 54926
+// Method Definition Index: 54928
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_OnEnable_mAFC9E34DA964741501ED1B6F9938C75DB527CEF5 (FriendsPopupController_tA5C0450743C1431DB60078135A804691A20DD3FE* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22380,7 +22380,7 @@ IL_000f:
 		return;
 	}
 }
-// Method Definition Index: 54927
+// Method Definition Index: 54929
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_RegisterCallbacks_mB4ABA7791CBFCD3EF0432C2A79EF499B82435EDD (FriendsPopupController_tA5C0450743C1431DB60078135A804691A20DD3FE* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22628,7 +22628,7 @@ IL_013a:
 		return;
 	}
 }
-// Method Definition Index: 54928
+// Method Definition Index: 54930
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_SetupPlaceholders_mB95658E84FFFB6634707A2A7A9704F370EBC5BB7 (FriendsPopupController_tA5C0450743C1431DB60078135A804691A20DD3FE* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22673,7 +22673,7 @@ IL_002a:
 		return;
 	}
 }
-// Method Definition Index: 54929
+// Method Definition Index: 54931
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_SetActiveTab_m0712D38727DAAC76E9B3537C9FC0B1328F3C7626 (FriendsPopupController_tA5C0450743C1431DB60078135A804691A20DD3FE* __this, Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* ___0_tab, int32_t ___1_tabType, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22766,7 +22766,7 @@ IL_0054:
 		return;
 	}
 }
-// Method Definition Index: 54930
+// Method Definition Index: 54932
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_UpdateLayoutForTab_mD4425FA07A9C0DA76B9A95673DE4F307ED01D385 (FriendsPopupController_tA5C0450743C1431DB60078135A804691A20DD3FE* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22946,7 +22946,7 @@ IL_00f1:
 		return;
 	}
 }
-// Method Definition Index: 54931
+// Method Definition Index: 54933
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_RefreshList_mFA5348AA6A5408F7C5691636AE15570ACD8B2A53 (FriendsPopupController_tA5C0450743C1431DB60078135A804691A20DD3FE* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -23027,7 +23027,7 @@ IL_0043:
 		return;
 	}
 }
-// Method Definition Index: 54932
+// Method Definition Index: 54934
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_GetListDataForActiveTab_m3427D958B74A7D08F391B384AAAFE297B6393EB1 (FriendsPopupController_tA5C0450743C1431DB60078135A804691A20DD3FE* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -23100,7 +23100,7 @@ IL_0049:
 		return;
 	}
 }
-// Method Definition Index: 54933
+// Method Definition Index: 54935
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* FriendsPopupController_CreatePlayerCard_mCEB13562F9A49C4F552B03B694216B416FD84E08 (FriendsPopupController_tA5C0450743C1431DB60078135A804691A20DD3FE* __this, FriendData_tE838C9EC650DAD4A3F8E9A6FB744562F13B651EA* ___0_data, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -23625,7 +23625,7 @@ IL_0316:
 		return L_109;
 	}
 }
-// Method Definition Index: 54934
+// Method Definition Index: 54936
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_HandleRemoveFriend_mCC091288C4E4D093FBD54302D9F0DF28B82BC826 (FriendsPopupController_tA5C0450743C1431DB60078135A804691A20DD3FE* __this, FriendData_tE838C9EC650DAD4A3F8E9A6FB744562F13B651EA* ___0_friend, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -23657,7 +23657,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_HandleRemoveFrien
 		return;
 	}
 }
-// Method Definition Index: 54935
+// Method Definition Index: 54937
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_HandleAcceptRequest_m8BE15305D5D39B1E2D17555E3D09D7FDB5A6EC92 (FriendsPopupController_tA5C0450743C1431DB60078135A804691A20DD3FE* __this, FriendData_tE838C9EC650DAD4A3F8E9A6FB744562F13B651EA* ___0_requester, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -23699,7 +23699,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_HandleAcceptReque
 		return;
 	}
 }
-// Method Definition Index: 54936
+// Method Definition Index: 54938
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_HandleDeclineRequest_m563C9DE0BC6335680183AD49078A1EA86F811066 (FriendsPopupController_tA5C0450743C1431DB60078135A804691A20DD3FE* __this, FriendData_tE838C9EC650DAD4A3F8E9A6FB744562F13B651EA* ___0_requester, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -23731,7 +23731,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_HandleDeclineRequ
 		return;
 	}
 }
-// Method Definition Index: 54937
+// Method Definition Index: 54939
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_HandleAddFriendRequest_m37B8200195521DDAB80185613C8D865DBB586AE9 (FriendsPopupController_tA5C0450743C1431DB60078135A804691A20DD3FE* __this, FriendData_tE838C9EC650DAD4A3F8E9A6FB744562F13B651EA* ___0_targetPlayer, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -23763,7 +23763,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_HandleAddFriendRe
 		return;
 	}
 }
-// Method Definition Index: 54938
+// Method Definition Index: 54940
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_ExecuteSearch_m33E115DACC7892FE78706834B5564461D67002C9 (FriendsPopupController_tA5C0450743C1431DB60078135A804691A20DD3FE* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24058,7 +24058,7 @@ IL_015c:
 		return;
 	}
 }
-// Method Definition Index: 54939
+// Method Definition Index: 54941
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_ExecuteRefreshSearchPool_m20FADD88032C639E77360FBBABA59EEA6A035EF9 (FriendsPopupController_tA5C0450743C1431DB60078135A804691A20DD3FE* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24097,7 +24097,7 @@ IL_0028:
 		return;
 	}
 }
-// Method Definition Index: 54940
+// Method Definition Index: 54942
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_GenerateNewSearchPool_mF5E8B1A3542BE36631D14C3EFB8DB1251D04251A (FriendsPopupController_tA5C0450743C1431DB60078135A804691A20DD3FE* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24269,7 +24269,7 @@ IL_0110:
 		return;
 	}
 }
-// Method Definition Index: 54941
+// Method Definition Index: 54943
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_Show_mAF9CC88F2C7690E7E36A0C5E32A7B951CCF2D6F8 (FriendsPopupController_tA5C0450743C1431DB60078135A804691A20DD3FE* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24313,7 +24313,7 @@ IL_0035:
 		return;
 	}
 }
-// Method Definition Index: 54942
+// Method Definition Index: 54944
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_Hide_m30D8A61718814ED69475B9465D77E5339D712487 (FriendsPopupController_tA5C0450743C1431DB60078135A804691A20DD3FE* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24354,7 +24354,7 @@ IL_0028:
 		return;
 	}
 }
-// Method Definition Index: 54943
+// Method Definition Index: 54945
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FriendsPopupController_IsVisible_mF3A1542EE1892D6A77128FD2EBF4C9EC28C15804 (FriendsPopupController_tA5C0450743C1431DB60078135A804691A20DD3FE* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24393,7 +24393,7 @@ IL_0024:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 54944
+// Method Definition Index: 54946
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_InitMockData_mA9F6C7EA80FBE581C44CB37E545DF1DFEC5AB355 (FriendsPopupController_tA5C0450743C1431DB60078135A804691A20DD3FE* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24512,7 +24512,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_InitMockData_mA9F
 		return;
 	}
 }
-// Method Definition Index: 54945
+// Method Definition Index: 54947
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController__ctor_mAABC12A55E89E642DB9708F3CEFAD046524FC6BB (FriendsPopupController_tA5C0450743C1431DB60078135A804691A20DD3FE* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24547,7 +24547,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController__ctor_mAABC12A55E
 		return;
 	}
 }
-// Method Definition Index: 54946
+// Method Definition Index: 54948
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_U3CRegisterCallbacksU3Eb__22_0_m406D645D55F49C72E17A325502074C86B4AE5E02 (FriendsPopupController_tA5C0450743C1431DB60078135A804691A20DD3FE* __this, PointerDownEvent_tABAAD1BACBB98156D6BCCED51E11883EAFE03A51* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -24556,7 +24556,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_U3CRegisterCallba
 		return;
 	}
 }
-// Method Definition Index: 54947
+// Method Definition Index: 54949
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_U3CRegisterCallbacksU3Eb__22_1_m077D7E92C27E6B5AF22F9D505E86DCD183D893C6 (FriendsPopupController_tA5C0450743C1431DB60078135A804691A20DD3FE* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -24582,7 +24582,7 @@ IL_0014:
 		return;
 	}
 }
-// Method Definition Index: 54948
+// Method Definition Index: 54950
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_U3CRegisterCallbacksU3Eb__22_2_mC57A61CE05AF195A8D7D3B765601D91F9271B0C3 (FriendsPopupController_tA5C0450743C1431DB60078135A804691A20DD3FE* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -24592,7 +24592,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_U3CRegisterCallba
 		return;
 	}
 }
-// Method Definition Index: 54949
+// Method Definition Index: 54951
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_U3CRegisterCallbacksU3Eb__22_3_m74E3817A58F87C0C4A994BD16688508A9F095EDB (FriendsPopupController_tA5C0450743C1431DB60078135A804691A20DD3FE* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -24602,7 +24602,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_U3CRegisterCallba
 		return;
 	}
 }
-// Method Definition Index: 54950
+// Method Definition Index: 54952
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_U3CRegisterCallbacksU3Eb__22_4_mA7BD5880F5AB4FD7508D4DB5933DBFF15ADA5865 (FriendsPopupController_tA5C0450743C1431DB60078135A804691A20DD3FE* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -24612,7 +24612,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_U3CRegisterCallba
 		return;
 	}
 }
-// Method Definition Index: 54951
+// Method Definition Index: 54953
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_U3CRegisterCallbacksU3Eb__22_5_mFDF7E7F5CF1B5ABA4B2701615882162F4B892BAD (FriendsPopupController_tA5C0450743C1431DB60078135A804691A20DD3FE* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -24621,7 +24621,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_U3CRegisterCallba
 		return;
 	}
 }
-// Method Definition Index: 54952
+// Method Definition Index: 54954
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_U3CRegisterCallbacksU3Eb__22_6_mE8D42DD0DB01FEE0D62BF7D9D2F0A57B5F76EC32 (FriendsPopupController_tA5C0450743C1431DB60078135A804691A20DD3FE* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -24630,7 +24630,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_U3CRegisterCallba
 		return;
 	}
 }
-// Method Definition Index: 54953
+// Method Definition Index: 54955
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_U3CRegisterCallbacksU3Eb__22_7_m829BD3836818C01171E576CF5B2BB136EAAA9FB1 (FriendsPopupController_tA5C0450743C1431DB60078135A804691A20DD3FE* __this, FocusInEvent_tC1179D309FE58E4766E94687240513A96F08AFBE* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24663,7 +24663,7 @@ IL_000b:
 		return;
 	}
 }
-// Method Definition Index: 54954
+// Method Definition Index: 54956
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendsPopupController_U3CRegisterCallbacksU3Eb__22_8_m3455CA794674041BB092550DE6D5903EA924332F (FriendsPopupController_tA5C0450743C1431DB60078135A804691A20DD3FE* __this, FocusOutEvent_t5CC3AC57C2BEFAD0E0A7E73FE6314F0F63DFFD2C* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24712,7 +24712,7 @@ IL_000b:
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 54955
+// Method Definition Index: 54957
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendData__ctor_m5C59E818B3B8D0561A6E9AE096E6BCD2B6DCEB73 (FriendData_tE838C9EC650DAD4A3F8E9A6FB744562F13B651EA* __this, String_t* ___0_name, int32_t ___1_level, bool ___2_isMale, bool ___3_isOnline, String_t* ___4_avatarEmoji, const RuntimeMethod* method) 
 {
 	{
@@ -24747,7 +24747,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FriendData__ctor_m5C59E818B3B8D0561A6E9A
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 54956
+// Method Definition Index: 54958
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass28_0__ctor_m35B7592C8FB957F6819F4FD25B3F4B88E3076F67 (U3CU3Ec__DisplayClass28_0_t19CA164085E15FB66DB36C05CB4C3A789853B59F* __this, const RuntimeMethod* method) 
 {
 	{
@@ -24755,7 +24755,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass28_0__ctor_m35B7592
 		return;
 	}
 }
-// Method Definition Index: 54957
+// Method Definition Index: 54959
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass28_0_U3CCreatePlayerCardU3Eb__0_m8E5E65599D2F8FD1D8DF6403D3559591DE7490C8 (U3CU3Ec__DisplayClass28_0_t19CA164085E15FB66DB36C05CB4C3A789853B59F* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -24767,7 +24767,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass28_0_U3CCreatePlaye
 		return;
 	}
 }
-// Method Definition Index: 54958
+// Method Definition Index: 54960
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass28_0_U3CCreatePlayerCardU3Eb__1_mEE097B0825F3DCB5CB4E8A18E1A01F15550864C5 (U3CU3Ec__DisplayClass28_0_t19CA164085E15FB66DB36C05CB4C3A789853B59F* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -24779,7 +24779,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass28_0_U3CCreatePlaye
 		return;
 	}
 }
-// Method Definition Index: 54959
+// Method Definition Index: 54961
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass28_0_U3CCreatePlayerCardU3Eb__2_mEF0401707E5A49C80C8E41E3E26BE98E54F61CF4 (U3CU3Ec__DisplayClass28_0_t19CA164085E15FB66DB36C05CB4C3A789853B59F* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -24791,7 +24791,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass28_0_U3CCreatePlaye
 		return;
 	}
 }
-// Method Definition Index: 54960
+// Method Definition Index: 54962
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass28_0_U3CCreatePlayerCardU3Eb__3_m193ADD002F80F183D2AC5E27496153AB4BBAFD07 (U3CU3Ec__DisplayClass28_0_t19CA164085E15FB66DB36C05CB4C3A789853B59F* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -24897,7 +24897,7 @@ IL2CPP_EXTERN_C void InteractionAction_t5E77A74EB7E20BBF76921E2B39BAB8DA6B022E5C
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 54961
+// Method Definition Index: 54963
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* GameHUDController_get_Instance_mE7C5F167AB1D4A2A2E581D2D5B55E3442D984CB5 (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24913,7 +24913,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR GameHUDController_tE3ABF9F6D07165DEEE04A7739F
 		return L_0;
 	}
 }
-// Method Definition Index: 54962
+// Method Definition Index: 54964
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_set_Instance_m8D6783745A978F6F58227C2AB31DC3DF24FF2643 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* ___0_value, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24931,7 +24931,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_set_Instance_m8D678374
 		return;
 	}
 }
-// Method Definition Index: 54963
+// Method Definition Index: 54965
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_OnEnable_m2D7B311C89B1C7EBAF99F3DE306143E89871141E (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -25331,7 +25331,7 @@ IL_01d6:
 		return;
 	}
 }
-// Method Definition Index: 54964
+// Method Definition Index: 54966
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* GameHUDController_WireHudWhenRootReady_mF46E3FC003A2E576AF8319CB063DD7601731F680 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -25350,7 +25350,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* GameHUDController_WireHudWhenR
 		return L_1;
 	}
 }
-// Method Definition Index: 54965
+// Method Definition Index: 54967
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_WireHud_m1FFAB160E08C71F953BF1A3936EE0CD06F8E8ACF (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -25516,7 +25516,7 @@ IL_0109:
 		return;
 	}
 }
-// Method Definition Index: 54966
+// Method Definition Index: 54968
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_EnsureMultiTouchUI_m44866E472915CC86A3C4FCF7FAA202540A575EBD (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -25607,7 +25607,7 @@ IL_0038:
 		return;
 	}
 }
-// Method Definition Index: 54967
+// Method Definition Index: 54969
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_OnDisable_m3F7FF00F5925726E3B18D6F128E0D06F1DFF1CD8 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -25717,7 +25717,7 @@ IL_008f:
 		return;
 	}
 }
-// Method Definition Index: 54968
+// Method Definition Index: 54970
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_OnExpChanged_m86C4418114406F70986CFF3866ED1A927E202157 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, int32_t ___0_level, float ___1_percent, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -25754,7 +25754,7 @@ IL_0023:
 		return;
 	}
 }
-// Method Definition Index: 54969
+// Method Definition Index: 54971
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_UpdateExpLabel_mF6BB393B69C68F7FC156BF219D8CB7AAC556DAA3 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -25855,7 +25855,7 @@ IL_006c:
 		return;
 	}
 }
-// Method Definition Index: 54970
+// Method Definition Index: 54972
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_QueryElements_m0F09E3B1E30E755515D79834F13EE52B430992C8 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* ___0_root, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -26239,7 +26239,7 @@ IL_0306:
 		return;
 	}
 }
-// Method Definition Index: 54971
+// Method Definition Index: 54973
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_SetupGuidanceDots_mD4594E41A5FE200F564080786CB0A14FE6910686 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -26280,7 +26280,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_SetupGuidanceDots_mD45
 		return;
 	}
 }
-// Method Definition Index: 54972
+// Method Definition Index: 54974
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* GameHUDController_AttachGuidanceDot_mAD5DB4816B7E02AB98808622F14137C63B730BC3 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* ___0_target, String_t* ___1_extraClass, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -26360,7 +26360,7 @@ IL_002c:
 		return L_13;
 	}
 }
-// Method Definition Index: 54973
+// Method Definition Index: 54975
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_SetGuidanceDot_mFA9E3EAC63DD24D3ED8D11AC2AD4E48D02C6028B (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* ___0_dot, bool ___1_visible, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -26430,7 +26430,7 @@ IL_001d:
 		return;
 	}
 }
-// Method Definition Index: 54974
+// Method Definition Index: 54976
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_UpdateGuidanceDots_m28F2F07F29AEBFA16A8B5ECCE7917A06E0A653B9 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, bool ___0_force, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -26659,7 +26659,7 @@ IL_007c:
 		return;
 	}
 }
-// Method Definition Index: 54975
+// Method Definition Index: 54977
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool GameHUDController_IsTutorialCompleteForGuidance_m05B43ACDFD54F8CB3E28D4F75FA21DB7E8A353A9 (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -26740,7 +26740,7 @@ IL_0040:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 54976
+// Method Definition Index: 54978
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_ApplyPlatformLayoutClass_m9B51EA25216B8D8233F0C6522D33BC7EBB630EFB (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* ___0_root, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -26790,7 +26790,7 @@ IL_0011:
 		return;
 	}
 }
-// Method Definition Index: 54977
+// Method Definition Index: 54979
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_RegisterCallbacks_mF7F9D0D7BE6FF53BFCD35968E239217EFB012541 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -27491,7 +27491,7 @@ IL_0272:
 		return;
 	}
 }
-// Method Definition Index: 54978
+// Method Definition Index: 54980
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_HideAllPopups_m9718AB1A05C6352AC67FD498AAF1B982FE98F793 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -27733,7 +27733,7 @@ IL_012c:
 		return;
 	}
 }
-// Method Definition Index: 54979
+// Method Definition Index: 54981
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_SetPlayerInfo_m92741AC8C0FF5582D83EEE15CECC46F5DF8F4DFB (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, String_t* ___0_name, int32_t ___1_level, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -27787,7 +27787,7 @@ IL_0037:
 		return;
 	}
 }
-// Method Definition Index: 54980
+// Method Definition Index: 54982
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_UpdateAvatar_m7B72F70A2F2BFE8C7202ED5932423FBADE14BDCA (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -27906,7 +27906,7 @@ IL_006a:
 		return;
 	}
 }
-// Method Definition Index: 54981
+// Method Definition Index: 54983
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_SetCurrency_mC96AA51AF2D097788A39083974061FE1D637E04A (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, int64_t ___0_amount, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -27938,7 +27938,7 @@ IL_001f:
 		return;
 	}
 }
-// Method Definition Index: 54982
+// Method Definition Index: 54984
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_SetQuest_mB0456615D6E88AB92C115DBFA7222A2F2465BC8B (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, String_t* ___0_text, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -28017,7 +28017,7 @@ IL_0052:
 		return;
 	}
 }
-// Method Definition Index: 54983
+// Method Definition Index: 54985
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_SetHUDVisible_m80D1018F80AB6B2BEAAD33BB3F3D02F78CCA7C48 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, bool ___0_visible, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -28096,7 +28096,7 @@ IL_003c:
 		return;
 	}
 }
-// Method Definition Index: 54984
+// Method Definition Index: 54986
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_ApplyIdleQuestText_m9C717534F283DDC37CC36CFCA32CCA7B1F0CE8F0 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -28216,7 +28216,7 @@ IL_0050:
 		return;
 	}
 }
-// Method Definition Index: 54985
+// Method Definition Index: 54987
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* GameHUDController_SyncQuestText_mFCA9824F0B552C4315AF08AEA64E20B521F8BF5B (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -28235,7 +28235,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* GameHUDController_SyncQuestTex
 		return L_1;
 	}
 }
-// Method Definition Index: 54986
+// Method Definition Index: 54988
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* GameHUDController_SyncPlayerName_m22B7159EF3755F19DA3C50D6D76D127B4D0FD2E6 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -28254,7 +28254,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* GameHUDController_SyncPlayerNa
 		return L_1;
 	}
 }
-// Method Definition Index: 54987
+// Method Definition Index: 54989
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_RefreshPlayerInfoFromSession_m56B1F42F90E9FCB526438C2833107E6D74ADE69B (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, bool ___0_force, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -28447,7 +28447,7 @@ IL_00a5:
 		return;
 	}
 }
-// Method Definition Index: 54988
+// Method Definition Index: 54990
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* GameHUDController_ResolveCurrentPlayerName_mECE47975386CA683AE25A05BE8FCD6316F3F2384 (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -28606,7 +28606,7 @@ IL_0084:
 		return _stringLiteralDA39A3EE5E6B4B0D3255BFEF95601890AFD80709;
 	}
 }
-// Method Definition Index: 54989
+// Method Definition Index: 54991
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_Awake_mC0242FDA706FED5FDA0DBDB60AB8D0953F6B2626 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -28623,7 +28623,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_Awake_mC0242FDA706FED5
 		return;
 	}
 }
-// Method Definition Index: 54990
+// Method Definition Index: 54992
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_Update_m03BFA4EF172CD13B1D31B7E29819F7195AFE86EC (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -29014,7 +29014,7 @@ IL_01ed:
 		return;
 	}
 }
-// Method Definition Index: 54991
+// Method Definition Index: 54993
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_SetupJoystick_mAD6E11A549C1A6290F20C1372958E9435F979D93 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -29081,7 +29081,7 @@ IL_0009:
 		return;
 	}
 }
-// Method Definition Index: 54992
+// Method Definition Index: 54994
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_OnJoystickDown_mF8CDC62BC24980F7F34C617D2A51455DF7153570 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, PointerDownEvent_tABAAD1BACBB98156D6BCCED51E11883EAFE03A51* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -29175,7 +29175,7 @@ IL_0038:
 		return;
 	}
 }
-// Method Definition Index: 54993
+// Method Definition Index: 54995
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_OnJoystickMove_mCA039F911EA274779A26B8B57E64E64E4868CADD (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, PointerMoveEvent_t2C1E2E20A07034638F48C3EB94B8520549D770C3* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -29238,7 +29238,7 @@ IL_0022:
 		return;
 	}
 }
-// Method Definition Index: 54994
+// Method Definition Index: 54996
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_OnJoystickUp_m8B12B8EEDDF308C9AF25B8AD3921BB52C0FA7F2F (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, PointerUpEvent_tCE779E8B94675B6A2758B82F6A84771CB26913D9* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -29301,7 +29301,7 @@ IL_0033:
 		return;
 	}
 }
-// Method Definition Index: 54995
+// Method Definition Index: 54997
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_OnJoystickCaptureOut_mC9C7358AB2E9845221DF8BFBFBB567B62C084566 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, PointerCaptureOutEvent_t3D53CEE79BD37EC74F40289B4D5501C4449905E5* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -29339,7 +29339,7 @@ IL_000f:
 		return;
 	}
 }
-// Method Definition Index: 54996
+// Method Definition Index: 54998
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_UpdateJoystick_m816CB1CE15F274AD26AE7591E0CA5EB204BBFC79 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7 ___0_localPos, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -29552,7 +29552,7 @@ IL_015a:
 		return;
 	}
 }
-// Method Definition Index: 54997
+// Method Definition Index: 54999
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_ResetJoystick_m2FBDB1835E882018950427F60494CE013D502EBA (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -29655,7 +29655,7 @@ IL_00b3:
 		return;
 	}
 }
-// Method Definition Index: 54998
+// Method Definition Index: 55000
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_UpdateJoystickSprintState_mB353D43A52C014613320A5528077338633071657 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -29876,7 +29876,7 @@ IL_00d4:
 		return;
 	}
 }
-// Method Definition Index: 54999
+// Method Definition Index: 55001
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_SetupLookZone_m2EB20744080153A4DFC274D4FAB119D3DCFC3EB5 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -29943,7 +29943,7 @@ IL_0009:
 		return;
 	}
 }
-// Method Definition Index: 55000
+// Method Definition Index: 55002
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_OnLookDown_m5F8E8855FC2AC55D3CB35F92A5412639196CBCB9 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, PointerDownEvent_tABAAD1BACBB98156D6BCCED51E11883EAFE03A51* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -30024,7 +30024,7 @@ IL_0027:
 		return;
 	}
 }
-// Method Definition Index: 55001
+// Method Definition Index: 55003
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_OnLookMove_m9EB3C81B0ACBF20D869FB9D7A63CECBDFA75C890 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, PointerMoveEvent_t2C1E2E20A07034638F48C3EB94B8520549D770C3* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -30165,7 +30165,7 @@ IL_008d:
 		return;
 	}
 }
-// Method Definition Index: 55002
+// Method Definition Index: 55004
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_OnLookUp_mD7EEF4B16AFD7DCFB9A13ACBDCFBF58D742C20C7 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, PointerUpEvent_tCE779E8B94675B6A2758B82F6A84771CB26913D9* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -30207,7 +30207,7 @@ IL_000f:
 		return;
 	}
 }
-// Method Definition Index: 55003
+// Method Definition Index: 55005
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_OnLookCaptureOut_m2DB1B4E29C34BF58A3EF9152E720F17779B89224 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, PointerCaptureOutEvent_t3D53CEE79BD37EC74F40289B4D5501C4449905E5* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -30245,7 +30245,7 @@ IL_000f:
 		return;
 	}
 }
-// Method Definition Index: 55004
+// Method Definition Index: 55006
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool GameHUDController_IsPointerReservedForJoystick_m00F995FB1FB5BEE01FA21AAA1BF3655CE60E0623 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, int32_t ___0_pointerId, Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7 ___1_panelPosition, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -30297,7 +30297,7 @@ IL_0028:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 55005
+// Method Definition Index: 55007
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_ReleaseLookPointer_mB9746AC053A49958EBB2F70B0A2133DE1BDD35FA (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, int32_t ___0_pointerId, const RuntimeMethod* method) 
 {
 	{
@@ -30346,7 +30346,7 @@ IL_0032:
 		return;
 	}
 }
-// Method Definition Index: 55006
+// Method Definition Index: 55008
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float GameHUDController_ArcButtonSizeFor_m2F58118A1C330B5113E4C2A8591A02FC94553833 (int32_t ___0_count, const RuntimeMethod* method) 
 {
 	{
@@ -30382,7 +30382,7 @@ IL_0014:
 		return (72.0f);
 	}
 }
-// Method Definition Index: 55007
+// Method Definition Index: 55009
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Texture2D_tE6505BC111DD8A424A9DBE8E05D7D09E11FFFCF4* GameHUDController_LoadInteractionIcon_mA1EB273E8F1667244026AB40A1731312068D5BDD (String_t* ___0_key, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -30453,7 +30453,7 @@ IL_001b:
 		return L_12;
 	}
 }
-// Method Definition Index: 55008
+// Method Definition Index: 55010
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Texture2D_tE6505BC111DD8A424A9DBE8E05D7D09E11FFFCF4* GameHUDController_ResolveInteractionIcon_m307D7A159193378773385C830D0ED1F1B4EA30C3 (InteractionAction_t5E77A74EB7E20BBF76921E2B39BAB8DA6B022E5C ___0_action, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -30546,7 +30546,7 @@ IL_0056:
 		return L_18;
 	}
 }
-// Method Definition Index: 55009
+// Method Definition Index: 55011
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_ShowInteractionPrompts_mAB74AE7F94079767D3F49AB835806D6B92314592 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, List_1_tE3463A5BFF93914AAD642334B3F524E1C35B2768* ___0_actions, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -31233,7 +31233,7 @@ IL_0421:
 		return;
 	}
 }
-// Method Definition Index: 55010
+// Method Definition Index: 55012
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_HideInteractionPrompt_m0DE74D056CC821F2B08D2614C8D7FC15C6B2186B (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -31275,7 +31275,7 @@ IL_0009:
 		return;
 	}
 }
-// Method Definition Index: 55011
+// Method Definition Index: 55013
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool GameHUDController_TryCancelCurrentActionFromHUD_m28B6C56B642E8D9D3664D6C8EFBB7426732A067B (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -31403,7 +31403,7 @@ IL_0071:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 55012
+// Method Definition Index: 55014
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_UpdateCancelButton_m85896541F2D9AA2BE9572E8899B1EE2D12091166 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -31568,7 +31568,7 @@ IL_0085:
 		return;
 	}
 }
-// Method Definition Index: 55013
+// Method Definition Index: 55015
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_ShowFishingCancelProgress_mD0CF084BA98426BD728CE2819E4F238DA110605A (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, float ___0_progress01, const RuntimeMethod* method) 
 {
 	{
@@ -31583,7 +31583,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_ShowFishingCancelProgr
 		return;
 	}
 }
-// Method Definition Index: 55014
+// Method Definition Index: 55016
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_SetFishingCancelProgress_m630D901A343409C15A2C69FAB8506E82C13A0AB8 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, float ___0_progress01, const RuntimeMethod* method) 
 {
 	VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* G_B2_0 = NULL;
@@ -31616,7 +31616,7 @@ IL_0017:
 		return;
 	}
 }
-// Method Definition Index: 55015
+// Method Definition Index: 55017
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_HideFishingCancelProgress_m1E009960AFF328E5C338A8132FC9192AC319F81A (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, const RuntimeMethod* method) 
 {
 	VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* G_B2_0 = NULL;
@@ -31654,7 +31654,7 @@ IL_0023:
 		return;
 	}
 }
-// Method Definition Index: 55016
+// Method Definition Index: 55018
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_ShowActionCancelProgress_m40A387E678182B087D6E3D8E3BD97F8B1748188A (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, float ___0_progress01, const RuntimeMethod* method) 
 {
 	{
@@ -31664,7 +31664,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_ShowActionCancelProgre
 		return;
 	}
 }
-// Method Definition Index: 55017
+// Method Definition Index: 55019
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_SetActionCancelProgress_mC7AAB4DF8E8D0EB37FBB7150E749FDAE444F19BE (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, float ___0_progress01, const RuntimeMethod* method) 
 {
 	{
@@ -31674,7 +31674,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_SetActionCancelProgres
 		return;
 	}
 }
-// Method Definition Index: 55018
+// Method Definition Index: 55020
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_HideActionCancelProgress_mAD7C344B9B8CA3BF086AD18C03E83710BF29CC24 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, const RuntimeMethod* method) 
 {
 	{
@@ -31683,7 +31683,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_HideActionCancelProgre
 		return;
 	}
 }
-// Method Definition Index: 55019
+// Method Definition Index: 55021
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_DrawFishingCancelProgress_m32A48E75278A61D3D8273255268D0D286CFCF82C (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, MeshGenerationContext_tD1BD8DB52C7126A7987DE5DF1A4AF47A906EAF62* ___0_context, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -31813,7 +31813,7 @@ IL_0011:
 		return;
 	}
 }
-// Method Definition Index: 55020
+// Method Definition Index: 55022
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_RefreshSprintVisual_mA393175906ACF94B2002F6737FC85EE51DE0A7EB (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -31868,7 +31868,7 @@ IL_0016:
 		return;
 	}
 }
-// Method Definition Index: 55021
+// Method Definition Index: 55023
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController__ctor_m699F9677C5983CED7C8340D202FFD24D8CA7A804 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, const RuntimeMethod* method) 
 {
 	{
@@ -31894,7 +31894,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController__ctor_m699F9677C5983CE
 		return;
 	}
 }
-// Method Definition Index: 55022
+// Method Definition Index: 55024
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController__cctor_m021FCC56E2595C31C2A8AF2B6502D6C561AE8E5C (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -32086,7 +32086,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController__cctor_m021FCC56E2595C
 		return;
 	}
 }
-// Method Definition Index: 55023
+// Method Definition Index: 55025
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_U3CQueryElementsU3Eb__87_0_m8C3E43BB24DBABD8C2BF13736A52ADD73D840521 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, PointerDownEvent_tABAAD1BACBB98156D6BCCED51E11883EAFE03A51* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -32124,7 +32124,7 @@ IL_0009:
 		return;
 	}
 }
-// Method Definition Index: 55024
+// Method Definition Index: 55026
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_U3CRegisterCallbacksU3Eb__94_0_m0E9A81AA21BC27FFBDC11DF6B3A59DE032282637 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -32191,7 +32191,7 @@ IL_0036:
 		return;
 	}
 }
-// Method Definition Index: 55025
+// Method Definition Index: 55027
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_U3CRegisterCallbacksU3Eb__94_1_m8A9FED79E7B9EA6EB81F86AFBF57C5DC6503E5A5 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -32230,7 +32230,7 @@ IL_001a:
 		return;
 	}
 }
-// Method Definition Index: 55026
+// Method Definition Index: 55028
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_U3CRegisterCallbacksU3Eb__94_2_m7BA0DF511E2720A1A16E77CC2516C9F5269806A8 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -32271,7 +32271,7 @@ IL_0020:
 		return;
 	}
 }
-// Method Definition Index: 55027
+// Method Definition Index: 55029
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_U3CRegisterCallbacksU3Eb__94_3_mAD5492E900F46FDAFEFD345313785575E127D7F4 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -32312,7 +32312,7 @@ IL_0021:
 		return;
 	}
 }
-// Method Definition Index: 55028
+// Method Definition Index: 55030
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_U3CRegisterCallbacksU3Eb__94_4_mDC6726A75969760F41047B08608D294E0EED5D30 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -32353,7 +32353,7 @@ IL_0020:
 		return;
 	}
 }
-// Method Definition Index: 55029
+// Method Definition Index: 55031
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_U3CRegisterCallbacksU3Eb__94_5_m6BCB82BC1AB71735D90BDDCEFAF3D0A1BC74BF4A (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -32394,7 +32394,7 @@ IL_0020:
 		return;
 	}
 }
-// Method Definition Index: 55030
+// Method Definition Index: 55032
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_U3CRegisterCallbacksU3Eb__94_6_mFC56EBD228723845B04C484A4804B7C2AF20B179 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -32435,7 +32435,7 @@ IL_0020:
 		return;
 	}
 }
-// Method Definition Index: 55031
+// Method Definition Index: 55033
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_U3CRegisterCallbacksU3Eb__94_7_m5EA8CA7CDB693C0BED22D87F03D63B5AE194A795 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -32476,7 +32476,7 @@ IL_0020:
 		return;
 	}
 }
-// Method Definition Index: 55032
+// Method Definition Index: 55034
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_U3CRegisterCallbacksU3Eb__94_8_m462F7C2CE961C11B02C52EF884C4980F2002D6AB (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -32517,7 +32517,7 @@ IL_0020:
 		return;
 	}
 }
-// Method Definition Index: 55033
+// Method Definition Index: 55035
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_U3CRegisterCallbacksU3Eb__94_9_m4AB766A9531BF735C535842666AB627CDC6D1F79 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -32558,7 +32558,7 @@ IL_0020:
 		return;
 	}
 }
-// Method Definition Index: 55034
+// Method Definition Index: 55036
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_U3CRegisterCallbacksU3Eb__94_10_mAB4CB3845A36FD7CCBC3E7C794711AE463E3765F (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -32599,7 +32599,7 @@ IL_0020:
 		return;
 	}
 }
-// Method Definition Index: 55035
+// Method Definition Index: 55037
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_U3CRegisterCallbacksU3Eb__94_11_mD8B18A5E38328D59CF3C1534D9C34E2775D5719B (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -32658,7 +32658,7 @@ IL_0033:
 		return;
 	}
 }
-// Method Definition Index: 55036
+// Method Definition Index: 55038
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_U3CRegisterCallbacksU3Eb__94_12_m3872D58F73D3DB65BF6FF267055013F71B518391 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -32699,7 +32699,7 @@ IL_0020:
 		return;
 	}
 }
-// Method Definition Index: 55037
+// Method Definition Index: 55039
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_U3CRegisterCallbacksU3Eb__94_13_mD306BDBEA944EEC989ECC86D7A903C80B4FF4CDE (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -32714,7 +32714,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_U3CRegisterCallbacksU3
 		return;
 	}
 }
-// Method Definition Index: 55038
+// Method Definition Index: 55040
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_U3CRegisterCallbacksU3Eb__94_15_mF362B759D0371EC3FDFD8C3723A1CB2B1505020F (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, PointerDownEvent_tABAAD1BACBB98156D6BCCED51E11883EAFE03A51* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -32767,7 +32767,7 @@ IL_000e:
 		return;
 	}
 }
-// Method Definition Index: 55039
+// Method Definition Index: 55041
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_U3CRegisterCallbacksU3Eb__94_16_m3C7DEA47AE843A23C20D4BFA948B7DBC03A74B6E (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, PointerUpEvent_tCE779E8B94675B6A2758B82F6A84771CB26913D9* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -32860,7 +32860,7 @@ IL_0061:
 		return;
 	}
 }
-// Method Definition Index: 55040
+// Method Definition Index: 55042
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_U3CRegisterCallbacksU3Eb__94_17_m58458FD8C49EA9982FA1D5BFC12C97F7849F78EA (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, PointerCaptureOutEvent_t3D53CEE79BD37EC74F40289B4D5501C4449905E5* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -32901,7 +32901,7 @@ IL_000e:
 		return;
 	}
 }
-// Method Definition Index: 55041
+// Method Definition Index: 55043
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_U3CRegisterCallbacksU3Eb__94_18_m6FC8C8FCF9CB06430EE2CF991DEB36A9D13E7E38 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -32957,7 +32957,7 @@ IL_001e:
 		return;
 	}
 }
-// Method Definition Index: 55042
+// Method Definition Index: 55044
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_U3CRegisterCallbacksU3Eb__94_19_mEA419F4B338571791F406C06907B1ECED7669F15 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -32998,7 +32998,7 @@ IL_0020:
 		return;
 	}
 }
-// Method Definition Index: 55043
+// Method Definition Index: 55045
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameHUDController_U3CRegisterCallbacksU3Eb__94_20_mEBB81DEB7229CAAB595A3792198054B636D14BF0 (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -33093,7 +33093,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Action_Invoke_m7126A54DACA72
 	typedef void (*FunctionPointerType) (RuntimeObject*, const RuntimeMethod*);
 	((FunctionPointerType)__this->___invoke_impl)((Il2CppObject*)__this->___method_code, reinterpret_cast<RuntimeMethod*>(__this->___method));
 }
-// Method Definition Index: 56806
+// Method Definition Index: 56808
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR PlayerProfileService_t341677C2E8BF495583AF04819B2335C3185A5B47* PlayerProfileService_get_Instance_m21922870AFFA030F2C69A47B7BCC7D2CC7700164_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -33108,7 +33108,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR PlayerProfileService_t341677C2E8B
 		return L_0;
 	}
 }
-// Method Definition Index: 56808
+// Method Definition Index: 56810
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR PlayerProfile_t09D50F5282A75B870E2C912121BD8B4FED5EB8F8* PlayerProfileService_get_Profile_m4FF999822AF2DA951629CC9B7B3B0B5E23A0399B_inline (PlayerProfileService_t341677C2E8BF495583AF04819B2335C3185A5B47* __this, const RuntimeMethod* method) 
 {
 	{
@@ -33132,7 +33132,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR TutorialManager_tA517EF826FE03300
 		return L_0;
 	}
 }
-// Method Definition Index: 55786
+// Method Definition Index: 55788
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR InventoryManager_t033115D1E989CF626FC0710C6FB1895D82788DDF* InventoryManager_get_Instance_m491A7891DFB69B09C18B6B258094448A9A6EEEE2_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -33147,7 +33147,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR InventoryManager_t033115D1E989CF6
 		return L_0;
 	}
 }
-// Method Definition Index: 55725
+// Method Definition Index: 55727
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR EconomyManager_t08D8384F0A9C9F401210ABA4348034DB63EFD166* EconomyManager_get_Instance_mC93C93A67D551BCABE92BB345E32013A796C3929_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -33323,7 +33323,7 @@ IL_0089:
 		return L_31;
 	}
 }
-// Method Definition Index: 56618
+// Method Definition Index: 56620
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* AuthService_get_Instance_mC5F3BCC6818176AEAD746F043ADB4B7B1F58245D_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -33338,7 +33338,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR AuthService_t84804C1CD86F65AFE5F5
 		return L_0;
 	}
 }
-// Method Definition Index: 56624
+// Method Definition Index: 56626
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR String_t* AuthService_get_Token_mAB243BD5FB2A8EBB85AEE450778BC9F82F7693D8_inline (AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* __this, const RuntimeMethod* method) 
 {
 	{
@@ -33414,7 +33414,7 @@ IL_001d:
 		return L_9;
 	}
 }
-// Method Definition Index: 54866
+// Method Definition Index: 54868
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* FishingOverlayController_get_Instance_m257D8CD0CB0564E83A5DC41B4FCCA6D5649545E8_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -33429,7 +33429,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR FishingOverlayController_t9518180
 		return L_0;
 	}
 }
-// Method Definition Index: 54867
+// Method Definition Index: 54869
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void FishingOverlayController_set_Instance_m2DF81F43DAC518C9185E547AF25E45DEE720BBC5_inline (FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* ___0_value, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -33446,7 +33446,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void FishingOverlayController_set
 		return;
 	}
 }
-// Method Definition Index: 54961
+// Method Definition Index: 54963
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* GameHUDController_get_Instance_mE7C5F167AB1D4A2A2E581D2D5B55E3442D984CB5_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -33525,7 +33525,7 @@ IL_002d:
 		return L_5;
 	}
 }
-// Method Definition Index: 56351
+// Method Definition Index: 56353
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR FishingLineController_t66B39BB0EF053981B6EA31EB4AA360883662843C* FishingLineController_get_Instance_m6895566B4CE04AFC220FA6A256C7060A46E031D8_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -33555,7 +33555,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR PlayerController_t7E8D7042FA2D0DF
 		return L_0;
 	}
 }
-// Method Definition Index: 55735
+// Method Definition Index: 55737
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int64_t EconomyManager_GetPOS_m7FAB4374654A214C09768828849F6BC82235C877_inline (EconomyManager_t08D8384F0A9C9F401210ABA4348034DB63EFD166* __this, const RuntimeMethod* method) 
 {
 	{
@@ -33564,7 +33564,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int64_t EconomyManager_GetPOS_m7F
 		return L_0;
 	}
 }
-// Method Definition Index: 55744
+// Method Definition Index: 55746
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t ExperienceManager_get_Level_m215BF8A1BC4BFF1A0DB7D4F60FC221ACD39673E7_inline (ExperienceManager_t9FEE6E0C119587D4D501CA28CFA186BE08900076* __this, const RuntimeMethod* method) 
 {
 	{
@@ -33601,7 +33601,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void VisualElement_set_generateVi
 		return;
 	}
 }
-// Method Definition Index: 55746
+// Method Definition Index: 55748
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t ExperienceManager_get_ExpInLevel_m71B8E1BC1BD2294B4F3C57F13EC15702DB199393_inline (ExperienceManager_t9FEE6E0C119587D4D501CA28CFA186BE08900076* __this, const RuntimeMethod* method) 
 {
 	{
@@ -33626,7 +33626,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR GameManager_tFE129A0017AF5BBD30FD
 		return L_0;
 	}
 }
-// Method Definition Index: 56628
+// Method Definition Index: 56630
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR String_t* AuthService_get_Username_mFD01939AB53FEFCB3A66C50195CE48C94D3283F0_inline (AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* __this, const RuntimeMethod* method) 
 {
 	{
@@ -33635,7 +33635,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR String_t* AuthService_get_Usernam
 		return L_0;
 	}
 }
-// Method Definition Index: 54962
+// Method Definition Index: 54964
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void GameHUDController_set_Instance_m8D6783745A978F6F58227C2AB31DC3DF24FF2643_inline (GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* ___0_value, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -33653,7 +33653,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void GameHUDController_set_Instan
 		return;
 	}
 }
-// Method Definition Index: 54731
+// Method Definition Index: 54733
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR ChatPanelController_tA561119C4D0916AD61F0BF611A277BC8B001F195* ChatPanelController_get_Instance_m4F22E05F3313328500B4BDA1578F98F4B6A501A5_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -33971,7 +33971,7 @@ IL_003b:
 		return (bool)G_B5_0;
 	}
 }
-// Method Definition Index: 56045
+// Method Definition Index: 56047
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* FarmInteractionController_get_Instance_m38C68A0A544291F95BD13376E15006083172D1DE_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
