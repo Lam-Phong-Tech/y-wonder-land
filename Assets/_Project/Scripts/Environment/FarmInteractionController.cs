@@ -144,6 +144,16 @@ namespace YWonderLand.Environment
         private const float DemolishConfirmWindow = 1.25f;
         private const string FertilizerItemId = "fertilizer_01";
 
+        // Xác nhận trồng cây LEO GIÀN (chiếm nhiều ô). Khách báo 13/08: gieo xong thấy
+        // "khu vực xung quanh cách tầm 6 ô bị dính liên kết", tưởng ruộng hỏng — thực ra
+        // là chanh dây (plotSlots = 20) khoá 19 ô đã cuốc quanh đó làm giàn, mà game
+        // không hề báo (chỉ có Debug.Log). Hỏi trước khi trừ hạt để không ai mất ruộng oan.
+        private FarmTile pendingMultiSlotTile;
+        private string pendingMultiSlotSeedId;
+        private float multiSlotConfirmTimer;
+        // Dài hơn hẳn DemolishConfirmWindow vì người chơi cần thời gian ĐỌC xem mất bao nhiêu ô.
+        private const float MultiSlotConfirmWindow = 8f;
+
         [Header("Bón phân (khách chốt 30/07)")]
         [Tooltip("Mỗi lần bón rút thẳng bao nhiêu GIỜ thời gian chờ. Cố định, KHÔNG theo phần trăm " +
                  "— khách chốt vậy để cây dài ngày không bị lợi dụng. Mặc định 3.6 giờ = đúng 15% " +
@@ -1613,6 +1623,18 @@ namespace YWonderLand.Environment
                     pendingDemolishTile = null;
                     pendingDemolishPath = null;
                     demolishConfirmTimer = 0f;
+                }
+            }
+
+            // Hết giờ xác nhận trồng cây leo giàn -> quên lựa chọn, lần sau hỏi lại từ đầu.
+            if (multiSlotConfirmTimer > 0f)
+            {
+                multiSlotConfirmTimer -= Time.deltaTime;
+                if (multiSlotConfirmTimer <= 0f)
+                {
+                    pendingMultiSlotTile = null;
+                    pendingMultiSlotSeedId = null;
+                    multiSlotConfirmTimer = 0f;
                 }
             }
 
@@ -4295,6 +4317,11 @@ namespace YWonderLand.Environment
                 return;
             }
 
+            // Cây leo giàn khoá thêm nhiều ô đất xung quanh -> hỏi TRƯỚC khi trừ hạt và
+            // trước khi múa động tác. Trả false thì chưa mất gì, túi đồ vẫn đang mở nên
+            // người chơi chỉ cần bấm lại đúng hạt đó để đồng ý.
+            if (!ConfirmMultiSlotPlanting(pendingPlantTile, itemId)) return;
+
             pendingSeedId = itemId;
 
             // Remove seed from inventory
@@ -4489,6 +4516,40 @@ namespace YWonderLand.Environment
             return crop != null ? Mathf.Max(1, crop.seedItemCost) : 1;
         }
 
+        /// <summary>
+        /// Xác nhận 2 bước trước khi trồng cây LEO GIÀN (plotSlots > 1).
+        /// Trả về true khi được phép trồng: cây 1 ô đi thẳng, cây nhiều ô phải bấm lần 2.
+        /// PHẢI gọi TRƯỚC khi trừ hạt giống — trả false nghĩa là chưa mất gì cả.
+        /// </summary>
+        private bool ConfirmMultiSlotPlanting(FarmTile tile, string seedId)
+        {
+            var cropDb = Resources.Load<CropDatabase>("CropDatabase");
+            var crop = cropDb != null ? cropDb.GetCropBySeedId(seedId) : null;
+            int slots = crop != null ? Mathf.Max(1, crop.plotSlots) : 1;
+            if (slots <= 1) return true;   // cây thường: không khoá ô nào, khỏi hỏi
+
+            bool alreadyAsked = pendingMultiSlotTile == tile
+                                && pendingMultiSlotSeedId == seedId
+                                && multiSlotConfirmTimer > 0f;
+            if (alreadyAsked)
+            {
+                pendingMultiSlotTile = null;
+                pendingMultiSlotSeedId = null;
+                multiSlotConfirmTimer = 0f;
+                return true;
+            }
+
+            pendingMultiSlotTile = tile;
+            pendingMultiSlotSeedId = seedId;
+            multiSlotConfirmTimer = MultiSlotConfirmWindow;
+            ScreenToast.Show(
+                $"{GetItemDisplayName(seedId)} là cây leo giàn: chiếm {slots} ô đất — ô này và " +
+                $"{slots - 1} ô đã cuốc xung quanh sẽ bị khoá lại, không cuốc/gieo riêng được " +
+                "cho tới khi nhổ cây. Chọn hạt lần nữa để đồng ý.",
+                MultiSlotConfirmWindow);
+            return false;
+        }
+
         // Trồng cây có thể CHIẾM NHIỀU Ô (giàn): cây nhiều ô (vd chanh dây 20 ô) cần thêm ô trống gần nhất.
         private bool PlantWithSlots(FarmTile master, string seedId)
         {
@@ -4525,6 +4586,11 @@ namespace YWonderLand.Environment
             }
             foreach (var t in extras) t.OccupyAsSlot(master);
             master.RegisterSlaves(extras);
+            // Báo cho NGƯỜI CHƠI, không chỉ Debug.Log: nếu không nói thì họ chỉ thấy một
+            // vùng ruộng quanh đó tự dưng không thao tác được và tưởng game lỗi.
+            ScreenToast.Show(
+                $"Đã trồng {GetItemDisplayName(seedId)}. {extras.Count} ô đất xung quanh giờ là ô giàn — " +
+                "nhổ cây thì các ô này tự do trở lại.", 4f);
             Debug.Log($"[FarmInteraction] Trồng {seedId} chiếm {slots} ô (1 master + {extras.Count} ô giàn).");
             return true;
         }
