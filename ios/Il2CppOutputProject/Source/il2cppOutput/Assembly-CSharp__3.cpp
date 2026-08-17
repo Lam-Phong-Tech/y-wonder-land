@@ -33093,7 +33093,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Action_Invoke_m7126A54DACA72
 	typedef void (*FunctionPointerType) (RuntimeObject*, const RuntimeMethod*);
 	((FunctionPointerType)__this->___invoke_impl)((Il2CppObject*)__this->___method_code, reinterpret_cast<RuntimeMethod*>(__this->___method));
 }
-// Method Definition Index: 56808
+// Method Definition Index: 56812
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR PlayerProfileService_t341677C2E8BF495583AF04819B2335C3185A5B47* PlayerProfileService_get_Instance_m21922870AFFA030F2C69A47B7BCC7D2CC7700164_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -33108,7 +33108,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR PlayerProfileService_t341677C2E8B
 		return L_0;
 	}
 }
-// Method Definition Index: 56810
+// Method Definition Index: 56814
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR PlayerProfile_t09D50F5282A75B870E2C912121BD8B4FED5EB8F8* PlayerProfileService_get_Profile_m4FF999822AF2DA951629CC9B7B3B0B5E23A0399B_inline (PlayerProfileService_t341677C2E8BF495583AF04819B2335C3185A5B47* __this, const RuntimeMethod* method) 
 {
 	{
@@ -33132,7 +33132,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR TutorialManager_tA517EF826FE03300
 		return L_0;
 	}
 }
-// Method Definition Index: 55788
+// Method Definition Index: 55792
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR InventoryManager_t033115D1E989CF626FC0710C6FB1895D82788DDF* InventoryManager_get_Instance_m491A7891DFB69B09C18B6B258094448A9A6EEEE2_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -33147,7 +33147,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR InventoryManager_t033115D1E989CF6
 		return L_0;
 	}
 }
-// Method Definition Index: 55727
+// Method Definition Index: 55731
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR EconomyManager_t08D8384F0A9C9F401210ABA4348034DB63EFD166* EconomyManager_get_Instance_mC93C93A67D551BCABE92BB345E32013A796C3929_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -33323,7 +33323,7 @@ IL_0089:
 		return L_31;
 	}
 }
-// Method Definition Index: 56620
+// Method Definition Index: 56624
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* AuthService_get_Instance_mC5F3BCC6818176AEAD746F043ADB4B7B1F58245D_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -33338,7 +33338,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR AuthService_t84804C1CD86F65AFE5F5
 		return L_0;
 	}
 }
-// Method Definition Index: 56626
+// Method Definition Index: 56630
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR String_t* AuthService_get_Token_mAB243BD5FB2A8EBB85AEE450778BC9F82F7693D8_inline (AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* __this, const RuntimeMethod* method) 
 {
 	{
@@ -33525,7 +33525,7 @@ IL_002d:
 		return L_5;
 	}
 }
-// Method Definition Index: 56353
+// Method Definition Index: 56357
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR FishingLineController_t66B39BB0EF053981B6EA31EB4AA360883662843C* FishingLineController_get_Instance_m6895566B4CE04AFC220FA6A256C7060A46E031D8_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -33555,7 +33555,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR PlayerController_t7E8D7042FA2D0DF
 		return L_0;
 	}
 }
-// Method Definition Index: 55737
+// Method Definition Index: 55741
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int64_t EconomyManager_GetPOS_m7FAB4374654A214C09768828849F6BC82235C877_inline (EconomyManager_t08D8384F0A9C9F401210ABA4348034DB63EFD166* __this, const RuntimeMethod* method) 
 {
 	{
@@ -33564,7 +33564,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int64_t EconomyManager_GetPOS_m7F
 		return L_0;
 	}
 }
-// Method Definition Index: 55746
+// Method Definition Index: 55750
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t ExperienceManager_get_Level_m215BF8A1BC4BFF1A0DB7D4F60FC221ACD39673E7_inline (ExperienceManager_t9FEE6E0C119587D4D501CA28CFA186BE08900076* __this, const RuntimeMethod* method) 
 {
 	{
@@ -33601,7 +33601,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void VisualElement_set_generateVi
 		return;
 	}
 }
-// Method Definition Index: 55748
+// Method Definition Index: 55752
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t ExperienceManager_get_ExpInLevel_m71B8E1BC1BD2294B4F3C57F13EC15702DB199393_inline (ExperienceManager_t9FEE6E0C119587D4D501CA28CFA186BE08900076* __this, const RuntimeMethod* method) 
 {
 	{
@@ -33626,7 +33626,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR GameManager_tFE129A0017AF5BBD30FD
 		return L_0;
 	}
 }
-// Method Definition Index: 56630
+// Method Definition Index: 56634
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR String_t* AuthService_get_Username_mFD01939AB53FEFCB3A66C50195CE48C94D3283F0_inline (AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* __this, const RuntimeMethod* method) 
 {
 	{
@@ -33971,7 +33971,7 @@ IL_003b:
 		return (bool)G_B5_0;
 	}
 }
-// Method Definition Index: 56047
+// Method Definition Index: 56051
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* FarmInteractionController_get_Instance_m38C68A0A544291F95BD13376E15006083172D1DE_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
