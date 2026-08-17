@@ -12788,13 +12788,13 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ApplyAuthModeLayou
 	}
 	BackendConfig_t4C8C70965890CD426DACBB91F6F2CDEE36C97593* V_0 = NULL;
 	VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* V_1 = NULL;
-	Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* G_B12_0 = NULL;
-	LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* G_B12_1 = NULL;
-	Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* G_B11_0 = NULL;
-	LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* G_B11_1 = NULL;
-	int32_t G_B13_0 = 0;
-	Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* G_B13_1 = NULL;
-	LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* G_B13_2 = NULL;
+	Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* G_B15_0 = NULL;
+	LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* G_B15_1 = NULL;
+	Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* G_B14_0 = NULL;
+	LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* G_B14_1 = NULL;
+	int32_t G_B16_0 = 0;
+	Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* G_B16_1 = NULL;
+	LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* G_B16_2 = NULL;
 	{
 		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:242>
 		BackendConfig_t4C8C70965890CD426DACBB91F6F2CDEE36C97593* L_0;
@@ -12807,7 +12807,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ApplyAuthModeLayou
 		L_2 = Object_op_Inequality_mD0BE578448EAA61948F25C32F8DD55AB1F778602(L_1, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
 		if (!L_2)
 		{
-			goto IL_0018;
+			goto IL_005a;
 		}
 	}
 	{
@@ -12816,203 +12816,237 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ApplyAuthModeLayou
 		bool L_4 = L_3->___localAuthEnabled;
 		if (!L_4)
 		{
-			goto IL_0018;
+			goto IL_005a;
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:243>
-		return;
-	}
-
-IL_0018:
-	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:244>
-		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_5 = __this->___rootElement;
-		if (L_5)
-		{
-			goto IL_0021;
-		}
-	}
-	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:244>
-		return;
-	}
-
-IL_0021:
-	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:246>
-		__this->___demoFormRevealed = (bool)0;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:248>
-		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_6 = __this->___rootElement;
-		il2cpp_codegen_runtime_class_init_inline(UQueryExtensions_t1271382882DF1B8FEEDE5EFA510405ABA7BD3426_il2cpp_TypeInfo_var);
-		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_7;
-		L_7 = UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB(L_6, _stringLiteral0998258455A1F0AB46ED1973F0EB6690FEDEFEAC, (String_t*)NULL, UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB_RuntimeMethod_var);
-		LoginScreenController_SetHidden_m20FAF9D73EE9629A1B66D4E0EE1DFA970537C737(__this, L_7, (bool)1, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:249>
-		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_8 = __this->___rootElement;
-		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_9;
-		L_9 = UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB(L_8, _stringLiteral9523F727551619081C65AF8A48C547FEE2D672AD, (String_t*)NULL, UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB_RuntimeMethod_var);
-		LoginScreenController_SetHidden_m20FAF9D73EE9629A1B66D4E0EE1DFA970537C737(__this, L_9, (bool)1, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:250>
-		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_10 = __this->___rootElement;
-		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_11;
-		L_11 = UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB(L_10, _stringLiteralFB6BE6F5B2ADC13B1832CF3903FB9EA891131BAA, (String_t*)NULL, UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB_RuntimeMethod_var);
-		LoginScreenController_SetHidden_m20FAF9D73EE9629A1B66D4E0EE1DFA970537C737(__this, L_11, (bool)1, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:251>
-		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_12 = __this->___rootElement;
-		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_13;
-		L_13 = UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB(L_12, _stringLiteralA05601B54E2A9D15753FE310B2D2C9E882ED1426, (String_t*)NULL, UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB_RuntimeMethod_var);
-		LoginScreenController_SetHidden_m20FAF9D73EE9629A1B66D4E0EE1DFA970537C737(__this, L_13, (bool)1, NULL);
 		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:252>
-		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_14 = __this->___rootElement;
-		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_15;
-		L_15 = UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB(L_14, _stringLiteral5A22A8FBD5D1B25B0A067965CAF687EB1E5B33FB, (String_t*)NULL, UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB_RuntimeMethod_var);
-		LoginScreenController_SetHidden_m20FAF9D73EE9629A1B66D4E0EE1DFA970537C737(__this, L_15, (bool)1, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:253>
-		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_16 = __this->___rootElement;
-		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_17;
-		L_17 = UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB(L_16, _stringLiteral6091C2DB6EEE05D7874C41A6825786C19FAD9971, (String_t*)NULL, UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB_RuntimeMethod_var);
-		LoginScreenController_SetHidden_m20FAF9D73EE9629A1B66D4E0EE1DFA970537C737(__this, L_17, (bool)1, NULL);
+		BackendConfig_t4C8C70965890CD426DACBB91F6F2CDEE36C97593* L_5 = V_0;
+		NullCheck(L_5);
+		bool L_6 = L_5->___browserAuthEnabled;
+		if (L_6)
+		{
+			goto IL_0059;
+		}
+	}
+	{
 		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:254>
-		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_18 = __this->___rootElement;
-		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_19;
-		L_19 = UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB(L_18, _stringLiteral65378F1EE5A5FA198D9AAEC8E008B581A529826E, (String_t*)NULL, UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB_RuntimeMethod_var);
-		LoginScreenController_SetHidden_m20FAF9D73EE9629A1B66D4E0EE1DFA970537C737(__this, L_19, (bool)1, NULL);
+		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_7 = __this->___btnLoginWeb;
+		LoginScreenController_SetHidden_m20FAF9D73EE9629A1B66D4E0EE1DFA970537C737(__this, L_7, (bool)1, NULL);
 		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:255>
-		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_20 = __this->___rootElement;
-		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_21;
-		L_21 = UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB(L_20, _stringLiteral2501EB2EB33CD3BC27EAF9837420BC9FF8CC9CD1, (String_t*)NULL, UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB_RuntimeMethod_var);
-		LoginScreenController_SetHidden_m20FAF9D73EE9629A1B66D4E0EE1DFA970537C737(__this, L_21, (bool)1, NULL);
+		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_8 = __this->___btnOpenWebRegistration;
+		LoginScreenController_SetHidden_m20FAF9D73EE9629A1B66D4E0EE1DFA970537C737(__this, L_8, (bool)1, NULL);
 		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:256>
-		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_22 = __this->___btnLogin;
-		LoginScreenController_SetHidden_m20FAF9D73EE9629A1B66D4E0EE1DFA970537C737(__this, L_22, (bool)1, NULL);
+		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_9 = __this->___rootElement;
+		if (!L_9)
+		{
+			goto IL_0059;
+		}
+	}
+	{
 		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:257>
-		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_23 = __this->___btnRegister;
-		LoginScreenController_SetHidden_m20FAF9D73EE9629A1B66D4E0EE1DFA970537C737(__this, L_23, (bool)1, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:258>
-		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_24 = __this->___rootElement;
-		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_25;
-		L_25 = UQueryExtensions_Q_TisLabel_tC160668F9119CE0F5567021FB208E64A5B1C5B70_m8F4BED0AE8A46A7D6F84F222B4154231ED2DAC9F(L_24, _stringLiteral4EE6E308F634F5D33C5C8CE8A606D3D2576CCD48, (String_t*)NULL, UQueryExtensions_Q_TisLabel_tC160668F9119CE0F5567021FB208E64A5B1C5B70_m8F4BED0AE8A46A7D6F84F222B4154231ED2DAC9F_RuntimeMethod_var);
-		LoginScreenController_SetHidden_m20FAF9D73EE9629A1B66D4E0EE1DFA970537C737(__this, L_25, (bool)0, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:260>
-		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_26 = __this->___btnLoginWeb;
-		if (!L_26)
-		{
-			goto IL_0172;
-		}
-	}
-	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:262>
-		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_27 = __this->___btnLoginWeb;
-		NullCheck(L_27);
-		VirtualActionInvoker1< String_t* >::Invoke(208, L_27, _stringLiteralC010D787DFBCBE2404A584E13C9B9081646518CD);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:263>
-		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_28 = __this->___btnLoginWeb;
-		NullCheck(L_28);
-		VisualElement_RemoveFromClassList_mA7A2EC202004DFCBF38C12B70C6218BF40D21220(L_28, _stringLiteralA96D1AFBAA0810FEF44F51B052B0E45A7D664829, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:264>
-		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_29 = __this->___btnLoginWeb;
-		NullCheck(L_29);
-		VisualElement_AddToClassList_mAF0DD8D8CFD5130229A0471DD260E01ED82117F1(L_29, _stringLiteral98D73CB40E5B72EE1DC4B2D815139D3FF9C651BA, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:265>
-		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_30 = __this->___btnLoginWeb;
-		NullCheck(L_30);
-		VisualElement_AddToClassList_mAF0DD8D8CFD5130229A0471DD260E01ED82117F1(L_30, _stringLiteralC3BCDECEFAA60C4D804D822A4F41A599E9FE6630, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:266>
-		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_31 = __this->___btnLoginWeb;
-		NullCheck(L_31);
-		VisualElement_AddToClassList_mAF0DD8D8CFD5130229A0471DD260E01ED82117F1(L_31, _stringLiteral26A31A7F9CBA843ADACDFE67C28E070123872E8B, NULL);
-	}
-
-IL_0172:
-	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:270>
-		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_32 = __this->___rootElement;
+		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_10 = __this->___rootElement;
 		il2cpp_codegen_runtime_class_init_inline(UQueryExtensions_t1271382882DF1B8FEEDE5EFA510405ABA7BD3426_il2cpp_TypeInfo_var);
-		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_33;
-		L_33 = UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB(L_32, _stringLiteral9C6982A704F1DC022682CC1F56577A4F96E9BB34, (String_t*)NULL, UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB_RuntimeMethod_var);
-		V_1 = L_33;
+		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_11;
+		L_11 = UQueryExtensions_Q_TisLabel_tC160668F9119CE0F5567021FB208E64A5B1C5B70_m8F4BED0AE8A46A7D6F84F222B4154231ED2DAC9F(L_10, _stringLiteral4EE6E308F634F5D33C5C8CE8A606D3D2576CCD48, (String_t*)NULL, UQueryExtensions_Q_TisLabel_tC160668F9119CE0F5567021FB208E64A5B1C5B70_m8F4BED0AE8A46A7D6F84F222B4154231ED2DAC9F_RuntimeMethod_var);
+		LoginScreenController_SetHidden_m20FAF9D73EE9629A1B66D4E0EE1DFA970537C737(__this, L_11, (bool)1, NULL);
+	}
+
+IL_0059:
+	{
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:259>
+		return;
+	}
+
+IL_005a:
+	{
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:261>
+		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_12 = __this->___rootElement;
+		if (L_12)
+		{
+			goto IL_0063;
+		}
+	}
+	{
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:261>
+		return;
+	}
+
+IL_0063:
+	{
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:263>
+		__this->___demoFormRevealed = (bool)0;
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:265>
+		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_13 = __this->___rootElement;
+		il2cpp_codegen_runtime_class_init_inline(UQueryExtensions_t1271382882DF1B8FEEDE5EFA510405ABA7BD3426_il2cpp_TypeInfo_var);
+		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_14;
+		L_14 = UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB(L_13, _stringLiteral0998258455A1F0AB46ED1973F0EB6690FEDEFEAC, (String_t*)NULL, UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB_RuntimeMethod_var);
+		LoginScreenController_SetHidden_m20FAF9D73EE9629A1B66D4E0EE1DFA970537C737(__this, L_14, (bool)1, NULL);
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:266>
+		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_15 = __this->___rootElement;
+		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_16;
+		L_16 = UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB(L_15, _stringLiteral9523F727551619081C65AF8A48C547FEE2D672AD, (String_t*)NULL, UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB_RuntimeMethod_var);
+		LoginScreenController_SetHidden_m20FAF9D73EE9629A1B66D4E0EE1DFA970537C737(__this, L_16, (bool)1, NULL);
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:267>
+		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_17 = __this->___rootElement;
+		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_18;
+		L_18 = UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB(L_17, _stringLiteralFB6BE6F5B2ADC13B1832CF3903FB9EA891131BAA, (String_t*)NULL, UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB_RuntimeMethod_var);
+		LoginScreenController_SetHidden_m20FAF9D73EE9629A1B66D4E0EE1DFA970537C737(__this, L_18, (bool)1, NULL);
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:268>
+		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_19 = __this->___rootElement;
+		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_20;
+		L_20 = UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB(L_19, _stringLiteralA05601B54E2A9D15753FE310B2D2C9E882ED1426, (String_t*)NULL, UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB_RuntimeMethod_var);
+		LoginScreenController_SetHidden_m20FAF9D73EE9629A1B66D4E0EE1DFA970537C737(__this, L_20, (bool)1, NULL);
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:269>
+		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_21 = __this->___rootElement;
+		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_22;
+		L_22 = UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB(L_21, _stringLiteral5A22A8FBD5D1B25B0A067965CAF687EB1E5B33FB, (String_t*)NULL, UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB_RuntimeMethod_var);
+		LoginScreenController_SetHidden_m20FAF9D73EE9629A1B66D4E0EE1DFA970537C737(__this, L_22, (bool)1, NULL);
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:270>
+		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_23 = __this->___rootElement;
+		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_24;
+		L_24 = UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB(L_23, _stringLiteral6091C2DB6EEE05D7874C41A6825786C19FAD9971, (String_t*)NULL, UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB_RuntimeMethod_var);
+		LoginScreenController_SetHidden_m20FAF9D73EE9629A1B66D4E0EE1DFA970537C737(__this, L_24, (bool)1, NULL);
 		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:271>
-		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_34 = __this->___btnOpenWebRegistration;
-		if (!L_34)
-		{
-			goto IL_01eb;
-		}
-	}
-	{
-		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_35 = V_1;
-		if (!L_35)
-		{
-			goto IL_01eb;
-		}
-	}
-	{
+		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_25 = __this->___rootElement;
+		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_26;
+		L_26 = UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB(L_25, _stringLiteral65378F1EE5A5FA198D9AAEC8E008B581A529826E, (String_t*)NULL, UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB_RuntimeMethod_var);
+		LoginScreenController_SetHidden_m20FAF9D73EE9629A1B66D4E0EE1DFA970537C737(__this, L_26, (bool)1, NULL);
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:272>
+		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_27 = __this->___rootElement;
+		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_28;
+		L_28 = UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB(L_27, _stringLiteral2501EB2EB33CD3BC27EAF9837420BC9FF8CC9CD1, (String_t*)NULL, UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB_RuntimeMethod_var);
+		LoginScreenController_SetHidden_m20FAF9D73EE9629A1B66D4E0EE1DFA970537C737(__this, L_28, (bool)1, NULL);
 		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:273>
-		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_36 = __this->___btnOpenWebRegistration;
-		NullCheck(L_36);
-		VirtualActionInvoker1< String_t* >::Invoke(208, L_36, _stringLiteralC09998B51FD739DE7CE51380C15132AD233F2F13);
+		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_29 = __this->___btnLogin;
+		LoginScreenController_SetHidden_m20FAF9D73EE9629A1B66D4E0EE1DFA970537C737(__this, L_29, (bool)1, NULL);
 		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:274>
-		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_37 = __this->___btnOpenWebRegistration;
-		NullCheck(L_37);
-		VisualElement_RemoveFromClassList_mA7A2EC202004DFCBF38C12B70C6218BF40D21220(L_37, _stringLiteralFB4E7D64AB7A0B6D4DA284ED2C3BC84C5A1A2319, NULL);
+		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_30 = __this->___btnRegister;
+		LoginScreenController_SetHidden_m20FAF9D73EE9629A1B66D4E0EE1DFA970537C737(__this, L_30, (bool)1, NULL);
 		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:275>
-		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_38 = __this->___btnOpenWebRegistration;
-		NullCheck(L_38);
-		VisualElement_AddToClassList_mAF0DD8D8CFD5130229A0471DD260E01ED82117F1(L_38, _stringLiteralEC39DAD6ACD5895EEBF9645FC0D195291BE07533, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:276>
-		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_39 = __this->___btnOpenWebRegistration;
-		NullCheck(L_39);
-		VisualElement_AddToClassList_mAF0DD8D8CFD5130229A0471DD260E01ED82117F1(L_39, _stringLiteralA96D1AFBAA0810FEF44F51B052B0E45A7D664829, NULL);
+		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_31 = __this->___rootElement;
+		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_32;
+		L_32 = UQueryExtensions_Q_TisLabel_tC160668F9119CE0F5567021FB208E64A5B1C5B70_m8F4BED0AE8A46A7D6F84F222B4154231ED2DAC9F(L_31, _stringLiteral4EE6E308F634F5D33C5C8CE8A606D3D2576CCD48, (String_t*)NULL, UQueryExtensions_Q_TisLabel_tC160668F9119CE0F5567021FB208E64A5B1C5B70_m8F4BED0AE8A46A7D6F84F222B4154231ED2DAC9F_RuntimeMethod_var);
+		LoginScreenController_SetHidden_m20FAF9D73EE9629A1B66D4E0EE1DFA970537C737(__this, L_32, (bool)0, NULL);
 		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:277>
-		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_40 = __this->___btnOpenWebRegistration;
-		NullCheck(L_40);
-		VisualElement_AddToClassList_mAF0DD8D8CFD5130229A0471DD260E01ED82117F1(L_40, _stringLiteralC3BCDECEFAA60C4D804D822A4F41A599E9FE6630, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:278>
-		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_41 = V_1;
-		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_42 = __this->___btnOpenWebRegistration;
-		NullCheck(L_41);
-		VisualElement_Add_mE2571CCB23C09103F8732EEC73833683F7236A7F(L_41, L_42, NULL);
-	}
-
-IL_01eb:
-	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:284>
-		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_43 = __this->___demoLoginLink;
-		BackendConfig_t4C8C70965890CD426DACBB91F6F2CDEE36C97593* L_44 = V_0;
-		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
-		bool L_45;
-		L_45 = Object_op_Equality_mB6120F782D83091EF56A198FCEBCF066DB4A9605(L_44, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
-		if (L_45)
+		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_33 = __this->___btnLoginWeb;
+		if (!L_33)
 		{
-			G_B12_0 = L_43;
-			G_B12_1 = __this;
-			goto IL_0206;
+			goto IL_01b4;
 		}
-		G_B11_0 = L_43;
-		G_B11_1 = __this;
 	}
 	{
-		BackendConfig_t4C8C70965890CD426DACBB91F6F2CDEE36C97593* L_46 = V_0;
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:279>
+		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_34 = __this->___btnLoginWeb;
+		NullCheck(L_34);
+		VirtualActionInvoker1< String_t* >::Invoke(208, L_34, _stringLiteralC010D787DFBCBE2404A584E13C9B9081646518CD);
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:280>
+		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_35 = __this->___btnLoginWeb;
+		NullCheck(L_35);
+		VisualElement_RemoveFromClassList_mA7A2EC202004DFCBF38C12B70C6218BF40D21220(L_35, _stringLiteralA96D1AFBAA0810FEF44F51B052B0E45A7D664829, NULL);
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:281>
+		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_36 = __this->___btnLoginWeb;
+		NullCheck(L_36);
+		VisualElement_AddToClassList_mAF0DD8D8CFD5130229A0471DD260E01ED82117F1(L_36, _stringLiteral98D73CB40E5B72EE1DC4B2D815139D3FF9C651BA, NULL);
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:282>
+		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_37 = __this->___btnLoginWeb;
+		NullCheck(L_37);
+		VisualElement_AddToClassList_mAF0DD8D8CFD5130229A0471DD260E01ED82117F1(L_37, _stringLiteralC3BCDECEFAA60C4D804D822A4F41A599E9FE6630, NULL);
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:283>
+		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_38 = __this->___btnLoginWeb;
+		NullCheck(L_38);
+		VisualElement_AddToClassList_mAF0DD8D8CFD5130229A0471DD260E01ED82117F1(L_38, _stringLiteral26A31A7F9CBA843ADACDFE67C28E070123872E8B, NULL);
+	}
+
+IL_01b4:
+	{
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:287>
+		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_39 = __this->___rootElement;
+		il2cpp_codegen_runtime_class_init_inline(UQueryExtensions_t1271382882DF1B8FEEDE5EFA510405ABA7BD3426_il2cpp_TypeInfo_var);
+		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_40;
+		L_40 = UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB(L_39, _stringLiteral9C6982A704F1DC022682CC1F56577A4F96E9BB34, (String_t*)NULL, UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB_RuntimeMethod_var);
+		V_1 = L_40;
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:288>
+		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_41 = __this->___btnOpenWebRegistration;
+		if (!L_41)
+		{
+			goto IL_022d;
+		}
+	}
+	{
+		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_42 = V_1;
+		if (!L_42)
+		{
+			goto IL_022d;
+		}
+	}
+	{
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:290>
+		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_43 = __this->___btnOpenWebRegistration;
+		NullCheck(L_43);
+		VirtualActionInvoker1< String_t* >::Invoke(208, L_43, _stringLiteralC09998B51FD739DE7CE51380C15132AD233F2F13);
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:291>
+		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_44 = __this->___btnOpenWebRegistration;
+		NullCheck(L_44);
+		VisualElement_RemoveFromClassList_mA7A2EC202004DFCBF38C12B70C6218BF40D21220(L_44, _stringLiteralFB4E7D64AB7A0B6D4DA284ED2C3BC84C5A1A2319, NULL);
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:292>
+		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_45 = __this->___btnOpenWebRegistration;
+		NullCheck(L_45);
+		VisualElement_AddToClassList_mAF0DD8D8CFD5130229A0471DD260E01ED82117F1(L_45, _stringLiteralEC39DAD6ACD5895EEBF9645FC0D195291BE07533, NULL);
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:293>
+		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_46 = __this->___btnOpenWebRegistration;
 		NullCheck(L_46);
-		bool L_47 = L_46->___demoLoginLinkEnabled;
-		G_B13_0 = ((((int32_t)L_47) == ((int32_t)0))? 1 : 0);
-		G_B13_1 = G_B11_0;
-		G_B13_2 = G_B11_1;
-		goto IL_0207;
+		VisualElement_AddToClassList_mAF0DD8D8CFD5130229A0471DD260E01ED82117F1(L_46, _stringLiteralA96D1AFBAA0810FEF44F51B052B0E45A7D664829, NULL);
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:294>
+		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_47 = __this->___btnOpenWebRegistration;
+		NullCheck(L_47);
+		VisualElement_AddToClassList_mAF0DD8D8CFD5130229A0471DD260E01ED82117F1(L_47, _stringLiteralC3BCDECEFAA60C4D804D822A4F41A599E9FE6630, NULL);
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:295>
+		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_48 = V_1;
+		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_49 = __this->___btnOpenWebRegistration;
+		NullCheck(L_48);
+		VisualElement_Add_mE2571CCB23C09103F8732EEC73833683F7236A7F(L_48, L_49, NULL);
 	}
 
-IL_0206:
+IL_022d:
 	{
-		G_B13_0 = 1;
-		G_B13_1 = G_B12_0;
-		G_B13_2 = G_B12_1;
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:301>
+		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_50 = __this->___demoLoginLink;
+		BackendConfig_t4C8C70965890CD426DACBB91F6F2CDEE36C97593* L_51 = V_0;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_52;
+		L_52 = Object_op_Equality_mB6120F782D83091EF56A198FCEBCF066DB4A9605(L_51, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (L_52)
+		{
+			G_B15_0 = L_50;
+			G_B15_1 = __this;
+			goto IL_0248;
+		}
+		G_B14_0 = L_50;
+		G_B14_1 = __this;
+	}
+	{
+		BackendConfig_t4C8C70965890CD426DACBB91F6F2CDEE36C97593* L_53 = V_0;
+		NullCheck(L_53);
+		bool L_54 = L_53->___demoLoginLinkEnabled;
+		G_B16_0 = ((((int32_t)L_54) == ((int32_t)0))? 1 : 0);
+		G_B16_1 = G_B14_0;
+		G_B16_2 = G_B14_1;
+		goto IL_0249;
 	}
 
-IL_0207:
+IL_0248:
 	{
-		NullCheck(G_B13_2);
-		LoginScreenController_SetHidden_m20FAF9D73EE9629A1B66D4E0EE1DFA970537C737(G_B13_2, G_B13_1, (bool)G_B13_0, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:285>
+		G_B16_0 = 1;
+		G_B16_1 = G_B15_0;
+		G_B16_2 = G_B15_1;
+	}
+
+IL_0249:
+	{
+		NullCheck(G_B16_2);
+		LoginScreenController_SetHidden_m20FAF9D73EE9629A1B66D4E0EE1DFA970537C737(G_B16_2, G_B16_1, (bool)G_B16_0, NULL);
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:302>
 		return;
 	}
 }
@@ -13037,7 +13071,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ShowDemoLoginForm_
 	TextField_tDB34369F9468D7F02670087D9444EC23115827D9* G_B11_0 = NULL;
 	TextField_tDB34369F9468D7F02670087D9444EC23115827D9* G_B10_0 = NULL;
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:293>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:310>
 		bool L_0 = __this->___demoFormRevealed;
 		if (!L_0)
 		{
@@ -13045,15 +13079,15 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ShowDemoLoginForm_
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:293>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:310>
 		return;
 	}
 
 IL_0009:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:294>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:311>
 		__this->___demoFormRevealed = (bool)1;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:298>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:315>
 		bool L_1 = __this->___isBrowserAuthWaiting;
 		if (!L_1)
 		{
@@ -13061,10 +13095,10 @@ IL_0009:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:300>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:317>
 		int32_t L_2 = __this->___browserAuthUiAttempt;
 		__this->___browserAuthUiAttempt = ((int32_t)il2cpp_codegen_add(L_2, 1));
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:301>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:318>
 		AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_3;
 		L_3 = AuthService_get_Instance_mC5F3BCC6818176AEAD746F043ADB4B7B1F58245D_inline(NULL);
 		AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_4 = L_3;
@@ -13087,40 +13121,40 @@ IL_0031:
 
 IL_0036:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:302>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:319>
 		__this->___isBrowserAuthWaiting = (bool)0;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:303>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:320>
 		LoginScreenController_SetAuthControlsEnabled_m31EC13A3434A06D1F38A008CEA94B3BF2EE6E3C2(__this, (bool)1, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:304>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:321>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_5 = __this->___loginStatus;
 		LoginScreenController_ClearStatus_m84CD860A7F76C89ADAC2CE65CE30B482A052BCCD(__this, L_5, NULL);
 	}
 
 IL_0050:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:307>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:324>
 		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_6 = __this->___rootElement;
 		il2cpp_codegen_runtime_class_init_inline(UQueryExtensions_t1271382882DF1B8FEEDE5EFA510405ABA7BD3426_il2cpp_TypeInfo_var);
 		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_7;
 		L_7 = UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB(L_6, _stringLiteral9523F727551619081C65AF8A48C547FEE2D672AD, (String_t*)NULL, UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB_RuntimeMethod_var);
 		LoginScreenController_SetHidden_m20FAF9D73EE9629A1B66D4E0EE1DFA970537C737(__this, L_7, (bool)0, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:308>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:325>
 		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_8 = __this->___rootElement;
 		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_9;
 		L_9 = UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB(L_8, _stringLiteralFB6BE6F5B2ADC13B1832CF3903FB9EA891131BAA, (String_t*)NULL, UQueryExtensions_Q_TisVisualElement_t2667F9D19E62C7A315927506C06F223AB9234115_m9FBF22C0E270F6EC6772878355A935E4AC2119EB_RuntimeMethod_var);
 		LoginScreenController_SetHidden_m20FAF9D73EE9629A1B66D4E0EE1DFA970537C737(__this, L_9, (bool)0, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:309>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:326>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_10 = __this->___btnLogin;
 		LoginScreenController_SetHidden_m20FAF9D73EE9629A1B66D4E0EE1DFA970537C737(__this, L_10, (bool)0, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:310>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:327>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_11 = __this->___demoLoginLink;
 		LoginScreenController_SetHidden_m20FAF9D73EE9629A1B66D4E0EE1DFA970537C737(__this, L_11, (bool)1, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:311>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:328>
 		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_12 = __this->___rootElement;
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_13;
 		L_13 = UQueryExtensions_Q_TisLabel_tC160668F9119CE0F5567021FB208E64A5B1C5B70_m8F4BED0AE8A46A7D6F84F222B4154231ED2DAC9F(L_12, _stringLiteral4EE6E308F634F5D33C5C8CE8A606D3D2576CCD48, (String_t*)NULL, UQueryExtensions_Q_TisLabel_tC160668F9119CE0F5567021FB208E64A5B1C5B70_m8F4BED0AE8A46A7D6F84F222B4154231ED2DAC9F_RuntimeMethod_var);
 		LoginScreenController_SetHidden_m20FAF9D73EE9629A1B66D4E0EE1DFA970537C737(__this, L_13, (bool)1, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:313>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:330>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_14 = __this->___btnLogin;
 		if (!L_14)
 		{
@@ -13128,11 +13162,11 @@ IL_0050:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:315>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:332>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_15 = __this->___btnLogin;
 		NullCheck(L_15);
 		VirtualActionInvoker1< String_t* >::Invoke(208, L_15, _stringLiteral38D394174931AC85CEDD1EE0D794A08860AC5D7C);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:316>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:333>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_16 = __this->___btnLogin;
 		NullCheck(L_16);
 		VisualElement_SetEnabled_mE53446BEB2C83C4D350D9BEDDAADBE9A174EAA5B(L_16, (bool)1, NULL);
@@ -13140,10 +13174,10 @@ IL_0050:
 
 IL_00d6:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:319>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:336>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_17 = __this->___usernameField;
 		LoginScreenController_SetPlaceholder_m671D6CE23685682600B8F9F03F58AB64FB97E0CE(__this, L_17, _stringLiteral238177CA7D401302955168F8D7C2FF9C525E37EE, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:320>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:337>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_18 = __this->___usernameField;
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_19 = L_18;
 		if (L_19)
@@ -13161,7 +13195,7 @@ IL_00f2:
 	{
 		NullCheck(G_B11_0);
 		VirtualActionInvoker0::Invoke(19, G_B11_0);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:321>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:338>
 		return;
 	}
 }
@@ -13175,7 +13209,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_SetHidden_m20FAF9D
 		s_Il2CppMethodInitialized = true;
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:325>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:342>
 		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_0 = ___0_element;
 		if (L_0)
 		{
@@ -13183,13 +13217,13 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_SetHidden_m20FAF9D
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:325>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:342>
 		return;
 	}
 
 IL_0004:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:326>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:343>
 		bool L_1 = ___1_hidden;
 		if (!L_1)
 		{
@@ -13197,7 +13231,7 @@ IL_0004:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:326>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:343>
 		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_2 = ___0_element;
 		NullCheck(L_2);
 		VisualElement_AddToClassList_mAF0DD8D8CFD5130229A0471DD260E01ED82117F1(L_2, _stringLiteral0E62D1EEC1CF40EEC3E55E672939594A78C717D9, NULL);
@@ -13206,11 +13240,11 @@ IL_0004:
 
 IL_0013:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:327>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:344>
 		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_3 = ___0_element;
 		NullCheck(L_3);
 		VisualElement_RemoveFromClassList_mA7A2EC202004DFCBF38C12B70C6218BF40D21220(L_3, _stringLiteral0E62D1EEC1CF40EEC3E55E672939594A78C717D9, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:328>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:345>
 		return;
 	}
 }
@@ -13235,9 +13269,9 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ShowLoginTab_mAED4
 	VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* G_B11_0 = NULL;
 	VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* G_B10_0 = NULL;
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:334>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:351>
 		LoginScreenController_ResetKeyboardAvoidance_m2B97BFB70A737F6806D7CF354E405F1CF21ED868(__this, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:335>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:352>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_0 = __this->___tabLogin;
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_1 = L_0;
 		if (L_1)
@@ -13259,7 +13293,7 @@ IL_0012:
 
 IL_001c:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:336>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:353>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_2 = __this->___tabRegister;
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_3 = L_2;
 		if (L_3)
@@ -13281,7 +13315,7 @@ IL_0028:
 
 IL_0032:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:338>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:355>
 		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_4 = __this->___loginForm;
 		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_5 = L_4;
 		if (L_5)
@@ -13303,7 +13337,7 @@ IL_003e:
 
 IL_0048:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:339>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:356>
 		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_6 = __this->___registerForm;
 		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_7 = L_6;
 		if (L_7)
@@ -13325,13 +13359,13 @@ IL_0054:
 
 IL_005e:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:341>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:358>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_8 = __this->___loginStatus;
 		LoginScreenController_ClearStatus_m84CD860A7F76C89ADAC2CE65CE30B482A052BCCD(__this, L_8, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:342>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:359>
 		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
 		Debug_Log_m87A9A3C761FF5C43ED8A53B16190A53D08F818BB(_stringLiteral7E8F338A3C2124C8484ADA3103E14D06ABA9C451, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:343>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:360>
 		return;
 	}
 }
@@ -13356,9 +13390,9 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ShowRegisterTab_m3
 	VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* G_B11_0 = NULL;
 	VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* G_B10_0 = NULL;
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:347>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:364>
 		LoginScreenController_ResetKeyboardAvoidance_m2B97BFB70A737F6806D7CF354E405F1CF21ED868(__this, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:348>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:365>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_0 = __this->___tabRegister;
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_1 = L_0;
 		if (L_1)
@@ -13380,7 +13414,7 @@ IL_0012:
 
 IL_001c:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:349>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:366>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_2 = __this->___tabLogin;
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_3 = L_2;
 		if (L_3)
@@ -13402,7 +13436,7 @@ IL_0028:
 
 IL_0032:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:351>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:368>
 		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_4 = __this->___registerForm;
 		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_5 = L_4;
 		if (L_5)
@@ -13424,7 +13458,7 @@ IL_003e:
 
 IL_0048:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:352>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:369>
 		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_6 = __this->___loginForm;
 		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_7 = L_6;
 		if (L_7)
@@ -13446,13 +13480,13 @@ IL_0054:
 
 IL_005e:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:354>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:371>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_8 = __this->___registerStatus;
 		LoginScreenController_ClearStatus_m84CD860A7F76C89ADAC2CE65CE30B482A052BCCD(__this, L_8, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:355>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:372>
 		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
 		Debug_Log_m87A9A3C761FF5C43ED8A53B16190A53D08F818BB(_stringLiteral40B09972D0EFC16ABD1F71292248E609D8782DC2, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:356>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:373>
 		return;
 	}
 }
@@ -13478,15 +13512,15 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OpenRegistrationPa
 	String_t* G_B4_0 = NULL;
 	String_t* G_B3_0 = NULL;
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:360>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:377>
 		LoginScreenController_ResetKeyboardAvoidance_m2B97BFB70A737F6806D7CF354E405F1CF21ED868(__this, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:361>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:378>
 		LoginScreenController_ShowLoginTab_mAED44C8ADE40BB2E749C30BCC215A31D42E68CC5(__this, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:363>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:380>
 		BackendConfig_t4C8C70965890CD426DACBB91F6F2CDEE36C97593* L_0;
 		L_0 = BackendConfig_get_Active_m8ECA146F6FFC253F07ADA2483B8A9D9F558C04A1(NULL);
 		V_0 = L_0;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:364>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:381>
 		BackendConfig_t4C8C70965890CD426DACBB91F6F2CDEE36C97593* L_1 = V_0;
 		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
 		bool L_2;
@@ -13529,8 +13563,8 @@ IL_002f:
 
 IL_0034:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:365>
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:366>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:382>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:383>
 		il2cpp_codegen_runtime_class_init_inline(Uri_t1500A52B5F71A04F5D05C0852D0F2A0941842A0E_il2cpp_TypeInfo_var);
 		bool L_7;
 		L_7 = Uri_TryCreate_m183077985BD7B1BE8DBDBCC4604F775C44723EC9(G_B5_0, 1, (&V_1), NULL);
@@ -13556,31 +13590,31 @@ IL_0034:
 
 IL_0051:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:368>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:385>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_12 = __this->___loginStatus;
 		LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(__this, L_12, _stringLiteralAAA6B1B62B74CFB92B1676DB89B87DE4CEEF1665, (bool)0, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:369>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:386>
 		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
 		Debug_LogWarning_m33EF1B897E0C7C6FF538989610BFAFFEF4628CA9(_stringLiteralBE268B456FE8DA0B6D761D81728BFDBDAEF81BC6, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:370>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:387>
 		return;
 	}
 
 IL_006e:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:373>
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:374>
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:375>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:390>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:391>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:392>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_13 = __this->___loginStatus;
 		LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(__this, L_13, _stringLiteralD8E8FDC218248C858D2752B3F366EA6971F1694B, (bool)1, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:376>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:393>
 		Uri_t1500A52B5F71A04F5D05C0852D0F2A0941842A0E* L_14 = V_1;
 		NullCheck(L_14);
 		String_t* L_15;
 		L_15 = Uri_get_AbsoluteUri_m080934F4F2E2160EBEABDF00F8B6D59888EA63AE(L_14, NULL);
 		il2cpp_codegen_runtime_class_init_inline(Application_tDB03BE91CDF0ACA614A5E0B67CFB77C44EB19B21_il2cpp_TypeInfo_var);
 		Application_OpenURL_mE748FA4D503715DEE12BCA4BDD8A5305AE41DB89(L_15, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:377>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:394>
 		return;
 	}
 }
@@ -13608,7 +13642,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_TogglePasswordVisi
 	String_t* G_B10_0 = NULL;
 	String_t* G_B10_1 = NULL;
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:383>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:400>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_0 = __this->___passwordField;
 		if (L_0)
 		{
@@ -13616,21 +13650,21 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_TogglePasswordVisi
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:383>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:400>
 		return;
 	}
 
 IL_0009:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:385>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:402>
 		bool L_1 = __this->___isPasswordVisible;
 		__this->___isPasswordVisible = (bool)((((int32_t)L_1) == ((int32_t)0))? 1 : 0);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:386>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:403>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_2 = __this->___passwordField;
 		bool L_3 = __this->___isPasswordVisible;
 		NullCheck(L_2);
 		TextInputBaseField_1_set_isPasswordField_m6E4CB157A133197FBD63D0FB693FA34254568085(L_2, (bool)((((int32_t)L_3) == ((int32_t)0))? 1 : 0), TextInputBaseField_1_set_isPasswordField_m6E4CB157A133197FBD63D0FB693FA34254568085_RuntimeMethod_var);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:388>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:405>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_4 = __this->___btnTogglePassword;
 		if (!L_4)
 		{
@@ -13638,7 +13672,7 @@ IL_0009:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:390>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:407>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_5 = __this->___btnTogglePassword;
 		bool L_6 = __this->___isPasswordVisible;
 		if (L_6)
@@ -13668,7 +13702,7 @@ IL_004e:
 
 IL_0053:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:393>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:410>
 		bool L_7 = __this->___isPasswordVisible;
 		if (L_7)
 		{
@@ -13695,7 +13729,7 @@ IL_006c:
 		L_8 = String_Concat_m9E3155FB84015C823606188F53B47CB44C444991(G_B10_1, G_B10_0, NULL);
 		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
 		Debug_Log_m87A9A3C761FF5C43ED8A53B16190A53D08F818BB(L_8, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:394>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:411>
 		return;
 	}
 }
@@ -13715,7 +13749,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ToggleRegPasswordV
 	String_t* G_B6_0 = NULL;
 	Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* G_B6_1 = NULL;
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:398>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:415>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_0 = __this->___regPasswordField;
 		if (L_0)
 		{
@@ -13723,21 +13757,21 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ToggleRegPasswordV
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:398>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:415>
 		return;
 	}
 
 IL_0009:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:400>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:417>
 		bool L_1 = __this->___isRegPasswordVisible;
 		__this->___isRegPasswordVisible = (bool)((((int32_t)L_1) == ((int32_t)0))? 1 : 0);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:401>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:418>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_2 = __this->___regPasswordField;
 		bool L_3 = __this->___isRegPasswordVisible;
 		NullCheck(L_2);
 		TextInputBaseField_1_set_isPasswordField_m6E4CB157A133197FBD63D0FB693FA34254568085(L_2, (bool)((((int32_t)L_3) == ((int32_t)0))? 1 : 0), TextInputBaseField_1_set_isPasswordField_m6E4CB157A133197FBD63D0FB693FA34254568085_RuntimeMethod_var);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:403>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:420>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_4 = __this->___btnToggleRegPassword;
 		if (!L_4)
 		{
@@ -13745,7 +13779,7 @@ IL_0009:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:405>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:422>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_5 = __this->___btnToggleRegPassword;
 		bool L_6 = __this->___isRegPasswordVisible;
 		if (L_6)
@@ -13775,7 +13809,7 @@ IL_004e:
 
 IL_0053:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:407>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:424>
 		return;
 	}
 }
@@ -13887,7 +13921,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Awaitable_t690337FEC1C411606E233EA36A41337B93
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_TransitionAfterLogin_m8BC45CBDE0745BCC1B56D805F7339991FA294A19 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, const RuntimeMethod* method) 
 {
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:580>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:597>
 		bool L_0 = __this->___shouldSkipCharacterSelectAfterLogin;
 		if (!L_0)
 		{
@@ -13895,16 +13929,16 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_TransitionAfterLog
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:581>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:598>
 		LoginScreenController_TransitionToExistingCharacter_mBC803248ACD85CEDACBC43A58578A7512F887DF1(__this, NULL);
 		return;
 	}
 
 IL_000f:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:583>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:600>
 		LoginScreenController_TransitionToCharacterSelect_m2E47ECFF97AC16CC449BC2E4C35EC4B1778EDA28(__this, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:584>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:601>
 		return;
 	}
 }
@@ -13922,7 +13956,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_TransitionToExisti
 		s_Il2CppMethodInitialized = true;
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:588>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:605>
 		il2cpp_codegen_runtime_class_init_inline(GameManager_tFE129A0017AF5BBD30FDCD4403B9CCEAE064C6B6_il2cpp_TypeInfo_var);
 		GameManager_tFE129A0017AF5BBD30FDCD4403B9CCEAE064C6B6* L_0;
 		L_0 = GameManager_get_Instance_m076FE4D98E785B5AEE0B4C360C7857F824E7FBD0_inline(NULL);
@@ -13935,13 +13969,13 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_TransitionToExisti
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:590>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:607>
 		il2cpp_codegen_runtime_class_init_inline(GameManager_tFE129A0017AF5BBD30FDCD4403B9CCEAE064C6B6_il2cpp_TypeInfo_var);
 		GameManager_tFE129A0017AF5BBD30FDCD4403B9CCEAE064C6B6* L_2;
 		L_2 = GameManager_get_Instance_m076FE4D98E785B5AEE0B4C360C7857F824E7FBD0_inline(NULL);
 		NullCheck(L_2);
 		GameManager_StartGameFromProfile_m1911949022976AAC711BAA7CD644B661C2FA33F4(L_2, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:591>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:608>
 		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
 		Debug_Log_m87A9A3C761FF5C43ED8A53B16190A53D08F818BB(_stringLiteralC7B66CFAD0D64185F82C485B8C36C9B91F771312, NULL);
 		return;
@@ -13949,10 +13983,10 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_TransitionToExisti
 
 IL_0022:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:595>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:612>
 		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
 		Debug_LogWarning_m33EF1B897E0C7C6FF538989610BFAFFEF4628CA9(_stringLiteral51BA66FB7D983C15B270256A804AA2DCCD714C73, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:597>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:614>
 		return;
 	}
 }
@@ -13970,7 +14004,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_TransitionToCharac
 		s_Il2CppMethodInitialized = true;
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:601>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:618>
 		il2cpp_codegen_runtime_class_init_inline(GameManager_tFE129A0017AF5BBD30FDCD4403B9CCEAE064C6B6_il2cpp_TypeInfo_var);
 		GameManager_tFE129A0017AF5BBD30FDCD4403B9CCEAE064C6B6* L_0;
 		L_0 = GameManager_get_Instance_m076FE4D98E785B5AEE0B4C360C7857F824E7FBD0_inline(NULL);
@@ -13983,13 +14017,13 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_TransitionToCharac
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:603>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:620>
 		il2cpp_codegen_runtime_class_init_inline(GameManager_tFE129A0017AF5BBD30FDCD4403B9CCEAE064C6B6_il2cpp_TypeInfo_var);
 		GameManager_tFE129A0017AF5BBD30FDCD4403B9CCEAE064C6B6* L_2;
 		L_2 = GameManager_get_Instance_m076FE4D98E785B5AEE0B4C360C7857F824E7FBD0_inline(NULL);
 		NullCheck(L_2);
 		GameManager_SetGameState_m5423452873452FC33B9228A8BF74154F9CC166BF(L_2, 1, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:604>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:621>
 		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
 		Debug_Log_m87A9A3C761FF5C43ED8A53B16190A53D08F818BB(_stringLiteralB1BF62142063D81281C5F091911335B612B58725, NULL);
 		return;
@@ -13997,10 +14031,10 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_TransitionToCharac
 
 IL_0023:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:608>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:625>
 		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
 		Debug_LogWarning_m33EF1B897E0C7C6FF538989610BFAFFEF4628CA9(_stringLiteralEB0B020C457A08DB2B463BC250C11DE06B145453, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:610>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:627>
 		return;
 	}
 }
@@ -14030,11 +14064,11 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OnRegisterFieldsCh
 	String_t* G_B17_0 = NULL;
 	int32_t G_B19_0 = 0;
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:617>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:634>
 		bool L_0;
 		L_0 = LoginScreenController_ValidateRegisterForm_m64E7712F89137D5816853FAEFB07022247DA3686(__this, (&V_0), NULL);
 		V_1 = L_0;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:619>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:636>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_1 = __this->___btnRegister;
 		if (!L_1)
 		{
@@ -14042,7 +14076,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OnRegisterFieldsCh
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:621>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:638>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_2 = __this->___btnRegister;
 		bool L_3 = V_1;
 		NullCheck(L_2);
@@ -14051,10 +14085,10 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OnRegisterFieldsCh
 
 IL_001d:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:625>
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:626>
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:627>
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:628>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:642>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:643>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:644>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:645>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_4 = __this->___regUsernameField;
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_5 = L_4;
 		if (L_5)
@@ -14189,7 +14223,7 @@ IL_0084:
 IL_0085:
 	{
 		V_2 = (bool)G_B19_0;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:630>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:647>
 		bool L_20 = V_1;
 		if (L_20)
 		{
@@ -14197,7 +14231,7 @@ IL_0085:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:632>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:649>
 		bool L_21 = V_2;
 		if (!L_21)
 		{
@@ -14205,7 +14239,7 @@ IL_0085:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:634>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:651>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_22 = __this->___registerStatus;
 		String_t* L_23 = V_0;
 		LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(__this, L_22, L_23, (bool)0, NULL);
@@ -14214,7 +14248,7 @@ IL_0085:
 
 IL_009b:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:638>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:655>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_24 = __this->___registerStatus;
 		LoginScreenController_ClearStatus_m84CD860A7F76C89ADAC2CE65CE30B482A052BCCD(__this, L_24, NULL);
 		return;
@@ -14222,10 +14256,10 @@ IL_009b:
 
 IL_00a8:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:643>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:660>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_25 = __this->___registerStatus;
 		LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(__this, L_25, _stringLiteral2FE83C397FDDACB931B86D376319CD9783BB076B, (bool)1, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:645>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:662>
 		return;
 	}
 }
@@ -14282,11 +14316,11 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool LoginScreenController_ValidateRegisterFo
 	String_t* G_B20_0 = NULL;
 	String_t* G_B19_0 = NULL;
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:649>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:666>
 		String_t** L_0 = ___0_errorMessage;
 		*((String_t**)L_0) = (String_t*)_stringLiteralDA39A3EE5E6B4B0D3255BFEF95601890AFD80709;
 		Il2CppCodeGenWriteBarrier((void**)(String_t**)L_0, (void*)(String_t*)_stringLiteralDA39A3EE5E6B4B0D3255BFEF95601890AFD80709);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:650>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:667>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_1 = __this->___regUsernameField;
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_2 = L_1;
 		if (L_2)
@@ -14329,7 +14363,7 @@ IL_0022:
 		String_t* L_5;
 		L_5 = String_Trim_mCD6D8C6D4CFD15225D12DB7D3E0544CA80FB8DA5(G_B5_0, NULL);
 		V_0 = L_5;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:651>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:668>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_6 = __this->___regEmailField;
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_7 = L_6;
 		if (L_7)
@@ -14372,7 +14406,7 @@ IL_0043:
 		String_t* L_10;
 		L_10 = String_Trim_mCD6D8C6D4CFD15225D12DB7D3E0544CA80FB8DA5(G_B10_0, NULL);
 		V_1 = L_10;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:652>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:669>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_11 = __this->___regPasswordField;
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_12 = L_11;
 		if (L_12)
@@ -14412,7 +14446,7 @@ IL_005b:
 IL_0064:
 	{
 		V_2 = G_B15_0;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:653>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:670>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_15 = __this->___regConfirmField;
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_16 = L_15;
 		if (L_16)
@@ -14452,8 +14486,8 @@ IL_0077:
 IL_0080:
 	{
 		V_3 = G_B20_0;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:656>
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:657>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:673>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:674>
 		String_t* L_19 = V_0;
 		bool L_20;
 		L_20 = String_IsNullOrEmpty_mEA9E3FB005AC28FE02E69FCF95A7B8456192B478(L_19, NULL);
@@ -14492,17 +14526,17 @@ IL_0080:
 
 IL_00a1:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:659>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:676>
 		String_t** L_27 = ___0_errorMessage;
 		*((String_t**)L_27) = (String_t*)_stringLiteralE7596FC874EC6AE9BBEAAC2F79445913C172747B;
 		Il2CppCodeGenWriteBarrier((void**)(String_t**)L_27, (void*)(String_t*)_stringLiteralE7596FC874EC6AE9BBEAAC2F79445913C172747B);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:660>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:677>
 		return (bool)0;
 	}
 
 IL_00aa:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:664>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:681>
 		String_t* L_28 = V_0;
 		NullCheck(L_28);
 		int32_t L_29;
@@ -14513,17 +14547,17 @@ IL_00aa:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:666>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:683>
 		String_t** L_30 = ___0_errorMessage;
 		*((String_t**)L_30) = (String_t*)_stringLiteral3827B134C65B817F264FFB91140D89F1A97EFA08;
 		Il2CppCodeGenWriteBarrier((void**)(String_t**)L_30, (void*)(String_t*)_stringLiteral3827B134C65B817F264FFB91140D89F1A97EFA08);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:667>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:684>
 		return (bool)0;
 	}
 
 IL_00bd:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:669>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:686>
 		String_t* L_31 = V_0;
 		NullCheck(L_31);
 		int32_t L_32;
@@ -14534,17 +14568,17 @@ IL_00bd:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:671>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:688>
 		String_t** L_33 = ___0_errorMessage;
 		*((String_t**)L_33) = (String_t*)_stringLiteralE1AC7C6D5E3E63BEDD339055003261B5D7C38582;
 		Il2CppCodeGenWriteBarrier((void**)(String_t**)L_33, (void*)(String_t*)_stringLiteralE1AC7C6D5E3E63BEDD339055003261B5D7C38582);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:672>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:689>
 		return (bool)0;
 	}
 
 IL_00d0:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:674>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:691>
 		String_t* L_34 = V_0;
 		il2cpp_codegen_runtime_class_init_inline(Regex_tE773142C2BE45C5D362B0F815AFF831707A51772_il2cpp_TypeInfo_var);
 		bool L_35;
@@ -14555,17 +14589,17 @@ IL_00d0:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:676>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:693>
 		String_t** L_36 = ___0_errorMessage;
 		*((String_t**)L_36) = (String_t*)_stringLiteralA6CE383AC130256D2D172E05FF181343820AFD63;
 		Il2CppCodeGenWriteBarrier((void**)(String_t**)L_36, (void*)(String_t*)_stringLiteralA6CE383AC130256D2D172E05FF181343820AFD63);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:677>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:694>
 		return (bool)0;
 	}
 
 IL_00e6:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:681>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:698>
 		String_t* L_37 = V_1;
 		il2cpp_codegen_runtime_class_init_inline(Regex_tE773142C2BE45C5D362B0F815AFF831707A51772_il2cpp_TypeInfo_var);
 		bool L_38;
@@ -14576,17 +14610,17 @@ IL_00e6:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:683>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:700>
 		String_t** L_39 = ___0_errorMessage;
 		*((String_t**)L_39) = (String_t*)_stringLiteralA955FD9B29A3112D2A2D6BE36DBC813B1CC04D50;
 		Il2CppCodeGenWriteBarrier((void**)(String_t**)L_39, (void*)(String_t*)_stringLiteralA955FD9B29A3112D2A2D6BE36DBC813B1CC04D50);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:684>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:701>
 		return (bool)0;
 	}
 
 IL_00fc:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:688>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:705>
 		String_t* L_40 = V_2;
 		NullCheck(L_40);
 		int32_t L_41;
@@ -14597,17 +14631,17 @@ IL_00fc:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:690>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:707>
 		String_t** L_42 = ___0_errorMessage;
 		*((String_t**)L_42) = (String_t*)_stringLiteral25FA7AC311323FA4CBB835D69FE4B4005AACC09D;
 		Il2CppCodeGenWriteBarrier((void**)(String_t**)L_42, (void*)(String_t*)_stringLiteral25FA7AC311323FA4CBB835D69FE4B4005AACC09D);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:691>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:708>
 		return (bool)0;
 	}
 
 IL_010f:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:693>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:710>
 		String_t* L_43 = V_2;
 		NullCheck(L_43);
 		int32_t L_44;
@@ -14618,25 +14652,25 @@ IL_010f:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:695>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:712>
 		String_t** L_45 = ___0_errorMessage;
 		*((String_t**)L_45) = (String_t*)_stringLiteralCD304950503EE3FD7F282BFDAD4E60AF54DDE5A9;
 		Il2CppCodeGenWriteBarrier((void**)(String_t**)L_45, (void*)(String_t*)_stringLiteralCD304950503EE3FD7F282BFDAD4E60AF54DDE5A9);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:696>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:713>
 		return (bool)0;
 	}
 
 IL_0122:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:699>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:716>
 		V_4 = (bool)0;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:700>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:717>
 		V_5 = (bool)0;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:701>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:718>
 		V_6 = (bool)0;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:702>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:719>
 		V_7 = (bool)0;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:704>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:721>
 		String_t* L_46 = V_2;
 		V_8 = L_46;
 		V_9 = 0;
@@ -14645,14 +14679,14 @@ IL_0122:
 
 IL_0136:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:704>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:721>
 		String_t* L_47 = V_8;
 		int32_t L_48 = V_9;
 		NullCheck(L_47);
 		Il2CppChar L_49;
 		L_49 = String_get_Chars_mC49DF0CD2D3BE7BE97B3AD9C995BE3094F8E36D3(L_47, L_48, NULL);
 		V_10 = L_49;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:706>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:723>
 		Il2CppChar L_50 = V_10;
 		il2cpp_codegen_runtime_class_init_inline(il2cpp_defaults.char_class);
 		bool L_51;
@@ -14663,14 +14697,14 @@ IL_0136:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:706>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:723>
 		V_4 = (bool)1;
 		goto IL_0177;
 	}
 
 IL_014f:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:707>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:724>
 		Il2CppChar L_52 = V_10;
 		il2cpp_codegen_runtime_class_init_inline(il2cpp_defaults.char_class);
 		bool L_53;
@@ -14681,14 +14715,14 @@ IL_014f:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:707>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:724>
 		V_5 = (bool)1;
 		goto IL_0177;
 	}
 
 IL_015d:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:708>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:725>
 		Il2CppChar L_54 = V_10;
 		il2cpp_codegen_runtime_class_init_inline(il2cpp_defaults.char_class);
 		bool L_55;
@@ -14699,14 +14733,14 @@ IL_015d:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:708>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:725>
 		V_6 = (bool)1;
 		goto IL_0177;
 	}
 
 IL_016b:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:709>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:726>
 		Il2CppChar L_56 = V_10;
 		il2cpp_codegen_runtime_class_init_inline(il2cpp_defaults.char_class);
 		bool L_57;
@@ -14717,7 +14751,7 @@ IL_016b:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:709>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:726>
 		V_7 = (bool)1;
 	}
 
@@ -14729,7 +14763,7 @@ IL_0177:
 
 IL_017d:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:704>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:721>
 		int32_t L_59 = V_9;
 		String_t* L_60 = V_8;
 		NullCheck(L_60);
@@ -14741,7 +14775,7 @@ IL_017d:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:712>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:729>
 		bool L_62 = V_4;
 		if (!L_62)
 		{
@@ -14772,17 +14806,17 @@ IL_017d:
 
 IL_0198:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:714>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:731>
 		String_t** L_66 = ___0_errorMessage;
 		*((String_t**)L_66) = (String_t*)_stringLiteral023519EE6AB088540D7976215AE1932C3FAD5E21;
 		Il2CppCodeGenWriteBarrier((void**)(String_t**)L_66, (void*)(String_t*)_stringLiteral023519EE6AB088540D7976215AE1932C3FAD5E21);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:715>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:732>
 		return (bool)0;
 	}
 
 IL_01a1:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:719>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:736>
 		String_t* L_67 = V_2;
 		String_t* L_68 = V_3;
 		bool L_69;
@@ -14793,17 +14827,17 @@ IL_01a1:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:721>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:738>
 		String_t** L_70 = ___0_errorMessage;
 		*((String_t**)L_70) = (String_t*)_stringLiteral9F5FC95AB8E66187E5D19DF31B452510AE65B968;
 		Il2CppCodeGenWriteBarrier((void**)(String_t**)L_70, (void*)(String_t*)_stringLiteral9F5FC95AB8E66187E5D19DF31B452510AE65B968);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:722>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:739>
 		return (bool)0;
 	}
 
 IL_01b3:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:725>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:742>
 		return (bool)1;
 	}
 }
@@ -14844,9 +14878,9 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OnRegisterClicked_
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_SwitchToLoginAfterRegister_mE962E0F310229A596BF8E4AF5155678012EA2BF8 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, const RuntimeMethod* method) 
 {
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:772>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:789>
 		LoginScreenController_ShowLoginTab_mAED44C8ADE40BB2E749C30BCC215A31D42E68CC5(__this, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:774>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:791>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_0 = __this->___usernameField;
 		if (!L_0)
 		{
@@ -14861,7 +14895,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_SwitchToLoginAfter
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:776>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:793>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_2 = __this->___usernameField;
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_3 = __this->___regUsernameField;
 		NullCheck(L_3);
@@ -14873,7 +14907,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_SwitchToLoginAfter
 
 IL_002c:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:778>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:795>
 		return;
 	}
 }
@@ -14891,10 +14925,10 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OnForgotPasswordCl
 		s_Il2CppMethodInitialized = true;
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:784>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:801>
 		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
 		Debug_Log_m87A9A3C761FF5C43ED8A53B16190A53D08F818BB(_stringLiteral190783BB6A2B7567CBA8B8C547726BB39F8B8FB5, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:786>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:803>
 		ForgotPasswordPopupController_t4943C53230D805C3CCBFB961BB52B296854EE2F5* L_0 = __this->___forgotPasswordPopup;
 		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
 		bool L_1;
@@ -14905,7 +14939,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OnForgotPasswordCl
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:788>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:805>
 		ForgotPasswordPopupController_t4943C53230D805C3CCBFB961BB52B296854EE2F5* L_2 = __this->___forgotPasswordPopup;
 		NullCheck(L_2);
 		ForgotPasswordPopupController_Show_m8B072E28AFE58C92B8F77157961CD207CAC14D05(L_2, NULL);
@@ -14914,13 +14948,13 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OnForgotPasswordCl
 
 IL_0024:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:792>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:809>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_3 = __this->___loginStatus;
 		LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(__this, L_3, _stringLiteral5A463E6A0AB5BB7086CBE7D501A880EFC8D0E95E, (bool)0, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:793>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:810>
 		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
 		Debug_LogWarning_m33EF1B897E0C7C6FF538989610BFAFFEF4628CA9(_stringLiteral20E3445307978A6A99602465DD7FDD93140576AE, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:795>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:812>
 		return;
 	}
 }
@@ -14934,7 +14968,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool LoginScreenController_IsOnlineOnly_m957D
 		s_Il2CppMethodInitialized = true;
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:801>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:818>
 		BackendConfig_t4C8C70965890CD426DACBB91F6F2CDEE36C97593* L_0;
 		L_0 = BackendConfig_get_Active_m8ECA146F6FFC253F07ADA2483B8A9D9F558C04A1(NULL);
 		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
@@ -14983,7 +15017,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* LoginScreenController_ResolveLoginF
 	int64_t G_B3_0 = 0;
 	String_t* G_B6_0 = NULL;
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:806>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:823>
 		AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_0 = ___0_auth;
 		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
 		bool L_1;
@@ -15010,7 +15044,7 @@ IL_000d:
 IL_0013:
 	{
 		V_0 = G_B3_0;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:807>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:824>
 		AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_4 = ___0_auth;
 		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
 		bool L_5;
@@ -15037,7 +15071,7 @@ IL_0024:
 IL_002a:
 	{
 		V_1 = G_B6_0;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:808>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:825>
 		int64_t L_8 = V_0;
 		if (L_8)
 		{
@@ -15045,13 +15079,13 @@ IL_002a:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:809>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:826>
 		return _stringLiteral219E546EBA497F547451D1681714948C22788D5F;
 	}
 
 IL_0034:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:810>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:827>
 		int64_t L_9 = V_0;
 		if ((((int64_t)L_9) == ((int64_t)((int64_t)((int32_t)401)))))
 		{
@@ -15068,17 +15102,17 @@ IL_0034:
 
 IL_0046:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:811>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:828>
 		return _stringLiteral5437EE99354A1DBFFD0CBCA04908CC7EA7845CB8;
 	}
 
 IL_004c:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:812>
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:813>
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:814>
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:815>
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:816>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:829>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:830>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:831>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:832>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:833>
 		int64_t L_11 = V_0;
 		if ((!(((uint64_t)L_11) == ((uint64_t)((int64_t)((int32_t)403))))))
 		{
@@ -15124,13 +15158,13 @@ IL_004c:
 
 IL_008d:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:817>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:834>
 		return _stringLiteral11FCDC3092478806E6A251009C8D7942F424B5B8;
 	}
 
 IL_0093:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:818>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:835>
 		int64_t L_20 = V_0;
 		if ((!(((uint64_t)L_20) == ((uint64_t)((int64_t)((int32_t)429))))))
 		{
@@ -15138,13 +15172,13 @@ IL_0093:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:819>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:836>
 		return _stringLiteralDC48D8ECFF3656DB50AEF2FFFF8E52F3CDE5D87A;
 	}
 
 IL_00a2:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:820>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:837>
 		int64_t L_21 = V_0;
 		if ((((int64_t)L_21) < ((int64_t)((int64_t)((int32_t)500)))))
 		{
@@ -15152,13 +15186,13 @@ IL_00a2:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:821>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:838>
 		return _stringLiteral1475E8AB7E14CA169B43825EA8E22B000C6CDC1C;
 	}
 
 IL_00b1:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:822>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:839>
 		return _stringLiteral8F6CAFB0BC6D6CDCFE42C5A23C6F9A9FFE65C3CA;
 	}
 }
@@ -15185,7 +15219,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* LoginScreenController_ResolveBrowse
 	String_t* V_0 = NULL;
 	String_t* G_B3_0 = NULL;
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:827>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:844>
 		AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_0 = ___0_auth;
 		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
 		bool L_1;
@@ -15212,7 +15246,7 @@ IL_0010:
 IL_0016:
 	{
 		V_0 = G_B3_0;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:828>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:845>
 		String_t* L_4 = V_0;
 		bool L_5;
 		L_5 = String_Equals_mCC34895D0DB2AD440C9D8767032215BC86B5C48B(L_4, _stringLiteral201A863CF9048EA9C67A6D87E86C9BA603DD4CB2, 5, NULL);
@@ -15222,13 +15256,13 @@ IL_0016:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:829>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:846>
 		return _stringLiteral53A6E19132ED93F721AB7716B7217C5E42D82FAD;
 	}
 
 IL_002b:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:830>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:847>
 		String_t* L_6 = V_0;
 		bool L_7;
 		L_7 = String_Equals_mCC34895D0DB2AD440C9D8767032215BC86B5C48B(L_6, _stringLiteral334E5F854C1F350329099E1A01C3678971B17C3E, 5, NULL);
@@ -15238,13 +15272,13 @@ IL_002b:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:831>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:848>
 		return _stringLiteral8B66DDE0C48175DDD0AB16755EFA203224245EDC;
 	}
 
 IL_003f:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:832>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:849>
 		String_t* L_8 = V_0;
 		bool L_9;
 		L_9 = String_Equals_mCC34895D0DB2AD440C9D8767032215BC86B5C48B(L_8, _stringLiteral89834ED519BB05C67C6BE86C4B50606180FA4D44, 5, NULL);
@@ -15254,15 +15288,15 @@ IL_003f:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:833>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:850>
 		return _stringLiteralC6DEFDBC0E20A9DE557B02C0CC1AE4ACD9E95A81;
 	}
 
 IL_0053:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:834>
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:835>
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:836>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:851>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:852>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:853>
 		String_t* L_10 = V_0;
 		bool L_11;
 		L_11 = String_Equals_mCC34895D0DB2AD440C9D8767032215BC86B5C48B(L_10, _stringLiteralE9379C516D0227D6800386B4DD5CCC0A0F05E164, 5, NULL);
@@ -15292,13 +15326,13 @@ IL_0053:
 
 IL_007d:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:837>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:854>
 		return _stringLiteralA8D4D46D57461EF6E71E4FDC7E545B5BBE1A54D2;
 	}
 
 IL_0083:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:838>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:855>
 		AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_16 = ___0_auth;
 		String_t* L_17;
 		L_17 = LoginScreenController_ResolveLoginFailureMessage_m1E2E725DEEB09E368B68805771BF525B8F8BD205(L_16, NULL);
@@ -15321,7 +15355,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* LoginScreenController_ResolveRegist
 	int64_t V_0 = 0;
 	int64_t G_B3_0 = 0;
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:843>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:860>
 		AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_0 = ___0_auth;
 		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
 		bool L_1;
@@ -15348,7 +15382,7 @@ IL_000d:
 IL_0013:
 	{
 		V_0 = G_B3_0;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:844>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:861>
 		int64_t L_4 = V_0;
 		if (L_4)
 		{
@@ -15356,13 +15390,13 @@ IL_0013:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:845>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:862>
 		return _stringLiteral7EFB89E4754C17AF730C6466C15E78BEE9D3F70E;
 	}
 
 IL_001d:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:846>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:863>
 		int64_t L_5 = V_0;
 		if ((!(((uint64_t)L_5) == ((uint64_t)((int64_t)((int32_t)409))))))
 		{
@@ -15370,13 +15404,13 @@ IL_001d:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:847>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:864>
 		return _stringLiteralF6421E33512F1DBD937204AA25345CD07584E1E2;
 	}
 
 IL_002c:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:848>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:865>
 		int64_t L_6 = V_0;
 		if ((((int64_t)L_6) < ((int64_t)((int64_t)((int32_t)500)))))
 		{
@@ -15384,13 +15418,13 @@ IL_002c:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:849>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:866>
 		return _stringLiteralDD157F6D4A2098EFD792DC9F789A6EBE43EE3DD2;
 	}
 
 IL_003b:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:850>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:867>
 		return _stringLiteral509543BA9221FB347F950914CAD630F962FEA25A;
 	}
 }
@@ -15409,7 +15443,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* LoginScreenController_ResolveBootst
 	int64_t V_0 = 0;
 	int64_t G_B3_0 = 0;
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:855>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:872>
 		PlayerBootstrapService_t4A614618E10C2ECC4C19643B1E86C3B3664A1D2D* L_0 = ___0_bootstrap;
 		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
 		bool L_1;
@@ -15436,7 +15470,7 @@ IL_000d:
 IL_0013:
 	{
 		V_0 = G_B3_0;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:856>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:873>
 		int64_t L_4 = V_0;
 		if ((!(((uint64_t)L_4) == ((uint64_t)((int64_t)((int32_t)401))))))
 		{
@@ -15444,13 +15478,13 @@ IL_0013:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:857>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:874>
 		return _stringLiteralA1482AE42D699F21A92530EF1A9F4B42561B84FB;
 	}
 
 IL_0023:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:858>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:875>
 		int64_t L_5 = V_0;
 		if (L_5)
 		{
@@ -15458,13 +15492,13 @@ IL_0023:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:859>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:876>
 		return _stringLiteralF2E605BCFF8860D48B14E05F75B3E27668250BBC;
 	}
 
 IL_002c:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:860>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:877>
 		return _stringLiteral575400595090DAAF1E13B2FE8F3A08DBAEAD2E7C;
 	}
 }
@@ -15485,7 +15519,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ShowStatus_m237D14
 	String_t* G_B5_0 = NULL;
 	Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* G_B5_1 = NULL;
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:865>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:882>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_0 = ___0_label;
 		if (L_0)
 		{
@@ -15493,26 +15527,26 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ShowStatus_m237D14
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:865>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:882>
 		return;
 	}
 
 IL_0004:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:867>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:884>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_1 = ___0_label;
 		String_t* L_2 = ___1_message;
 		NullCheck(L_1);
 		VirtualActionInvoker1< String_t* >::Invoke(208, L_1, L_2);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:868>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:885>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_3 = ___0_label;
 		NullCheck(L_3);
 		VisualElement_RemoveFromClassList_mA7A2EC202004DFCBF38C12B70C6218BF40D21220(L_3, _stringLiteralFD29A9DBDF8CB35F1AD3033F10DE8DA95C2277DC, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:869>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:886>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_4 = ___0_label;
 		NullCheck(L_4);
 		VisualElement_RemoveFromClassList_mA7A2EC202004DFCBF38C12B70C6218BF40D21220(L_4, _stringLiteral7AF19DE431BFCCD5A358CD6548254EE1B63DAC47, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:870>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:887>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_5 = ___0_label;
 		bool L_6 = ___2_isSuccess;
 		if (L_6)
@@ -15538,7 +15572,7 @@ IL_0031:
 	{
 		NullCheck(G_B5_1);
 		VisualElement_AddToClassList_mAF0DD8D8CFD5130229A0471DD260E01ED82117F1(G_B5_1, G_B5_0, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:871>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:888>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_7 = ___0_label;
 		NullCheck(L_7);
 		RuntimeObject* L_8;
@@ -15547,7 +15581,7 @@ IL_0031:
 		L_9 = StyleEnum_1_op_Implicit_mE2664CDFC678F602380EED12BA228071E6F49030(0, StyleEnum_1_op_Implicit_mE2664CDFC678F602380EED12BA228071E6F49030_RuntimeMethod_var);
 		NullCheck(L_8);
 		InterfaceActionInvoker1< StyleEnum_1_t3B02FFF55849C9C8E6A7C0AA9C7E5F65F10C9C69 >::Invoke(51, IStyle_t4FD66C97CA5F46BFE328FED0C65277A37E0A89F7_il2cpp_TypeInfo_var, L_8, L_9);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:872>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:889>
 		return;
 	}
 }
@@ -15565,7 +15599,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ClearStatus_m84CD8
 		s_Il2CppMethodInitialized = true;
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:876>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:893>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_0 = ___0_label;
 		if (L_0)
 		{
@@ -15573,25 +15607,25 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ClearStatus_m84CD8
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:876>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:893>
 		return;
 	}
 
 IL_0004:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:878>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:895>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_1 = ___0_label;
 		NullCheck(L_1);
 		VirtualActionInvoker1< String_t* >::Invoke(208, L_1, _stringLiteralDA39A3EE5E6B4B0D3255BFEF95601890AFD80709);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:879>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:896>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_2 = ___0_label;
 		NullCheck(L_2);
 		VisualElement_RemoveFromClassList_mA7A2EC202004DFCBF38C12B70C6218BF40D21220(L_2, _stringLiteralFD29A9DBDF8CB35F1AD3033F10DE8DA95C2277DC, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:880>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:897>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_3 = ___0_label;
 		NullCheck(L_3);
 		VisualElement_RemoveFromClassList_mA7A2EC202004DFCBF38C12B70C6218BF40D21220(L_3, _stringLiteral7AF19DE431BFCCD5A358CD6548254EE1B63DAC47, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:881>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:898>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_4 = ___0_label;
 		NullCheck(L_4);
 		RuntimeObject* L_5;
@@ -15600,7 +15634,7 @@ IL_0004:
 		L_6 = StyleEnum_1_op_Implicit_mE2664CDFC678F602380EED12BA228071E6F49030(1, StyleEnum_1_op_Implicit_mE2664CDFC678F602380EED12BA228071E6F49030_RuntimeMethod_var);
 		NullCheck(L_5);
 		InterfaceActionInvoker1< StyleEnum_1_t3B02FFF55849C9C8E6A7C0AA9C7E5F65F10C9C69 >::Invoke(51, IStyle_t4FD66C97CA5F46BFE328FED0C65277A37E0A89F7_il2cpp_TypeInfo_var, L_5, L_6);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:882>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:899>
 		return;
 	}
 }
@@ -15643,10 +15677,10 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_SetAuthControlsEna
 	int32_t G_B49_0 = 0;
 	Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* G_B49_1 = NULL;
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:886>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:903>
 		bool L_0 = ___0_enabled;
 		__this->___isAuthRequestInProgress = (bool)((((int32_t)L_0) == ((int32_t)0))? 1 : 0);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:888>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:905>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_1 = __this->___tabLogin;
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_2 = L_1;
 		if (L_2)
@@ -15669,7 +15703,7 @@ IL_0016:
 
 IL_001c:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:889>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:906>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_4 = __this->___tabRegister;
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_5 = L_4;
 		if (L_5)
@@ -15692,7 +15726,7 @@ IL_0028:
 
 IL_002e:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:891>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:908>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_7 = __this->___usernameField;
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_8 = L_7;
 		if (L_8)
@@ -15715,7 +15749,7 @@ IL_003a:
 
 IL_0040:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:892>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:909>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_10 = __this->___passwordField;
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_11 = L_10;
 		if (L_11)
@@ -15738,7 +15772,7 @@ IL_004c:
 
 IL_0052:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:893>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:910>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_13 = __this->___btnTogglePassword;
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_14 = L_13;
 		if (L_14)
@@ -15761,7 +15795,7 @@ IL_005e:
 
 IL_0064:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:894>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:911>
 		Toggle_t27BE43456B97DD7A793D272D3318F9FE682B844C* L_16 = __this->___rememberToggle;
 		Toggle_t27BE43456B97DD7A793D272D3318F9FE682B844C* L_17 = L_16;
 		if (L_17)
@@ -15784,7 +15818,7 @@ IL_0070:
 
 IL_0076:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:895>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:912>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_19 = __this->___forgotPassword;
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_20 = L_19;
 		if (L_20)
@@ -15807,7 +15841,7 @@ IL_0082:
 
 IL_0088:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:896>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:913>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_22 = __this->___btnLogin;
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_23 = L_22;
 		if (L_23)
@@ -15830,7 +15864,7 @@ IL_0094:
 
 IL_009a:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:897>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:914>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_25 = __this->___btnLoginWeb;
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_26 = L_25;
 		if (L_26)
@@ -15853,7 +15887,7 @@ IL_00a6:
 
 IL_00ac:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:898>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:915>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_28 = __this->___regUsernameField;
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_29 = L_28;
 		if (L_29)
@@ -15876,7 +15910,7 @@ IL_00b8:
 
 IL_00be:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:899>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:916>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_31 = __this->___regEmailField;
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_32 = L_31;
 		if (L_32)
@@ -15899,7 +15933,7 @@ IL_00ca:
 
 IL_00d0:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:900>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:917>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_34 = __this->___regPasswordField;
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_35 = L_34;
 		if (L_35)
@@ -15922,7 +15956,7 @@ IL_00dc:
 
 IL_00e2:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:901>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:918>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_37 = __this->___regConfirmField;
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_38 = L_37;
 		if (L_38)
@@ -15945,7 +15979,7 @@ IL_00ee:
 
 IL_00f4:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:902>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:919>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_40 = __this->___btnToggleRegPassword;
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_41 = L_40;
 		if (L_41)
@@ -15968,7 +16002,7 @@ IL_0100:
 
 IL_0106:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:903>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:920>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_43 = __this->___btnOpenWebRegistration;
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_44 = L_43;
 		if (L_44)
@@ -15991,7 +16025,7 @@ IL_0112:
 
 IL_0118:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:905>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:922>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_46 = __this->___btnRegister;
 		if (!L_46)
 		{
@@ -15999,7 +16033,7 @@ IL_0118:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:907>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:924>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_47 = __this->___btnRegister;
 		bool L_48 = ___0_enabled;
 		if (!L_48)
@@ -16031,7 +16065,7 @@ IL_0134:
 
 IL_0139:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:909>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:926>
 		return;
 	}
 }
@@ -16046,7 +16080,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_UpdateKeyboardAvoi
 	}
 	float V_0 = 0.0f;
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:913>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:930>
 		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_0 = __this->___rootElement;
 		if (!L_0)
 		{
@@ -16063,13 +16097,13 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_UpdateKeyboardAvoi
 
 IL_0010:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:913>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:930>
 		return;
 	}
 
 IL_0011:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:915>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:932>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_2 = __this->___focusedKeyboardField;
 		bool L_3;
 		L_3 = MobileKeyboardAvoidance_ShouldAvoidKeyboard_m583C477F662AC39DA49E51F5952F1B7667160744(L_2, NULL);
@@ -16079,7 +16113,7 @@ IL_0011:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:917>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:934>
 		float L_4 = __this->___keyboardUpShift;
 		if ((!(((float)L_4) > ((float)(0.0f)))))
 		{
@@ -16087,30 +16121,30 @@ IL_0011:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:918>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:935>
 		LoginScreenController_ResetKeyboardAvoidance_m2B97BFB70A737F6806D7CF354E405F1CF21ED868(__this, NULL);
 	}
 
 IL_0031:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:919>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:936>
 		return;
 	}
 
 IL_0032:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:922>
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:923>
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:924>
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:925>
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:926>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:939>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:940>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:941>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:942>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:943>
 		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_5 = __this->___rootElement;
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_6 = __this->___focusedKeyboardField;
 		float L_7 = __this->___keyboardUpShift;
 		float L_8;
 		L_8 = MobileKeyboardAvoidance_CalculateRequiredUpShift_m2FDD31679C6A549B806A3E9529D66A573EE5B5F3(L_5, L_6, L_7, (24.0f), (0.449999988f), NULL);
 		V_0 = L_8;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:928>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:945>
 		float L_9 = V_0;
 		float L_10 = __this->___keyboardUpShift;
 		float L_11;
@@ -16121,16 +16155,16 @@ IL_0032:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:928>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:945>
 		return;
 	}
 
 IL_0069:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:930>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:947>
 		float L_12 = V_0;
 		__this->___keyboardUpShift = L_12;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:931>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:948>
 		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_13 = __this->___loginShadow;
 		NullCheck(L_13);
 		RuntimeObject* L_14;
@@ -16147,7 +16181,7 @@ IL_0069:
 		L_19 = StyleTranslate_op_Implicit_m07F947CEE79D8E54CE1DB08840561A833895C0CE(L_18, NULL);
 		NullCheck(L_14);
 		InterfaceActionInvoker1< StyleTranslate_tF9528CA4B45EE4EB2C4D294336A83D88DB6AF089 >::Invoke(127, IStyle_t4FD66C97CA5F46BFE328FED0C65277A37E0A89F7_il2cpp_TypeInfo_var, L_14, L_19);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:932>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:949>
 		return;
 	}
 }
@@ -16161,12 +16195,12 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ResetKeyboardAvoid
 		s_Il2CppMethodInitialized = true;
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:936>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:953>
 		__this->___focusedKeyboardField = (TextField_tDB34369F9468D7F02670087D9444EC23115827D9*)NULL;
 		Il2CppCodeGenWriteBarrier((void**)(&__this->___focusedKeyboardField), (void*)(TextField_tDB34369F9468D7F02670087D9444EC23115827D9*)NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:937>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:954>
 		__this->___keyboardUpShift = (0.0f);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:938>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:955>
 		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_0 = __this->___loginShadow;
 		if (!L_0)
 		{
@@ -16174,7 +16208,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ResetKeyboardAvoid
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:939>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:956>
 		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_1 = __this->___loginShadow;
 		NullCheck(L_1);
 		RuntimeObject* L_2;
@@ -16194,7 +16228,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ResetKeyboardAvoid
 
 IL_004d:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:940>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:957>
 		return;
 	}
 }
@@ -16210,7 +16244,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OnQuitAppClicked_m
 		s_Il2CppMethodInitialized = true;
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:944>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:961>
 		bool L_0 = __this->___isQuitRequestSent;
 		if (!L_0)
 		{
@@ -16218,21 +16252,21 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OnQuitAppClicked_m
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:944>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:961>
 		return;
 	}
 
 IL_0009:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:945>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:962>
 		__this->___isQuitRequestSent = (bool)1;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:947>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:964>
 		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
 		Debug_Log_m87A9A3C761FF5C43ED8A53B16190A53D08F818BB(_stringLiteral21208564699FFE46260EEBA3DF8E68458898DAA5, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:951>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:968>
 		il2cpp_codegen_runtime_class_init_inline(Application_tDB03BE91CDF0ACA614A5E0B67CFB77C44EB19B21_il2cpp_TypeInfo_var);
 		Application_Quit_mE304382DB9A6455C2A474C8F364C7387F37E9281(NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:953>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:970>
 		return;
 	}
 }
@@ -16240,13 +16274,13 @@ IL_0009:
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OnQuitAppPointerDown_m35BD16A9560B17054E473B283A50467B020241DC (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, PointerDownEvent_tABAAD1BACBB98156D6BCCED51E11883EAFE03A51* ___0_evt, const RuntimeMethod* method) 
 {
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:957>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:974>
 		PointerDownEvent_tABAAD1BACBB98156D6BCCED51E11883EAFE03A51* L_0 = ___0_evt;
 		NullCheck(L_0);
 		EventBase_StopImmediatePropagation_m2D6646624DDC02AE96657F5EAD5BC0361380A8DA(L_0, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:958>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:975>
 		LoginScreenController_OnQuitAppClicked_m791B5979AE05A52F1EFF87B36A3DFE6264E7D903(__this, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:959>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:976>
 		return;
 	}
 }
@@ -16503,7 +16537,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass63_0_U3COnWebsiteAu
 		s_Il2CppMethodInitialized = true;
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:509>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:526>
 		int32_t L_0 = __this->___myAttempt;
 		LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_1 = __this->___U3CU3E4__this;
 		NullCheck(L_1);
@@ -16514,13 +16548,13 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass63_0_U3COnWebsiteAu
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:509>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:526>
 		return;
 	}
 
 IL_0014:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:510>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:527>
 		LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_3 = __this->___U3CU3E4__this;
 		NullCheck(L_3);
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_4 = L_3->___loginStatus;
@@ -16530,7 +16564,7 @@ IL_0014:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:511>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:528>
 		LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_5 = __this->___U3CU3E4__this;
 		LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_6 = __this->___U3CU3E4__this;
 		NullCheck(L_6);
@@ -16544,7 +16578,7 @@ IL_0014:
 
 IL_0043:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:512>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:529>
 		return;
 	}
 }
@@ -16626,23 +16660,23 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CCompleteAuthenticatedLoginAsyncU3Ed__
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:530>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:547>
 			AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_4;
 			L_4 = AuthService_get_Instance_mC5F3BCC6818176AEAD746F043ADB4B7B1F58245D_inline(NULL);
 			__this->___U3CauthU3E5__2 = L_4;
 			Il2CppCodeGenWriteBarrier((void**)(&__this->___U3CauthU3E5__2), (void*)L_4);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:531>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:548>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_5 = V_1;
 			NullCheck(L_5);
 			L_5->___shouldSkipCharacterSelectAfterLogin = (bool)0;
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:532>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:549>
 			V_2 = (bool)0;
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:533>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:550>
 			PlayerBootstrapService_t4A614618E10C2ECC4C19643B1E86C3B3664A1D2D* L_6;
 			L_6 = PlayerBootstrapService_get_Instance_m4D0CE33C1F390004D82A0537BA10A74EA155E0E1_inline(NULL);
 			__this->___U3CbootstrapU3E5__3 = L_6;
 			Il2CppCodeGenWriteBarrier((void**)(&__this->___U3CbootstrapU3E5__3), (void*)L_6);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:534>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:551>
 			PlayerBootstrapService_t4A614618E10C2ECC4C19643B1E86C3B3664A1D2D* L_7 = __this->___U3CbootstrapU3E5__3;
 			il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
 			bool L_8;
@@ -16653,14 +16687,14 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CCompleteAuthenticatedLoginAsyncU3Ed__
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:536>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:553>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_9 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_10 = V_1;
 			NullCheck(L_10);
 			Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_11 = L_10->___loginStatus;
 			NullCheck(L_9);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(L_9, L_11, _stringLiteralFF941AE46E9E184688C446ACE2BCD5B967A299AB, (bool)1, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:537>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:554>
 			PlayerBootstrapService_t4A614618E10C2ECC4C19643B1E86C3B3664A1D2D* L_12 = __this->___U3CbootstrapU3E5__3;
 			NullCheck(L_12);
 			Awaitable_1_tE9B21A5D85428306C2DE8210A1FC9D38D9A92A90* L_13;
@@ -16708,7 +16742,7 @@ IL_00b3_1:
 
 IL_00bb_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:540>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:557>
 			bool L_23 = V_2;
 			if (L_23)
 			{
@@ -16724,20 +16758,20 @@ IL_00bb_1:
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:542>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:559>
 			PlayerBootstrapService_t4A614618E10C2ECC4C19643B1E86C3B3664A1D2D* L_25 = __this->___U3CbootstrapU3E5__3;
 			String_t* L_26;
 			L_26 = LoginScreenController_ResolveBootstrapFailureMessage_m00717EFC880CDA0C753C311DDE35365DFA5162D1(L_25, NULL);
 			V_4 = L_26;
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:543>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:560>
 			AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_27 = __this->___U3CauthU3E5__2;
 			NullCheck(L_27);
 			AuthService_SignOut_m120410ADCF61BAC94152EAA440C49597637D17F5(L_27, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:544>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:561>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_28 = V_1;
 			NullCheck(L_28);
 			LoginScreenController_SetAuthControlsEnabled_m31EC13A3434A06D1F38A008CEA94B3BF2EE6E3C2(L_28, (bool)1, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:545>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:562>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_29 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_30 = V_1;
 			NullCheck(L_30);
@@ -16745,18 +16779,18 @@ IL_00bb_1:
 			String_t* L_32 = V_4;
 			NullCheck(L_29);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(L_29, L_31, L_32, (bool)0, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:546>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:563>
 			goto IL_0283;
 		}
 
 IL_00f8_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:549>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:566>
 			PlayerProfileService_t341677C2E8BF495583AF04819B2335C3185A5B47* L_33;
 			L_33 = PlayerProfileService_get_Instance_m21922870AFFA030F2C69A47B7BCC7D2CC7700164_inline(NULL);
 			__this->___U3CprofileU3E5__4 = L_33;
 			Il2CppCodeGenWriteBarrier((void**)(&__this->___U3CprofileU3E5__4), (void*)L_33);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:550>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:567>
 			PlayerProfileService_t341677C2E8BF495583AF04819B2335C3185A5B47* L_34 = __this->___U3CprofileU3E5__4;
 			il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
 			bool L_35;
@@ -16767,7 +16801,7 @@ IL_00f8_1:
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:552>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:569>
 			bool L_36 = V_2;
 			if (L_36)
 			{
@@ -16775,14 +16809,14 @@ IL_00f8_1:
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:554>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:571>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_37 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_38 = V_1;
 			NullCheck(L_38);
 			Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_39 = L_38->___loginStatus;
 			NullCheck(L_37);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(L_37, L_39, _stringLiteral3EFDD7BDEBE8308DA1FAC22603957187A74B3F32, (bool)1, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:555>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:572>
 			PlayerProfileService_t341677C2E8BF495583AF04819B2335C3185A5B47* L_40 = __this->___U3CprofileU3E5__4;
 			NullCheck(L_40);
 			Awaitable_t690337FEC1C411606E233EA36A41337B931C23CB* L_41;
@@ -16828,7 +16862,7 @@ IL_0185_1:
 
 IL_018c_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:558>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:575>
 			String_t* L_50 = __this->___username;
 			il2cpp_codegen_runtime_class_init_inline(GameManager_tFE129A0017AF5BBD30FDCD4403B9CCEAE064C6B6_il2cpp_TypeInfo_var);
 			bool L_51;
@@ -16849,7 +16883,7 @@ IL_018c_1:
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:559>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:576>
 			PlayerProfileService_t341677C2E8BF495583AF04819B2335C3185A5B47* L_54 = __this->___U3CprofileU3E5__4;
 			String_t* L_55 = __this->___username;
 			PlayerProfileService_t341677C2E8BF495583AF04819B2335C3185A5B47* L_56 = __this->___U3CprofileU3E5__4;
@@ -16893,7 +16927,7 @@ IL_01d6_1:
 
 IL_01dc_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:561>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:578>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_61 = V_1;
 			PlayerProfileService_t341677C2E8BF495583AF04819B2335C3185A5B47* L_62 = __this->___U3CprofileU3E5__4;
 			NullCheck(L_62);
@@ -16905,7 +16939,7 @@ IL_01dc_1:
 
 IL_01ed_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:564>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:581>
 			String_t* L_64 = __this->___username;
 			il2cpp_codegen_runtime_class_init_inline(GameManager_tFE129A0017AF5BBD30FDCD4403B9CCEAE064C6B6_il2cpp_TypeInfo_var);
 			bool L_65;
@@ -16916,7 +16950,7 @@ IL_01ed_1:
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:565>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:582>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_66 = V_1;
 			NullCheck(L_66);
 			L_66->___shouldSkipCharacterSelectAfterLogin = (bool)1;
@@ -16924,15 +16958,15 @@ IL_01ed_1:
 
 IL_0201_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:567>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:584>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_67 = V_1;
 			NullCheck(L_67);
 			LoginScreenController_SetAuthControlsEnabled_m31EC13A3434A06D1F38A008CEA94B3BF2EE6E3C2(L_67, (bool)1, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:568>
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:569>
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:570>
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:571>
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:572>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:585>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:586>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:587>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:588>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:589>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_68 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_69 = V_1;
 			NullCheck(L_69);
@@ -16967,7 +17001,7 @@ IL_0223_1:
 		{
 			NullCheck(G_B29_2);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(G_B29_2, G_B29_1, G_B29_0, (bool)1, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:573>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:590>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_73 = V_1;
 			NullCheck(L_73);
 			bool L_74 = L_73->___shouldSkipCharacterSelectAfterLogin;
@@ -16977,7 +17011,7 @@ IL_0223_1:
 			L_77 = String_Format_mA8DBB4C2516B9723C5A41E6CB1E2FAF4BBE96DD8(_stringLiteralB93529914AC60CEBCEC13ECCB3D2A5982E34D838, L_76, NULL);
 			il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
 			Debug_Log_m87A9A3C761FF5C43ED8A53B16190A53D08F818BB(L_77, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:575>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:592>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_78 = V_1;
 			NullCheck(L_78);
 			MonoBehaviour_Invoke_mF724350C59362B0F1BFE26383209A274A29A63FB(L_78, _stringLiteral5CBED419BABE6AA083EF001149E4D2613BCDF230, (0.800000012f), NULL);
@@ -17014,7 +17048,7 @@ CATCH_0255:
 
 IL_0283:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:576>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:593>
 		__this->___U3CU3E1__state = ((int32_t)-2);
 		__this->___U3CauthU3E5__2 = (AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2*)NULL;
 		Il2CppCodeGenWriteBarrier((void**)(&__this->___U3CauthU3E5__2), (void*)(AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2*)NULL);
@@ -17158,7 +17192,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3COnLoginClickedU3Ed__62_MoveNext_m293B
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:413>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:430>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_3 = V_1;
 			NullCheck(L_3);
 			bool L_4 = L_3->___isAuthRequestInProgress;
@@ -17168,13 +17202,13 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3COnLoginClickedU3Ed__62_MoveNext_m293B
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:413>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:430>
 			goto IL_0311;
 		}
 
 IL_002d_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:415>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:432>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_5 = V_1;
 			NullCheck(L_5);
 			TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_6 = L_5->___usernameField;
@@ -17219,7 +17253,7 @@ IL_0048_1:
 			String_t* L_10;
 			L_10 = String_Trim_mCD6D8C6D4CFD15225D12DB7D3E0544CA80FB8DA5(G_B9_0, NULL);
 			V_2 = L_10;
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:416>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:433>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_11 = V_1;
 			NullCheck(L_11);
 			TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_12 = L_11->___passwordField;
@@ -17261,7 +17295,7 @@ IL_0060_1:
 IL_0069_1:
 		{
 			V_3 = G_B14_0;
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:418>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:435>
 			bool L_16 = __this->___useWebAccount;
 			if (L_16)
 			{
@@ -17288,7 +17322,7 @@ IL_0083_1:
 			L_17 = String_Concat_m8855A6DE10F84DA7F4EC113CADDB59873A25573B(G_B17_1, G_B17_0, _stringLiteralEA32B3266DB996D40B9B08C80EC3EB0914B94AD0, NULL);
 			il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
 			Debug_Log_m87A9A3C761FF5C43ED8A53B16190A53D08F818BB(L_17, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:421>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:438>
 			String_t* L_18 = V_2;
 			bool L_19;
 			L_19 = String_IsNullOrWhiteSpace_m42E1F3B2C358068D645E46F01CF1834DC77A5A10(L_18, NULL);
@@ -17298,9 +17332,9 @@ IL_0083_1:
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:423>
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:424>
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:425>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:440>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:441>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:442>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_20 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_21 = V_1;
 			NullCheck(L_21);
@@ -17335,13 +17369,13 @@ IL_00b5_1:
 		{
 			NullCheck(G_B21_2);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(G_B21_2, G_B21_1, G_B21_0, (bool)0, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:426>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:443>
 			goto IL_0311;
 		}
 
 IL_00c0_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:428>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:445>
 			String_t* L_25 = V_2;
 			NullCheck(L_25);
 			int32_t L_26;
@@ -17352,20 +17386,20 @@ IL_00c0_1:
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:430>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:447>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_27 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_28 = V_1;
 			NullCheck(L_28);
 			Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_29 = L_28->___loginStatus;
 			NullCheck(L_27);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(L_27, L_29, _stringLiteralD2B9975998DB58394627A1A71049FCC14CBB536C, (bool)0, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:431>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:448>
 			goto IL_0311;
 		}
 
 IL_00e4_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:434>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:451>
 			String_t* L_30 = V_3;
 			bool L_31;
 			L_31 = String_IsNullOrWhiteSpace_m42E1F3B2C358068D645E46F01CF1834DC77A5A10(L_30, NULL);
@@ -17375,20 +17409,20 @@ IL_00e4_1:
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:436>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:453>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_32 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_33 = V_1;
 			NullCheck(L_33);
 			Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_34 = L_33->___loginStatus;
 			NullCheck(L_32);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(L_32, L_34, _stringLiteral01146A285C2AF37F527C9B6B8EE527B1AD525F2F, (bool)0, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:437>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:454>
 			goto IL_0311;
 		}
 
 IL_0103_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:439>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:456>
 			String_t* L_35 = V_3;
 			NullCheck(L_35);
 			int32_t L_36;
@@ -17399,25 +17433,25 @@ IL_0103_1:
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:441>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:458>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_37 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_38 = V_1;
 			NullCheck(L_38);
 			Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_39 = L_38->___loginStatus;
 			NullCheck(L_37);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(L_37, L_39, _stringLiteralDC5FD243880331D171F4D59E29DAB09988B8D29F, (bool)0, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:442>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:459>
 			goto IL_0311;
 		}
 
 IL_0127_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:445>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:462>
 			AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_40;
 			L_40 = AuthService_get_Instance_mC5F3BCC6818176AEAD746F043ADB4B7B1F58245D_inline(NULL);
 			__this->___U3CauthU3E5__2 = L_40;
 			Il2CppCodeGenWriteBarrier((void**)(&__this->___U3CauthU3E5__2), (void*)L_40);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:446>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:463>
 			AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_41 = __this->___U3CauthU3E5__2;
 			il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
 			bool L_42;
@@ -17428,29 +17462,29 @@ IL_0127_1:
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:448>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:465>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_43 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_44 = V_1;
 			NullCheck(L_44);
 			Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_45 = L_44->___loginStatus;
 			NullCheck(L_43);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(L_43, L_45, _stringLiteral7C89F8059C17D357141A70B541E2ABE4FEA7685B, (bool)0, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:449>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:466>
 			il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
 			Debug_LogWarning_m33EF1B897E0C7C6FF538989610BFAFFEF4628CA9(_stringLiteralB3DAEBFB056855D3E3F3734C834487578184616B, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:450>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:467>
 			goto IL_0311;
 		}
 
 IL_0161_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:453>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:470>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_46 = V_1;
 			NullCheck(L_46);
 			LoginScreenController_SetAuthControlsEnabled_m31EC13A3434A06D1F38A008CEA94B3BF2EE6E3C2(L_46, (bool)0, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:454>
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:455>
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:456>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:471>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:472>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:473>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_47 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_48 = V_1;
 			NullCheck(L_48);
@@ -17483,9 +17517,9 @@ IL_0183_1:
 		{
 			NullCheck(G_B33_2);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(G_B33_2, G_B33_1, G_B33_0, (bool)1, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:457>
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:458>
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:459>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:474>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:475>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:476>
 			bool L_51 = __this->___useWebAccount;
 			if (!L_51)
 			{
@@ -17593,18 +17627,18 @@ IL_0258_1:
 IL_0261_1:
 		{
 			bool L_78 = V_4;
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:461>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:478>
 			if (L_78)
 			{
 				goto IL_0289_1;
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:463>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:480>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_79 = V_1;
 			NullCheck(L_79);
 			LoginScreenController_SetAuthControlsEnabled_m31EC13A3434A06D1F38A008CEA94B3BF2EE6E3C2(L_79, (bool)1, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:464>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:481>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_80 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_81 = V_1;
 			NullCheck(L_81);
@@ -17614,13 +17648,13 @@ IL_0261_1:
 			L_84 = LoginScreenController_ResolveLoginFailureMessage_m1E2E725DEEB09E368B68805771BF525B8F8BD205(L_83, NULL);
 			NullCheck(L_80);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(L_80, L_82, L_84, (bool)0, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:465>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:482>
 			goto IL_0311;
 		}
 
 IL_0289_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:468>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:485>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_85 = V_1;
 			AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_86 = __this->___U3CauthU3E5__2;
 			NullCheck(L_86);
@@ -17695,7 +17729,7 @@ CATCH_02f1:
 
 IL_0311:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:469>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:486>
 		__this->___U3CU3E1__state = ((int32_t)-2);
 		__this->___U3CauthU3E5__2 = (AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2*)NULL;
 		Il2CppCodeGenWriteBarrier((void**)(&__this->___U3CauthU3E5__2), (void*)(AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2*)NULL);
@@ -17802,7 +17836,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3COnRegisterClickedU3Ed__70_MoveNext_mE
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:730>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:747>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_3 = V_1;
 			NullCheck(L_3);
 			bool L_4 = L_3->___isAuthRequestInProgress;
@@ -17812,13 +17846,13 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3COnRegisterClickedU3Ed__70_MoveNext_mE
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:730>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:747>
 			goto IL_01da;
 		}
 
 IL_0021_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:733>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:750>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_5 = V_1;
 			NullCheck(L_5);
 			bool L_6;
@@ -17829,7 +17863,7 @@ IL_0021_1:
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:735>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:752>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_7 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_8 = V_1;
 			NullCheck(L_8);
@@ -17837,18 +17871,18 @@ IL_0021_1:
 			String_t* L_10 = V_2;
 			NullCheck(L_7);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(L_7, L_9, L_10, (bool)0, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:736>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:753>
 			goto IL_01da;
 		}
 
 IL_003e_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:739>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:756>
 			AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_11;
 			L_11 = AuthService_get_Instance_mC5F3BCC6818176AEAD746F043ADB4B7B1F58245D_inline(NULL);
 			__this->___U3CauthU3E5__2 = L_11;
 			Il2CppCodeGenWriteBarrier((void**)(&__this->___U3CauthU3E5__2), (void*)L_11);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:740>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:757>
 			AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_12 = __this->___U3CauthU3E5__2;
 			il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
 			bool L_13;
@@ -17859,23 +17893,23 @@ IL_003e_1:
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:742>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:759>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_14 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_15 = V_1;
 			NullCheck(L_15);
 			Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_16 = L_15->___registerStatus;
 			NullCheck(L_14);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(L_14, L_16, _stringLiteral41FEE938F1CB950E7A482107CFDF80780192323E, (bool)0, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:743>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:760>
 			il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
 			Debug_LogWarning_m33EF1B897E0C7C6FF538989610BFAFFEF4628CA9(_stringLiteral61F1E7488673732D8F445860F3D6D01AC39F2199, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:744>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:761>
 			goto IL_01da;
 		}
 
 IL_0078_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:747>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:764>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_17 = V_1;
 			NullCheck(L_17);
 			TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_18 = L_17->___regUsernameField;
@@ -17920,7 +17954,7 @@ IL_0093_1:
 			String_t* L_22;
 			L_22 = String_Trim_mCD6D8C6D4CFD15225D12DB7D3E0544CA80FB8DA5(G_B13_0, NULL);
 			V_3 = L_22;
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:748>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:765>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_23 = V_1;
 			NullCheck(L_23);
 			TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_24 = L_23->___regEmailField;
@@ -17965,7 +17999,7 @@ IL_00b4_1:
 			String_t* L_28;
 			L_28 = String_Trim_mCD6D8C6D4CFD15225D12DB7D3E0544CA80FB8DA5(G_B18_0, NULL);
 			V_4 = L_28;
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:749>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:766>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_29 = V_1;
 			NullCheck(L_29);
 			TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_30 = L_29->___regPasswordField;
@@ -18007,18 +18041,18 @@ IL_00cd_1:
 IL_00d6_1:
 		{
 			V_5 = G_B23_0;
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:751>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:768>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_34 = V_1;
 			NullCheck(L_34);
 			LoginScreenController_SetAuthControlsEnabled_m31EC13A3434A06D1F38A008CEA94B3BF2EE6E3C2(L_34, (bool)0, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:752>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:769>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_35 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_36 = V_1;
 			NullCheck(L_36);
 			Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_37 = L_36->___registerStatus;
 			NullCheck(L_35);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(L_35, L_37, _stringLiteralA1392898255171864C5A887620B0F546EAEBD559, (bool)1, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:753>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:770>
 			AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_38 = __this->___U3CauthU3E5__2;
 			String_t* L_39 = V_3;
 			String_t* L_40 = V_5;
@@ -18064,18 +18098,18 @@ IL_0157_1:
 		{
 			bool L_51;
 			L_51 = Awaiter_GetResult_m6D93CE7E01A6A5877C2DDEF2BB604F19C20919ED((&V_6), Awaiter_GetResult_m6D93CE7E01A6A5877C2DDEF2BB604F19C20919ED_RuntimeMethod_var);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:754>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:771>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_52 = V_1;
 			NullCheck(L_52);
 			LoginScreenController_SetAuthControlsEnabled_m31EC13A3434A06D1F38A008CEA94B3BF2EE6E3C2(L_52, (bool)1, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:756>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:773>
 			if (L_51)
 			{
 				goto IL_0181_1;
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:758>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:775>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_53 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_54 = V_1;
 			NullCheck(L_54);
@@ -18085,27 +18119,27 @@ IL_0157_1:
 			L_57 = LoginScreenController_ResolveRegisterFailureMessage_mDE6F7B225028F70C5954B63D98B67E9DBADD2B35(L_56, NULL);
 			NullCheck(L_53);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(L_53, L_55, L_57, (bool)0, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:759>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:776>
 			goto IL_01da;
 		}
 
 IL_0181_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:762>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:779>
 			AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_58 = __this->___U3CauthU3E5__2;
 			NullCheck(L_58);
 			AuthService_SignOut_m120410ADCF61BAC94152EAA440C49597637D17F5(L_58, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:764>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:781>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_59 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_60 = V_1;
 			NullCheck(L_60);
 			Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_61 = L_60->___registerStatus;
 			NullCheck(L_59);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(L_59, L_61, _stringLiteralE0C46C75119172A0766F50372DE35A07DCB0031E, (bool)1, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:765>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:782>
 			il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
 			Debug_Log_m87A9A3C761FF5C43ED8A53B16190A53D08F818BB(_stringLiteral4D44971EB475F55D3F4DECC0E6B072A3AB811277, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:767>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:784>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_62 = V_1;
 			NullCheck(L_62);
 			MonoBehaviour_Invoke_mF724350C59362B0F1BFE26383209A274A29A63FB(L_62, _stringLiteral441BEE75F560CB6608E0FA49EB30F75C8F0EFC0E, (1.20000005f), NULL);
@@ -18138,7 +18172,7 @@ CATCH_01ba:
 
 IL_01da:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:768>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:785>
 		__this->___U3CU3E1__state = ((int32_t)-2);
 		__this->___U3CauthU3E5__2 = (AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2*)NULL;
 		Il2CppCodeGenWriteBarrier((void**)(&__this->___U3CauthU3E5__2), (void*)(AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2*)NULL);
@@ -18251,7 +18285,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3COnWebsiteAuthClickedU3Ed__63_MoveNext
 			NullCheck(L_5);
 			L_5->___U3CU3E4__this = L_6;
 			Il2CppCodeGenWriteBarrier((void**)(&L_5->___U3CU3E4__this), (void*)L_6);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:477>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:494>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_7 = V_1;
 			NullCheck(L_7);
 			bool L_8 = L_7->___isAuthRequestInProgress;
@@ -18270,17 +18304,17 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3COnWebsiteAuthClickedU3Ed__63_MoveNext
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:477>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:494>
 			goto IL_0281;
 		}
 
 IL_004c_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:479>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:496>
 			BackendConfig_t4C8C70965890CD426DACBB91F6F2CDEE36C97593* L_11;
 			L_11 = BackendConfig_get_Active_m8ECA146F6FFC253F07ADA2483B8A9D9F558C04A1(NULL);
 			V_2 = L_11;
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:480>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:497>
 			BackendConfig_t4C8C70965890CD426DACBB91F6F2CDEE36C97593* L_12 = V_2;
 			il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
 			bool L_13;
@@ -18302,7 +18336,7 @@ IL_004c_1:
 
 IL_0063_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:483>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:500>
 			BackendConfig_t4C8C70965890CD426DACBB91F6F2CDEE36C97593* L_16 = V_2;
 			il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
 			bool L_17;
@@ -18327,7 +18361,7 @@ IL_0074_1:
 
 IL_0075_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:484>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:501>
 			if (!G_B11_0)
 			{
 				goto IL_008a_1;
@@ -18345,7 +18379,7 @@ IL_0075_1:
 
 IL_008a_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:485>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:502>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_22 = V_1;
 			NullCheck(L_22);
 			LoginScreenController_OpenRegistrationPage_mB2C59727FD670C97D8F3F77A75BF762DCB800186(L_22, NULL);
@@ -18354,7 +18388,7 @@ IL_008a_1:
 
 IL_0092_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:487>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:504>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_23 = V_1;
 			NullCheck(L_23);
 			LoginScreenController_OnLoginClicked_mC4B0AF5280A21691B41ACA40C9278B912BC91487(L_23, (bool)1, NULL);
@@ -18362,18 +18396,18 @@ IL_0092_1:
 
 IL_0099_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:488>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:505>
 			goto IL_0281;
 		}
 
 IL_009e_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:491>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:508>
 			AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_24;
 			L_24 = AuthService_get_Instance_mC5F3BCC6818176AEAD746F043ADB4B7B1F58245D_inline(NULL);
 			__this->___U3CauthU3E5__2 = L_24;
 			Il2CppCodeGenWriteBarrier((void**)(&__this->___U3CauthU3E5__2), (void*)L_24);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:492>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:509>
 			AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_25 = __this->___U3CauthU3E5__2;
 			il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
 			bool L_26;
@@ -18384,20 +18418,20 @@ IL_009e_1:
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:494>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:511>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_27 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_28 = V_1;
 			NullCheck(L_28);
 			Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_29 = L_28->___loginStatus;
 			NullCheck(L_27);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(L_27, L_29, _stringLiteral7C89F8059C17D357141A70B541E2ABE4FEA7685B, (bool)0, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:495>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:512>
 			goto IL_0281;
 		}
 
 IL_00ce_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:498>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:515>
 			U3CU3Ec__DisplayClass63_0_tBECA2139243417BE5E945BFD8747B73293395864* L_30 = __this->___U3CU3E8__1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_31 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_32 = V_1;
@@ -18410,15 +18444,15 @@ IL_00ce_1:
 			int32_t L_35 = V_4;
 			NullCheck(L_30);
 			L_30->___myAttempt = L_35;
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:499>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:516>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_36 = V_1;
 			NullCheck(L_36);
 			L_36->___isBrowserAuthWaiting = (bool)1;
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:501>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:518>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_37 = V_1;
 			NullCheck(L_37);
 			LoginScreenController_SetAuthControlsEnabled_m31EC13A3434A06D1F38A008CEA94B3BF2EE6E3C2(L_37, (bool)0, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:503>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:520>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_38 = V_1;
 			NullCheck(L_38);
 			Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_39 = L_38->___btnLoginWeb;
@@ -18442,7 +18476,7 @@ IL_0107_1:
 
 IL_010d_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:504>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:521>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_41 = V_1;
 			NullCheck(L_41);
 			Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_42 = L_41->___btnOpenWebRegistration;
@@ -18466,19 +18500,19 @@ IL_0119_1:
 
 IL_011f_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:506>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:523>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_44 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_45 = V_1;
 			NullCheck(L_45);
 			Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_46 = L_45->___loginStatus;
 			NullCheck(L_44);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(L_44, L_46, _stringLiteralE57ADB7DEE660DF32BE4D74CFB15591479582DAB, (bool)1, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:507>
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:508>
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:509>
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:510>
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:511>
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:512>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:524>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:525>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:526>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:527>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:528>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:529>
 			AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_47 = __this->___U3CauthU3E5__2;
 			String_t* L_48 = __this->___intent;
 			U3CU3Ec__DisplayClass63_0_tBECA2139243417BE5E945BFD8747B73293395864* L_49 = __this->___U3CU3E8__1;
@@ -18526,7 +18560,7 @@ IL_01a4_1:
 			bool L_60;
 			L_60 = Awaiter_GetResult_m6D93CE7E01A6A5877C2DDEF2BB604F19C20919ED((&V_5), Awaiter_GetResult_m6D93CE7E01A6A5877C2DDEF2BB604F19C20919ED_RuntimeMethod_var);
 			V_3 = L_60;
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:515>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:532>
 			U3CU3Ec__DisplayClass63_0_tBECA2139243417BE5E945BFD8747B73293395864* L_61 = __this->___U3CU3E8__1;
 			NullCheck(L_61);
 			int32_t L_62 = L_61->___myAttempt;
@@ -18539,17 +18573,17 @@ IL_01a4_1:
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:515>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:532>
 			goto IL_0281;
 		}
 
 IL_01c4_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:517>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:534>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_65 = V_1;
 			NullCheck(L_65);
 			L_65->___isBrowserAuthWaiting = (bool)0;
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:518>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:535>
 			bool L_66 = V_3;
 			if (L_66)
 			{
@@ -18557,11 +18591,11 @@ IL_01c4_1:
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:520>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:537>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_67 = V_1;
 			NullCheck(L_67);
 			LoginScreenController_SetAuthControlsEnabled_m31EC13A3434A06D1F38A008CEA94B3BF2EE6E3C2(L_67, (bool)1, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:521>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:538>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_68 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_69 = V_1;
 			NullCheck(L_69);
@@ -18571,13 +18605,13 @@ IL_01c4_1:
 			L_72 = LoginScreenController_ResolveBrowserAuthFailureMessage_m455E22B719C9E9F7E8B2321493131450E33ADB54(L_71, NULL);
 			NullCheck(L_68);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(L_68, L_70, L_72, (bool)0, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:522>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:539>
 			goto IL_0281;
 		}
 
 IL_01f2_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:525>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:542>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_73 = V_1;
 			AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_74 = __this->___U3CauthU3E5__2;
 			NullCheck(L_74);
@@ -18654,7 +18688,7 @@ CATCH_025a:
 
 IL_0281:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:526>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:543>
 		__this->___U3CU3E1__state = ((int32_t)-2);
 		__this->___U3CU3E8__1 = (U3CU3Ec__DisplayClass63_0_tBECA2139243417BE5E945BFD8747B73293395864*)NULL;
 		Il2CppCodeGenWriteBarrier((void**)(&__this->___U3CU3E8__1), (void*)(U3CU3Ec__DisplayClass63_0_tBECA2139243417BE5E945BFD8747B73293395864*)NULL);
