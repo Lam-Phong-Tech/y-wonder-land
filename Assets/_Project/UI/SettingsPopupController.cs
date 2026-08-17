@@ -375,12 +375,68 @@ public class SettingsPopupController : MonoBehaviour
 
     // ── Confirm Dialog Callbacks ──
 
-    private void OnDeleteAccountConfirmed()
+    [System.Serializable]
+    private class DeleteAccountRequest { public bool confirm; }
+
+    [System.Serializable]
+    private class DeleteAccountResponse { public bool ok; public bool deleted; }
+
+    /// <summary>
+    /// Xoá tài khoản NGAY TRONG APP — Apple Guideline 5.1.1(v) bắt buộc, và họ đã
+    /// nhắc trong thư từ chối 16/08/2026. Trước đây hàm này chỉ là stub gọi UGS
+    /// (dự án không dùng UGS) nên nút bấm xong không xoá được gì.
+    ///
+    /// Server xoá dữ liệu chơi, ẩn danh thông tin cá nhân và khoá đăng nhập; sổ cái
+    /// giao dịch cùng số dư Point được giữ để còn đối soát (xem softDeleteAccount
+    /// trong server/postgresStore.js). Tài khoản web và ví USDT không bị đụng tới.
+    /// </summary>
+    private async void OnDeleteAccountConfirmed()
     {
-        Debug.Log("[Settings] ✅ Xác nhận XÓA TÀI KHOẢN — đang thực hiện...");
-        // TODO: Gọi UGS Authentication để xóa tài khoản
-        // AuthenticationService.Instance.DeleteAccountAsync();
+        Debug.Log("[Settings] Xác nhận XÓA TÀI KHOẢN — đang gửi yêu cầu lên máy chủ...");
+
+        var auth = YWonderLand.Backend.AuthService.Instance;
+        if (auth == null || !auth.IsSignedIn)
+        {
+            ScreenToast.Show("Bạn cần đăng nhập trước khi xoá tài khoản.");
+            return;
+        }
+
+        if (btnDeleteAccount != null) btnDeleteAccount.SetEnabled(false);
+
+        var res = await YWonderLand.Backend.ApiClient.PostAsync<DeleteAccountResponse>(
+            "/player/account/delete",
+            new DeleteAccountRequest { confirm = true },
+            auth.Token);
+
+        if (btnDeleteAccount != null) btnDeleteAccount.SetEnabled(true);
+
+        if (!res.ok)
+        {
+            string reason = res.status == 0
+                ? "Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại."
+                : (string.IsNullOrEmpty(res.error) ? "Lỗi không xác định." : res.error);
+            Debug.LogWarning($"[Settings] Xoá tài khoản THẤT BẠI (status={res.status}): {reason}");
+            ScreenToast.Show("Không xoá được tài khoản. " + reason);
+            return;
+        }
+
+        Debug.Log("[Settings] Đã xoá tài khoản trên máy chủ. Đăng xuất và về màn hình đăng nhập.");
+        ScreenToast.Show("Tài khoản của bạn đã được xoá.");
+
         Hide();
+
+        // Dùng bản KHÔNG lưu: dữ liệu vừa bị xoá trên máy chủ, đẩy state cũ lên
+        // nữa là tạo lại đúng thứ vừa xoá. LogoutToLoginAsync(false) lo cả việc
+        // đăng xuất lẫn đưa về màn hình Login.
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.LogoutToLoginWithoutSaving();
+        }
+        else
+        {
+            Debug.LogWarning("[Settings] Không thấy GameManager — tự đăng xuất tại chỗ.");
+            auth.SignOutWithoutSavingGameplay();
+        }
     }
 
     private void OnExitGameConfirmed()

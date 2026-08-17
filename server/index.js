@@ -528,6 +528,33 @@ api.put("/player/profile", auth, asyncRoute(async (req, res) => {
   res.json({ ok: true, updatedAt: merged.updatedAt });
 }));
 
+// Xoá tài khoản theo yêu cầu của chính người chơi.
+// Apple Guideline 5.1.1(v): app cho ĐĂNG KÝ thì bắt buộc cho XOÁ ngay trong app,
+// không được chỉ bảo người dùng gửi email. Apple đã nhắc trong thư từ chối 16/08.
+//
+// Dùng POST chứ không DELETE vì UnityWebRequest.Delete không gửi kèm body được,
+// mà ta cần body để bắt xác nhận tường minh — tránh một request lạc xoá nhầm.
+//
+// Phạm vi xoá xem softDeleteAccount(): dữ liệu chơi bị xoá, sổ cái và số dư Point
+// giữ lại để còn đối soát, tài khoản web/ví USDT không đụng tới.
+api.post("/player/account/delete", auth, asyncRoute(async (req, res) => {
+  if (!req.body || req.body.confirm !== true) {
+    return res
+      .status(400)
+      .json({ error: "Thiếu xác nhận. Gửi { \"confirm\": true } để xoá tài khoản." });
+  }
+
+  if (typeof store.softDeleteAccount !== "function") {
+    return res.status(501).json({ error: "Chế độ lưu trữ hiện tại chưa hỗ trợ xoá tài khoản." });
+  }
+
+  const deleted = await store.softDeleteAccount(req.userId);
+  if (!deleted) return res.status(404).json({ error: "Không tìm thấy tài khoản." });
+
+  console.log(`[account] Người chơi ${req.userId} đã tự xoá tài khoản.`);
+  res.json({ ok: true, deleted: true });
+}));
+
 api.get("/player/bootstrap", auth, asyncRoute(async (req, res) => {
   let profile = await store.getProfile(req.userId);
   if (!profile) {

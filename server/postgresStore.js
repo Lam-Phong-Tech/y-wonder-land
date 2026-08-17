@@ -2149,6 +2149,72 @@ class PostgresStore {
     const result = await this.pool.query("delete from game_players where id=$1", [playerId]);
     return result.rowCount > 0;
   }
+
+  /**
+   * Xoá tài khoản theo yêu cầu của người chơi (Apple Guideline 5.1.1(v) bắt buộc
+   * app cho tạo tài khoản thì phải cho xoá ngay trong app).
+   *
+   * CỐ Ý không dùng deletePlayer(): xoá cứng game_players sẽ kéo theo MỌI bảng
+   * qua khoá ngoại, gồm cả game_transactions (sổ cái) và player_economy (giữ
+   * Point — Point quy đổi ra USDT nên là tiền thật). Xoá là huỷ chứng từ.
+   *
+   * Ở đây:
+   *   - XOÁ dữ liệu chơi thuần tuý (nông trại, kho đồ, điểm danh, hồ sơ...)
+   *   - GIỮ player_economy + game_transactions + các bảng point_* để còn đối
+   *     soát tiền và tra cứu khi có tranh chấp
+   *   - Vô hiệu hoá đăng nhập và ẩn danh thông tin cá nhân trong game_accounts
+   *
+   * Tài khoản web trên ywonder.net (ví USDT, KYC, cây giới thiệu) KHÔNG bị đụng
+   * tới — đó là hệ thống riêng, xoá phải theo quy trình khác.
+   */
+  async softDeleteAccount(playerId) {
+    if (!playerId) return false;
+
+    return this.withTransaction(async (client) => {
+      const exists = await client.query("select 1 from game_players where id=$1", [playerId]);
+      if (exists.rowCount === 0) return false;
+
+      const gameplayTables = [
+        "player_farm_state",
+        "player_inventory",
+        "player_inventory_meta",
+        "player_attendance",
+        "player_daily_limits",
+        "player_profiles",
+      ];
+      for (const table of gameplayTables) {
+        await client.query(`delete from ${table} where player_id=$1`, [playerId]);
+      }
+
+      // Ẩn danh + khoá đăng nhập. Dùng playerId làm hậu tố nên không đụng
+      // ràng buộc unique dù nhiều người xoá cùng lúc.
+      await client.query(
+        `update game_accounts
+            set soft_deleted = true,
+                status = 'DELETED',
+                username = 'deleted_' || $1,
+                email = 'deleted+' || $1 || '@invalid.local',
+                phone = null,
+                password_hash = null,
+                updated_at = now()
+          where player_id = $1`,
+        [playerId]
+      );
+
+      // Cắt phiên đang đăng nhập để token hiện tại hết hiệu lực ngay.
+      await client.query(
+        `update game_players
+            set display_name = 'Tài khoản đã xoá',
+                active_session_id = null,
+                active_session_updated_at = null,
+                updated_at = now()
+          where id = $1`,
+        [playerId]
+      );
+
+      return true;
+    });
+  }
 }
 
 function createPostgresStore(options) {
