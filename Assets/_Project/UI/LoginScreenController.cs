@@ -240,7 +240,24 @@ public class LoginScreenController : MonoBehaviour
     private void ApplyAuthModeLayout()
     {
         var config = BackendConfig.Active;
-        if (config != null && config.localAuthEnabled) return;
+        if (config != null && config.localAuthEnabled)
+        {
+            // Apple từ chối 16/08/2026 theo Guideline 4: đẩy người chơi ra trình duyệt
+            // mặc định để đăng nhập/đăng ký là trải nghiệm kém.
+            //
+            // Khi đã có form NGAY TRONG GAME và KHÔNG bật browser SSO thì giấu hẳn 2 nút
+            // mở website. Nút "ĐĂNG NHẬP WEBSITE" tuy đã tự rơi về form trong game (xem
+            // OnWebsiteAuthClicked), nhưng nút "ĐĂNG KÝ TRONG WEBSITE" vẫn gọi thẳng
+            // Application.OpenURL — để lại là còn nguyên đường vi phạm.
+            if (!config.browserAuthEnabled)
+            {
+                SetHidden(btnLoginWeb, true);
+                SetHidden(btnOpenWebRegistration, true);
+                if (rootElement != null)
+                    SetHidden(rootElement.Q<Label>("WebOnlyHint"), true);
+            }
+            return;
+        }
         if (rootElement == null) return;
 
         demoFormRevealed = false; // OnEnable có thể chạy lại -> phải mở lại được form demo
