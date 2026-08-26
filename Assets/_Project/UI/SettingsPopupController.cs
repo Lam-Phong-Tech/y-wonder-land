@@ -397,7 +397,7 @@ public class SettingsPopupController : MonoBehaviour
         var auth = YWonderLand.Backend.AuthService.Instance;
         if (auth == null || !auth.IsSignedIn)
         {
-            ScreenToast.Show("Bạn cần đăng nhập trước khi xoá tài khoản.");
+            YWonderLand.Environment.ScreenToast.Show("Bạn cần đăng nhập trước khi xoá tài khoản.");
             return;
         }
 
@@ -416,12 +416,12 @@ public class SettingsPopupController : MonoBehaviour
                 ? "Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại."
                 : (string.IsNullOrEmpty(res.error) ? "Lỗi không xác định." : res.error);
             Debug.LogWarning($"[Settings] Xoá tài khoản THẤT BẠI (status={res.status}): {reason}");
-            ScreenToast.Show("Không xoá được tài khoản. " + reason);
+            YWonderLand.Environment.ScreenToast.Show("Không xoá được tài khoản. " + reason);
             return;
         }
 
         Debug.Log("[Settings] Đã xoá tài khoản trên máy chủ. Đăng xuất và về màn hình đăng nhập.");
-        ScreenToast.Show("Tài khoản của bạn đã được xoá.");
+        YWonderLand.Environment.ScreenToast.Show("Tài khoản của bạn đã được xoá.");
 
         Hide();
 

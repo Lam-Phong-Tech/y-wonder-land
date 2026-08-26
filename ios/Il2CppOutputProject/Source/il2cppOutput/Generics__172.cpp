@@ -8346,7 +8346,7 @@ inline void ValueCollection_CopyTo_m36ADBED36AA3374AC1EE4B5284CF99DE05E40251 (Va
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 89445
+// Method Definition Index: 89448
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UxmlSerializedData_Register_mDF675A06E27DCEBC398C3C4F74F74D40270E31E1_gshared (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8378,7 +8378,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UxmlSerializedData_Register_mDF675A06E27
 		return;
 	}
 }
-// Method Definition Index: 89446
+// Method Definition Index: 89449
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* UxmlSerializedData_CreateInstance_mEFADE5E6C7CFFB0F6EFFA877125D05036C40992E_gshared (UxmlSerializedData_t9E59DE3DBC5FF44A7F1EA15C05FD606F2A3888EA* __this, const RuntimeMethod* method) 
 {
 	{
@@ -8387,7 +8387,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* UxmlSerializedData_CreateInsta
 		return (RuntimeObject*)L_0;
 	}
 }
-// Method Definition Index: 89447
+// Method Definition Index: 89450
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UxmlSerializedData_Deserialize_m4ED273797BF39D8D4603C7EB1B2DF01A22878AA9_gshared (UxmlSerializedData_t9E59DE3DBC5FF44A7F1EA15C05FD606F2A3888EA* __this, RuntimeObject* ___0_obj, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8421,7 +8421,7 @@ IL_0020:
 		return;
 	}
 }
-// Method Definition Index: 89448
+// Method Definition Index: 89451
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UxmlSerializedData__ctor_m78D9B273697AC739F4CD2513B8218FA17A9F2A17_gshared (UxmlSerializedData_t9E59DE3DBC5FF44A7F1EA15C05FD606F2A3888EA* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8444,7 +8444,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UxmlSerializedData__ctor_m78D9B273697AC7
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 89445
+// Method Definition Index: 89448
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UxmlSerializedData_Register_m5E6AB408A27A9BBA69F65ABC004C0E1E76BE6210_gshared (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8476,7 +8476,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UxmlSerializedData_Register_m5E6AB408A27
 		return;
 	}
 }
-// Method Definition Index: 89446
+// Method Definition Index: 89449
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* UxmlSerializedData_CreateInstance_mC45D29EBC64F99BABFA5D49BE4B04CE3B4792738_gshared (UxmlSerializedData_tA09C21B909D0C416AD2FD20C8F1C8998EAB1ED09* __this, const RuntimeMethod* method) 
 {
 	{
@@ -8485,7 +8485,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* UxmlSerializedData_CreateInsta
 		return (RuntimeObject*)L_0;
 	}
 }
-// Method Definition Index: 89447
+// Method Definition Index: 89450
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UxmlSerializedData_Deserialize_m0C3016E04D5927B23C5AE52606024B8E3EBFDB2E_gshared (UxmlSerializedData_tA09C21B909D0C416AD2FD20C8F1C8998EAB1ED09* __this, RuntimeObject* ___0_obj, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8519,7 +8519,7 @@ IL_0020:
 		return;
 	}
 }
-// Method Definition Index: 89448
+// Method Definition Index: 89451
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UxmlSerializedData__ctor_mFDC360B35D7851B45AD90E46AF25454C30858433_gshared (UxmlSerializedData_tA09C21B909D0C416AD2FD20C8F1C8998EAB1ED09* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8542,7 +8542,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UxmlSerializedData__ctor_mFDC360B35D7851
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 89445
+// Method Definition Index: 89448
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UxmlSerializedData_Register_m8F0B2E0AF6E5212ABD0A64EB375CA93FDE5C3E36_gshared (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8574,7 +8574,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UxmlSerializedData_Register_m8F0B2E0AF6E
 		return;
 	}
 }
-// Method Definition Index: 89446
+// Method Definition Index: 89449
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* UxmlSerializedData_CreateInstance_mD911770F42D9DF8EEF40B4C0912071EB39ED20B9_gshared (UxmlSerializedData_tF2A7A445516C933026DD6A427F701CEEFE7AAA6A* __this, const RuntimeMethod* method) 
 {
 	{
@@ -8583,7 +8583,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* UxmlSerializedData_CreateInsta
 		return (RuntimeObject*)L_0;
 	}
 }
-// Method Definition Index: 89447
+// Method Definition Index: 89450
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UxmlSerializedData_Deserialize_mD4FFB7629292127E1A57EB4655F5EE97DB67949C_gshared (UxmlSerializedData_tF2A7A445516C933026DD6A427F701CEEFE7AAA6A* __this, RuntimeObject* ___0_obj, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8617,7 +8617,7 @@ IL_0020:
 		return;
 	}
 }
-// Method Definition Index: 89448
+// Method Definition Index: 89451
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UxmlSerializedData__ctor_m3D17A248E0F3FB68742883FD951540A78E36DA76_gshared (UxmlSerializedData_tF2A7A445516C933026DD6A427F701CEEFE7AAA6A* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8640,7 +8640,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UxmlSerializedData__ctor_m3D17A248E0F3FB
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 89445
+// Method Definition Index: 89448
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UxmlSerializedData_Register_m0BC110377BEE1BB2CA01D9BD86A2EA81762A0E6D_gshared (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8672,7 +8672,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UxmlSerializedData_Register_m0BC110377BE
 		return;
 	}
 }
-// Method Definition Index: 89446
+// Method Definition Index: 89449
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* UxmlSerializedData_CreateInstance_m2D4EFFBABA8FF20E46E7E76FAFCCBD924AE03EE0_gshared (UxmlSerializedData_tADA99E246AD58A4D5AB539C09E8D17BA07263954* __this, const RuntimeMethod* method) 
 {
 	{
@@ -8681,7 +8681,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* UxmlSerializedData_CreateInsta
 		return (RuntimeObject*)L_0;
 	}
 }
-// Method Definition Index: 89447
+// Method Definition Index: 89450
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UxmlSerializedData_Deserialize_mEE804A0B2FD966FC08BC9A90DC0D6041E7A29411_gshared (UxmlSerializedData_tADA99E246AD58A4D5AB539C09E8D17BA07263954* __this, RuntimeObject* ___0_obj, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8715,7 +8715,7 @@ IL_0020:
 		return;
 	}
 }
-// Method Definition Index: 89448
+// Method Definition Index: 89451
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UxmlSerializedData__ctor_mB4D45495562D6C96D9A52429B2B84B30476C0EC9_gshared (UxmlSerializedData_tADA99E246AD58A4D5AB539C09E8D17BA07263954* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -9348,7 +9348,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UxmlSerializedData__ctor_m687E7D0F90C63D
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 89445
+// Method Definition Index: 89448
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UxmlSerializedData_Register_m25A2072F42175446E123FDD673AA5A4A146468EC_gshared (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -9380,7 +9380,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UxmlSerializedData_Register_m25A2072F421
 		return;
 	}
 }
-// Method Definition Index: 89446
+// Method Definition Index: 89449
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* UxmlSerializedData_CreateInstance_m8B3D235D2CF55A76B4C54D3F2C565BC59F848559_gshared (UxmlSerializedData_t71F4A1CB8E28C6EE9A5E7C75E01742BAE53EC6E1* __this, const RuntimeMethod* method) 
 {
 	{
@@ -9389,7 +9389,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* UxmlSerializedData_CreateInsta
 		return (RuntimeObject*)L_0;
 	}
 }
-// Method Definition Index: 89447
+// Method Definition Index: 89450
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UxmlSerializedData_Deserialize_mAA05D5E588F650AFDBD7D18A92AB41BD5CA82C4B_gshared (UxmlSerializedData_t71F4A1CB8E28C6EE9A5E7C75E01742BAE53EC6E1* __this, RuntimeObject* ___0_obj, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -9425,7 +9425,7 @@ IL_0020:
 		return;
 	}
 }
-// Method Definition Index: 89448
+// Method Definition Index: 89451
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UxmlSerializedData__ctor_mD77562DB36747EFC00E69A50E6E9075E1A264055_gshared (UxmlSerializedData_t71F4A1CB8E28C6EE9A5E7C75E01742BAE53EC6E1* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;

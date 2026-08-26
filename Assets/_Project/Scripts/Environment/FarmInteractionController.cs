@@ -722,7 +722,7 @@ namespace YWonderLand.Environment
             {
                 // Thú ĐANG TRONG CHUỒNG thì bảng nút là của CHUỒNG, không phải của riêng con.
                 if (TryGetAnimalEnclosure(animal, out var animalEnclosure) && IsEnclosureInRange(animalEnclosure, true))
-                    AddEnclosureActions(animalEnclosure, actions);
+                    AddEnclosureActions(animalEnclosure, actions, MoveCellsForAnimal(animal));
                 else
                     AddAnimalActions(animal, actions, out _, out _);
             }
@@ -736,7 +736,7 @@ namespace YWonderLand.Environment
                 {
                     var pen = PenEnclosure.FindPen(penCell);
                     if (pen != null && IsEnclosureInRange(pen, true))
-                        AddEnclosureActions(pen, actions);
+                        AddEnclosureActions(pen, actions, MoveCellsForPenCell(penCell));
                 }
 
                 if (actions.Count == 0)
@@ -1001,7 +1001,11 @@ namespace YWonderLand.Environment
             {
                 switch (tile.currentState)
                 {
-                    case FarmTile.TileState.Soil: actName = "Cu\u1ed1c \u0111\u1ea5t"; break;
+                    // "Cu\u1ed1c & gieo": t\u1eeb 24/08 m\u1ed9t l\u1ea7n b\u1ea5m l\u00e0m c\u1ea3 hai kh\u00e2u (xem HandlePlow).
+                    // Nh\u00e3n n\u00f3i \u0111\u00fang vi\u1ec7c s\u1ebd x\u1ea3y ra, kh\u1ecfi b\u1ea5t ng\u1edd khi b\u1ea3ng ch\u1ecdn h\u1ea1t t\u1ef1 m\u1edf.
+                    case FarmTile.TileState.Soil: actName = "Cu\u1ed1c & gieo"; break;
+                    // V\u1eabn gi\u1eef nh\u00e1nh n\u00e0y: \u00f4 \u0111\u00e3 cu\u1ed1c m\u00e0 ng\u01b0\u1eddi ch\u01a1i \u0111\u00f3ng b\u1ea3ng ch\u1ecdn h\u1ea1t th\u00ec l\u1ea7n sau
+                    // b\u1ea5m v\u00e0o l\u00e0 gieo th\u1eb3ng, kh\u00f4ng cu\u1ed1c l\u1ea1i.
                     case FarmTile.TileState.Plowed: actName = "Gieo h\u1ea1t"; break;
                     case FarmTile.TileState.Planted: actName = "T\u01b0\u1edbi n\u01b0\u1edbc"; break;
                     case FarmTile.TileState.Watered: actName = "T\u01b0\u1edbi n\u01b0\u1edbc"; break;
@@ -1044,20 +1048,20 @@ namespace YWonderLand.Environment
                 });
             }
 
-            // DỜI RUỘNG (khách chốt 30/07): làm y như "Dời chuồng" — nhấc cả mảnh ruộng liền nhau,
+            // DỜI Ô RUỘNG (khách chốt 24/08 — trước 30/07 là nhấc cả mảnh): nhấc ĐÚNG ô đang chỉ,
             // cây đang trồng đi theo. Chỉ hiện với ruộng dựng bằng Chế độ Xây (có ô nền để đặt lại).
             if (CanDemolishFarmTile(plotSeed))
             {
                 actions.Add(new InteractionAction
                 {
                     keyName = "M",
-                    actionName = "Dời ruộng",
+                    actionName = "Dời ô này",
                     // Nút đã hiện thì bấm phải có phản hồi — ngoài tầm cũng phải nói, đừng nuốt cú bấm.
                     onClick = () =>
                     {
                         if (!IsTileInRange(plotSeed, useDirectTapInteraction))
                         {
-                            NotifyBlocked("Đứng gần mảnh ruộng hơn mới dời được.");
+                            NotifyBlocked("Đứng gần ô ruộng hơn mới dời được.");
                             return;
                         }
                         BeginMovePlot(plotSeed);
@@ -1400,7 +1404,64 @@ namespace YWonderLand.Environment
             return false;
         }
 
-        private void AddEnclosureActions(List<BuildSurfaceCell> enclosure, List<InteractionAction> actions)
+        /// <summary>
+        /// Phần được DỜI khi chạm vào một con thú: TRỌN BỘ ô nó chiếm.
+        /// Con 9 ô không tách rời được — dời lẻ một ô thì con vật đứng vắt ngang hai chỗ.
+        /// </summary>
+        private List<BuildSurfaceCell> MoveCellsForAnimal(FarmAnimal animal)
+        {
+            var cells = new List<BuildSurfaceCell>();
+            if (animal == null || animal.occupiedCells == null) return cells;
+            foreach (var cell in animal.occupiedCells)
+                if (cell != null && !cells.Contains(cell)) cells.Add(cell);
+            return cells;
+        }
+
+        /// <summary>
+        /// Phần được DỜI khi chạm vào một ô rào: ĐÚNG ô đó (khách chốt 24/08).
+        /// Trừ khi ô nằm trong vùng của một con thú — lúc đó phải mang trọn bộ ô của nó đi cùng.
+        ///
+        /// CHÚ Ý: chỉ ô NEO mới giữ AnimalObject (BuildPersistence gán cells[0]), 8 ô còn lại
+        /// của con 9 ô thì AnimalObject == null. Nên phải dò NGƯỢC qua occupiedCells, nếu chỉ
+        /// nhìn AnimalObject thì chạm vào ô rìa sẽ dời lẻ một ô và bỏ con vật đứng lại.
+        /// </summary>
+        private List<BuildSurfaceCell> MoveCellsForPenCell(BuildSurfaceCell cell)
+        {
+            if (cell == null) return new List<BuildSurfaceCell>();
+
+            // Đường nhanh: ô neo cầm sẵn tham chiếu, khỏi quét scene.
+            var animalObject = cell.AnimalObject;
+            if (animalObject != null)
+            {
+                var anchored = MoveCellsForAnimal(animalObject.GetComponentInParent<FarmAnimal>());
+                if (anchored.Count > 0) return anchored;
+            }
+
+            // Ô trống thì khỏi quét. Hàm này chạy MỖI KHUNG HÌNH khi người chơi đứng trước ô rào,
+            // mà quét cả cảnh tìm FarmAnimal thì tốn — cờ HasAnimal cho biết ngay là khỏi hỏi.
+            // (Mọi ô của con nhiều ô đều bật cờ này: ô neo qua SetAnimalOccupant, ô rìa qua SetAnimal.)
+            if (!cell.HasAnimal) return new List<BuildSurfaceCell> { cell };
+
+            // Ô rìa: hỏi từng con xem có nhận ô này không.
+            foreach (var animal in Object.FindObjectsByType<FarmAnimal>(FindObjectsSortMode.None))
+            {
+                if (animal == null || animal.occupiedCells == null) continue;
+                if (!animal.occupiedCells.Contains(cell)) continue;
+
+                var owned = MoveCellsForAnimal(animal);
+                if (owned.Count > 0) return owned;
+            }
+
+            return new List<BuildSurfaceCell> { cell };
+        }
+
+        /// <summary>
+        /// Bảng nút của chuồng. <paramref name="enclosure"/> là CẢ chuồng (dùng cho Xem/Thả thú),
+        /// còn <paramref name="moveCells"/> là phần được DỜI — khách chốt 24/08: dời TỪNG Ô,
+        /// trừ con vật chiếm nhiều ô thì đi trọn bộ. Truyền null thì lấy cả chuồng như cũ.
+        /// </summary>
+        private void AddEnclosureActions(List<BuildSurfaceCell> enclosure, List<InteractionAction> actions,
+            List<BuildSurfaceCell> moveCells = null)
         {
             if (enclosure == null || actions == null) return;
 
@@ -1422,15 +1483,41 @@ namespace YWonderLand.Environment
                 actions.Add(new InteractionAction { keyName = "E", actionName = "Thả thú", onClick = () => { if (IsEnclosureInRange(addEnclosure, useDirectTapInteraction)) OpenEnclosurePicker(addEnclosure); } });
             }
 
-            // Khách chốt 29/07: cho DỜI nguyên cụm chuồng sang chỗ khác (thú đi theo, không tốn vật liệu).
-            var moveEnclosure = new List<BuildSurfaceCell>(enclosure);
+            // Dời chuồng (thú đi theo, không tốn vật liệu — khách chốt 29/07).
+            // Khách chốt 24/08: dời TỪNG Ô chứ không bốc cả chuồng. moveCells do nơi gọi quyết định:
+            //   - chạm vào THÚ            -> occupiedCells của nó (con 9 ô đi trọn 9 ô, không tách được)
+            //   - chạm vào Ô RÀO trống    -> đúng một ô đó
+            // Không có moveCells thì giữ hành vi cũ (cả chuồng) để nhánh gọi cũ không gãy.
+            var moveEnclosure = new List<BuildSurfaceCell>(
+                moveCells != null && moveCells.Count > 0 ? moveCells : enclosure);
+
+            // Nhãn phải NÓI ĐÚNG việc sắp làm, không thì người chơi bấm "Dời ô này" mà bay đi 9 ô.
+            //   cả chuồng  -> "Dời chuồng"
+            //   nhiều ô    -> chỉ xảy ra với thú chiếm nhiều ô; ghi rõ số ô
+            //   một ô      -> "Dời ô này"
+            string moveLabel = moveEnclosure.Count >= enclosure.Count
+                ? "Dời chuồng"
+                : moveEnclosure.Count > 1
+                    ? $"Dời thú ({moveEnclosure.Count} ô)"
+                    : "Dời ô này";
+
             actions.Add(new InteractionAction
             {
                 keyName = "M",
-                actionName = "Dời chuồng",
+                actionName = moveLabel,
                 onClick = () =>
                 {
-                    if (!IsEnclosureInRange(moveEnclosure, useDirectTapInteraction)) return;
+                    // Nút hiện ra theo tầm với CẢ CHUỒNG (chỉ cần một ô trong tầm), nhưng trước đây
+                    // lại chặn theo tầm với riêng phần sắp dời. Chuồng dài thì đứng đầu này chạm ô
+                    // đầu kia: nút hiện mà bấm không nhúc nhích, không một lời báo — người chơi
+                    // tưởng game đơ. Giờ nói thẳng ra thay vì nuốt cú bấm.
+                    if (!IsEnclosureInRange(moveEnclosure, useDirectTapInteraction))
+                    {
+                        NotifyBlocked(moveEnclosure.Count > 1
+                            ? "Đứng gần con thú hơn mới dời được."
+                            : "Đứng gần ô này hơn mới dời được.");
+                        return;
+                    }
                     BeginMovePen(moveEnclosure);
                 }
             });
@@ -1729,6 +1816,13 @@ namespace YWonderLand.Environment
             pendingDemolishPath = null;
             demolishConfirmTimer = 0f;
 
+            // Quên luôn chuồng đã nhớ. Bảng nút chỉ dựng lại danh sách ô khi ô gốc ĐỔI, nên nếu
+            // giữ lại thì sau một lần dời (nhất là dời TỪNG Ô — cùng ô gốc nhưng chuồng đã khác)
+            // bảng nút sẽ làm việc trên danh sách ô cũ: báo thừa chỗ trống, thả thú thì máy chủ
+            // từ chối, bấm mãi không thoát. Dựng lại từ đầu rẻ hơn nhiều so với đoán xem còn đúng không.
+            hoverEnclosureSeed = null;
+            hoverEnclosure = null;
+
             if (GameHUDController.Instance != null)
                 GameHUDController.Instance.HideInteractionPrompt();
             if (YWonderLand.UI.ResourceInteractionUIController.Instance != null)
@@ -1962,7 +2056,7 @@ namespace YWonderLand.Environment
                 return false;
 
             foundObj = cell.gameObject;
-            AddEnclosureActions(hoverEnclosure, actions);
+            AddEnclosureActions(hoverEnclosure, actions, MoveCellsForPenCell(cell));
             return actions != null && actions.Count > 0;
         }
 
@@ -2510,7 +2604,7 @@ namespace YWonderLand.Environment
                 if (TryGetAnimalEnclosure(priorityAnimal, out var priorityEnclosure) && IsEnclosureInRange(priorityEnclosure, directTap))
                 {
                     foundObj = priorityAnimal.gameObject;
-                    AddEnclosureActions(priorityEnclosure, foundActions);
+                    AddEnclosureActions(priorityEnclosure, foundActions, MoveCellsForAnimal(priorityAnimal));
                 }
                 else
                 {
@@ -2535,7 +2629,7 @@ namespace YWonderLand.Environment
                     if (TryGetAnimalEnclosure(animal, out var animalEnclosure) && IsEnclosureInRange(animalEnclosure, directTap))
                     {
                         foundObj = animal.gameObject;
-                        AddEnclosureActions(animalEnclosure, foundActions);
+                        AddEnclosureActions(animalEnclosure, foundActions, MoveCellsForAnimal(animal));
                     }
                     else
                     {
@@ -2592,7 +2686,7 @@ namespace YWonderLand.Environment
                         if (IsEnclosureInRange(encl, directTap))
                         {
                             foundObj = directPenCell.gameObject;
-                            AddEnclosureActions(encl, foundActions);
+                            AddEnclosureActions(encl, foundActions, MoveCellsForPenCell(directPenCell));
                         }
                     }
                     break;
@@ -2665,7 +2759,7 @@ namespace YWonderLand.Environment
                             if (IsEnclosureInRange(encl, directTap))
                             {
                                 foundObj = penCell.gameObject;
-                                AddEnclosureActions(encl, foundActions);
+                                AddEnclosureActions(encl, foundActions, MoveCellsForPenCell(penCell));
                             }
                         }
                         break;
@@ -2936,16 +3030,24 @@ namespace YWonderLand.Environment
         }
 
         /// <summary>
-        /// DỜI CẢ MẢNH RUỘNG (khách chốt 30/07): nhấc mọi ô đất liền nhau — cây đang trồng đi theo
-        /// vì model cây là con của ô đất — rồi đặt xuống chỗ mới. Không tốn/hoàn vật liệu (ruộng vốn free).
-        /// Chỉ dời được ruộng dựng bằng Chế độ Xây (nằm trên BuildSurfaceCell); ruộng cũ của
-        /// TilePlacementSystem không có ô nền nên từ chối, thà không cho dời còn hơn dời xong mất cây.
+        /// DỜI Ô RUỘNG (khách chốt 24/08 — đổi từ "cả mảnh" của 30/07): nhấc ĐÚNG ô đang chỉ,
+        /// cây đang trồng đi theo vì model cây là con của ô đất.
+        /// Ô thuộc GIÀN nhiều ô thì đi trọn bộ giàn — giàn không tách rời được, dời lẻ một ô
+        /// sẽ làm cây vắt ngang hai chỗ.
+        /// Không tốn/hoàn vật liệu (ruộng vốn free). Chỉ dời được ruộng dựng bằng Chế độ Xây
+        /// (nằm trên BuildSurfaceCell); ruộng cũ của TilePlacementSystem không có ô nền nên từ chối,
+        /// thà không cho dời còn hơn dời xong mất cây.
         /// </summary>
         public bool BeginMovePlot(FarmTile seed)
         {
             if (seed == null) return false;
 
-            var tiles = FindPlotTiles(seed.masterTile != null ? seed.masterTile : seed);
+            // Chỉ ô đang chỉ. Nếu nó thuộc một giàn thì lấy master + mọi ô con của giàn đó.
+            FarmTile master = seed.masterTile != null ? seed.masterTile : seed;
+            var tiles = new List<FarmTile> { master };
+            foreach (var t in FindObjectsByType<FarmTile>(FindObjectsSortMode.None))
+                if (t != null && t != master && t.masterTile == master) tiles.Add(t);
+
             var cells = new List<BuildSurfaceCell>();
             var seen = new HashSet<BuildSurfaceCell>();
 
@@ -3721,6 +3823,13 @@ namespace YWonderLand.Environment
                     {
                         FarmStateSync.SaveTileState(tile);
                         Debug.Log("[FarmInteraction] Plowed tile!");
+
+                        // Khách chốt 24/08: BỎ BỚT MỘT KHÂU — cuốc xong mở luôn bảng chọn hạt,
+                        // không bắt bấm lần thứ hai. Gọi ở ĐÂY (trong callback của BeginTimedAction)
+                        // chứ không gọi ngoài, vì phải đợi múa cuốc xong; gọi sớm thì ô vẫn còn
+                        // Soil và HandleOpenSeedSelection sẽ từ chối.
+                        // Người chơi vẫn đóng được bảng chọn để giữ ô đất trống đã cuốc.
+                        HandleOpenSeedSelection(tile);
                     }
                 });
         }

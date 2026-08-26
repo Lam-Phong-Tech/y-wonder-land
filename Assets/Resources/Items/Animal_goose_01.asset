@@ -31,9 +31,9 @@ MonoBehaviour:
   expReward: 4500
   meatItemId: goose_meat_01
   meatAmount: 5
-  feedIntervalSec: 86400
-  noFeedDeathSec: 86400
-  fedLifeSec: 172800
+  feedIntervalSec: 43200
+  noFeedDeathSec: 43200
+  fedLifeSec: 86400
   canGetSick: 1
   raisingDays: 90
   sicknessOnsetRatio: 0.15

@@ -202,7 +202,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t String_get_Length_m42625D
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 56971
+// Method Definition Index: 56974
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void RotateObjectHDRP_Update_mE07B0389BB2FB43B519A9721128DC2369F07BB2D (RotateObjectHDRP_t20F082219E1493C3C46187BE6BDD7C66EF970332* __this, const RuntimeMethod* method) 
 {
 	float V_0 = 0.0f;
@@ -228,7 +228,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void RotateObjectHDRP_Update_mE07B0389BB2FB43
 		return;
 	}
 }
-// Method Definition Index: 56972
+// Method Definition Index: 56975
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void RotateObjectHDRP__ctor_mE6A11E1D537474E48958C4888FCE8DE304B52F32 (RotateObjectHDRP_t20F082219E1493C3C46187BE6BDD7C66EF970332* __this, const RuntimeMethod* method) 
 {
 	{
@@ -246,7 +246,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void RotateObjectHDRP__ctor_mE6A11E1D537474E4
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 56973
+// Method Definition Index: 56976
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void RotateObjectURP_Update_mDDFC4D3B306C8885542917FF5FABDD7686E1B268 (RotateObjectURP_tC530BD886D95E9274113991521D4615D199094AC* __this, const RuntimeMethod* method) 
 {
 	float V_0 = 0.0f;
@@ -272,7 +272,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void RotateObjectURP_Update_mDDFC4D3B306C8885
 		return;
 	}
 }
-// Method Definition Index: 56974
+// Method Definition Index: 56977
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void RotateObjectURP__ctor_m43B1C044CC5FF6F059ECC9A90901870BCA2CD27C (RotateObjectURP_tC530BD886D95E9274113991521D4615D199094AC* __this, const RuntimeMethod* method) 
 {
 	{
@@ -290,7 +290,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void RotateObjectURP__ctor_m43B1C044CC5FF6F05
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 56975
+// Method Definition Index: 56978
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR uint32_t U3CPrivateImplementationDetailsU3E_ComputeStringHash_m6EA1F233618497AEFF8902A5EDFA24C74E2F2876 (String_t* ___0_s, const RuntimeMethod* method) 
 {
 	uint32_t V_0 = 0;

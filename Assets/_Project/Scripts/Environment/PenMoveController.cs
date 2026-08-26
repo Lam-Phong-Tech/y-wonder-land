@@ -33,6 +33,7 @@ namespace YWonderLand.Environment
             public GameObject animalObject;        // ô neo mới giữ thú
             public string animalItemId;
             public Vector3 animalStartPos;
+            public bool hadAnimal;                 // ô này ĐANG bị thú chiếm chỗ (kể cả ô "mượn chỗ" của con nhiều ô)
             public string historyKeyBefore;        // khoá nhật ký của cây trên ô này TRƯỚC khi dời (ruộng)
         }
 
@@ -67,6 +68,28 @@ namespace YWonderLand.Environment
         /// <summary>Chữ gọi thứ đang dời trong gợi ý và thông báo: "chuồng" / "ruộng" / "đường".</summary>
         public static string SubjectLabel { get; private set; } = DefaultSubject;
 
+        /// <summary>
+        /// Vị trí của vật thể TRƯỚC khi bắt đầu rê. Chỉ có nghĩa khi đang dời dở.
+        ///
+        /// Dùng cho lúc LƯU: xem trước chỉ dịch transform chứ chưa đổi dữ liệu ô, nên nếu có một lần
+        /// lưu chen vào giữa (bấm nút Home, thú chết đói, thú đổ bệnh) thì bản lưu sẽ ghi VỊ TRÍ ĐÃ RÊ
+        /// mà vẫn gắn với Ô CŨ — mở lại game là hàng rào nằm lệch hẳn khỏi ô của nó và không tự nắn lại.
+        /// Hỏi hàm này để lưu đúng vị trí gốc.
+        /// </summary>
+        public static bool TryGetStartPosition(GameObject occupant, out Vector3 position)
+        {
+            position = default;
+            if (!IsActive || occupant == null) return false;
+
+            foreach (var e in entries)
+            {
+                if (e == null) continue;
+                if (e.fence == occupant) { position = e.fenceStartPos; return true; }
+                if (e.animalObject == occupant) { position = e.animalStartPos; return true; }
+            }
+            return false;
+        }
+
         private const string DefaultSubject = "chuồng";
 
         /// <summary>Vào chế độ dời. Trả false nếu cụm ô không hợp lệ.</summary>
@@ -92,6 +115,7 @@ namespace YWonderLand.Environment
                     cost = cell.BuildCost,
                     animalObject = cell.AnimalObject,
                     animalItemId = cell.AnimalItemId,
+                    hadAnimal = cell.HasAnimal,
                     historyKeyBefore = HistoryKeyOf(cell.Occupant)
                 };
                 if (entry.fence != null) entry.fenceStartPos = entry.fence.transform.position;
@@ -261,6 +285,11 @@ namespace YWonderLand.Environment
                 if (e.fence != null) target.SetOccupant(e.fence);
                 target.SetBuildMaterial(e.materialId, e.cost);
                 if (e.animalObject != null) target.SetAnimalOccupant(e.animalObject, e.animalItemId);
+                // Con nhiều ô: CHỈ ô neo giữ AnimalObject, 8 ô còn lại chỉ "mượn chỗ" (BuildPersistence:266).
+                // Bước 1 vừa xoá cờ của cả 9 ô, mà nhánh trên chỉ trả cờ cho ô neo — thiếu dòng này thì
+                // 8 ô kia thành trống ảo: chuồng báo còn chỗ ngay trên lưng con vật, thả thú vào là
+                // máy chủ từ chối. Trả lại đúng cờ đã chụp lúc nhấc lên.
+                else if (e.hadAnimal) target.SetAnimal(true);
             }
 
             // 3) Cập nhật ô mà mỗi con thú đang chiếm (thú nhiều ô cũng đúng).

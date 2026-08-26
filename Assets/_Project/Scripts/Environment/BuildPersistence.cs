@@ -69,6 +69,17 @@ namespace YWonderLand.Environment
 
         private void HandleAuthoritativeSnapshotApplied()
         {
+            // Đang rê chuồng/ruộng dở mà máy chủ ập ảnh chụp xuống thì ClearRuntimeState() ngay bên dưới
+            // sẽ HUỶ đúng những GameObject mà PenMoveController đang cầm. Người chơi bấm "Đặt" sau đó:
+            // bước 1 của Confirm() xoá sạch ô cũ (nơi hàng rào + thú vừa được nạp lại), bước 2 thì trượt
+            // im lặng vì tham chiếu đã chết — chuồng và con vật biến mất khỏi bản lưu rồi được đẩy luôn
+            // lên máy chủ. Mất thật, không tự lành. Nên phải bỏ dở việc dời TRƯỚC, lúc vật thể còn sống.
+            if (PenMoveController.IsActive)
+            {
+                PenMoveController.Cancel();
+                Debug.LogWarning("[BuildPersistence] Máy chủ gửi ảnh chụp mới khi đang dời — đã bỏ dở việc dời để khỏi mất chuồng/thú.");
+            }
+
             StopAllCoroutines();
             loadComplete = false;
             ClearRuntimeState();
@@ -115,15 +126,23 @@ namespace YWonderLand.Environment
                 if (tag == null) continue; // chỉ lưu công trình đặt qua Build Mode (có tag); bỏ vật đặt-sẵn trong scene
 
                 var ft = occ.GetComponentInChildren<FarmTile>(); // FarmTile nằm ở prefab con (vd Dirt)
+
+                // cellKey lấy theo Ô, còn px/py/pz lấy theo VẬT THỂ — hai nguồn này lệch nhau trong lúc
+                // đang rê, vì xem trước chỉ dịch transform mà chưa đổi dữ liệu ô. Lưu thẳng sẽ ghi vị trí
+                // đã rê kèm ô cũ, mở lại game là rào nằm lệch hẳn khỏi ô và không tự nắn về. Đang dời dở
+                // thì lấy vị trí gốc; dời xong Confirm() ghi dữ liệu ô rồi nên hai nguồn lại khớp.
+                Vector3 occPos = occ.transform.position;
+                if (PenMoveController.TryGetStartPosition(occ, out var startPos)) occPos = startPos;
+
                 data.items.Add(new BuildItem
                 {
                     cellKey = PosKey(cell.transform.position),
                     itemName = tag.itemName,
                     fx = tag.footprintX,
                     fy = tag.footprintY,
-                    px = occ.transform.position.x,
-                    py = occ.transform.position.y,
-                    pz = occ.transform.position.z,
+                    px = occPos.x,
+                    py = occPos.y,
+                    pz = occPos.z,
                     rotY = occ.transform.eulerAngles.y,
                     materialId = tag.materialId,
                     cost = tag.cost,
