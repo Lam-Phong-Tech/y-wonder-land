@@ -314,7 +314,7 @@ public class BoatCutscene : MonoBehaviour
         skipButton.style.fontSize = 16;
         skipButton.style.unityFontStyleAndWeight = FontStyle.Bold;
         
-        // Palia Style Skip Button (Accent Yellow Pill)
+        // Skip Button (Accent Yellow Pill)
         Color accentYellow = new Color(0.992f, 0.937f, 0.439f, 1f);
         Color yellowLip = new Color(0.815f, 0.764f, 0.313f, 1f);
         Color mysticBlack = new Color(0.082f, 0.101f, 0.152f, 1f);
@@ -387,7 +387,7 @@ public class BoatCutscene : MonoBehaviour
         subtitleLabel = new Label("Chào mừng bạn đến với Y WONDER GREEN FARM...");
         subtitleLabel.style.fontSize = 18;
         subtitleLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
-        subtitleLabel.style.color = new Color(1f, 0.988f, 0.968f, 1f); // Palia White
+        subtitleLabel.style.color = new Color(1f, 0.988f, 0.968f, 1f); // trắng ngà
         subtitleLabel.style.whiteSpace = WhiteSpace.Normal;
         subtitleLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
         

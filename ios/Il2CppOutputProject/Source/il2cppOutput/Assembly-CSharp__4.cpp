@@ -664,6 +664,7 @@ IL2CPP_EXTERN_C String_t* _stringLiteral79BC89E5CB018196EA6E48BFA6DFE34DB7BFD9F0
 IL2CPP_EXTERN_C String_t* _stringLiteral79F7DC15DB9B99101325FC739FD26F0B1950990D;
 IL2CPP_EXTERN_C String_t* _stringLiteral7AB1954CE6ABA3D2618E2F21C9F2B46300A3BFBD;
 IL2CPP_EXTERN_C String_t* _stringLiteral7AF19DE431BFCCD5A358CD6548254EE1B63DAC47;
+IL2CPP_EXTERN_C String_t* _stringLiteral7B0A6248C409E108D15E0B776F4B9E6CD10A3849;
 IL2CPP_EXTERN_C String_t* _stringLiteral7B5CA5216D4B368B8444470F0B45E8932DDE585A;
 IL2CPP_EXTERN_C String_t* _stringLiteral7BF0AB2696F6AA1D5B9124B057C08FD4E81D43A1;
 IL2CPP_EXTERN_C String_t* _stringLiteral7C0EC5453F43CFDF7C6184A335521BCEA9DFBCE9;
@@ -4456,6 +4457,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR AuthService_t84804C1CD86F65AFE5F5
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void AuthService_CancelBrowserLogin_mF32D2DD67DDBA3BEC9D21BB2582F6C4BB6294011 (AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* __this, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_SetAuthControlsEnabled_m31EC13A3434A06D1F38A008CEA94B3BF2EE6E3C2 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, bool ___0_enabled, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ClearStatus_m84CD860A7F76C89ADAC2CE65CE30B482A052BCCD (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* ___0_label, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ShowRegisterTab_m3631EE54C29C2721F130626617E82CFE595868E3 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* String_Trim_mCD6D8C6D4CFD15225D12DB7D3E0544CA80FB8DA5 (String_t* __this, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool Uri_TryCreate_m183077985BD7B1BE8DBDBCC4604F775C44723EC9 (String_t* ___0_uriString, int32_t ___1_uriKind, Uri_t1500A52B5F71A04F5D05C0852D0F2A0941842A0E** ___2_result, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* Uri_get_Scheme_m29106D5109538220B22FC49DE7B44040E51B0F6F (Uri_t1500A52B5F71A04F5D05C0852D0F2A0941842A0E* __this, const RuntimeMethod* method) ;
@@ -4512,7 +4514,6 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Translate__ctor_mA8F128A2982F876C2986134
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR StyleTranslate_tF9528CA4B45EE4EB2C4D294336A83D88DB6AF089 StyleTranslate_op_Implicit_m07F947CEE79D8E54CE1DB08840561A833895C0CE (Translate_t494F6E802F8A640D67819C9D26BE62DED1218A8E ___0_v, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Application_Quit_mE304382DB9A6455C2A474C8F364C7387F37E9281 (const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OnQuitAppClicked_m791B5979AE05A52F1EFF87B36A3DFE6264E7D903 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, const RuntimeMethod* method) ;
-IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ShowRegisterTab_m3631EE54C29C2721F130626617E82CFE595868E3 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OnLoginClicked_mC4B0AF5280A21691B41ACA40C9278B912BC91487 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, bool ___0_useWebAccount, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OnWebsiteAuthClicked_m9E01C09AD9E4659356E68F2599F8E4E5321662C3 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, String_t* ___0_intent, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_TogglePasswordVisibility_mA157192B51B209A0FA62D0606AA0D398BC235899 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, const RuntimeMethod* method) ;
@@ -4566,7 +4567,7 @@ inline void AsyncVoidMethodBuilder_AwaitOnCompleted_TisAwaiter_t97FFD2496460F466
 {
 	((  void (*) (AsyncVoidMethodBuilder_t253E37B63E7E7B504878AE6563347C147F98EF2D*, Awaiter_t97FFD2496460F466EB07669E49F040712341D831*, U3COnLoginClickedU3Ed__62_tF910E3B321D5C7D625042EE56D77917B80D072B4*, const RuntimeMethod*))AsyncVoidMethodBuilder_AwaitOnCompleted_TisAwaiter_t97FFD2496460F466EB07669E49F040712341D831_TisU3COnLoginClickedU3Ed__62_tF910E3B321D5C7D625042EE56D77917B80D072B4_mCE18C1018DAFEB38CFA6EA2F262E1CFFD8E171C1_gshared)(__this, ___0_awaiter, ___1_stateMachine, method);
 }
-IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Awaitable_1_tE9B21A5D85428306C2DE8210A1FC9D38D9A92A90* AuthService_LoginLocalAsync_m7AF004873B2C7C3817A02B057B8DC001079C16F1 (AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* __this, String_t* ___0_username, String_t* ___1_password, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Awaitable_1_tE9B21A5D85428306C2DE8210A1FC9D38D9A92A90* AuthService_LoginAsync_m1B919D76590F5B1EC40BC593C5928A06D05FF51C (AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* __this, String_t* ___0_username, String_t* ___1_password, const RuntimeMethod* method) ;
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR String_t* AuthService_get_Username_mFD01939AB53FEFCB3A66C50195CE48C94D3283F0_inline (AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* __this, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Awaitable_t690337FEC1C411606E233EA36A41337B931C23CB* LoginScreenController_CompleteAuthenticatedLoginAsync_m1F83C6EAB3B5783D5D9BB399672432A0A789520D (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, String_t* ___0_username, const RuntimeMethod* method) ;
 inline void AsyncVoidMethodBuilder_AwaitOnCompleted_TisAwaiter_t5D0EA628306CFACF132061071EE06FB6EFCADCD7_TisU3COnLoginClickedU3Ed__62_tF910E3B321D5C7D625042EE56D77917B80D072B4_m0148C4C77B5092A4C341EAB60A322DC690B62337 (AsyncVoidMethodBuilder_t253E37B63E7E7B504878AE6563347C147F98EF2D* __this, Awaiter_t5D0EA628306CFACF132061071EE06FB6EFCADCD7* ___0_awaiter, U3COnLoginClickedU3Ed__62_tF910E3B321D5C7D625042EE56D77917B80D072B4* ___1_stateMachine, const RuntimeMethod* method)
@@ -4814,7 +4815,7 @@ inline void Awaitable_1_ContinueWith_mCB36B47605030965A8FA3C2FBDAEA252CC09CCA3_i
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 55046
+// Method Definition Index: 55021
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__cctor_m2F666424EFDF18D93B325FBB6A9D7D807F5DD2D6 (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -4831,7 +4832,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__cctor_m2F666424EFDF18D93B325FBB
 		return;
 	}
 }
-// Method Definition Index: 55047
+// Method Definition Index: 55022
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__ctor_mE9DD0D9667101003669EE95FFDF8D4BC2EF795DF (U3CU3Ec_t709AEC73B10AE7C72794E358330AEF20DBA98D6B* __this, const RuntimeMethod* method) 
 {
 	{
@@ -4839,7 +4840,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__ctor_mE9DD0D9667101003669EE95FF
 		return;
 	}
 }
-// Method Definition Index: 55048
+// Method Definition Index: 55023
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec_U3CRegisterCallbacksU3Eb__94_14_mAD34A319182955E0D8156A3E6A2E79A3BD1E61F6 (U3CU3Ec_t709AEC73B10AE7C72794E358330AEF20DBA98D6B* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -4874,7 +4875,7 @@ IL_0017:
 		return;
 	}
 }
-// Method Definition Index: 55049
+// Method Definition Index: 55024
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec_U3CShowInteractionPromptsU3Eb__140_6_m14D4A664E7CDB6E13608F5CA091B9E325281E805 (U3CU3Ec_t709AEC73B10AE7C72794E358330AEF20DBA98D6B* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -4893,7 +4894,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec_U3CShowInteractionPromptsU3Eb__1
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 55050
+// Method Definition Index: 55025
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass140_0__ctor_m49FD4844B5CAB83562BFD6C9B2ABDB983569C29A (U3CU3Ec__DisplayClass140_0_t2EDC23389D343D60BFF7B3D1E6B7D0601DD4893D* __this, const RuntimeMethod* method) 
 {
 	{
@@ -4901,7 +4902,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass140_0__ctor_m49FD48
 		return;
 	}
 }
-// Method Definition Index: 55051
+// Method Definition Index: 55026
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass140_0_U3CShowInteractionPromptsU3Eb__0_m00060AB3383BAB79242D1C4AC07BF46ED651C0CD (U3CU3Ec__DisplayClass140_0_t2EDC23389D343D60BFF7B3D1E6B7D0601DD4893D* __this, PointerDownEvent_tABAAD1BACBB98156D6BCCED51E11883EAFE03A51* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -4946,7 +4947,7 @@ IL_0011:
 		return;
 	}
 }
-// Method Definition Index: 55052
+// Method Definition Index: 55027
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass140_0_U3CShowInteractionPromptsU3Eb__1_m278809EE78D092C3D809A00441DF27226108AE0D (U3CU3Ec__DisplayClass140_0_t2EDC23389D343D60BFF7B3D1E6B7D0601DD4893D* __this, PointerUpEvent_tCE779E8B94675B6A2758B82F6A84771CB26913D9* ___0_evt, const RuntimeMethod* method) 
 {
 	Action_tD00B0A84D7945E50C2DFFC28EFEE6ED44ED2AD07* G_B2_0 = NULL;
@@ -4973,7 +4974,7 @@ IL_000b:
 		return;
 	}
 }
-// Method Definition Index: 55053
+// Method Definition Index: 55028
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass140_0_U3CShowInteractionPromptsU3Eb__2_mA67B91F8C0D6520CCC31B9C7F3295D053DEF5DE1 (U3CU3Ec__DisplayClass140_0_t2EDC23389D343D60BFF7B3D1E6B7D0601DD4893D* __this, PointerCaptureOutEvent_t3D53CEE79BD37EC74F40289B4D5501C4449905E5* ___0_evt, const RuntimeMethod* method) 
 {
 	Action_tD00B0A84D7945E50C2DFFC28EFEE6ED44ED2AD07* G_B2_0 = NULL;
@@ -5008,7 +5009,7 @@ IL_000b:
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 55054
+// Method Definition Index: 55029
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass140_1__ctor_m8D4736D9AA10C4851870F37BD764CA21374B7365 (U3CU3Ec__DisplayClass140_1_t9DF533E60DD5D2324ED4ED8DCBFE8010BF11932B* __this, const RuntimeMethod* method) 
 {
 	{
@@ -5016,7 +5017,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass140_1__ctor_m8D4736
 		return;
 	}
 }
-// Method Definition Index: 55055
+// Method Definition Index: 55030
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass140_1_U3CShowInteractionPromptsU3Eb__3_mAC6E870E75B423A0143587CC9374F619C188E302 (U3CU3Ec__DisplayClass140_1_t9DF533E60DD5D2324ED4ED8DCBFE8010BF11932B* __this, PointerDownEvent_tABAAD1BACBB98156D6BCCED51E11883EAFE03A51* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -5049,7 +5050,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass140_1_U3CShowIntera
 		return;
 	}
 }
-// Method Definition Index: 55056
+// Method Definition Index: 55031
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass140_1_U3CShowInteractionPromptsU3Eb__4_m0E0C142F7D08103F3A668A580DD1D104F61CD892 (U3CU3Ec__DisplayClass140_1_t9DF533E60DD5D2324ED4ED8DCBFE8010BF11932B* __this, PointerUpEvent_tCE779E8B94675B6A2758B82F6A84771CB26913D9* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -5167,7 +5168,7 @@ IL_0083:
 		return;
 	}
 }
-// Method Definition Index: 55057
+// Method Definition Index: 55032
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass140_1_U3CShowInteractionPromptsU3Eb__5_m61A63ECCD1FDE1CBC70337B84EC75F43472CA68B (U3CU3Ec__DisplayClass140_1_t9DF533E60DD5D2324ED4ED8DCBFE8010BF11932B* __this, PointerCaptureOutEvent_t3D53CEE79BD37EC74F40289B4D5501C4449905E5* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -5187,7 +5188,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass140_1_U3CShowIntera
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 55058
+// Method Definition Index: 55033
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CSyncPlayerNameU3Ed__105__ctor_m0AED19AEFC120104692EFF2DD35D07D0908750DA (U3CSyncPlayerNameU3Ed__105_tA6A561ACE5F98443E3558C685FD41A74134C698E* __this, int32_t ___0_U3CU3E1__state, const RuntimeMethod* method) 
 {
 	{
@@ -5197,14 +5198,14 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CSyncPlayerNameU3Ed__105__ctor_m0AED19
 		return;
 	}
 }
-// Method Definition Index: 55059
+// Method Definition Index: 55034
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CSyncPlayerNameU3Ed__105_System_IDisposable_Dispose_mE2D458B6E05F872106F3205804DB4F93589309AD (U3CSyncPlayerNameU3Ed__105_tA6A561ACE5F98443E3558C685FD41A74134C698E* __this, const RuntimeMethod* method) 
 {
 	{
 		return;
 	}
 }
-// Method Definition Index: 55060
+// Method Definition Index: 55035
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool U3CSyncPlayerNameU3Ed__105_MoveNext_mA80EF4A90019FE85DD72E28BA72157A7FDEF26E8 (U3CSyncPlayerNameU3Ed__105_tA6A561ACE5F98443E3558C685FD41A74134C698E* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -5304,7 +5305,7 @@ IL_006c:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 55061
+// Method Definition Index: 55036
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* U3CSyncPlayerNameU3Ed__105_System_Collections_Generic_IEnumeratorU3CSystem_ObjectU3E_get_Current_m95D981F53E5EA63B3293C825FA6942BB11FD7A5D (U3CSyncPlayerNameU3Ed__105_tA6A561ACE5F98443E3558C685FD41A74134C698E* __this, const RuntimeMethod* method) 
 {
 	{
@@ -5312,7 +5313,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* U3CSyncPlayerNameU3Ed__105_Sys
 		return L_0;
 	}
 }
-// Method Definition Index: 55062
+// Method Definition Index: 55037
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CSyncPlayerNameU3Ed__105_System_Collections_IEnumerator_Reset_m5693099B98C1E8D319369AFD19C4F34CD6EB025E (U3CSyncPlayerNameU3Ed__105_tA6A561ACE5F98443E3558C685FD41A74134C698E* __this, const RuntimeMethod* method) 
 {
 	{
@@ -5321,7 +5322,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CSyncPlayerNameU3Ed__105_System_Collec
 		IL2CPP_RAISE_MANAGED_EXCEPTION(L_0, ((RuntimeMethod*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&U3CSyncPlayerNameU3Ed__105_System_Collections_IEnumerator_Reset_m5693099B98C1E8D319369AFD19C4F34CD6EB025E_RuntimeMethod_var)));
 	}
 }
-// Method Definition Index: 55063
+// Method Definition Index: 55038
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* U3CSyncPlayerNameU3Ed__105_System_Collections_IEnumerator_get_Current_m75404C613A0C6BE70B13D2E1CB6DD4EF17CA6CAA (U3CSyncPlayerNameU3Ed__105_tA6A561ACE5F98443E3558C685FD41A74134C698E* __this, const RuntimeMethod* method) 
 {
 	{
@@ -5337,7 +5338,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* U3CSyncPlayerNameU3Ed__105_Sys
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 55064
+// Method Definition Index: 55039
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CSyncQuestTextU3Ed__104__ctor_mB444E2584364F4E3EF14614E61207F7193208B0C (U3CSyncQuestTextU3Ed__104_tD584817D2A8785F9B06D20841BFDD24410FCD833* __this, int32_t ___0_U3CU3E1__state, const RuntimeMethod* method) 
 {
 	{
@@ -5347,14 +5348,14 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CSyncQuestTextU3Ed__104__ctor_mB444E25
 		return;
 	}
 }
-// Method Definition Index: 55065
+// Method Definition Index: 55040
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CSyncQuestTextU3Ed__104_System_IDisposable_Dispose_m4774810B831CE1C73645CDED378C605FEB2C58CC (U3CSyncQuestTextU3Ed__104_tD584817D2A8785F9B06D20841BFDD24410FCD833* __this, const RuntimeMethod* method) 
 {
 	{
 		return;
 	}
 }
-// Method Definition Index: 55066
+// Method Definition Index: 55041
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool U3CSyncQuestTextU3Ed__104_MoveNext_m1E6FA1BF1A440BE26D278F62E51638987EB575BE (U3CSyncQuestTextU3Ed__104_tD584817D2A8785F9B06D20841BFDD24410FCD833* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -5497,7 +5498,7 @@ IL_0091:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 55067
+// Method Definition Index: 55042
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* U3CSyncQuestTextU3Ed__104_System_Collections_Generic_IEnumeratorU3CSystem_ObjectU3E_get_Current_m6329AFBCCB7C0317CFB49651607535BD2B472AF1 (U3CSyncQuestTextU3Ed__104_tD584817D2A8785F9B06D20841BFDD24410FCD833* __this, const RuntimeMethod* method) 
 {
 	{
@@ -5505,7 +5506,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* U3CSyncQuestTextU3Ed__104_Syst
 		return L_0;
 	}
 }
-// Method Definition Index: 55068
+// Method Definition Index: 55043
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CSyncQuestTextU3Ed__104_System_Collections_IEnumerator_Reset_m7F07CD0D48C101C39236ADEF7D537B8F5038C909 (U3CSyncQuestTextU3Ed__104_tD584817D2A8785F9B06D20841BFDD24410FCD833* __this, const RuntimeMethod* method) 
 {
 	{
@@ -5514,7 +5515,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CSyncQuestTextU3Ed__104_System_Collect
 		IL2CPP_RAISE_MANAGED_EXCEPTION(L_0, ((RuntimeMethod*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&U3CSyncQuestTextU3Ed__104_System_Collections_IEnumerator_Reset_m7F07CD0D48C101C39236ADEF7D537B8F5038C909_RuntimeMethod_var)));
 	}
 }
-// Method Definition Index: 55069
+// Method Definition Index: 55044
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* U3CSyncQuestTextU3Ed__104_System_Collections_IEnumerator_get_Current_mDAB4C2407D14B8D2D1EB775C462CF0059E3BC3C0 (U3CSyncQuestTextU3Ed__104_tD584817D2A8785F9B06D20841BFDD24410FCD833* __this, const RuntimeMethod* method) 
 {
 	{
@@ -5530,7 +5531,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* U3CSyncQuestTextU3Ed__104_Syst
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 55070
+// Method Definition Index: 55045
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CWireHudWhenRootReadyU3Ed__81__ctor_m68A902EAFA1EDE302C6E620004D87CA9EBD582A9 (U3CWireHudWhenRootReadyU3Ed__81_tFBFC87294970D43A2CDFA5248198ADAFC45EEB25* __this, int32_t ___0_U3CU3E1__state, const RuntimeMethod* method) 
 {
 	{
@@ -5540,14 +5541,14 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CWireHudWhenRootReadyU3Ed__81__ctor_m6
 		return;
 	}
 }
-// Method Definition Index: 55071
+// Method Definition Index: 55046
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CWireHudWhenRootReadyU3Ed__81_System_IDisposable_Dispose_m566A9BAEE100E3911B81488459B09F160EDE39BA (U3CWireHudWhenRootReadyU3Ed__81_tFBFC87294970D43A2CDFA5248198ADAFC45EEB25* __this, const RuntimeMethod* method) 
 {
 	{
 		return;
 	}
 }
-// Method Definition Index: 55072
+// Method Definition Index: 55047
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool U3CWireHudWhenRootReadyU3Ed__81_MoveNext_m107FCF56E695B0C68E1D5DEAD5970D2F9D08E1B1 (U3CWireHudWhenRootReadyU3Ed__81_tFBFC87294970D43A2CDFA5248198ADAFC45EEB25* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -5699,7 +5700,7 @@ IL_00ab:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 55073
+// Method Definition Index: 55048
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* U3CWireHudWhenRootReadyU3Ed__81_System_Collections_Generic_IEnumeratorU3CSystem_ObjectU3E_get_Current_m75F6C613039669EEA74D91B8D2B4CD52B4D9E1DE (U3CWireHudWhenRootReadyU3Ed__81_tFBFC87294970D43A2CDFA5248198ADAFC45EEB25* __this, const RuntimeMethod* method) 
 {
 	{
@@ -5707,7 +5708,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* U3CWireHudWhenRootReadyU3Ed__8
 		return L_0;
 	}
 }
-// Method Definition Index: 55074
+// Method Definition Index: 55049
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CWireHudWhenRootReadyU3Ed__81_System_Collections_IEnumerator_Reset_m81FC89511FBDB38A12159710097B7D49789AF943 (U3CWireHudWhenRootReadyU3Ed__81_tFBFC87294970D43A2CDFA5248198ADAFC45EEB25* __this, const RuntimeMethod* method) 
 {
 	{
@@ -5716,7 +5717,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CWireHudWhenRootReadyU3Ed__81_System_C
 		IL2CPP_RAISE_MANAGED_EXCEPTION(L_0, ((RuntimeMethod*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&U3CWireHudWhenRootReadyU3Ed__81_System_Collections_IEnumerator_Reset_m81FC89511FBDB38A12159710097B7D49789AF943_RuntimeMethod_var)));
 	}
 }
-// Method Definition Index: 55075
+// Method Definition Index: 55050
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* U3CWireHudWhenRootReadyU3Ed__81_System_Collections_IEnumerator_get_Current_m96F9BB5F8981F234BF2CCAD7DABB0954D71A995F (U3CWireHudWhenRootReadyU3Ed__81_tFBFC87294970D43A2CDFA5248198ADAFC45EEB25* __this, const RuntimeMethod* method) 
 {
 	{
@@ -5732,7 +5733,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* U3CWireHudWhenRootReadyU3Ed__8
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 55076
+// Method Definition Index: 55051
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController_add_OnItemUsed_m9B9FDF66C5294059386A9779A566D007113C937F (InventoryPopupController_tF007E7E89E2C3E413E6B0D7D8907A50B64C7CD2A* __this, Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* ___0_value, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -5775,7 +5776,7 @@ IL_0007:
 		return;
 	}
 }
-// Method Definition Index: 55077
+// Method Definition Index: 55052
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController_remove_OnItemUsed_mCE92BE505B832EE550E633C4E6B66D2720641D6C (InventoryPopupController_tF007E7E89E2C3E413E6B0D7D8907A50B64C7CD2A* __this, Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* ___0_value, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -5818,7 +5819,7 @@ IL_0007:
 		return;
 	}
 }
-// Method Definition Index: 55078
+// Method Definition Index: 55053
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool InventoryPopupController_get_LastItemUseHandled_m8076A4E4014801E63E72EBF81BA3435A3FEE9C08 (InventoryPopupController_tF007E7E89E2C3E413E6B0D7D8907A50B64C7CD2A* __this, const RuntimeMethod* method) 
 {
 	{
@@ -5827,7 +5828,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool InventoryPopupController_get_LastItemUse
 		return L_0;
 	}
 }
-// Method Definition Index: 55079
+// Method Definition Index: 55054
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController_set_LastItemUseHandled_mECC077419C9DB9897D255CD7075A1AAD2BA25D4D (InventoryPopupController_tF007E7E89E2C3E413E6B0D7D8907A50B64C7CD2A* __this, bool ___0_value, const RuntimeMethod* method) 
 {
 	{
@@ -5837,7 +5838,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController_set_LastItemUse
 		return;
 	}
 }
-// Method Definition Index: 55080
+// Method Definition Index: 55055
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t InventoryPopupController_get_maxSlots_mB5F41162F92BE12C2BCD72D2EF1DB8A0CF251EC7 (InventoryPopupController_tF007E7E89E2C3E413E6B0D7D8907A50B64C7CD2A* __this, const RuntimeMethod* method) 
 {
 	InventoryManager_t033115D1E989CF626FC0710C6FB1895D82788DDF* G_B2_0 = NULL;
@@ -5866,7 +5867,7 @@ IL_000c:
 		return L_2;
 	}
 }
-// Method Definition Index: 55081
+// Method Definition Index: 55056
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController_Awake_mD9EA4B43FA1AD64351A8390924DF6C0E86FA7B31 (InventoryPopupController_tF007E7E89E2C3E413E6B0D7D8907A50B64C7CD2A* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -5947,7 +5948,7 @@ IL_0060:
 		return;
 	}
 }
-// Method Definition Index: 55082
+// Method Definition Index: 55057
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController_OnEnable_m52474585AD9A23FDBAB77A33E4A8C2F34D245936 (InventoryPopupController_tF007E7E89E2C3E413E6B0D7D8907A50B64C7CD2A* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -6314,7 +6315,7 @@ IL_026d:
 		return;
 	}
 }
-// Method Definition Index: 55083
+// Method Definition Index: 55058
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController_OnDisable_mE4B1FDCFFA0EC8430A64E8D2B19C3282610BAA3A (InventoryPopupController_tF007E7E89E2C3E413E6B0D7D8907A50B64C7CD2A* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -6357,7 +6358,7 @@ IL_0023:
 		return;
 	}
 }
-// Method Definition Index: 55084
+// Method Definition Index: 55059
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController_RegisterCallbacks_mF177E7A007761837BB99ABDBCD51941C42182C2B (InventoryPopupController_tF007E7E89E2C3E413E6B0D7D8907A50B64C7CD2A* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -6657,7 +6658,7 @@ IL_0119:
 		return;
 	}
 }
-// Method Definition Index: 55085
+// Method Definition Index: 55060
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController_SetActiveTab_m3085EA2DE87E8BCD39DA8482B07F5B9B7F0C2509 (InventoryPopupController_tF007E7E89E2C3E413E6B0D7D8907A50B64C7CD2A* __this, Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* ___0_tab, String_t* ___1_category, String_t* ___2_categoryName, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -6746,7 +6747,7 @@ IL_0050:
 		return;
 	}
 }
-// Method Definition Index: 55086
+// Method Definition Index: 55061
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController_RefreshGrid_m14BCCE44DC30CB305A0AE2B5719237A82B6B06CE (InventoryPopupController_tF007E7E89E2C3E413E6B0D7D8907A50B64C7CD2A* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -7167,7 +7168,7 @@ IL_01fe:
 		return;
 	}
 }
-// Method Definition Index: 55087
+// Method Definition Index: 55062
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* InventoryPopupController_CreateItemElement_mF2AD8BB7F0F400B88B04619DF611005AE6E5A99E (InventoryPopupController_tF007E7E89E2C3E413E6B0D7D8907A50B64C7CD2A* __this, InventoryItem_t7699059CD635C4F2CA7F214DA2A1B12E3F094909 ___0_item, VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115** ___1_card, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -7389,7 +7390,7 @@ IL_009e:
 		return L_50;
 	}
 }
-// Method Definition Index: 55088
+// Method Definition Index: 55063
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController_SelectItem_m1E6CA6863B995F31DE61C919E20CF9A892F6E336 (InventoryPopupController_tF007E7E89E2C3E413E6B0D7D8907A50B64C7CD2A* __this, InventoryItem_t7699059CD635C4F2CA7F214DA2A1B12E3F094909 ___0_item, VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* ___1_cardElement, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -7468,7 +7469,7 @@ IL_0043:
 		return;
 	}
 }
-// Method Definition Index: 55089
+// Method Definition Index: 55064
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController_ShowItemDetails_m091D6CC1F8FB355091C2B64DC82FD2D0D07A27CD (InventoryPopupController_tF007E7E89E2C3E413E6B0D7D8907A50B64C7CD2A* __this, InventoryItem_t7699059CD635C4F2CA7F214DA2A1B12E3F094909 ___0_item, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -7785,7 +7786,7 @@ IL_0152:
 		return;
 	}
 }
-// Method Definition Index: 55090
+// Method Definition Index: 55065
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* InventoryPopupController_AnimalInfoText_mBABBBF38366117317B0129DF716418BB06495DF2 (AnimalDefinition_t71C3EE057834630AE1CF4474F1704CCA0A19C194* ___0_d, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -7855,7 +7856,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* InventoryPopupController_AnimalInfo
 		return L_26;
 	}
 }
-// Method Definition Index: 55091
+// Method Definition Index: 55066
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool InventoryPopupController_ApplyGraphicIcon_m830EC31AA3EDBF3F56E5202A0C7E8623AE9A0108 (InventoryPopupController_tF007E7E89E2C3E413E6B0D7D8907A50B64C7CD2A* __this, Image_tAEB35FD00A2200BF406AE5EDD15B4CB24DBBB8E3* ___0_iconImage, InventoryItem_t7699059CD635C4F2CA7F214DA2A1B12E3F094909 ___1_item, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -7939,7 +7940,7 @@ IL_004b:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 55092
+// Method Definition Index: 55067
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController_ShowEmptyDetails_m19F375399925A302E7F08ECEBFCAC962D18D85FB (InventoryPopupController_tF007E7E89E2C3E413E6B0D7D8907A50B64C7CD2A* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8019,7 +8020,7 @@ IL_0067:
 		return;
 	}
 }
-// Method Definition Index: 55093
+// Method Definition Index: 55068
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController_Show_m8E3348F62AA1F310E2BB2A27FADD60B65A58433C (InventoryPopupController_tF007E7E89E2C3E413E6B0D7D8907A50B64C7CD2A* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8066,7 +8067,7 @@ IL_0035:
 		return;
 	}
 }
-// Method Definition Index: 55094
+// Method Definition Index: 55069
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController_Hide_m2AF31102CBFA9465D245DB014AB0C82887AF6B0F (InventoryPopupController_tF007E7E89E2C3E413E6B0D7D8907A50B64C7CD2A* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8111,7 +8112,7 @@ IL_002f:
 		return;
 	}
 }
-// Method Definition Index: 55095
+// Method Definition Index: 55070
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool InventoryPopupController_IsVisible_mE99FE8E371F668D213A67E23AD7DC1A7B56C6272 (InventoryPopupController_tF007E7E89E2C3E413E6B0D7D8907A50B64C7CD2A* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8150,7 +8151,7 @@ IL_0024:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 55096
+// Method Definition Index: 55071
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController_ShowAtTab_m040DAAD08EC11143E4EE7E86A5EDCB2727E1D543 (InventoryPopupController_tF007E7E89E2C3E413E6B0D7D8907A50B64C7CD2A* __this, String_t* ___0_tabName, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8442,7 +8443,7 @@ IL_01bb:
 		return;
 	}
 }
-// Method Definition Index: 55097
+// Method Definition Index: 55072
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController__ctor_m04ECADFADF05BD26E4C9FB16EC5FFBF2C3B27574 (InventoryPopupController_tF007E7E89E2C3E413E6B0D7D8907A50B64C7CD2A* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8459,7 +8460,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController__ctor_m04ECADFA
 		return;
 	}
 }
-// Method Definition Index: 55098
+// Method Definition Index: 55073
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController_U3CRegisterCallbacksU3Eb__41_0_m3E22C134B0FB6A2FF2E0C1B39E8CE118B377CE0A (InventoryPopupController_tF007E7E89E2C3E413E6B0D7D8907A50B64C7CD2A* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -8468,7 +8469,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController_U3CRegisterCall
 		return;
 	}
 }
-// Method Definition Index: 55099
+// Method Definition Index: 55074
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController_U3CRegisterCallbacksU3Eb__41_1_m922A1582D93DF94C7CA903DBB3E237E7D8DC9791 (InventoryPopupController_tF007E7E89E2C3E413E6B0D7D8907A50B64C7CD2A* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -8494,7 +8495,7 @@ IL_0014:
 		return;
 	}
 }
-// Method Definition Index: 55100
+// Method Definition Index: 55075
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController_U3CRegisterCallbacksU3Eb__41_2_mA420D1F4843EF29FA98E346AF3BE23E00EA13012 (InventoryPopupController_tF007E7E89E2C3E413E6B0D7D8907A50B64C7CD2A* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8511,7 +8512,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController_U3CRegisterCall
 		return;
 	}
 }
-// Method Definition Index: 55101
+// Method Definition Index: 55076
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController_U3CRegisterCallbacksU3Eb__41_3_m9BF2C796AF0EAA8982BC6DFC0E42F7136E18D615 (InventoryPopupController_tF007E7E89E2C3E413E6B0D7D8907A50B64C7CD2A* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8528,7 +8529,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController_U3CRegisterCall
 		return;
 	}
 }
-// Method Definition Index: 55102
+// Method Definition Index: 55077
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController_U3CRegisterCallbacksU3Eb__41_4_mB827DCAEE991409A369F7E9263BCE578966A59A7 (InventoryPopupController_tF007E7E89E2C3E413E6B0D7D8907A50B64C7CD2A* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8545,7 +8546,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController_U3CRegisterCall
 		return;
 	}
 }
-// Method Definition Index: 55103
+// Method Definition Index: 55078
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController_U3CRegisterCallbacksU3Eb__41_5_mB17E33A04618669416541944203744C71A6EF923 (InventoryPopupController_tF007E7E89E2C3E413E6B0D7D8907A50B64C7CD2A* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8562,7 +8563,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController_U3CRegisterCall
 		return;
 	}
 }
-// Method Definition Index: 55104
+// Method Definition Index: 55079
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController_U3CRegisterCallbacksU3Eb__41_6_mA29D47FBB03379226D1965BA336B980B23864807 (InventoryPopupController_tF007E7E89E2C3E413E6B0D7D8907A50B64C7CD2A* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8579,7 +8580,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController_U3CRegisterCall
 		return;
 	}
 }
-// Method Definition Index: 55105
+// Method Definition Index: 55080
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController_U3CRegisterCallbacksU3Eb__41_7_m7EBD5CE33D14A3C48C36A0C4D19D3F2E0F8A260A (InventoryPopupController_tF007E7E89E2C3E413E6B0D7D8907A50B64C7CD2A* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8596,7 +8597,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController_U3CRegisterCall
 		return;
 	}
 }
-// Method Definition Index: 55106
+// Method Definition Index: 55081
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController_U3CRegisterCallbacksU3Eb__41_8_m4CA0DBAA71BD1E6E66E1563EFEDDDCCCE552774F (InventoryPopupController_tF007E7E89E2C3E413E6B0D7D8907A50B64C7CD2A* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8613,7 +8614,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController_U3CRegisterCall
 		return;
 	}
 }
-// Method Definition Index: 55107
+// Method Definition Index: 55082
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InventoryPopupController_U3CRegisterCallbacksU3Eb__41_9_m55346266B68B0A1D5E1B5FCFC902EB17E31C14F5 (InventoryPopupController_tF007E7E89E2C3E413E6B0D7D8907A50B64C7CD2A* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8740,7 +8741,7 @@ IL_009b:
 		return;
 	}
 }
-// Method Definition Index: 55108
+// Method Definition Index: 55083
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* InventoryPopupController_U3CAnimalInfoTextU3Eg__FoodU7C47_0_m01324E5834FCC8B3F92CE38D7B537160C227E040 (String_t* ___0_name, int32_t ___1_amount, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8858,7 +8859,7 @@ IL2CPP_EXTERN_C void InventoryItem_t7699059CD635C4F2CA7F214DA2A1B12E3F094909_mar
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 55109
+// Method Definition Index: 55084
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass44_0__ctor_m393C18F14A59506FC6482B89EEC8C5CCD72C3D2C (U3CU3Ec__DisplayClass44_0_tD75C5237AAAF11D52E0F859817FEB90C9B6F2C12* __this, const RuntimeMethod* method) 
 {
 	{
@@ -8866,7 +8867,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass44_0__ctor_m393C18F
 		return;
 	}
 }
-// Method Definition Index: 55110
+// Method Definition Index: 55085
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass44_0_U3CCreateItemElementU3Eb__0_m3FE3891AD70DBE6AA6F5E5C83BD3B6BDFDC6DDD4 (U3CU3Ec__DisplayClass44_0_tD75C5237AAAF11D52E0F859817FEB90C9B6F2C12* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -8888,7 +8889,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass44_0_U3CCreateItemE
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 55111
+// Method Definition Index: 55086
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LeaderboardPopupController_Awake_m84159FBA71A14E0985C3951A64034E8EF48966C0 (LeaderboardPopupController_tC0D9631BC0FB8AC2EC7FBA8FB57D4815BCE0B451* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8925,7 +8926,7 @@ IL_001a:
 		return;
 	}
 }
-// Method Definition Index: 55112
+// Method Definition Index: 55087
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LeaderboardPopupController_OnEnable_m50FA38AEEEA31C036414E14434240987EFA83FC1 (LeaderboardPopupController_tC0D9631BC0FB8AC2EC7FBA8FB57D4815BCE0B451* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -9035,7 +9036,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LeaderboardPopupController_OnEnable_m50F
 		return;
 	}
 }
-// Method Definition Index: 55113
+// Method Definition Index: 55088
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LeaderboardPopupController_RegisterCallbacks_m7F6C2F4DC73FE77C0A22D506A730FC75B6C96B4F (LeaderboardPopupController_tC0D9631BC0FB8AC2EC7FBA8FB57D4815BCE0B451* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -9238,7 +9239,7 @@ IL_00bf:
 		return;
 	}
 }
-// Method Definition Index: 55114
+// Method Definition Index: 55089
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LeaderboardPopupController_SetupTabVisuals_mFE181ACA16DEC1B889F818D2D37B0178602CDCAF (LeaderboardPopupController_tC0D9631BC0FB8AC2EC7FBA8FB57D4815BCE0B451* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -9276,7 +9277,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LeaderboardPopupController_SetupTabVisua
 		return;
 	}
 }
-// Method Definition Index: 55115
+// Method Definition Index: 55090
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LeaderboardPopupController_SetupTabVisual_m5EE483BF1664428D90505765502389C853F2AFB4 (Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* ___0_tab, String_t* ___1_labelText, String_t* ___2_iconClass, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -9355,7 +9356,7 @@ IL_0004:
 		return;
 	}
 }
-// Method Definition Index: 55116
+// Method Definition Index: 55091
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LeaderboardPopupController_SetActiveTab_mDC15A44548B33648980985FBCFD86B2D60B5D0E1 (LeaderboardPopupController_tC0D9631BC0FB8AC2EC7FBA8FB57D4815BCE0B451* __this, Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* ___0_tab, String_t* ___1_category, String_t* ___2_valueHeaderName, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -9474,7 +9475,7 @@ IL_0079:
 		return;
 	}
 }
-// Method Definition Index: 55117
+// Method Definition Index: 55092
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LeaderboardPopupController_RefreshList_m9CC6A77132497C67DFE496D3CBA388572793E7A9 (LeaderboardPopupController_tC0D9631BC0FB8AC2EC7FBA8FB57D4815BCE0B451* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -9571,7 +9572,7 @@ IL_0057:
 		return;
 	}
 }
-// Method Definition Index: 55118
+// Method Definition Index: 55093
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* LeaderboardPopupController_CreateRowElement_mFD62E1514AF590EE21D1AD749CE38E699FE6FA91 (LeaderboardPopupController_tC0D9631BC0FB8AC2EC7FBA8FB57D4815BCE0B451* __this, LeaderboardEntry_tC82240A78A511E6D8E57D264D8803B4EC904A55F ___0_entry, int32_t ___1_index, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -9903,7 +9904,7 @@ IL_0167:
 		return L_71;
 	}
 }
-// Method Definition Index: 55119
+// Method Definition Index: 55094
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* LeaderboardPopupController_GetDisplayValue_m05FDBC9B976355DC80AF153A7A1A788D27715410 (LeaderboardPopupController_tC0D9631BC0FB8AC2EC7FBA8FB57D4815BCE0B451* __this, LeaderboardEntry_tC82240A78A511E6D8E57D264D8803B4EC904A55F ___0_entry, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -10010,7 +10011,7 @@ IL_0085:
 		return L_20;
 	}
 }
-// Method Definition Index: 55120
+// Method Definition Index: 55095
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* LeaderboardPopupController_StripTrailingSymbol_m1FA765555805ED708AC338D11884C76E99272A3D (String_t* ___0_value, const RuntimeMethod* method) 
 {
 	int32_t V_0 = 0;
@@ -10060,7 +10061,7 @@ IL_001d:
 		return L_9;
 	}
 }
-// Method Definition Index: 55121
+// Method Definition Index: 55096
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LeaderboardPopupController_Show_mB6E7C05A88ECC48C9DABF234D9E2DB174CAA4429 (LeaderboardPopupController_tC0D9631BC0FB8AC2EC7FBA8FB57D4815BCE0B451* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -10103,7 +10104,7 @@ IL_002e:
 		return;
 	}
 }
-// Method Definition Index: 55122
+// Method Definition Index: 55097
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LeaderboardPopupController_Hide_m7E12AD4AC0C2440FEE6DDC893E3C6295A229336F (LeaderboardPopupController_tC0D9631BC0FB8AC2EC7FBA8FB57D4815BCE0B451* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -10144,7 +10145,7 @@ IL_0028:
 		return;
 	}
 }
-// Method Definition Index: 55123
+// Method Definition Index: 55098
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool LeaderboardPopupController_IsVisible_m5BECE1EB85333CC5BBF95F91252886D11191B10E (LeaderboardPopupController_tC0D9631BC0FB8AC2EC7FBA8FB57D4815BCE0B451* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -10183,7 +10184,7 @@ IL_0024:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 55124
+// Method Definition Index: 55099
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LeaderboardPopupController_InitMockData_mB6B61F4293126D58B79F82DE96605BD020DFA32A (LeaderboardPopupController_tC0D9631BC0FB8AC2EC7FBA8FB57D4815BCE0B451* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -11017,7 +11018,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LeaderboardPopupController_InitMockData_
 		return;
 	}
 }
-// Method Definition Index: 55125
+// Method Definition Index: 55100
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LeaderboardPopupController__ctor_m0F73CF866D49ACA4811FC9900293E151063CE467 (LeaderboardPopupController_tC0D9631BC0FB8AC2EC7FBA8FB57D4815BCE0B451* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -11034,7 +11035,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LeaderboardPopupController__ctor_m0F73CF
 		return;
 	}
 }
-// Method Definition Index: 55126
+// Method Definition Index: 55101
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LeaderboardPopupController_U3CRegisterCallbacksU3Eb__18_0_mF2B45C35E4F2E145D29DDE8066DC1683E8553BCE (LeaderboardPopupController_tC0D9631BC0FB8AC2EC7FBA8FB57D4815BCE0B451* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -11043,7 +11044,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LeaderboardPopupController_U3CRegisterCa
 		return;
 	}
 }
-// Method Definition Index: 55127
+// Method Definition Index: 55102
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LeaderboardPopupController_U3CRegisterCallbacksU3Eb__18_1_m40C04089C9DF2AD557A3E9435D23FB282DE07DAF (LeaderboardPopupController_tC0D9631BC0FB8AC2EC7FBA8FB57D4815BCE0B451* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -11069,7 +11070,7 @@ IL_0014:
 		return;
 	}
 }
-// Method Definition Index: 55128
+// Method Definition Index: 55103
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LeaderboardPopupController_U3CRegisterCallbacksU3Eb__18_2_m4F755DE4D995808B74347A9826AE3703BBB38B0D (LeaderboardPopupController_tC0D9631BC0FB8AC2EC7FBA8FB57D4815BCE0B451* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -11086,7 +11087,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LeaderboardPopupController_U3CRegisterCa
 		return;
 	}
 }
-// Method Definition Index: 55129
+// Method Definition Index: 55104
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LeaderboardPopupController_U3CRegisterCallbacksU3Eb__18_3_m84B263C9DE3CD95183A766A8A0FB538DD1E8491E (LeaderboardPopupController_tC0D9631BC0FB8AC2EC7FBA8FB57D4815BCE0B451* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -11103,7 +11104,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LeaderboardPopupController_U3CRegisterCa
 		return;
 	}
 }
-// Method Definition Index: 55130
+// Method Definition Index: 55105
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LeaderboardPopupController_U3CRegisterCallbacksU3Eb__18_4_mED9A50C73FEC48969F33875701BF02E107343098 (LeaderboardPopupController_tC0D9631BC0FB8AC2EC7FBA8FB57D4815BCE0B451* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -11120,7 +11121,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LeaderboardPopupController_U3CRegisterCa
 		return;
 	}
 }
-// Method Definition Index: 55131
+// Method Definition Index: 55106
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LeaderboardPopupController_U3CRegisterCallbacksU3Eb__18_5_m8AC43F6ED9C4A56D0A0600AB1590F9E38F4393A6 (LeaderboardPopupController_tC0D9631BC0FB8AC2EC7FBA8FB57D4815BCE0B451* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -11137,7 +11138,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LeaderboardPopupController_U3CRegisterCa
 		return;
 	}
 }
-// Method Definition Index: 55132
+// Method Definition Index: 55107
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LeaderboardPopupController_U3CRegisterCallbacksU3Eb__18_6_mC1F34D406F885362FDD9EB5AFC7E5B9B994A479A (LeaderboardPopupController_tC0D9631BC0FB8AC2EC7FBA8FB57D4815BCE0B451* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -11226,7 +11227,7 @@ IL2CPP_EXTERN_C void LeaderboardEntry_tC82240A78A511E6D8E57D264D8803B4EC904A55F_
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 55133
+// Method Definition Index: 55108
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LevelUpOverlayController_Awake_m26BC08A8425C0870E088D9525AA7A09893D52EA8 (LevelUpOverlayController_t43E472DC2F130795033ADBDEADDEEC560703F18D* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -11261,7 +11262,7 @@ IL_001a:
 		return;
 	}
 }
-// Method Definition Index: 55134
+// Method Definition Index: 55109
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LevelUpOverlayController_OnEnable_mD417A4A971DCF4CECE0F55E5357E66077EA02564 (LevelUpOverlayController_t43E472DC2F130795033ADBDEADDEEC560703F18D* __this, const RuntimeMethod* method) 
 {
 	VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* V_0 = NULL;
@@ -11283,7 +11284,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LevelUpOverlayController_OnEnable_mD417A
 		return;
 	}
 }
-// Method Definition Index: 55135
+// Method Definition Index: 55110
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LevelUpOverlayController_QueryElements_m64C04BAF60AF39CBD05B6162C3C96E8A01DCEF93 (LevelUpOverlayController_t43E472DC2F130795033ADBDEADDEEC560703F18D* __this, VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* ___0_root, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -11343,7 +11344,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LevelUpOverlayController_QueryElements_m
 		return;
 	}
 }
-// Method Definition Index: 55136
+// Method Definition Index: 55111
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LevelUpOverlayController_RegisterCallbacks_m54975CE14624B255AAB232FAAE3BD58F30BF23AE (LevelUpOverlayController_t43E472DC2F130795033ADBDEADDEEC560703F18D* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -11381,7 +11382,7 @@ IL_000b:
 		return;
 	}
 }
-// Method Definition Index: 55137
+// Method Definition Index: 55112
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LevelUpOverlayController_Show_m43B165912029B6BEEA8F3875ED4D1E1FD7F865D4 (LevelUpOverlayController_t43E472DC2F130795033ADBDEADDEEC560703F18D* __this, int32_t ___0_newLevel, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -11599,7 +11600,7 @@ IL_011f:
 		return;
 	}
 }
-// Method Definition Index: 55138
+// Method Definition Index: 55113
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LevelUpOverlayController_Hide_mAC04ABA9AA4CDB9FBE3D3873B3909668700E350E (LevelUpOverlayController_t43E472DC2F130795033ADBDEADDEEC560703F18D* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -11651,7 +11652,7 @@ IL_0009:
 		return;
 	}
 }
-// Method Definition Index: 55139
+// Method Definition Index: 55114
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool LevelUpOverlayController_IsVisible_m388D029A9DBF877CD54E039568E38E056230A708 (LevelUpOverlayController_t43E472DC2F130795033ADBDEADDEEC560703F18D* __this, const RuntimeMethod* method) 
 {
 	{
@@ -11660,7 +11661,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool LevelUpOverlayController_IsVisible_m388D
 		return L_0;
 	}
 }
-// Method Definition Index: 55140
+// Method Definition Index: 55115
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LevelUpOverlayController_TestLevelUp_m3B4373D33E7FDCFEF50DFE9649DE7467A13AE44F (LevelUpOverlayController_t43E472DC2F130795033ADBDEADDEEC560703F18D* __this, const RuntimeMethod* method) 
 {
 	{
@@ -11674,7 +11675,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LevelUpOverlayController_TestLevelUp_m3B
 		return;
 	}
 }
-// Method Definition Index: 55141
+// Method Definition Index: 55116
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LevelUpOverlayController__ctor_m9D19C4C9843E1D42BC04E3B62BA81AB2AE032BED (LevelUpOverlayController_t43E472DC2F130795033ADBDEADDEEC560703F18D* __this, const RuntimeMethod* method) 
 {
 	{
@@ -11684,7 +11685,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LevelUpOverlayController__ctor_m9D19C4C9
 		return;
 	}
 }
-// Method Definition Index: 55142
+// Method Definition Index: 55117
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LevelUpOverlayController__cctor_mAC31D68750D12B2BF2CEEEDB36B5B2F36DC4E5E9 (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -11748,7 +11749,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LevelUpOverlayController__cctor_mAC31D68
 		return;
 	}
 }
-// Method Definition Index: 55143
+// Method Definition Index: 55118
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LevelUpOverlayController_U3CRegisterCallbacksU3Eb__12_0_mFF9CBF2EB911287074FDEDAB1163C95D579C1FE5 (LevelUpOverlayController_t43E472DC2F130795033ADBDEADDEEC560703F18D* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -11757,7 +11758,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LevelUpOverlayController_U3CRegisterCall
 		return;
 	}
 }
-// Method Definition Index: 55144
+// Method Definition Index: 55119
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LevelUpOverlayController_U3CShowU3Eb__13_0_m38C7A9982EC8DBBF09F0AF85A85967CE7A3CDE76 (LevelUpOverlayController_t43E472DC2F130795033ADBDEADDEEC560703F18D* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -11775,7 +11776,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LevelUpOverlayController_U3CShowU3Eb__13
 		return;
 	}
 }
-// Method Definition Index: 55145
+// Method Definition Index: 55120
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LevelUpOverlayController_U3CHideU3Eb__14_0_mC73F0AE710F78D195260A03DE762A555A2774FF6 (LevelUpOverlayController_t43E472DC2F130795033ADBDEADDEEC560703F18D* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -11809,7 +11810,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LevelUpOverlayController_U3CHideU3Eb__14
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 55146
+// Method Definition Index: 55121
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OnEnable_mFB03CA17C6CE7D6951C714031A3CAC052030ABF4 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -11885,7 +11886,7 @@ IL_0068:
 		return;
 	}
 }
-// Method Definition Index: 55147
+// Method Definition Index: 55122
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_Update_mB5028CD7DF2E35A30EC2617CA068E0EEEEB74B2A (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, const RuntimeMethod* method) 
 {
 	{
@@ -11895,7 +11896,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_Update_mB5028CD7DF
 		return;
 	}
 }
-// Method Definition Index: 55148
+// Method Definition Index: 55123
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OnDisable_mDA84446807A1160702E437FC9AE8DB21D0BA166A (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, const RuntimeMethod* method) 
 {
 	{
@@ -11905,7 +11906,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OnDisable_mDA84446
 		return;
 	}
 }
-// Method Definition Index: 55149
+// Method Definition Index: 55124
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_QueryElements_m6D263C3F16360B2AE17A2900DCC9D6B21FE0A398 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* ___0_root, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -12090,7 +12091,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_QueryElements_m6D2
 		return;
 	}
 }
-// Method Definition Index: 55150
+// Method Definition Index: 55125
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_RegisterCallbacks_m1A4AA10104A95500339099946F69859001B3F431 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -12571,7 +12572,7 @@ IL_0217:
 		return;
 	}
 }
-// Method Definition Index: 55151
+// Method Definition Index: 55126
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_RegisterInputFocusEvents_mA7061FBC22D828AD8680D1FD0FB3A0BB45EC68A8 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, TextField_tDB34369F9468D7F02670087D9444EC23115827D9* ___0_field, String_t* ___1_groupName, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -12683,7 +12684,7 @@ IL_0040:
 		return;
 	}
 }
-// Method Definition Index: 55152
+// Method Definition Index: 55127
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_SetupPlaceholders_mA17408D6FC5344801A5777E3CAD11BB1B7528117 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -12719,7 +12720,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_SetupPlaceholders_
 		return;
 	}
 }
-// Method Definition Index: 55153
+// Method Definition Index: 55128
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_SetPlaceholder_m671D6CE23685682600B8F9F03F58AB64FB97E0CE (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, TextField_tDB34369F9468D7F02670087D9444EC23115827D9* ___0_field, String_t* ___1_placeholder, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -12756,7 +12757,7 @@ IL_0004:
 		return;
 	}
 }
-// Method Definition Index: 55154
+// Method Definition Index: 55129
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ApplyAuthModeLayout_mB65A703D6DE6D9FBD5503CF509CED35F011AE1EC (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -13050,7 +13051,7 @@ IL_0249:
 		return;
 	}
 }
-// Method Definition Index: 55155
+// Method Definition Index: 55130
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ShowDemoLoginForm_m8F9478E333CEA5E45B90C6C749F337B0C53CF561 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -13199,7 +13200,7 @@ IL_00f2:
 		return;
 	}
 }
-// Method Definition Index: 55156
+// Method Definition Index: 55131
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_SetHidden_m20FAF9D73EE9629A1B66D4E0EE1DFA970537C737 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* ___0_element, bool ___1_hidden, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -13248,7 +13249,7 @@ IL_0013:
 		return;
 	}
 }
-// Method Definition Index: 55157
+// Method Definition Index: 55132
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ShowLoginTab_mAED44C8ADE40BB2E749C30BCC215A31D42E68CC5 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -13369,7 +13370,7 @@ IL_005e:
 		return;
 	}
 }
-// Method Definition Index: 55158
+// Method Definition Index: 55133
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ShowRegisterTab_m3631EE54C29C2721F130626617E82CFE595868E3 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -13490,7 +13491,7 @@ IL_005e:
 		return;
 	}
 }
-// Method Definition Index: 55159
+// Method Definition Index: 55134
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OpenRegistrationPage_mB2C59727FD670C97D8F3F77A75BF762DCB800186 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -13500,6 +13501,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OpenRegistrationPa
 		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
 		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
 		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Uri_t1500A52B5F71A04F5D05C0852D0F2A0941842A0E_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral7B0A6248C409E108D15E0B776F4B9E6CD10A3849);
 		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteralAAA6B1B62B74CFB92B1676DB89B87DE4CEEF1665);
 		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteralBE268B456FE8DA0B6D761D81728BFDBDAEF81BC6);
 		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteralD8E8FDC218248C858D2752B3F366EA6971F1694B);
@@ -13508,9 +13510,9 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OpenRegistrationPa
 	}
 	BackendConfig_t4C8C70965890CD426DACBB91F6F2CDEE36C97593* V_0 = NULL;
 	Uri_t1500A52B5F71A04F5D05C0852D0F2A0941842A0E* V_1 = NULL;
-	String_t* G_B5_0 = NULL;
-	String_t* G_B4_0 = NULL;
-	String_t* G_B3_0 = NULL;
+	String_t* G_B9_0 = NULL;
+	String_t* G_B8_0 = NULL;
+	String_t* G_B7_0 = NULL;
 	{
 		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:377>
 		LoginScreenController_ResetKeyboardAvoidance_m2B97BFB70A737F6806D7CF354E405F1CF21ED868(__this, NULL);
@@ -13520,105 +13522,145 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OpenRegistrationPa
 		BackendConfig_t4C8C70965890CD426DACBB91F6F2CDEE36C97593* L_0;
 		L_0 = BackendConfig_get_Active_m8ECA146F6FFC253F07ADA2483B8A9D9F558C04A1(NULL);
 		V_0 = L_0;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:381>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:387>
 		BackendConfig_t4C8C70965890CD426DACBB91F6F2CDEE36C97593* L_1 = V_0;
 		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
 		bool L_2;
 		L_2 = Object_op_Inequality_mD0BE578448EAA61948F25C32F8DD55AB1F778602(L_1, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
-		if (L_2)
+		if (!L_2)
 		{
-			goto IL_0022;
+			goto IL_003c;
 		}
 	}
-	{
-		G_B5_0 = _stringLiteralDA39A3EE5E6B4B0D3255BFEF95601890AFD80709;
-		goto IL_0034;
-	}
-
-IL_0022:
 	{
 		BackendConfig_t4C8C70965890CD426DACBB91F6F2CDEE36C97593* L_3 = V_0;
 		NullCheck(L_3);
-		String_t* L_4 = L_3->___registrationUrl;
-		String_t* L_5 = L_4;
-		if (L_5)
+		bool L_4 = L_3->___localAuthEnabled;
+		if (!L_4)
 		{
-			G_B4_0 = L_5;
-			goto IL_002f;
-		}
-		G_B3_0 = L_5;
-	}
-	{
-		G_B5_0 = ((String_t*)(NULL));
-		goto IL_0034;
-	}
-
-IL_002f:
-	{
-		NullCheck(G_B4_0);
-		String_t* L_6;
-		L_6 = String_Trim_mCD6D8C6D4CFD15225D12DB7D3E0544CA80FB8DA5(G_B4_0, NULL);
-		G_B5_0 = L_6;
-	}
-
-IL_0034:
-	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:382>
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:383>
-		il2cpp_codegen_runtime_class_init_inline(Uri_t1500A52B5F71A04F5D05C0852D0F2A0941842A0E_il2cpp_TypeInfo_var);
-		bool L_7;
-		L_7 = Uri_TryCreate_m183077985BD7B1BE8DBDBCC4604F775C44723EC9(G_B5_0, 1, (&V_1), NULL);
-		if (!L_7)
-		{
-			goto IL_0051;
+			goto IL_003c;
 		}
 	}
 	{
-		Uri_t1500A52B5F71A04F5D05C0852D0F2A0941842A0E* L_8 = V_1;
-		NullCheck(L_8);
-		String_t* L_9;
-		L_9 = Uri_get_Scheme_m29106D5109538220B22FC49DE7B44040E51B0F6F(L_8, NULL);
-		il2cpp_codegen_runtime_class_init_inline(Uri_t1500A52B5F71A04F5D05C0852D0F2A0941842A0E_il2cpp_TypeInfo_var);
-		String_t* L_10 = ((Uri_t1500A52B5F71A04F5D05C0852D0F2A0941842A0E_StaticFields*)il2cpp_codegen_static_fields_for(Uri_t1500A52B5F71A04F5D05C0852D0F2A0941842A0E_il2cpp_TypeInfo_var))->___UriSchemeHttps;
-		bool L_11;
-		L_11 = String_Equals_mCC34895D0DB2AD440C9D8767032215BC86B5C48B(L_9, L_10, 5, NULL);
-		if (L_11)
+		BackendConfig_t4C8C70965890CD426DACBB91F6F2CDEE36C97593* L_5 = V_0;
+		NullCheck(L_5);
+		bool L_6 = L_5->___browserAuthEnabled;
+		if (L_6)
 		{
-			goto IL_006e;
+			goto IL_003c;
 		}
 	}
-
-IL_0051:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:385>
-		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_12 = __this->___loginStatus;
-		LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(__this, L_12, _stringLiteralAAA6B1B62B74CFB92B1676DB89B87DE4CEEF1665, (bool)0, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:386>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:389>
+		LoginScreenController_ShowRegisterTab_m3631EE54C29C2721F130626617E82CFE595868E3(__this, NULL);
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:390>
 		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
-		Debug_LogWarning_m33EF1B897E0C7C6FF538989610BFAFFEF4628CA9(_stringLiteralBE268B456FE8DA0B6D761D81728BFDBDAEF81BC6, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:387>
+		Debug_Log_m87A9A3C761FF5C43ED8A53B16190A53D08F818BB(_stringLiteral7B0A6248C409E108D15E0B776F4B9E6CD10A3849, NULL);
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:391>
 		return;
 	}
 
-IL_006e:
+IL_003c:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:390>
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:391>
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:392>
-		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_13 = __this->___loginStatus;
-		LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(__this, L_13, _stringLiteralD8E8FDC218248C858D2752B3F366EA6971F1694B, (bool)1, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:393>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:394>
+		BackendConfig_t4C8C70965890CD426DACBB91F6F2CDEE36C97593* L_7 = V_0;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_8;
+		L_8 = Object_op_Inequality_mD0BE578448EAA61948F25C32F8DD55AB1F778602(L_7, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (L_8)
+		{
+			goto IL_004c;
+		}
+	}
+	{
+		G_B9_0 = _stringLiteralDA39A3EE5E6B4B0D3255BFEF95601890AFD80709;
+		goto IL_005e;
+	}
+
+IL_004c:
+	{
+		BackendConfig_t4C8C70965890CD426DACBB91F6F2CDEE36C97593* L_9 = V_0;
+		NullCheck(L_9);
+		String_t* L_10 = L_9->___registrationUrl;
+		String_t* L_11 = L_10;
+		if (L_11)
+		{
+			G_B8_0 = L_11;
+			goto IL_0059;
+		}
+		G_B7_0 = L_11;
+	}
+	{
+		G_B9_0 = ((String_t*)(NULL));
+		goto IL_005e;
+	}
+
+IL_0059:
+	{
+		NullCheck(G_B8_0);
+		String_t* L_12;
+		L_12 = String_Trim_mCD6D8C6D4CFD15225D12DB7D3E0544CA80FB8DA5(G_B8_0, NULL);
+		G_B9_0 = L_12;
+	}
+
+IL_005e:
+	{
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:395>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:396>
+		il2cpp_codegen_runtime_class_init_inline(Uri_t1500A52B5F71A04F5D05C0852D0F2A0941842A0E_il2cpp_TypeInfo_var);
+		bool L_13;
+		L_13 = Uri_TryCreate_m183077985BD7B1BE8DBDBCC4604F775C44723EC9(G_B9_0, 1, (&V_1), NULL);
+		if (!L_13)
+		{
+			goto IL_007b;
+		}
+	}
+	{
 		Uri_t1500A52B5F71A04F5D05C0852D0F2A0941842A0E* L_14 = V_1;
 		NullCheck(L_14);
 		String_t* L_15;
-		L_15 = Uri_get_AbsoluteUri_m080934F4F2E2160EBEABDF00F8B6D59888EA63AE(L_14, NULL);
+		L_15 = Uri_get_Scheme_m29106D5109538220B22FC49DE7B44040E51B0F6F(L_14, NULL);
+		il2cpp_codegen_runtime_class_init_inline(Uri_t1500A52B5F71A04F5D05C0852D0F2A0941842A0E_il2cpp_TypeInfo_var);
+		String_t* L_16 = ((Uri_t1500A52B5F71A04F5D05C0852D0F2A0941842A0E_StaticFields*)il2cpp_codegen_static_fields_for(Uri_t1500A52B5F71A04F5D05C0852D0F2A0941842A0E_il2cpp_TypeInfo_var))->___UriSchemeHttps;
+		bool L_17;
+		L_17 = String_Equals_mCC34895D0DB2AD440C9D8767032215BC86B5C48B(L_15, L_16, 5, NULL);
+		if (L_17)
+		{
+			goto IL_0098;
+		}
+	}
+
+IL_007b:
+	{
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:398>
+		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_18 = __this->___loginStatus;
+		LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(__this, L_18, _stringLiteralAAA6B1B62B74CFB92B1676DB89B87DE4CEEF1665, (bool)0, NULL);
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:399>
+		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		Debug_LogWarning_m33EF1B897E0C7C6FF538989610BFAFFEF4628CA9(_stringLiteralBE268B456FE8DA0B6D761D81728BFDBDAEF81BC6, NULL);
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:400>
+		return;
+	}
+
+IL_0098:
+	{
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:403>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:404>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:405>
+		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_19 = __this->___loginStatus;
+		LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(__this, L_19, _stringLiteralD8E8FDC218248C858D2752B3F366EA6971F1694B, (bool)1, NULL);
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:406>
+		Uri_t1500A52B5F71A04F5D05C0852D0F2A0941842A0E* L_20 = V_1;
+		NullCheck(L_20);
+		String_t* L_21;
+		L_21 = Uri_get_AbsoluteUri_m080934F4F2E2160EBEABDF00F8B6D59888EA63AE(L_20, NULL);
 		il2cpp_codegen_runtime_class_init_inline(Application_tDB03BE91CDF0ACA614A5E0B67CFB77C44EB19B21_il2cpp_TypeInfo_var);
-		Application_OpenURL_mE748FA4D503715DEE12BCA4BDD8A5305AE41DB89(L_15, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:394>
+		Application_OpenURL_mE748FA4D503715DEE12BCA4BDD8A5305AE41DB89(L_21, NULL);
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:407>
 		return;
 	}
 }
-// Method Definition Index: 55160
+// Method Definition Index: 55135
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_TogglePasswordVisibility_mA157192B51B209A0FA62D0606AA0D398BC235899 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -13642,7 +13684,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_TogglePasswordVisi
 	String_t* G_B10_0 = NULL;
 	String_t* G_B10_1 = NULL;
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:400>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:413>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_0 = __this->___passwordField;
 		if (L_0)
 		{
@@ -13650,21 +13692,21 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_TogglePasswordVisi
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:400>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:413>
 		return;
 	}
 
 IL_0009:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:402>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:415>
 		bool L_1 = __this->___isPasswordVisible;
 		__this->___isPasswordVisible = (bool)((((int32_t)L_1) == ((int32_t)0))? 1 : 0);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:403>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:416>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_2 = __this->___passwordField;
 		bool L_3 = __this->___isPasswordVisible;
 		NullCheck(L_2);
 		TextInputBaseField_1_set_isPasswordField_m6E4CB157A133197FBD63D0FB693FA34254568085(L_2, (bool)((((int32_t)L_3) == ((int32_t)0))? 1 : 0), TextInputBaseField_1_set_isPasswordField_m6E4CB157A133197FBD63D0FB693FA34254568085_RuntimeMethod_var);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:405>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:418>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_4 = __this->___btnTogglePassword;
 		if (!L_4)
 		{
@@ -13672,7 +13714,7 @@ IL_0009:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:407>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:420>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_5 = __this->___btnTogglePassword;
 		bool L_6 = __this->___isPasswordVisible;
 		if (L_6)
@@ -13702,7 +13744,7 @@ IL_004e:
 
 IL_0053:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:410>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:423>
 		bool L_7 = __this->___isPasswordVisible;
 		if (L_7)
 		{
@@ -13729,11 +13771,11 @@ IL_006c:
 		L_8 = String_Concat_m9E3155FB84015C823606188F53B47CB44C444991(G_B10_1, G_B10_0, NULL);
 		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
 		Debug_Log_m87A9A3C761FF5C43ED8A53B16190A53D08F818BB(L_8, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:411>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:424>
 		return;
 	}
 }
-// Method Definition Index: 55161
+// Method Definition Index: 55136
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ToggleRegPasswordVisibility_m035D30594C406CD4EE63E659852365E09C6258ED (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -13749,7 +13791,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ToggleRegPasswordV
 	String_t* G_B6_0 = NULL;
 	Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* G_B6_1 = NULL;
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:415>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:428>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_0 = __this->___regPasswordField;
 		if (L_0)
 		{
@@ -13757,21 +13799,21 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ToggleRegPasswordV
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:415>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:428>
 		return;
 	}
 
 IL_0009:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:417>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:430>
 		bool L_1 = __this->___isRegPasswordVisible;
 		__this->___isRegPasswordVisible = (bool)((((int32_t)L_1) == ((int32_t)0))? 1 : 0);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:418>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:431>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_2 = __this->___regPasswordField;
 		bool L_3 = __this->___isRegPasswordVisible;
 		NullCheck(L_2);
 		TextInputBaseField_1_set_isPasswordField_m6E4CB157A133197FBD63D0FB693FA34254568085(L_2, (bool)((((int32_t)L_3) == ((int32_t)0))? 1 : 0), TextInputBaseField_1_set_isPasswordField_m6E4CB157A133197FBD63D0FB693FA34254568085_RuntimeMethod_var);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:420>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:433>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_4 = __this->___btnToggleRegPassword;
 		if (!L_4)
 		{
@@ -13779,7 +13821,7 @@ IL_0009:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:422>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:435>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_5 = __this->___btnToggleRegPassword;
 		bool L_6 = __this->___isRegPasswordVisible;
 		if (L_6)
@@ -13809,11 +13851,11 @@ IL_004e:
 
 IL_0053:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:424>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:437>
 		return;
 	}
 }
-// Method Definition Index: 55162
+// Method Definition Index: 55137
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OnLoginClicked_mC4B0AF5280A21691B41ACA40C9278B912BC91487 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, bool ___0_useWebAccount, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -13848,7 +13890,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OnLoginClicked_mC4
 		return;
 	}
 }
-// Method Definition Index: 55163
+// Method Definition Index: 55138
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OnWebsiteAuthClicked_m9E01C09AD9E4659356E68F2599F8E4E5321662C3 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, String_t* ___0_intent, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -13884,7 +13926,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OnWebsiteAuthClick
 		return;
 	}
 }
-// Method Definition Index: 55164
+// Method Definition Index: 55139
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Awaitable_t690337FEC1C411606E233EA36A41337B931C23CB* LoginScreenController_CompleteAuthenticatedLoginAsync_m1F83C6EAB3B5783D5D9BB399672432A0A789520D (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, String_t* ___0_username, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -13917,11 +13959,11 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Awaitable_t690337FEC1C411606E233EA36A41337B93
 		return L_4;
 	}
 }
-// Method Definition Index: 55165
+// Method Definition Index: 55140
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_TransitionAfterLogin_m8BC45CBDE0745BCC1B56D805F7339991FA294A19 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, const RuntimeMethod* method) 
 {
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:597>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:614>
 		bool L_0 = __this->___shouldSkipCharacterSelectAfterLogin;
 		if (!L_0)
 		{
@@ -13929,20 +13971,20 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_TransitionAfterLog
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:598>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:615>
 		LoginScreenController_TransitionToExistingCharacter_mBC803248ACD85CEDACBC43A58578A7512F887DF1(__this, NULL);
 		return;
 	}
 
 IL_000f:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:600>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:617>
 		LoginScreenController_TransitionToCharacterSelect_m2E47ECFF97AC16CC449BC2E4C35EC4B1778EDA28(__this, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:601>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:618>
 		return;
 	}
 }
-// Method Definition Index: 55166
+// Method Definition Index: 55141
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_TransitionToExistingCharacter_mBC803248ACD85CEDACBC43A58578A7512F887DF1 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -13956,7 +13998,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_TransitionToExisti
 		s_Il2CppMethodInitialized = true;
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:605>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:622>
 		il2cpp_codegen_runtime_class_init_inline(GameManager_tFE129A0017AF5BBD30FDCD4403B9CCEAE064C6B6_il2cpp_TypeInfo_var);
 		GameManager_tFE129A0017AF5BBD30FDCD4403B9CCEAE064C6B6* L_0;
 		L_0 = GameManager_get_Instance_m076FE4D98E785B5AEE0B4C360C7857F824E7FBD0_inline(NULL);
@@ -13969,13 +14011,13 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_TransitionToExisti
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:607>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:624>
 		il2cpp_codegen_runtime_class_init_inline(GameManager_tFE129A0017AF5BBD30FDCD4403B9CCEAE064C6B6_il2cpp_TypeInfo_var);
 		GameManager_tFE129A0017AF5BBD30FDCD4403B9CCEAE064C6B6* L_2;
 		L_2 = GameManager_get_Instance_m076FE4D98E785B5AEE0B4C360C7857F824E7FBD0_inline(NULL);
 		NullCheck(L_2);
 		GameManager_StartGameFromProfile_m1911949022976AAC711BAA7CD644B661C2FA33F4(L_2, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:608>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:625>
 		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
 		Debug_Log_m87A9A3C761FF5C43ED8A53B16190A53D08F818BB(_stringLiteralC7B66CFAD0D64185F82C485B8C36C9B91F771312, NULL);
 		return;
@@ -13983,14 +14025,14 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_TransitionToExisti
 
 IL_0022:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:612>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:629>
 		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
 		Debug_LogWarning_m33EF1B897E0C7C6FF538989610BFAFFEF4628CA9(_stringLiteral51BA66FB7D983C15B270256A804AA2DCCD714C73, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:614>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:631>
 		return;
 	}
 }
-// Method Definition Index: 55167
+// Method Definition Index: 55142
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_TransitionToCharacterSelect_m2E47ECFF97AC16CC449BC2E4C35EC4B1778EDA28 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -14004,7 +14046,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_TransitionToCharac
 		s_Il2CppMethodInitialized = true;
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:618>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:635>
 		il2cpp_codegen_runtime_class_init_inline(GameManager_tFE129A0017AF5BBD30FDCD4403B9CCEAE064C6B6_il2cpp_TypeInfo_var);
 		GameManager_tFE129A0017AF5BBD30FDCD4403B9CCEAE064C6B6* L_0;
 		L_0 = GameManager_get_Instance_m076FE4D98E785B5AEE0B4C360C7857F824E7FBD0_inline(NULL);
@@ -14017,13 +14059,13 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_TransitionToCharac
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:620>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:637>
 		il2cpp_codegen_runtime_class_init_inline(GameManager_tFE129A0017AF5BBD30FDCD4403B9CCEAE064C6B6_il2cpp_TypeInfo_var);
 		GameManager_tFE129A0017AF5BBD30FDCD4403B9CCEAE064C6B6* L_2;
 		L_2 = GameManager_get_Instance_m076FE4D98E785B5AEE0B4C360C7857F824E7FBD0_inline(NULL);
 		NullCheck(L_2);
 		GameManager_SetGameState_m5423452873452FC33B9228A8BF74154F9CC166BF(L_2, 1, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:621>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:638>
 		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
 		Debug_Log_m87A9A3C761FF5C43ED8A53B16190A53D08F818BB(_stringLiteralB1BF62142063D81281C5F091911335B612B58725, NULL);
 		return;
@@ -14031,14 +14073,14 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_TransitionToCharac
 
 IL_0023:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:625>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:642>
 		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
 		Debug_LogWarning_m33EF1B897E0C7C6FF538989610BFAFFEF4628CA9(_stringLiteralEB0B020C457A08DB2B463BC250C11DE06B145453, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:627>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:644>
 		return;
 	}
 }
-// Method Definition Index: 55168
+// Method Definition Index: 55143
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OnRegisterFieldsChanged_m472CC4CB807D68A40C75F8245D945D6128A8A348 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -14064,11 +14106,11 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OnRegisterFieldsCh
 	String_t* G_B17_0 = NULL;
 	int32_t G_B19_0 = 0;
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:634>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:651>
 		bool L_0;
 		L_0 = LoginScreenController_ValidateRegisterForm_m64E7712F89137D5816853FAEFB07022247DA3686(__this, (&V_0), NULL);
 		V_1 = L_0;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:636>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:653>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_1 = __this->___btnRegister;
 		if (!L_1)
 		{
@@ -14076,7 +14118,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OnRegisterFieldsCh
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:638>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:655>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_2 = __this->___btnRegister;
 		bool L_3 = V_1;
 		NullCheck(L_2);
@@ -14085,10 +14127,10 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OnRegisterFieldsCh
 
 IL_001d:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:642>
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:643>
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:644>
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:645>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:659>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:660>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:661>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:662>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_4 = __this->___regUsernameField;
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_5 = L_4;
 		if (L_5)
@@ -14223,7 +14265,7 @@ IL_0084:
 IL_0085:
 	{
 		V_2 = (bool)G_B19_0;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:647>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:664>
 		bool L_20 = V_1;
 		if (L_20)
 		{
@@ -14231,7 +14273,7 @@ IL_0085:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:649>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:666>
 		bool L_21 = V_2;
 		if (!L_21)
 		{
@@ -14239,7 +14281,7 @@ IL_0085:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:651>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:668>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_22 = __this->___registerStatus;
 		String_t* L_23 = V_0;
 		LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(__this, L_22, L_23, (bool)0, NULL);
@@ -14248,7 +14290,7 @@ IL_0085:
 
 IL_009b:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:655>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:672>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_24 = __this->___registerStatus;
 		LoginScreenController_ClearStatus_m84CD860A7F76C89ADAC2CE65CE30B482A052BCCD(__this, L_24, NULL);
 		return;
@@ -14256,14 +14298,14 @@ IL_009b:
 
 IL_00a8:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:660>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:677>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_25 = __this->___registerStatus;
 		LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(__this, L_25, _stringLiteral2FE83C397FDDACB931B86D376319CD9783BB076B, (bool)1, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:662>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:679>
 		return;
 	}
 }
-// Method Definition Index: 55169
+// Method Definition Index: 55144
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool LoginScreenController_ValidateRegisterForm_m64E7712F89137D5816853FAEFB07022247DA3686 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, String_t** ___0_errorMessage, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -14316,11 +14358,11 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool LoginScreenController_ValidateRegisterFo
 	String_t* G_B20_0 = NULL;
 	String_t* G_B19_0 = NULL;
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:666>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:683>
 		String_t** L_0 = ___0_errorMessage;
 		*((String_t**)L_0) = (String_t*)_stringLiteralDA39A3EE5E6B4B0D3255BFEF95601890AFD80709;
 		Il2CppCodeGenWriteBarrier((void**)(String_t**)L_0, (void*)(String_t*)_stringLiteralDA39A3EE5E6B4B0D3255BFEF95601890AFD80709);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:667>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:684>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_1 = __this->___regUsernameField;
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_2 = L_1;
 		if (L_2)
@@ -14363,7 +14405,7 @@ IL_0022:
 		String_t* L_5;
 		L_5 = String_Trim_mCD6D8C6D4CFD15225D12DB7D3E0544CA80FB8DA5(G_B5_0, NULL);
 		V_0 = L_5;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:668>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:685>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_6 = __this->___regEmailField;
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_7 = L_6;
 		if (L_7)
@@ -14406,7 +14448,7 @@ IL_0043:
 		String_t* L_10;
 		L_10 = String_Trim_mCD6D8C6D4CFD15225D12DB7D3E0544CA80FB8DA5(G_B10_0, NULL);
 		V_1 = L_10;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:669>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:686>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_11 = __this->___regPasswordField;
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_12 = L_11;
 		if (L_12)
@@ -14446,7 +14488,7 @@ IL_005b:
 IL_0064:
 	{
 		V_2 = G_B15_0;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:670>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:687>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_15 = __this->___regConfirmField;
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_16 = L_15;
 		if (L_16)
@@ -14486,8 +14528,8 @@ IL_0077:
 IL_0080:
 	{
 		V_3 = G_B20_0;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:673>
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:674>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:690>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:691>
 		String_t* L_19 = V_0;
 		bool L_20;
 		L_20 = String_IsNullOrEmpty_mEA9E3FB005AC28FE02E69FCF95A7B8456192B478(L_19, NULL);
@@ -14526,17 +14568,17 @@ IL_0080:
 
 IL_00a1:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:676>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:693>
 		String_t** L_27 = ___0_errorMessage;
 		*((String_t**)L_27) = (String_t*)_stringLiteralE7596FC874EC6AE9BBEAAC2F79445913C172747B;
 		Il2CppCodeGenWriteBarrier((void**)(String_t**)L_27, (void*)(String_t*)_stringLiteralE7596FC874EC6AE9BBEAAC2F79445913C172747B);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:677>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:694>
 		return (bool)0;
 	}
 
 IL_00aa:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:681>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:698>
 		String_t* L_28 = V_0;
 		NullCheck(L_28);
 		int32_t L_29;
@@ -14547,17 +14589,17 @@ IL_00aa:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:683>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:700>
 		String_t** L_30 = ___0_errorMessage;
 		*((String_t**)L_30) = (String_t*)_stringLiteral3827B134C65B817F264FFB91140D89F1A97EFA08;
 		Il2CppCodeGenWriteBarrier((void**)(String_t**)L_30, (void*)(String_t*)_stringLiteral3827B134C65B817F264FFB91140D89F1A97EFA08);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:684>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:701>
 		return (bool)0;
 	}
 
 IL_00bd:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:686>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:703>
 		String_t* L_31 = V_0;
 		NullCheck(L_31);
 		int32_t L_32;
@@ -14568,17 +14610,17 @@ IL_00bd:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:688>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:705>
 		String_t** L_33 = ___0_errorMessage;
 		*((String_t**)L_33) = (String_t*)_stringLiteralE1AC7C6D5E3E63BEDD339055003261B5D7C38582;
 		Il2CppCodeGenWriteBarrier((void**)(String_t**)L_33, (void*)(String_t*)_stringLiteralE1AC7C6D5E3E63BEDD339055003261B5D7C38582);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:689>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:706>
 		return (bool)0;
 	}
 
 IL_00d0:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:691>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:708>
 		String_t* L_34 = V_0;
 		il2cpp_codegen_runtime_class_init_inline(Regex_tE773142C2BE45C5D362B0F815AFF831707A51772_il2cpp_TypeInfo_var);
 		bool L_35;
@@ -14589,17 +14631,17 @@ IL_00d0:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:693>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:710>
 		String_t** L_36 = ___0_errorMessage;
 		*((String_t**)L_36) = (String_t*)_stringLiteralA6CE383AC130256D2D172E05FF181343820AFD63;
 		Il2CppCodeGenWriteBarrier((void**)(String_t**)L_36, (void*)(String_t*)_stringLiteralA6CE383AC130256D2D172E05FF181343820AFD63);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:694>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:711>
 		return (bool)0;
 	}
 
 IL_00e6:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:698>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:715>
 		String_t* L_37 = V_1;
 		il2cpp_codegen_runtime_class_init_inline(Regex_tE773142C2BE45C5D362B0F815AFF831707A51772_il2cpp_TypeInfo_var);
 		bool L_38;
@@ -14610,17 +14652,17 @@ IL_00e6:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:700>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:717>
 		String_t** L_39 = ___0_errorMessage;
 		*((String_t**)L_39) = (String_t*)_stringLiteralA955FD9B29A3112D2A2D6BE36DBC813B1CC04D50;
 		Il2CppCodeGenWriteBarrier((void**)(String_t**)L_39, (void*)(String_t*)_stringLiteralA955FD9B29A3112D2A2D6BE36DBC813B1CC04D50);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:701>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:718>
 		return (bool)0;
 	}
 
 IL_00fc:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:705>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:722>
 		String_t* L_40 = V_2;
 		NullCheck(L_40);
 		int32_t L_41;
@@ -14631,17 +14673,17 @@ IL_00fc:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:707>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:724>
 		String_t** L_42 = ___0_errorMessage;
 		*((String_t**)L_42) = (String_t*)_stringLiteral25FA7AC311323FA4CBB835D69FE4B4005AACC09D;
 		Il2CppCodeGenWriteBarrier((void**)(String_t**)L_42, (void*)(String_t*)_stringLiteral25FA7AC311323FA4CBB835D69FE4B4005AACC09D);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:708>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:725>
 		return (bool)0;
 	}
 
 IL_010f:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:710>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:727>
 		String_t* L_43 = V_2;
 		NullCheck(L_43);
 		int32_t L_44;
@@ -14652,25 +14694,25 @@ IL_010f:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:712>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:729>
 		String_t** L_45 = ___0_errorMessage;
 		*((String_t**)L_45) = (String_t*)_stringLiteralCD304950503EE3FD7F282BFDAD4E60AF54DDE5A9;
 		Il2CppCodeGenWriteBarrier((void**)(String_t**)L_45, (void*)(String_t*)_stringLiteralCD304950503EE3FD7F282BFDAD4E60AF54DDE5A9);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:713>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:730>
 		return (bool)0;
 	}
 
 IL_0122:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:716>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:733>
 		V_4 = (bool)0;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:717>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:734>
 		V_5 = (bool)0;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:718>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:735>
 		V_6 = (bool)0;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:719>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:736>
 		V_7 = (bool)0;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:721>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:738>
 		String_t* L_46 = V_2;
 		V_8 = L_46;
 		V_9 = 0;
@@ -14679,14 +14721,14 @@ IL_0122:
 
 IL_0136:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:721>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:738>
 		String_t* L_47 = V_8;
 		int32_t L_48 = V_9;
 		NullCheck(L_47);
 		Il2CppChar L_49;
 		L_49 = String_get_Chars_mC49DF0CD2D3BE7BE97B3AD9C995BE3094F8E36D3(L_47, L_48, NULL);
 		V_10 = L_49;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:723>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:740>
 		Il2CppChar L_50 = V_10;
 		il2cpp_codegen_runtime_class_init_inline(il2cpp_defaults.char_class);
 		bool L_51;
@@ -14697,14 +14739,14 @@ IL_0136:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:723>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:740>
 		V_4 = (bool)1;
 		goto IL_0177;
 	}
 
 IL_014f:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:724>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:741>
 		Il2CppChar L_52 = V_10;
 		il2cpp_codegen_runtime_class_init_inline(il2cpp_defaults.char_class);
 		bool L_53;
@@ -14715,14 +14757,14 @@ IL_014f:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:724>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:741>
 		V_5 = (bool)1;
 		goto IL_0177;
 	}
 
 IL_015d:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:725>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:742>
 		Il2CppChar L_54 = V_10;
 		il2cpp_codegen_runtime_class_init_inline(il2cpp_defaults.char_class);
 		bool L_55;
@@ -14733,14 +14775,14 @@ IL_015d:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:725>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:742>
 		V_6 = (bool)1;
 		goto IL_0177;
 	}
 
 IL_016b:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:726>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:743>
 		Il2CppChar L_56 = V_10;
 		il2cpp_codegen_runtime_class_init_inline(il2cpp_defaults.char_class);
 		bool L_57;
@@ -14751,7 +14793,7 @@ IL_016b:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:726>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:743>
 		V_7 = (bool)1;
 	}
 
@@ -14763,7 +14805,7 @@ IL_0177:
 
 IL_017d:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:721>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:738>
 		int32_t L_59 = V_9;
 		String_t* L_60 = V_8;
 		NullCheck(L_60);
@@ -14775,7 +14817,7 @@ IL_017d:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:729>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:746>
 		bool L_62 = V_4;
 		if (!L_62)
 		{
@@ -14806,17 +14848,17 @@ IL_017d:
 
 IL_0198:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:731>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:748>
 		String_t** L_66 = ___0_errorMessage;
 		*((String_t**)L_66) = (String_t*)_stringLiteral023519EE6AB088540D7976215AE1932C3FAD5E21;
 		Il2CppCodeGenWriteBarrier((void**)(String_t**)L_66, (void*)(String_t*)_stringLiteral023519EE6AB088540D7976215AE1932C3FAD5E21);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:732>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:749>
 		return (bool)0;
 	}
 
 IL_01a1:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:736>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:753>
 		String_t* L_67 = V_2;
 		String_t* L_68 = V_3;
 		bool L_69;
@@ -14827,21 +14869,21 @@ IL_01a1:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:738>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:755>
 		String_t** L_70 = ___0_errorMessage;
 		*((String_t**)L_70) = (String_t*)_stringLiteral9F5FC95AB8E66187E5D19DF31B452510AE65B968;
 		Il2CppCodeGenWriteBarrier((void**)(String_t**)L_70, (void*)(String_t*)_stringLiteral9F5FC95AB8E66187E5D19DF31B452510AE65B968);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:739>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:756>
 		return (bool)0;
 	}
 
 IL_01b3:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:742>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:759>
 		return (bool)1;
 	}
 }
-// Method Definition Index: 55170
+// Method Definition Index: 55145
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OnRegisterClicked_m037E192A755569EBB767309322A3F15524B1DB97 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -14874,13 +14916,13 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OnRegisterClicked_
 		return;
 	}
 }
-// Method Definition Index: 55171
+// Method Definition Index: 55146
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_SwitchToLoginAfterRegister_mE962E0F310229A596BF8E4AF5155678012EA2BF8 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, const RuntimeMethod* method) 
 {
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:789>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:806>
 		LoginScreenController_ShowLoginTab_mAED44C8ADE40BB2E749C30BCC215A31D42E68CC5(__this, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:791>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:808>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_0 = __this->___usernameField;
 		if (!L_0)
 		{
@@ -14895,7 +14937,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_SwitchToLoginAfter
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:793>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:810>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_2 = __this->___usernameField;
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_3 = __this->___regUsernameField;
 		NullCheck(L_3);
@@ -14907,11 +14949,11 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_SwitchToLoginAfter
 
 IL_002c:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:795>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:812>
 		return;
 	}
 }
-// Method Definition Index: 55172
+// Method Definition Index: 55147
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OnForgotPasswordClicked_m17DC4B3CC28AFA4C826CFC0D6221F412A9557E85 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -14925,10 +14967,10 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OnForgotPasswordCl
 		s_Il2CppMethodInitialized = true;
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:801>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:818>
 		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
 		Debug_Log_m87A9A3C761FF5C43ED8A53B16190A53D08F818BB(_stringLiteral190783BB6A2B7567CBA8B8C547726BB39F8B8FB5, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:803>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:820>
 		ForgotPasswordPopupController_t4943C53230D805C3CCBFB961BB52B296854EE2F5* L_0 = __this->___forgotPasswordPopup;
 		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
 		bool L_1;
@@ -14939,7 +14981,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OnForgotPasswordCl
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:805>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:822>
 		ForgotPasswordPopupController_t4943C53230D805C3CCBFB961BB52B296854EE2F5* L_2 = __this->___forgotPasswordPopup;
 		NullCheck(L_2);
 		ForgotPasswordPopupController_Show_m8B072E28AFE58C92B8F77157961CD207CAC14D05(L_2, NULL);
@@ -14948,17 +14990,17 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OnForgotPasswordCl
 
 IL_0024:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:809>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:826>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_3 = __this->___loginStatus;
 		LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(__this, L_3, _stringLiteral5A463E6A0AB5BB7086CBE7D501A880EFC8D0E95E, (bool)0, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:810>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:827>
 		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
 		Debug_LogWarning_m33EF1B897E0C7C6FF538989610BFAFFEF4628CA9(_stringLiteral20E3445307978A6A99602465DD7FDD93140576AE, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:812>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:829>
 		return;
 	}
 }
-// Method Definition Index: 55173
+// Method Definition Index: 55148
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool LoginScreenController_IsOnlineOnly_m957DE40EFA7C19C0B1712919CF470848F8619F76 (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -14968,7 +15010,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool LoginScreenController_IsOnlineOnly_m957D
 		s_Il2CppMethodInitialized = true;
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:818>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:835>
 		BackendConfig_t4C8C70965890CD426DACBB91F6F2CDEE36C97593* L_0;
 		L_0 = BackendConfig_get_Active_m8ECA146F6FFC253F07ADA2483B8A9D9F558C04A1(NULL);
 		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
@@ -14992,7 +15034,7 @@ IL_001b:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 55174
+// Method Definition Index: 55149
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* LoginScreenController_ResolveLoginFailureMessage_m1E2E725DEEB09E368B68805771BF525B8F8BD205 (AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* ___0_auth, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -15017,7 +15059,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* LoginScreenController_ResolveLoginF
 	int64_t G_B3_0 = 0;
 	String_t* G_B6_0 = NULL;
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:823>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:840>
 		AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_0 = ___0_auth;
 		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
 		bool L_1;
@@ -15044,7 +15086,7 @@ IL_000d:
 IL_0013:
 	{
 		V_0 = G_B3_0;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:824>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:841>
 		AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_4 = ___0_auth;
 		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
 		bool L_5;
@@ -15071,7 +15113,7 @@ IL_0024:
 IL_002a:
 	{
 		V_1 = G_B6_0;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:825>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:842>
 		int64_t L_8 = V_0;
 		if (L_8)
 		{
@@ -15079,13 +15121,13 @@ IL_002a:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:826>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:843>
 		return _stringLiteral219E546EBA497F547451D1681714948C22788D5F;
 	}
 
 IL_0034:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:827>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:844>
 		int64_t L_9 = V_0;
 		if ((((int64_t)L_9) == ((int64_t)((int64_t)((int32_t)401)))))
 		{
@@ -15102,17 +15144,17 @@ IL_0034:
 
 IL_0046:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:828>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:845>
 		return _stringLiteral5437EE99354A1DBFFD0CBCA04908CC7EA7845CB8;
 	}
 
 IL_004c:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:829>
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:830>
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:831>
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:832>
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:833>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:846>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:847>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:848>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:849>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:850>
 		int64_t L_11 = V_0;
 		if ((!(((uint64_t)L_11) == ((uint64_t)((int64_t)((int32_t)403))))))
 		{
@@ -15158,13 +15200,13 @@ IL_004c:
 
 IL_008d:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:834>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:851>
 		return _stringLiteral11FCDC3092478806E6A251009C8D7942F424B5B8;
 	}
 
 IL_0093:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:835>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:852>
 		int64_t L_20 = V_0;
 		if ((!(((uint64_t)L_20) == ((uint64_t)((int64_t)((int32_t)429))))))
 		{
@@ -15172,13 +15214,13 @@ IL_0093:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:836>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:853>
 		return _stringLiteralDC48D8ECFF3656DB50AEF2FFFF8E52F3CDE5D87A;
 	}
 
 IL_00a2:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:837>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:854>
 		int64_t L_21 = V_0;
 		if ((((int64_t)L_21) < ((int64_t)((int64_t)((int32_t)500)))))
 		{
@@ -15186,17 +15228,17 @@ IL_00a2:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:838>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:855>
 		return _stringLiteral1475E8AB7E14CA169B43825EA8E22B000C6CDC1C;
 	}
 
 IL_00b1:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:839>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:856>
 		return _stringLiteral8F6CAFB0BC6D6CDCFE42C5A23C6F9A9FFE65C3CA;
 	}
 }
-// Method Definition Index: 55175
+// Method Definition Index: 55150
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* LoginScreenController_ResolveBrowserAuthFailureMessage_m455E22B719C9E9F7E8B2321493131450E33ADB54 (AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* ___0_auth, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -15219,7 +15261,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* LoginScreenController_ResolveBrowse
 	String_t* V_0 = NULL;
 	String_t* G_B3_0 = NULL;
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:844>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:861>
 		AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_0 = ___0_auth;
 		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
 		bool L_1;
@@ -15246,7 +15288,7 @@ IL_0010:
 IL_0016:
 	{
 		V_0 = G_B3_0;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:845>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:862>
 		String_t* L_4 = V_0;
 		bool L_5;
 		L_5 = String_Equals_mCC34895D0DB2AD440C9D8767032215BC86B5C48B(L_4, _stringLiteral201A863CF9048EA9C67A6D87E86C9BA603DD4CB2, 5, NULL);
@@ -15256,13 +15298,13 @@ IL_0016:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:846>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:863>
 		return _stringLiteral53A6E19132ED93F721AB7716B7217C5E42D82FAD;
 	}
 
 IL_002b:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:847>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:864>
 		String_t* L_6 = V_0;
 		bool L_7;
 		L_7 = String_Equals_mCC34895D0DB2AD440C9D8767032215BC86B5C48B(L_6, _stringLiteral334E5F854C1F350329099E1A01C3678971B17C3E, 5, NULL);
@@ -15272,13 +15314,13 @@ IL_002b:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:848>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:865>
 		return _stringLiteral8B66DDE0C48175DDD0AB16755EFA203224245EDC;
 	}
 
 IL_003f:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:849>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:866>
 		String_t* L_8 = V_0;
 		bool L_9;
 		L_9 = String_Equals_mCC34895D0DB2AD440C9D8767032215BC86B5C48B(L_8, _stringLiteral89834ED519BB05C67C6BE86C4B50606180FA4D44, 5, NULL);
@@ -15288,15 +15330,15 @@ IL_003f:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:850>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:867>
 		return _stringLiteralC6DEFDBC0E20A9DE557B02C0CC1AE4ACD9E95A81;
 	}
 
 IL_0053:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:851>
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:852>
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:853>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:868>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:869>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:870>
 		String_t* L_10 = V_0;
 		bool L_11;
 		L_11 = String_Equals_mCC34895D0DB2AD440C9D8767032215BC86B5C48B(L_10, _stringLiteralE9379C516D0227D6800386B4DD5CCC0A0F05E164, 5, NULL);
@@ -15326,20 +15368,20 @@ IL_0053:
 
 IL_007d:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:854>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:871>
 		return _stringLiteralA8D4D46D57461EF6E71E4FDC7E545B5BBE1A54D2;
 	}
 
 IL_0083:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:855>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:872>
 		AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_16 = ___0_auth;
 		String_t* L_17;
 		L_17 = LoginScreenController_ResolveLoginFailureMessage_m1E2E725DEEB09E368B68805771BF525B8F8BD205(L_16, NULL);
 		return L_17;
 	}
 }
-// Method Definition Index: 55176
+// Method Definition Index: 55151
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* LoginScreenController_ResolveRegisterFailureMessage_mDE6F7B225028F70C5954B63D98B67E9DBADD2B35 (AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* ___0_auth, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -15355,7 +15397,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* LoginScreenController_ResolveRegist
 	int64_t V_0 = 0;
 	int64_t G_B3_0 = 0;
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:860>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:877>
 		AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_0 = ___0_auth;
 		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
 		bool L_1;
@@ -15382,7 +15424,7 @@ IL_000d:
 IL_0013:
 	{
 		V_0 = G_B3_0;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:861>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:878>
 		int64_t L_4 = V_0;
 		if (L_4)
 		{
@@ -15390,13 +15432,13 @@ IL_0013:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:862>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:879>
 		return _stringLiteral7EFB89E4754C17AF730C6466C15E78BEE9D3F70E;
 	}
 
 IL_001d:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:863>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:880>
 		int64_t L_5 = V_0;
 		if ((!(((uint64_t)L_5) == ((uint64_t)((int64_t)((int32_t)409))))))
 		{
@@ -15404,13 +15446,13 @@ IL_001d:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:864>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:881>
 		return _stringLiteralF6421E33512F1DBD937204AA25345CD07584E1E2;
 	}
 
 IL_002c:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:865>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:882>
 		int64_t L_6 = V_0;
 		if ((((int64_t)L_6) < ((int64_t)((int64_t)((int32_t)500)))))
 		{
@@ -15418,17 +15460,17 @@ IL_002c:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:866>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:883>
 		return _stringLiteralDD157F6D4A2098EFD792DC9F789A6EBE43EE3DD2;
 	}
 
 IL_003b:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:867>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:884>
 		return _stringLiteral509543BA9221FB347F950914CAD630F962FEA25A;
 	}
 }
-// Method Definition Index: 55177
+// Method Definition Index: 55152
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* LoginScreenController_ResolveBootstrapFailureMessage_m00717EFC880CDA0C753C311DDE35365DFA5162D1 (PlayerBootstrapService_t4A614618E10C2ECC4C19643B1E86C3B3664A1D2D* ___0_bootstrap, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -15443,7 +15485,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* LoginScreenController_ResolveBootst
 	int64_t V_0 = 0;
 	int64_t G_B3_0 = 0;
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:872>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:889>
 		PlayerBootstrapService_t4A614618E10C2ECC4C19643B1E86C3B3664A1D2D* L_0 = ___0_bootstrap;
 		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
 		bool L_1;
@@ -15470,7 +15512,7 @@ IL_000d:
 IL_0013:
 	{
 		V_0 = G_B3_0;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:873>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:890>
 		int64_t L_4 = V_0;
 		if ((!(((uint64_t)L_4) == ((uint64_t)((int64_t)((int32_t)401))))))
 		{
@@ -15478,13 +15520,13 @@ IL_0013:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:874>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:891>
 		return _stringLiteralA1482AE42D699F21A92530EF1A9F4B42561B84FB;
 	}
 
 IL_0023:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:875>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:892>
 		int64_t L_5 = V_0;
 		if (L_5)
 		{
@@ -15492,17 +15534,17 @@ IL_0023:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:876>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:893>
 		return _stringLiteralF2E605BCFF8860D48B14E05F75B3E27668250BBC;
 	}
 
 IL_002c:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:877>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:894>
 		return _stringLiteral575400595090DAAF1E13B2FE8F3A08DBAEAD2E7C;
 	}
 }
-// Method Definition Index: 55178
+// Method Definition Index: 55153
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* ___0_label, String_t* ___1_message, bool ___2_isSuccess, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -15519,7 +15561,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ShowStatus_m237D14
 	String_t* G_B5_0 = NULL;
 	Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* G_B5_1 = NULL;
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:882>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:899>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_0 = ___0_label;
 		if (L_0)
 		{
@@ -15527,26 +15569,26 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ShowStatus_m237D14
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:882>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:899>
 		return;
 	}
 
 IL_0004:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:884>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:901>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_1 = ___0_label;
 		String_t* L_2 = ___1_message;
 		NullCheck(L_1);
 		VirtualActionInvoker1< String_t* >::Invoke(208, L_1, L_2);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:885>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:902>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_3 = ___0_label;
 		NullCheck(L_3);
 		VisualElement_RemoveFromClassList_mA7A2EC202004DFCBF38C12B70C6218BF40D21220(L_3, _stringLiteralFD29A9DBDF8CB35F1AD3033F10DE8DA95C2277DC, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:886>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:903>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_4 = ___0_label;
 		NullCheck(L_4);
 		VisualElement_RemoveFromClassList_mA7A2EC202004DFCBF38C12B70C6218BF40D21220(L_4, _stringLiteral7AF19DE431BFCCD5A358CD6548254EE1B63DAC47, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:887>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:904>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_5 = ___0_label;
 		bool L_6 = ___2_isSuccess;
 		if (L_6)
@@ -15572,7 +15614,7 @@ IL_0031:
 	{
 		NullCheck(G_B5_1);
 		VisualElement_AddToClassList_mAF0DD8D8CFD5130229A0471DD260E01ED82117F1(G_B5_1, G_B5_0, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:888>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:905>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_7 = ___0_label;
 		NullCheck(L_7);
 		RuntimeObject* L_8;
@@ -15581,11 +15623,11 @@ IL_0031:
 		L_9 = StyleEnum_1_op_Implicit_mE2664CDFC678F602380EED12BA228071E6F49030(0, StyleEnum_1_op_Implicit_mE2664CDFC678F602380EED12BA228071E6F49030_RuntimeMethod_var);
 		NullCheck(L_8);
 		InterfaceActionInvoker1< StyleEnum_1_t3B02FFF55849C9C8E6A7C0AA9C7E5F65F10C9C69 >::Invoke(51, IStyle_t4FD66C97CA5F46BFE328FED0C65277A37E0A89F7_il2cpp_TypeInfo_var, L_8, L_9);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:889>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:906>
 		return;
 	}
 }
-// Method Definition Index: 55179
+// Method Definition Index: 55154
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ClearStatus_m84CD860A7F76C89ADAC2CE65CE30B482A052BCCD (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* ___0_label, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -15599,7 +15641,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ClearStatus_m84CD8
 		s_Il2CppMethodInitialized = true;
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:893>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:910>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_0 = ___0_label;
 		if (L_0)
 		{
@@ -15607,25 +15649,25 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ClearStatus_m84CD8
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:893>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:910>
 		return;
 	}
 
 IL_0004:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:895>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:912>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_1 = ___0_label;
 		NullCheck(L_1);
 		VirtualActionInvoker1< String_t* >::Invoke(208, L_1, _stringLiteralDA39A3EE5E6B4B0D3255BFEF95601890AFD80709);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:896>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:913>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_2 = ___0_label;
 		NullCheck(L_2);
 		VisualElement_RemoveFromClassList_mA7A2EC202004DFCBF38C12B70C6218BF40D21220(L_2, _stringLiteralFD29A9DBDF8CB35F1AD3033F10DE8DA95C2277DC, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:897>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:914>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_3 = ___0_label;
 		NullCheck(L_3);
 		VisualElement_RemoveFromClassList_mA7A2EC202004DFCBF38C12B70C6218BF40D21220(L_3, _stringLiteral7AF19DE431BFCCD5A358CD6548254EE1B63DAC47, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:898>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:915>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_4 = ___0_label;
 		NullCheck(L_4);
 		RuntimeObject* L_5;
@@ -15634,11 +15676,11 @@ IL_0004:
 		L_6 = StyleEnum_1_op_Implicit_mE2664CDFC678F602380EED12BA228071E6F49030(1, StyleEnum_1_op_Implicit_mE2664CDFC678F602380EED12BA228071E6F49030_RuntimeMethod_var);
 		NullCheck(L_5);
 		InterfaceActionInvoker1< StyleEnum_1_t3B02FFF55849C9C8E6A7C0AA9C7E5F65F10C9C69 >::Invoke(51, IStyle_t4FD66C97CA5F46BFE328FED0C65277A37E0A89F7_il2cpp_TypeInfo_var, L_5, L_6);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:899>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:916>
 		return;
 	}
 }
-// Method Definition Index: 55180
+// Method Definition Index: 55155
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_SetAuthControlsEnabled_m31EC13A3434A06D1F38A008CEA94B3BF2EE6E3C2 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, bool ___0_enabled, const RuntimeMethod* method) 
 {
 	String_t* V_0 = NULL;
@@ -15677,10 +15719,10 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_SetAuthControlsEna
 	int32_t G_B49_0 = 0;
 	Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* G_B49_1 = NULL;
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:903>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:920>
 		bool L_0 = ___0_enabled;
 		__this->___isAuthRequestInProgress = (bool)((((int32_t)L_0) == ((int32_t)0))? 1 : 0);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:905>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:922>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_1 = __this->___tabLogin;
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_2 = L_1;
 		if (L_2)
@@ -15703,7 +15745,7 @@ IL_0016:
 
 IL_001c:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:906>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:923>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_4 = __this->___tabRegister;
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_5 = L_4;
 		if (L_5)
@@ -15726,7 +15768,7 @@ IL_0028:
 
 IL_002e:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:908>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:925>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_7 = __this->___usernameField;
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_8 = L_7;
 		if (L_8)
@@ -15749,7 +15791,7 @@ IL_003a:
 
 IL_0040:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:909>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:926>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_10 = __this->___passwordField;
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_11 = L_10;
 		if (L_11)
@@ -15772,7 +15814,7 @@ IL_004c:
 
 IL_0052:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:910>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:927>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_13 = __this->___btnTogglePassword;
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_14 = L_13;
 		if (L_14)
@@ -15795,7 +15837,7 @@ IL_005e:
 
 IL_0064:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:911>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:928>
 		Toggle_t27BE43456B97DD7A793D272D3318F9FE682B844C* L_16 = __this->___rememberToggle;
 		Toggle_t27BE43456B97DD7A793D272D3318F9FE682B844C* L_17 = L_16;
 		if (L_17)
@@ -15818,7 +15860,7 @@ IL_0070:
 
 IL_0076:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:912>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:929>
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_19 = __this->___forgotPassword;
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_20 = L_19;
 		if (L_20)
@@ -15841,7 +15883,7 @@ IL_0082:
 
 IL_0088:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:913>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:930>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_22 = __this->___btnLogin;
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_23 = L_22;
 		if (L_23)
@@ -15864,7 +15906,7 @@ IL_0094:
 
 IL_009a:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:914>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:931>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_25 = __this->___btnLoginWeb;
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_26 = L_25;
 		if (L_26)
@@ -15887,7 +15929,7 @@ IL_00a6:
 
 IL_00ac:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:915>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:932>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_28 = __this->___regUsernameField;
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_29 = L_28;
 		if (L_29)
@@ -15910,7 +15952,7 @@ IL_00b8:
 
 IL_00be:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:916>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:933>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_31 = __this->___regEmailField;
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_32 = L_31;
 		if (L_32)
@@ -15933,7 +15975,7 @@ IL_00ca:
 
 IL_00d0:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:917>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:934>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_34 = __this->___regPasswordField;
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_35 = L_34;
 		if (L_35)
@@ -15956,7 +15998,7 @@ IL_00dc:
 
 IL_00e2:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:918>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:935>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_37 = __this->___regConfirmField;
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_38 = L_37;
 		if (L_38)
@@ -15979,7 +16021,7 @@ IL_00ee:
 
 IL_00f4:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:919>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:936>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_40 = __this->___btnToggleRegPassword;
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_41 = L_40;
 		if (L_41)
@@ -16002,7 +16044,7 @@ IL_0100:
 
 IL_0106:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:920>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:937>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_43 = __this->___btnOpenWebRegistration;
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_44 = L_43;
 		if (L_44)
@@ -16025,7 +16067,7 @@ IL_0112:
 
 IL_0118:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:922>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:939>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_46 = __this->___btnRegister;
 		if (!L_46)
 		{
@@ -16033,7 +16075,7 @@ IL_0118:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:924>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:941>
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_47 = __this->___btnRegister;
 		bool L_48 = ___0_enabled;
 		if (!L_48)
@@ -16065,11 +16107,11 @@ IL_0134:
 
 IL_0139:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:926>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:943>
 		return;
 	}
 }
-// Method Definition Index: 55181
+// Method Definition Index: 55156
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_UpdateKeyboardAvoidance_m4B018842C2255AECAC0E8E8CF1D36B9EADF7B99D (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -16080,7 +16122,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_UpdateKeyboardAvoi
 	}
 	float V_0 = 0.0f;
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:930>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:947>
 		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_0 = __this->___rootElement;
 		if (!L_0)
 		{
@@ -16097,13 +16139,13 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_UpdateKeyboardAvoi
 
 IL_0010:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:930>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:947>
 		return;
 	}
 
 IL_0011:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:932>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:949>
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_2 = __this->___focusedKeyboardField;
 		bool L_3;
 		L_3 = MobileKeyboardAvoidance_ShouldAvoidKeyboard_m583C477F662AC39DA49E51F5952F1B7667160744(L_2, NULL);
@@ -16113,7 +16155,7 @@ IL_0011:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:934>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:951>
 		float L_4 = __this->___keyboardUpShift;
 		if ((!(((float)L_4) > ((float)(0.0f)))))
 		{
@@ -16121,30 +16163,30 @@ IL_0011:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:935>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:952>
 		LoginScreenController_ResetKeyboardAvoidance_m2B97BFB70A737F6806D7CF354E405F1CF21ED868(__this, NULL);
 	}
 
 IL_0031:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:936>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:953>
 		return;
 	}
 
 IL_0032:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:939>
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:940>
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:941>
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:942>
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:943>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:956>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:957>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:958>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:959>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:960>
 		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_5 = __this->___rootElement;
 		TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_6 = __this->___focusedKeyboardField;
 		float L_7 = __this->___keyboardUpShift;
 		float L_8;
 		L_8 = MobileKeyboardAvoidance_CalculateRequiredUpShift_m2FDD31679C6A549B806A3E9529D66A573EE5B5F3(L_5, L_6, L_7, (24.0f), (0.449999988f), NULL);
 		V_0 = L_8;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:945>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:962>
 		float L_9 = V_0;
 		float L_10 = __this->___keyboardUpShift;
 		float L_11;
@@ -16155,16 +16197,16 @@ IL_0032:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:945>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:962>
 		return;
 	}
 
 IL_0069:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:947>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:964>
 		float L_12 = V_0;
 		__this->___keyboardUpShift = L_12;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:948>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:965>
 		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_13 = __this->___loginShadow;
 		NullCheck(L_13);
 		RuntimeObject* L_14;
@@ -16181,11 +16223,11 @@ IL_0069:
 		L_19 = StyleTranslate_op_Implicit_m07F947CEE79D8E54CE1DB08840561A833895C0CE(L_18, NULL);
 		NullCheck(L_14);
 		InterfaceActionInvoker1< StyleTranslate_tF9528CA4B45EE4EB2C4D294336A83D88DB6AF089 >::Invoke(127, IStyle_t4FD66C97CA5F46BFE328FED0C65277A37E0A89F7_il2cpp_TypeInfo_var, L_14, L_19);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:949>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:966>
 		return;
 	}
 }
-// Method Definition Index: 55182
+// Method Definition Index: 55157
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ResetKeyboardAvoidance_m2B97BFB70A737F6806D7CF354E405F1CF21ED868 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -16195,12 +16237,12 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ResetKeyboardAvoid
 		s_Il2CppMethodInitialized = true;
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:953>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:970>
 		__this->___focusedKeyboardField = (TextField_tDB34369F9468D7F02670087D9444EC23115827D9*)NULL;
 		Il2CppCodeGenWriteBarrier((void**)(&__this->___focusedKeyboardField), (void*)(TextField_tDB34369F9468D7F02670087D9444EC23115827D9*)NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:954>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:971>
 		__this->___keyboardUpShift = (0.0f);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:955>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:972>
 		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_0 = __this->___loginShadow;
 		if (!L_0)
 		{
@@ -16208,7 +16250,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ResetKeyboardAvoid
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:956>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:973>
 		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_1 = __this->___loginShadow;
 		NullCheck(L_1);
 		RuntimeObject* L_2;
@@ -16228,11 +16270,11 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_ResetKeyboardAvoid
 
 IL_004d:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:957>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:974>
 		return;
 	}
 }
-// Method Definition Index: 55183
+// Method Definition Index: 55158
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OnQuitAppClicked_m791B5979AE05A52F1EFF87B36A3DFE6264E7D903 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -16244,7 +16286,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OnQuitAppClicked_m
 		s_Il2CppMethodInitialized = true;
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:961>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:978>
 		bool L_0 = __this->___isQuitRequestSent;
 		if (!L_0)
 		{
@@ -16252,39 +16294,39 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OnQuitAppClicked_m
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:961>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:978>
 		return;
 	}
 
 IL_0009:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:962>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:979>
 		__this->___isQuitRequestSent = (bool)1;
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:964>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:981>
 		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
 		Debug_Log_m87A9A3C761FF5C43ED8A53B16190A53D08F818BB(_stringLiteral21208564699FFE46260EEBA3DF8E68458898DAA5, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:968>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:985>
 		il2cpp_codegen_runtime_class_init_inline(Application_tDB03BE91CDF0ACA614A5E0B67CFB77C44EB19B21_il2cpp_TypeInfo_var);
 		Application_Quit_mE304382DB9A6455C2A474C8F364C7387F37E9281(NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:970>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:987>
 		return;
 	}
 }
-// Method Definition Index: 55184
+// Method Definition Index: 55159
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_OnQuitAppPointerDown_m35BD16A9560B17054E473B283A50467B020241DC (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, PointerDownEvent_tABAAD1BACBB98156D6BCCED51E11883EAFE03A51* ___0_evt, const RuntimeMethod* method) 
 {
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:974>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:991>
 		PointerDownEvent_tABAAD1BACBB98156D6BCCED51E11883EAFE03A51* L_0 = ___0_evt;
 		NullCheck(L_0);
 		EventBase_StopImmediatePropagation_m2D6646624DDC02AE96657F5EAD5BC0361380A8DA(L_0, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:975>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:992>
 		LoginScreenController_OnQuitAppClicked_m791B5979AE05A52F1EFF87B36A3DFE6264E7D903(__this, NULL);
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:976>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:993>
 		return;
 	}
 }
-// Method Definition Index: 55185
+// Method Definition Index: 55160
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController__ctor_mCA8F619FF7D5DDEA83BF5CCCEE614B5764DF81F1 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, const RuntimeMethod* method) 
 {
 	{
@@ -16292,7 +16334,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController__ctor_mCA8F619FF7D
 		return;
 	}
 }
-// Method Definition Index: 55186
+// Method Definition Index: 55161
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_U3CRegisterCallbacksU3Eb__50_0_m2AD132A00C5AC6AF3C33B8A58836870794EEF8FC (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -16301,7 +16343,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_U3CRegisterCallbac
 		return;
 	}
 }
-// Method Definition Index: 55187
+// Method Definition Index: 55162
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_U3CRegisterCallbacksU3Eb__50_1_m6E29599D0205206B23703A74BD4B4263A437F038 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -16310,7 +16352,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_U3CRegisterCallbac
 		return;
 	}
 }
-// Method Definition Index: 55188
+// Method Definition Index: 55163
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_U3CRegisterCallbacksU3Eb__50_2_m513645F770A43BD58CF772F03917D2C55FFC3A90 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -16319,7 +16361,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_U3CRegisterCallbac
 		return;
 	}
 }
-// Method Definition Index: 55189
+// Method Definition Index: 55164
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_U3CRegisterCallbacksU3Eb__50_3_mA4B2AEE7F900D469B80D10BB57B033043D5B1C24 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -16334,7 +16376,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_U3CRegisterCallbac
 		return;
 	}
 }
-// Method Definition Index: 55190
+// Method Definition Index: 55165
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_U3CRegisterCallbacksU3Eb__50_4_mF1CFAEBA2779C78E9F1F7716D306C8E0C08614E1 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -16343,7 +16385,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_U3CRegisterCallbac
 		return;
 	}
 }
-// Method Definition Index: 55191
+// Method Definition Index: 55166
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_U3CRegisterCallbacksU3Eb__50_5_mBECCE336D22C2D2A3BDC7EB252623A21694E054E (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -16352,7 +16394,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_U3CRegisterCallbac
 		return;
 	}
 }
-// Method Definition Index: 55192
+// Method Definition Index: 55167
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_U3CRegisterCallbacksU3Eb__50_6_mAF6CF38ED6ED46B3EB72C83C4B977F300D2BD13E (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -16367,7 +16409,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_U3CRegisterCallbac
 		return;
 	}
 }
-// Method Definition Index: 55193
+// Method Definition Index: 55168
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_U3CRegisterCallbacksU3Eb__50_7_m401DDB4C66DCEE10E2DBB3FEFCAECDDFD3961C10 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -16376,7 +16418,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_U3CRegisterCallbac
 		return;
 	}
 }
-// Method Definition Index: 55194
+// Method Definition Index: 55169
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_U3CRegisterCallbacksU3Eb__50_8_mDD07AADADA6697BAE664B251E08B3699F766AE56 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, ChangeEvent_1_tC8920B8153267870361787158B3897821AA4522F* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -16385,7 +16427,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_U3CRegisterCallbac
 		return;
 	}
 }
-// Method Definition Index: 55195
+// Method Definition Index: 55170
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_U3CRegisterCallbacksU3Eb__50_9_mC09A9FE37038D3BC37CE704F464CEAE87337BA1A (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, ChangeEvent_1_tC8920B8153267870361787158B3897821AA4522F* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -16394,7 +16436,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_U3CRegisterCallbac
 		return;
 	}
 }
-// Method Definition Index: 55196
+// Method Definition Index: 55171
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_U3CRegisterCallbacksU3Eb__50_10_mE46EE8157B20C5DDB68753DBAEAC69274BA891FD (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, ChangeEvent_1_tC8920B8153267870361787158B3897821AA4522F* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -16403,7 +16445,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_U3CRegisterCallbac
 		return;
 	}
 }
-// Method Definition Index: 55197
+// Method Definition Index: 55172
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_U3CRegisterCallbacksU3Eb__50_11_m5C435E8A7F6A29693CBD4B722AE84D4C213D48EC (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, ChangeEvent_1_tC8920B8153267870361787158B3897821AA4522F* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -16412,7 +16454,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_U3CRegisterCallbac
 		return;
 	}
 }
-// Method Definition Index: 55198
+// Method Definition Index: 55173
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_U3CRegisterCallbacksU3Eb__50_12_mC86899F90A81393BA84CB94310CF5B59BF3BB70F (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -16421,7 +16463,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_U3CRegisterCallbac
 		return;
 	}
 }
-// Method Definition Index: 55199
+// Method Definition Index: 55174
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_U3CRegisterCallbacksU3Eb__50_13_mFB3386D99C803A43DCE2C015DC3C2ACECE4E5110 (LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -16438,7 +16480,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LoginScreenController_U3CRegisterCallbac
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 55200
+// Method Definition Index: 55175
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass51_0__ctor_mBBAAF84B9E6D0DDD8288DCE0850DB54FC012B674 (U3CU3Ec__DisplayClass51_0_t9E5048F2B6201751D3EB334F0ED0CFFC5FEFC917* __this, const RuntimeMethod* method) 
 {
 	{
@@ -16446,7 +16488,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass51_0__ctor_mBBAAF84
 		return;
 	}
 }
-// Method Definition Index: 55201
+// Method Definition Index: 55176
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass51_0_U3CRegisterInputFocusEventsU3Eb__0_m54F10BE6AE25785241432DFF3CADBC5DEC81535E (U3CU3Ec__DisplayClass51_0_t9E5048F2B6201751D3EB334F0ED0CFFC5FEFC917* __this, FocusInEvent_tC1179D309FE58E4766E94687240513A96F08AFBE* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -16474,7 +16516,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass51_0_U3CRegisterInp
 		return;
 	}
 }
-// Method Definition Index: 55202
+// Method Definition Index: 55177
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass51_0_U3CRegisterInputFocusEventsU3Eb__1_mD036B0B07191AF87913A7CC03BCC36962CBBCF3B (U3CU3Ec__DisplayClass51_0_t9E5048F2B6201751D3EB334F0ED0CFFC5FEFC917* __this, FocusOutEvent_t5CC3AC57C2BEFAD0E0A7E73FE6314F0F63DFFD2C* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -16519,7 +16561,7 @@ IL_002e:
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 55203
+// Method Definition Index: 55178
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass63_0__ctor_mAF4688EEFCA8A5B10A8449A284C9974943E3006D (U3CU3Ec__DisplayClass63_0_tBECA2139243417BE5E945BFD8747B73293395864* __this, const RuntimeMethod* method) 
 {
 	{
@@ -16527,7 +16569,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass63_0__ctor_mAF4688E
 		return;
 	}
 }
-// Method Definition Index: 55204
+// Method Definition Index: 55179
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass63_0_U3COnWebsiteAuthClickedU3Eb__0_mFAFED5659969C6AB622C23D29583316BF9C77D1A (U3CU3Ec__DisplayClass63_0_tBECA2139243417BE5E945BFD8747B73293395864* __this, String_t* ___0_message, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -16537,7 +16579,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass63_0_U3COnWebsiteAu
 		s_Il2CppMethodInitialized = true;
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:526>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:543>
 		int32_t L_0 = __this->___myAttempt;
 		LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_1 = __this->___U3CU3E4__this;
 		NullCheck(L_1);
@@ -16548,13 +16590,13 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass63_0_U3COnWebsiteAu
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:526>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:543>
 		return;
 	}
 
 IL_0014:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:527>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:544>
 		LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_3 = __this->___U3CU3E4__this;
 		NullCheck(L_3);
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_4 = L_3->___loginStatus;
@@ -16564,7 +16606,7 @@ IL_0014:
 		}
 	}
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:528>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:545>
 		LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_5 = __this->___U3CU3E4__this;
 		LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_6 = __this->___U3CU3E4__this;
 		NullCheck(L_6);
@@ -16578,7 +16620,7 @@ IL_0014:
 
 IL_0043:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:529>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:546>
 		return;
 	}
 }
@@ -16590,7 +16632,7 @@ IL_0043:
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 55205
+// Method Definition Index: 55180
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CCompleteAuthenticatedLoginAsyncU3Ed__64_MoveNext_m4C785796208049292B627D1D1155053E76BDF84D (U3CCompleteAuthenticatedLoginAsyncU3Ed__64_tC9CC46B12EF2580C0A7F77C142A84B16300D1E5F* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -16660,23 +16702,23 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CCompleteAuthenticatedLoginAsyncU3Ed__
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:547>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:564>
 			AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_4;
 			L_4 = AuthService_get_Instance_mC5F3BCC6818176AEAD746F043ADB4B7B1F58245D_inline(NULL);
 			__this->___U3CauthU3E5__2 = L_4;
 			Il2CppCodeGenWriteBarrier((void**)(&__this->___U3CauthU3E5__2), (void*)L_4);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:548>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:565>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_5 = V_1;
 			NullCheck(L_5);
 			L_5->___shouldSkipCharacterSelectAfterLogin = (bool)0;
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:549>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:566>
 			V_2 = (bool)0;
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:550>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:567>
 			PlayerBootstrapService_t4A614618E10C2ECC4C19643B1E86C3B3664A1D2D* L_6;
 			L_6 = PlayerBootstrapService_get_Instance_m4D0CE33C1F390004D82A0537BA10A74EA155E0E1_inline(NULL);
 			__this->___U3CbootstrapU3E5__3 = L_6;
 			Il2CppCodeGenWriteBarrier((void**)(&__this->___U3CbootstrapU3E5__3), (void*)L_6);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:551>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:568>
 			PlayerBootstrapService_t4A614618E10C2ECC4C19643B1E86C3B3664A1D2D* L_7 = __this->___U3CbootstrapU3E5__3;
 			il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
 			bool L_8;
@@ -16687,14 +16729,14 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CCompleteAuthenticatedLoginAsyncU3Ed__
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:553>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:570>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_9 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_10 = V_1;
 			NullCheck(L_10);
 			Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_11 = L_10->___loginStatus;
 			NullCheck(L_9);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(L_9, L_11, _stringLiteralFF941AE46E9E184688C446ACE2BCD5B967A299AB, (bool)1, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:554>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:571>
 			PlayerBootstrapService_t4A614618E10C2ECC4C19643B1E86C3B3664A1D2D* L_12 = __this->___U3CbootstrapU3E5__3;
 			NullCheck(L_12);
 			Awaitable_1_tE9B21A5D85428306C2DE8210A1FC9D38D9A92A90* L_13;
@@ -16742,7 +16784,7 @@ IL_00b3_1:
 
 IL_00bb_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:557>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:574>
 			bool L_23 = V_2;
 			if (L_23)
 			{
@@ -16758,20 +16800,20 @@ IL_00bb_1:
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:559>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:576>
 			PlayerBootstrapService_t4A614618E10C2ECC4C19643B1E86C3B3664A1D2D* L_25 = __this->___U3CbootstrapU3E5__3;
 			String_t* L_26;
 			L_26 = LoginScreenController_ResolveBootstrapFailureMessage_m00717EFC880CDA0C753C311DDE35365DFA5162D1(L_25, NULL);
 			V_4 = L_26;
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:560>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:577>
 			AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_27 = __this->___U3CauthU3E5__2;
 			NullCheck(L_27);
 			AuthService_SignOut_m120410ADCF61BAC94152EAA440C49597637D17F5(L_27, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:561>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:578>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_28 = V_1;
 			NullCheck(L_28);
 			LoginScreenController_SetAuthControlsEnabled_m31EC13A3434A06D1F38A008CEA94B3BF2EE6E3C2(L_28, (bool)1, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:562>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:579>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_29 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_30 = V_1;
 			NullCheck(L_30);
@@ -16779,18 +16821,18 @@ IL_00bb_1:
 			String_t* L_32 = V_4;
 			NullCheck(L_29);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(L_29, L_31, L_32, (bool)0, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:563>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:580>
 			goto IL_0283;
 		}
 
 IL_00f8_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:566>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:583>
 			PlayerProfileService_t341677C2E8BF495583AF04819B2335C3185A5B47* L_33;
 			L_33 = PlayerProfileService_get_Instance_m21922870AFFA030F2C69A47B7BCC7D2CC7700164_inline(NULL);
 			__this->___U3CprofileU3E5__4 = L_33;
 			Il2CppCodeGenWriteBarrier((void**)(&__this->___U3CprofileU3E5__4), (void*)L_33);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:567>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:584>
 			PlayerProfileService_t341677C2E8BF495583AF04819B2335C3185A5B47* L_34 = __this->___U3CprofileU3E5__4;
 			il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
 			bool L_35;
@@ -16801,7 +16843,7 @@ IL_00f8_1:
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:569>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:586>
 			bool L_36 = V_2;
 			if (L_36)
 			{
@@ -16809,14 +16851,14 @@ IL_00f8_1:
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:571>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:588>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_37 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_38 = V_1;
 			NullCheck(L_38);
 			Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_39 = L_38->___loginStatus;
 			NullCheck(L_37);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(L_37, L_39, _stringLiteral3EFDD7BDEBE8308DA1FAC22603957187A74B3F32, (bool)1, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:572>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:589>
 			PlayerProfileService_t341677C2E8BF495583AF04819B2335C3185A5B47* L_40 = __this->___U3CprofileU3E5__4;
 			NullCheck(L_40);
 			Awaitable_t690337FEC1C411606E233EA36A41337B931C23CB* L_41;
@@ -16862,7 +16904,7 @@ IL_0185_1:
 
 IL_018c_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:575>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:592>
 			String_t* L_50 = __this->___username;
 			il2cpp_codegen_runtime_class_init_inline(GameManager_tFE129A0017AF5BBD30FDCD4403B9CCEAE064C6B6_il2cpp_TypeInfo_var);
 			bool L_51;
@@ -16883,7 +16925,7 @@ IL_018c_1:
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:576>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:593>
 			PlayerProfileService_t341677C2E8BF495583AF04819B2335C3185A5B47* L_54 = __this->___U3CprofileU3E5__4;
 			String_t* L_55 = __this->___username;
 			PlayerProfileService_t341677C2E8BF495583AF04819B2335C3185A5B47* L_56 = __this->___U3CprofileU3E5__4;
@@ -16927,7 +16969,7 @@ IL_01d6_1:
 
 IL_01dc_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:578>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:595>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_61 = V_1;
 			PlayerProfileService_t341677C2E8BF495583AF04819B2335C3185A5B47* L_62 = __this->___U3CprofileU3E5__4;
 			NullCheck(L_62);
@@ -16939,7 +16981,7 @@ IL_01dc_1:
 
 IL_01ed_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:581>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:598>
 			String_t* L_64 = __this->___username;
 			il2cpp_codegen_runtime_class_init_inline(GameManager_tFE129A0017AF5BBD30FDCD4403B9CCEAE064C6B6_il2cpp_TypeInfo_var);
 			bool L_65;
@@ -16950,7 +16992,7 @@ IL_01ed_1:
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:582>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:599>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_66 = V_1;
 			NullCheck(L_66);
 			L_66->___shouldSkipCharacterSelectAfterLogin = (bool)1;
@@ -16958,15 +17000,15 @@ IL_01ed_1:
 
 IL_0201_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:584>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:601>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_67 = V_1;
 			NullCheck(L_67);
 			LoginScreenController_SetAuthControlsEnabled_m31EC13A3434A06D1F38A008CEA94B3BF2EE6E3C2(L_67, (bool)1, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:585>
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:586>
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:587>
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:588>
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:589>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:602>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:603>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:604>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:605>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:606>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_68 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_69 = V_1;
 			NullCheck(L_69);
@@ -17001,7 +17043,7 @@ IL_0223_1:
 		{
 			NullCheck(G_B29_2);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(G_B29_2, G_B29_1, G_B29_0, (bool)1, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:590>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:607>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_73 = V_1;
 			NullCheck(L_73);
 			bool L_74 = L_73->___shouldSkipCharacterSelectAfterLogin;
@@ -17011,7 +17053,7 @@ IL_0223_1:
 			L_77 = String_Format_mA8DBB4C2516B9723C5A41E6CB1E2FAF4BBE96DD8(_stringLiteralB93529914AC60CEBCEC13ECCB3D2A5982E34D838, L_76, NULL);
 			il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
 			Debug_Log_m87A9A3C761FF5C43ED8A53B16190A53D08F818BB(L_77, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:592>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:609>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_78 = V_1;
 			NullCheck(L_78);
 			MonoBehaviour_Invoke_mF724350C59362B0F1BFE26383209A274A29A63FB(L_78, _stringLiteral5CBED419BABE6AA083EF001149E4D2613BCDF230, (0.800000012f), NULL);
@@ -17048,7 +17090,7 @@ CATCH_0255:
 
 IL_0283:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:593>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:610>
 		__this->___U3CU3E1__state = ((int32_t)-2);
 		__this->___U3CauthU3E5__2 = (AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2*)NULL;
 		Il2CppCodeGenWriteBarrier((void**)(&__this->___U3CauthU3E5__2), (void*)(AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2*)NULL);
@@ -17072,7 +17114,7 @@ IL2CPP_EXTERN_C  void U3CCompleteAuthenticatedLoginAsyncU3Ed__64_MoveNext_m4C785
 	_thisAdjusted = reinterpret_cast<U3CCompleteAuthenticatedLoginAsyncU3Ed__64_tC9CC46B12EF2580C0A7F77C142A84B16300D1E5F*>(__this + _offset);
 	U3CCompleteAuthenticatedLoginAsyncU3Ed__64_MoveNext_m4C785796208049292B627D1D1155053E76BDF84D(_thisAdjusted, method);
 }
-// Method Definition Index: 55206
+// Method Definition Index: 55181
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CCompleteAuthenticatedLoginAsyncU3Ed__64_SetStateMachine_mBE68F4BDA5170CC82A77F5402F8A738BB18FDDF0 (U3CCompleteAuthenticatedLoginAsyncU3Ed__64_tC9CC46B12EF2580C0A7F77C142A84B16300D1E5F* __this, RuntimeObject* ___0_stateMachine, const RuntimeMethod* method) 
 {
 	{
@@ -17097,7 +17139,7 @@ IL2CPP_EXTERN_C  void U3CCompleteAuthenticatedLoginAsyncU3Ed__64_SetStateMachine
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 55207
+// Method Definition Index: 55182
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3COnLoginClickedU3Ed__62_MoveNext_m293B2E4573E14B0A0CC14973F7DC119B618FDF23 (U3COnLoginClickedU3Ed__62_tF910E3B321D5C7D625042EE56D77917B80D072B4* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -17192,7 +17234,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3COnLoginClickedU3Ed__62_MoveNext_m293B
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:430>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:443>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_3 = V_1;
 			NullCheck(L_3);
 			bool L_4 = L_3->___isAuthRequestInProgress;
@@ -17202,13 +17244,13 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3COnLoginClickedU3Ed__62_MoveNext_m293B
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:430>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:443>
 			goto IL_0311;
 		}
 
 IL_002d_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:432>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:445>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_5 = V_1;
 			NullCheck(L_5);
 			TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_6 = L_5->___usernameField;
@@ -17253,7 +17295,7 @@ IL_0048_1:
 			String_t* L_10;
 			L_10 = String_Trim_mCD6D8C6D4CFD15225D12DB7D3E0544CA80FB8DA5(G_B9_0, NULL);
 			V_2 = L_10;
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:433>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:446>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_11 = V_1;
 			NullCheck(L_11);
 			TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_12 = L_11->___passwordField;
@@ -17295,7 +17337,7 @@ IL_0060_1:
 IL_0069_1:
 		{
 			V_3 = G_B14_0;
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:435>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:448>
 			bool L_16 = __this->___useWebAccount;
 			if (L_16)
 			{
@@ -17322,7 +17364,7 @@ IL_0083_1:
 			L_17 = String_Concat_m8855A6DE10F84DA7F4EC113CADDB59873A25573B(G_B17_1, G_B17_0, _stringLiteralEA32B3266DB996D40B9B08C80EC3EB0914B94AD0, NULL);
 			il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
 			Debug_Log_m87A9A3C761FF5C43ED8A53B16190A53D08F818BB(L_17, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:438>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:451>
 			String_t* L_18 = V_2;
 			bool L_19;
 			L_19 = String_IsNullOrWhiteSpace_m42E1F3B2C358068D645E46F01CF1834DC77A5A10(L_18, NULL);
@@ -17332,9 +17374,9 @@ IL_0083_1:
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:440>
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:441>
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:442>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:453>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:454>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:455>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_20 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_21 = V_1;
 			NullCheck(L_21);
@@ -17369,13 +17411,13 @@ IL_00b5_1:
 		{
 			NullCheck(G_B21_2);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(G_B21_2, G_B21_1, G_B21_0, (bool)0, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:443>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:456>
 			goto IL_0311;
 		}
 
 IL_00c0_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:445>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:458>
 			String_t* L_25 = V_2;
 			NullCheck(L_25);
 			int32_t L_26;
@@ -17386,20 +17428,20 @@ IL_00c0_1:
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:447>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:460>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_27 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_28 = V_1;
 			NullCheck(L_28);
 			Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_29 = L_28->___loginStatus;
 			NullCheck(L_27);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(L_27, L_29, _stringLiteralD2B9975998DB58394627A1A71049FCC14CBB536C, (bool)0, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:448>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:461>
 			goto IL_0311;
 		}
 
 IL_00e4_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:451>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:464>
 			String_t* L_30 = V_3;
 			bool L_31;
 			L_31 = String_IsNullOrWhiteSpace_m42E1F3B2C358068D645E46F01CF1834DC77A5A10(L_30, NULL);
@@ -17409,20 +17451,20 @@ IL_00e4_1:
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:453>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:466>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_32 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_33 = V_1;
 			NullCheck(L_33);
 			Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_34 = L_33->___loginStatus;
 			NullCheck(L_32);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(L_32, L_34, _stringLiteral01146A285C2AF37F527C9B6B8EE527B1AD525F2F, (bool)0, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:454>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:467>
 			goto IL_0311;
 		}
 
 IL_0103_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:456>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:469>
 			String_t* L_35 = V_3;
 			NullCheck(L_35);
 			int32_t L_36;
@@ -17433,25 +17475,25 @@ IL_0103_1:
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:458>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:471>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_37 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_38 = V_1;
 			NullCheck(L_38);
 			Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_39 = L_38->___loginStatus;
 			NullCheck(L_37);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(L_37, L_39, _stringLiteralDC5FD243880331D171F4D59E29DAB09988B8D29F, (bool)0, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:459>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:472>
 			goto IL_0311;
 		}
 
 IL_0127_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:462>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:475>
 			AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_40;
 			L_40 = AuthService_get_Instance_mC5F3BCC6818176AEAD746F043ADB4B7B1F58245D_inline(NULL);
 			__this->___U3CauthU3E5__2 = L_40;
 			Il2CppCodeGenWriteBarrier((void**)(&__this->___U3CauthU3E5__2), (void*)L_40);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:463>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:476>
 			AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_41 = __this->___U3CauthU3E5__2;
 			il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
 			bool L_42;
@@ -17462,29 +17504,29 @@ IL_0127_1:
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:465>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:478>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_43 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_44 = V_1;
 			NullCheck(L_44);
 			Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_45 = L_44->___loginStatus;
 			NullCheck(L_43);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(L_43, L_45, _stringLiteral7C89F8059C17D357141A70B541E2ABE4FEA7685B, (bool)0, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:466>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:479>
 			il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
 			Debug_LogWarning_m33EF1B897E0C7C6FF538989610BFAFFEF4628CA9(_stringLiteralB3DAEBFB056855D3E3F3734C834487578184616B, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:467>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:480>
 			goto IL_0311;
 		}
 
 IL_0161_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:470>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:483>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_46 = V_1;
 			NullCheck(L_46);
 			LoginScreenController_SetAuthControlsEnabled_m31EC13A3434A06D1F38A008CEA94B3BF2EE6E3C2(L_46, (bool)0, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:471>
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:472>
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:473>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:484>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:485>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:486>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_47 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_48 = V_1;
 			NullCheck(L_48);
@@ -17517,9 +17559,13 @@ IL_0183_1:
 		{
 			NullCheck(G_B33_2);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(G_B33_2, G_B33_1, G_B33_0, (bool)1, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:474>
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:475>
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:476>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:487>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:488>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:489>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:490>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:491>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:492>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:493>
 			bool L_51 = __this->___useWebAccount;
 			if (!L_51)
 			{
@@ -17582,7 +17628,7 @@ IL_01fa_1:
 			String_t* L_67 = V_3;
 			NullCheck(L_65);
 			Awaitable_1_tE9B21A5D85428306C2DE8210A1FC9D38D9A92A90* L_68;
-			L_68 = AuthService_LoginLocalAsync_m7AF004873B2C7C3817A02B057B8DC001079C16F1(L_65, L_66, L_67, NULL);
+			L_68 = AuthService_LoginAsync_m1B919D76590F5B1EC40BC593C5928A06D05FF51C(L_65, L_66, L_67, NULL);
 			NullCheck(L_68);
 			Awaiter_t97FFD2496460F466EB07669E49F040712341D831 L_69;
 			L_69 = Awaitable_1_GetAwaiter_m08F048CB2066F558A98DD34B808701654D6FE002(L_68, Awaitable_1_GetAwaiter_m08F048CB2066F558A98DD34B808701654D6FE002_RuntimeMethod_var);
@@ -17627,18 +17673,18 @@ IL_0258_1:
 IL_0261_1:
 		{
 			bool L_78 = V_4;
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:478>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:495>
 			if (L_78)
 			{
 				goto IL_0289_1;
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:480>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:497>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_79 = V_1;
 			NullCheck(L_79);
 			LoginScreenController_SetAuthControlsEnabled_m31EC13A3434A06D1F38A008CEA94B3BF2EE6E3C2(L_79, (bool)1, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:481>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:498>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_80 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_81 = V_1;
 			NullCheck(L_81);
@@ -17648,13 +17694,13 @@ IL_0261_1:
 			L_84 = LoginScreenController_ResolveLoginFailureMessage_m1E2E725DEEB09E368B68805771BF525B8F8BD205(L_83, NULL);
 			NullCheck(L_80);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(L_80, L_82, L_84, (bool)0, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:482>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:499>
 			goto IL_0311;
 		}
 
 IL_0289_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:485>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:502>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_85 = V_1;
 			AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_86 = __this->___U3CauthU3E5__2;
 			NullCheck(L_86);
@@ -17729,7 +17775,7 @@ CATCH_02f1:
 
 IL_0311:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:486>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:503>
 		__this->___U3CU3E1__state = ((int32_t)-2);
 		__this->___U3CauthU3E5__2 = (AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2*)NULL;
 		Il2CppCodeGenWriteBarrier((void**)(&__this->___U3CauthU3E5__2), (void*)(AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2*)NULL);
@@ -17749,7 +17795,7 @@ IL2CPP_EXTERN_C  void U3COnLoginClickedU3Ed__62_MoveNext_m293B2E4573E14B0A0CC149
 	_thisAdjusted = reinterpret_cast<U3COnLoginClickedU3Ed__62_tF910E3B321D5C7D625042EE56D77917B80D072B4*>(__this + _offset);
 	U3COnLoginClickedU3Ed__62_MoveNext_m293B2E4573E14B0A0CC14973F7DC119B618FDF23(_thisAdjusted, method);
 }
-// Method Definition Index: 55208
+// Method Definition Index: 55183
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3COnLoginClickedU3Ed__62_SetStateMachine_mF219041FBF27AC45F7044956F488414FFB90D09C (U3COnLoginClickedU3Ed__62_tF910E3B321D5C7D625042EE56D77917B80D072B4* __this, RuntimeObject* ___0_stateMachine, const RuntimeMethod* method) 
 {
 	{
@@ -17774,7 +17820,7 @@ IL2CPP_EXTERN_C  void U3COnLoginClickedU3Ed__62_SetStateMachine_mF219041FBF27AC4
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 55209
+// Method Definition Index: 55184
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3COnRegisterClickedU3Ed__70_MoveNext_mE8F8B9F777D52D87CC4D10EE7E6FE89E2A29A44F (U3COnRegisterClickedU3Ed__70_t7255AB8D348AFB1EF70362E2B91211D79BEB9DF6* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -17836,7 +17882,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3COnRegisterClickedU3Ed__70_MoveNext_mE
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:747>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:764>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_3 = V_1;
 			NullCheck(L_3);
 			bool L_4 = L_3->___isAuthRequestInProgress;
@@ -17846,13 +17892,13 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3COnRegisterClickedU3Ed__70_MoveNext_mE
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:747>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:764>
 			goto IL_01da;
 		}
 
 IL_0021_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:750>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:767>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_5 = V_1;
 			NullCheck(L_5);
 			bool L_6;
@@ -17863,7 +17909,7 @@ IL_0021_1:
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:752>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:769>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_7 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_8 = V_1;
 			NullCheck(L_8);
@@ -17871,18 +17917,18 @@ IL_0021_1:
 			String_t* L_10 = V_2;
 			NullCheck(L_7);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(L_7, L_9, L_10, (bool)0, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:753>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:770>
 			goto IL_01da;
 		}
 
 IL_003e_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:756>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:773>
 			AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_11;
 			L_11 = AuthService_get_Instance_mC5F3BCC6818176AEAD746F043ADB4B7B1F58245D_inline(NULL);
 			__this->___U3CauthU3E5__2 = L_11;
 			Il2CppCodeGenWriteBarrier((void**)(&__this->___U3CauthU3E5__2), (void*)L_11);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:757>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:774>
 			AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_12 = __this->___U3CauthU3E5__2;
 			il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
 			bool L_13;
@@ -17893,23 +17939,23 @@ IL_003e_1:
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:759>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:776>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_14 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_15 = V_1;
 			NullCheck(L_15);
 			Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_16 = L_15->___registerStatus;
 			NullCheck(L_14);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(L_14, L_16, _stringLiteral41FEE938F1CB950E7A482107CFDF80780192323E, (bool)0, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:760>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:777>
 			il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
 			Debug_LogWarning_m33EF1B897E0C7C6FF538989610BFAFFEF4628CA9(_stringLiteral61F1E7488673732D8F445860F3D6D01AC39F2199, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:761>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:778>
 			goto IL_01da;
 		}
 
 IL_0078_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:764>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:781>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_17 = V_1;
 			NullCheck(L_17);
 			TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_18 = L_17->___regUsernameField;
@@ -17954,7 +18000,7 @@ IL_0093_1:
 			String_t* L_22;
 			L_22 = String_Trim_mCD6D8C6D4CFD15225D12DB7D3E0544CA80FB8DA5(G_B13_0, NULL);
 			V_3 = L_22;
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:765>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:782>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_23 = V_1;
 			NullCheck(L_23);
 			TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_24 = L_23->___regEmailField;
@@ -17999,7 +18045,7 @@ IL_00b4_1:
 			String_t* L_28;
 			L_28 = String_Trim_mCD6D8C6D4CFD15225D12DB7D3E0544CA80FB8DA5(G_B18_0, NULL);
 			V_4 = L_28;
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:766>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:783>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_29 = V_1;
 			NullCheck(L_29);
 			TextField_tDB34369F9468D7F02670087D9444EC23115827D9* L_30 = L_29->___regPasswordField;
@@ -18041,18 +18087,18 @@ IL_00cd_1:
 IL_00d6_1:
 		{
 			V_5 = G_B23_0;
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:768>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:785>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_34 = V_1;
 			NullCheck(L_34);
 			LoginScreenController_SetAuthControlsEnabled_m31EC13A3434A06D1F38A008CEA94B3BF2EE6E3C2(L_34, (bool)0, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:769>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:786>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_35 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_36 = V_1;
 			NullCheck(L_36);
 			Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_37 = L_36->___registerStatus;
 			NullCheck(L_35);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(L_35, L_37, _stringLiteralA1392898255171864C5A887620B0F546EAEBD559, (bool)1, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:770>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:787>
 			AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_38 = __this->___U3CauthU3E5__2;
 			String_t* L_39 = V_3;
 			String_t* L_40 = V_5;
@@ -18098,18 +18144,18 @@ IL_0157_1:
 		{
 			bool L_51;
 			L_51 = Awaiter_GetResult_m6D93CE7E01A6A5877C2DDEF2BB604F19C20919ED((&V_6), Awaiter_GetResult_m6D93CE7E01A6A5877C2DDEF2BB604F19C20919ED_RuntimeMethod_var);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:771>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:788>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_52 = V_1;
 			NullCheck(L_52);
 			LoginScreenController_SetAuthControlsEnabled_m31EC13A3434A06D1F38A008CEA94B3BF2EE6E3C2(L_52, (bool)1, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:773>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:790>
 			if (L_51)
 			{
 				goto IL_0181_1;
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:775>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:792>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_53 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_54 = V_1;
 			NullCheck(L_54);
@@ -18119,27 +18165,27 @@ IL_0157_1:
 			L_57 = LoginScreenController_ResolveRegisterFailureMessage_mDE6F7B225028F70C5954B63D98B67E9DBADD2B35(L_56, NULL);
 			NullCheck(L_53);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(L_53, L_55, L_57, (bool)0, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:776>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:793>
 			goto IL_01da;
 		}
 
 IL_0181_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:779>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:796>
 			AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_58 = __this->___U3CauthU3E5__2;
 			NullCheck(L_58);
 			AuthService_SignOut_m120410ADCF61BAC94152EAA440C49597637D17F5(L_58, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:781>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:798>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_59 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_60 = V_1;
 			NullCheck(L_60);
 			Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_61 = L_60->___registerStatus;
 			NullCheck(L_59);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(L_59, L_61, _stringLiteralE0C46C75119172A0766F50372DE35A07DCB0031E, (bool)1, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:782>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:799>
 			il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
 			Debug_Log_m87A9A3C761FF5C43ED8A53B16190A53D08F818BB(_stringLiteral4D44971EB475F55D3F4DECC0E6B072A3AB811277, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:784>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:801>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_62 = V_1;
 			NullCheck(L_62);
 			MonoBehaviour_Invoke_mF724350C59362B0F1BFE26383209A274A29A63FB(L_62, _stringLiteral441BEE75F560CB6608E0FA49EB30F75C8F0EFC0E, (1.20000005f), NULL);
@@ -18172,7 +18218,7 @@ CATCH_01ba:
 
 IL_01da:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:785>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:802>
 		__this->___U3CU3E1__state = ((int32_t)-2);
 		__this->___U3CauthU3E5__2 = (AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2*)NULL;
 		Il2CppCodeGenWriteBarrier((void**)(&__this->___U3CauthU3E5__2), (void*)(AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2*)NULL);
@@ -18192,7 +18238,7 @@ IL2CPP_EXTERN_C  void U3COnRegisterClickedU3Ed__70_MoveNext_mE8F8B9F777D52D87CC4
 	_thisAdjusted = reinterpret_cast<U3COnRegisterClickedU3Ed__70_t7255AB8D348AFB1EF70362E2B91211D79BEB9DF6*>(__this + _offset);
 	U3COnRegisterClickedU3Ed__70_MoveNext_mE8F8B9F777D52D87CC4D10EE7E6FE89E2A29A44F(_thisAdjusted, method);
 }
-// Method Definition Index: 55210
+// Method Definition Index: 55185
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3COnRegisterClickedU3Ed__70_SetStateMachine_mF64CE8C116DCF368E4310340F78A2DC97DE182E6 (U3COnRegisterClickedU3Ed__70_t7255AB8D348AFB1EF70362E2B91211D79BEB9DF6* __this, RuntimeObject* ___0_stateMachine, const RuntimeMethod* method) 
 {
 	{
@@ -18217,7 +18263,7 @@ IL2CPP_EXTERN_C  void U3COnRegisterClickedU3Ed__70_SetStateMachine_mF64CE8C116DC
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 55211
+// Method Definition Index: 55186
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3COnWebsiteAuthClickedU3Ed__63_MoveNext_m4D1532590503867C3BCFBD48AF0599812801E3EC (U3COnWebsiteAuthClickedU3Ed__63_t020ACC9B0771B6281C2CAD1FF2C268E42E3BA9E4* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -18285,7 +18331,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3COnWebsiteAuthClickedU3Ed__63_MoveNext
 			NullCheck(L_5);
 			L_5->___U3CU3E4__this = L_6;
 			Il2CppCodeGenWriteBarrier((void**)(&L_5->___U3CU3E4__this), (void*)L_6);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:494>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:511>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_7 = V_1;
 			NullCheck(L_7);
 			bool L_8 = L_7->___isAuthRequestInProgress;
@@ -18304,17 +18350,17 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3COnWebsiteAuthClickedU3Ed__63_MoveNext
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:494>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:511>
 			goto IL_0281;
 		}
 
 IL_004c_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:496>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:513>
 			BackendConfig_t4C8C70965890CD426DACBB91F6F2CDEE36C97593* L_11;
 			L_11 = BackendConfig_get_Active_m8ECA146F6FFC253F07ADA2483B8A9D9F558C04A1(NULL);
 			V_2 = L_11;
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:497>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:514>
 			BackendConfig_t4C8C70965890CD426DACBB91F6F2CDEE36C97593* L_12 = V_2;
 			il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
 			bool L_13;
@@ -18336,7 +18382,7 @@ IL_004c_1:
 
 IL_0063_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:500>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:517>
 			BackendConfig_t4C8C70965890CD426DACBB91F6F2CDEE36C97593* L_16 = V_2;
 			il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
 			bool L_17;
@@ -18361,7 +18407,7 @@ IL_0074_1:
 
 IL_0075_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:501>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:518>
 			if (!G_B11_0)
 			{
 				goto IL_008a_1;
@@ -18379,7 +18425,7 @@ IL_0075_1:
 
 IL_008a_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:502>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:519>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_22 = V_1;
 			NullCheck(L_22);
 			LoginScreenController_OpenRegistrationPage_mB2C59727FD670C97D8F3F77A75BF762DCB800186(L_22, NULL);
@@ -18388,7 +18434,7 @@ IL_008a_1:
 
 IL_0092_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:504>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:521>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_23 = V_1;
 			NullCheck(L_23);
 			LoginScreenController_OnLoginClicked_mC4B0AF5280A21691B41ACA40C9278B912BC91487(L_23, (bool)1, NULL);
@@ -18396,18 +18442,18 @@ IL_0092_1:
 
 IL_0099_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:505>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:522>
 			goto IL_0281;
 		}
 
 IL_009e_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:508>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:525>
 			AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_24;
 			L_24 = AuthService_get_Instance_mC5F3BCC6818176AEAD746F043ADB4B7B1F58245D_inline(NULL);
 			__this->___U3CauthU3E5__2 = L_24;
 			Il2CppCodeGenWriteBarrier((void**)(&__this->___U3CauthU3E5__2), (void*)L_24);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:509>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:526>
 			AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_25 = __this->___U3CauthU3E5__2;
 			il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
 			bool L_26;
@@ -18418,20 +18464,20 @@ IL_009e_1:
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:511>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:528>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_27 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_28 = V_1;
 			NullCheck(L_28);
 			Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_29 = L_28->___loginStatus;
 			NullCheck(L_27);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(L_27, L_29, _stringLiteral7C89F8059C17D357141A70B541E2ABE4FEA7685B, (bool)0, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:512>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:529>
 			goto IL_0281;
 		}
 
 IL_00ce_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:515>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:532>
 			U3CU3Ec__DisplayClass63_0_tBECA2139243417BE5E945BFD8747B73293395864* L_30 = __this->___U3CU3E8__1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_31 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_32 = V_1;
@@ -18444,15 +18490,15 @@ IL_00ce_1:
 			int32_t L_35 = V_4;
 			NullCheck(L_30);
 			L_30->___myAttempt = L_35;
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:516>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:533>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_36 = V_1;
 			NullCheck(L_36);
 			L_36->___isBrowserAuthWaiting = (bool)1;
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:518>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:535>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_37 = V_1;
 			NullCheck(L_37);
 			LoginScreenController_SetAuthControlsEnabled_m31EC13A3434A06D1F38A008CEA94B3BF2EE6E3C2(L_37, (bool)0, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:520>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:537>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_38 = V_1;
 			NullCheck(L_38);
 			Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_39 = L_38->___btnLoginWeb;
@@ -18476,7 +18522,7 @@ IL_0107_1:
 
 IL_010d_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:521>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:538>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_41 = V_1;
 			NullCheck(L_41);
 			Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_42 = L_41->___btnOpenWebRegistration;
@@ -18500,19 +18546,19 @@ IL_0119_1:
 
 IL_011f_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:523>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:540>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_44 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_45 = V_1;
 			NullCheck(L_45);
 			Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_46 = L_45->___loginStatus;
 			NullCheck(L_44);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(L_44, L_46, _stringLiteralE57ADB7DEE660DF32BE4D74CFB15591479582DAB, (bool)1, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:524>
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:525>
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:526>
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:527>
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:528>
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:529>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:541>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:542>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:543>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:544>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:545>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:546>
 			AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_47 = __this->___U3CauthU3E5__2;
 			String_t* L_48 = __this->___intent;
 			U3CU3Ec__DisplayClass63_0_tBECA2139243417BE5E945BFD8747B73293395864* L_49 = __this->___U3CU3E8__1;
@@ -18560,7 +18606,7 @@ IL_01a4_1:
 			bool L_60;
 			L_60 = Awaiter_GetResult_m6D93CE7E01A6A5877C2DDEF2BB604F19C20919ED((&V_5), Awaiter_GetResult_m6D93CE7E01A6A5877C2DDEF2BB604F19C20919ED_RuntimeMethod_var);
 			V_3 = L_60;
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:532>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:549>
 			U3CU3Ec__DisplayClass63_0_tBECA2139243417BE5E945BFD8747B73293395864* L_61 = __this->___U3CU3E8__1;
 			NullCheck(L_61);
 			int32_t L_62 = L_61->___myAttempt;
@@ -18573,17 +18619,17 @@ IL_01a4_1:
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:532>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:549>
 			goto IL_0281;
 		}
 
 IL_01c4_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:534>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:551>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_65 = V_1;
 			NullCheck(L_65);
 			L_65->___isBrowserAuthWaiting = (bool)0;
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:535>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:552>
 			bool L_66 = V_3;
 			if (L_66)
 			{
@@ -18591,11 +18637,11 @@ IL_01c4_1:
 			}
 		}
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:537>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:554>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_67 = V_1;
 			NullCheck(L_67);
 			LoginScreenController_SetAuthControlsEnabled_m31EC13A3434A06D1F38A008CEA94B3BF2EE6E3C2(L_67, (bool)1, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:538>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:555>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_68 = V_1;
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_69 = V_1;
 			NullCheck(L_69);
@@ -18605,13 +18651,13 @@ IL_01c4_1:
 			L_72 = LoginScreenController_ResolveBrowserAuthFailureMessage_m455E22B719C9E9F7E8B2321493131450E33ADB54(L_71, NULL);
 			NullCheck(L_68);
 			LoginScreenController_ShowStatus_m237D1466A18810D4AF27A952C116BCDE7AE7E759(L_68, L_70, L_72, (bool)0, NULL);
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:539>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:556>
 			goto IL_0281;
 		}
 
 IL_01f2_1:
 		{
-			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:542>
+			//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:559>
 			LoginScreenController_t7720DF298CDD1AFC997DEB7EC884BC92657B0FA2* L_73 = V_1;
 			AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* L_74 = __this->___U3CauthU3E5__2;
 			NullCheck(L_74);
@@ -18688,7 +18734,7 @@ CATCH_025a:
 
 IL_0281:
 	{
-		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:543>
+		//<source_info:D:/y-wonder-land/Assets/_Project/UI/LoginScreenController.cs:560>
 		__this->___U3CU3E1__state = ((int32_t)-2);
 		__this->___U3CU3E8__1 = (U3CU3Ec__DisplayClass63_0_tBECA2139243417BE5E945BFD8747B73293395864*)NULL;
 		Il2CppCodeGenWriteBarrier((void**)(&__this->___U3CU3E8__1), (void*)(U3CU3Ec__DisplayClass63_0_tBECA2139243417BE5E945BFD8747B73293395864*)NULL);
@@ -18710,7 +18756,7 @@ IL2CPP_EXTERN_C  void U3COnWebsiteAuthClickedU3Ed__63_MoveNext_m4D1532590503867C
 	_thisAdjusted = reinterpret_cast<U3COnWebsiteAuthClickedU3Ed__63_t020ACC9B0771B6281C2CAD1FF2C268E42E3BA9E4*>(__this + _offset);
 	U3COnWebsiteAuthClickedU3Ed__63_MoveNext_m4D1532590503867C3BCFBD48AF0599812801E3EC(_thisAdjusted, method);
 }
-// Method Definition Index: 55212
+// Method Definition Index: 55187
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3COnWebsiteAuthClickedU3Ed__63_SetStateMachine_m72856D7010925E67513D7756A2AEA5779147198C (U3COnWebsiteAuthClickedU3Ed__63_t020ACC9B0771B6281C2CAD1FF2C268E42E3BA9E4* __this, RuntimeObject* ___0_stateMachine, const RuntimeMethod* method) 
 {
 	{
@@ -18735,7 +18781,7 @@ IL2CPP_EXTERN_C  void U3COnWebsiteAuthClickedU3Ed__63_SetStateMachine_m72856D701
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 55213
+// Method Definition Index: 55188
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MailboxPopupController_Awake_mA859039FBD29E9C78242FE52181527B9E1EEBC24 (MailboxPopupController_tE0676B7CE451C0769C17F5B73BE9F273855501B7* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -18812,7 +18858,7 @@ IL_0033:
 		return;
 	}
 }
-// Method Definition Index: 55214
+// Method Definition Index: 55189
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MailboxPopupController_QueryElements_m42D2945AD6FE172C74D06552587991661A21B1D4 (MailboxPopupController_tE0676B7CE451C0769C17F5B73BE9F273855501B7* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -18943,7 +18989,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MailboxPopupController_QueryElements_m42
 		return;
 	}
 }
-// Method Definition Index: 55215
+// Method Definition Index: 55190
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MailboxPopupController_RegisterCallbacks_m78DD0C34A7EC17CD7E6FF46E0A44E7D07E5CF87A (MailboxPopupController_tE0676B7CE451C0769C17F5B73BE9F273855501B7* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -19122,7 +19168,7 @@ IL_00a1:
 		return;
 	}
 }
-// Method Definition Index: 55216
+// Method Definition Index: 55191
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MailboxPopupController_Show_mFA654CD885C5D11EE8965CA6E8DA435A4A75B959 (MailboxPopupController_tE0676B7CE451C0769C17F5B73BE9F273855501B7* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -19166,7 +19212,7 @@ IL_001e:
 		return;
 	}
 }
-// Method Definition Index: 55217
+// Method Definition Index: 55192
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MailboxPopupController_SyncDeathMails_m596DBA30AAC7383E74AEF4332C211A9F0ABA0F8F (MailboxPopupController_tE0676B7CE451C0769C17F5B73BE9F273855501B7* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -19417,7 +19463,7 @@ IL_0128:
 		return;
 	}
 }
-// Method Definition Index: 55218
+// Method Definition Index: 55193
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MailboxPopupController_Hide_m74FD893B2BA85833CD6C6A1842D6A41B78EECED3 (MailboxPopupController_tE0676B7CE451C0769C17F5B73BE9F273855501B7* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -19453,7 +19499,7 @@ IL_001e:
 		return;
 	}
 }
-// Method Definition Index: 55219
+// Method Definition Index: 55194
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MailboxPopupController_RenderMailList_m294FFA33EC84635F44DE62D822708E4906178771 (MailboxPopupController_tE0676B7CE451C0769C17F5B73BE9F273855501B7* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -20047,7 +20093,7 @@ IL_0356:
 		return;
 	}
 }
-// Method Definition Index: 55220
+// Method Definition Index: 55195
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MailboxPopupController_SelectMail_mE898B3AF392997CB11D6EE480A5E087E10FFE3F1 (MailboxPopupController_tE0676B7CE451C0769C17F5B73BE9F273855501B7* __this, MailData_tB9A22C2E28CC1EE512E9DC375964B597E304F71C* ___0_mail, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -20412,7 +20458,7 @@ IL_020f:
 		return;
 	}
 }
-// Method Definition Index: 55221
+// Method Definition Index: 55196
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MailboxPopupController_ClaimSelectedReward_m2670D5B3FA645AC020CABF5178FD6BCEF0B4A01D (MailboxPopupController_tE0676B7CE451C0769C17F5B73BE9F273855501B7* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -20590,7 +20636,7 @@ IL_00aa:
 		return;
 	}
 }
-// Method Definition Index: 55222
+// Method Definition Index: 55197
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* MailboxPopupController_CreateAttachmentIcon_m81B107C7FDC659A9257F284A08B172AF2189E882 (MailboxPopupController_tE0676B7CE451C0769C17F5B73BE9F273855501B7* __this, AttachmentItem_t4574784CADB06CFA31E017AA0C069A6B087009EE* ___0_item, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -20795,7 +20841,7 @@ IL_00cc:
 		return L_41;
 	}
 }
-// Method Definition Index: 55223
+// Method Definition Index: 55198
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* MailboxPopupController_CreateCheckMark_mDEB70E8455603C850973CB485082ACD2A612F96B (MailboxPopupController_tE0676B7CE451C0769C17F5B73BE9F273855501B7* __this, String_t* ___0_className, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -20822,7 +20868,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR VisualElement_t2667F9D19E62C7A315927506C06F22
 		return L_2;
 	}
 }
-// Method Definition Index: 55224
+// Method Definition Index: 55199
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MailboxPopupController_ClaimAllRewards_m6769BD53AA90D0542EC2AD20BF9B241A377F3F80 (MailboxPopupController_tE0676B7CE451C0769C17F5B73BE9F273855501B7* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -21061,7 +21107,7 @@ IL_00f8:
 		return;
 	}
 }
-// Method Definition Index: 55225
+// Method Definition Index: 55200
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MailboxPopupController_DeleteSelectedMail_m3569F20B4CBC9126C8E96ECD82DF65C763A395D9 (MailboxPopupController_tE0676B7CE451C0769C17F5B73BE9F273855501B7* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -21133,7 +21179,7 @@ IL_004a:
 		return;
 	}
 }
-// Method Definition Index: 55226
+// Method Definition Index: 55201
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MailboxPopupController_DeleteAllReadMails_mB0D76B0C79EFD5FA5D6CC970EC4E07B208A96151 (MailboxPopupController_tE0676B7CE451C0769C17F5B73BE9F273855501B7* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -21256,7 +21302,7 @@ IL_0075:
 		return;
 	}
 }
-// Method Definition Index: 55227
+// Method Definition Index: 55202
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MailboxPopupController_UpdateFooterButtons_m0D4301CC20E84F40BFFC2BCFDE8A26CBBD1DEEC3 (MailboxPopupController_tE0676B7CE451C0769C17F5B73BE9F273855501B7* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -21492,7 +21538,7 @@ IL_00b3:
 		return;
 	}
 }
-// Method Definition Index: 55228
+// Method Definition Index: 55203
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MailboxPopupController__ctor_m9C72096074BD56BE22310584426A5B544DBE3996 (MailboxPopupController_tE0676B7CE451C0769C17F5B73BE9F273855501B7* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -21512,7 +21558,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MailboxPopupController__ctor_m9C72096074
 		return;
 	}
 }
-// Method Definition Index: 55229
+// Method Definition Index: 55204
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MailboxPopupController_U3CRegisterCallbacksU3Eb__25_0_mAA91EFA065EE3F2BA34D819F993C958ED3AEF980 (MailboxPopupController_tE0676B7CE451C0769C17F5B73BE9F273855501B7* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -21521,7 +21567,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MailboxPopupController_U3CRegisterCallba
 		return;
 	}
 }
-// Method Definition Index: 55230
+// Method Definition Index: 55205
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MailboxPopupController_U3CRegisterCallbacksU3Eb__25_1_m6B60CF9BD0211F28C512AF5B5A8BD2F424C496FC (MailboxPopupController_tE0676B7CE451C0769C17F5B73BE9F273855501B7* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -21547,7 +21593,7 @@ IL_0014:
 		return;
 	}
 }
-// Method Definition Index: 55231
+// Method Definition Index: 55206
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MailboxPopupController_U3CRegisterCallbacksU3Eb__25_2_mFCC4A4D45F5702B5F49193C9E5C2A77C0C1B0204 (MailboxPopupController_tE0676B7CE451C0769C17F5B73BE9F273855501B7* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -21556,7 +21602,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MailboxPopupController_U3CRegisterCallba
 		return;
 	}
 }
-// Method Definition Index: 55232
+// Method Definition Index: 55207
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MailboxPopupController_U3CRegisterCallbacksU3Eb__25_3_mB5E73E89858CBA4A30632BDF0D7E565B1168AE87 (MailboxPopupController_tE0676B7CE451C0769C17F5B73BE9F273855501B7* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -21565,7 +21611,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MailboxPopupController_U3CRegisterCallba
 		return;
 	}
 }
-// Method Definition Index: 55233
+// Method Definition Index: 55208
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MailboxPopupController_U3CRegisterCallbacksU3Eb__25_4_m793DE818310D8F7F1FD5996F1CF68ED3159B5B5B (MailboxPopupController_tE0676B7CE451C0769C17F5B73BE9F273855501B7* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -21574,7 +21620,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MailboxPopupController_U3CRegisterCallba
 		return;
 	}
 }
-// Method Definition Index: 55234
+// Method Definition Index: 55209
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MailboxPopupController_U3CRegisterCallbacksU3Eb__25_5_mB7301AB7D06AB951965B1F85305152EEDD861537 (MailboxPopupController_tE0676B7CE451C0769C17F5B73BE9F273855501B7* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -21591,7 +21637,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MailboxPopupController_U3CRegisterCallba
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 55235
+// Method Definition Index: 55210
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void AttachmentItem__ctor_m3C7A7B16F6FE8CA9FD7BFAA816B05DD5C5F1FAAA (AttachmentItem_t4574784CADB06CFA31E017AA0C069A6B087009EE* __this, String_t* ___0_name, String_t* ___1_emoji, int32_t ___2_amt, String_t* ___3_itemId, String_t* ___4_iconClass, const RuntimeMethod* method) 
 {
 	{
@@ -21628,7 +21674,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void AttachmentItem__ctor_m3C7A7B16F6FE8CA9FD
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 55236
+// Method Definition Index: 55211
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MailData__ctor_mC603FFFE6384C7B0E0F1B183D774DBE6642B1B5C (MailData_tB9A22C2E28CC1EE512E9DC375964B597E304F71C* __this, String_t* ___0_id, String_t* ___1_title, String_t* ___2_sender, String_t* ___3_date, String_t* ___4_content, bool ___5_hasReward, List_1_tBCA534DF535AE8C541E31570985815BD89E83760* ___6_attachments, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -21708,7 +21754,7 @@ IL_004d:
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 55237
+// Method Definition Index: 55212
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__cctor_m2D5E1454048A609BBFAC72E3D267E48B58F6C320 (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -21725,7 +21771,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__cctor_m2D5E1454048A609BBFAC72E3
 		return;
 	}
 }
-// Method Definition Index: 55238
+// Method Definition Index: 55213
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__ctor_m670F6875D103987064BC05D8717822A860E000D9 (U3CU3Ec_tA8223D54E4A6E18A6924F465830F85A38A546877* __this, const RuntimeMethod* method) 
 {
 	{
@@ -21733,7 +21779,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__ctor_m670F6875D103987064BC05D87
 		return;
 	}
 }
-// Method Definition Index: 55239
+// Method Definition Index: 55214
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool U3CU3Ec_U3CSyncDeathMailsU3Eb__27_0_m4EA1681D769405D3B9A5A6E88B479F31FB08A711 (U3CU3Ec_tA8223D54E4A6E18A6924F465830F85A38A546877* __this, MailData_tB9A22C2E28CC1EE512E9DC375964B597E304F71C* ___0_m, const RuntimeMethod* method) 
 {
 	{
@@ -21746,7 +21792,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool U3CU3Ec_U3CSyncDeathMailsU3Eb__27_0_m4EA
 		return (bool)((((int32_t)L_2) == ((int32_t)0))? 1 : 0);
 	}
 }
-// Method Definition Index: 55240
+// Method Definition Index: 55215
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool U3CU3Ec_U3CDeleteAllReadMailsU3Eb__36_0_mA668C3682C34FD83A0AE9026A29E0876FDC65674 (U3CU3Ec_tA8223D54E4A6E18A6924F465830F85A38A546877* __this, MailData_tB9A22C2E28CC1EE512E9DC375964B597E304F71C* ___0_mail, const RuntimeMethod* method) 
 {
 	{
@@ -21819,7 +21865,7 @@ IL_0032:
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 55241
+// Method Definition Index: 55216
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass29_0__ctor_m4E9143593EA17162D617475243AA390B7BA084A0 (U3CU3Ec__DisplayClass29_0_tFAAC88FC981BEFB03EF7373496DA6DC71435BE2D* __this, const RuntimeMethod* method) 
 {
 	{
@@ -21827,7 +21873,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass29_0__ctor_m4E91435
 		return;
 	}
 }
-// Method Definition Index: 55242
+// Method Definition Index: 55217
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass29_0_U3CRenderMailListU3Eb__0_m5873F10FC6EF464B7852FF1F8A95C5A75BA41813 (U3CU3Ec__DisplayClass29_0_tFAAC88FC981BEFB03EF7373496DA6DC71435BE2D* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -21847,7 +21893,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass29_0_U3CRenderMailL
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 55243
+// Method Definition Index: 55218
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MainMenuUIToolkit_OnEnable_mE7D6EC35D0E7DD9CDDEC9A7C509E04E4440E4136 (MainMenuUIToolkit_tBD8AC2BB1C894428C5760F0E39337CECF9B9FB6E* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22201,7 +22247,7 @@ IL_0221:
 		return;
 	}
 }
-// Method Definition Index: 55244
+// Method Definition Index: 55219
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MainMenuUIToolkit_OnSelectMale_mF2B2FE63AD52DF3833DBA3A68AE27D4D29069D14 (MainMenuUIToolkit_tBD8AC2BB1C894428C5760F0E39337CECF9B9FB6E* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22241,7 +22287,7 @@ IL_001f:
 		return;
 	}
 }
-// Method Definition Index: 55245
+// Method Definition Index: 55220
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MainMenuUIToolkit_OnSelectFemale_mC04D0075DC5A54743046A73F4A24CBD6F70B8E8C (MainMenuUIToolkit_tBD8AC2BB1C894428C5760F0E39337CECF9B9FB6E* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22281,7 +22327,7 @@ IL_001f:
 		return;
 	}
 }
-// Method Definition Index: 55246
+// Method Definition Index: 55221
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MainMenuUIToolkit_OnNameChanged_mDF361C9504FA07CB68941FA49916FAA24323D61A (MainMenuUIToolkit_tBD8AC2BB1C894428C5760F0E39337CECF9B9FB6E* __this, const RuntimeMethod* method) 
 {
 	String_t* V_0 = NULL;
@@ -22362,7 +22408,7 @@ IL_0048:
 		return;
 	}
 }
-// Method Definition Index: 55247
+// Method Definition Index: 55222
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool MainMenuUIToolkit_ValidateName_m96BA00DF44BC04B9B710600C89755CE3A56E89F9 (MainMenuUIToolkit_tBD8AC2BB1C894428C5760F0E39337CECF9B9FB6E* __this, String_t** ___0_errorMessage, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22511,7 +22557,7 @@ IL_006d:
 		return (bool)1;
 	}
 }
-// Method Definition Index: 55248
+// Method Definition Index: 55223
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MainMenuUIToolkit_OnPlayClicked_m060D84B35B5580E4B4B88FF9AEA129C3A9A54C8D (MainMenuUIToolkit_tBD8AC2BB1C894428C5760F0E39337CECF9B9FB6E* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22589,7 +22635,7 @@ IL_0043:
 		return;
 	}
 }
-// Method Definition Index: 55249
+// Method Definition Index: 55224
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MainMenuUIToolkit_OnCancelConfirmClicked_m7EECDB1524C20EC29C3483E462000B550F388D15 (MainMenuUIToolkit_tBD8AC2BB1C894428C5760F0E39337CECF9B9FB6E* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22632,7 +22678,7 @@ IL_0016:
 		return;
 	}
 }
-// Method Definition Index: 55250
+// Method Definition Index: 55225
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MainMenuUIToolkit_OnAcceptConfirmClicked_m2EA3D9B45609281E0E170144989D91453D977C30 (MainMenuUIToolkit_tBD8AC2BB1C894428C5760F0E39337CECF9B9FB6E* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22835,7 +22881,7 @@ IL_00be:
 		return;
 	}
 }
-// Method Definition Index: 55251
+// Method Definition Index: 55226
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MainMenuUIToolkit_HighlightSelection_mC7BB654DE2A375C47A3D4729F5CAC3D590CC57CB (MainMenuUIToolkit_tBD8AC2BB1C894428C5760F0E39337CECF9B9FB6E* __this, int32_t ___0_index, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22901,7 +22947,7 @@ IL_0035:
 		return;
 	}
 }
-// Method Definition Index: 55252
+// Method Definition Index: 55227
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MainMenuUIToolkit_ShowStatus_m6FC0E7FB9A2EDC4B1B323FA4DD592D35BD170C4A (MainMenuUIToolkit_tBD8AC2BB1C894428C5760F0E39337CECF9B9FB6E* __this, Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* ___0_label, String_t* ___1_message, bool ___2_isSuccess, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22984,7 +23030,7 @@ IL_0031:
 		return;
 	}
 }
-// Method Definition Index: 55253
+// Method Definition Index: 55228
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MainMenuUIToolkit_ClearStatus_mDEEB07ACF1CF6736C63FA528AFE8E730BA9A5977 (MainMenuUIToolkit_tBD8AC2BB1C894428C5760F0E39337CECF9B9FB6E* __this, Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* ___0_label, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -23037,7 +23083,7 @@ IL_0004:
 		return;
 	}
 }
-// Method Definition Index: 55254
+// Method Definition Index: 55229
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MainMenuUIToolkit__ctor_mB5956ED333FA60851EBEDA93D991960384C1263F (MainMenuUIToolkit_tBD8AC2BB1C894428C5760F0E39337CECF9B9FB6E* __this, const RuntimeMethod* method) 
 {
 	{
@@ -23045,7 +23091,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MainMenuUIToolkit__ctor_mB5956ED333FA608
 		return;
 	}
 }
-// Method Definition Index: 55255
+// Method Definition Index: 55230
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MainMenuUIToolkit_U3COnEnableU3Eb__15_0_mA7EB7BEDDF9E4ACDF9BE969B58695FDFD49ADD4C (MainMenuUIToolkit_tBD8AC2BB1C894428C5760F0E39337CECF9B9FB6E* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -23054,7 +23100,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MainMenuUIToolkit_U3COnEnableU3Eb__15_0_
 		return;
 	}
 }
-// Method Definition Index: 55256
+// Method Definition Index: 55231
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MainMenuUIToolkit_U3COnEnableU3Eb__15_1_m195EC031FF8D795B9BB067498564B49B0BF2B14A (MainMenuUIToolkit_tBD8AC2BB1C894428C5760F0E39337CECF9B9FB6E* __this, ClickEvent_t30651949F0BA68E61187B63F5D325323E92CC318* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -23063,7 +23109,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MainMenuUIToolkit_U3COnEnableU3Eb__15_1_
 		return;
 	}
 }
-// Method Definition Index: 55257
+// Method Definition Index: 55232
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MainMenuUIToolkit_U3COnEnableU3Eb__15_2_mBCE213635626D91C5C05498F10E661D701A8CCB9 (MainMenuUIToolkit_tBD8AC2BB1C894428C5760F0E39337CECF9B9FB6E* __this, ChangeEvent_1_tC8920B8153267870361787158B3897821AA4522F* ___0_evt, const RuntimeMethod* method) 
 {
 	{
@@ -23072,7 +23118,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MainMenuUIToolkit_U3COnEnableU3Eb__15_2_
 		return;
 	}
 }
-// Method Definition Index: 55258
+// Method Definition Index: 55233
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MainMenuUIToolkit_U3COnEnableU3Eb__15_3_mB89F7BC82D4CAF1D2A779812F28E6EB22C16B67C (MainMenuUIToolkit_tBD8AC2BB1C894428C5760F0E39337CECF9B9FB6E* __this, FocusInEvent_tC1179D309FE58E4766E94687240513A96F08AFBE* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -23089,7 +23135,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MainMenuUIToolkit_U3COnEnableU3Eb__15_3_
 		return;
 	}
 }
-// Method Definition Index: 55259
+// Method Definition Index: 55234
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MainMenuUIToolkit_U3COnEnableU3Eb__15_4_m9074E01595AEB380CE807FE42B01741675755861 (MainMenuUIToolkit_tBD8AC2BB1C894428C5760F0E39337CECF9B9FB6E* __this, FocusOutEvent_t5CC3AC57C2BEFAD0E0A7E73FE6314F0F63DFFD2C* ___0_evt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -23114,7 +23160,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MainMenuUIToolkit_U3COnEnableU3Eb__15_4_
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 55260
+// Method Definition Index: 55235
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MapPopupController_Awake_m2E5DB2253022DF60565A8872C2DCA0890A941C0A (MapPopupController_t2EF811A247FB8FDB13F1F925022D66791B89D1EA* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -23151,7 +23197,7 @@ IL_001a:
 		return;
 	}
 }
-// Method Definition Index: 55261
+// Method Definition Index: 55236
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MapPopupController_OnEnable_m922C89B1D02F1A95BB9D41C0D87CE4704BBE1ADA (MapPopupController_t2EF811A247FB8FDB13F1F925022D66791B89D1EA* __this, const RuntimeMethod* method) 
 {
 	VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* V_0 = NULL;
@@ -23173,7 +23219,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MapPopupController_OnEnable_m922C89B1D02
 		return;
 	}
 }
-// Method Definition Index: 55262
+// Method Definition Index: 55237
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MapPopupController_InitLocationData_m853A895D549DF5DB31F8188A50C4BB849A89206D (MapPopupController_t2EF811A247FB8FDB13F1F925022D66791B89D1EA* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -23432,7 +23478,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MapPopupController_InitLocationData_m853
 		return;
 	}
 }
-// Method Definition Index: 55263
+// Method Definition Index: 55238
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MapPopupController_QueryElements_m780F5A1A823C8B7B8F7637B53693752A1D37EAB9 (MapPopupController_t2EF811A247FB8FDB13F1F925022D66791B89D1EA* __this, VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* ___0_root, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -23612,7 +23658,7 @@ IL_0116:
 		return;
 	}
 }
-// Method Definition Index: 55264
+// Method Definition Index: 55239
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MapPopupController_RegisterCallbacks_mDDA2463C9DFAC7D524F51078AA9893115090D347 (MapPopupController_t2EF811A247FB8FDB13F1F925022D66791B89D1EA* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -23839,7 +23885,7 @@ IL_0103:
 		return;
 	}
 }
-// Method Definition Index: 55265
+// Method Definition Index: 55240
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MapPopupController_RegisterIslandClick_mEBC649AFF30BECD363C7DC19877A6F15C5651A71 (MapPopupController_t2EF811A247FB8FDB13F1F925022D66791B89D1EA* __this, VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* ___0_island, String_t* ___1_id, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -23903,7 +23949,7 @@ IL_0024:
 		return;
 	}
 }
-// Method Definition Index: 55266
+// Method Definition Index: 55241
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MapPopupController_Show_mF9AC97E8F7E9BB8265B4F5510FBBD9E4C0177F94 (MapPopupController_t2EF811A247FB8FDB13F1F925022D66791B89D1EA* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24094,7 +24140,7 @@ IL_00c6:
 		return;
 	}
 }
-// Method Definition Index: 55267
+// Method Definition Index: 55242
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MapPopupController_Hide_m93D3BE76C6E26FDADC58893B3B9EE9B98E565237 (MapPopupController_t2EF811A247FB8FDB13F1F925022D66791B89D1EA* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24164,7 +24210,7 @@ IL_0040:
 		return;
 	}
 }
-// Method Definition Index: 55268
+// Method Definition Index: 55243
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MapPopupController_OnDisable_m6FAF1B8115144F1431C7CCBEAF0AA18E0B64227D (MapPopupController_t2EF811A247FB8FDB13F1F925022D66791B89D1EA* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24181,7 +24227,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MapPopupController_OnDisable_m6FAF1B8115
 		return;
 	}
 }
-// Method Definition Index: 55269
+// Method Definition Index: 55244
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool MapPopupController_IsVisible_m7944C1F950ABC6E92F70391E67E01C9E0926CF9D (MapPopupController_t2EF811A247FB8FDB13F1F925022D66791B89D1EA* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24220,7 +24266,7 @@ IL_0024:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 55270
+// Method Definition Index: 55245
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MapPopupController_RefreshIslandStates_m6AFC9DF5B058D5D070DF065916C36023CB4FC3DF (MapPopupController_t2EF811A247FB8FDB13F1F925022D66791B89D1EA* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24245,7 +24291,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MapPopupController_RefreshIslandStates_m
 		return;
 	}
 }
-// Method Definition Index: 55271
+// Method Definition Index: 55246
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MapPopupController_UpdateLockOverlay_m2C124F109E2B6B386CBA30E7B8B5FA298A1052A3 (MapPopupController_t2EF811A247FB8FDB13F1F925022D66791B89D1EA* __this, VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* ___0_lockElement, String_t* ___1_id, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24334,7 +24380,7 @@ IL_0032:
 		return;
 	}
 }
-// Method Definition Index: 55272
+// Method Definition Index: 55247
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MapPopupController_UpdatePlayerIndicator_mE227E6F9ECAE9B75AECCC3B972B8DE7EBCFB625D (MapPopupController_t2EF811A247FB8FDB13F1F925022D66791B89D1EA* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24394,7 +24440,7 @@ IL_0009:
 		return;
 	}
 }
-// Method Definition Index: 55273
+// Method Definition Index: 55248
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MapPopupController_OnCompassClicked_m901AB8FC1B406BEE4D51B08198FC9C5418737976 (MapPopupController_t2EF811A247FB8FDB13F1F925022D66791B89D1EA* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24569,7 +24615,7 @@ IL_00c8:
 		return;
 	}
 }
-// Method Definition Index: 55274
+// Method Definition Index: 55249
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MapPopupController_HandleIslandClick_m6DB8FD30E02111ECE64E26BC955260EA825EA203 (MapPopupController_t2EF811A247FB8FDB13F1F925022D66791B89D1EA* __this, String_t* ___0_id, VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* ___1_islandElement, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24847,7 +24893,7 @@ IL_0138:
 		return;
 	}
 }
-// Method Definition Index: 55275
+// Method Definition Index: 55250
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MapPopupController_DeselectIsland_m381EB9FB4C559F229823FAF56290122EEC790307 (MapPopupController_t2EF811A247FB8FDB13F1F925022D66791B89D1EA* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24891,7 +24937,7 @@ IL_0016:
 		return;
 	}
 }
-// Method Definition Index: 55276
+// Method Definition Index: 55251
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool MapPopupController_IsUnlocked_m6692CDC5E931AA74EFD0047823F9B6A3A38CD582 (MapPopupController_t2EF811A247FB8FDB13F1F925022D66791B89D1EA* __this, MapLocation_tE63B8136FB497CF93904EE619DADA444F4ADE762* ___0_loc, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -25042,7 +25088,7 @@ IL_0089:
 		return (bool)1;
 	}
 }
-// Method Definition Index: 55277
+// Method Definition Index: 55252
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MapPopupController_OnCheatLevel_m016A8586C2BD9A1B78FDC4CF68E5C95465CB2EBA (MapPopupController_t2EF811A247FB8FDB13F1F925022D66791B89D1EA* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -25081,7 +25127,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MapPopupController_OnCheatLevel_m016A858
 		return;
 	}
 }
-// Method Definition Index: 55278
+// Method Definition Index: 55253
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MapPopupController_OnCheatVip_mDC0DD6F0A0DE1EB8D8446B170472A7E610BE0EC2 (MapPopupController_t2EF811A247FB8FDB13F1F925022D66791B89D1EA* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -25189,7 +25235,7 @@ IL_0088:
 		return;
 	}
 }
-// Method Definition Index: 55279
+// Method Definition Index: 55254
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MapPopupController_UpdateLevelDisplay_m9F06CEF38C64C942DD2EDBE2113580C9BA75BFAD (MapPopupController_t2EF811A247FB8FDB13F1F925022D66791B89D1EA* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -25224,7 +25270,7 @@ IL_0028:
 		return;
 	}
 }
-// Method Definition Index: 55280
+// Method Definition Index: 55255
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MapPopupController__ctor_m73BD9EC136DCF4030E849B525AB4438307121319 (MapPopupController_t2EF811A247FB8FDB13F1F925022D66791B89D1EA* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -25254,7 +25300,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MapPopupController__ctor_m73BD9EC136DCF4
 		return;
 	}
 }
-// Method Definition Index: 55281
+// Method Definition Index: 55256
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MapPopupController_U3CShowU3Eb__36_0_m883F30273A4963D7F00C93F317B7433FFB4346CB (MapPopupController_t2EF811A247FB8FDB13F1F925022D66791B89D1EA* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -25275,7 +25321,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MapPopupController_U3CShowU3Eb__36_0_m88
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
-// Method Definition Index: 54348
+// Method Definition Index: 54323
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR PlayerController_t7E8D7042FA2D0DFEC54A1FCDF395161D88DAAE95* PlayerController_get_Instance_m304823623518B0D034B8A0510EECC8D1C4093966_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -25296,7 +25342,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Action_Invoke_m7126A54DACA72
 	typedef void (*FunctionPointerType) (RuntimeObject*, const RuntimeMethod*);
 	((FunctionPointerType)__this->___invoke_impl)((Il2CppObject*)__this->___method_code, reinterpret_cast<RuntimeMethod*>(__this->___method));
 }
-// Method Definition Index: 54414
+// Method Definition Index: 54389
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR TutorialManager_tA517EF826FE03300C6A8ED492158E82A0E210CCF* TutorialManager_get_Instance_m42501574BCC12E6BA6E5A6BAF99C9AFA47BC1D5C_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -25311,7 +25357,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR TutorialManager_tA517EF826FE03300
 		return L_0;
 	}
 }
-// Method Definition Index: 56815
+// Method Definition Index: 56790
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR PlayerProfileService_t341677C2E8BF495583AF04819B2335C3185A5B47* PlayerProfileService_get_Instance_m21922870AFFA030F2C69A47B7BCC7D2CC7700164_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -25326,7 +25372,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR PlayerProfileService_t341677C2E8B
 		return L_0;
 	}
 }
-// Method Definition Index: 56819
+// Method Definition Index: 56794
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool PlayerProfileService_get_IsLoaded_mAA3FE168FDCB9436E2FA3B8B5A77FF321BE8CCED_inline (PlayerProfileService_t341677C2E8BF495583AF04819B2335C3185A5B47* __this, const RuntimeMethod* method) 
 {
 	{
@@ -25335,7 +25381,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool PlayerProfileService_get_IsL
 		return L_0;
 	}
 }
-// Method Definition Index: 55792
+// Method Definition Index: 55767
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR InventoryManager_t033115D1E989CF626FC0710C6FB1895D82788DDF* InventoryManager_get_Instance_m491A7891DFB69B09C18B6B258094448A9A6EEEE2_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -25350,7 +25396,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR InventoryManager_t033115D1E989CF6
 		return L_0;
 	}
 }
-// Method Definition Index: 55079
+// Method Definition Index: 55054
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void InventoryPopupController_set_LastItemUseHandled_mECC077419C9DB9897D255CD7075A1AAD2BA25D4D_inline (InventoryPopupController_tF007E7E89E2C3E413E6B0D7D8907A50B64C7CD2A* __this, bool ___0_value, const RuntimeMethod* method) 
 {
 	{
@@ -25360,7 +25406,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void InventoryPopupController_set
 		return;
 	}
 }
-// Method Definition Index: 55078
+// Method Definition Index: 55053
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool InventoryPopupController_get_LastItemUseHandled_m8076A4E4014801E63E72EBF81BA3435A3FEE9C08_inline (InventoryPopupController_tF007E7E89E2C3E413E6B0D7D8907A50B64C7CD2A* __this, const RuntimeMethod* method) 
 {
 	{
@@ -25369,7 +25415,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool InventoryPopupController_get
 		return L_0;
 	}
 }
-// Method Definition Index: 50538
+// Method Definition Index: 50525
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t Mathf_Max_m7FA442918DE37E3A00106D1F2E789D65829792B8_inline (int32_t ___0_a, int32_t ___1_b, const RuntimeMethod* method) 
 {
 	int32_t V_0 = 0;
@@ -25406,7 +25452,7 @@ IL_000c:
 		return L_4;
 	}
 }
-// Method Definition Index: 56627
+// Method Definition Index: 56602
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* AuthService_get_Instance_mC5F3BCC6818176AEAD746F043ADB4B7B1F58245D_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -25421,7 +25467,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR AuthService_t84804C1CD86F65AFE5F5
 		return L_0;
 	}
 }
-// Method Definition Index: 54281
+// Method Definition Index: 54256
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR GameManager_tFE129A0017AF5BBD30FDCD4403B9CCEAE064C6B6* GameManager_get_Instance_m076FE4D98E785B5AEE0B4C360C7857F824E7FBD0_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -25445,7 +25491,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t String_get_Length_m42625D
 		return L_0;
 	}
 }
-// Method Definition Index: 56640
+// Method Definition Index: 56615
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int64_t AuthService_get_LastStatus_m363F2FB5E4437BCEADD80985EEF26AE0156A9FBB_inline (AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* __this, const RuntimeMethod* method) 
 {
 	{
@@ -25454,7 +25500,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int64_t AuthService_get_LastStatu
 		return L_0;
 	}
 }
-// Method Definition Index: 56644
+// Method Definition Index: 56619
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR String_t* AuthService_get_LastErrorCode_m0CD1F3FBB72530B3FCED01EA81CF416876BA906F_inline (AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* __this, const RuntimeMethod* method) 
 {
 	{
@@ -25463,7 +25509,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR String_t* AuthService_get_LastErr
 		return L_0;
 	}
 }
-// Method Definition Index: 56796
+// Method Definition Index: 56771
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int64_t PlayerBootstrapService_get_LastStatus_m0387E4F7919BB372609FB17BC1EAF3E2067F1588_inline (PlayerBootstrapService_t4A614618E10C2ECC4C19643B1E86C3B3664A1D2D* __this, const RuntimeMethod* method) 
 {
 	{
@@ -25472,7 +25518,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int64_t PlayerBootstrapService_ge
 		return L_0;
 	}
 }
-// Method Definition Index: 56790
+// Method Definition Index: 56765
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR PlayerBootstrapService_t4A614618E10C2ECC4C19643B1E86C3B3664A1D2D* PlayerBootstrapService_get_Instance_m4D0CE33C1F390004D82A0537BA10A74EA155E0E1_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -25487,7 +25533,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR PlayerBootstrapService_t4A614618E
 		return L_0;
 	}
 }
-// Method Definition Index: 51024
+// Method Definition Index: 51010
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Awaiter_GetResult_mB2E321DF49E4CD5A2997A8EE7BEF8D71F5A24EB2_inline (Awaiter_t5D0EA628306CFACF132061071EE06FB6EFCADCD7* __this, const RuntimeMethod* method) 
 {
 	{
@@ -25497,7 +25543,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Awaiter_GetResult_mB2E321DF4
 		return;
 	}
 }
-// Method Definition Index: 56817
+// Method Definition Index: 56792
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR PlayerProfile_t09D50F5282A75B870E2C912121BD8B4FED5EB8F8* PlayerProfileService_get_Profile_m4FF999822AF2DA951629CC9B7B3B0B5E23A0399B_inline (PlayerProfileService_t341677C2E8BF495583AF04819B2335C3185A5B47* __this, const RuntimeMethod* method) 
 {
 	{
@@ -25506,7 +25552,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR PlayerProfile_t09D50F5282A75B870E
 		return L_0;
 	}
 }
-// Method Definition Index: 50977
+// Method Definition Index: 50963
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void AwaitableAsyncMethodBuilder_SetException_mFC06F283CFA89D8D533B3AF188F2EA501E65387D_inline (AwaitableAsyncMethodBuilder_tEED8886993D22F5480D9BF117DA59548001C12D5* __this, Exception_t* ___0_e, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -25529,7 +25575,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void AwaitableAsyncMethodBuilder_
 		return;
 	}
 }
-// Method Definition Index: 50978
+// Method Definition Index: 50964
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void AwaitableAsyncMethodBuilder_SetResult_m2A64F7573E37E29BB4CC19A985AE485A0FD1AEA8_inline (AwaitableAsyncMethodBuilder_tEED8886993D22F5480D9BF117DA59548001C12D5* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -25551,14 +25597,14 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void AwaitableAsyncMethodBuilder_
 		return;
 	}
 }
-// Method Definition Index: 50974
+// Method Definition Index: 50960
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void AwaitableAsyncMethodBuilder_SetStateMachine_m6CE402814770E3679C8C90980932FB573B6398D5_inline (AwaitableAsyncMethodBuilder_tEED8886993D22F5480D9BF117DA59548001C12D5* __this, RuntimeObject* ___0_stateMachine, const RuntimeMethod* method) 
 {
 	{
 		return;
 	}
 }
-// Method Definition Index: 56637
+// Method Definition Index: 56612
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR String_t* AuthService_get_Username_mFD01939AB53FEFCB3A66C50195CE48C94D3283F0_inline (AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* __this, const RuntimeMethod* method) 
 {
 	{
@@ -25567,7 +25613,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR String_t* AuthService_get_Usernam
 		return L_0;
 	}
 }
-// Method Definition Index: 50265
+// Method Definition Index: 50252
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Color__ctor_mCD6889CDE39F18704CD6EA8E2EFBFA48BA3E13B0_inline (Color_tD001788D726C3A7F1379BEED0260B9591F440C1F* __this, float ___0_r, float ___1_g, float ___2_b, const RuntimeMethod* method) 
 {
 	{
@@ -25581,7 +25627,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Color__ctor_mCD6889CDE39F187
 		return;
 	}
 }
-// Method Definition Index: 55750
+// Method Definition Index: 55725
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t ExperienceManager_get_Level_m215BF8A1BC4BFF1A0DB7D4F60FC221ACD39673E7_inline (ExperienceManager_t9FEE6E0C119587D4D501CA28CFA186BE08900076* __this, const RuntimeMethod* method) 
 {
 	{
@@ -25590,7 +25636,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t ExperienceManager_get_Lev
 		return L_0;
 	}
 }
-// Method Definition Index: 54330
+// Method Definition Index: 54305
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR IslandTravelManager_tE231A23B71ED80F3305D1123F29DAD4C1952DD6B* IslandTravelManager_get_Instance_mDD2631BC8714644CA792754C5AFBF02F472E5ABC_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -25605,7 +25651,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR IslandTravelManager_tE231A23B71ED
 		return L_0;
 	}
 }
-// Method Definition Index: 54332
+// Method Definition Index: 54307
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR String_t* IslandTravelManager_get_CurrentIslandId_m61EC41D62F49612BB820950FDA97D823FECBEBD4_inline (IslandTravelManager_tE231A23B71ED80F3305D1123F29DAD4C1952DD6B* __this, const RuntimeMethod* method) 
 {
 	{
@@ -25736,7 +25782,7 @@ IL_0034:
 		return;
 	}
 }
-// Method Definition Index: 50973
+// Method Definition Index: 50959
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void AwaitableAsyncMethodBuilder_Start_TisU3CCompleteAuthenticatedLoginAsyncU3Ed__64_tC9CC46B12EF2580C0A7F77C142A84B16300D1E5F_mCE039DA894110912F8A6574774AFF87E1EC061A6_gshared_inline (AwaitableAsyncMethodBuilder_tEED8886993D22F5480D9BF117DA59548001C12D5* __this, U3CCompleteAuthenticatedLoginAsyncU3Ed__64_tC9CC46B12EF2580C0A7F77C142A84B16300D1E5F* ___0_stateMachine, const RuntimeMethod* method) 
 {
 	if (!il2cpp_rgctx_is_initialized(method))
@@ -25802,7 +25848,7 @@ IL_002a:
 		return;
 	}
 }
-// Method Definition Index: 50975
+// Method Definition Index: 50961
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void AwaitableAsyncMethodBuilder_AwaitOnCompleted_TisAwaiter_t97FFD2496460F466EB07669E49F040712341D831_TisU3CCompleteAuthenticatedLoginAsyncU3Ed__64_tC9CC46B12EF2580C0A7F77C142A84B16300D1E5F_m11E540932BD5E5837E3071A22CDD52A3BFDB2700_gshared_inline (AwaitableAsyncMethodBuilder_tEED8886993D22F5480D9BF117DA59548001C12D5* __this, Awaiter_t97FFD2496460F466EB07669E49F040712341D831* ___0_awaiter, U3CCompleteAuthenticatedLoginAsyncU3Ed__64_tC9CC46B12EF2580C0A7F77C142A84B16300D1E5F* ___1_stateMachine, const RuntimeMethod* method) 
 {
 	if (!il2cpp_rgctx_is_initialized(method))
@@ -25832,7 +25878,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void AwaitableAsyncMethodBuilder_
 		return;
 	}
 }
-// Method Definition Index: 50975
+// Method Definition Index: 50961
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void AwaitableAsyncMethodBuilder_AwaitOnCompleted_TisAwaiter_t5D0EA628306CFACF132061071EE06FB6EFCADCD7_TisU3CCompleteAuthenticatedLoginAsyncU3Ed__64_tC9CC46B12EF2580C0A7F77C142A84B16300D1E5F_mF699E91C5D68D7069E93A57E253E5A48E8C777B4_gshared_inline (AwaitableAsyncMethodBuilder_tEED8886993D22F5480D9BF117DA59548001C12D5* __this, Awaiter_t5D0EA628306CFACF132061071EE06FB6EFCADCD7* ___0_awaiter, U3CCompleteAuthenticatedLoginAsyncU3Ed__64_tC9CC46B12EF2580C0A7F77C142A84B16300D1E5F* ___1_stateMachine, const RuntimeMethod* method) 
 {
 	if (!il2cpp_rgctx_is_initialized(method))
@@ -25870,7 +25916,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t List_1_get_Count_m4407E4C
 		return L_0;
 	}
 }
-// Method Definition Index: 50943
+// Method Definition Index: 50929
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Awaitable_RaiseManagedCompletion_mB3E3179534F6CB91E2BC5486857F5D607FD695D2_inline (Awaitable_t690337FEC1C411606E233EA36A41337B931C23CB* __this, Exception_t* ___0_exception, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -25977,7 +26023,7 @@ IL_0076:
 		return;
 	}
 }
-// Method Definition Index: 50946
+// Method Definition Index: 50932
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Awaitable_RaiseManagedCompletion_m07CF97F840485310EBDE6EF657FD2C3A5F145891_inline (Awaitable_t690337FEC1C411606E233EA36A41337B931C23CB* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -26065,7 +26111,7 @@ IL_0065:
 		return;
 	}
 }
-// Method Definition Index: 51022
+// Method Definition Index: 51008
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Awaiter_OnCompleted_m1F26883040142ED9D70C4AABA0E81EC6B4CD36F9_inline (Awaiter_t5D0EA628306CFACF132061071EE06FB6EFCADCD7* __this, Action_tD00B0A84D7945E50C2DFFC28EFEE6ED44ED2AD07* ___0_continuation, const RuntimeMethod* method) 
 {
 	{
@@ -26076,7 +26122,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Awaiter_OnCompleted_m1F26883
 		return;
 	}
 }
-// Method Definition Index: 50985
+// Method Definition Index: 50971
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void StateMachineBox_1_set_StateMachine_m44696E7899AA752E4EBED89F0775F83D6D947A58_gshared_inline (StateMachineBox_1_t051C8850A5E6B321D16B4014C786F651FB99B70A* __this, U3CCompleteAuthenticatedLoginAsyncU3Ed__64_tC9CC46B12EF2580C0A7F77C142A84B16300D1E5F ___0_value, const RuntimeMethod* method) 
 {
 	{
@@ -26110,7 +26156,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void StateMachineBox_1_set_StateM
 		return;
 	}
 }
-// Method Definition Index: 50987
+// Method Definition Index: 50973
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Action_tD00B0A84D7945E50C2DFFC28EFEE6ED44ED2AD07* StateMachineBox_1_get_MoveNext_mFACE1E365F245B4EB27DA4E51A85A1478BB7999F_gshared_inline (StateMachineBox_1_t051C8850A5E6B321D16B4014C786F651FB99B70A* __this, const RuntimeMethod* method) 
 {
 	{
@@ -26118,7 +26164,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Action_tD00B0A84D7945E50C2DFFC28E
 		return L_0;
 	}
 }
-// Method Definition Index: 51056
+// Method Definition Index: 51042
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Awaiter_OnCompleted_m5CC7CE2B743CCB92A624C9363719A491BBBF4D71_gshared_inline (Awaiter_t97FFD2496460F466EB07669E49F040712341D831* __this, Action_tD00B0A84D7945E50C2DFFC28EFEE6ED44ED2AD07* ___0_continuation, const RuntimeMethod* method) 
 {
 	{
@@ -26129,7 +26175,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Awaiter_OnCompleted_m5CC7CE2
 		return;
 	}
 }
-// Method Definition Index: 51046
+// Method Definition Index: 51032
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Awaitable_1_ContinueWith_mCB36B47605030965A8FA3C2FBDAEA252CC09CCA3_gshared_inline (Awaitable_1_tE9B21A5D85428306C2DE8210A1FC9D38D9A92A90* __this, Action_tD00B0A84D7945E50C2DFFC28EFEE6ED44ED2AD07* ___0_continuation, const RuntimeMethod* method) 
 {
 	{

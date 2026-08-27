@@ -4886,7 +4886,7 @@ inline Action_tD00B0A84D7945E50C2DFFC28EFEE6ED44ED2AD07* StateMachineBox_1_get_M
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 56051
+// Method Definition Index: 56026
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* FarmInteractionController_get_Instance_m38C68A0A544291F95BD13376E15006083172D1DE (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -4902,7 +4902,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR FarmInteractionController_t75302FC7E684AEB35B
 		return L_0;
 	}
 }
-// Method Definition Index: 56052
+// Method Definition Index: 56027
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_set_Instance_m9C1EE45D0B68E2F1A322EF04B0EF3D5DB1F7299C (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* ___0_value, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -4920,7 +4920,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_set_Instance_m
 		return;
 	}
 }
-// Method Definition Index: 56053
+// Method Definition Index: 56028
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float FarmInteractionController_get_FertilizerBonusSec_m37211C731B4AC688FA246B26D130649559473C1E (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	{
@@ -4931,7 +4931,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float FarmInteractionController_get_Fertilize
 		return L_1;
 	}
 }
-// Method Definition Index: 56054
+// Method Definition Index: 56029
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float FarmInteractionController_get_FertilizerMaxGrowthSec_m25661C1ADB354AFB376B0BF4EB4265EFE7506D3A (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	{
@@ -4942,7 +4942,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float FarmInteractionController_get_Fertilize
 		return L_1;
 	}
 }
-// Method Definition Index: 56055
+// Method Definition Index: 56030
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_Awake_m2E4D9C2BE21C72E06FD51DAC07735B2E28BCA9B3 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -5014,7 +5014,7 @@ IL_0038:
 		return;
 	}
 }
-// Method Definition Index: 56056
+// Method Definition Index: 56031
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_Start_mEB44D93D40CBBD07F8611977604AF2F88BB2C079 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -5189,7 +5189,7 @@ IL_0102:
 		return;
 	}
 }
-// Method Definition Index: 56057
+// Method Definition Index: 56032
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_EnsureInventoryPopupSubscribed_mF4E08251960AD5C507D5837250C7A8D04FB6B568 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -5254,7 +5254,7 @@ IL_0055:
 		return;
 	}
 }
-// Method Definition Index: 56058
+// Method Definition Index: 56033
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_OnDestroy_mE3FF2826B2FA6B337873889D99F4B180E743E38D (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -5357,7 +5357,7 @@ IL_006e:
 		return;
 	}
 }
-// Method Definition Index: 56059
+// Method Definition Index: 56034
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_HandleIdentityChanged_m6A15CBDFA551D1BA69127810504ED490915EBA18 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, String_t* ___0_previousScopeId, String_t* ___1_nextScopeId, const RuntimeMethod* method) 
 {
 	{
@@ -5369,7 +5369,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_HandleIdentity
 		return;
 	}
 }
-// Method Definition Index: 56060
+// Method Definition Index: 56035
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_HarvestResourceTick_m99DBF21391D5A43AE9F8F4C9725B9EDDF35CF125 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, HarvestableResource_tC78B91FFDA374C3C892C36CCD402CCA7E7F361C9* ___0_resource, float ___1_delta, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -5852,7 +5852,7 @@ IL_0184:
 		return L_73;
 	}
 }
-// Method Definition Index: 56061
+// Method Definition Index: 56036
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_HarvestSharedResourceTick_mE78618459A85E77A7C29D310BE19E9C5F1F6D57A (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, HarvestableResource_tC78B91FFDA374C3C892C36CCD402CCA7E7F361C9* ___0_resource, float ___1_delta, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -6013,7 +6013,7 @@ IL_00bd:
 		return (bool)1;
 	}
 }
-// Method Definition Index: 56062
+// Method Definition Index: 56037
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_HandleSharedResourceHarvestResult_mA1C44773C853EFBD36575104FD26D5C1F6225B22 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, HarvestableResource_tC78B91FFDA374C3C892C36CCD402CCA7E7F361C9* ___0_resource, ResourceHarvestResult_t2484FF1592E073142AF9B307F6C3121346699B8A* ___1_result, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -6618,7 +6618,7 @@ IL_021b:
 		return;
 	}
 }
-// Method Definition Index: 56063
+// Method Definition Index: 56038
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_SetServerMiningTurns_m4BB4FAEFA35DFDA7608AAC0904C16AEDD3DA7726 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, int32_t ___0_remaining, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -6658,7 +6658,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_SetServerMinin
 		return;
 	}
 }
-// Method Definition Index: 56064
+// Method Definition Index: 56039
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_RequiresServerResourceSync_m0E42F0D5E9CB9DE03F9AA100CDF767B207F3131D (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -6698,7 +6698,7 @@ IL_0016:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 56065
+// Method Definition Index: 56040
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsServerResourceSyncReady_mC2C7EFDC59DE3F778F4DC159E8DCCDAD95A3590B (bool ___0_showToast, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -6780,7 +6780,7 @@ IL_0035:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 56066
+// Method Definition Index: 56041
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_OnSharedResourceUnavailable_m6A7B58578AB6F11FBA8D37768233914198D28C8A (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, HarvestableResource_tC78B91FFDA374C3C892C36CCD402CCA7E7F361C9* ___0_resource, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -6899,7 +6899,7 @@ IL_0051:
 		return;
 	}
 }
-// Method Definition Index: 56067
+// Method Definition Index: 56042
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR GemstoneMiningReward_t2BFE6321B7E89EEA134B723AFC93CC1BF32864A8* FarmInteractionController_RollGemstoneReward_mDC45AE307A1E88D99F173EE9BCAFE73CA4EEBF67 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -7145,7 +7145,7 @@ IL_00d0:
 		return L_30;
 	}
 }
-// Method Definition Index: 56068
+// Method Definition Index: 56043
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsValidGemstoneReward_m431FD1797ADC058DD33CB0C53246930843E1EB31 (GemstoneMiningReward_t2BFE6321B7E89EEA134B723AFC93CC1BF32864A8* ___0_reward, const RuntimeMethod* method) 
 {
 	{
@@ -7191,7 +7191,7 @@ IL_0027:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 56069
+// Method Definition Index: 56044
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_ShowResourceHarvestToast_m55BC5C2C6198C9F9CACD030EA9B038DCC5A902B4 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, int32_t ___0_resourceType, String_t* ___1_yieldId, int32_t ___2_gained, GemstoneMiningReward_t2BFE6321B7E89EEA134B723AFC93CC1BF32864A8* ___3_gemstoneReward, int32_t ___4_miningTurnsRemaining, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -7508,7 +7508,7 @@ IL_014f:
 		return;
 	}
 }
-// Method Definition Index: 56070
+// Method Definition Index: 56045
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_get_IsTimedActionActive_m08843B167A3D4AE88A0C360C724DEC247EA7F444 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	{
@@ -7517,7 +7517,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_get_IsTimedAct
 		return L_0;
 	}
 }
-// Method Definition Index: 56071
+// Method Definition Index: 56046
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_CancelTimedActionFromHUD_m2CD001F80FEC1C0D0EFF0B3B341089BCFE1DA42F (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -7554,7 +7554,7 @@ IL_0012:
 		return (bool)1;
 	}
 }
-// Method Definition Index: 56072
+// Method Definition Index: 56047
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_BeginTimedActionCursorMode_m72B04B1CF16393503AD99874A93E175283D48426 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -7597,7 +7597,7 @@ IL_0025:
 		return;
 	}
 }
-// Method Definition Index: 56073
+// Method Definition Index: 56048
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_EndTimedActionCursorMode_mE351E24090068D1BCBC49BD124E15F89B93EDE32 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -7650,7 +7650,7 @@ IL_002d:
 		return;
 	}
 }
-// Method Definition Index: 56074
+// Method Definition Index: 56049
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_BeginTimedAction_m752458ED95C564C5EDF7501CC1A8D25B98672E4E (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, String_t* ___0_animName, float ___1_fallbackDuration, int32_t ___2_tool, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___3_facePoint, Action_tD00B0A84D7945E50C2DFFC28EFEE6ED44ED2AD07* ___4_onComplete, Action_tD00B0A84D7945E50C2DFFC28EFEE6ED44ED2AD07* ___5_onCancelRefund, float ___6_speed, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8004,7 +8004,7 @@ IL_01b9:
 		return (bool)1;
 	}
 }
-// Method Definition Index: 56075
+// Method Definition Index: 56050
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* FarmInteractionController_RunTimedAction_mE9D0DA82B010F4A05620F319ACDF7B1C02D1999C (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, int32_t ___0_token, float ___1_duration, Action_tD00B0A84D7945E50C2DFFC28EFEE6ED44ED2AD07* ___2_onComplete, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8036,7 +8036,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* FarmInteractionController_RunT
 		return L_6;
 	}
 }
-// Method Definition Index: 56076
+// Method Definition Index: 56051
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_FinishTimedAction_mA207A95DCFCF3C021D25151BA5B80048D0E4CBDC (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, bool ___0_restorePrompt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8118,7 +8118,7 @@ IL_0060:
 		return;
 	}
 }
-// Method Definition Index: 56077
+// Method Definition Index: 56052
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_RebuildPromptFor_mB57056E729E2DBB08497543A26E4BD8A9891EF15 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* ___0_target, bool ___1_fromFrontCell, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8442,7 +8442,7 @@ IL_012a:
 		return;
 	}
 }
-// Method Definition Index: 56078
+// Method Definition Index: 56053
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_CancelTimedAction_m4977073C8D9882DDDDB77814847E861F59BF5B81 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, String_t* ___0_toast, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8647,7 +8647,7 @@ IL_00f0:
 		return;
 	}
 }
-// Method Definition Index: 56079
+// Method Definition Index: 56054
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float FarmInteractionController_HorizontalDistanceToPlayer_mDC71A135537520F77147E3B140881E569A5BE924 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_worldPos, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -8718,7 +8718,7 @@ IL_0029:
 		return L_18;
 	}
 }
-// Method Definition Index: 56080
+// Method Definition Index: 56055
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float FarmInteractionController_NormalizeRange_mF9AC03E48C31CC19AAD253F3BEAC7EFBF38D8EE6 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, float ___0_range, const RuntimeMethod* method) 
 {
 	{
@@ -8739,7 +8739,7 @@ IL_000e:
 		return L_1;
 	}
 }
-// Method Definition Index: 56081
+// Method Definition Index: 56056
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float FarmInteractionController_NormalizeGroundRange_mCE1EFADB037FC61FBE1676BDEF38A3F3ABF4E9B3 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, float ___0_range, const RuntimeMethod* method) 
 {
 	{
@@ -8760,7 +8760,7 @@ IL_000e:
 		return L_1;
 	}
 }
-// Method Definition Index: 56082
+// Method Definition Index: 56057
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float FarmInteractionController_HorizontalDistance_mD9D4E052ACA5F2C1B298DE57B5E321B671B9E70A (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_a, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___1_b, const RuntimeMethod* method) 
 {
 	float V_0 = 0.0f;
@@ -8785,7 +8785,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float FarmInteractionController_HorizontalDis
 		return L_11;
 	}
 }
-// Method Definition Index: 56083
+// Method Definition Index: 56058
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsInInteractRange_m0AB67B27D2B862D50FDF62F1F58385B8AA6683B6 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_worldPos, float ___1_range, const RuntimeMethod* method) 
 {
 	{
@@ -8799,7 +8799,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsInInteractRa
 		return (bool)((((int32_t)((!(((float)L_1) <= ((float)L_3)))? 1 : 0)) == ((int32_t)0))? 1 : 0);
 	}
 }
-// Method Definition Index: 56084
+// Method Definition Index: 56059
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsInInteractRangeAtPoint_mDEFCF5480FE7572DC88C1AE5D0A982FEEF2F02A7 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_hitPoint, float ___1_range, const RuntimeMethod* method) 
 {
 	{
@@ -8813,7 +8813,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsInInteractRa
 		return (bool)((((int32_t)((!(((float)L_1) <= ((float)L_3)))? 1 : 0)) == ((int32_t)0))? 1 : 0);
 	}
 }
-// Method Definition Index: 56085
+// Method Definition Index: 56060
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float FarmInteractionController_GetDirectTapRange_m4642785F7B4BD133E498F9793C6811EB55C439C0 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, float ___0_configuredRange, float ___1_fallbackRange, const RuntimeMethod* method) 
 {
 	{
@@ -8824,7 +8824,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float FarmInteractionController_GetDirectTapR
 		return L_1;
 	}
 }
-// Method Definition Index: 56086
+// Method Definition Index: 56061
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsInDirectTapRangeAtPoint_m7ECE654249E25D515B9319994D205B2965CDA468 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_hitPoint, float ___1_configuredRange, float ___2_fallbackRange, const RuntimeMethod* method) 
 {
 	{
@@ -8839,7 +8839,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsInDirectTapR
 		return (bool)((((int32_t)((!(((float)L_1) <= ((float)L_4)))? 1 : 0)) == ((int32_t)0))? 1 : 0);
 	}
 }
-// Method Definition Index: 56087
+// Method Definition Index: 56062
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsDirectTapObjectInRange_m4F738D57A033AF48FFF85E4AA4A5E71651BAA818 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* ___0_root, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___1_fallbackWorldPos, float ___2_configuredRange, float ___3_fallbackRange, const RuntimeMethod* method) 
 {
 	{
@@ -8855,7 +8855,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsDirectTapObj
 		return (bool)((((int32_t)((!(((float)L_2) <= ((float)L_5)))? 1 : 0)) == ((int32_t)0))? 1 : 0);
 	}
 }
-// Method Definition Index: 56088
+// Method Definition Index: 56063
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsInInteractRange_m0AF4566346BF330B07C5A7A4741ED0D39B533480 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_worldPos, const RuntimeMethod* method) 
 {
 	{
@@ -8867,7 +8867,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsInInteractRa
 		return L_2;
 	}
 }
-// Method Definition Index: 56089
+// Method Definition Index: 56064
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float FarmInteractionController_ClampedRange_mC344C67770506C8DFF0910C00DE203EB199CD102 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, float ___0_targetRange, float ___1_fallbackRange, const RuntimeMethod* method) 
 {
 	{
@@ -8896,7 +8896,7 @@ IL_0010:
 		return L_6;
 	}
 }
-// Method Definition Index: 56090
+// Method Definition Index: 56065
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float FarmInteractionController_HorizontalDistanceToClosestColliderPoint_mC6092F8432EB875EC75F84E0DD34D6EE402E97EA (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* ___0_root, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___1_fallbackWorldPos, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -9091,7 +9091,7 @@ IL_00af:
 		return L_32;
 	}
 }
-// Method Definition Index: 56091
+// Method Definition Index: 56066
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 FarmInteractionController_SafeClosestPoint_mB4D53F7135DBA404A2E85228A5CB2160D8FD6B8C (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, Collider_t1CC3163924FCD6C4CC2E816373A929C1E3D55E76* ___0_col, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___1_point, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -9221,7 +9221,7 @@ IL_005c:
 		return L_23;
 	}
 }
-// Method Definition Index: 56092
+// Method Definition Index: 56067
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float FarmInteractionController_GetResourceExecuteRange_mFE70B500DFA4535133C280C2612F172A118CA2E5 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, HarvestableResource_tC78B91FFDA374C3C892C36CCD402CCA7E7F361C9* ___0_resource, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -9261,7 +9261,7 @@ IL_0016:
 		return ((float)il2cpp_codegen_add(L_7, (0.25f)));
 	}
 }
-// Method Definition Index: 56093
+// Method Definition Index: 56068
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float FarmInteractionController_GetResourceActionRange_m64E97D8B65ECBD86763C82A067D43227CC5D354F (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, HarvestableResource_tC78B91FFDA374C3C892C36CCD402CCA7E7F361C9* ___0_resource, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -9329,7 +9329,7 @@ IL_0028:
 		return L_9;
 	}
 }
-// Method Definition Index: 56094
+// Method Definition Index: 56069
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float FarmInteractionController_GetResourceDistanceToPlayer_m2E0EB1C6B969CA601FAE8B78F9563D86F29727BE (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, HarvestableResource_tC78B91FFDA374C3C892C36CCD402CCA7E7F361C9* ___0_resource, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -9373,7 +9373,7 @@ IL_000f:
 		return L_7;
 	}
 }
-// Method Definition Index: 56095
+// Method Definition Index: 56070
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR BuildSurfaceCell_t124365F3644E699718FE2AF4DCDA22A352722658* FarmInteractionController_ResolveBuildSurfaceCellFromHit_m6C60A00986DE71922D1BE5ABFFBE0349A9EB7562 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, RaycastHit_t6F30BD0B38B56401CA833A1B87BD74F2ACD2F2B5 ___0_hit, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -9581,7 +9581,7 @@ IL_00ac:
 		return L_28;
 	}
 }
-// Method Definition Index: 56096
+// Method Definition Index: 56071
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* FarmInteractionController_ResolveFarmTileFromHit_m6D5B5C174A4089938BF45ED2DBC58A2EFB1BCDFF (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, RaycastHit_t6F30BD0B38B56401CA833A1B87BD74F2ACD2F2B5 ___0_hit, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -9734,7 +9734,7 @@ IL_0073:
 		return L_25;
 	}
 }
-// Method Definition Index: 56097
+// Method Definition Index: 56072
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_TryResolveFarmTileFromAim_m2D3E9C4CE31359FF677B41BBDC6C4AC5AFFAAE9A (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, Ray_t2B1742D7958DC05BDC3EFC7461D3593E1430DC00 ___0_ray, FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40** ___1_tile, bool ___2_directTap, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -9894,7 +9894,7 @@ IL_008b:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 56098
+// Method Definition Index: 56073
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* FarmInteractionController_ResolveDemolishablePathFromHit_mC3E6B3B4FF06A0466C428FCFA9FE9CC92EB7066B (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, RaycastHit_t6F30BD0B38B56401CA833A1B87BD74F2ACD2F2B5 ___0_hit, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -9996,7 +9996,7 @@ IL_005b:
 		return (GameObject_t76FEDD663AB33C991A9C9A23129337651094216F*)NULL;
 	}
 }
-// Method Definition Index: 56099
+// Method Definition Index: 56074
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_TryResolvePathFromAim_mEA80AF009CB5DD1FF7F2E9E44690C55F376F07FB (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, Ray_t2B1742D7958DC05BDC3EFC7461D3593E1430DC00 ___0_ray, GameObject_t76FEDD663AB33C991A9C9A23129337651094216F** ___1_path, bool ___2_directTap, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -10156,7 +10156,7 @@ IL_008b:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 56100
+// Method Definition Index: 56075
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_AddTileAction_m35ACF0B91D4C768CC1F4A3F7243051E499129B7F (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* ___0_tile, List_1_tE3463A5BFF93914AAD642334B3F524E1C35B2768* ___1_actions, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -10683,7 +10683,7 @@ IL_0294:
 		return;
 	}
 }
-// Method Definition Index: 56101
+// Method Definition Index: 56076
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_CanDemolishFarmTile_m60F449D1CB315298CC66F1ABAAF0A565DAB76532 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* ___0_tile, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -10703,7 +10703,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_CanDemolishFar
 		return L_2;
 	}
 }
-// Method Definition Index: 56102
+// Method Definition Index: 56077
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_HasCropOnFarmTile_m811258A74BD68A2D0D335234B8C530804CEB9008 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* ___0_tile, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -10847,7 +10847,7 @@ IL_0059:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 56103
+// Method Definition Index: 56078
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsCropState_m3C5A0BFD41F74308B6544389C4C50EDC98AFCC68 (int32_t ___0_state, const RuntimeMethod* method) 
 {
 	{
@@ -10877,7 +10877,7 @@ IL_000d:
 		return (bool)1;
 	}
 }
-// Method Definition Index: 56104
+// Method Definition Index: 56079
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_EnclosureHasAnimal_mBFEAD649AC690A315E845C02730A1C4E84DA9B46 (List_1_t5C77C5321F6B9ABB671CB36BA0DF702419814120* ___0_pen, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -10972,7 +10972,7 @@ IL_0032:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 56105
+// Method Definition Index: 56080
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* FarmInteractionController_ResolvePlacedBuildingRoot_m12CC66E720E92BA12CA5290F37A3B77F39FB0896 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* ___0_tile, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -11030,7 +11030,7 @@ IL_001d:
 		return L_7;
 	}
 }
-// Method Definition Index: 56106
+// Method Definition Index: 56081
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* FarmInteractionController_ResolveDemolishablePath_mB09259E5D44DB55EE933AFAA52FBDAE2566426AC (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* ___0_candidate, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -11136,7 +11136,7 @@ IL_0046:
 		return L_14;
 	}
 }
-// Method Definition Index: 56107
+// Method Definition Index: 56082
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsPlacedBuildingInRange_mF3476BE227CB5C1651ACF4DC487C696C185D4B37 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* ___0_building, bool ___1_directTap, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -11207,7 +11207,7 @@ IL_0027:
 		return (bool)((((int32_t)((!(((float)L_10) <= ((float)L_11)))? 1 : 0)) == ((int32_t)0))? 1 : 0);
 	}
 }
-// Method Definition Index: 56108
+// Method Definition Index: 56083
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_AddPathDemolishAction_m5A21067A2AF72AA52922C85E308E29CEB4776E99 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* ___0_building, List_1_tE3463A5BFF93914AAD642334B3F524E1C35B2768* ___1_actions, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -11312,7 +11312,7 @@ IL_001a:
 		return;
 	}
 }
-// Method Definition Index: 56109
+// Method Definition Index: 56084
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsPenSpawnerInRange_mBADBCE1BA7A40485488263EC9D1979185A2F9985 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, AnimalPenSpawner_t2D9D404601F41954B6F433E33ABD072B457E820D* ___0_pen, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -11359,7 +11359,7 @@ IL_000b:
 		return (bool)((((int32_t)((!(((float)L_7) <= ((float)L_9)))? 1 : 0)) == ((int32_t)0))? 1 : 0);
 	}
 }
-// Method Definition Index: 56110
+// Method Definition Index: 56085
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsPenSpawnerInRange_m73271A0E73E18D91BA829E1644D0C79A8772588D (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, AnimalPenSpawner_t2D9D404601F41954B6F433E33ABD072B457E820D* ___0_pen, bool ___1_directTap, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -11427,7 +11427,7 @@ IL_0016:
 		return (bool)((((int32_t)((!(((float)L_12) <= ((float)L_13)))? 1 : 0)) == ((int32_t)0))? 1 : 0);
 	}
 }
-// Method Definition Index: 56111
+// Method Definition Index: 56086
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsEnclosureInRange_mD63076DF817E7F604CB99F7966E5BDBAE0DAF361 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, List_1_t5C77C5321F6B9ABB671CB36BA0DF702419814120* ___0_enclosure, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -11612,7 +11612,7 @@ IL_008f:
 		return L_26;
 	}
 }
-// Method Definition Index: 56112
+// Method Definition Index: 56087
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsEnclosureInRange_m21A2F3CE54A9E317F6479C23A336B2BC58D001E2 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, List_1_t5C77C5321F6B9ABB671CB36BA0DF702419814120* ___0_enclosure, bool ___1_directTap, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -11814,7 +11814,7 @@ IL_009f:
 		return L_29;
 	}
 }
-// Method Definition Index: 56113
+// Method Definition Index: 56088
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_NotifyBlocked_mE1C10DADEEA8B5E3AD65EF3B5B20245BA7542879 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, String_t* ___0_message, float ___1_cooldownSec, const RuntimeMethod* method) 
 {
 	{
@@ -11876,7 +11876,7 @@ IL_0025:
 		return;
 	}
 }
-// Method Definition Index: 56114
+// Method Definition Index: 56089
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsTileInRange_mC469329A1DA24178A3F5261DD3E9AFAC91D08C9C (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* ___0_tile, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -11922,7 +11922,7 @@ IL_000b:
 		return (bool)((((int32_t)((!(((float)L_7) <= ((float)L_8)))? 1 : 0)) == ((int32_t)0))? 1 : 0);
 	}
 }
-// Method Definition Index: 56115
+// Method Definition Index: 56090
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsTileInRange_mA8FCE1AD94A351E1FBFD52AE04CCB70B6B9D9F9B (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* ___0_tile, bool ___1_directTap, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -11990,7 +11990,7 @@ IL_0016:
 		return (bool)((((int32_t)((!(((float)L_12) <= ((float)L_13)))? 1 : 0)) == ((int32_t)0))? 1 : 0);
 	}
 }
-// Method Definition Index: 56116
+// Method Definition Index: 56091
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float FarmInteractionController_GetTileInteractRange_m14D684ECD1A86F0DFDF7EF5FADA4A0C9FD7EF3BF (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	{
@@ -12003,7 +12003,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float FarmInteractionController_GetTileIntera
 		return L_2;
 	}
 }
-// Method Definition Index: 56117
+// Method Definition Index: 56092
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FarmInteractionController_get_InteractionLayerMask_m7EE2E64FEE6BE1C60419EF1765280C6AB280CBD0 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	{
@@ -12028,7 +12028,7 @@ IL_000f:
 		return L_3;
 	}
 }
-// Method Definition Index: 56118
+// Method Definition Index: 56093
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsAnimalInRange_m3BF8E432469A7D968E444A4023D8CE6F85CDD21B (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmAnimal_t354FCB1012B2DC2691BB7BCCFB3E5CAC6C6AE87E* ___0_animal, RaycastHit_t6F30BD0B38B56401CA833A1B87BD74F2ACD2F2B5 ___1_hit, const RuntimeMethod* method) 
 {
 	{
@@ -12039,7 +12039,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsAnimalInRang
 		return L_1;
 	}
 }
-// Method Definition Index: 56119
+// Method Definition Index: 56094
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsAnimalInRange_m293B036DB533B90EB7B6B09F76AEFBB48C8F4EDF (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmAnimal_t354FCB1012B2DC2691BB7BCCFB3E5CAC6C6AE87E* ___0_animal, RaycastHit_t6F30BD0B38B56401CA833A1B87BD74F2ACD2F2B5 ___1_hit, bool ___2_directTap, const RuntimeMethod* method) 
 {
 	{
@@ -12051,7 +12051,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsAnimalInRang
 		return L_2;
 	}
 }
-// Method Definition Index: 56120
+// Method Definition Index: 56095
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsAnimalInRange_m15896BA62A4F32EEEC236A2E4EAA51E0AA3203DB (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmAnimal_t354FCB1012B2DC2691BB7BCCFB3E5CAC6C6AE87E* ___0_animal, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -12102,7 +12102,7 @@ IL_000b:
 		return (bool)((((int32_t)((!(((float)L_9) <= ((float)L_10)))? 1 : 0)) == ((int32_t)0))? 1 : 0);
 	}
 }
-// Method Definition Index: 56121
+// Method Definition Index: 56096
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsAnimalInRange_m9FC787359B7DA9EB9DC81EAA05D6C6394D96A189 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmAnimal_t354FCB1012B2DC2691BB7BCCFB3E5CAC6C6AE87E* ___0_animal, bool ___1_directTap, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -12170,7 +12170,7 @@ IL_0016:
 		return (bool)((((int32_t)((!(((float)L_12) <= ((float)L_13)))? 1 : 0)) == ((int32_t)0))? 1 : 0);
 	}
 }
-// Method Definition Index: 56122
+// Method Definition Index: 56097
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsWaterSourceInRange_mCCE9506C33102770218A4709964743CC23AC2682 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, WaterSource_t7D84866738C69E0541D641CB38D2ED19C23ED376* ___0_waterSource, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -12224,7 +12224,7 @@ IL_000b:
 		return (bool)((((int32_t)((!(((float)L_11) <= ((float)L_12)))? 1 : 0)) == ((int32_t)0))? 1 : 0);
 	}
 }
-// Method Definition Index: 56123
+// Method Definition Index: 56098
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsWaterSourceInRange_mEECDC3F9DBB455077DACECD45C96F32BD2646722 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, WaterSource_t7D84866738C69E0541D641CB38D2ED19C23ED376* ___0_waterSource, bool ___1_directTap, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -12295,7 +12295,7 @@ IL_0016:
 		return (bool)((((int32_t)((!(((float)L_14) <= ((float)L_15)))? 1 : 0)) == ((int32_t)0))? 1 : 0);
 	}
 }
-// Method Definition Index: 56124
+// Method Definition Index: 56099
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float FarmInteractionController_GetFishingRange_m498A648F63720FE29D0EB2C617AE8D83A107332D (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FishingSpot_t9035FA94C1AE0210D2C8A431E4EA538466ED9009* ___0_spot, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -12353,7 +12353,7 @@ IL_002a:
 		return L_8;
 	}
 }
-// Method Definition Index: 56125
+// Method Definition Index: 56100
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsFishingSpotInRange_m06F72A90FE9F3E2FFD1419A22D3CA2ED9070BE74 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FishingSpot_t9035FA94C1AE0210D2C8A431E4EA538466ED9009* ___0_spot, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___1_hitPoint, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -12394,7 +12394,7 @@ IL_000b:
 		return (bool)((((int32_t)((!(((float)L_5) <= ((float)L_7)))? 1 : 0)) == ((int32_t)0))? 1 : 0);
 	}
 }
-// Method Definition Index: 56126
+// Method Definition Index: 56101
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsFishingSpotInRange_mAD6BD73856B3B055D2DE6B4D8D3EC7F2EBC08510 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FishingSpot_t9035FA94C1AE0210D2C8A431E4EA538466ED9009* ___0_spot, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___1_hitPoint, bool ___2_directTap, const RuntimeMethod* method) 
 {
 	{
@@ -12406,7 +12406,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsFishingSpotI
 		return L_2;
 	}
 }
-// Method Definition Index: 56127
+// Method Definition Index: 56102
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_CanPriorityScanPassThrough_mA1115BEFEB756FEBA58224397A1AFE2F3B23E200 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, RaycastHit_t6F30BD0B38B56401CA833A1B87BD74F2ACD2F2B5 ___0_hit, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -12522,7 +12522,7 @@ IL_0067:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 56128
+// Method Definition Index: 56103
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR FarmAnimal_t354FCB1012B2DC2691BB7BCCFB3E5CAC6C6AE87E* FarmInteractionController_FindPriorityAnimalTarget_m8800E4AE4D671B7EC930F022F859DF50D18DCE77 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, RaycastHitU5BU5D_t008B8309DE422FE7567068D743D68054D5EBF1A8* ___0_hits, int32_t ___1_hitCount, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -12671,7 +12671,7 @@ IL_008a:
 		return (FarmAnimal_t354FCB1012B2DC2691BB7BCCFB3E5CAC6C6AE87E*)NULL;
 	}
 }
-// Method Definition Index: 56129
+// Method Definition Index: 56104
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_AddAnimalActions_m0E9733EFCAE2C1BB130217E7075C6F4C3947E1E6 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmAnimal_t354FCB1012B2DC2691BB7BCCFB3E5CAC6C6AE87E* ___0_animal, List_1_tE3463A5BFF93914AAD642334B3F524E1C35B2768* ___1_actions, int32_t* ___2_animalState, bool* ___3_hasProduct, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -12962,7 +12962,7 @@ IL_01a8:
 		return;
 	}
 }
-// Method Definition Index: 56130
+// Method Definition Index: 56105
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_TryGetAnimalEnclosure_m9A112379CE93147581FEA9C94B48B60EDBC914E0 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmAnimal_t354FCB1012B2DC2691BB7BCCFB3E5CAC6C6AE87E* ___0_animal, List_1_t5C77C5321F6B9ABB671CB36BA0DF702419814120** ___1_enclosure, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -13137,7 +13137,7 @@ IL_0079:
 		return L_22;
 	}
 }
-// Method Definition Index: 56131
+// Method Definition Index: 56106
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR List_1_t5C77C5321F6B9ABB671CB36BA0DF702419814120* FarmInteractionController_MoveCellsForAnimal_m0D398E760F1FEB79B5907E35A75D3C23441CEAE1 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmAnimal_t354FCB1012B2DC2691BB7BCCFB3E5CAC6C6AE87E* ___0_animal, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -13279,7 +13279,7 @@ IL_0061:
 		return L_18;
 	}
 }
-// Method Definition Index: 56132
+// Method Definition Index: 56107
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR List_1_t5C77C5321F6B9ABB671CB36BA0DF702419814120* FarmInteractionController_MoveCellsForPenCell_mEED1611200355343E8CBE741BDD9573894A2428E (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, BuildSurfaceCell_t124365F3644E699718FE2AF4DCDA22A352722658* ___0_cell, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -13488,7 +13488,7 @@ IL_0099:
 		return L_40;
 	}
 }
-// Method Definition Index: 56133
+// Method Definition Index: 56108
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_AddEnclosureActions_m27DC2776B0D5E14373BE688A8AC27A884DC3A658 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, List_1_t5C77C5321F6B9ABB671CB36BA0DF702419814120* ___0_enclosure, List_1_tE3463A5BFF93914AAD642334B3F524E1C35B2768* ___1_actions, List_1_t5C77C5321F6B9ABB671CB36BA0DF702419814120* ___2_moveCells, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -13833,7 +13833,7 @@ IL_01b0:
 		return;
 	}
 }
-// Method Definition Index: 56134
+// Method Definition Index: 56109
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_TryShowAnimalEnclosurePopup_m60BF190889BE2F3BF5FFFAB9D6941D281C5CCFE6 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmAnimal_t354FCB1012B2DC2691BB7BCCFB3E5CAC6C6AE87E* ___0_animal, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -13903,7 +13903,7 @@ IL_0036:
 		return (bool)1;
 	}
 }
-// Method Definition Index: 56135
+// Method Definition Index: 56110
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR FarmAnimal_t354FCB1012B2DC2691BB7BCCFB3E5CAC6C6AE87E* FarmInteractionController_FindAnimalInEnclosure_m12555F0B9627F2243D1DE0A5BB45597AEEAED438 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, List_1_t5C77C5321F6B9ABB671CB36BA0DF702419814120* ___0_enclosure, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -14361,7 +14361,7 @@ IL_018f:
 		return L_76;
 	}
 }
-// Method Definition Index: 56136
+// Method Definition Index: 56111
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_Update_mC5C3ED31034F62C8B48CB2499F64CB9B427402E3 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -14954,7 +14954,7 @@ IL_02ba:
 		return;
 	}
 }
-// Method Definition Index: 56137
+// Method Definition Index: 56112
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsLockedMousePointer_mB0747831C1AEDC8CA80108BA08F8B78A6AD97A48 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, Pointer_t800EF2832B62E889AC9C182E3B18098AF220E32A* ___0_pointer, const RuntimeMethod* method) 
 {
 	{
@@ -15001,7 +15001,7 @@ IL_0022:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 56138
+// Method Definition Index: 56113
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_TryInvokeCurrentHotkeyAction_mF2E99599239384269C9E255A0100C7BEB1250D52 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -15321,7 +15321,7 @@ IL_0118:
 		return (bool)1;
 	}
 }
-// Method Definition Index: 56139
+// Method Definition Index: 56114
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_TryInvokeCurrentClickAction_m5407DB31524558B19023588D4F68080328E995B7 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -15475,7 +15475,7 @@ IL_007c:
 		return (bool)1;
 	}
 }
-// Method Definition Index: 56140
+// Method Definition Index: 56115
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsBuildModeOpen_mEF81083014DFF43584401BA4D150F782736031DA (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -15510,7 +15510,7 @@ IL_0018:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 56141
+// Method Definition Index: 56116
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_ClearWorldInteractionState_m592471AC9069227A81CF4479C611CBA9FDBB30E2 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -15627,7 +15627,7 @@ IL_00b1:
 		return;
 	}
 }
-// Method Definition Index: 56142
+// Method Definition Index: 56117
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_ClearWorldInteractionStateForSwimming_mA1F7FC39136857A8014BD50F5F9EE95EC37AEA9B (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	{
@@ -15665,7 +15665,7 @@ IL_0017:
 		return;
 	}
 }
-// Method Definition Index: 56143
+// Method Definition Index: 56118
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_ClearDirectTapPromptIfOutOfRange_mA7CB383D76BF4B4CB418E666917684341B1CCE71 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -15739,7 +15739,7 @@ IL_0040:
 		return;
 	}
 }
-// Method Definition Index: 56144
+// Method Definition Index: 56119
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_RefreshFacingInteractionPrompts_m54B6054E80932EA0470F48F775A4D2BA08C9068F (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -15835,7 +15835,7 @@ IL_006c:
 		return;
 	}
 }
-// Method Definition Index: 56145
+// Method Definition Index: 56120
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_HasDirectTapPrompt_mC216896C7C512FDEB85BA7EAC668CC8518361A48 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -15910,7 +15910,7 @@ IL_0045:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 56146
+// Method Definition Index: 56121
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_RefreshPenMovePrompt_mDA31FA05F0276853B5896F1B14CFFD0E8AA927E2 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -16230,7 +16230,7 @@ IL_0192:
 		return;
 	}
 }
-// Method Definition Index: 56147
+// Method Definition Index: 56122
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_RefreshFrontCellInteractionPrompt_m7AD97799CB7550D2E4F0A19F181DB2864ED1574A (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -16558,7 +16558,7 @@ IL_0139:
 		return;
 	}
 }
-// Method Definition Index: 56148
+// Method Definition Index: 56123
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_ShouldFrontCellOverrideStickyTilePrompt_m0E5A174EBE9489B7AAD1094C8AF92A4099B06CA7 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -16712,7 +16712,7 @@ IL_0079:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 56149
+// Method Definition Index: 56124
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_TryBuildFrontCellEnclosurePrompt_mDF57720A51E74DF9CA1AD8C63B0ECEF85766D4B3 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, BuildSurfaceCell_t124365F3644E699718FE2AF4DCDA22A352722658* ___0_cell, List_1_tE3463A5BFF93914AAD642334B3F524E1C35B2768* ___1_actions, GameObject_t76FEDD663AB33C991A9C9A23129337651094216F** ___2_foundObj, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -16853,7 +16853,7 @@ IL_0086:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 56150
+// Method Definition Index: 56125
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_TryBuildFrontCellTilePrompt_m605B0EA9069FC87DDF06A0ECC3DD561291315857 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, BuildSurfaceCell_t124365F3644E699718FE2AF4DCDA22A352722658* ___0_cell, List_1_tE3463A5BFF93914AAD642334B3F524E1C35B2768* ___1_actions, GameObject_t76FEDD663AB33C991A9C9A23129337651094216F** ___2_foundObj, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -16934,7 +16934,7 @@ IL_003d:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 56151
+// Method Definition Index: 56126
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_TryBuildFrontCellPathPrompt_mC533A67E7FA61281D3018306DE52C8E9459219E9 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, BuildSurfaceCell_t124365F3644E699718FE2AF4DCDA22A352722658* ___0_cell, List_1_tE3463A5BFF93914AAD642334B3F524E1C35B2768* ___1_actions, GameObject_t76FEDD663AB33C991A9C9A23129337651094216F** ___2_foundObj, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -17047,7 +17047,7 @@ IL_0056:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 56152
+// Method Definition Index: 56127
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_RefreshFootWaterInteractionPrompt_m842AB4ECCAA04641FFB5DEA61C8214A768E42014 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -17282,7 +17282,7 @@ IL_00f1:
 		return;
 	}
 }
-// Method Definition Index: 56153
+// Method Definition Index: 56128
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_AddWaterSourceAction_m79F6FC7DE4B343A4095A8A54AB1633353199C2C0 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, WaterSource_t7D84866738C69E0541D641CB38D2ED19C23ED376* ___0_waterSource, List_1_tE3463A5BFF93914AAD642334B3F524E1C35B2768* ___1_actions, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -17359,7 +17359,7 @@ IL_001a:
 		return;
 	}
 }
-// Method Definition Index: 56154
+// Method Definition Index: 56129
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* FarmInteractionController_ResolveFarmTileFromCell_m82E436020F843EAD06784ECC9D5518075057E181 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, BuildSurfaceCell_t124365F3644E699718FE2AF4DCDA22A352722658* ___0_cell, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -17522,7 +17522,7 @@ IL_0068:
 		return L_28;
 	}
 }
-// Method Definition Index: 56155
+// Method Definition Index: 56130
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR WaterSource_t7D84866738C69E0541D641CB38D2ED19C23ED376* FarmInteractionController_FindWaterSourceNearFoot_m57D103874DB6EAED36C0EFE6F408934144DD84D8 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -17755,7 +17755,7 @@ IL_0116:
 		return L_50;
 	}
 }
-// Method Definition Index: 56156
+// Method Definition Index: 56131
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_RefreshFootFishingInteractionPrompt_m384265768D02387EC27077C2A83EB3D50249AE80 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -18055,7 +18055,7 @@ IL_0150:
 		return;
 	}
 }
-// Method Definition Index: 56157
+// Method Definition Index: 56132
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 FarmInteractionController_ClosestFishingPoint_m1F16E785377C19B5BDE5B862C97D2A359E5E7140 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FishingSpot_t9035FA94C1AE0210D2C8A431E4EA538466ED9009* ___0_spot, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -18282,7 +18282,7 @@ IL_00d5:
 		return L_40;
 	}
 }
-// Method Definition Index: 56158
+// Method Definition Index: 56133
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR FishingSpot_t9035FA94C1AE0210D2C8A431E4EA538466ED9009* FarmInteractionController_FindFishingSpotNearFoot_m36394F2EFA839005ED4B67C8D046FB7749A8CFD1 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -18522,7 +18522,7 @@ IL_0121:
 		return L_53;
 	}
 }
-// Method Definition Index: 56159
+// Method Definition Index: 56134
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_ClearFootFishingInteractionPrompt_m307EAD508ACAC185D3387E29F36A2A814383B274 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -18588,7 +18588,7 @@ IL_0044:
 		return;
 	}
 }
-// Method Definition Index: 56160
+// Method Definition Index: 56135
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_ClearFootWaterInteractionPrompt_m8BDEEE265A7B82B1E8B508E94C84108201C2F1BB (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -18654,7 +18654,7 @@ IL_0044:
 		return;
 	}
 }
-// Method Definition Index: 56161
+// Method Definition Index: 56136
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_ClearFrontCellInteractionPrompt_m8A1CF7030437A7E1CF5DEA4F34F4ACB33C5FAEF4 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -18720,7 +18720,7 @@ IL_0044:
 		return;
 	}
 }
-// Method Definition Index: 56162
+// Method Definition Index: 56137
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_RefreshFootResourceInteractionPrompt_mEFD9766C865B3D2C0D748D3AA08744429C9EE789 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -18962,7 +18962,7 @@ IL_00f9:
 		return;
 	}
 }
-// Method Definition Index: 56163
+// Method Definition Index: 56138
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_AddFootResourceAction_mEADA34AA51C7049A20B4DEDF652E08BD7415C9D3 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, HarvestableResource_tC78B91FFDA374C3C892C36CCD402CCA7E7F361C9* ___0_resource, List_1_tE3463A5BFF93914AAD642334B3F524E1C35B2768* ___1_actions, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -19065,7 +19065,7 @@ IL_0035:
 		return;
 	}
 }
-// Method Definition Index: 56164
+// Method Definition Index: 56139
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR HarvestableResource_tC78B91FFDA374C3C892C36CCD402CCA7E7F361C9* FarmInteractionController_FindHarvestableNearFoot_mFB0AC1D6C4094C36CB6FCF019E288EBB02CD72AE (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -19331,7 +19331,7 @@ IL_0138:
 		return L_57;
 	}
 }
-// Method Definition Index: 56165
+// Method Definition Index: 56140
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_ClearFootResourceInteractionPrompt_m64DD6D835558574039BC0AC5D1D00F93ECFFCD3A (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -19399,7 +19399,7 @@ IL_004b:
 		return;
 	}
 }
-// Method Definition Index: 56166
+// Method Definition Index: 56141
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsDirectTapTargetStillInRange_m12CB97BA702A62A8769DBE4B36F6E44BA38FB0D7 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* ___0_target, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -19733,7 +19733,7 @@ IL_0168:
 		return (bool)((((int32_t)((!(((float)L_79) <= ((float)L_82)))? 1 : 0)) == ((int32_t)0))? 1 : 0);
 	}
 }
-// Method Definition Index: 56167
+// Method Definition Index: 56142
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FarmInteractionController_CollectInteractionHits_m69F727CC90AD4227CD6A6FC925688B3AED437FAC (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, Ray_t2B1742D7958DC05BDC3EFC7461D3593E1430DC00 ___0_ray, bool ___1_directTap, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -19972,7 +19972,7 @@ IL_00f5:
 		return L_43;
 	}
 }
-// Method Definition Index: 56168
+// Method Definition Index: 56143
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_HandleHover_m562D38B62C0F77D03992390825414784AAA9FAD5 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7 ___0_screenPos, bool ___1_directTap, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -21678,7 +21678,7 @@ IL_0933:
 		return;
 	}
 }
-// Method Definition Index: 56169
+// Method Definition Index: 56144
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* FarmInteractionController_BuildActionSignature_m3ECC3E418D883222270EDF9E4C26E045B580E594 (List_1_tE3463A5BFF93914AAD642334B3F524E1C35B2768* ___0_actions, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -21801,7 +21801,7 @@ IL_005b:
 		return L_26;
 	}
 }
-// Method Definition Index: 56170
+// Method Definition Index: 56145
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsOnCityIsland_m726C9A12F6D19B0E53902DEB4C91C99CB3EFB0FF (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -21842,7 +21842,7 @@ IL_0020:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 56171
+// Method Definition Index: 56146
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsMiningAllowedHere_mE6A5EBB2F6FC7E5122A1205E8668D75D027C729B (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -21901,7 +21901,7 @@ IL_0034:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 56172
+// Method Definition Index: 56147
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_EnsureMiningDailyTurns_m45ED56949C8FB3483CCD703ABDC790FBEE35B706 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -21986,7 +21986,7 @@ IL_0080:
 		return;
 	}
 }
-// Method Definition Index: 56173
+// Method Definition Index: 56148
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_HasMiningTurnsRemaining_m9C99A5E956E1A30C12B90A737BEA30B0236420F5 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, bool ___0_showToast, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22043,7 +22043,7 @@ IL_0041:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 56174
+// Method Definition Index: 56149
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_ConsumeMiningTurn_mCB2100D85D844B91FEE7556EFF47322C54001D1B (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22081,7 +22081,7 @@ IL_0011:
 		return (bool)1;
 	}
 }
-// Method Definition Index: 56175
+// Method Definition Index: 56150
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsPlayerSwimming_mB5A062FE5F9242085014F620FE453328CFBA3806 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22118,7 +22118,7 @@ IL_0016:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 56176
+// Method Definition Index: 56151
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsFishingAllowedHere_m2D389B28BC1D86CF340FB879C0373273E2363044 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	{
@@ -22141,7 +22141,7 @@ IL_0012:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 56177
+// Method Definition Index: 56152
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_StartFishing_m35485E1DAFEDF7BD2909B8C455FE04C6F7BBDFD5 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FishingSpot_t9035FA94C1AE0210D2C8A431E4EA538466ED9009* ___0_spot, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___1_targetPoint, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22364,7 +22364,7 @@ IL_0106:
 		return;
 	}
 }
-// Method Definition Index: 56178
+// Method Definition Index: 56153
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_BeginFeed_mC8C72B8F8EAAE93D3511F035C84011B62B2BF22F (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmAnimal_t354FCB1012B2DC2691BB7BCCFB3E5CAC6C6AE87E* ___0_animal, const RuntimeMethod* method) 
 {
 	{
@@ -22374,7 +22374,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_BeginFeed_mC8C
 		return;
 	}
 }
-// Method Definition Index: 56179
+// Method Definition Index: 56154
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_BeginPlaceAnimalInEnclosure_m50F61A33639858DECA4AFFA3ACEA9BAE0F4BC4A8 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, List_1_t5C77C5321F6B9ABB671CB36BA0DF702419814120* ___0_interior, const RuntimeMethod* method) 
 {
 	{
@@ -22384,7 +22384,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_BeginPlaceAnim
 		return;
 	}
 }
-// Method Definition Index: 56180
+// Method Definition Index: 56155
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_BeginWaterTile_m11B828E58211AA851706A72B5DC37EDA74A6E8E3 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* ___0_tile, Action_tD00B0A84D7945E50C2DFFC28EFEE6ED44ED2AD07* ___1_onWatered, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22475,7 +22475,7 @@ IL_004e:
 		return;
 	}
 }
-// Method Definition Index: 56181
+// Method Definition Index: 56156
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_BeginHarvestTile_m71D51F558CE2A03EFFC1C5FC33B8B03156874D30 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* ___0_tile, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22556,7 +22556,7 @@ IL_0045:
 		return;
 	}
 }
-// Method Definition Index: 56182
+// Method Definition Index: 56157
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_BeginFertilizeTile_m64D79CF8D35DC90BCD25A62F1785C202578812BD (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* ___0_tile, const RuntimeMethod* method) 
 {
 	{
@@ -22567,7 +22567,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_BeginFertilize
 		return L_1;
 	}
 }
-// Method Definition Index: 56183
+// Method Definition Index: 56158
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_CanFertilizeTile_m9C34366FF1660AEBB45CC02918A8DBBD06EF964A (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* ___0_tile, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22602,7 +22602,7 @@ IL_0016:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 56184
+// Method Definition Index: 56159
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_BeginMovePen_mBA1937A535BC7A2CC683E82C7B57766FD7334EF4 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, List_1_t5C77C5321F6B9ABB671CB36BA0DF702419814120* ___0_pen, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22650,7 +22650,7 @@ IL_000d:
 		return L_5;
 	}
 }
-// Method Definition Index: 56185
+// Method Definition Index: 56160
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_BeginMovePlot_mFC2B3B2F422649D75E47DD90BABA72B850F4E90A (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* ___0_seed, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22997,7 +22997,7 @@ IL_0126:
 		return L_55;
 	}
 }
-// Method Definition Index: 56186
+// Method Definition Index: 56161
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_BeginMovePath_mC9AF3FBF8B0E158D54E612EE892B9F7B688FE8F8 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* ___0_pathBuilding, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -23061,7 +23061,7 @@ IL_002b:
 		return L_7;
 	}
 }
-// Method Definition Index: 56187
+// Method Definition Index: 56162
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_StartGroupMove_m87E36FED8CC23ED52C98CB4815C9034309ED0DE6 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, List_1_t5C77C5321F6B9ABB671CB36BA0DF702419814120* ___0_cells, String_t* ___1_subjectLabel, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -23113,7 +23113,7 @@ IL_0025:
 		return (bool)1;
 	}
 }
-// Method Definition Index: 56188
+// Method Definition Index: 56163
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_MarkPendingItemPick_mD9D17D5C3312877ECEB68BC4F20FAA3F09D8DE51 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	{
@@ -23124,7 +23124,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_MarkPendingIte
 		return;
 	}
 }
-// Method Definition Index: 56189
+// Method Definition Index: 56164
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_ClearPendingItemPickIfBagClosed_m2F504F8CE8A6C5243B236D7AE16788FDE971BD32 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -23214,7 +23214,7 @@ IL_0049:
 		return;
 	}
 }
-// Method Definition Index: 56190
+// Method Definition Index: 56165
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_BeginFertilize_mF4319B08729A8222BE6F9A79D0D5BE9BA71CB832 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* ___0_tile, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -23446,7 +23446,7 @@ IL_00f0:
 		return (bool)1;
 	}
 }
-// Method Definition Index: 56191
+// Method Definition Index: 56166
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* FarmInteractionController_FertilizerSavingText_m7E76FA657B2C20C0D46AD87EC97C23E25E09F07E (CropDefinition_t0AE904B6184B5E6B571EF3CA6466A4C6D2705F15* ___0_crop, float ___1_bonusSec, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -23515,7 +23515,7 @@ IL_003f:
 		return L_15;
 	}
 }
-// Method Definition Index: 56192
+// Method Definition Index: 56167
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_FeedAnimal_m07C44126D444B96CDF82005E60BE902C0DD9CB70 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmAnimal_t354FCB1012B2DC2691BB7BCCFB3E5CAC6C6AE87E* ___0_animal, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -23626,7 +23626,7 @@ IL_008f:
 		return;
 	}
 }
-// Method Definition Index: 56193
+// Method Definition Index: 56168
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_HandleFeedSelected_mC1B86A7FD4A57A7F9BABD95E10D81DC83594EE15 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, String_t* ___0_itemId, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24149,7 +24149,7 @@ IL_0283:
 		return;
 	}
 }
-// Method Definition Index: 56194
+// Method Definition Index: 56169
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_WarnIfNoFeed_m536CCB7B5C388D503E4DD66D5FB3266A9CBC5D26 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmAnimal_t354FCB1012B2DC2691BB7BCCFB3E5CAC6C6AE87E* ___0_animal, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24362,7 +24362,7 @@ IL_00aa:
 		return;
 	}
 }
-// Method Definition Index: 56195
+// Method Definition Index: 56170
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_HasFood_m3D5C9C6D8DB5D084146DEB87184399763EEF122D (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, InventoryManager_t033115D1E989CF626FC0710C6FB1895D82788DDF* ___0_inv, String_t* ___1_foodName, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24427,7 +24427,7 @@ IL_0031:
 		return (bool)((((int32_t)L_10) > ((int32_t)0))? 1 : 0);
 	}
 }
-// Method Definition Index: 56196
+// Method Definition Index: 56171
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR ItemDatabase_t0E86CF88EBC430F70E98926E3BE8CB25E7B0221B* FarmInteractionController_get_FoodDb_mA5595AB9D3F0F83A49971384267FE934CDE514E3 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24464,7 +24464,7 @@ IL_001e:
 		return L_3;
 	}
 }
-// Method Definition Index: 56197
+// Method Definition Index: 56172
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* FarmInteractionController_GetItemDisplayName_m326A12510973705FA765DFF284A6A63F918BD188 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, String_t* ___0_itemId, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24542,7 +24542,7 @@ IL_0036:
 		return L_12;
 	}
 }
-// Method Definition Index: 56198
+// Method Definition Index: 56173
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* FarmInteractionController_ResolveItemIdByName_m59B96851A71044B7008410FAF21BA2D21A0C3FBF (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, String_t* ___0_displayName, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24699,7 +24699,7 @@ IL_0073:
 		return L_20;
 	}
 }
-// Method Definition Index: 56199
+// Method Definition Index: 56174
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_NameMatches_mF21C996DE64448E316FD9C589A3209CC3C9A02BC (String_t* ___0_a, String_t* ___1_b, const RuntimeMethod* method) 
 {
 	{
@@ -24744,7 +24744,7 @@ IL_0012:
 		return L_8;
 	}
 }
-// Method Definition Index: 56200
+// Method Definition Index: 56175
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* FarmInteractionController_FoodOptionsText_m24A98D043FE378A604B7E09261282E02F9A45B2D (AnimalDefinition_t71C3EE057834630AE1CF4474F1704CCA0A19C194* ___0_d, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24907,7 +24907,7 @@ IL_0095:
 		return G_B14_0;
 	}
 }
-// Method Definition Index: 56201
+// Method Definition Index: 56176
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_HealAnimal_m2DD3C6D8D67E152D05110F6FF733C4D1593CCAAB (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmAnimal_t354FCB1012B2DC2691BB7BCCFB3E5CAC6C6AE87E* ___0_animal, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -25129,7 +25129,7 @@ IL_00d6:
 		return;
 	}
 }
-// Method Definition Index: 56202
+// Method Definition Index: 56177
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_VaccinateAnimal_m5DF955EE108D6424E782A8F5676D6DC08DD9FAFF (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmAnimal_t354FCB1012B2DC2691BB7BCCFB3E5CAC6C6AE87E* ___0_animal, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -25309,7 +25309,7 @@ IL_00bf:
 		return;
 	}
 }
-// Method Definition Index: 56203
+// Method Definition Index: 56178
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_HarvestAnimal_mB752C4962C56A412A39B5050855E2B7CD64F40AB (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmAnimal_t354FCB1012B2DC2691BB7BCCFB3E5CAC6C6AE87E* ___0_animal, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -25494,7 +25494,7 @@ IL_0092:
 		return;
 	}
 }
-// Method Definition Index: 56204
+// Method Definition Index: 56179
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_ClickHarvestResource_m216C46D292EEB897177F8F7D90FCF00E8C16D51B (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, HarvestableResource_tC78B91FFDA374C3C892C36CCD402CCA7E7F361C9* ___0_resource, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -25630,7 +25630,7 @@ IL_0067:
 		return;
 	}
 }
-// Method Definition Index: 56205
+// Method Definition Index: 56180
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_StartResourceTimedAction_mC1A464008BF8DA134869FB09CBA075998311BE98 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, HarvestableResource_tC78B91FFDA374C3C892C36CCD402CCA7E7F361C9* ___0_resource, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -25899,7 +25899,7 @@ IL_00e3:
 		return;
 	}
 }
-// Method Definition Index: 56206
+// Method Definition Index: 56181
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_HoldChopResource_m037831A8A0E82267CE06A7AAE9212CE64ACCAE72 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, HarvestableResource_tC78B91FFDA374C3C892C36CCD402CCA7E7F361C9* ___0_resource, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -26175,7 +26175,7 @@ IL_010d:
 		return;
 	}
 }
-// Method Definition Index: 56207
+// Method Definition Index: 56182
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_PerformTileAction_m1252C2587B924C4FEF1BC24EBE44CD1C0D803489 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* ___0_tile, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -26360,7 +26360,7 @@ IL_00b7:
 		return;
 	}
 }
-// Method Definition Index: 56208
+// Method Definition Index: 56183
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_HandleHold_m6C52E4D5321B465FE8A27263A0E609C196D062F2 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7 ___0_screenPos, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -26824,7 +26824,7 @@ IL_0214:
 		return;
 	}
 }
-// Method Definition Index: 56209
+// Method Definition Index: 56184
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_HandleClick_m8F01906FEE9082F24825C3AFEBE40E60086E5789 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7 ___0_screenPos, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -27705,7 +27705,7 @@ IL_03d8:
 		return;
 	}
 }
-// Method Definition Index: 56210
+// Method Definition Index: 56185
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_HandlePlow_m1226EB572B16097737E2DDD12C84C282123BCC66 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* ___0_tile, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -27811,7 +27811,7 @@ IL_004c:
 		return;
 	}
 }
-// Method Definition Index: 56211
+// Method Definition Index: 56186
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_HandleOpenSeedSelection_m8EDF2B387678CC4C98953F2FED65A6F789645AA2 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* ___0_tile, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -27929,7 +27929,7 @@ IL_0090:
 		return;
 	}
 }
-// Method Definition Index: 56212
+// Method Definition Index: 56187
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_WarnIfNoSeeds_mC00DABE5396CB4BAB7293BB4BDE9DEB5C6E7B8C8 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -27979,7 +27979,7 @@ IL_0019:
 		return;
 	}
 }
-// Method Definition Index: 56213
+// Method Definition Index: 56188
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_HasAnySeed_mD6A457A7F030C960D082EE1ACFBC580189B4BE7A (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, InventoryManager_t033115D1E989CF626FC0710C6FB1895D82788DDF* ___0_inv, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -28139,7 +28139,7 @@ IL_007c:
 		return L_20;
 	}
 }
-// Method Definition Index: 56214
+// Method Definition Index: 56189
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_OpenPenAnimalPicker_mB20C5D28BE2B61BAC8BA26DDF7FAD22989B78964 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, AnimalPenSpawner_t2D9D404601F41954B6F433E33ABD072B457E820D* ___0_pen, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -28197,7 +28197,7 @@ IL_000a:
 		return;
 	}
 }
-// Method Definition Index: 56215
+// Method Definition Index: 56190
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_OpenEnclosurePicker_m544C8603A77A2BDF1C56850E541F4A1416E4E26F (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, List_1_t5C77C5321F6B9ABB671CB36BA0DF702419814120* ___0_interior, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -28278,7 +28278,7 @@ IL_0060:
 		return;
 	}
 }
-// Method Definition Index: 56216
+// Method Definition Index: 56191
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Awaitable_t690337FEC1C411606E233EA36A41337B931C23CB* FarmInteractionController_HandleEnclosureAnimalSelectedAsync_mCB5D47826705C5AE84FEC0465F5E0A0766AC513D (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, String_t* ___0_itemId, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -28311,7 +28311,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Awaitable_t690337FEC1C411606E233EA36A41337B93
 		return L_4;
 	}
 }
-// Method Definition Index: 56217
+// Method Definition Index: 56192
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_RequestDemolishEnclosure_m1AA63A71BC657C72761429CD5C89D92316B90ED5 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, List_1_t5C77C5321F6B9ABB671CB36BA0DF702419814120* ___0_encl, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -28402,7 +28402,7 @@ IL_0044:
 		return;
 	}
 }
-// Method Definition Index: 56218
+// Method Definition Index: 56193
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_RequestDemolishFarmTile_m892B8C15F928AB906EBE59C200D411117A668BFA (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* ___0_tile, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -28503,7 +28503,7 @@ IL_0061:
 		return;
 	}
 }
-// Method Definition Index: 56219
+// Method Definition Index: 56194
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_DemolishFarmTile_mBBCE07174DE8E706E8D304DB43EDDF1988668B18 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* ___0_tile, GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* ___1_building, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -28839,7 +28839,7 @@ IL_0163:
 		return;
 	}
 }
-// Method Definition Index: 56220
+// Method Definition Index: 56195
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_RequestDemolishPathBuilding_m134DB531ECE67ED387619AFB4F5F2291D7DBC757 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* ___0_building, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -28917,7 +28917,7 @@ IL_0040:
 		return;
 	}
 }
-// Method Definition Index: 56221
+// Method Definition Index: 56196
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_DemolishPathBuilding_m7F114CC592B67C8DA0A4C24C3BB3666C2F09F56A (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* ___0_building, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -29225,7 +29225,7 @@ IL_0168:
 		return;
 	}
 }
-// Method Definition Index: 56222
+// Method Definition Index: 56197
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsSameEnclosure_m0D26433D5761A9CE1C524A0EB5D8D0B26BB8F65D (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, List_1_t5C77C5321F6B9ABB671CB36BA0DF702419814120* ___0_a, List_1_t5C77C5321F6B9ABB671CB36BA0DF702419814120* ___1_b, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -29388,7 +29388,7 @@ IL_0061:
 		return L_17;
 	}
 }
-// Method Definition Index: 56223
+// Method Definition Index: 56198
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* FarmInteractionController_ResolveAnimalItemIdInEnclosure_mD53A80BC79FED7DFED150A5187CA49908EB8FAA4 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmAnimal_t354FCB1012B2DC2691BB7BCCFB3E5CAC6C6AE87E* ___0_animal, List_1_t5C77C5321F6B9ABB671CB36BA0DF702419814120* ___1_pen, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -29609,7 +29609,7 @@ IL_00b6:
 		return L_34;
 	}
 }
-// Method Definition Index: 56224
+// Method Definition Index: 56199
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_DemolishEnclosure_m95334EAA66E2998EAF6272EB50B56A81E335F27B (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, List_1_t5C77C5321F6B9ABB671CB36BA0DF702419814120* ___0_pen, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -30585,7 +30585,7 @@ IL_0457:
 		return;
 	}
 }
-// Method Definition Index: 56225
+// Method Definition Index: 56200
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_HandlePenAnimalSelected_m5C4D5A54A44F3981C9E3EF129EF279F0BA0CFCA5 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, String_t* ___0_itemId, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -30676,7 +30676,7 @@ IL_0031:
 		return;
 	}
 }
-// Method Definition Index: 56226
+// Method Definition Index: 56201
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_OnInventoryItemSelected_mE327199EAFF17A6FC3422E9EFD14568E3A9DF798 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, String_t* ___0_itemId, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -31029,7 +31029,7 @@ IL_0199:
 		return;
 	}
 }
-// Method Definition Index: 56227
+// Method Definition Index: 56202
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_IsMiningServerAuthoritative_m2032B78BA9DC86C5DA0EC443BD617387534D5F3E (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -31079,7 +31079,7 @@ IL_0026:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 56228
+// Method Definition Index: 56203
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_UseMineTicket_mD5E1DAEC10C358CAE140942E90B7D05668737663 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -31189,7 +31189,7 @@ IL_0055:
 		return;
 	}
 }
-// Method Definition Index: 56229
+// Method Definition Index: 56204
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_RedeemMineTicketServerAsync_mF57DDE7A63BFB6EE3B1567D0CEDD165992908849 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -31222,7 +31222,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_RedeemMineTick
 		return;
 	}
 }
-// Method Definition Index: 56230
+// Method Definition Index: 56205
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_HasMineTicket_m7955AAD6F8AAF6FE7DDE7893CEB8CFD2615FF185 (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -31261,7 +31261,7 @@ IL_001e:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 56231
+// Method Definition Index: 56206
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_AutoRedeemMineTicketThenRetry_m300E5ACDC5C99006057566F7002C69B761FB8BFF (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, HarvestableResource_tC78B91FFDA374C3C892C36CCD402CCA7E7F361C9* ___0_resource, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -31297,7 +31297,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_AutoRedeemMine
 		return;
 	}
 }
-// Method Definition Index: 56232
+// Method Definition Index: 56207
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_UseSpinTicket_mE9D6E8FA7D9735639FC9FD8D106B7D0CFEB9D779 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -31398,7 +31398,7 @@ IL_0065:
 		return;
 	}
 }
-// Method Definition Index: 56233
+// Method Definition Index: 56208
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_StartPlantTimedAction_m4DB4D77D3DA49853A5F4FE094629E2AFAAFF15F9 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* ___0_tile, String_t* ___1_seedId, bool ___2_seedConsumed, int32_t ___3_seedConsumedAmount, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -31540,7 +31540,7 @@ IL_00ba:
 		return G_B4_0;
 	}
 }
-// Method Definition Index: 56234
+// Method Definition Index: 56209
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FarmInteractionController_GetSeedCostForPlanting_m99DF290A1E053C96FD9ACC9E10C7F15C9D54243F (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, String_t* ___0_seedId, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -31627,7 +31627,7 @@ IL_0034:
 		return L_12;
 	}
 }
-// Method Definition Index: 56235
+// Method Definition Index: 56210
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_ConfirmMultiSlotPlanting_m304DCB7F3A42AB3878297F3D35F47C5244A063C8 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* ___0_tile, String_t* ___1_seedId, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -31814,7 +31814,7 @@ IL_0087:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 56236
+// Method Definition Index: 56211
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_PlantWithSlots_m89A611615B8CBA3EA68E8B929D20944C614AB604 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* ___0_master, String_t* ___1_seedId, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -32113,7 +32113,7 @@ IL_0106:
 		return (bool)1;
 	}
 }
-// Method Definition Index: 56237
+// Method Definition Index: 56212
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool FarmInteractionController_TryValidatePlanting_mD1D876DD335C81658143F4E109B9E43FEE1D2ED8 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* ___0_tile, String_t* ___1_seedId, String_t** ___2_error, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -32340,7 +32340,7 @@ IL_00a0:
 		return (bool)0;
 	}
 }
-// Method Definition Index: 56238
+// Method Definition Index: 56213
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR List_1_t9411242987E888895AC512943D750AE7FCAF0A7B* FarmInteractionController_FindPlotTiles_m7C2A6D2D9672E5BE35B6284395EEDFCAD457283B (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* ___0_seed, int32_t ___1_maxTiles, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -32788,7 +32788,7 @@ IL_01fa:
 		return L_115;
 	}
 }
-// Method Definition Index: 56239
+// Method Definition Index: 56214
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR List_1_t9411242987E888895AC512943D750AE7FCAF0A7B* FarmInteractionController_FindNearbyPlowedTiles_m68FE453C546EA0BCAAA7A5AF41D784BDAE60E6D8 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* ___0_master, int32_t ___1_count, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -33219,7 +33219,7 @@ IL_01e7:
 		return L_110;
 	}
 }
-// Method Definition Index: 56240
+// Method Definition Index: 56215
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7 FarmInteractionController_GetFarmSlotSpacing_mA1849E2C0FC29C2679811816DE738C0AFFBE7A30 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* ___0_tile, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -33340,7 +33340,7 @@ IL_0073:
 		return L_17;
 	}
 }
-// Method Definition Index: 56241
+// Method Definition Index: 56216
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_HandleWater_mAC757CC9B401BCA0425E85E68094DB349BBE195B (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* ___0_tile, Action_tD00B0A84D7945E50C2DFFC28EFEE6ED44ED2AD07* ___1_onWatered, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -33555,7 +33555,7 @@ IL_0114:
 		return;
 	}
 }
-// Method Definition Index: 56242
+// Method Definition Index: 56217
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_ScoopWater_m8A0CB605448BF658B3249CB1B9CD516A336A873F (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, WaterSource_t7D84866738C69E0541D641CB38D2ED19C23ED376* ___0_src, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -33764,7 +33764,7 @@ IL_00a3:
 		return;
 	}
 }
-// Method Definition Index: 56243
+// Method Definition Index: 56218
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_HandleHarvest_m2535479E70747E2B110F2A42400E0A67FCAD1A87 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* ___0_tile, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -34116,7 +34116,7 @@ IL_01c8:
 		return;
 	}
 }
-// Method Definition Index: 56244
+// Method Definition Index: 56219
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController__ctor_m600DBFB29E2A8ED0B9B22F3572D6420F4F14674F (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -34283,7 +34283,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController__ctor_m600DBFB
 		return;
 	}
 }
-// Method Definition Index: 56245
+// Method Definition Index: 56220
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController__cctor_m806C38257C6684A9951AE651B760C8F290D33AEA (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -34331,7 +34331,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController__cctor_m806C38
 		return;
 	}
 }
-// Method Definition Index: 56246
+// Method Definition Index: 56221
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FarmInteractionController_U3COnInventoryItemSelectedU3Eg__MarkHandledU7C287_0_m88E5116B24436D420720061758577E01C7E4A9F6 (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -34367,7 +34367,7 @@ IL_001a:
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
-// Method Definition Index: 56051
+// Method Definition Index: 56026
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* FarmInteractionController_get_Instance_m38C68A0A544291F95BD13376E15006083172D1DE_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -34383,7 +34383,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR FarmInteractionController_t75302F
 		return L_0;
 	}
 }
-// Method Definition Index: 56052
+// Method Definition Index: 56027
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void FarmInteractionController_set_Instance_m9C1EE45D0B68E2F1A322EF04B0EF3D5DB1F7299C_inline (FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* ___0_value, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -34401,7 +34401,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void FarmInteractionController_se
 		return;
 	}
 }
-// Method Definition Index: 56627
+// Method Definition Index: 56602
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* AuthService_get_Instance_mC5F3BCC6818176AEAD746F043ADB4B7B1F58245D_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -34416,7 +34416,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR AuthService_t84804C1CD86F65AFE5F5
 		return L_0;
 	}
 }
-// Method Definition Index: 56465
+// Method Definition Index: 56440
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool PenMoveController_get_IsActive_m71A61FF69F4DB1E0DCBEC4C992138540C5149E69_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -34432,7 +34432,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool PenMoveController_get_IsActi
 		return L_0;
 	}
 }
-// Method Definition Index: 55792
+// Method Definition Index: 55767
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR InventoryManager_t033115D1E989CF626FC0710C6FB1895D82788DDF* InventoryManager_get_Instance_m491A7891DFB69B09C18B6B258094448A9A6EEEE2_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -34447,7 +34447,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR InventoryManager_t033115D1E989CF6
 		return L_0;
 	}
 }
-// Method Definition Index: 50538
+// Method Definition Index: 50525
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t Mathf_Max_m7FA442918DE37E3A00106D1F2E789D65829792B8_inline (int32_t ___0_a, int32_t ___1_b, const RuntimeMethod* method) 
 {
 	int32_t V_0 = 0;
@@ -34484,7 +34484,7 @@ IL_000c:
 		return L_4;
 	}
 }
-// Method Definition Index: 50536
+// Method Definition Index: 50523
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Mathf_Max_mF5379E63D2BBAC76D090748695D833934F8AD051_inline (float ___0_a, float ___1_b, const RuntimeMethod* method) 
 {
 	float V_0 = 0.0f;
@@ -34521,7 +34521,7 @@ IL_000c:
 		return L_4;
 	}
 }
-// Method Definition Index: 55580
+// Method Definition Index: 55555
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR RealtimeClient_tAC878B7FACBA3E620FC46EC3CEFCB00D2BA5163F* RealtimeClient_get_Instance_m6F2913BE8C73BC21A2A5ECD708BE9E0169A2333C_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -34537,7 +34537,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR RealtimeClient_tAC878B7FACBA3E620
 		return L_0;
 	}
 }
-// Method Definition Index: 50552
+// Method Definition Index: 50539
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t Mathf_Clamp_m4DC36EEFDBE5F07C16249DA568023C5ECCFF0E7B_inline (int32_t ___0_value, int32_t ___1_min, int32_t ___2_max, const RuntimeMethod* method) 
 {
 	bool V_0 = false;
@@ -34588,7 +34588,7 @@ IL_001d:
 		return L_9;
 	}
 }
-// Method Definition Index: 55568
+// Method Definition Index: 55543
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR ResourceInteractionUIController_t52A880A0CE21435739138F375E9A599F94DA91EB* ResourceInteractionUIController_get_Instance_m94237C3A47F5B5F46BB34656BAC3CA7091206425_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -34603,7 +34603,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR ResourceInteractionUIController_t
 		return L_0;
 	}
 }
-// Method Definition Index: 54348
+// Method Definition Index: 54323
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR PlayerController_t7E8D7042FA2D0DFEC54A1FCDF395161D88DAAE95* PlayerController_get_Instance_m304823623518B0D034B8A0510EECC8D1C4093966_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -34618,7 +34618,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR PlayerController_t7E8D7042FA2D0DF
 		return L_0;
 	}
 }
-// Method Definition Index: 54868
+// Method Definition Index: 54843
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR FishingOverlayController_t9518180503FD2C490F00079D98C449927D3DC000* FishingOverlayController_get_Instance_m257D8CD0CB0564E83A5DC41B4FCCA6D5649545E8_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -34633,7 +34633,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR FishingOverlayController_t9518180
 		return L_0;
 	}
 }
-// Method Definition Index: 54963
+// Method Definition Index: 54938
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR GameHUDController_tE3ABF9F6D07165DEEE04A7739F413F8475ADD330* GameHUDController_get_Instance_mE7C5F167AB1D4A2A2E581D2D5B55E3442D984CB5_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -34655,7 +34655,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Action_Invoke_m7126A54DACA72
 	typedef void (*FunctionPointerType) (RuntimeObject*, const RuntimeMethod*);
 	((FunctionPointerType)__this->___invoke_impl)((Il2CppObject*)__this->___method_code, reinterpret_cast<RuntimeMethod*>(__this->___method));
 }
-// Method Definition Index: 50534
+// Method Definition Index: 50521
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Mathf_Min_m747CA71A9483CDB394B13BD0AD048EE17E48FFE4_inline (float ___0_a, float ___1_b, const RuntimeMethod* method) 
 {
 	float V_0 = 0.0f;
@@ -34692,7 +34692,7 @@ IL_000c:
 		return L_4;
 	}
 }
-// Method Definition Index: 48823
+// Method Definition Index: 48816
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 Bounds_ClosestPoint_m5BEB0BAC00387C354CF3C4D013442384122F24FC_inline (Bounds_t367E830C64BBF235ED8C3B2F8CF6254FDCAD39C3* __this, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_point, const RuntimeMethod* method) 
 {
 	{
@@ -34701,7 +34701,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D
 		return L_0;
 	}
 }
-// Method Definition Index: 55904
+// Method Definition Index: 55879
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* BuildSurfaceCell_get_Occupant_m2E666625EBBDA6438DA3FF7F2CD621842B7C5D70_inline (BuildSurfaceCell_t124365F3644E699718FE2AF4DCDA22A352722658* __this, const RuntimeMethod* method) 
 {
 	{
@@ -34710,7 +34710,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR GameObject_t76FEDD663AB33C991A9C9
 		return L_0;
 	}
 }
-// Method Definition Index: 55912
+// Method Definition Index: 55887
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* BuildSurfaceCell_get_AnimalObject_m128144C5154B40718FDC9D683543A5B4BE1BCB8B_inline (BuildSurfaceCell_t124365F3644E699718FE2AF4DCDA22A352722658* __this, const RuntimeMethod* method) 
 {
 	{
@@ -34719,7 +34719,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR GameObject_t76FEDD663AB33C991A9C9
 		return L_0;
 	}
 }
-// Method Definition Index: 50551
+// Method Definition Index: 50538
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Mathf_Clamp_mEB9AEA827D27D20FCC787F7375156AF46BB12BBF_inline (float ___0_value, float ___1_min, float ___2_max, const RuntimeMethod* method) 
 {
 	bool V_0 = false;
@@ -34770,7 +34770,7 @@ IL_001d:
 		return L_9;
 	}
 }
-// Method Definition Index: 55909
+// Method Definition Index: 55884
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool BuildSurfaceCell_get_HasAnimal_m0FC282CA37A30E2C3BD2F45D0618C1B2BB3FBF34_inline (BuildSurfaceCell_t124365F3644E699718FE2AF4DCDA22A352722658* __this, const RuntimeMethod* method) 
 {
 	{
@@ -34779,7 +34779,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool BuildSurfaceCell_get_HasAnim
 		return L_0;
 	}
 }
-// Method Definition Index: 54557
+// Method Definition Index: 54532
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR AnimalInteractionPopupController_t514D833EB927F3421A0A66510E45364B76EA4F3B* AnimalInteractionPopupController_get_Instance_m17E4CE047B63A989733AE03314668A65EA85DCD2_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -34794,7 +34794,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR AnimalInteractionPopupController_
 		return L_0;
 	}
 }
-// Method Definition Index: 54281
+// Method Definition Index: 54256
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR GameManager_tFE129A0017AF5BBD30FDCD4403B9CCEAE064C6B6* GameManager_get_Instance_m076FE4D98E785B5AEE0B4C360C7857F824E7FBD0_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -34843,7 +34843,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector2Control_t8D1B4021A1D82671A
 		return L_0;
 	}
 }
-// Method Definition Index: 50576
+// Method Definition Index: 50562
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Vector2__ctor_m9525B79969AFFE3254B303A40997A56DEEB6F548_inline (Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7* __this, float ___0_x, float ___1_y, const RuntimeMethod* method) 
 {
 	{
@@ -34869,7 +34869,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Mouse_t9A9CC4636FA9CDBAD7FB7A02DB
 		return L_0;
 	}
 }
-// Method Definition Index: 54733
+// Method Definition Index: 54708
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR ChatPanelController_tA561119C4D0916AD61F0BF611A277BC8B001F195* ChatPanelController_get_Instance_m4F22E05F3313328500B4BDA1578F98F4B6A501A5_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -34899,7 +34899,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Keyboard_t015BD1A6508137D20B43952
 		return L_0;
 	}
 }
-// Method Definition Index: 54634
+// Method Definition Index: 54609
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR BuildModeOverlayController_t66BD101B89097CE5DA8D9EFB150B8CED6EE43CD7* BuildModeOverlayController_get_Instance_mC77457D3A31C9C14863BCF164630DE01C59CDF7F_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -34914,7 +34914,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR BuildModeOverlayController_t66BD1
 		return L_0;
 	}
 }
-// Method Definition Index: 56468
+// Method Definition Index: 56443
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR String_t* PenMoveController_get_SubjectLabel_m2B82A2277397CF6ED4872C610B4E2E4D7F4F4544_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -34930,7 +34930,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR String_t* PenMoveController_get_S
 		return L_0;
 	}
 }
-// Method Definition Index: 56389
+// Method Definition Index: 56364
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR FrontBuildCellSelector_tA86920623175D2C6494012A32D761509525EB3A4* FrontBuildCellSelector_get_Instance_mD889A0A5E00B8DB286E109D5D06E67DD53839DBA_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -34945,7 +34945,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR FrontBuildCellSelector_tA86920623
 		return L_0;
 	}
 }
-// Method Definition Index: 56391
+// Method Definition Index: 56366
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR BuildSurfaceCell_t124365F3644E699718FE2AF4DCDA22A352722658* FrontBuildCellSelector_get_CurrentCell_m9574FF624B39A5F615419646036C73C1C375CAE6_inline (FrontBuildCellSelector_tA86920623175D2C6494012A32D761509525EB3A4* __this, const RuntimeMethod* method) 
 {
 	{
@@ -34954,7 +34954,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR BuildSurfaceCell_t124365F3644E699
 		return L_0;
 	}
 }
-// Method Definition Index: 50441
+// Method Definition Index: 50428
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Vector3_get_sqrMagnitude_m43C27DEC47C4811FB30AB474FF2131A963B66FC8_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2* __this, const RuntimeMethod* method) 
 {
 	{
@@ -34967,7 +34967,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Vector3_get_sqrMagnitude_m4
 		return ((float)il2cpp_codegen_add(((float)il2cpp_codegen_add(((float)il2cpp_codegen_multiply(L_0, L_1)), ((float)il2cpp_codegen_multiply(L_2, L_3)))), ((float)il2cpp_codegen_multiply(L_4, L_5))));
 	}
 }
-// Method Definition Index: 50428
+// Method Definition Index: 50415
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Vector3_Normalize_mC749B887A4C74BA0A2E13E6377F17CCAEB0AADA8_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2* __this, const RuntimeMethod* method) 
 {
 	float V_0 = 0.0f;
@@ -35009,7 +35009,7 @@ IL_0065:
 		return;
 	}
 }
-// Method Definition Index: 50458
+// Method Definition Index: 50445
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 Vector3_op_Multiply_m87BA7C578F96C8E49BB07088DAAC4649F83B0353_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_a, float ___1_d, const RuntimeMethod* method) 
 {
 	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 V_0;
@@ -35032,7 +35032,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D
 		return L_9;
 	}
 }
-// Method Definition Index: 50455
+// Method Definition Index: 50442
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 Vector3_op_Addition_m78C0EC70CB66E8DCAC225743D82B268DAEE92067_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_a, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___1_b, const RuntimeMethod* method) 
 {
 	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 V_0;
@@ -35058,7 +35058,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D
 		return L_12;
 	}
 }
-// Method Definition Index: 50450
+// Method Definition Index: 50437
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 Vector3_get_up_m128AF3FDC820BF59D5DE86D973E7DE3F20C3AEBA_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -35072,7 +35072,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D
 		return L_0;
 	}
 }
-// Method Definition Index: 50610
+// Method Definition Index: 50596
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 Vector2_op_Implicit_m6D9CABB2C791A192867D7A4559D132BE86DD3EB7_inline (Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7 ___0_v, const RuntimeMethod* method) 
 {
 	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 V_0;
@@ -35090,7 +35090,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D
 		return L_4;
 	}
 }
-// Method Definition Index: 54330
+// Method Definition Index: 54305
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR IslandTravelManager_tE231A23B71ED80F3305D1123F29DAD4C1952DD6B* IslandTravelManager_get_Instance_mDD2631BC8714644CA792754C5AFBF02F472E5ABC_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -35105,7 +35105,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR IslandTravelManager_tE231A23B71ED
 		return L_0;
 	}
 }
-// Method Definition Index: 54332
+// Method Definition Index: 54307
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR String_t* IslandTravelManager_get_CurrentIslandId_m61EC41D62F49612BB820950FDA97D823FECBEBD4_inline (IslandTravelManager_tE231A23B71ED80F3305D1123F29DAD4C1952DD6B* __this, const RuntimeMethod* method) 
 {
 	{
@@ -35114,7 +35114,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR String_t* IslandTravelManager_get
 		return L_0;
 	}
 }
-// Method Definition Index: 56359
+// Method Definition Index: 56334
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR FishingLineController_t66B39BB0EF053981B6EA31EB4AA360883662843C* FishingLineController_get_Instance_m6895566B4CE04AFC220FA6A256C7060A46E031D8_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -35129,7 +35129,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR FishingLineController_t66B39BB0EF
 		return L_0;
 	}
 }
-// Method Definition Index: 54160
+// Method Definition Index: 54135
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR CropDefinition_t0AE904B6184B5E6B571EF3CA6466A4C6D2705F15* FarmTile_GetCurrentCrop_m2B1B6FB370634BC343BC298932AB0C1EB1A35EF6_inline (FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* __this, const RuntimeMethod* method) 
 {
 	{
@@ -35138,7 +35138,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR CropDefinition_t0AE904B6184B5E6B5
 		return L_0;
 	}
 }
-// Method Definition Index: 50549
+// Method Definition Index: 50536
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t Mathf_RoundToInt_m60F8B66CF27F1FA75AA219342BD184B75771EB4B_inline (float ___0_f, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -35163,7 +35163,7 @@ IL_000c:
 		return L_2;
 	}
 }
-// Method Definition Index: 55972
+// Method Definition Index: 55947
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool FarmAnimal_get_LastHarvestWasFinal_m75610360867A6583388B3664EE1AFED5EF15974C_inline (FarmAnimal_t354FCB1012B2DC2691BB7BCCFB3E5CAC6C6AE87E* __this, const RuntimeMethod* method) 
 {
 	{
@@ -35172,7 +35172,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool FarmAnimal_get_LastHarvestWa
 		return L_0;
 	}
 }
-// Method Definition Index: 55914
+// Method Definition Index: 55889
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR String_t* BuildSurfaceCell_get_AnimalItemId_m3F119D06E09C35A9021709CD354A64CA1ACB7A9C_inline (BuildSurfaceCell_t124365F3644E699718FE2AF4DCDA22A352722658* __this, const RuntimeMethod* method) 
 {
 	{
@@ -35181,7 +35181,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR String_t* BuildSurfaceCell_get_An
 		return L_0;
 	}
 }
-// Method Definition Index: 55920
+// Method Definition Index: 55895
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR String_t* BuildSurfaceCell_get_BuildMaterialId_m64F0B32614B4098805B5743DA899AC5F0AFE722D_inline (BuildSurfaceCell_t124365F3644E699718FE2AF4DCDA22A352722658* __this, const RuntimeMethod* method) 
 {
 	{
@@ -35190,7 +35190,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR String_t* BuildSurfaceCell_get_Bu
 		return L_0;
 	}
 }
-// Method Definition Index: 55918
+// Method Definition Index: 55893
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t BuildSurfaceCell_get_BuildCost_mEDF8464B5467353A3DFCE63C18182FD7415E750B_inline (BuildSurfaceCell_t124365F3644E699718FE2AF4DCDA22A352722658* __this, const RuntimeMethod* method) 
 {
 	{
@@ -35199,7 +35199,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t BuildSurfaceCell_get_Buil
 		return L_0;
 	}
 }
-// Method Definition Index: 56633
+// Method Definition Index: 56608
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR String_t* AuthService_get_Token_mAB243BD5FB2A8EBB85AEE450778BC9F82F7693D8_inline (AuthService_t84804C1CD86F65AFE5F57A6C815F8B977782C4C2* __this, const RuntimeMethod* method) 
 {
 	{
@@ -35208,7 +35208,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR String_t* AuthService_get_Token_m
 		return L_0;
 	}
 }
-// Method Definition Index: 54124
+// Method Definition Index: 54099
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void FarmTile_OccupyAsSlot_m737174BAF3066E41CBF41BABAD46C56BCC1C90D5_inline (FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* __this, FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* ___0_master, const RuntimeMethod* method) 
 {
 	{
@@ -35220,7 +35220,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void FarmTile_OccupyAsSlot_m73717
 		return;
 	}
 }
-// Method Definition Index: 54125
+// Method Definition Index: 54100
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void FarmTile_RegisterSlaves_m0ED0F190D4BBB0E176DD09EF474755EE7E533F71_inline (FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* __this, List_1_t9411242987E888895AC512943D750AE7FCAF0A7B* ___0_slaves, const RuntimeMethod* method) 
 {
 	{
@@ -35232,7 +35232,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void FarmTile_RegisterSlaves_m0ED
 		return;
 	}
 }
-// Method Definition Index: 50624
+// Method Definition Index: 50610
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Vector2Int__ctor_mC20D1312133EB8CB63EC11067088B043660F11CE_inline (Vector2Int_t69B2886EBAB732D9B880565E18E7568F3DE0CE6A* __this, int32_t ___0_x, int32_t ___1_y, const RuntimeMethod* method) 
 {
 	{
@@ -35243,7 +35243,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Vector2Int__ctor_mC20D131213
 		return;
 	}
 }
-// Method Definition Index: 50640
+// Method Definition Index: 50626
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector2Int_t69B2886EBAB732D9B880565E18E7568F3DE0CE6A Vector2Int_get_zero_mF92C338E9CB9434105090E675E04D20A29649553_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -35257,7 +35257,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector2Int_t69B2886EBAB732D9B8805
 		return L_0;
 	}
 }
-// Method Definition Index: 50632
+// Method Definition Index: 50618
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool Vector2Int_op_Equality_mD80F6ED22EA1200C4F408440D02FE61388C7D6BA_inline (Vector2Int_t69B2886EBAB732D9B880565E18E7568F3DE0CE6A ___0_lhs, Vector2Int_t69B2886EBAB732D9B880565E18E7568F3DE0CE6A ___1_rhs, const RuntimeMethod* method) 
 {
 	int32_t G_B3_0 = 0;
@@ -35290,7 +35290,7 @@ IL_001f:
 		return (bool)G_B3_0;
 	}
 }
-// Method Definition Index: 50629
+// Method Definition Index: 50615
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector2Int_t69B2886EBAB732D9B880565E18E7568F3DE0CE6A Vector2Int_op_Addition_m6358133A28BA913D2080FD44472D1FD1CE1AC28F_inline (Vector2Int_t69B2886EBAB732D9B880565E18E7568F3DE0CE6A ___0_a, Vector2Int_t69B2886EBAB732D9B880565E18E7568F3DE0CE6A ___1_b, const RuntimeMethod* method) 
 {
 	{
@@ -35308,7 +35308,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector2Int_t69B2886EBAB732D9B8805
 		return L_8;
 	}
 }
-// Method Definition Index: 54117
+// Method Definition Index: 54092
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR String_t* FarmTile_get_LastFinalProductId_mB29DBB81472F92F31D5B85776F8AB8D1F3EB60DD_inline (FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* __this, const RuntimeMethod* method) 
 {
 	{
@@ -35317,7 +35317,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR String_t* FarmTile_get_LastFinalP
 		return L_0;
 	}
 }
-// Method Definition Index: 54119
+// Method Definition Index: 54094
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t FarmTile_get_LastFinalProductAmount_m94D571BC6D35E45007A84422DDCC284A1D0BD379_inline (FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* __this, const RuntimeMethod* method) 
 {
 	{
@@ -35326,7 +35326,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t FarmTile_get_LastFinalPro
 		return L_0;
 	}
 }
-// Method Definition Index: 54115
+// Method Definition Index: 54090
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float FarmTile_get_LastCareFactor_mC582FB4522C029346D7212C7B2D6833F2CDA9803_inline (FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* __this, const RuntimeMethod* method) 
 {
 	{
@@ -35335,7 +35335,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float FarmTile_get_LastCareFactor
 		return L_0;
 	}
 }
-// Method Definition Index: 55731
+// Method Definition Index: 55706
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR EconomyManager_t08D8384F0A9C9F401210ABA4348034DB63EFD166* EconomyManager_get_Instance_mC93C93A67D551BCABE92BB345E32013A796C3929_inline (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -35350,7 +35350,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR EconomyManager_t08D8384F0A9C9F401
 		return L_0;
 	}
 }
-// Method Definition Index: 54121
+// Method Definition Index: 54096
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool FarmTile_get_LastHarvestWasFinal_mC2E122E352DC88601892F814E1F9CC85BDA6F516_inline (FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* __this, const RuntimeMethod* method) 
 {
 	{
@@ -35359,7 +35359,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool FarmTile_get_LastHarvestWasF
 		return L_0;
 	}
 }
-// Method Definition Index: 55079
+// Method Definition Index: 55054
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void InventoryPopupController_set_LastItemUseHandled_mECC077419C9DB9897D255CD7075A1AAD2BA25D4D_inline (InventoryPopupController_tF007E7E89E2C3E413E6B0D7D8907A50B64C7CD2A* __this, bool ___0_value, const RuntimeMethod* method) 
 {
 	{
@@ -35529,7 +35529,7 @@ IL_0034:
 		return;
 	}
 }
-// Method Definition Index: 50973
+// Method Definition Index: 50959
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void AwaitableAsyncMethodBuilder_Start_TisU3CHandleEnclosureAnimalSelectedAsyncU3Ed__277_tF18B5E878FEDC97744711935C1257B0A772699AB_mBD0466EBC2CA260F33C4750E288F73D24B6669E7_gshared_inline (AwaitableAsyncMethodBuilder_tEED8886993D22F5480D9BF117DA59548001C12D5* __this, U3CHandleEnclosureAnimalSelectedAsyncU3Ed__277_tF18B5E878FEDC97744711935C1257B0A772699AB* ___0_stateMachine, const RuntimeMethod* method) 
 {
 	if (!il2cpp_rgctx_is_initialized(method))
@@ -35603,7 +35603,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t Queue_1_get_Count_m1FE2DD
 		return L_0;
 	}
 }
-// Method Definition Index: 50439
+// Method Definition Index: 50426
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Vector3_get_magnitude_mF0D6017E90B345F1F52D1CC564C640F1A847AF2D_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -35625,7 +35625,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Vector3_get_magnitude_mF0D6
 		return ((float)L_6);
 	}
 }
-// Method Definition Index: 50985
+// Method Definition Index: 50971
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void StateMachineBox_1_set_StateMachine_mBB3596EB571AE887FBB2617D0D352FBC544C038D_gshared_inline (StateMachineBox_1_tAD338009DA5DF50871C313593ACA0BC58D7DD0A3* __this, U3CHandleEnclosureAnimalSelectedAsyncU3Ed__277_tF18B5E878FEDC97744711935C1257B0A772699AB ___0_value, const RuntimeMethod* method) 
 {
 	{
@@ -35662,7 +35662,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void StateMachineBox_1_set_StateM
 		return;
 	}
 }
-// Method Definition Index: 50987
+// Method Definition Index: 50973
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Action_tD00B0A84D7945E50C2DFFC28EFEE6ED44ED2AD07* StateMachineBox_1_get_MoveNext_m2BB4FC21A8BAF6B4209CFC1A943801C4079C2A5B_gshared_inline (StateMachineBox_1_tAD338009DA5DF50871C313593ACA0BC58D7DD0A3* __this, const RuntimeMethod* method) 
 {
 	{

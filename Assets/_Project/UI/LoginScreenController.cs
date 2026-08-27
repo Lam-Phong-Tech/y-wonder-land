@@ -378,6 +378,19 @@ public class LoginScreenController : MonoBehaviour
         ShowLoginTab();
 
         var config = BackendConfig.Active;
+
+        // CHỐT CHẶN (Apple từ chối lần 2 ngày 18/08/2026, Guideline 4): đăng ký được NGAY
+        // TRONG GAME thì tuyệt đối không đẩy người chơi ra trình duyệt mặc định.
+        // Giấu nút thôi chưa đủ — hàm này trước đây không có rào nào, nút hiện lại vì bất kỳ
+        // lý do gì (đổi cấu hình, đường gọi khác, layout iPad khác máy thử) là vi phạm ngay.
+        // Rào ở ĐÂY mới chặn được tận gốc; nút chỉ là lớp ngoài.
+        if (config != null && config.localAuthEnabled && !config.browserAuthEnabled)
+        {
+            ShowRegisterTab();
+            Debug.Log("[LoginScreen] Đăng ký trong game — không mở trình duyệt (Guideline 4).");
+            return;
+        }
+
         string configuredUrl = config != null ? config.registrationUrl?.Trim() : "";
         if (!System.Uri.TryCreate(configuredUrl, System.UriKind.Absolute, out var registrationUri) ||
             !string.Equals(registrationUri.Scheme, System.Uri.UriSchemeHttps, System.StringComparison.OrdinalIgnoreCase))
@@ -473,7 +486,11 @@ public class LoginScreenController : MonoBehaviour
             true);
         bool success = useWebAccount
             ? await auth.LoginWebAsync(username, password)
-            : await auth.LoginLocalAsync(username, password);
+            // LoginAsync chu KHONG phai LoginLocalAsync: no thu /auth/login truoc, gap 404 thi
+            // rơi sang /auth/web-login. Truoc day chi goi /auth/login nen tai khoan tao tren
+            // ywonder.net khong dang nhap duoc trong game — nguoi duyet cua Apple ma duoc cap
+            // tai khoan website la ket ngay man hinh dau, khong xem duoc gi de duyet.
+            : await auth.LoginAsync(username, password);
 
         if (!success)
         {

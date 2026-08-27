@@ -966,10 +966,6 @@ void RegisterAllStrippedInternalCalls()
 		void Register_UnityEngine_Animator_Play_Injected();
 		Register_UnityEngine_Animator_Play_Injected();
 
-		//System.Void UnityEngine.Animator::Rebind_Injected(System.IntPtr,System.Boolean)
-		void Register_UnityEngine_Animator_Rebind_Injected();
-		Register_UnityEngine_Animator_Rebind_Injected();
-
 		//System.Void UnityEngine.Animator::ResetTriggerString_Injected(System.IntPtr,UnityEngine.Bindings.ManagedSpanWrapper&)
 		void Register_UnityEngine_Animator_ResetTriggerString_Injected();
 		Register_UnityEngine_Animator_ResetTriggerString_Injected();
@@ -978,25 +974,9 @@ void RegisterAllStrippedInternalCalls()
 		void Register_UnityEngine_Animator_SetTriggerString_Injected();
 		Register_UnityEngine_Animator_SetTriggerString_Injected();
 
-		//System.Void UnityEngine.Animator::Update_Injected(System.IntPtr,System.Single)
-		void Register_UnityEngine_Animator_Update_Injected();
-		Register_UnityEngine_Animator_Update_Injected();
-
-		//System.Void UnityEngine.Animator::get_deltaPosition_Injected(System.IntPtr,UnityEngine.Vector3&)
-		void Register_UnityEngine_Animator_get_deltaPosition_Injected();
-		Register_UnityEngine_Animator_get_deltaPosition_Injected();
-
-		//System.Void UnityEngine.Animator::get_deltaRotation_Injected(System.IntPtr,UnityEngine.Quaternion&)
-		void Register_UnityEngine_Animator_get_deltaRotation_Injected();
-		Register_UnityEngine_Animator_get_deltaRotation_Injected();
-
 		//System.Void UnityEngine.Animator::set_applyRootMotion_Injected(System.IntPtr,System.Boolean)
 		void Register_UnityEngine_Animator_set_applyRootMotion_Injected();
 		Register_UnityEngine_Animator_set_applyRootMotion_Injected();
-
-		//System.Void UnityEngine.Animator::set_runtimeAnimatorController_Injected(System.IntPtr,System.IntPtr)
-		void Register_UnityEngine_Animator_set_runtimeAnimatorController_Injected();
-		Register_UnityEngine_Animator_set_runtimeAnimatorController_Injected();
 
 		//System.Void UnityEngine.Animator::set_speed_Injected(System.IntPtr,System.Single)
 		void Register_UnityEngine_Animator_set_speed_Injected();
@@ -1019,18 +999,6 @@ void RegisterAllStrippedInternalCalls()
 		Register_UnityEngine_AnimatorClipInfo_InstanceIDToAnimationClipPPtr_Injected();
 
 	//End Registrations for type : UnityEngine.AnimatorClipInfo
-
-	//Start Registrations for type : UnityEngine.AnimatorOverrideController
-
-		//System.Void UnityEngine.AnimatorOverrideController::Internal_Create_Injected(UnityEngine.AnimatorOverrideController,System.IntPtr)
-		void Register_UnityEngine_AnimatorOverrideController_Internal_Create_Injected();
-		Register_UnityEngine_AnimatorOverrideController_Internal_Create_Injected();
-
-		//System.Void UnityEngine.AnimatorOverrideController::Internal_SetClipByName_Injected(System.IntPtr,UnityEngine.Bindings.ManagedSpanWrapper&,System.IntPtr)
-		void Register_UnityEngine_AnimatorOverrideController_Internal_SetClipByName_Injected();
-		Register_UnityEngine_AnimatorOverrideController_Internal_SetClipByName_Injected();
-
-	//End Registrations for type : UnityEngine.AnimatorOverrideController
 
 	//Start Registrations for type : UnityEngine.Application
 
@@ -1649,10 +1617,6 @@ void RegisterAllStrippedInternalCalls()
 		//System.Single UnityEngine.Camera::get_shutterSpeed_Injected(System.IntPtr)
 		void Register_UnityEngine_Camera_get_shutterSpeed_Injected();
 		Register_UnityEngine_Camera_get_shutterSpeed_Injected();
-
-		//System.Void UnityEngine.Camera::CopyFrom_Injected(System.IntPtr,System.IntPtr)
-		void Register_UnityEngine_Camera_CopyFrom_Injected();
-		Register_UnityEngine_Camera_CopyFrom_Injected();
 
 		//System.Void UnityEngine.Camera::ResetWorldToCameraMatrix_Injected(System.IntPtr)
 		void Register_UnityEngine_Camera_ResetWorldToCameraMatrix_Injected();
@@ -4293,10 +4257,6 @@ void RegisterAllStrippedInternalCalls()
 		//System.Void UnityEngine.Material::GetColorImpl_Injected(System.IntPtr,System.Int32,UnityEngine.Color&)
 		void Register_UnityEngine_Material_GetColorImpl_Injected();
 		Register_UnityEngine_Material_GetColorImpl_Injected();
-
-		//System.Void UnityEngine.Material::GetTextureScaleAndOffsetImpl_Injected(System.IntPtr,System.Int32,UnityEngine.Vector4&)
-		void Register_UnityEngine_Material_GetTextureScaleAndOffsetImpl_Injected();
-		Register_UnityEngine_Material_GetTextureScaleAndOffsetImpl_Injected();
 
 		//System.Void UnityEngine.Material::SetColorImpl_Injected(System.IntPtr,System.Int32,UnityEngine.Color&)
 		void Register_UnityEngine_Material_SetColorImpl_Injected();
@@ -8026,17 +7986,9 @@ void RegisterAllStrippedInternalCalls()
 		void Register_UnityEngine_SpriteRenderer_get_sprite_Injected();
 		Register_UnityEngine_SpriteRenderer_get_sprite_Injected();
 
-		//System.Void UnityEngine.SpriteRenderer::get_color_Injected(System.IntPtr,UnityEngine.Color&)
-		void Register_UnityEngine_SpriteRenderer_get_color_Injected();
-		Register_UnityEngine_SpriteRenderer_get_color_Injected();
-
 		//System.Void UnityEngine.SpriteRenderer::get_size_Injected(System.IntPtr,UnityEngine.Vector2&)
 		void Register_UnityEngine_SpriteRenderer_get_size_Injected();
 		Register_UnityEngine_SpriteRenderer_get_size_Injected();
-
-		//System.Void UnityEngine.SpriteRenderer::set_color_Injected(System.IntPtr,UnityEngine.Color&)
-		void Register_UnityEngine_SpriteRenderer_set_color_Injected();
-		Register_UnityEngine_SpriteRenderer_set_color_Injected();
 
 		//System.Void UnityEngine.SpriteRenderer::set_hasSpriteChangeEvents_Injected(System.IntPtr,System.Boolean)
 		void Register_UnityEngine_SpriteRenderer_set_hasSpriteChangeEvents_Injected();

@@ -2195,7 +2195,14 @@ class PostgresStore {
                 username = 'deleted_' || $1,
                 email = 'deleted+' || $1 || '@invalid.local',
                 phone = null,
-                password_hash = null,
+                -- KHONG duoc dat null: cot khai 'password_hash text not null' (schema.sql:27),
+                -- gan null la Postgres nem loi rang buoc -> nut "Xoa tai khoan" tra 500.
+                -- Apple bat buoc app co dang ky tai khoan phai xoa duoc tai khoan ngay trong app
+                -- (Guideline 5.1.1(v)); nguoi duyet bam thu la thay hong -> tu choi.
+                -- Chuoi rong van khoa duoc dang nhap: index.js:355 co rao
+                -- Boolean(user.password_hash) && await bcrypt.compare(...) nen '' cho ra false
+                -- va khong he goi toi bcrypt.
+                password_hash = '',
                 updated_at = now()
           where player_id = $1`,
         [playerId]

@@ -12,7 +12,7 @@ namespace YWonderLand.Environment
         private static ScreenToast _instance;
         private string _message;
         private float _hideAt;
-        private Color _color = new Color(0.90f, 0.35f, 0.30f, 0.95f); // đỏ Palia
+        private Color _color = new Color(0.90f, 0.35f, 0.30f, 0.95f); // đỏ
         private Texture2D _iconTexture;
         private Sprite _iconSprite;
         private string _iconFallbackText;

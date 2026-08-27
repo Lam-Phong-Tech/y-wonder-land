@@ -1,9 +1,9 @@
 /* ============================================
-   Design System - Structured Palia (Cozy Dark)
+   Design System - Y Wonder Cozy (Dark)
    ============================================ */
 
 :root {
-    /* Palia Standard Palette */
+    /* Bang mau Y Wonder */
     --color-primary-navy: #3A4766;
     --color-deep-blue: #305080;
     --color-light-blue: #508FB3;
@@ -18,7 +18,7 @@
     --color-mystic-black: #151A27;
     --color-overcast-grey: #A6A4A9;
     --color-bright-grey: #DFDCE4;
-    --color-palia-white: #FFFCF7;
+    --color-brand-white: #FFFCF7;
 
     /* Semantic Mappings */
     --color-neutral-surface: var(--color-primary-navy); /* Main Panel */
@@ -36,7 +36,7 @@
     --color-danger-active: #C63A2E;
     
     /* Typography */
-    --color-text-white: var(--color-palia-white);
+    --color-text-white: var(--color-brand-white);
     --color-text-dark: var(--color-mystic-black);
     --color-text-secondary: var(--color-bright-grey);
     --color-text-placeholder: var(--color-overcast-grey);
@@ -47,7 +47,7 @@
     --color-border: rgba(255, 255, 255, 0.1);
     --color-border-focus: rgb(255, 179, 71);
     --radius-panel: 24px; /* Mềm mại hơn */
-    --radius-button: 24px; /* Pill-shape chuẩn Palia */
+    --radius-button: 24px; /* Pill-shape */
     --radius-input: 16px;
     --radius-tab: 16px;
     --border-thick: 2px;
@@ -129,7 +129,7 @@
 }
 
 /* ============================================
-   Buttons (Structured Palia)
+   Buttons (Y Wonder Cozy)
    ============================================ */
 .btn-close {
     position: absolute; top: 12px; right: 12px;
