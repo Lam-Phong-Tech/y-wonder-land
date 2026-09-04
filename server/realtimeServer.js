@@ -50,6 +50,15 @@ function send(ws, payload) {
   }
 }
 
+// Gui chuoi DA serialize san. Dung cho phat theo phong: mot goi vi tri phat cho
+// 99 nguoi thi truoc day JSON.stringify chay 99 lan tren cung mot object.
+// Voi 100 nguoi cung gui 6,67 lan/giay, do la ~66.000 lan serialize moi giay.
+function sendRaw(ws, text) {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(text);
+  }
+}
+
 function attachRealtimeServer(server, options) {
   const verifyToken = options && options.verifyToken;
   const store = options && options.store;
@@ -71,16 +80,18 @@ function attachRealtimeServer(server, options) {
   }
 
   function broadcastAll(payload, except) {
+    const text = JSON.stringify(payload); // serialize MOT lan, khong phai moi nguoi mot lan
     for (const ws of clients.keys()) {
-      if (ws !== except) send(ws, payload);
+      if (ws !== except) sendRaw(ws, text);
     }
   }
 
   function broadcastRoom(room, payload, except) {
     const set = rooms.get(room);
     if (!set) return;
+    const text = JSON.stringify(payload); // serialize MOT lan cho ca phong
     for (const ws of set) {
-      if (ws !== except) send(ws, payload);
+      if (ws !== except) sendRaw(ws, text);
     }
   }
 
