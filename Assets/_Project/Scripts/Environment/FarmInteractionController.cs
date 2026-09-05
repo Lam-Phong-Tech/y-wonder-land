@@ -3926,6 +3926,81 @@ namespace YWonderLand.Environment
             }
         }
 
+        /// <summary>Lấy đúng n ô trống đầu tiên (dùng cho con chiếm 1 ô).</summary>
+        private List<BuildSurfaceCell> FindFirstFreeCells(List<BuildSurfaceCell> pen, int n)
+        {
+            var result = new List<BuildSurfaceCell>();
+            if (pen == null) return result;
+            foreach (var c in pen)
+            {
+                if (c == null || c.HasAnimal) continue;
+                result.Add(c);
+                if (result.Count >= n) break;
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Tìm một KHỐI VUÔNG cạnh √n gồm toàn ô trống trong chuồng (n = 9 -> 3x3).
+        /// Trả về Ô GIỮA ĐỨNG ĐẦU danh sách, vì:
+        ///   - BuildPersistence dựng con vật tại cells[0].SurfaceCenter, nên nó đứng đúng giữa khối;
+        ///   - cells[0] cũng là ô NEO giữ tham chiếu con vật.
+        /// Trả về null nếu chuồng không có khoảng vuông nào đủ trống.
+        /// Cạnh chẵn (2x2, 4x4) không có ô giữa thật nên chỉ nhận cạnh LẺ; hiện game chỉ dùng 1 và 9.
+        /// </summary>
+        private List<BuildSurfaceCell> FindSquareBlock(List<BuildSurfaceCell> pen, int need)
+        {
+            if (pen == null || pen.Count < need) return null;
+
+            int side = Mathf.RoundToInt(Mathf.Sqrt(need));
+            if (side * side != need || side % 2 == 0) return null; // không phải vuông cạnh lẻ
+            int reach = side / 2;
+
+            // Bề rộng ô để quy vị trí thế giới về toạ độ lưới. Lấy từ ô đầu tiên có thật.
+            float cellSize = 0f;
+            foreach (var c in pen) { if (c != null) { cellSize = c.FootprintSize.x; break; } }
+            if (cellSize < 0.01f) return null;
+
+            // Bản đồ lưới: khoá theo ô, để tra hàng xóm trong O(1).
+            var byGrid = new Dictionary<Vector2Int, BuildSurfaceCell>();
+            foreach (var c in pen)
+            {
+                if (c == null) continue;
+                Vector3 p = c.transform.position;
+                var key = new Vector2Int(
+                    Mathf.RoundToInt(p.x / cellSize),
+                    Mathf.RoundToInt(p.z / cellSize));
+                if (!byGrid.ContainsKey(key)) byGrid[key] = c;
+            }
+
+            // Thử từng ô trống làm TÂM, kiểm cả khối quanh nó có trống hết không.
+            foreach (var pair in byGrid)
+            {
+                var center = pair.Value;
+                if (center.HasAnimal) continue;
+
+                var block = new List<BuildSurfaceCell> { center }; // tâm đứng đầu
+                bool ok = true;
+                for (int dx = -reach; dx <= reach && ok; dx++)
+                {
+                    for (int dz = -reach; dz <= reach && ok; dz++)
+                    {
+                        if (dx == 0 && dz == 0) continue;
+                        if (!byGrid.TryGetValue(pair.Key + new Vector2Int(dx, dz), out var n)
+                            || n == null || n.HasAnimal)
+                        {
+                            ok = false;
+                            break;
+                        }
+                        block.Add(n);
+                    }
+                }
+                if (ok && block.Count == need) return block;
+            }
+
+            return null;
+        }
+
         // Server atomically consumes the inventory item and appends the animal to the farm snapshot.
         private async Awaitable HandleEnclosureAnimalSelectedAsync(string itemId)
         {
@@ -3954,15 +4029,21 @@ namespace YWonderLand.Environment
                 return;
             }
 
-            // Gom 'need' ô chuồng còn trống cho con vật đứng + đánh dấu đã có thú.
-            var cells = new List<BuildSurfaceCell>();
-            foreach (var c in interior)
+            // Gom ô cho con vật đứng.
+            // Khách chốt 04/09: con NHIỀU Ô phải đứng trên một KHỐI VUÔNG KHÍT, con vật neo
+            // ở Ô GIỮA. Trước đây chỉ nhặt 'need' ô trống đầu tiên theo thứ tự duyệt nên
+            // 9 ô có thể ra hình chữ L hay so le — thả dê vào là chuồng dính vào nhau, dời
+            // ra thì rời rạc. Không tìm được khối vuông thì THÀ TỪ CHỐI còn hơn thả bậy.
+            List<BuildSurfaceCell> cells = need > 1
+                ? FindSquareBlock(interior, need)
+                : FindFirstFreeCells(interior, 1);
+
+            if (cells == null || cells.Count < need)
             {
-                if (c != null && !c.HasAnimal) { cells.Add(c); if (cells.Count >= need) break; }
-            }
-            if (cells.Count < need)
-            {
-                ScreenToast.Show("Chuồng không đủ chỗ!");
+                int side = Mathf.RoundToInt(Mathf.Sqrt(need));
+                ScreenToast.Show(need > 1
+                    ? $"Cần một khoảng vuông {side}x{side} ô trống liền nhau. Hãy xây chuồng vuông vắn rồi thả lại."
+                    : "Chuồng không đủ chỗ!");
                 if (inventoryPopup != null) inventoryPopup.Hide();
                 return;
             }
