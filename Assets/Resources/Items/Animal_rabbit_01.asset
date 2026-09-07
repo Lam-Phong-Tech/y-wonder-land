@@ -26,7 +26,7 @@ MonoBehaviour:
   productAltAmount: 5
   produceItemId: rabbit_fur_01
   produceAmount: 8
-  produceCycleTimeSec: 3456000
+  produceCycleTimeSec: 2592000
   maxHarvests: 2
   expReward: 1500
   meatItemId: rabbit_meat_01

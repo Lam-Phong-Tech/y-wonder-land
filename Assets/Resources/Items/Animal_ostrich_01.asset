@@ -26,8 +26,8 @@ MonoBehaviour:
   productAltAmount: 20
   produceItemId: ostrich_egg_01
   produceAmount: 1
-  produceCycleTimeSec: 518400
-  maxHarvests: 30
+  produceCycleTimeSec: 259200
+  maxHarvests: 60
   expReward: 5000
   meatItemId: ostrich_meat_01
   meatAmount: 20

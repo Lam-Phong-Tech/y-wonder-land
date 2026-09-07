@@ -2,16 +2,19 @@ const catalog = require("./shopCatalog.json");
 
 // Server-authoritative husbandry rules. These values mirror the approved
 // AnimalDefinition assets and are intentionally not accepted from clients.
+// 07/09/2026: dong bo chu ky thu hoach khach chot — ngong 2 ngay (45 lan),
+// da dieu 3 ngay (60 lan), vit 1 thang (30 lan). PHAI khop voi Assets/Resources/Items/
+// Animal_*.asset, lech la nguoi choi thu hoach bi may chu tu choi giua chung.
 const animalPlacementRules = Object.freeze({
   chicken_01: Object.freeze({ penSlots: 1, maxHarvests: 45 }),
   rabbit_01: Object.freeze({ penSlots: 1, maxHarvests: 2 }),
-  ostrich_01: Object.freeze({ penSlots: 1, maxHarvests: 30 }),
+  ostrich_01: Object.freeze({ penSlots: 1, maxHarvests: 60 }),
   goat_01: Object.freeze({ penSlots: 9, maxHarvests: 60 }),
   cow_01: Object.freeze({ penSlots: 9, maxHarvests: 38 }),
   deer_01: Object.freeze({ penSlots: 9, maxHarvests: 2 }),
   pig_01: Object.freeze({ penSlots: 9, maxHarvests: 1 }),
-  duck_01: Object.freeze({ penSlots: 1, maxHarvests: 45 }),
-  goose_01: Object.freeze({ penSlots: 1, maxHarvests: 30 }),
+  duck_01: Object.freeze({ penSlots: 1, maxHarvests: 30 }),
+  goose_01: Object.freeze({ penSlots: 1, maxHarvests: 45 }),
   turtle_01: Object.freeze({ penSlots: 1, maxHarvests: 1 }),
 });
 

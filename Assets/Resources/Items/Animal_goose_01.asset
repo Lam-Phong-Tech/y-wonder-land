@@ -26,8 +26,8 @@ MonoBehaviour:
   productAltAmount: 5
   produceItemId: goose_egg_01
   produceAmount: 2
-  produceCycleTimeSec: 259200
-  maxHarvests: 30
+  produceCycleTimeSec: 172800
+  maxHarvests: 45
   expReward: 4500
   meatItemId: goose_meat_01
   meatAmount: 5

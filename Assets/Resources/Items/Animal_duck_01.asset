@@ -27,7 +27,7 @@ MonoBehaviour:
   produceItemId: duck_egg_01
   produceAmount: 1
   produceCycleTimeSec: 86400
-  maxHarvests: 45
+  maxHarvests: 30
   expReward: 1000
   meatItemId: duck_meat_01
   meatAmount: 5
