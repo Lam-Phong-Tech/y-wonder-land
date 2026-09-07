@@ -1900,7 +1900,7 @@ struct ValueCollection_tD1F51CD625B96F9BBD48505E7DE3709F73408F88;
 struct Store_tFD64AC6646B6D4A664CA33FAD6FCA85DBB471F45;
 struct U3CU3Ec__DisplayClass174_0_t7D6F792B6313B43FF49ABA274269E26B62502E50;
 struct U3CU3Ec__DisplayClass226_1_t7EAC634AA0928AC6C3CFA1139BAF72A6735C89F4;
-struct U3CU3Ec__DisplayClass293_0_tFF4915E58C01B4DE4063B87343207AFC7E9FB7D2;
+struct U3CU3Ec__DisplayClass295_0_t4E80B5B91360FA1AE8939556DE7E931F8FFE7133;
 struct AnimalPlacementRequest_t5C3CB5E9700321A809C1023809987741AED7D34F;
 struct AnimalPlacementResult_t7B49FE159AE37B934EA644F6426B8442F8D5A584;
 struct PendingUpload_t8AF8BF0CE15E0841ED939720EFDA43B08FD4195A;
@@ -6109,12 +6109,12 @@ struct U3CU3Ec__DisplayClass271_0_t39077E50AA10A51AA54A5DDE6D9704E9A67C21D9  : p
 	FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* ___tile;
 	FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* ___U3CU3E4__this;
 };
-struct U3CU3Ec__DisplayClass293_0_tFF4915E58C01B4DE4063B87343207AFC7E9FB7D2  : public RuntimeObject
+struct U3CU3Ec__DisplayClass295_0_t4E80B5B91360FA1AE8939556DE7E931F8FFE7133  : public RuntimeObject
 {
 	FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* ___U3CU3E4__this;
 	HarvestableResource_tC78B91FFDA374C3C892C36CCD402CCA7E7F361C9* ___resource;
 };
-struct U3CU3Ec__DisplayClass295_0_t4E80B5B91360FA1AE8939556DE7E931F8FFE7133  : public RuntimeObject
+struct U3CU3Ec__DisplayClass297_0_t50F67B277D3AF418B5F22D144AE64338EBA32439  : public RuntimeObject
 {
 	FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* ___tile;
 	FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* ___U3CU3E4__this;
@@ -6123,13 +6123,13 @@ struct U3CU3Ec__DisplayClass295_0_t4E80B5B91360FA1AE8939556DE7E931F8FFE7133  : p
 	InventoryManager_t033115D1E989CF626FC0710C6FB1895D82788DDF* ___inv;
 	int32_t ___seedConsumedAmount;
 };
-struct U3CU3Ec__DisplayClass303_0_tA094C5B9A6B916E7B477D215CD7DC1DA3568E643  : public RuntimeObject
+struct U3CU3Ec__DisplayClass305_0_t0838DF4D11FE8EA1228B7751583736CD33E4A322  : public RuntimeObject
 {
 	FarmTile_t1331E6BCDA6919F6B66A4B3C4526CCD428D65B40* ___tile;
 	Action_tD00B0A84D7945E50C2DFFC28EFEE6ED44ED2AD07* ___onWatered;
 	InventoryManager_t033115D1E989CF626FC0710C6FB1895D82788DDF* ___inv;
 };
-struct U3CU3Ec__DisplayClass304_0_tCED2DFB8D9964EA3BB91B960F781A39DB314F8B4  : public RuntimeObject
+struct U3CU3Ec__DisplayClass306_0_t9FF1EF61E625A9227C9ABCDCEA30A95A1256E80E  : public RuntimeObject
 {
 	InventoryManager_t033115D1E989CF626FC0710C6FB1895D82788DDF* ___inv;
 	int32_t ___amt;
@@ -32368,7 +32368,7 @@ struct U3CU3Ec__DisplayClass226_3_t9CC59722CCCC73385D8525F83836253C59B4905F  : p
 	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___fishingHitPoint;
 	U3CU3Ec__DisplayClass226_1_t7EAC634AA0928AC6C3CFA1139BAF72A6735C89F4* ___CSU24U3CU3E8__locals2;
 };
-struct U3CHandleEnclosureAnimalSelectedAsyncU3Ed__277_tF18B5E878FEDC97744711935C1257B0A772699AB 
+struct U3CHandleEnclosureAnimalSelectedAsyncU3Ed__279_tE981967EE32EEE29351BC42A72639A4005F531AF 
 {
 	int32_t ___U3CU3E1__state;
 	AwaitableAsyncMethodBuilder_tEED8886993D22F5480D9BF117DA59548001C12D5 ___U3CU3Et__builder;
@@ -38626,16 +38626,16 @@ struct ReservedWords_t2834E11516C795E0AD880A651793517590DFCF87_marshaled_com
 	int32_t ____token;
 	int32_t ____op;
 };
-struct U3CAutoRedeemMineTicketThenRetryU3Ed__293_t037D1B17A1A713EB44EFD0B83F871F6EB85E5C20 
+struct U3CAutoRedeemMineTicketThenRetryU3Ed__295_t1E7891878E9E22B3077B85763DE81936D8FE9A34 
 {
 	int32_t ___U3CU3E1__state;
 	AsyncVoidMethodBuilder_t253E37B63E7E7B504878AE6563347C147F98EF2D ___U3CU3Et__builder;
 	FarmInteractionController_t75302FC7E684AEB35B11040FB7D88104C363E405* ___U3CU3E4__this;
 	HarvestableResource_tC78B91FFDA374C3C892C36CCD402CCA7E7F361C9* ___resource;
-	U3CU3Ec__DisplayClass293_0_tFF4915E58C01B4DE4063B87343207AFC7E9FB7D2* ___U3CU3E8__1;
+	U3CU3Ec__DisplayClass295_0_t4E80B5B91360FA1AE8939556DE7E931F8FFE7133* ___U3CU3E8__1;
 	Awaiter_tC8671CE9BA08A3CC270808FA6553B4665F65B918 ___U3CU3Eu__1;
 };
-struct U3CRedeemMineTicketServerAsyncU3Ed__290_t9F4CE7E5EDAE483A2C959B4555BCBA7641434594 
+struct U3CRedeemMineTicketServerAsyncU3Ed__292_t705C8F4C88B653196CB748521A9FA53255DEFB1C 
 {
 	int32_t ___U3CU3E1__state;
 	AsyncVoidMethodBuilder_t253E37B63E7E7B504878AE6563347C147F98EF2D ___U3CU3Et__builder;
@@ -58976,21 +58976,21 @@ const Il2CppTypeDefinitionSizes g_typeDefinitionSize7554 = { sizeof(U3CU3Ec__Dis
 IL2CPP_EXTERN_C_CONST Il2CppTypeDefinitionSizes g_typeDefinitionSize7555;
 const Il2CppTypeDefinitionSizes g_typeDefinitionSize7555 = { sizeof(U3CU3Ec__DisplayClass271_0_t39077E50AA10A51AA54A5DDE6D9704E9A67C21D9), -1, 0, 0 };
 IL2CPP_EXTERN_C_CONST Il2CppTypeDefinitionSizes g_typeDefinitionSize7556;
-const Il2CppTypeDefinitionSizes g_typeDefinitionSize7556 = { sizeof(U3CU3Ec__DisplayClass293_0_tFF4915E58C01B4DE4063B87343207AFC7E9FB7D2), -1, 0, 0 };
+const Il2CppTypeDefinitionSizes g_typeDefinitionSize7556 = { sizeof(U3CU3Ec__DisplayClass295_0_t4E80B5B91360FA1AE8939556DE7E931F8FFE7133), -1, 0, 0 };
 IL2CPP_EXTERN_C_CONST Il2CppTypeDefinitionSizes g_typeDefinitionSize7557;
-const Il2CppTypeDefinitionSizes g_typeDefinitionSize7557 = { sizeof(U3CU3Ec__DisplayClass295_0_t4E80B5B91360FA1AE8939556DE7E931F8FFE7133), -1, 0, 0 };
+const Il2CppTypeDefinitionSizes g_typeDefinitionSize7557 = { sizeof(U3CU3Ec__DisplayClass297_0_t50F67B277D3AF418B5F22D144AE64338EBA32439), -1, 0, 0 };
 IL2CPP_EXTERN_C_CONST Il2CppTypeDefinitionSizes g_typeDefinitionSize7558;
-const Il2CppTypeDefinitionSizes g_typeDefinitionSize7558 = { sizeof(U3CU3Ec__DisplayClass303_0_tA094C5B9A6B916E7B477D215CD7DC1DA3568E643), -1, 0, 0 };
+const Il2CppTypeDefinitionSizes g_typeDefinitionSize7558 = { sizeof(U3CU3Ec__DisplayClass305_0_t0838DF4D11FE8EA1228B7751583736CD33E4A322), -1, 0, 0 };
 IL2CPP_EXTERN_C_CONST Il2CppTypeDefinitionSizes g_typeDefinitionSize7559;
-const Il2CppTypeDefinitionSizes g_typeDefinitionSize7559 = { sizeof(U3CU3Ec__DisplayClass304_0_tCED2DFB8D9964EA3BB91B960F781A39DB314F8B4), -1, 0, 0 };
+const Il2CppTypeDefinitionSizes g_typeDefinitionSize7559 = { sizeof(U3CU3Ec__DisplayClass306_0_t9FF1EF61E625A9227C9ABCDCEA30A95A1256E80E), -1, 0, 0 };
 IL2CPP_EXTERN_C_CONST Il2CppTypeDefinitionSizes g_typeDefinitionSize7560;
 const Il2CppTypeDefinitionSizes g_typeDefinitionSize7560 = { sizeof(U3CU3Ec__DisplayClass87_0_t8A5370F87C26A89E8237353798CD2E1E50DDB071), -1, 0, 0 };
 IL2CPP_EXTERN_C_CONST Il2CppTypeDefinitionSizes g_typeDefinitionSize7561;
-const Il2CppTypeDefinitionSizes g_typeDefinitionSize7561 = { sizeof(U3CAutoRedeemMineTicketThenRetryU3Ed__293_t037D1B17A1A713EB44EFD0B83F871F6EB85E5C20)+ sizeof(RuntimeObject), -1, 0, 0 };
+const Il2CppTypeDefinitionSizes g_typeDefinitionSize7561 = { sizeof(U3CAutoRedeemMineTicketThenRetryU3Ed__295_t1E7891878E9E22B3077B85763DE81936D8FE9A34)+ sizeof(RuntimeObject), -1, 0, 0 };
 IL2CPP_EXTERN_C_CONST Il2CppTypeDefinitionSizes g_typeDefinitionSize7562;
-const Il2CppTypeDefinitionSizes g_typeDefinitionSize7562 = { sizeof(U3CHandleEnclosureAnimalSelectedAsyncU3Ed__277_tF18B5E878FEDC97744711935C1257B0A772699AB)+ sizeof(RuntimeObject), -1, 0, 0 };
+const Il2CppTypeDefinitionSizes g_typeDefinitionSize7562 = { sizeof(U3CHandleEnclosureAnimalSelectedAsyncU3Ed__279_tE981967EE32EEE29351BC42A72639A4005F531AF)+ sizeof(RuntimeObject), -1, 0, 0 };
 IL2CPP_EXTERN_C_CONST Il2CppTypeDefinitionSizes g_typeDefinitionSize7563;
-const Il2CppTypeDefinitionSizes g_typeDefinitionSize7563 = { sizeof(U3CRedeemMineTicketServerAsyncU3Ed__290_t9F4CE7E5EDAE483A2C959B4555BCBA7641434594)+ sizeof(RuntimeObject), -1, 0, 0 };
+const Il2CppTypeDefinitionSizes g_typeDefinitionSize7563 = { sizeof(U3CRedeemMineTicketServerAsyncU3Ed__292_t705C8F4C88B653196CB748521A9FA53255DEFB1C)+ sizeof(RuntimeObject), -1, 0, 0 };
 IL2CPP_EXTERN_C_CONST Il2CppTypeDefinitionSizes g_typeDefinitionSize7564;
 const Il2CppTypeDefinitionSizes g_typeDefinitionSize7564 = { sizeof(U3CRunTimedActionU3Ed__113_t4B8309536EFB48EE6FD063C407FDADD3F0A1C8A5), -1, 0, 0 };
 IL2CPP_EXTERN_C_CONST Il2CppTypeDefinitionSizes g_typeDefinitionSize7565;
