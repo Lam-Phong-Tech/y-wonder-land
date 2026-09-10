@@ -59,7 +59,7 @@
     "beef_01": {
       "category": "products",
       "buyPrice": 0,
-      "sellPrice": 325,
+      "sellPrice": 338,
       "canSell": true
     },
     "bread_01": {
@@ -107,7 +107,7 @@
     "chicken_meat_01": {
       "category": "products",
       "buyPrice": 0,
-      "sellPrice": 310,
+      "sellPrice": 234,
       "canSell": true
     },
     "coconut_01": {
@@ -161,13 +161,13 @@
     "deer_meat_01": {
       "category": "products",
       "buyPrice": 0,
-      "sellPrice": 933,
+      "sellPrice": 778,
       "canSell": true
     },
     "deer_velvet_01": {
       "category": "products",
       "buyPrice": 0,
-      "sellPrice": 12368,
+      "sellPrice": 10316,
       "canSell": true
     },
     "duck_01": {
@@ -179,13 +179,13 @@
     "duck_egg_01": {
       "category": "products",
       "buyPrice": 0,
-      "sellPrice": 5,
+      "sellPrice": 2,
       "canSell": true
     },
     "duck_meat_01": {
       "category": "products",
       "buyPrice": 0,
-      "sellPrice": 332,
+      "sellPrice": 165,
       "canSell": true
     },
     "durian_01": {
@@ -203,7 +203,7 @@
     "egg_01": {
       "category": "products",
       "buyPrice": 0,
-      "sellPrice": 11,
+      "sellPrice": 8,
       "canSell": true
     },
     "fertilizer_01": {
@@ -353,13 +353,13 @@
     "goat_meat_01": {
       "category": "products",
       "buyPrice": 0,
-      "sellPrice": 118,
+      "sellPrice": 305,
       "canSell": true
     },
     "goat_milk_01": {
       "category": "products",
       "buyPrice": 0,
-      "sellPrice": 12,
+      "sellPrice": 31,
       "canSell": true
     },
     "goose_01": {
@@ -371,13 +371,13 @@
     "goose_egg_01": {
       "category": "products",
       "buyPrice": 0,
-      "sellPrice": 14,
+      "sellPrice": 4,
       "canSell": true
     },
     "goose_meat_01": {
       "category": "products",
       "buyPrice": 0,
-      "sellPrice": 665,
+      "sellPrice": 277,
       "canSell": true
     },
     "grass_01": {
@@ -413,7 +413,7 @@
     "milk_01": {
       "category": "products",
       "buyPrice": 0,
-      "sellPrice": 50,
+      "sellPrice": 52,
       "canSell": true
     },
     "mine_ticket_01": {
@@ -449,13 +449,13 @@
     "ostrich_egg_01": {
       "category": "products",
       "buyPrice": 0,
-      "sellPrice": 409,
+      "sellPrice": 92,
       "canSell": true
     },
     "ostrich_meat_01": {
       "category": "products",
       "buyPrice": 0,
-      "sellPrice": 1050,
+      "sellPrice": 474,
       "canSell": true
     },
     "passion_fruit_01": {
@@ -466,7 +466,7 @@
     },
     "passion_fruit_seed_01": {
       "category": "seeds",
-      "buyPrice": 5300,
+      "buyPrice": 1560,
       "sellPrice": 3,
       "canSell": true
     },
@@ -485,13 +485,13 @@
     "pigskin_01": {
       "category": "products",
       "buyPrice": 0,
-      "sellPrice": 7042,
+      "sellPrice": 4796,
       "canSell": true
     },
     "pork_01": {
       "category": "products",
       "buyPrice": 0,
-      "sellPrice": 292,
+      "sellPrice": 199,
       "canSell": true
     },
     "pumpkin_01": {
@@ -515,13 +515,13 @@
     "rabbit_fur_01": {
       "category": "products",
       "buyPrice": 0,
-      "sellPrice": 21,
+      "sellPrice": 7,
       "canSell": true
     },
     "rabbit_meat_01": {
       "category": "products",
       "buyPrice": 0,
-      "sellPrice": 289,
+      "sellPrice": 117,
       "canSell": true
     },
     "red_ginseng_01": {
@@ -605,13 +605,13 @@
     "turtle_meat_01": {
       "category": "products",
       "buyPrice": 0,
-      "sellPrice": 1084,
+      "sellPrice": 657,
       "canSell": true
     },
     "turtle_shell_01": {
       "category": "products",
       "buyPrice": 0,
-      "sellPrice": 11893,
+      "sellPrice": 7446,
       "canSell": true
     },
     "vaccine_01": {

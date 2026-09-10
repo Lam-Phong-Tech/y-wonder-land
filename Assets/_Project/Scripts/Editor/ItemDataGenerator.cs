@@ -96,28 +96,28 @@ namespace YWonderLand.EditorScripts
             
             // Sản phẩm chăn nuôi
             // S\u1EA3n ph\u1EA9m ch\u00EDnh (Pro1) \u2014 gi\u00E1 b\u00E1n theo c\u1ED9t "Gi\u00E1 Product 1" trong VatNuoi.md
-            AddItem(db, "egg_01", "Tr\u1EE9ng g\u00E0", "Tr\u1EE9ng g\u00E0 ta.", "\ud83e\udd5a", "products", 0, 11, true);
-            AddItem(db, "milk_01", "S\u1EEFa b\u00F2", "S\u1EEFa b\u00F2 t\u01B0\u01A1i.", "\ud83e\udd5b", "products", 0, 50, true); // kh\u00E1ch ch\u1ED1t 22/06: l\u1EA5y s\u1ED1 l\u1EDBn h\u01A1n (233 vs 305)
-            AddItem(db, "pigskin_01", "Da heo", "Da heo thu\u1ED9c.", "\uD83D\uDC16", "products", 0, 7042, true);
-            AddItem(db, "ostrich_egg_01", "Tr\u1EE9ng \u0111\u00E0 \u0111i\u1EC3u", "Tr\u1EE9ng \u0111\u00E0 \u0111i\u1EC3u kh\u1ED5ng l\u1ED3.", "\ud83e\udd5a", "products", 0, 409, true);
-            AddItem(db, "deer_velvet_01", "Nhung h\u01B0\u01A1u", "Nhung h\u01B0\u01A1u qu\u00FD.", "\ud83e\uDD8C", "products", 0, 12368, true);
-            AddItem(db, "goat_milk_01", "S\u1EEFa d\u00EA", "S\u1EEFa d\u00EA t\u01B0\u01A1i.", "\ud83e\udd5b", "products", 0, 12, true);
-            AddItem(db, "rabbit_fur_01", "L\u00F4ng th\u1ECF", "L\u00F4ng th\u1ECF m\u1EC1m.", "\uD83D\uDC07", "products", 0, 21, true);
-            AddItem(db, "goose_egg_01", "Tr\u1EE9ng ng\u1ED7ng", "Tr\u1EE9ng ng\u1ED7ng.", "\ud83e\udd5a", "products", 0, 14, true);
-            AddItem(db, "duck_egg_01", "Tr\u1EE9ng v\u1ECBt", "Tr\u1EE9ng v\u1ECBt.", "\ud83e\udd5a", "products", 0, 5, true);
-            AddItem(db, "turtle_shell_01", "Mai r\u00F9a", "Mai r\u00F9a c\u1EE9ng.", "\uD83D\uDC22", "products", 0, 11893, true);
+            AddItem(db, "egg_01", "Tr\u1EE9ng g\u00E0", "Tr\u1EE9ng g\u00E0 ta.", "\ud83e\udd5a", "products", 0, 8, true);
+            AddItem(db, "milk_01", "S\u1EEFa b\u00F2", "S\u1EEFa b\u00F2 t\u01B0\u01A1i.", "\ud83e\udd5b", "products", 0, 52, true); // kh\u00E1ch ch\u1ED1t 22/06: l\u1EA5y s\u1ED1 l\u1EDBn h\u01A1n (233 vs 305)
+            AddItem(db, "pigskin_01", "Da heo", "Da heo thu\u1ED9c.", "\uD83D\uDC16", "products", 0, 4796, true);
+            AddItem(db, "ostrich_egg_01", "Tr\u1EE9ng \u0111\u00E0 \u0111i\u1EC3u", "Tr\u1EE9ng \u0111\u00E0 \u0111i\u1EC3u kh\u1ED5ng l\u1ED3.", "\ud83e\udd5a", "products", 0, 92, true);
+            AddItem(db, "deer_velvet_01", "Nhung h\u01B0\u01A1u", "Nhung h\u01B0\u01A1u qu\u00FD.", "\ud83e\uDD8C", "products", 0, 10316, true);
+            AddItem(db, "goat_milk_01", "S\u1EEFa d\u00EA", "S\u1EEFa d\u00EA t\u01B0\u01A1i.", "\ud83e\udd5b", "products", 0, 31, true);
+            AddItem(db, "rabbit_fur_01", "L\u00F4ng th\u1ECF", "L\u00F4ng th\u1ECF m\u1EC1m.", "\uD83D\uDC07", "products", 0, 7, true);
+            AddItem(db, "goose_egg_01", "Tr\u1EE9ng ng\u1ED7ng", "Tr\u1EE9ng ng\u1ED7ng.", "\ud83e\udd5a", "products", 0, 4, true);
+            AddItem(db, "duck_egg_01", "Tr\u1EE9ng v\u1ECBt", "Tr\u1EE9ng v\u1ECBt.", "\ud83e\udd5a", "products", 0, 2, true);
+            AddItem(db, "turtle_shell_01", "Mai r\u00F9a", "Mai r\u00F9a c\u1EE9ng.", "\uD83D\uDC22", "products", 0, 7446, true);
 
             // S\u1EA3n ph\u1EA9m th\u1ECBt (Pro2 \u2014 v\u1EE5 cu\u1ED1i) \u2014 gi\u00E1 b\u00E1n theo c\u1ED9t "Gi\u00E1 product 2" trong VatNuoi.md
-            AddItem(db, "pork_01", "Th\u1ECBt heo", "Th\u1ECBt heo t\u01B0\u01A1i.", "\ud83e\udd69", "products", 0, 292, true);
-            AddItem(db, "chicken_meat_01", "Th\u1ECBt g\u00E0", "Th\u1ECBt g\u00E0 t\u01B0\u01A1i.", "\uD83C\uDF57", "products", 0, 310, true);
-            AddItem(db, "beef_01", "Th\u1ECBt b\u00F2", "Th\u1ECBt b\u00F2 t\u01B0\u01A1i.", "\ud83e\udd69", "products", 0, 325, true);
-            AddItem(db, "ostrich_meat_01", "Th\u1ECBt \u0111\u00E0 \u0111i\u1EC3u", "Th\u1ECBt \u0111\u00E0 \u0111i\u1EC3u.", "\uD83C\uDF57", "products", 0, 1050, true);
-            AddItem(db, "deer_meat_01", "Th\u1ECBt h\u01B0\u01A1u", "Th\u1ECBt h\u01B0\u01A1u.", "\uD83C\uDF56", "products", 0, 933, true);
-            AddItem(db, "goat_meat_01", "Th\u1ECBt d\u00EA", "Th\u1ECBt d\u00EA.", "\uD83C\uDF56", "products", 0, 118, true);
-            AddItem(db, "rabbit_meat_01", "Th\u1ECBt th\u1ECF", "Th\u1ECBt th\u1ECF.", "\uD83C\uDF56", "products", 0, 289, true);
-            AddItem(db, "goose_meat_01", "Th\u1ECBt ng\u1ED7ng", "Th\u1ECBt ng\u1ED7ng.", "\uD83C\uDF57", "products", 0, 665, true);
-            AddItem(db, "duck_meat_01", "Th\u1ECBt v\u1ECBt", "Th\u1ECBt v\u1ECBt.", "\uD83C\uDF57", "products", 0, 332, true);
-            AddItem(db, "turtle_meat_01", "Th\u1ECBt r\u00F9a", "Th\u1ECBt r\u00F9a.", "\uD83C\uDF56", "products", 0, 1084, true);
+            AddItem(db, "pork_01", "Th\u1ECBt heo", "Th\u1ECBt heo t\u01B0\u01A1i.", "\ud83e\udd69", "products", 0, 199, true);
+            AddItem(db, "chicken_meat_01", "Th\u1ECBt g\u00E0", "Th\u1ECBt g\u00E0 t\u01B0\u01A1i.", "\uD83C\uDF57", "products", 0, 234, true);
+            AddItem(db, "beef_01", "Th\u1ECBt b\u00F2", "Th\u1ECBt b\u00F2 t\u01B0\u01A1i.", "\ud83e\udd69", "products", 0, 338, true);
+            AddItem(db, "ostrich_meat_01", "Th\u1ECBt \u0111\u00E0 \u0111i\u1EC3u", "Th\u1ECBt \u0111\u00E0 \u0111i\u1EC3u.", "\uD83C\uDF57", "products", 0, 474, true);
+            AddItem(db, "deer_meat_01", "Th\u1ECBt h\u01B0\u01A1u", "Th\u1ECBt h\u01B0\u01A1u.", "\uD83C\uDF56", "products", 0, 778, true);
+            AddItem(db, "goat_meat_01", "Th\u1ECBt d\u00EA", "Th\u1ECBt d\u00EA.", "\uD83C\uDF56", "products", 0, 305, true);
+            AddItem(db, "rabbit_meat_01", "Th\u1ECBt th\u1ECF", "Th\u1ECBt th\u1ECF.", "\uD83C\uDF56", "products", 0, 117, true);
+            AddItem(db, "goose_meat_01", "Th\u1ECBt ng\u1ED7ng", "Th\u1ECBt ng\u1ED7ng.", "\uD83C\uDF57", "products", 0, 277, true);
+            AddItem(db, "duck_meat_01", "Th\u1ECBt v\u1ECBt", "Th\u1ECBt v\u1ECBt.", "\uD83C\uDF57", "products", 0, 165, true);
+            AddItem(db, "turtle_meat_01", "Th\u1ECBt r\u00F9a", "Th\u1ECBt r\u00F9a.", "\uD83C\uDF56", "products", 0, 657, true);
 
             // \u2500\u2500 S\u1EA3n ph\u1EA9m C\u00C2Y L\u00C2U N\u0102M (10) \u2014 gi\u00E1 b\u00E1n: Sa Chi/S\u1EA7u Ri\u00EAng theo CayTrong.md, c\u00F2n l\u1EA1i DEMO.
             AddItem(db, "banana_01", "Bu\u1ED3ng chu\u1ED1i", "Bu\u1ED3ng chu\u1ED1i ch\u00EDn.", "\uD83C\uDF4C", "products", 0, 80, true);
@@ -389,12 +389,12 @@ namespace YWonderLand.EditorScripts
             SetAnimalGameplay("chicken_01", "egg_01", 1, 45, 3000, "chicken_meat_01", 5, Days(2f), Days(1f), Days(1f), Days(2f)); // gia cầm: trứng theo chu kỳ, thịt ở vụ cuối (khách đổi lại 29/06)
             SetAnimalGameplay("cow_01", "milk_01", 10, 38, 10000, "beef_01", 50, Days(7f), Days(1f), Days(1f), Days(2f));
             SetAnimalGameplay("pig_01", "pigskin_01", 1, 1, 8000, "pork_01", 50, Days(180f), Days(1f), Days(1f), Days(2f));
-            SetAnimalGameplay("ostrich_01", "ostrich_egg_01", 1, 30, 5000, "ostrich_meat_01", 20, Days(6f), Days(1f), Days(1f), Days(2f)); // gia cầm: trứng theo chu kỳ, thịt ở vụ cuối
+            SetAnimalGameplay("ostrich_01", "ostrich_egg_01", 1, 60, 5000, "ostrich_meat_01", 20, Days(3f), Days(1f), Days(1f), Days(2f)); // gia cầm: trứng theo chu kỳ, thịt ở vụ cuối
             SetAnimalGameplay("deer_01", "deer_velvet_01", 2, 2, 15000, "deer_meat_01", 40, Days(180f), Days(1f), Days(2f), Days(4f)); // khách chốt 13/08: hươu chưa ăn 48h chết / cho ăn 96h
             SetAnimalGameplay("goat_01", "goat_milk_01", 2, 60, 8000, "goat_meat_01", 20, Days(3f), Days(1f), Days(1f), Days(2f));
-            SetAnimalGameplay("rabbit_01", "rabbit_fur_01", 8, 2, 1500, "rabbit_meat_01", 5, Days(40f), Days(1f), Days(1f), Days(2f));
-            SetAnimalGameplay("goose_01", "goose_egg_01", 2, 30, 4500, "goose_meat_01", 5, Days(3f), Days(1f), Days(1f), Days(2f)); // gia cầm: trứng theo chu kỳ, thịt ở vụ cuối
-            SetAnimalGameplay("duck_01", "duck_egg_01", 1, 45, 1000, "duck_meat_01", 5, Days(1f), Days(0.5f), Days(0.5f), Days(1f)); // khách chốt 13/08: vịt chưa ăn 12h chết / cho ăn 24h
+            SetAnimalGameplay("rabbit_01", "rabbit_fur_01", 8, 2, 1500, "rabbit_meat_01", 5, Days(30f), Days(1f), Days(1f), Days(2f));
+            SetAnimalGameplay("goose_01", "goose_egg_01", 2, 45, 4500, "goose_meat_01", 5, Days(2f), Days(1f), Days(1f), Days(2f)); // gia cầm: trứng theo chu kỳ, thịt ở vụ cuối
+            SetAnimalGameplay("duck_01", "duck_egg_01", 1, 30, 1000, "duck_meat_01", 5, Days(1f), Days(0.5f), Days(0.5f), Days(1f)); // khách chốt 13/08: vịt chưa ăn 12h chết / cho ăn 24h
             SetAnimalGameplay("turtle_01", "turtle_shell_01", 1, 1, 20000, "turtle_meat_01", 10, Days(300f), Days(7f), Days(4f), Days(8f)); // khách chốt 13/08: rùa chưa ăn 4 ngày chết / cho ăn 8 ngày (trước là 5/10)
 
             // ── BỆNH / VẮC-XIN: số lấy NGUYÊN từ VatNuoi2 (Thời điểm phát bệnh · Tỉ lệ phát bệnh ·
